@@ -55,7 +55,23 @@ export type CommandRunner = (
   command: string,
   args: readonly string[],
   options: CommandOptions
-) => Promise<void>;
+) => Promise<string | void>;
+
+export interface RegistryCandidate {
+  type: "dev.nipmod.registry-candidate.v1";
+  package: string;
+  version: string;
+  digest: string;
+  manifestDigest: string;
+  publisher: string;
+  repoName: string;
+  resolved: string;
+  sourceRepo: string;
+  sourceTag: string;
+  sourceCommit: string | null;
+  artifactPath: string;
+  releasePath: string;
+}
 
 export interface PublishGitlawbPackageOptions {
   projectDir: string;
@@ -73,6 +89,8 @@ export interface PublishGitlawbPackageResult {
   digest: string;
   resolved: string;
   repoName: string;
+  sourceCommit: string;
+  registryCandidate: RegistryCandidate;
 }
 
 export type PublishVersionCheckStatus = "available" | "same-artifact" | "blocked-existing-version" | "unknown";
@@ -88,6 +106,7 @@ export interface PublishDryRunPlan {
   nodeUrl: string;
   sourceRepo: string;
   sourceTag: string;
+  registryCandidate: RegistryCandidate;
   helper: GitlawbHelperStatus;
   git: { ok: boolean; path?: string };
   versionCheck: {
@@ -325,20 +344,19 @@ export async function publishGitlawbPackage(
     await mkdir(join(repoDir, dirname(bundlePathForVersion(spec.version))), { recursive: true });
     await assertVersionIsPublishable(repoDir, packed);
     await writeFile(join(repoDir, bundlePathForVersion(spec.version)), packed.bytes);
-    await writeFile(
-      join(repoDir, releasePathForVersion(spec.version)),
-      `${canonicalJson(signReleaseEvent(releaseEventForPackedBundle(packed), identity))}\n`
-    );
-    await writeFile(join(repoDir, "index.json"), `${canonicalJson(indexForPackedBundle(packed))}\n`);
 
     await runCommand("git", ["config", "user.email", "bot@nipmod.local"], { cwd: repoDir, env });
     await runCommand("git", ["config", "user.name", "nipmod"], { cwd: repoDir, env });
-    await runCommand(
-      "git",
-      ["add", bundlePathForVersion(spec.version), releasePathForVersion(spec.version), "index.json"],
-      { cwd: repoDir, env }
+    await runCommand("git", ["add", bundlePathForVersion(spec.version)], { cwd: repoDir, env });
+    await runCommand("git", ["commit", "-m", `Add ${spec.repoName} ${spec.version} artifact`], { cwd: repoDir, env });
+    const sourceCommit = normalizeGitCommit(await runCommand("git", ["rev-parse", "HEAD"], { cwd: repoDir, env }));
+    await writeFile(
+      join(repoDir, releasePathForVersion(spec.version)),
+      `${canonicalJson(signReleaseEvent(releaseEventForPackedBundle(packed, sourceCommit), identity))}\n`
     );
-    await runCommand("git", ["commit", "-m", `Publish ${spec.repoName} ${spec.version}`], { cwd: repoDir, env });
+    await writeFile(join(repoDir, "index.json"), `${canonicalJson(indexForPackedBundle(packed, sourceCommit))}\n`);
+    await runCommand("git", ["add", releasePathForVersion(spec.version), "index.json"], { cwd: repoDir, env });
+    await runCommand("git", ["commit", "-m", `Publish ${spec.repoName} ${spec.version} metadata`], { cwd: repoDir, env });
     await runCommand("git", ["tag", "-f", `v${spec.version}`], { cwd: repoDir, env });
     await runCommand("git", ["push", `gitlawb://${identity.did}/${spec.repoName}`, "HEAD:main", `refs/tags/v${spec.version}`], {
       cwd: repoDir,
@@ -350,7 +368,13 @@ export async function publishGitlawbPackage(
       version: packed.manifest.version,
       digest: packed.digest,
       resolved: gitlawbBlobUrl(nodeUrl, spec),
-      repoName: spec.repoName
+      repoName: spec.repoName,
+      sourceCommit,
+      registryCandidate: registryCandidateForPackedBundle({
+        nodeUrl,
+        packed,
+        sourceCommit
+      })
     };
   } finally {
     await rm(stagingDir, { recursive: true, force: true });
@@ -399,6 +423,11 @@ export async function createPublishDryRunPlan(options: PublishDryRunOptions): Pr
   }
   const versionCheck = await checkPublishedVersion(versionCheckOptions);
   const releaseEvent = signReleaseEvent(releaseEventForPackedBundle(packed), identity);
+  const registryCandidate = registryCandidateForPackedBundle({
+    nodeUrl,
+    packed,
+    sourceCommit: null
+  });
 
   return {
     ready: helper.ok && git.ok && (versionCheck.status === "available" || versionCheck.status === "same-artifact"),
@@ -411,6 +440,7 @@ export async function createPublishDryRunPlan(options: PublishDryRunOptions): Pr
     nodeUrl,
     sourceRepo: `gitlawb://${identity.did}/${spec.repoName}`,
     sourceTag: `v${packed.manifest.version}`,
+    registryCandidate,
     helper,
     git,
     versionCheck,
@@ -595,8 +625,16 @@ export async function doctorGitlawb(options: DoctorGitlawbOptions = {}): Promise
   };
 }
 
-function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>): ReleaseEvent {
+function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>, sourceCommit?: string | null): ReleaseEvent {
   const spec = parseRemoteSpecifier(`${packed.manifest.canonical}@${packed.manifest.version}`);
+  const source: ReleaseEvent["source"] = {
+    type: "gitlawb",
+    repo: `gitlawb://${packed.manifest.publish.signingKey}/${spec.repoName}`,
+    tag: `v${packed.manifest.version}`
+  };
+  if (sourceCommit) {
+    source.commit = sourceCommit;
+  }
 
   return {
     type: "dev.nipmod.release.v1",
@@ -604,11 +642,7 @@ function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProje
     package: packed.manifest.canonical,
     version: packed.manifest.version,
     publisher: packed.manifest.publish.signingKey,
-    source: {
-      type: "gitlawb",
-      repo: `gitlawb://${packed.manifest.publish.signingKey}/${spec.repoName}`,
-      tag: `v${packed.manifest.version}`
-    },
+    source,
     artifact: {
       mediaType: BUNDLE_MEDIA_TYPE,
       path: bundlePathForVersion(packed.manifest.version),
@@ -618,7 +652,8 @@ function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProje
   };
 }
 
-function indexForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>): unknown {
+function indexForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>, sourceCommit?: string | null): unknown {
+  const spec = parseRemoteSpecifier(`${packed.manifest.canonical}@${packed.manifest.version}`);
   return {
     formatVersion: 1,
     package: packed.manifest.canonical,
@@ -631,10 +666,47 @@ function indexForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>): 
           manifestDigest: packed.manifestDigest,
           sha256: packed.digest
         },
-        publisher: packed.manifest.publish.signingKey
+        publisher: packed.manifest.publish.signingKey,
+        source: {
+          type: "gitlawb",
+          repo: `gitlawb://${packed.manifest.publish.signingKey}/${spec.repoName}`,
+          tag: `v${packed.manifest.version}`,
+          ...(sourceCommit ? { commit: sourceCommit } : {})
+        }
       }
     }
   };
+}
+
+function registryCandidateForPackedBundle(options: {
+  nodeUrl: string;
+  packed: Awaited<ReturnType<typeof packProject>>;
+  sourceCommit: string | null;
+}): RegistryCandidate {
+  const spec = parseRemoteSpecifier(`${options.packed.manifest.canonical}@${options.packed.manifest.version}`);
+  return {
+    type: "dev.nipmod.registry-candidate.v1",
+    package: options.packed.manifest.canonical,
+    version: options.packed.manifest.version,
+    digest: options.packed.digest,
+    manifestDigest: options.packed.manifestDigest,
+    publisher: options.packed.manifest.publish.signingKey,
+    repoName: spec.repoName,
+    resolved: gitlawbBlobUrl(options.nodeUrl, spec),
+    sourceRepo: `gitlawb://${options.packed.manifest.publish.signingKey}/${spec.repoName}`,
+    sourceTag: `v${options.packed.manifest.version}`,
+    sourceCommit: options.sourceCommit,
+    artifactPath: bundlePathForVersion(options.packed.manifest.version),
+    releasePath: releasePathForVersion(options.packed.manifest.version)
+  };
+}
+
+function normalizeGitCommit(value: string | void): string {
+  const commit = String(value ?? "").trim();
+  if (!/^[a-f0-9]{40}$/.test(commit)) {
+    throw new Error("git rev-parse HEAD did not return a commit hash");
+  }
+  return commit;
 }
 
 async function assertVersionIsPublishable(
@@ -877,7 +949,7 @@ function prependPath(dir: string, pathValue: string): string {
   return [dir, ...dirs].join(delimiter);
 }
 
-async function defaultRunCommand(command: string, args: readonly string[], options: CommandOptions): Promise<void> {
+async function defaultRunCommand(command: string, args: readonly string[], options: CommandOptions): Promise<string> {
   const child = spawn(command, args, {
     cwd: options.cwd,
     env: options.env,
@@ -904,4 +976,5 @@ async function defaultRunCommand(command: string, args: readonly string[], optio
     const output = [stdout.trim(), stderr.trim()].filter(Boolean).join("\n");
     throw new Error(`command failed (${code}): ${command} ${args.join(" ")}${output ? `\n${output}` : ""}`);
   }
+  return stdout;
 }

@@ -118,6 +118,7 @@ describe("Gitlawb integration", () => {
     const requests: Array<{ url: string; init: RequestInit }> = [];
     const commands: Array<{ command: string; args: readonly string[]; cwd: string; env: Record<string, string> }> = [];
     let releaseJson: unknown = null;
+    const sourceCommit = "0123456789abcdef0123456789abcdef01234567";
 
     await writeFile(helperPath, "#!/bin/sh\nexit 0\n");
     await chmod(helperPath, 0o755);
@@ -134,7 +135,10 @@ describe("Gitlawb integration", () => {
       fetchImpl,
       runCommand: async (command, args, options) => {
         commands.push({ command, args, cwd: options.cwd, env: options.env });
-        if (args[0] === "add") {
+        if (args[0] === "rev-parse") {
+          return `${sourceCommit}\n`;
+        }
+        if (args[0] === "add" && args.some((arg) => arg.endsWith("release.json"))) {
           releaseJson = JSON.parse(
             await readFile(join(options.cwd, "releases", "0.1.0", "release.json"), "utf8")
           );
@@ -146,14 +150,30 @@ describe("Gitlawb integration", () => {
     expect(result.version).toBe("0.1.0");
     expect(result.digest).toBe(packed.digest);
     expect(result.resolved).toBe(`https://node.example/api/v1/repos/${signedProject.identity.did.split(":").at(-1)}/signed-skill/blob/releases/0.1.0/bundle.nipmod`);
+    expect(result.sourceCommit).toBe(sourceCommit);
+    expect(result.registryCandidate).toMatchObject({
+      artifactPath: "releases/0.1.0/bundle.nipmod",
+      digest: packed.digest,
+      package: signedProject.manifest.canonical,
+      publisher: signedProject.identity.did,
+      releasePath: "releases/0.1.0/release.json",
+      sourceCommit,
+      sourceRepo: `gitlawb://${signedProject.identity.did}/signed-skill`,
+      sourceTag: "v0.1.0",
+      type: "dev.nipmod.registry-candidate.v1",
+      version: "0.1.0"
+    });
     expect(requests[0]?.url).toBe("https://node.example/api/v1/repos");
     expect(commands.map((call) => `${call.command} ${call.args.join(" ")}`)).toEqual([
       "git init",
       "git checkout -B main",
       "git config user.email bot@nipmod.local",
       "git config user.name nipmod",
-      "git add releases/0.1.0/bundle.nipmod releases/0.1.0/release.json index.json",
-      "git commit -m Publish signed-skill 0.1.0",
+      "git add releases/0.1.0/bundle.nipmod",
+      "git commit -m Add signed-skill 0.1.0 artifact",
+      "git rev-parse HEAD",
+      "git add releases/0.1.0/release.json index.json",
+      "git commit -m Publish signed-skill 0.1.0 metadata",
       "git tag -f v0.1.0",
       `git push gitlawb://${signedProject.identity.did}/signed-skill HEAD:main refs/tags/v0.1.0`
     ]);
@@ -167,6 +187,7 @@ describe("Gitlawb integration", () => {
         artifactSha256: packed.digest,
         package: signedProject.manifest.canonical,
         publisher: signedProject.identity.did,
+        sourceCommit,
         sourceRepo: `gitlawb://${signedProject.identity.did}/signed-skill`,
         sourceTag: "v0.1.0",
         version: "0.1.0"
@@ -209,6 +230,10 @@ describe("Gitlawb integration", () => {
       nodeUrl: "https://node.example",
       sourceRepo: `gitlawb://${signedProject.identity.did}/signed-skill`,
       sourceTag: "v0.1.0",
+      registryCandidate: {
+        sourceCommit: null,
+        type: "dev.nipmod.registry-candidate.v1"
+      },
       helper: { ok: true, path: helperPath, source: "PATH" },
       git: { ok: true, path: gitPath },
       versionCheck: {
@@ -219,6 +244,7 @@ describe("Gitlawb integration", () => {
       `https://node.example/api/v1/repos/${signedProject.identity.did.split(":").at(-1)}/signed-skill/blob/releases/0.1.0/bundle.nipmod`
     );
     expect(plan.releaseEvent.payload.artifact.sha256).toBe(packed.digest);
+    expect(plan.releaseEvent.payload.source.commit).toBeUndefined();
     expect(plan.releaseEvent.signature.keyId).toBe(signedProject.identity.did);
     expect(requests).toEqual([
       {
@@ -272,6 +298,9 @@ describe("Gitlawb integration", () => {
       fetchImpl: async () => new Response('{"ok":true}', { status: 201, headers: { "content-type": "application/json" } }),
       runCommand: async (command, args, options) => {
         commands.push({ command, args, env: options.env });
+        if (args[0] === "rev-parse") {
+          return "1234567890abcdef1234567890abcdef12345678\n";
+        }
       }
     });
 
@@ -419,6 +448,9 @@ describe("Gitlawb integration", () => {
       fetchImpl,
       runCommand: async (command, args, options) => {
         commands.push({ command, args, cwd: options.cwd });
+        if (args[0] === "rev-parse") {
+          return "abcdef1234567890abcdef1234567890abcdef12\n";
+        }
       }
     });
 
@@ -429,8 +461,11 @@ describe("Gitlawb integration", () => {
       "git checkout -B main",
       "git config user.email bot@nipmod.local",
       "git config user.name nipmod",
-      "git add releases/0.1.0/bundle.nipmod releases/0.1.0/release.json index.json",
-      "git commit -m Publish signed-skill 0.1.0",
+      "git add releases/0.1.0/bundle.nipmod",
+      "git commit -m Add signed-skill 0.1.0 artifact",
+      "git rev-parse HEAD",
+      "git add releases/0.1.0/release.json index.json",
+      "git commit -m Publish signed-skill 0.1.0 metadata",
       "git tag -f v0.1.0",
       `git push gitlawb://${signedProject.identity.did}/signed-skill HEAD:main refs/tags/v0.1.0`
     ]);

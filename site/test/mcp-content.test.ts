@@ -16,7 +16,7 @@ describe("MCP host content", () => {
     const text = JSON.stringify(mcpContent);
 
     expect(text).toContain("Read only");
-    expect(text).toContain("They cannot publish, add or install packages through MCP.");
+    expect(text).toContain("They cannot mutate Gitlawb, add or install through MCP.");
     expect(text).toContain("Custom transparency or advisory roots require an opt in flag");
   });
 

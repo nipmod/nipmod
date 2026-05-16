@@ -7,10 +7,11 @@ Default tools:
 - `nipmod.search`
 - `nipmod.inspect`
 - `nipmod.install_plan`
+- `nipmod.publish_plan`
 - `nipmod.verify`
 - `nipmod.audit`
 
-The server does not expose `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`. Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
+The server does not expose mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`. `nipmod.publish_plan` is a dry run only. Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
 
 ## Install
 
@@ -88,7 +89,7 @@ Add to `opencode.json`:
 printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0.0"}}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n' | nipmod mcp serve
 ```
 
-The response must list only the five read only tools above.
+The response must list only the six read only tools above.
 
 Host syntax references:
 

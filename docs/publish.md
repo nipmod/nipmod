@@ -32,6 +32,12 @@ nipmod publish .
 
 The public registry indexes this data. It does not own the package and cannot grant itself publish rights.
 
+## Name limits
+
+Gitlawb repo names currently allow lowercase letters, numbers, hyphens and underscores. A package can look npm style while drafting, but the canonical slug that gets published must map to a Gitlawb repo name.
+
+Use `nipmod package gitlawb://did:key:z6Mk.../repo --dir repo` when turning an existing Gitlawb repo into a package draft. Use `nipmod publish . --dry-run --json` before any public write; it returns the registry candidate that an indexer or reviewer can inspect.
+
 ## Manifest rules
 
 Required fields:

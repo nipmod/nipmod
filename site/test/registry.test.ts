@@ -193,6 +193,33 @@ describe("registry data", () => {
     expect(searchPackages([low, high], "pkg:did:key").length).toBe(2);
   });
 
+  test("search ranking boosts exact names and agent-native package types", () => {
+    const exactWorkflow = packageFixture({
+      name: "policy",
+      description: "policy helper",
+      score: 70,
+      type: "workflow-pack"
+    });
+    const broadTool = packageFixture({
+      name: "policy-sidecar",
+      description: "policy helper",
+      score: 70,
+      type: "tool"
+    });
+    const unrelated = packageFixture({
+      name: "zzz",
+      description: "policy helper",
+      score: 70,
+      type: "adapter"
+    });
+
+    expect(searchPackages([broadTool, unrelated, exactWorkflow], "policy").map((pkg) => pkg.name)).toEqual([
+      "policy",
+      "policy-sidecar",
+      "zzz"
+    ]);
+  });
+
   test("search hides active quarantined packages by default", () => {
     const safe = packageFixture({ name: "safe-agent" });
     const blocked = packageFixture({

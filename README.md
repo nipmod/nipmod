@@ -21,7 +21,7 @@ Current implementation status:
 - Public Gitlawb publish/install against `https://node.nipmod.com`
 - `nipmod doctor` setup checks for Git, Gitlawb helper and node health
 - Public installer at `https://nipmod.com/install.sh`
-- Standalone CLI release artifact at `/releases/nipmod-0.1.22.tgz`
+- Standalone CLI release artifact at `/releases/nipmod-0.1.23.tgz`
 - Detached Ed25519 release signatures for CLI artifacts
 - Signed public transparency log under `/transparency/*`
 - Live independent witness at `https://nipmod-witness.fly.dev`
@@ -31,7 +31,7 @@ Current implementation status:
 - `nipmod ci` for strict lockfile enforcement in automation
 - `nipmod inspect`, `install --plan` and `add` for verified registry packages
 - `nipmod policy init`, `policy check` and `policy explain` for local install policy decisions
-- `nipmod mcp serve` with read-only agent tools for search, inspect, install plans, verify and audit
+- `nipmod mcp serve` with read-only agent tools for search, inspect, install plans, publish plans, verify and audit
 - Public MCP host setup guide at `https://nipmod.com/mcp` and `docs/mcp-hosts.md`
 - Public compatibility receipts for MCP server JSON, APM package JSON and Git source provenance examples
 - Verified registry build guard for the Vercel site
@@ -42,7 +42,7 @@ Current implementation status:
 
 ```bash
 curl -fLO https://nipmod.com/install.sh
-printf '%s  install.sh\n' fddaf5881b873f657358ac42cc164f37d2b60a496ee4270b41255c76f5cbdb8d | shasum -a 256 -c -
+printf '%s  install.sh\n' 3695e9e22edad41e48498ce00b64a7bcde066dd18b13aa5383a61f5773678cc9 | shasum -a 256 -c -
 bash install.sh
 nipmod doctor
 nipmod search skill --online
@@ -85,6 +85,7 @@ pnpm --dir site security:secrets
 See `RUNBOOK.md` for deploy, recovery, witness and token-handling procedures.
 See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
+See `docs/community.md` for package expectations, feedback links and founder outreach copy.
 
 Canonical public brand:
 

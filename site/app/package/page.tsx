@@ -62,6 +62,22 @@ export default function PackagePage() {
           </article>
         ))}
       </section>
+
+      <section className="proof-section" aria-labelledby="boundary-title">
+        <div>
+          <p className="eyebrow">Boundary</p>
+          <h2 id="boundary-title">Gitlawb stores it. nipmod verifies it.</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">
+            Moving refs are not enough. A green package needs digest, DID signature, release event, transparency,
+            witness and advisory evidence.
+          </p>
+          <pre className="install-command">
+            <code>{"nipmod publish repo --dry-run --json"}</code>
+          </pre>
+        </div>
+      </section>
     </main>
   );
 }

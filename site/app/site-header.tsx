@@ -28,6 +28,9 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide" href="/mcp">
           MCP
         </a>
+        <a className="nav-link nav-link-wide" href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod" rel="noreferrer" target="_blank">
+          Source
+        </a>
         <a className="nav-link" href={homeContent.links.x} rel="noreferrer" target="_blank">
           X
         </a>

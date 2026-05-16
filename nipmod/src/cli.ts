@@ -379,7 +379,9 @@ async function publishCommand(args: string[]): Promise<CliResult> {
       package: result.package,
       version: result.version,
       digest: result.digest,
-      resolved: result.resolved
+      resolved: result.resolved,
+      sourceCommit: result.sourceCommit,
+      registryCandidate: result.registryCandidate
     }
   };
 }
@@ -1023,6 +1025,7 @@ function formatPublishDryRunPlan(plan: Awaited<ReturnType<typeof createPublishDr
   lines.push(`manifest: sha256-${plan.manifestDigest}`);
   lines.push(`repo: ${plan.sourceRepo}`);
   lines.push(`tag: ${plan.sourceTag}`);
+  lines.push(`registry candidate: ${plan.registryCandidate.package}@${plan.registryCandidate.version}`);
   lines.push(`helper: ${plan.helper.ok ? plan.helper.message : "missing"}`);
   lines.push(`git: ${plan.git.ok ? `found at ${plan.git.path}` : "missing"}`);
   lines.push(`version: ${plan.versionCheck.status} (${plan.versionCheck.message})`);

@@ -110,7 +110,7 @@ export async function searchRegistry(options: {
   const packages = registry.packages
     .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
     .filter((pkg) => registryPackageMatches(pkg, query))
-    .sort(compareRegistryPackages)
+    .sort((left, right) => compareRegistryPackages(left, right, query))
     .slice(0, options.limit)
     .map(toSearchPackage);
 
@@ -138,10 +138,44 @@ function registryPackageMatches(pkg: z.infer<typeof RegistrySearchPackageSchema>
 
 function compareRegistryPackages(
   left: z.infer<typeof RegistrySearchPackageSchema>,
-  right: z.infer<typeof RegistrySearchPackageSchema>
+  right: z.infer<typeof RegistrySearchPackageSchema>,
+  query: string
 ): number {
-  return right.trust.score - left.trust.score || left.name.localeCompare(right.name) || left.version.localeCompare(right.version);
+  return (
+    registrySearchScore(right, query) - registrySearchScore(left, query) ||
+    left.name.localeCompare(right.name) ||
+    left.version.localeCompare(right.version)
+  );
 }
+
+function registrySearchScore(pkg: z.infer<typeof RegistrySearchPackageSchema>, query: string): number {
+  let score = pkg.trust.score;
+  const name = pkg.name.toLowerCase();
+  if (query && name === query) {
+    score += 60;
+  } else if (query && name.startsWith(query)) {
+    score += 35;
+  }
+  if (agentNativeTypes.has(pkg.type ?? "")) {
+    score += 10;
+  }
+  const permissions = pkg.permissions;
+  if (
+    permissions &&
+    (permissions.filesystem ?? 0) === 0 &&
+    (permissions.network ?? 0) === 0 &&
+    (permissions.mcpTools ?? 0) === 0 &&
+    (permissions.env ?? 0) === 0 &&
+    (permissions.secrets ?? 0) === 0 &&
+    permissions.exec !== true &&
+    permissions.postinstall !== true
+  ) {
+    score += 5;
+  }
+  return score;
+}
+
+const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "policy-pack", "mcp-server"]);
 
 function toSearchPackage(pkg: z.infer<typeof RegistrySearchPackageSchema>): RegistrySearchPackage {
   const quarantine = activeQuarantine(pkg);

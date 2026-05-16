@@ -52,6 +52,12 @@ nipmod add gitlawb-repo-reader --online
 
 Policy packs should be installed before broad capability packs. This makes risky permissions fail before workspace mutation.
 
+## How ranking works
+
+Search ranks by trust first, then exact package name, name prefix, agent native package type, quiet permissions, compatibility receipts and recency. Active high and critical quarantines are hidden unless explicitly requested.
+
+The ranking is advice, not authority. Agents should still run `nipmod inspect` before install.
+
 ## What nipmod does not control
 
 nipmod does not decide who can publish to Gitlawb. It rates, indexes, quarantines, warns and blocks in nipmod surfaces based on signed evidence and advisories.

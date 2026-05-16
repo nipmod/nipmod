@@ -1,12 +1,12 @@
 export const mcpContent = {
   headline: "Connect nipmod to agents",
-  lead: "Run the live CLI as a local MCP server for search, inspect, install plans, verify and audit.",
+  lead: "Run the live CLI as a read only MCP server for search, inspect, plans, verify and audit.",
   primaryAction: "Install",
   secondaryAction: "Trust",
   safety: [
     {
       label: "Read only",
-      text: "Hosts can ask for package facts and plans. They cannot publish, add or install packages through MCP."
+      text: "Hosts can ask for package facts and dry run plans. They cannot mutate Gitlawb, add or install through MCP."
     },
     {
       label: "Proof first",

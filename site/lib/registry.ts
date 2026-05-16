@@ -157,26 +157,14 @@ export function searchPackages(
   options: { includeQuarantined?: boolean } = {}
 ): RegistryPackage[] {
   const normalized = query.trim().toLowerCase();
-  const sorted = packages
-    .filter((item) => options.includeQuarantined === true || !isActivelyQuarantined(item))
-    .sort(comparePackages);
+  const publicPackages = packages.filter((item) => options.includeQuarantined === true || !isActivelyQuarantined(item));
   if (!normalized) {
-    return sorted;
+    return [...publicPackages].sort(comparePackages);
   }
 
-  return sorted.filter((item) =>
-    [
-      item.name,
-      item.canonical,
-      item.description,
-      item.type,
-      item.publisher,
-      ...compatibilityHighlights(item),
-      ...(item.compatibilityReceipts ?? []).map((receipt) => receipt.externalFormat)
-    ].some((value) =>
-      value.toLowerCase().includes(normalized)
-    )
-  );
+  return publicPackages
+    .filter((item) => packageSearchFields(item).some((value) => value.toLowerCase().includes(normalized)))
+    .sort((left, right) => compareSearchMatches(left, right, normalized));
 }
 
 export function homepagePackages(packages: readonly RegistryPackage[]): RegistryPackage[] {
@@ -423,6 +411,43 @@ function comparePackages(left: RegistryPackage, right: RegistryPackage): number 
 
   return right.updatedAt.localeCompare(left.updatedAt);
 }
+
+function compareSearchMatches(left: RegistryPackage, right: RegistryPackage, query: string): number {
+  return searchScore(right, query) - searchScore(left, query) || comparePackages(left, right);
+}
+
+function searchScore(pkg: RegistryPackage, query: string): number {
+  let score = pkg.trust.score;
+  if (pkg.name.toLowerCase() === query) {
+    score += 60;
+  } else if (pkg.name.toLowerCase().startsWith(query)) {
+    score += 35;
+  }
+  if (agentNativeTypes.has(pkg.type)) {
+    score += 10;
+  }
+  if (hasNoRequestedPermissions(pkg.permissions)) {
+    score += 5;
+  }
+  if (compatibilityHighlights(pkg).some((label) => label.toLowerCase().includes(query))) {
+    score += 8;
+  }
+  return score;
+}
+
+function packageSearchFields(pkg: RegistryPackage): string[] {
+  return [
+    pkg.name,
+    pkg.canonical,
+    pkg.description,
+    pkg.type,
+    pkg.publisher,
+    ...compatibilityHighlights(pkg),
+    ...(pkg.compatibilityReceipts ?? []).map((receipt) => receipt.externalFormat)
+  ];
+}
+
+const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "policy-pack", "mcp-server"]);
 
 function packageVersionKey(pkg: Pick<RegistryPackage, "canonical" | "version">): string {
   return `${pkg.canonical}@${pkg.version}`;

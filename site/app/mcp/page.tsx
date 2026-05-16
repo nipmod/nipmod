@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   },
   description: "Connect nipmod to Codex, Claude Code and OpenCode.",
   openGraph: {
-    description: "Use nipmod as a read only MCP server for package search, inspect, plans, verify and audit.",
+    description: "Use nipmod as a read only MCP server for package search, inspect, install plans, publish plans, verify and audit.",
     title: "nipmod MCP",
     url: "https://nipmod.com/mcp"
   },

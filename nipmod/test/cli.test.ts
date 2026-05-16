@@ -383,6 +383,36 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain(`nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
   });
 
+  test("search ranking boosts exact agent-native matches", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-ranking-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          searchPackageFixture(owner, "policy-sidecar", "tool", 70),
+          searchPackageFixture(owner, "zzz", "adapter", 70, "policy helper"),
+          searchPackageFixture(owner, "policy", "workflow-pack", 70)
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "search",
+      "policy",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as { data: { packages: Array<{ name: string }> } };
+
+    expect(parsed.data.packages.map((pkg) => pkg.name)).toEqual(["policy", "policy-sidecar", "zzz"]);
+  });
+
   test("search hides quarantined packages unless explicitly included", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-quarantine-"));
     const owner = generateIdentity().did;
@@ -2248,6 +2278,34 @@ function quarantineFixture(canonical: string, version: string, digest: string) {
     status: "active",
     type: "dev.nipmod.quarantine.v1",
     version
+  };
+}
+
+function searchPackageFixture(
+  owner: string,
+  name: string,
+  type: string,
+  score: number,
+  description = `${name} package`
+) {
+  return {
+    canonical: `pkg:${owner}/${name}`,
+    description,
+    digest: "a".repeat(64),
+    name,
+    owner,
+    permissions: {
+      env: 0,
+      exec: false,
+      filesystem: 0,
+      mcpTools: 0,
+      network: 0,
+      postinstall: false,
+      secrets: 0
+    },
+    trust: { level: "verified", score },
+    type,
+    version: "0.1.0"
   };
 }
 

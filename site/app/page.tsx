@@ -132,6 +132,9 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           ))}
         </div>
+        <p className="ranking-note">
+          Ranked by trust, exact match, agent native type, quiet permissions, compatibility proof and freshness.
+        </p>
 
         <div className="package-grid" aria-live="polite">
           {packages.length > 0 ? (

@@ -370,6 +370,14 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.ranking-note {
+  color: var(--quiet);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: -6px 0 2px;
+  max-width: 720px;
+}
+
 .stat-tile,
 .package-card,
 .empty-state {
