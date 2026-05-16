@@ -16,9 +16,28 @@ probe-work/
 site/.vercel/
 site/tsconfig.tsbuildinfo
 
+# Local planning artifacts
+findings.md
+mass-readiness-plan.md
+nipmod-*-snapshot.md
+nipmod-master-spec.md
+nipmod-gitlawb-probe-report.md
+progress.md
+task_plan.md
+*.png
+
+# Keep only current public release artifact in git
+site/public/releases/*
+!site/public/releases/nipmod-0.1.21.tgz
+!site/public/releases/nipmod-0.1.21.tgz.sha256
+!site/public/releases/nipmod-0.1.21.tgz.sig
+
 # Secrets
 .env
 .env.*
 *.pem
 *identity*.json
 keys/
+*.env
+*.env.*
+tools/verified-registry.env
