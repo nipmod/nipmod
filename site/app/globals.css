@@ -100,14 +100,19 @@ input:focus-visible {
 
 .brand-mark {
   align-items: center;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 9px;
-  color: #050506;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
   display: inline-flex;
-  font-size: 15px;
-  font-weight: 760;
   height: 26px;
   justify-content: center;
+  overflow: hidden;
+  width: 26px;
+}
+
+.brand-mark img {
+  display: block;
+  height: 26px;
   width: 26px;
 }
 
