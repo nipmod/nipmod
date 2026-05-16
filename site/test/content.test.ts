@@ -35,9 +35,14 @@ describe("home content", () => {
       homeContent.quickstartSteps?.map(({ command: _command, ...copy }) => copy) ?? [];
     const { inputPlaceholder: _inputPlaceholder, outputCommand: _outputCommand, ...repoCopy } =
       homeContent.repoToPackage;
+    const ecosystemCopy =
+      homeContent.ecosystemPackages?.map(({ command: _command, name: _name, ...copy }) => copy) ?? [];
+    const demoCopy = homeContent.demoFlow?.map(({ command: _command, ...copy }) => copy) ?? [];
     const text = collectText({
       ...homeContent,
       commands: [],
+      demoFlow: demoCopy,
+      ecosystemPackages: ecosystemCopy,
       quickstartSteps: quickstartCopy,
       repoToPackage: repoCopy
     }).join(" ");
@@ -90,6 +95,20 @@ describe("home content", () => {
   test("explains the package ecosystem without hype", () => {
     expect(homeContent.packageUseCases.map((item) => item.label)).toEqual(["Read", "Guard", "Connect"]);
     expect(homeContent.operatorChecks.map((item) => item.label)).toEqual(["Monitor", "Restore", "Respond"]);
+  });
+
+  test("exposes launch proof, founder outreach and real package content", () => {
+    expect(homeContent.launchReadiness.map((item) => item.label)).toEqual([
+      "Founder review",
+      "Demo flow",
+      "Public proof",
+      "Agent setup"
+    ]);
+    expect(homeContent.founderOutreach.post).toContain("decentralized npm for Gitlawb agents");
+    expect(homeContent.founderOutreach.dm).toContain("sanity check");
+    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Convert", "Preflight", "Verify", "Install"]);
+    expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(6);
+    expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod add "))).toBe(true);
   });
 
   test("defines the Gitlawb repo to package flow without claiming ownership", () => {

@@ -86,6 +86,8 @@ See `RUNBOOK.md` for deploy, recovery, witness and token-handling procedures.
 See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
 See `docs/community.md` for package expectations, feedback links and founder outreach copy.
+See `docs/launch-demo.md` for the public demo script.
+See `docs/ecosystem-packages.md` for the first party package catalog.
 
 Canonical public brand:
 

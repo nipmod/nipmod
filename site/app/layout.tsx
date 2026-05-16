@@ -14,7 +14,14 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://nipmod.com"
   },
-  title: "nipmod"
+  title: "nipmod",
+  twitter: {
+    card: "summary",
+    creator: "@Nipmod",
+    description: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+    site: "@Nipmod",
+    title: "nipmod"
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

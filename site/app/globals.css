@@ -741,6 +741,39 @@ h1 {
   color: var(--quiet);
 }
 
+.draft-input p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.demo-step {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.demo-step + .demo-step {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 14px;
+}
+
+.demo-step h3 {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 680;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.demo-step p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .safety-strip {
   display: grid;
   gap: 12px;

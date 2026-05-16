@@ -100,6 +100,61 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
+      <section className="ecosystem-section" aria-labelledby="launch-title">
+        <div className="section-head">
+          <p className="eyebrow">Launch</p>
+          <h2 id="launch-title">Ready to review in public.</h2>
+        </div>
+        <div className="block-grid">
+          {homeContent.launchReadiness.map((item) => (
+            <article className="block-card" key={item.label}>
+              <span>{item.label}</span>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="proof-section" aria-labelledby="demo-title">
+        <div>
+          <p className="eyebrow">Demo</p>
+          <h2 id="demo-title">Repo to package without an account.</h2>
+        </div>
+        <div className="proof-panel">
+          {homeContent.demoFlow.map((item) => (
+            <div className="demo-step" key={item.label}>
+              <h3>{item.label}</h3>
+              <p>{item.text}</p>
+              <pre className="install-command">
+                <code>{item.command}</code>
+              </pre>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="ecosystem-section" aria-labelledby="ecosystem-packages-title">
+        <div className="section-head">
+          <p className="eyebrow">Ecosystem</p>
+          <h2 id="ecosystem-packages-title">First packages are already useful.</h2>
+        </div>
+        <div className="package-grid">
+          {homeContent.ecosystemPackages.map((pkg) => (
+            <article className="package-card" key={pkg.name}>
+              <div className="package-card-top">
+                <div>
+                  <h3>{pkg.name}</h3>
+                  <p>{pkg.text}</p>
+                </div>
+              </div>
+              <pre className="install-command">
+                <code>{pkg.command}</code>
+              </pre>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="registry-section" id="registry" aria-labelledby="registry-title">
         <div className="registry-head">
           <div>

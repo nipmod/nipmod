@@ -99,6 +99,84 @@ export const homeContent = {
       text: "Signed advisories and quarantine metadata can block install surfaces without owning publishing rights."
     }
   ],
+  launchReadiness: [
+    {
+      label: "Founder review",
+      text: "A short public ask, a direct message and the Gitlawb source link are ready."
+    },
+    {
+      label: "Demo flow",
+      text: "A Gitlawb repo can be drafted, checked, verified and installed from one terminal path."
+    },
+    {
+      label: "Public proof",
+      text: "Manifest, advisory feed, transparency checkpoint, witness and release signature are public."
+    },
+    {
+      label: "Agent setup",
+      text: "Codex, Claude Code and OpenCode can use the read only MCP server."
+    }
+  ],
+  founderOutreach: {
+    post:
+      "We built nipmod, decentralized npm for Gitlawb agents. It turns Gitlawb repos into signed agent packages with digest, DID signature, release event, transparency and witness proof. Source and live installer are public.",
+    dm:
+      "Could you sanity check whether nipmod fits Gitlawb as a package layer for agents? Code, proof and the live CLI are public."
+  },
+  demoFlow: [
+    {
+      label: "Convert",
+      text: "Create a package draft from a Gitlawb repo URL or DID path.",
+      command: "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo"
+    },
+    {
+      label: "Preflight",
+      text: "Validate manifest, permissions and the registry candidate before a public write.",
+      command: "nipmod publish repo --dry-run --json"
+    },
+    {
+      label: "Verify",
+      text: "Inspect digest, signer, source commit, witness and transparency evidence.",
+      command: "nipmod inspect repo --online"
+    },
+    {
+      label: "Install",
+      text: "Pin the verified package in the workspace lockfile.",
+      command: "nipmod add repo --online"
+    }
+  ],
+  ecosystemPackages: [
+    {
+      name: "gitlawb-repo-reader",
+      text: "Read a public Gitlawb repo and return a provenance focused summary.",
+      command: "nipmod add gitlawb-repo-reader --online"
+    },
+    {
+      name: "gitlawb-release-review",
+      text: "Review immutable tags, signed release events and registry readiness.",
+      command: "nipmod add gitlawb-release-review --online"
+    },
+    {
+      name: "dependency-risk-review",
+      text: "Review dependency manifests, permissions and lockfiles before install.",
+      command: "nipmod add dependency-risk-review --online"
+    },
+    {
+      name: "prompt-injection-scan",
+      text: "Scan package text and prompts for instruction injection risk.",
+      command: "nipmod add prompt-injection-scan --online"
+    },
+    {
+      name: "strict-ci-policy",
+      text: "Run strict install policy gates for automated agent workspaces.",
+      command: "nipmod add strict-ci-policy --online"
+    },
+    {
+      name: "mcp-server-import-example",
+      text: "Map MCP server metadata into nipmod compatibility receipts.",
+      command: "nipmod add mcp-server-import-example --online"
+    }
+  ],
   repoToPackage: {
     headline: "Turn a Gitlawb repo into an agent package",
     lead: "Paste a public Gitlawb repo. Get a package draft, manifest, trust checklist and publish preflight.",

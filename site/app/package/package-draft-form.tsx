@@ -1,0 +1,79 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
+type PackageDraftFormProps = {
+  inputLabel: string;
+  inputPlaceholder: string;
+};
+
+export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftFormProps) {
+  const [repo, setRepo] = useState("");
+  const draft = useMemo(() => draftFromRepo(repo), [repo]);
+
+  return (
+    <section className="package-draft" aria-labelledby="draft-title">
+      <div className="draft-input">
+        <label htmlFor="repo-input">{inputLabel}</label>
+        <input
+          autoComplete="off"
+          id="repo-input"
+          name="repo"
+          onChange={(event) => setRepo(event.target.value)}
+          placeholder={inputPlaceholder}
+          type="text"
+          value={repo}
+        />
+        <p>{draft.helper}</p>
+      </div>
+      <div className="proof-panel">
+        <h2 id="draft-title">Draft output</h2>
+        <pre className="install-command">
+          <code>{draft.commands}</code>
+        </pre>
+        <p className="panel-copy">
+          The dry run returns the registry candidate, permissions checklist and source commit before any public write.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function draftFromRepo(input: string) {
+  const trimmed = input.trim();
+  if (trimmed.length === 0) {
+    return {
+      commands:
+        "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run --json",
+      helper: "Paste a public Gitlawb repo to generate exact commands."
+    };
+  }
+
+  const repoName = inferRepoName(trimmed);
+  const quotedInput = shellQuote(trimmed);
+  const quotedDir = shellQuote(repoName);
+
+  return {
+    commands: `nipmod package ${quotedInput} --dir ${quotedDir}\nnipmod manifest validate --dir ${quotedDir}\nnipmod publish ${quotedDir} --dry-run --json`,
+    helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`
+  };
+}
+
+function inferRepoName(input: string): string {
+  const lastPathPart = input.replace(/\/+$/, "").split("/").at(-1) ?? "repo";
+  const clean = lastPathPart
+    .replace(/\.git$/i, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return clean || "repo";
+}
+
+function shellQuote(value: string): string {
+  if (/^[a-zA-Z0-9_./:@-]+$/.test(value)) {
+    return value;
+  }
+
+  return `'${value.replaceAll("'", "'\\''")}'`;
+}

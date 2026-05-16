@@ -30,7 +30,9 @@ X: https://x.com/Nipmod
 
 Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 
-Founder review ask:
+## Founder review kit
+
+Primary public post:
 
 ```text
 We built nipmod, decentralized npm for Gitlawb agents.
@@ -44,6 +46,42 @@ https://nipmod.com
 Could you sanity check whether this fits Gitlawb's intended package layer?
 ```
 
+Short public post:
+
+```text
+nipmod is decentralized npm for Gitlawb agents.
+
+Gitlawb stores repos. nipmod turns them into signed, verifiable agent packages with digest, DID signature, transparency and witness proof.
+
+Code: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+Site: https://nipmod.com
+```
+
+Direct message:
+
+```text
+We built nipmod as a package layer for Gitlawb agents. It does not control who can publish on Gitlawb. It gives agents verified package search, install planning, audit and publish dry runs over signed Gitlawb content.
+
+Could you sanity check the architecture and tell us whether this matches Gitlawb's direction?
+```
+
+Review asks:
+
+- Is the package model aligned with Gitlawb DID ownership?
+- Should registry candidates live as Gitlawb repo metadata, separate package repos or both?
+- Is `gitlawb://did:key/.../repo` the right canonical source path for agents?
+- Should Gitlawb expose a first class package index later, or should nipmod remain a rating and verification layer?
+- Which Gitlawb invariants must nipmod never abstract away?
+
+Follow up matrix:
+
+- If Gitlawb says yes, publish the first reviewed package list and ask for ecosystem repos to convert.
+- If Gitlawb wants protocol changes, capture them as `docs/gitlawb-feedback.md` before implementation.
+- If Gitlawb wants nipmod independent, keep Gitlawb as the default source but document multi source support.
+- If no response after 48 hours, post the short public demo and keep the ask technical.
+
 ## Security and incidents
 
 nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
+
+Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. Send the first report path through X DM to https://x.com/Nipmod until a dedicated security mailbox is published.

@@ -38,6 +38,7 @@ fly status --app nipmod-gitlawb-node-v2
 fly status --app nipmod-witness
 curl -i -X POST https://nipmod-witness.fly.dev/run
 node tools/prod-synthetic-monitor.mjs
+node tools/prod-load-smoke.mjs
 node tools/restore-drill.mjs
 node tools/node-edge-resilience-smoke.mjs
 node tools/verify-all.mjs --prod
@@ -54,6 +55,7 @@ The registry is public-ready only when:
 - `sourceCommit`, `sourceTag` and `sourceProvenanceVerified` are present
 - Vercel deployment status is Ready and aliased to `nipmod.com`
 - the advisory dry-run blocks a live verified package with `audit` exit `6` and `ci` exit `8` without changing the public advisory feed
+- bounded load smoke passes for the homepage crawler, registry, trust page and node health
 
 ## Synthetic Monitoring
 
@@ -89,7 +91,21 @@ It uses exactly 5 serial node requests with no retries:
 
 Total receive-pack body budget is 1,048,580 bytes. The smoke fails on any 5xx response, oversized catalog response, missing `clone_url`, exposed unauthenticated receive-pack path or unhealthy node after probes.
 
-This does not prove real per-IP rate limits, DID rate limits, crawler throttling or 10x launch load. Those remain public launch blockers until tested against explicit edge controls.
+This does not prove real per-IP rate limits, DID rate limits or aggressive crawler throttling. It does prove the public edge rejects unauthenticated write probes and stays healthy after bounded abuse probes.
+
+## Production Load Smoke
+
+`node tools/prod-load-smoke.mjs` is the bounded launch smoke for 100 early users. It is not a stress test and does not try to exhaust Gitlawb or Vercel.
+
+It verifies:
+
+- homepage crawler can discover the Trust page
+- registry stays valid under 20 bounded requests
+- node health stays valid under 20 bounded requests
+- Trust page stays valid under 10 bounded requests
+- p95 latency remains under 2500ms for each checked surface
+
+Default budget is 20 iterations with concurrency 4 and a 10 second request timeout. Run it before public posts and after deploys that touch registry, trust or node health.
 
 ## Alert Delivery
 
@@ -109,6 +125,14 @@ node tools/prod-alert-runner.mjs --probe
 ```
 
 The command exits non-zero when a destination is missing or returns non-2xx. Its stdout redacts webhook URLs and reports destinations only as short SHA-256 ids. A public launch requires a successful `--probe` from the external runner plus a normal 60-second schedule outside the nipmod production stack.
+
+Current deployable monitor target:
+
+- Fly app config: `tools/fly.monitor.toml`
+- health: `https://nipmod-monitor.fly.dev/health`
+- last cycle: `https://nipmod-monitor.fly.dev/last`
+
+The monitor uses `node tools/prod-alert-runner.mjs` every 60 seconds. The default checked in alert URLs hit the public Vercel alert sinks, which prove delivery wiring. For stronger independent paging, replace them with two external destinations before a large launch.
 
 ## Restore Drill
 
@@ -178,10 +202,11 @@ Default tools are read-only and non-destructive:
 - `nipmod.search`
 - `nipmod.inspect`
 - `nipmod.install_plan`
+- `nipmod.publish_plan`
 - `nipmod.verify`
 - `nipmod.audit`
 
-The server does not expose `init`, `add`, `install`, `pack`, `publish`, `policy init` or `setup-cloudflare`. Package registry fields, manifests, READMEs and advisory text are returned as data, not as instructions. Custom transparency or advisory trust roots require explicit `allowCustomRoots: true`.
+The server does not expose mutating `init`, `add`, `install`, `pack`, `publish`, `policy init` or `setup-cloudflare`. `nipmod.publish_plan` is dry run only and returns planned Gitlawb writes as data. Package registry fields, manifests, READMEs and advisory text are returned as data, not as instructions. Custom transparency or advisory trust roots require explicit `allowCustomRoots: true`.
 
 Public host setup docs live at `https://nipmod.com/mcp` and `docs/mcp-hosts.md`.
 

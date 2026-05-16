@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { homeContent } from "../content";
 import { SiteHeader } from "../site-header";
+import { PackageDraftForm } from "./package-draft-form";
 
 export const metadata: Metadata = {
   alternates: {
@@ -34,25 +35,10 @@ export default function PackagePage() {
         </div>
       </section>
 
-      <section className="package-draft" aria-labelledby="draft-title">
-        <div className="draft-input">
-          <label htmlFor="repo-input">{homeContent.repoToPackage.inputLabel}</label>
-          <input
-            autoComplete="off"
-            id="repo-input"
-            name="repo"
-            placeholder={homeContent.repoToPackage.inputPlaceholder}
-            type="text"
-          />
-        </div>
-        <div className="proof-panel">
-          <h2 id="draft-title">{homeContent.repoToPackage.outputTitle}</h2>
-          <pre className="install-command">
-            <code>{homeContent.repoToPackage.outputCommand}</code>
-          </pre>
-          <p className="panel-copy">{homeContent.repoToPackage.claim.text}</p>
-        </div>
-      </section>
+      <PackageDraftForm
+        inputLabel={homeContent.repoToPackage.inputLabel}
+        inputPlaceholder={homeContent.repoToPackage.inputPlaceholder}
+      />
 
       <section className="usage-strip" aria-label="Repo to package steps">
         {homeContent.repoToPackage.steps.map((step) => (
