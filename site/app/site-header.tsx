@@ -25,6 +25,9 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide" href="/security">
           Security
         </a>
+        <a className="nav-link nav-link-wide" href="/launch">
+          Launch
+        </a>
         <a className="nav-link nav-link-wide" href="/proof">
           Proof
         </a>

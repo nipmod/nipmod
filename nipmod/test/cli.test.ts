@@ -413,6 +413,70 @@ describe("nipmod CLI", () => {
     expect(parsed.data.packages.map((pkg) => pkg.name)).toEqual(["policy", "policy-sidecar", "zzz"]);
   });
 
+  test("searches multiple registry sources and fails on digest conflicts", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-multi-"));
+    const owner = generateIdentity().did;
+    const firstRegistryPath = join(workspace, "registry-a.json");
+    const secondRegistryPath = join(workspace, "registry-b.json");
+    await writeFile(
+      firstRegistryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [searchPackageFixture(owner, "alpha", "skill", 100)],
+        source: "registry-a"
+      })}\n`
+    );
+    await writeFile(
+      secondRegistryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [searchPackageFixture(owner, "beta", "workflow-pack", 90)],
+        source: "registry-b"
+      })}\n`
+    );
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "search",
+      "a",
+      "--registries",
+      `${pathToFileURL(firstRegistryPath).href},${pathToFileURL(secondRegistryPath).href}`,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      data: {
+        sources: string[];
+        packages: Array<{ name: string; sourceRegistry: string }>;
+      };
+    };
+
+    expect(parsed.data.sources).toHaveLength(2);
+    expect(parsed.data.packages.map((pkg) => pkg.name)).toEqual(["alpha", "beta"]);
+    expect(parsed.data.packages.map((pkg) => pkg.sourceRegistry)).toEqual([
+      pathToFileURL(firstRegistryPath).href,
+      pathToFileURL(secondRegistryPath).href
+    ]);
+
+    await writeFile(
+      secondRegistryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [{ ...searchPackageFixture(owner, "alpha", "skill", 100), digest: "f".repeat(64) }],
+        source: "registry-b"
+      })}\n`
+    );
+
+    await expect(
+      execaNode([
+        "src/cli.ts",
+        "search",
+        "alpha",
+        "--registries",
+        `${pathToFileURL(firstRegistryPath).href},${pathToFileURL(secondRegistryPath).href}`
+      ])
+    ).rejects.toThrow(/conflicting registry records/i);
+  });
+
   test("search hides quarantined packages unless explicitly included", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-quarantine-"));
     const owner = generateIdentity().did;

@@ -172,9 +172,34 @@ export const homeContent = {
       command: "nipmod add strict-ci-policy --online"
     },
     {
+      name: "developer-default-policy",
+      text: "Apply a practical default policy for trying packages safely before production use.",
+      command: "nipmod add developer-default-policy --online"
+    },
+    {
+      name: "nipmod-audit-ci",
+      text: "Turn audit and policy output into CI decisions agents can explain and enforce.",
+      command: "nipmod add nipmod-audit-ci --online"
+    },
+    {
+      name: "github-issue-triage",
+      text: "Triage GitHub issues from untrusted issue text without package permissions.",
+      command: "nipmod add github-issue-triage --online"
+    },
+    {
       name: "mcp-server-import-example",
       text: "Map MCP server metadata into nipmod compatibility receipts.",
       command: "nipmod add mcp-server-import-example --online"
+    },
+    {
+      name: "apm-import-example",
+      text: "Map an APM package listing into nipmod trust metadata.",
+      command: "nipmod add apm-import-example --online"
+    },
+    {
+      name: "malicious-skill-fixtures",
+      text: "Provide safe negative test fixtures for scanners and policy reviewers.",
+      command: "nipmod add malicious-skill-fixtures --online"
     }
   ],
   repoToPackage: {

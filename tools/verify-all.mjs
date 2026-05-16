@@ -43,6 +43,7 @@ await run("pnpm", [
 	  "../tools/prod-load-smoke.test.mjs",
 	  "../tools/node-edge-resilience-smoke.test.mjs",
 	  "../tools/first-party-packages.test.mjs",
+	  "../tools/generate-review-packet.test.mjs",
 	  "../tools/public-proof-loop.test.mjs"
 	]);
 await run("pnpm", ["--dir", "nipmod", "test"]);

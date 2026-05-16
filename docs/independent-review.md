@@ -23,6 +23,12 @@ Attach or link:
 - browser test output for the public site
 - known limitations and accepted risks
 
+Generate the packet:
+
+```bash
+node tools/generate-review-packet.mjs /tmp/nipmod-review-packet.md
+```
+
 ## Threat Model Focus
 
 Reviewers should focus on:

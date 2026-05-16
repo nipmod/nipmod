@@ -85,6 +85,7 @@ export interface RegistrySearchPackage {
   name: string;
   permissionSummary: string;
   quarantined: boolean;
+  sourceRegistry: string;
   trust: string;
   trustLevel: string;
   trustScore: number;
@@ -95,6 +96,7 @@ export interface RegistrySearchPackage {
 export interface RegistrySearchResult {
   packages: RegistrySearchPackage[];
   query: string;
+  sources: string[];
   total: number;
 }
 
@@ -106,8 +108,47 @@ export async function searchRegistry(options: {
   registryUrl: string;
 }): Promise<RegistrySearchResult> {
   const registry = RegistrySearchIndexSchema.parse(await readJsonSource(options.registryUrl, options.fetchImpl ?? fetch));
+  return searchParsedRegistries({
+    ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    limit: options.limit,
+    query: options.query,
+    registries: [{ registry, sourceRegistry: options.registryUrl }]
+  });
+}
+
+export async function searchRegistries(options: {
+  fetchImpl?: typeof fetch;
+  includeQuarantined?: boolean;
+  limit: number;
+  query: string;
+  registryUrls: readonly string[];
+}): Promise<RegistrySearchResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const registries = await Promise.all(
+    uniqueRegistryUrls(options.registryUrls).map(async (registryUrl) => ({
+      registry: RegistrySearchIndexSchema.parse(await readJsonSource(registryUrl, fetchImpl)),
+      sourceRegistry: registryUrl
+    }))
+  );
+  return searchParsedRegistries({
+    ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    limit: options.limit,
+    query: options.query,
+    registries
+  });
+}
+
+function searchParsedRegistries(options: {
+  includeQuarantined?: boolean;
+  limit: number;
+  query: string;
+  registries: Array<{
+    registry: z.infer<typeof RegistrySearchIndexSchema>;
+    sourceRegistry: string;
+  }>;
+}): RegistrySearchResult {
   const query = options.query.trim().toLowerCase();
-  const packages = registry.packages
+  const packages = dedupeRegistryPackages(options.registries)
     .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
     .filter((pkg) => registryPackageMatches(pkg, query))
     .sort((left, right) => compareRegistryPackages(left, right, query))
@@ -117,8 +158,39 @@ export async function searchRegistry(options: {
   return {
     packages,
     query: options.query,
+    sources: options.registries.map((entry) => entry.sourceRegistry),
     total: packages.length
   };
+}
+
+function uniqueRegistryUrls(registryUrls: readonly string[]): string[] {
+  return [...new Set(registryUrls.map((url) => url.trim()).filter(Boolean))];
+}
+
+type RegistryPackageWithSource = z.infer<typeof RegistrySearchPackageSchema> & {
+  sourceRegistry: string;
+};
+
+function dedupeRegistryPackages(
+  registries: Array<{
+    registry: z.infer<typeof RegistrySearchIndexSchema>;
+    sourceRegistry: string;
+  }>
+): RegistryPackageWithSource[] {
+  const byKey = new Map<string, RegistryPackageWithSource>();
+  for (const entry of registries) {
+    for (const pkg of entry.registry.packages) {
+      const key = `${pkg.canonical}@${pkg.version}`;
+      const existing = byKey.get(key);
+      if (existing && existing.digest !== pkg.digest) {
+        throw new Error(`conflicting registry records for ${key}`);
+      }
+      if (!existing) {
+        byKey.set(key, { ...pkg, sourceRegistry: entry.sourceRegistry });
+      }
+    }
+  }
+  return [...byKey.values()];
 }
 
 function registryPackageMatches(pkg: z.infer<typeof RegistrySearchPackageSchema>, query: string): boolean {
@@ -177,7 +249,7 @@ function registrySearchScore(pkg: z.infer<typeof RegistrySearchPackageSchema>, q
 
 const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "policy-pack", "mcp-server"]);
 
-function toSearchPackage(pkg: z.infer<typeof RegistrySearchPackageSchema>): RegistrySearchPackage {
+function toSearchPackage(pkg: RegistryPackageWithSource): RegistrySearchPackage {
   const quarantine = activeQuarantine(pkg);
   const installBlockedReason = quarantine ? quarantineBlockedReason(quarantine) : undefined;
   return {
@@ -190,6 +262,7 @@ function toSearchPackage(pkg: z.infer<typeof RegistrySearchPackageSchema>): Regi
     name: pkg.name,
     permissionSummary: permissionSummary(pkg.permissions),
     quarantined: Boolean(quarantine),
+    sourceRegistry: pkg.sourceRegistry,
     trust: `${pkg.trust.level}/${pkg.trust.score}`,
     trustLevel: pkg.trust.level,
     trustScore: pkg.trust.score,

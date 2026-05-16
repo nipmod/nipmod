@@ -89,6 +89,7 @@ See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
 See `docs/community.md` for package expectations, feedback links and founder outreach copy.
 See `SECURITY.md` and `docs/independent-review.md` for disclosure scope and external review readiness.
+See `docs/adoption.md`, `docs/self-service-publishing.md` and `docs/multi-source-registry.md` for the remaining ecosystem scale paths.
 See `docs/launch-demo.md` for the public demo script.
 See `docs/ecosystem-packages.md` for the first party package catalog.
 

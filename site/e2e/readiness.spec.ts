@@ -34,3 +34,13 @@ test("trust and security proof links are public", async ({ page }) => {
   await expect(response).toBeOK();
   await expect(response.text()).resolves.toContain("Policy: https://nipmod.com/security");
 });
+
+test("launch page exposes adoption, review and multi source paths", async ({ page }) => {
+  await page.goto("/launch");
+
+  await expect(page.getByRole("heading", { name: "Use it. Publish into it. Review it." })).toBeVisible();
+  await expect(page.getByText("nipmod publish repo --dry-run --json")).toBeVisible();
+  await expect(page.getByText("node tools/verify-all.mjs --prod")).toBeVisible();
+  await expect(page.getByText("nipmod search policy --registries")).toBeVisible();
+  await expect(page.getByText("2 alert destinations outside Vercel and Fly")).toBeVisible();
+});

@@ -45,6 +45,7 @@ node tools/supply-chain-check.mjs
 node tools/restore-drill.mjs
 node tools/node-edge-resilience-smoke.mjs
 node tools/verify-all.mjs --prod
+nipmod search policy --registries https://nipmod.com/registry/packages.json,https://mirror.example/packages.json
 ```
 
 The registry is public-ready only when:

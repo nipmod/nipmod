@@ -34,7 +34,7 @@ import {
 } from "./install-plan.js";
 import { installBundlePackage, installFilePackage } from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
-import { DEFAULT_REGISTRY_URL, searchRegistry, type RegistrySearchResult } from "./registry.js";
+import { DEFAULT_REGISTRY_URL, searchRegistries, searchRegistry, type RegistrySearchResult } from "./registry.js";
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
 import {
@@ -752,16 +752,24 @@ function formatVerdict(verdict: TrustReportVerdict): string {
 
 async function searchCommand(args: string[]): Promise<CliResult> {
   const query = firstPositional(args);
-  const registryUrl = optionalFlagValue(args, "--registry");
-  if (!registryUrl && !hasFlag(args, "--online")) {
-    throw new Error("search network access requires --online or --registry");
+  const registryUrls = registrySearchUrls(args);
+  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
+    throw new Error("search network access requires --online, --registry or --registries");
   }
-  const result = await searchRegistry({
-    includeQuarantined: hasFlag(args, "--include-quarantined"),
-    limit: searchLimit(args),
-    query,
-    registryUrl: registryUrl ?? DEFAULT_REGISTRY_URL
-  });
+  const result =
+    registryUrls.length > 1
+      ? await searchRegistries({
+          includeQuarantined: hasFlag(args, "--include-quarantined"),
+          limit: searchLimit(args),
+          query,
+          registryUrls
+        })
+      : await searchRegistry({
+          includeQuarantined: hasFlag(args, "--include-quarantined"),
+          limit: searchLimit(args),
+          query,
+          registryUrl: registryUrls[0] ?? DEFAULT_REGISTRY_URL
+        });
 
   return {
     ok: true,
@@ -770,6 +778,24 @@ async function searchCommand(args: string[]): Promise<CliResult> {
       ...result
     }
   };
+}
+
+function registrySearchUrls(args: readonly string[]): string[] {
+  const explicit = [
+    ...optionalFlagValues(args, "--registry"),
+    ...optionalFlagValues(args, "--registries").flatMap(splitRegistryList)
+  ];
+  if (explicit.length > 0) {
+    return [...new Set(explicit)];
+  }
+  return splitRegistryList(process.env.NIPMOD_REGISTRY_URLS ?? "");
+}
+
+function splitRegistryList(value: string): string[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 async function policyCommand(args: string[]): Promise<CliResult> {
@@ -1074,6 +1100,7 @@ const VALUE_FLAGS = new Set([
   "--port",
   "--profile",
   "--registry",
+  "--registries",
   "--type",
   "--version",
   "--witness"
