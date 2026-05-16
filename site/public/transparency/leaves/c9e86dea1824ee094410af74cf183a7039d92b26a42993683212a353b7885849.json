@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+  "eventHash": "9f3a443a2ad09d657f5ec26fb7918eae7131f0367a6d072c18c3f8d0b0ce99a4",
+  "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+  "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+  "version": "0.1.0"
+}

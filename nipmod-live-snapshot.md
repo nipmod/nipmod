@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic "Primary" [ref=e3]:
+      - link "nipmod home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: "n"
+        - generic [ref=e6]: nipmod
+      - navigation "Site" [ref=e7]:
+        - link "Registry" [ref=e8] [cursor=pointer]:
+          - /url: /#registry
+        - link "Trust" [ref=e9] [cursor=pointer]:
+          - /url: /trust
+        - link "MCP" [ref=e10] [cursor=pointer]:
+          - /url: /mcp
+        - link "X" [ref=e11] [cursor=pointer]:
+          - /url: https://x.com/nipmod
+    - region "Verifiable packages for agents" [ref=e12]:
+      - generic [ref=e13]:
+        - heading "Verifiable packages for agents" [level=1] [ref=e14]
+        - paragraph [ref=e15]: Built on Gitlawb. Used from terminal, Codex, or any agent runtime.
+        - generic "Actions" [ref=e16]
+      - generic "Terminal flow" [ref=e19]:
+        - generic [ref=e20]
+        - generic [ref=e23]
+    - region "Where nipmod is used" [ref=e33]:
+      - article [ref=e34]:
+        - heading "Terminal" [level=2] [ref=e35]
+        - paragraph [ref=e36]: Install and pin packages.
+      - article [ref=e37]:
+        - heading "Website" [level=2] [ref=e38]
+        - paragraph [ref=e39]: Find packages and inspect trust.
+      - article [ref=e40]:
+        - heading "Codex" [level=2] [ref=e41]
+        - paragraph [ref=e42]: Run nipmod inside a workspace.
+    - region "Install from Gitlawb. Inspect the proof." [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]
+        - generic [ref=e48]
+      - generic "Registry stats" [ref=e52]:
+        - generic [ref=e53]
+        - generic [ref=e56]
+        - generic [ref=e59]
+      - generic [ref=e62]:
+        - article [ref=e63]
+        - article [ref=e88]
+        - article [ref=e113]
+        - article [ref=e138]
+        - article [ref=e163]
+        - article [ref=e188]
+        - article [ref=e213]
+        - article [ref=e238]
+        - article [ref=e263]
+        - article [ref=e288]
+        - article [ref=e315]
+        - article [ref=e342]
+  - alert [ref=e369]

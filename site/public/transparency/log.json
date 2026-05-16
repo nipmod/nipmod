@@ -1,0 +1,512 @@
+{
+  "entries": [
+    {
+      "inclusionProof": [
+        {
+          "hash": "800b206365833bcd4e86fae6b4cb396f7eb2c4de790b206286ca7dbcb7e5b9a4",
+          "side": "right"
+        },
+        {
+          "hash": "7c0730b87e112367ddb9d6b684578961157fa83207b476df2c6d60ae945c0ea0",
+          "side": "right"
+        },
+        {
+          "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+          "side": "right"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "e64a5932dc8dc43cff5fa66aab2817ceb8e159e231bea5d883ab0bba52d26e8e",
+        "eventHash": "188e3134c460f37cdbd3c407e37bc3e784667056872b293aea9cf59e16663cfb",
+        "package": "pkg:did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617",
+        "publisher": "did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK",
+        "version": "0.1.0"
+      },
+      "leafHash": "7c4dab67f798a955b54e2d1d2b532adbb2906ba4008c24ff0186efb08335f7c8",
+      "leafIndex": 0
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "7c4dab67f798a955b54e2d1d2b532adbb2906ba4008c24ff0186efb08335f7c8",
+          "side": "left"
+        },
+        {
+          "hash": "7c0730b87e112367ddb9d6b684578961157fa83207b476df2c6d60ae945c0ea0",
+          "side": "right"
+        },
+        {
+          "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+          "side": "right"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "580777249f6fbd950a3c06dc57911d113f1645dce2e5670d814b2b842ae67e1b",
+        "eventHash": "f04dd720875a776dc8644a2b9867e371aee528a9858172b43bf2892fc77214f6",
+        "package": "pkg:did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5/repo-readme-audit",
+        "publisher": "did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5",
+        "version": "0.1.0"
+      },
+      "leafHash": "800b206365833bcd4e86fae6b4cb396f7eb2c4de790b206286ca7dbcb7e5b9a4",
+      "leafIndex": 1
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "f277b955ea61ef3289f30887af39db874e8d305c3f635fb6f51e8b1de1bb0bd6",
+          "side": "right"
+        },
+        {
+          "hash": "ae27661b97e9d51c052a59ccc8f519c4c99f692aadd7d582c0fed618c3ecbeab",
+          "side": "left"
+        },
+        {
+          "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+          "side": "right"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "dacc4bd3d1fd146b42d46761baf824c297425baa842772dfd154fe5c2ae13316",
+        "eventHash": "c170cf6358d0b3c36edae6448092e0ef61c674a8ed3e7534eba630a35a1ab6e3",
+        "package": "pkg:did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h/gitlawb-repo-reader",
+        "publisher": "did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h",
+        "version": "0.1.0"
+      },
+      "leafHash": "25d6875876c2bb9f635c3fda8b13c013515d5ee7fb83e80751479fb03009a9b1",
+      "leafIndex": 2
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "25d6875876c2bb9f635c3fda8b13c013515d5ee7fb83e80751479fb03009a9b1",
+          "side": "left"
+        },
+        {
+          "hash": "ae27661b97e9d51c052a59ccc8f519c4c99f692aadd7d582c0fed618c3ecbeab",
+          "side": "left"
+        },
+        {
+          "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+          "side": "right"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "a88d5223d50782b02d41c923ca21cc1e0304601662ebbc0ce6493bd08c9d6c41",
+        "eventHash": "056b04bb454151ef3e68d95fe406ab22de7b933d8b2ca09122c841c412f1f9c7",
+        "package": "pkg:did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em/dependency-risk-review",
+        "publisher": "did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em",
+        "version": "0.1.0"
+      },
+      "leafHash": "f277b955ea61ef3289f30887af39db874e8d305c3f635fb6f51e8b1de1bb0bd6",
+      "leafIndex": 3
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524",
+          "side": "right"
+        },
+        {
+          "hash": "57310846d25daca0719000a79136de8d94f83c48314f48b2afbff672ddc9f1c6",
+          "side": "right"
+        },
+        {
+          "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+          "side": "left"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+        "eventHash": "1e0c54476e578ddad2dbb2d5108a6fed74217e36272747f190abdd111371a561",
+        "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+        "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+        "version": "0.1.0"
+      },
+      "leafHash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+      "leafIndex": 4
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+          "side": "left"
+        },
+        {
+          "hash": "57310846d25daca0719000a79136de8d94f83c48314f48b2afbff672ddc9f1c6",
+          "side": "right"
+        },
+        {
+          "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+          "side": "left"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+        "eventHash": "2fa34ba9ae6b9543156add08356509b29428c8a29d5cc022bae9fe294f3e5949",
+        "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+        "publisher": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+        "version": "0.1.0"
+      },
+      "leafHash": "d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524",
+      "leafIndex": 5
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185",
+          "side": "right"
+        },
+        {
+          "hash": "e8ab142b06f2df270e445ce50c3d2ffd19f513fe6a141bcc241f61b3a1a2350e",
+          "side": "left"
+        },
+        {
+          "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+          "side": "left"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+        "eventHash": "759de3ebf2f8cf2a39052b4b33025c177f1c27b6f7af80b329a9e90569139b42",
+        "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+        "publisher": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+        "version": "0.1.0"
+      },
+      "leafHash": "f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601",
+      "leafIndex": 6
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601",
+          "side": "left"
+        },
+        {
+          "hash": "e8ab142b06f2df270e445ce50c3d2ffd19f513fe6a141bcc241f61b3a1a2350e",
+          "side": "left"
+        },
+        {
+          "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+          "side": "left"
+        },
+        {
+          "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+          "side": "right"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+        "eventHash": "ea3ec9e2e4ac205e86dd3d9510356fff0eba2b4b31efaa03aaef8bf964d0c064",
+        "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+        "publisher": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+        "version": "0.1.0"
+      },
+      "leafHash": "564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185",
+      "leafIndex": 7
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7",
+          "side": "right"
+        },
+        {
+          "hash": "671bc94ab9ef0f38b8eeae70fb5a53a6d7c6fbf14916a698b4ecf3f9e8cc57bd",
+          "side": "right"
+        },
+        {
+          "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+          "side": "right"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+        "eventHash": "c4c5e215b5bdec546e60c1bad3b085bf4ee86126b6f4cf376419fa1f402dc7ed",
+        "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+        "publisher": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+        "version": "0.1.0"
+      },
+      "leafHash": "f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1",
+      "leafIndex": 8
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1",
+          "side": "left"
+        },
+        {
+          "hash": "671bc94ab9ef0f38b8eeae70fb5a53a6d7c6fbf14916a698b4ecf3f9e8cc57bd",
+          "side": "right"
+        },
+        {
+          "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+          "side": "right"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+        "eventHash": "272007e8a3fecd27fdaf0679cceef0229952a7fc12f0d11292e041175fd91974",
+        "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+        "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+        "version": "0.1.0"
+      },
+      "leafHash": "27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7",
+      "leafIndex": 9
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+          "side": "right"
+        },
+        {
+          "hash": "d6ceb917c3ba78ed31889a9e66fffc3ff172063b8e7c145874a0f287c1f7066e",
+          "side": "left"
+        },
+        {
+          "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+          "side": "right"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+        "eventHash": "994009b1ac805522b247e949dee38d0243463693358cb74a5898ab90db35bba1",
+        "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+        "publisher": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+        "version": "0.1.0"
+      },
+      "leafHash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
+      "leafIndex": 10
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
+          "side": "left"
+        },
+        {
+          "hash": "d6ceb917c3ba78ed31889a9e66fffc3ff172063b8e7c145874a0f287c1f7066e",
+          "side": "left"
+        },
+        {
+          "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+          "side": "right"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+        "eventHash": "9f3a443a2ad09d657f5ec26fb7918eae7131f0367a6d072c18c3f8d0b0ce99a4",
+        "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+        "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+        "version": "0.1.0"
+      },
+      "leafHash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+      "leafIndex": 11
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332",
+          "side": "right"
+        },
+        {
+          "hash": "7e40a78a75ec906c7a5dbe9396cc8f4750b27379c03a6248ba9690f0795633bc",
+          "side": "right"
+        },
+        {
+          "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+          "side": "left"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+        "eventHash": "a04921daf871bc72a1f7e42be7b393c6b33ac5099bdb42401ef21a712e8a4edc",
+        "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+        "publisher": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+        "version": "0.1.0"
+      },
+      "leafHash": "f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b",
+      "leafIndex": 12
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b",
+          "side": "left"
+        },
+        {
+          "hash": "7e40a78a75ec906c7a5dbe9396cc8f4750b27379c03a6248ba9690f0795633bc",
+          "side": "right"
+        },
+        {
+          "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+          "side": "left"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+        "eventHash": "dc8ea82d092a925a9234bb19783fec72937b652ab79ecf398d7d7b7ee59eb380",
+        "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+        "publisher": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+        "version": "0.1.0"
+      },
+      "leafHash": "546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332",
+      "leafIndex": 13
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644",
+          "side": "right"
+        },
+        {
+          "hash": "c4db7e6520577538a1885cfa239b69aa0297b2f485d5fe86411dab0a449ea1b0",
+          "side": "left"
+        },
+        {
+          "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+          "side": "left"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+        "eventHash": "65dd5971c4b95d2b93b4551f608e566b092294b496e3f2878acd0e653f64228a",
+        "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+        "publisher": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+        "version": "0.1.0"
+      },
+      "leafHash": "27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497",
+      "leafIndex": 14
+    },
+    {
+      "inclusionProof": [
+        {
+          "hash": "27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497",
+          "side": "left"
+        },
+        {
+          "hash": "c4db7e6520577538a1885cfa239b69aa0297b2f485d5fe86411dab0a449ea1b0",
+          "side": "left"
+        },
+        {
+          "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+          "side": "left"
+        },
+        {
+          "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+          "side": "left"
+        }
+      ],
+      "leaf": {
+        "artifactSha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+        "eventHash": "0d6938940bc37c58b199d5214203e1dc9e1eb787b11c03078a568a4aca1495fa",
+        "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+        "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+        "version": "0.1.0"
+      },
+      "leafHash": "03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644",
+      "leafIndex": 15
+    }
+  ],
+  "formatVersion": 1,
+  "treeHead": {
+    "formatVersion": 1,
+    "generatedAt": "2026-05-16T15:46:44.454Z",
+    "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+    "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+    "treeSize": 16,
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+      "signatureBase64": "J7pYLqF5pQI9nZnEwIGFtQy8WXESwlw0ZLgfZLsb5nD2n2jIWrsu/9XHhMYjsb6IobAgyYEz2cYqmO7OrQd6DQ=="
+    }
+  },
+  "previousCheckpoint": {
+    "formatVersion": 1,
+    "generatedAt": "2026-05-16T15:46:44.454Z",
+    "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+    "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+    "treeSize": 16,
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+      "signatureBase64": "J7pYLqF5pQI9nZnEwIGFtQy8WXESwlw0ZLgfZLsb5nD2n2jIWrsu/9XHhMYjsb6IobAgyYEz2cYqmO7OrQd6DQ=="
+    }
+  },
+  "witnesses": [
+    {
+      "formatVersion": 1,
+      "treeHead": {
+        "formatVersion": 1,
+        "generatedAt": "2026-05-16T15:46:44.454Z",
+        "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+        "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+        "treeSize": 16
+      },
+      "type": "dev.nipmod.transparency.witness.v1",
+      "witness": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+      "signature": {
+        "algorithm": "Ed25519",
+        "keyId": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+        "signatureBase64": "/jjEp7W1N8N061qPv0Etv6CLeLutGYyAV/KrfKd7fY1T+H7jSW/rVjOocXQy9BvXbkA4XB+Fr+i0Kj6uq1clBg=="
+      }
+    }
+  ]
+}

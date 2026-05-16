@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+  "eventHash": "a04921daf871bc72a1f7e42be7b393c6b33ac5099bdb42401ef21a712e8a4edc",
+  "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+  "publisher": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+  "version": "0.1.0"
+}

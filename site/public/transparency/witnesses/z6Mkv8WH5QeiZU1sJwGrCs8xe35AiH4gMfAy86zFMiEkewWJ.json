@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "treeHead": {
+    "formatVersion": 1,
+    "generatedAt": "2026-05-16T15:46:44.454Z",
+    "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+    "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+    "treeSize": 16
+  },
+  "type": "dev.nipmod.transparency.witness.v1",
+  "witness": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+  "signature": {
+    "algorithm": "Ed25519",
+    "keyId": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+    "signatureBase64": "/jjEp7W1N8N061qPv0Etv6CLeLutGYyAV/KrfKd7fY1T+H7jSW/rVjOocXQy9BvXbkA4XB+Fr+i0Kj6uq1clBg=="
+  }
+}

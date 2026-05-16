@@ -1,0 +1,24 @@
+.DS_Store
+
+# Dependencies and build output
+node_modules/
+dist/
+.next/
+out/
+target/
+
+# Local service state and generated helpers
+.gitlawb-bin/
+.nipmod/
+.playwright-mcp/
+gitlawb-node/
+probe-work/
+site/.vercel/
+site/tsconfig.tsbuildinfo
+
+# Secrets
+.env
+.env.*
+*.pem
+*identity*.json
+keys/

@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+  "eventHash": "0d6938940bc37c58b199d5214203e1dc9e1eb787b11c03078a568a4aca1495fa",
+  "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+  "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+  "version": "0.1.0"
+}

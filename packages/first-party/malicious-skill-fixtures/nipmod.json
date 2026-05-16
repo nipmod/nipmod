@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "malicious-skill-fixtures",
+  "canonical": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Provide safe negative-test fixtures for agent package scanners and policy reviews.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+    "provenance": "local"
+  }
+}

@@ -1,0 +1,77 @@
+- main [ref=e2]:
+  - generic "Primary" [ref=e3]:
+    - link "nipmod home" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]: "n"
+      - generic [ref=e6]: nipmod
+    - navigation "Site" [ref=e7]:
+      - link "Registry" [ref=e8] [cursor=pointer]:
+        - /url: /#registry
+      - link "Trust" [ref=e9] [cursor=pointer]:
+        - /url: /trust
+      - link "Proof" [ref=e10] [cursor=pointer]:
+        - /url: /proof
+      - link "MCP" [ref=e11] [cursor=pointer]:
+        - /url: /mcp
+      - link "X" [ref=e12] [cursor=pointer]:
+        - /url: https://x.com/nipmod
+  - region "Proof you can run" [ref=e13]:
+    - paragraph [ref=e14]: Proof
+    - heading "Proof you can run" [level=1] [ref=e15]
+    - paragraph [ref=e16]: A public package installs cleanly, audits cleanly and unsafe package manifests fail before release.
+    - generic "Proof actions" [ref=e17]:
+      - link "Install" [ref=e18] [cursor=pointer]:
+        - /url: /install.sh
+      - link "Trust" [ref=e19] [cursor=pointer]:
+        - /url: /trust
+      - link "Transcript" [ref=e20] [cursor=pointer]:
+        - /url: /proof/transcript.json
+  - region "Proof state" [ref=e21]:
+    - article [ref=e22]:
+      - generic [ref=e23]: "12"
+      - paragraph [ref=e24]: Verified packages
+    - article [ref=e25]:
+      - generic [ref=e26]: "16"
+      - paragraph [ref=e27]: Transparency leaves
+    - article [ref=e28]:
+      - generic [ref=e29]: verified/100
+      - paragraph [ref=e30]: Registry trust
+  - region "Install one package. Verify every step." [ref=e31]:
+    - generic [ref=e32]:
+      - paragraph [ref=e33]: Safe path
+      - heading "Install one package. Verify every step." [level=2] [ref=e34]
+    - generic [ref=e35]:
+      - code [ref=e37]: nipmod inspect pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0 --online nipmod add gitlawb-release-review --online nipmod audit --online nipmod ci --online
+      - generic [ref=e38]:
+        - generic [ref=e39]
+        - generic [ref=e42]
+        - generic [ref=e45]
+  - region "Unsafe manifests fail before release." [ref=e48]:
+    - generic [ref=e49]:
+      - paragraph [ref=e50]: Blocks
+      - heading "Unsafe manifests fail before release." [level=2] [ref=e51]
+    - generic [ref=e52]:
+      - article [ref=e53]:
+        - heading "postinstall" [level=3] [ref=e54]
+        - paragraph [ref=e55]: postinstall.allowed must be false
+        - generic [ref=e56]: manifest schema
+      - article [ref=e57]:
+        - heading "exec" [level=3] [ref=e58]
+        - paragraph [ref=e59]: exec.allowed must be false
+        - generic [ref=e60]: manifest schema
+      - article [ref=e61]:
+        - heading "broad network" [level=3] [ref=e62]
+        - paragraph [ref=e63]: network wildcards are not allowed
+        - generic [ref=e64]: permission grammar
+      - article [ref=e65]:
+        - heading "secret env" [level=3] [ref=e66]
+        - paragraph [ref=e67]: secret like environment variables are rejected
+        - generic [ref=e68]: permission grammar
+      - article [ref=e69]:
+        - heading "secret scope" [level=3] [ref=e70]
+        - paragraph [ref=e71]: secrets permissions are unsupported in v1
+        - generic [ref=e72]: permission grammar
+      - article [ref=e73]:
+        - heading "write path" [level=3] [ref=e74]
+        - paragraph [ref=e75]: filesystem write scopes are rejected
+        - generic [ref=e76]: permission grammar

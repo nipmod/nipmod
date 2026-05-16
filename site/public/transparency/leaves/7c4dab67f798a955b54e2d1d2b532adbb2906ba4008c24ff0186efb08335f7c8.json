@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "e64a5932dc8dc43cff5fa66aab2817ceb8e159e231bea5d883ab0bba52d26e8e",
+  "eventHash": "188e3134c460f37cdbd3c407e37bc3e784667056872b293aea9cf59e16663cfb",
+  "package": "pkg:did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617",
+  "publisher": "did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK",
+  "version": "0.1.0"
+}

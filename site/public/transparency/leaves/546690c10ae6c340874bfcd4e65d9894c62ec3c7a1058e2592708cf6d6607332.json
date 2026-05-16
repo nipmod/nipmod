@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+  "eventHash": "dc8ea82d092a925a9234bb19783fec72937b652ab79ecf398d7d7b7ee59eb380",
+  "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+  "publisher": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+  "version": "0.1.0"
+}

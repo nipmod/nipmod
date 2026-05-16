@@ -1,0 +1,9 @@
+.git
+.next
+.nipmod
+**/.next
+**/node_modules
+**/.env*
+**/*.log
+site/.vercel
+probe-work

@@ -1,0 +1,47 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.discovery.v1",
+  "name": "nipmod",
+  "homepage": "https://nipmod.com",
+  "trustPage": "https://nipmod.com/trust",
+  "advisories": "https://nipmod.com/advisories.json",
+  "advisoriesSignature": "https://nipmod.com/advisories.json.sig",
+  "advisoriesPublicKey": {
+    "algorithm": "Ed25519",
+    "publicKeySpkiBase64": "MCowBQYDK2VwAyEAI+Y0SgEn/OH7BW0OZzSnf3S1Eu+koiKosrAo3c/12DU=",
+    "spkiSha256": "448bb21fae566abf873b04f05623f137c7629d5f10131d951d79d40f71c0b90b"
+  },
+  "registry": {
+    "url": "https://nipmod.com/registry/packages.json",
+    "source": "https://node.nipmod.com"
+  },
+  "node": {
+    "url": "https://node.nipmod.com",
+    "health": "https://node.nipmod.com/health"
+  },
+  "witness": {
+    "did": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+    "statements": "https://nipmod-witness.fly.dev/witness-statements.json",
+    "health": "https://nipmod-witness.fly.dev/health"
+  },
+  "transparency": {
+    "checkpoint": "https://nipmod.com/transparency/checkpoint.json",
+    "log": "https://nipmod.com/transparency/log.json",
+    "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk"
+  },
+  "install": {
+    "script": "https://nipmod.com/install.sh",
+    "release": {
+      "version": "0.1.21",
+      "artifact": "https://nipmod.com/releases/nipmod-0.1.21.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-0.1.21.tgz.sig",
+      "publicKey": {
+        "algorithm": "Ed25519",
+        "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
+        "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
+      },
+      "artifactSha256": "8ddf522f7a8ac5d60fe8f133eeb824dc19b79c26e7c3f54fc7722ecf940cbf9f"
+    },
+    "scriptSha256": "f0adffc43c905c0d44c804822cf1e1b26c41d2b27d08d36f58e857f7cc7a32d1"
+  }
+}

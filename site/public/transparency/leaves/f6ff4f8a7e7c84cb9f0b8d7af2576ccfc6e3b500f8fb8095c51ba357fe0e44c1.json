@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+  "eventHash": "c4c5e215b5bdec546e60c1bad3b085bf4ee86126b6f4cf376419fa1f402dc7ed",
+  "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+  "publisher": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+  "version": "0.1.0"
+}

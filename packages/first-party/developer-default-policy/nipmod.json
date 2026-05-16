@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "developer-default-policy",
+  "canonical": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Apply a practical default policy for developers trying agent packages safely before production use.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+    "provenance": "local"
+  }
+}

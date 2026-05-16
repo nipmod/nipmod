@@ -1,0 +1,227 @@
+# nipmod Progress
+
+## Current Production State
+
+- Website: `https://nipmod.com`, latest verified deploy `dpl_FtefbeXjVw5stwzVSrGNWFxBkSi7`.
+- Registry: 12 real first-party packages, all `verified/100`, with source provenance, transparency proofs, Fly witness proof and compatibility receipts where applicable.
+- Gitlawb node: `https://node.nipmod.com`, Fly app `nipmod-gitlawb-node-v2`.
+- Witness: `https://nipmod-witness.fly.dev`, DID `did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ`.
+- Installer: `install.sh` hash `21ebf4a882fdf00a24a688b70dcfd2a9ad6ba6f020490b214fd18eacb551f670`, signed release `nipmod-0.1.19`.
+- Discovery: `https://nipmod.com/.well-known/nipmod.json`.
+- Advisories: `https://nipmod.com/advisories.json`, currently 0 active advisories.
+- Transparency checkpoint: root `42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f`, tree size `16`.
+
+## 2026-05-15
+
+- Completed Gitlawb Contract Probe.
+- Started Epic B Protocol Core.
+- Planning files created.
+- Built nipmod TypeScript protocol core under `nipmod/`.
+- Added deterministic package bundles, Ed25519 did:key identities, signed bundle verification and install lockfiles.
+- Added CLI commands: `init`, `pack`, `verify`, `install`.
+- Closed independent security review findings: unsigned publisher spoofing, self-referential digest checks, symlink file escape, unsafe exports, malformed lockfile preservation and remote-host file URLs.
+- Verification green: `pnpm test` (22 tests), `pnpm typecheck`, `pnpm build`, manual CLI init/pack/verify/install flow.
+- Recorded launch identity: `nipmod.com`, X handle `@nipmod`, Cloudflare DNS.
+- Added local Cloudflare setup webpage via `nipmod setup-cloudflare`.
+- Verification green after setup flow: `pnpm test` (28 tests), `pnpm typecheck`, `pnpm build`.
+- Opened local Cloudflare setup page at `http://127.0.0.1:8788`; secrets target is `nipmod/.env.local`.
+- Verified Vercel CLI login as `aficial`.
+- Created local Gitlawb canonical repo and pushed initial commit `8cb91153b3a31b55d60dec21e63b57556c13e7f9`.
+- Validated Cloudflare token for `nipmod.com`; zone/account IDs are stored in local `.env.local`.
+- Read Cloudflare DNS records for `nipmod.com`; zone currently has 0 DNS records.
+- Verified Cloudflare `DNS:Edit` by creating, reading and deleting temporary TXT record `_nipmod_dns_edit_probe.nipmod.com`; zone returned to 0 records.
+- Built production website under `site/`: minimal dark glass Next.js landing page with `Search`, `Verify` and `Install` product actions.
+- Verification green for website: `pnpm test`, `pnpm typecheck`, `pnpm build`, live mobile and desktop browser checks through Chrome DevTools Protocol.
+- Created Vercel project `nipmod`, set framework preset to Next.js and deployed production `dpl_84xdvVUrwCBWhpDDj8uCgmqZrBu3`.
+- Added Vercel domains `nipmod.com` and `www.nipmod.com`.
+- Added Cloudflare DNS only A records for `nipmod.com` and `www.nipmod.com` to `76.76.21.21`.
+- Verified live HTTPS content at `https://nipmod.com` and `https://www.nipmod.com`.
+- Reworked website after design review: removed `Private alpha`, removed registry simulation, reduced copy to terminal, website and Codex usage.
+- Redeployed production website as `dpl_AQ76P83aujVb5sVtPoY7Q5V4Ascq`; verified `https://nipmod.com` live on mobile with no overflow.
+- Validated updated Cloudflare token with temporary permission probes: DNS, Workers Scripts, Workers Routes, KV, D1 and R2 edit all passed; no probe resources remain.
+- Validated Fly token for org `personal`.
+- Created Fly app `nipmod-gitlawb-node` in `fra`.
+- Created Fly Managed Postgres cluster `nipmod-gitlawb-db` (`kzpwm0j6qm2r4nv3`) on Basic plan with 10GB disk.
+- Created encrypted Fly volume `gitlawb_data` (`vol_vxmm1eqe7m3p58j4`) with 10GB disk.
+- Deployed Gitlawb node image `deployment-01KRPMZVA6DE1Y17H92YZN40GE` to machine `68397e0b126d98`.
+- Added Cloudflare DNS for `node.nipmod.com` and issued Fly TLS certificate.
+- Verified live node at `https://node.nipmod.com`: `/health`, `/`, `/api/v1/repos` and `/api/v1/p2p/info` all pass.
+- Added nipmod public Gitlawb backend integration: CLI `publish`, remote `install pkg:<did>/<name>@<version>`, signed `POST /api/v1/repos`, Git Smart HTTP push through `git-remote-gitlawb` and digest-strict blob installs.
+- Added remote install identity guard: fetched bundles must match the requested canonical package and version, not only the integrity digest.
+- Added idempotent publish behavior for existing Gitlawb repos: clone current repo, commit new release on top and push `main`.
+- Live public probe passed: published `pkg:did:key:z6MksYv3qtekYGZBVBp4Q5Hog2ETfc3jDu4kWKtMA8E9fTk4/live-probe-1778878997@0.1.0` to `https://node.nipmod.com`, then installed it back by remote spec and `sha256-0c7b9e8f21a1505e9270423366635852777730e76d3339e8cf524c42a7d30d17`.
+- Verification green after public backend integration: `pnpm test` (40 tests), `pnpm typecheck`, `pnpm build`, Docker live publish/install probe.
+- Added publish setup UX: `nipmod doctor`, automatic `git-remote-gitlawb` discovery from `PATH` / `NIPMOD_GITLAWB_HELPER`, and preflight failure before any Gitlawb write if the helper is missing.
+- Updated current CLI flow docs so publish no longer requires a visible `--helper` argument.
+- Live auto-helper probe passed in Docker: `doctor` found Git and `/usr/local/bin/git-remote-gitlawb`, published `pkg:did:key:z6MkwPvvFVHCJqPtkiLfMHn6ApKQuTu2UFAg2g5LopvrQr4m/autopath-probe-1778880050@0.1.0` without `--helper`, then installed it back by remote spec and `sha256-92800bc54eb3eb5937ea22ab97b5cfb748fe1e67c3b27ef157cde6f722875f94`.
+- Live `nipmod doctor --json` passed against `https://node.nipmod.com` from the Docker verification image.
+- Closed independent review findings for setup UX: no project-local helper auto-trust, `git` preflight before Gitlawb repo create, and immutable release-version guard before overwriting `releases/<version>`.
+- Added public installer assets under the website: `/install.sh`, `/releases/nipmod-0.0.0.tgz` and checksum.
+- Added reproducible release packager `tools/build-nipmod-release.mjs`; the tarball contains a standalone bundled CLI with no npm runtime dependency fetch.
+- Verified local installer from the static tarball into a temp prefix, then ran installed `nipmod doctor`, `init`, `pack` and `install`.
+- Deployed production website `dpl_E32n8P697yYYVhkcL8ksfN1PgsMN`; verified live `https://nipmod.com/install.sh`, live release checksum, live landing copy and live installer dry run.
+- Added Discovery/Trust v1: static Gitlawb package indexer `tools/build-package-index.mjs`, `/registry/packages.json`, server-rendered package search and package cards on `https://nipmod.com`.
+- Indexed 3 live Gitlawb packages from `https://node.nipmod.com`; all are `review` rather than `verified` because release events are not cryptographically signed yet.
+- Added hard trust evidence fields, immutable `canonical@version -> digest` baseline checks, safe Gitlawb URL construction, response size caps and permission detail surfacing.
+- Closed Discovery/Trust review findings: unsigned release events cannot become verified, malformed previous registry index fails closed, registry search focus is visible and default installer no longer executes Gitlawb helper via `curl | sh`.
+- Updated CLI doctor copy to avoid recommending pipe-to-shell Gitlawb helper installs; rebuilt `/releases/nipmod-0.0.0.tgz` with checksum `b40a324a353b7e831210e3be5a504a985c502f39a0390f69b25315b4d0f464be`.
+- Verification green after Discovery/Trust v1: `pnpm --dir nipmod test` (48 tests), `pnpm --dir nipmod build`, `pnpm --dir site test` (23 tests), `pnpm --dir site typecheck`, `pnpm --dir site build`, local HTTP registry/search checks and live release checksum check.
+- Deployed production website `dpl_Gcd2K5XQH4LAFuJREhQCCsSMLfbp`; verified `https://nipmod.com`, `https://nipmod.com/registry/packages.json`, `https://nipmod.com/install.sh` and live release tarball checksum.
+
+## 2026-05-16
+
+- Added signed transparency log v1 for the public registry: checkpoint, log, leaves, inclusion proofs and witness request are generated under `/transparency/*`.
+- Hardened trust scoring: packages are `signed/90` with a valid log inclusion proof, and only become `verified/100` when an independent pinned witness statement verifies the signed checkpoint.
+- Added external witness validation pins: `NIPMOD_ALLOWED_LOG_IDS`, `NIPMOD_ALLOWED_WITNESSES` and `NIPMOD_WITNESS_STATEMENTS_SOURCE`.
+- Added deployable witness worker HTTP service: `/health`, `/run` and `/witness-statements.json`.
+- Added Fly deployment assets for the witness service: `tools/Dockerfile.witness`, `tools/fly.witness.toml` and `tools/witness-deploy.md`.
+- Verified local HTTP witness end-to-end: live-style witness statements from the server upgrade the registry to `verified/100`; normal build resets correctly to `signed/90` until the external witness is deployed.
+- Verified local Docker image `nipmod-witness:local`: container starts, fetches live `https://nipmod.com/transparency/*`, writes a witness statement and returns healthy status.
+- Created Fly app `nipmod-witness`, encrypted volume `witness_data` (`vol_4911kywnxq580d5r`) and machine `68394def613238` in `fra`.
+- Deployed witness image `deployment-01KRQ27RKNF7NR7C3CKXN6KXYG` to `https://nipmod-witness.fly.dev`.
+- Live witness DID is `did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ`; live log DID is `did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk`.
+- Removed bootstrap secret after the first successful witness statement so the worker can no longer silently re-anchor from a lost state volume.
+- Added reproducible verified registry pins under `tools/verified-registry.env`.
+- Deployed production website `dpl_8sXKhBj1wFjbyAtkyAnsVYYD3mqt`; verified live `https://nipmod.com/registry/packages.json` returns `verified/100` with the Fly witness.
+- Hardened the witness worker after independent review: the witness now pins allowed log IDs, refuses implicit re-bootstrap after state loss and returns unhealthy until a real witness statement exists.
+- Restored `node.nipmod.com` on Fly app `nipmod-gitlawb-node-v2` with app machine `28624d4f7d7308`, Postgres `nipmod-gitlawb-db-v2`, encrypted volume `gitlawb_data` and Fly TLS issued for `node.nipmod.com`.
+- Updated Cloudflare DNS-only records for `node.nipmod.com` to the new Fly ingress IPs and verified live `/health` and `/api/v1/repos`.
+- Installed the Gitlawb helper locally under `.gitlawb-bin` from the official release archive with checksum verification; no global PATH or shell profile was changed.
+- Republished `pkg:did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617@0.1.0` to the restored public node and verified Gitlawb blob reads for `index.json`, `release.json` and `bundle.nipmod`.
+- Added fail-closed registry protection against disappearing `canonical@version` package records before the static index can be written.
+- Added a Vercel build-time registry verifier under `site/scripts/verify-registry-before-build.mjs`; `prebuild` now checks the static registry against the pinned Fly witness before `next build`.
+- Verified registry rebuild from the restored node: 1 package, 0 skipped, `verified/100`, checkpoint root `7c4dab67f798a955b54e2d1d2b532adbb2906ba4008c24ff0186efb08335f7c8`.
+- Hardened source provenance: `nipmod publish` now creates and pushes `refs/tags/v<version>` alongside `main`; release source commits are schema-validated when present.
+- Pushed live `refs/tags/v0.1.0` for `source-bound-probe-1778883617`; `git ls-remote` now shows `HEAD`, `refs/heads/main` and `refs/tags/v0.1.0` at `e84864363eb18301bd838bfe80f9ea0a7230cf6a`.
+- Hardened registry trust scoring: `verified/100` now requires source tag verification, not only bundle signature, release event, transparency inclusion and witness.
+- Rebuilt the verified registry with source provenance: package record now includes `sourceCommit: e84864363eb18301bd838bfe80f9ea0a7230cf6a`, `sourceTag: v0.1.0` and `sourceProvenanceVerified: true`.
+- Hardened Vercel `prebuild`: it now verifies the signed transparency checkpoint, witness signature and per-package inclusion proof cryptographically instead of trusting JSON `verified` claims.
+- Deployed production website `dpl_6vYvvjK8pacDG2LW1EabaF8MThny`; remote Vercel build ran the cryptographic prebuild guard and `https://nipmod.com/registry/packages.json` is live with `verified/100` plus source provenance.
+- Added root `.gitignore` for local secrets, generated helpers and build output.
+- Added `tools/secret-scan.mjs` plus tests; local scan passes while skipping intentionally local-only secret storage.
+- Added `pnpm --dir site security:secrets` and `RUNBOOK.md` covering fresh clone, production health, registry release, witness recovery, node recovery and secret handling.
+- Hardened witness manual runs: `POST /run` now requires `NIPMOD_WITNESS_RUN_TOKEN` and fails closed when no token is configured, while `/health` and `/witness-statements.json` remain public.
+- Hardened the public CLI installer: release artifacts are now immutable `0.1.0`, signed with a pinned Ed25519 release key, verified by `install.sh`, installed with `npm --ignore-scripts` and rejected if package metadata contains lifecycle scripts.
+- Closed final installer review findings: README now pins the installer hash out-of-band, the release builder refuses to overwrite existing artifacts, committed signed release artifacts are installed in tests, and installer post-check no longer masks broken binaries or blocking doctor failures.
+- Deployed production website `dpl_H4qBnZq9VmJfsBNGpMC5FXqhyh8x`; verified live installer hash `0cdf5c8ecb5d259908d6d24847e235bdc71ffad936a4da1d54e87a5dd7e0b0a9`, live signed `nipmod-0.1.0` release install, live homepage content, witness health and node health.
+- Added `tools/verify-all.mjs` as the canonical local gate runner, with optional `--prod` checks for live node, witness, registry, homepage, installer hash and release hash.
+- Added the public Trust page at `/trust`: it exposes the verified registry state, signed bundle/source tag/transparency/witness checks, current log DID, witness DID, checkpoint root, installer hash and release key hash.
+- Deployed production website `dpl_4SwGJ8uECN56u5VHn8crMdLrL1xz`; verified live `https://nipmod.com/trust`, live `verified/100` registry source provenance, node health and witness health.
+- Extended `tools/verify-all.mjs --prod` so the canonical production gate also verifies the live Trust page proof surface.
+- Closed independent audit findings on the Trust/prebuild path: Vercel `prebuild` now fetches and verifies the signed release event plus Git Smart HTTP tag ref, requiring `sourceTag === v<version>` and the tag commit to match the registry's pinned `sourceCommit`.
+- Deployed production website `dpl_EPC9v9jZ2woMCcWfVRGEcLu5vPPk`; remote Vercel build ran the hardened source-provenance prebuild guard and live `/trust` carries that deployment id.
+- Hardened `tools/verify-all.mjs` against stale `.next` type artifacts by clearing local site build output before typecheck/build; `node tools/verify-all.mjs --prod` is green after deploy.
+- Added `/.well-known/nipmod.json` as the public machine-readable discovery manifest for agents. It exposes only canonical endpoints plus installer/release verification pins; it deliberately does not duplicate mutable registry counts, root hash or tree size.
+- Hardened manifest tests: exact nested schema, HTTPS host allowlist, no local/secret strings, release signature verification from manifest key material and installer dry-run/version alignment.
+- Deployed production website `dpl_5QWZoarznz9pc9YAPeyj4Amzmw1p`; verified live discovery manifest, live Trust page Discovery pin, node health, witness health and `node tools/verify-all.mjs --prod`.
+- Added public advisory feed v1 at `/advisories.json` and linked it from the discovery manifest so agents have a canonical advisory source.
+- Added `nipmod audit`: it checks `nipmod.lock.json` packages against registry digest, complete verified trust evidence and active advisories. Network access is explicit via `--online`; CI can also pass file-backed `--registry` and `--advisories` feeds.
+- Released signed CLI artifact `nipmod-0.1.1.tgz` with `nipmod audit`; release hash `1d596648925315a537c44d8294df3d67f995aefe107bb4fe18e96c9ed005e4c3`, installer hash `a94faaa6117d90ab675491091e14c80b7c0385d74f0fbbd0a9844caa8e82e520`.
+- Deployed production website `dpl_FoFm5R8nhAfmPT8F7ZwetUDyaPj6`; verified live manifest release `0.1.1`, advisory feed, Trust page advisory pin, live installer hash, live signed install and `nipmod audit` from the installed CLI.
+- Hardened `nipmod audit` so verified packages must pass the full pinned transparency chain locally: registry publisher is required, lockfile key must match canonical identity, publisher must match the canonical DID owner, registry/lockfile/leaf publishers must agree, and proof `eventHash` plus `leafIndex` must match the verified log entry.
+- Added CLI audit pins for file-backed CI feeds: `--log-id` and `--witness` now allow offline registry/advisory sources to remain cryptographically pinned without discovery-network access.
+- Released signed CLI artifact `nipmod-0.1.2.tgz`; release hash `884d67a2ef45acf51860b802842736ed8c7ca08eeefeb0d287858d7d8e4c12f2`, installer hash `4d12820d14e35a9ab9a5d8c01a7f3baf8ac73f1fc0d4a4537ab3b6198464f2a8`.
+- Deployed production website `dpl_7Jw4tgQdiv9EJvo9LTE8sKhs5KE8`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live discovery manifest, live release hash, node health, witness health, live signed install and installed `nipmod audit --online` against the public verified package.
+- Hardened the canonical production gate: `node tools/verify-all.mjs --prod` now installs the live `https://nipmod.com/install.sh`, builds a temporary lockfile from the live verified registry package and runs the installed live `nipmod audit --online`; current run passed with `OK 1 WARN 0 FAIL 0`.
+- Added signed advisory feed verification for `nipmod audit`: HTTPS/file advisory sources now require an Ed25519 `.sig`, direct in-memory advisory objects are rejected, raw advisory bytes must verify against the pinned advisory key and stale/replayed feeds are blocked by `expiresAt`.
+- Split advisory signing from release signing: advisory feeds use `dev.nipmod.advisory.signature.v1` and advisory key hash `448bb21fae566abf873b04f05623f137c7629d5f10131d951d79d40f71c0b90b`.
+- Hardened default audit roots: the CLI no longer trusts mutable discovery-provided log/witness pins by default; default log and witness roots are pinned in the released client.
+- Hardened advisory release tooling after independent review: `tools/sign-advisories.mjs` validates strict feed shape, strict advisory shape, RFC3339 UTC timestamps, freshness and max TTL before signing.
+- Hardened `tools/verify-all.mjs --prod` so the live discovery manifest must match local release version, artifact URL, artifact digest, signature URL and release key fingerprint.
+- Released signed CLI artifact `nipmod-0.1.3.tgz`; release hash `44de1035cc1681aad7676c35fde596c612ca230922954093d5223dec2fd626a9`, installer hash `c492336d61ec087793c2941efa7f3739de9e3660b5d9fa04cd162502e6c581a2`.
+- Deployed production website `dpl_HbcgP8jaLdCHHrWeFV2sH5962bYX`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live discovery manifest, live advisory signature, live release hash, node health, witness health, live signed install and installed `nipmod audit --online`.
+- Added `nipmod search <query>` for terminal package discovery against the public registry or any file/HTTPS/loopback registry mirror. It refuses implicit network access without `--online`, returns install-ready commands, and rejects remote-host `file://` registries.
+- Released signed CLI artifact `nipmod-0.1.4.tgz`; release hash `68d17c8a48e5c8560796dffd465f37a5eb433d8834990658442b4b06287374fd`, installer hash `ec5ac88083b0cb7ac4b3e80be118098e2a7333ba9066009514166414bf81cb1b`.
+- Deployed production website `dpl_4kveikJFY2qW9p12sUMjtkqDgwYh`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live manifest release `0.1.4`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online` and installed `nipmod search source --online`.
+- Created `mass-readiness-plan.md` as the active 100% launch master plan after parallel product, ecosystem, CLI/protocol and security/ops audits. Promoted `task_plan.md` to a concise active control plan and marked the old Epic B plan as historical.
+- Added `nipmod inspect` with a shared Trust Report model. It inspects verified registry packages and signed local bundles, verifies pinned transparency and witness evidence, rejects duplicate immutable registry records, accepts valid dotted package slugs, fails closed on incomplete registry evidence, and withholds install commands from failed reports.
+- Released signed CLI artifact `nipmod-0.1.6.tgz`; release hash `ee6182acf5a6d5bf062960d8d865e873ad861affdea77651a2459568b4febfd2`, installer hash `292f758ee14b0a741ce1ea0d677434d1e2f615abef9e4bcfab7e66c55a5e5c4f`.
+- Deployed production website `dpl_3nMnZoQjffMLY8HcjBMoqqP6RtTu`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live manifest release `0.1.6`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online` and installed `nipmod inspect --online`.
+- Added `nipmod install --plan` and `nipmod add` for verified registry packages. `add` resolves exact package names or full canonical specs through the trust-report gate, refuses fuzzy mutation, rejects registry `file:` artifact URLs, requires resolved bundle origin/path to match source provenance, streams remote bundles with a hard size cap and validates existing lockfile entries before reporting an unchanged plan.
+- Hardened terminal install guidance and registry cards so public install commands use `nipmod add ... --online` instead of unverified low-level install snippets.
+- Released signed CLI artifact `nipmod-0.1.7.tgz`; release hash `5b29915cd556a5757fb67972e777cb6152a1b0400d4e826584f05cb00f57a3d4`, installer hash `4035cabe9b890fb44cd6105d1fcce7ebf145a833a6423d8f8df7a84621268204`.
+- Deployed production website `dpl_569u6TJvyY982x9Qche2cCkDcyMF`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live manifest release `0.1.7`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, installed `nipmod inspect --online`, live `install --plan --online` and live `add --online`.
+- Added `nipmod ci` as a strict automation gate over verified lockfiles. It fails on audit warnings, audit failures, duplicate registry records and self-attested trust roots unless `--allow-custom-roots` is explicitly set for private mirrors/tests.
+- Released signed CLI artifact `nipmod-0.1.8.tgz`; release hash `02b3af3b908ca31da4dae172faad41568ba2fae19f42d4d679831c3379eca3dd`, installer hash `881a8b17c34d84a046dcc68c08c667fc91a1b0d3afa5fbe8ff35f47ed133f47d`.
+- Deployed production website `dpl_CK5wBcLxwT6DwVbxs1GNHi4RgGg2`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live manifest release `0.1.8`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, installed `nipmod ci --online`, installed `nipmod inspect --online`, live `install --plan --online` and live `add --online`.
+- Published the first 3 real starter packages to the restored Gitlawb node: `gitlawb-repo-reader`, `repo-readme-audit` and `dependency-risk-review`.
+- Rotated exposed first-party package DIDs, moved publisher identities into root-local ignored `.nipmod/first-party-identities`, added `nipmod pack --identity` and `nipmod publish --identity`, and verified no package tree contains `.nipmod/identity.json`.
+- Removed probe-first homepage framing and excluded probe/rotated package records from the public package catalog while preserving append-only transparency history.
+- Fixed odd-sized transparency tree verification in the CLI and site prebuild verifier; the public registry now verifies tree size 7 at root `eccb5bf6c60568491da43bd4ecd129d39b7c48f137d346183333112165ba445c`.
+- Hardened the Fly witness server and worker so persisted witness statements survive refresh errors and idempotent reruns do not poison health; live witness health is green with `lastError: null`.
+- Hardened the secret scanner: release tarballs are scanned, real `.env` files are scanned, local `.env.local` stays private, and npm/GitHub/bearer/generic secret assignments are detected without false positives on code fields.
+- Released signed CLI artifact `nipmod-0.1.9.tgz`; release hash `99771a916f0099cf74912c8adfb65f8258af0b43d5f7457b497c95d74a3e68b9`, installer hash `f7fe4d6ad0290780b16d0302f5988411a6a3afb709118e603cb2bb8b2bc4175c`.
+- Deployed production website `dpl_9AXjiKxYDLgSFGWKr6MTZj5p8Q3G`; verified Vercel Ready alias, `node tools/verify-all.mjs --prod`, live manifest release `0.1.9`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, installed `nipmod ci --online`, installed `nipmod inspect --online`, live `install --plan --online`, live `add --online`, and desktop/mobile visual checks with no horizontal overflow.
+- Added `tools/advisory-drill.mjs` as the repeatable quarantine dry-run: it snapshots registry data, creates a temporary signed high-severity advisory and lockfile, then proves `nipmod audit` exits `6` and `nipmod ci` exits `8` without mutating `site/public/advisories.json`.
+- Added CLI contract coverage for the same signed quarantine feed so `audit` and `ci` fail against one package with the same advisory id.
+- Added the advisory dry-run to `node tools/verify-all.mjs --prod`; current production gate is green and includes live registry plus dry-run advisory result `NIPMOD-2026-9001`, `auditExitCode: 6`, `ciExitCode: 8`.
+- Added registry-level quarantine metadata `dev.nipmod.quarantine.v1` and shipped blocking across search, inspect, install plan and add: active high/critical quarantine hides packages by default, `--include-quarantined` shows them without install command, and mutation paths exit blocked with no lockfile write.
+- Added matching website registry filtering so homepage/search exclude active quarantined packages and never display a normal install command for them.
+- Hardened the quarantine drill so it also injects temporary registry quarantine metadata and proves `inspect` exits `7` plus `install --plan` exits `7`, while the public advisory feed remains untouched.
+- Hardened slow integration tests by giving the local package install and advisory drill tests explicit timeouts instead of relying on Vitest's 5s default under full-suite load.
+- Released signed CLI artifact `nipmod-0.1.10.tgz`; release hash `931b2b353113f39970b4da512872d560e31dd10815bde78d56e77c3ce1d6d8be`, installer hash `2c720fd40fc0640db9c9722a73c0eb62119fab2f5e1ce75994e9de6ad64a6334`.
+- Deployed production website `dpl_4nhEq2i6GXyvrCQA8iXXQnmAKNee`; verified Vercel Ready alias, live manifest release `0.1.10`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, `nipmod ci --online`, `nipmod inspect --online`, live `install --plan --online`, live `add --online`, and dry-run quarantine blocking.
+- Added Policy Engine Basics: `nipmod policy init`, `policy check` and `policy explain`, with a signed local `dev.nipmod.policy.v1` schema, canonical profiles and rule-level JSON reasons.
+- Added optional policy enforcement to `install --plan` and `add`; verified packages with blocked permissions now return exit `11`, include `policyDecision`, and do not mutate lockfiles.
+- Added policy checks for installed lockfile permissions so exec/postinstall/secrets risk is blocked from local state without treating user/package content as instructions.
+- Released signed CLI artifact `nipmod-0.1.11.tgz`; release hash `571407f33a8beadf909c05ccf6c063704ad2f958ddb450ec9c2cddd5ff19d110`, installer hash `8e785fe39e2bd3372ae9c3099f24e74a1b086ab3830f30fb5c2f38ff560cf22a`.
+- Deployed production website `dpl_6XKW2vWDcXDuMWaZz7C7DJDjswmT`; verified Vercel Ready alias, live manifest release `0.1.11`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, `nipmod ci --online`, `nipmod inspect --online`, live `install --plan --online`, live `add --online`, dry-run quarantine blocking, and live `policy init` plus `policy explain --online`.
+- Hardened policy integration across high-risk command surfaces: `audit` and `inspect` now require `--allow-custom-roots` for self-attested trust pins, while `install --plan` and `add` already inherit the same custom-root gate.
+- Hardened permission grammar for manifests and lockfiles: filesystem scopes must be read-only project-relative paths, network scopes must be exact DNS/HTTPS origins with IP literals blocked, MCP tool scopes must be exact `server.tool` names, secret-like env vars are rejected and `secrets` remain unsupported in v1 manifests.
+- Extended policy output to `inspect --policy/--profile`, `audit --policy/--profile` and `ci`, with `ci` now failing when either audit or strict policy blocks the lockfile.
+- Hardened registry-count policy behavior so packages with non-zero permission counts but no detailed permission scopes are blocked under `blockUnknownPermissions`, including MCP and secrets counts.
+- Updated the advisory quarantine drill for explicit custom trust roots and kept it in the production gate.
+- Released signed CLI artifact `nipmod-0.1.13.tgz`; release hash `de8ee06458185721a545856f5ca9cd2f634f4bed68996f2687e933bf80578d25`, installer hash `a9a728cd8d1cd27dfbad517449dd4ac4adf4884a2f1da54b971def497469cd98`.
+- Deployed production website `dpl_2U9WMyY4kSrAAJAodPHwuC2WZUb5`; verified Vercel Ready alias, live manifest release `0.1.13`, live release hash, node health, witness health, live signed install, installed `nipmod audit --online`, `nipmod ci --online`, `nipmod inspect --online`, live `install --plan --online`, live `add --online`, dry-run quarantine blocking and full `node tools/verify-all.mjs --prod`.
+- Proved public Gitlawb receive-pack write auth on the live node: direct unauthenticated `POST https://node.nipmod.com/z6MknipmodUnauthProbe/receive-pack-abuse/git-receive-pack` returns `401` with `Signature realm="gitlawb-alpha"` for both a minimal pkt-flush body and a 1 MiB body.
+- Added `tools/receive-pack-abuse-smoke.mjs` plus regression tests and wired it into `node tools/verify-all.mjs --prod`, so unauthenticated minimal or large receive-pack exposure now fails the canonical production gate.
+- Corrected `gitlawb-node/SECURITY.md`: direct HTTP receive-pack is no longer documented as unauthenticated; the remaining limitation is fine-grained UCAN delegation enforcement for authenticated writers.
+- Added `tools/prod-synthetic-monitor.mjs` as the production alerting contract with JSON output and non-zero failure exit. It checks homepage, Trust page, discovery endpoint integrity, deploy drift, live installer/release/signature bytes, registry `verified/100` with source provenance fields, signed and unexpired advisories, transparency checkpoint freshness, witness health/root continuity, unauthenticated witness `/run` rejection, node health and receive-pack auth.
+- Added synthetic monitor regression tests for healthy production, release drift, discovery key-material mismatch, live installer byte drift, missing source provenance fields, unauthenticated witness run exposure and stale checkpoint failures.
+- Wired the synthetic monitor into `node tools/verify-all.mjs --prod`; current live monitor output passes 12/12 checks.
+- Added `tools/restore-drill.mjs` as a non-destructive live restore proof. It validates discovery restore pins, registry snapshot recoverability, witness root/tree/DID continuity, node health, package blob digest recovery and Git source tag recovery through `git ls-remote`.
+- Added restore drill regression tests for healthy live-style state, witness root drift, package blob digest drift and source tag commit drift.
+- Wired the restore drill into `node tools/verify-all.mjs --prod`; current live restore drill passes 6/6 checks against `repo-readme-audit`.
+- Hardened the restore drill after independent review: it now pins the canonical node URL and checkpoint URL, requires the pinned witness DID in the selected package proof, verifies the signed checkpoint with the pinned transparency log DID, and streams package blobs with a 10 MiB fail-closed cap before buffering.
+- Added regression tests for discovery restore URL drift, wrong witness proof, missing checkpoint signature and oversized streamed package blobs.
+- Added `tools/prod-alert-runner.mjs` as the alert delivery contract around the production synthetic monitor and restore drill. Normal mode sends critical alerts only on failing checks; `--probe` sends an info alert to prove delivery while healthy.
+- Added alert delivery regression tests for healthy no-alert cycles, firing fan-out to primary/secondary destinations, probe delivery, missing destinations, destination rejection and monitor exceptions.
+- Wired alert delivery tests and the normal alert runner into `node tools/verify-all.mjs --prod`; real launch readiness still requires a successful external `--probe` with primary/secondary operator webhooks.
+- Added `tools/node-edge-resilience-smoke.mjs` as a bounded non-destructive Gitlawb edge smoke with a 5 serial request budget, no retries, a 256 KiB repo catalog cap, receive-pack auth gating and health checks before and after the probes.
+- Added regression tests for request-budget enforcement, 5xx failure, oversized catalog failure and exposed unauthenticated receive-pack failure, then wired the smoke into `node tools/verify-all.mjs --prod`.
+- Live edge smoke passed on `https://node.nipmod.com` with 5/5 request budget used, 7 repos in a 3.7 KiB catalog, and `401` receive-pack auth responses for both 4 byte and 1 MiB bodies.
+- Added `nipmod mcp serve` as a newline-delimited stdio MCP server with read-only `nipmod.search`, `nipmod.inspect`, `nipmod.install_plan`, `nipmod.verify` and `nipmod.audit` tools.
+- Added MCP regression tests for initialize/tools-list, read-only non-destructive annotations, file-backed registry search, install-plan generation without lockfile mutation, custom-root opt-in, unknown-tool rejection and real CLI stdio framing.
+- Documented the MCP server contract in the runbook; public readiness still requires a signed CLI release containing MCP support and host setup docs for Codex, Claude Code and OpenCode.
+- Released signed CLI artifact `nipmod-0.1.14.tgz`; release hash `4b0fa9494faeb38c1549b88b06712dc7a8f0b5ef2c75bc61bfe969d472043fcc`, installer hash `01f1b7b80bbdeafc568ba48f1acc471d69a7b9eec3ef4a027095c5bb2f5492d1`.
+- Deployed production website `dpl_8EavLZjDJd8JAUpF7QbavJfgEtyg`; verified live discovery manifest, signed release artifact, installed `nipmod 0.1.14`, full `node tools/verify-all.mjs --prod`, and a live installed MCP stdio smoke listing only `search`, `inspect`, `install_plan`, `verify` and `audit`.
+- Fixed independent MCP review findings: `mcp serve --json` now fails without non-MCP stdout frames, all JSON-RPC notifications without ids are ignored, and MCP remote fetches are capped before downstream parsers can buffer oversized bodies.
+- Released signed CLI artifact `nipmod-0.1.15.tgz`; release hash `f34e791b5c076040fd6422dd09789ac68ea4eea3ac54372aab2b15122565cefc`, installer hash `a133fff66406e3ee828a7c8292bca0044fe18e2655d283b2c0c3363fd1960faf`.
+- Deployed production website `dpl_EjytTQ8UTstY3vq8zF5f9Ut6wguW`; verified full `node tools/verify-all.mjs --prod` and a live installed MCP stdio smoke for `0.1.15`, including `--json` rejection with empty stdout.
+- Added public MCP host setup docs for Codex, Claude Code and OpenCode at `/mcp`, plus `docs/mcp-hosts.md` and runbook links. The docs keep MCP read only by default and state the exact host configs for `nipmod mcp serve`.
+- Fixed the new MCP page mobile header after independent review, added `site/app/icon.svg`, deployed production website `dpl_2LBkG2WhCkqRzG3jAahKZC1hmWzH`, and verified live `/mcp`, 320px no-overflow behavior, console cleanliness, `node tools/prod-synthetic-monitor.mjs`, and full `node tools/verify-all.mjs --prod`.
+- Added public compatibility receipts for MCP server JSON, APM package JSON and Git source provenance examples. The registry builder now validates exact package digest/source binding, rejects hidden provenance loss, rejects overlong receipt fields and verifies local example SHA-256 before attaching receipts.
+- Hardened receipt trust after independent review: `inspect` only surfaces compatibility receipts from the canonical `https://nipmod.com` registry or local file registries, the build verifier only fetches package provenance from trusted package origins, and site chips link to exact receipt fragments.
+- Released signed CLI artifact `nipmod-0.1.16.tgz`; release hash `13905a8af40bea2deb530a30b8b353576f2481c66b9c1b8bbdc8d40f66aaf2ee`, installer hash `b42fabe35e8facecc8ebbb6d9b17b8d1a3e75999c7374fd47f8243bbbe74118a`.
+- Deployed production website `dpl_6ZgB4cxHCw2b7c5FJVQcKReW1UdM`; verified Vercel Ready alias, live discovery manifest release `0.1.16`, live installer hash, live release hash, live registry receipts, live installed `nipmod inspect --online` compatibility output, and full `node tools/verify-all.mjs --prod`.
+- Expanded the first-party catalog from 3 to 12 package directories with scoped README, SKILL, SMOKE and manifest files: `github-issue-triage`, `prompt-injection-scan`, `nipmod-audit-ci`, `strict-ci-policy`, `developer-default-policy`, `malicious-skill-fixtures`, `mcp-server-import-example`, `apm-import-example` and `gitlawb-release-review` joined the existing 3.
+- Added first-party catalog regression coverage so all 12 packages must be instruction-only, permissionless, identity-separated and packable with `nipmod pack --identity`.
+- Published the 9 new packages to `https://node.nipmod.com` through Gitlawb, then rebuilt the registry with 12 public packages and 4 excluded legacy/probe records.
+- Updated the Fly witness append-only state to checkpoint root `42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f` and tree size `16`; rebuilt the public registry to `verified/100` for all 12 packages.
+- Added release-event fixtures for the site build verifier so the static registry verification test covers the full 12-package catalog instead of a hardcoded 3-package subset.
+- Deployed production website `dpl_ExwWZzWouvd99x6mvTUojVKjkCSa`; verified live `https://nipmod.com/registry/packages.json` returns 12 `verified/100` packages with no probe package records.
+- Ran full `node tools/verify-all.mjs --prod`; production checks passed including registry, witness, node, restore drill, alert runner, edge resilience, live install, audit, CI, inspect, install plan and add.
+- Added the public proof loop at `/proof` with a committed transcript at `/proof/transcript.json`. The proof runs `inspect`, `add`, `audit` and `ci` against `gitlawb-release-review`, then proves seven unsafe manifests are blocked before packing: postinstall, exec, broad network, secret env, secret scope and write path.
+- Added `tools/public-proof-loop.mjs` plus regression coverage and wired it into `node tools/verify-all.mjs --prod`; production proof now passes with 12 verified packages and 7 unsafe fixture blocks.
+- Deployed production website `dpl_3VAGutPcEsA5GWgdJHRq3op72FwB`; verified live `/proof`, live transcript, full `node tools/verify-all.mjs --prod` and mobile no-overflow behavior for the proof page.
+- Added Authoring DX P0.5: `nipmod manifest validate` validates package manifests before packing, and `nipmod publish --dry-run` produces a signed release-event preview, digest, manifest digest, Gitlawb repo target, helper status, git status and non-mutating version immutability check.
+- Hardened `publish --dry-run` so unknown version checks do not count as ready; only `available` and `same-artifact` version states pass the dry-run.
+- Added protected alert sinks at `/api/alerts/primary` and `/api/alerts/secondary`, backed by a Bearer token stored in Vercel production env; real external `--probe` delivered to both sinks with destination hashes only in stdout.
+- Deployed Fly app `nipmod-monitor` with one running machine in `fra`, 60-second alert cycles and `/health`/`/last`; live recurring proof showed `runs: 2`, healthy synthetic monitor and healthy restore drill.
+- Added `tools/prod-load-smoke.mjs` as bounded production crawler/load proof; live run passed with 25 crawled links, registry p95 161ms, node health p95 399ms and Trust page p95 57ms.
+- Expanded malicious proof coverage: manifests now reject prompt-injection metadata, release events reject mutable branch refs by requiring `vX.Y.Z` tags, and verified registry rebuild rejects typosquat-confusable `verified/100` package names.
+- Added `docs/incident-publication.md` and linked it from the runbook as the real operator flow for signed advisory publication, registry quarantine metadata, public incident notes and withdrawal.
+- Started full Fly restore readiness: scheduled fresh snapshots for Gitlawb node volume `vol_vz88k12k1ew5w5xv` and witness volume `vol_4911kywnxq580d5r`, and documented the disposable restore drill path. Forked node volume to `vol_rnzzyq90j9l9g68r` and witness volume to `vol_vjyy59wz73zxejov`, mounted each into a one-shot Alpine machine, verified expected restore files with exit code 0, then destroyed only the disposable fork volumes. Postgres backup enablement is blocked on explicit approval to accept Tigris Terms via Fly.
+- Accepted the Fly/Tigris backup terms after explicit operator approval, enabled backups on `nipmod-gitlawb-db-v2`, deployed the new backup secrets, created manual backup `20260516T172926`, restored it into temporary cluster `nipmod-gitlawb-db-restore-drill`, verified the restored cluster was healthy and queryable with databases `gitlawb`, `postgres` and `repmgr`, then destroyed only the temporary restore cluster.
+- Released signed CLI artifact `nipmod-0.1.19.tgz`; release hash `8e487607b01a5c4e6bcaabfd6280dd9f103f3701a21a0076b7cc2b02fb69babd`, installer hash `21ebf4a882fdf00a24a688b70dcfd2a9ad6ba6f020490b214fd18eacb551f670`.
+- Deployed production website `dpl_FtefbeXjVw5stwzVSrGNWFxBkSi7`; verified live discovery manifest release `0.1.19`, live installer hash, live release hash, full `node tools/verify-all.mjs --prod`, live public proof with 7 unsafe fixtures blocked, and installed live `0.1.19` CLI smokes.

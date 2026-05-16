@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+  "eventHash": "272007e8a3fecd27fdaf0679cceef0229952a7fc12f0d11292e041175fd91974",
+  "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+  "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+  "version": "0.1.0"
+}

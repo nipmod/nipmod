@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "gitlawb-repo-reader",
+  "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Read a public Gitlawb repository and return a provenance-focused summary for agents.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+    "provenance": "local"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+  "eventHash": "1e0c54476e578ddad2dbb2d5108a6fed74217e36272747f190abdd111371a561",
+  "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+  "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+  "version": "0.1.0"
+}

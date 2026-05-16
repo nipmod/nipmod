@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+  "eventHash": "ea3ec9e2e4ac205e86dd3d9510356fff0eba2b4b31efaa03aaef8bf964d0c064",
+  "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+  "publisher": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+  "version": "0.1.0"
+}

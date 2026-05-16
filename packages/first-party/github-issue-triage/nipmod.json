@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "github-issue-triage",
+  "canonical": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Triage GitHub issues into reproducible bugs, support requests and security-sensitive reports for agents.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+    "provenance": "local"
+  }
+}

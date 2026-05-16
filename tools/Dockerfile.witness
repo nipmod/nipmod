@@ -1,0 +1,27 @@
+FROM node:22-bookworm-slim
+
+RUN corepack enable
+
+WORKDIR /app
+
+COPY nipmod/package.json nipmod/pnpm-lock.yaml ./nipmod/
+RUN pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+
+COPY nipmod ./nipmod
+COPY tools ./tools
+
+RUN pnpm --dir nipmod build \
+  && mkdir -p /data
+
+ENV NODE_ENV=production
+ENV PORT=8080
+ENV NIPMOD_REGISTRY_URL=https://nipmod.com
+ENV NIPMOD_WITNESS_REQUEST_SOURCE=https://nipmod.com/transparency/witness-request.json
+ENV NIPMOD_WITNESS_LOG_SOURCE=https://nipmod.com/transparency/log.json
+ENV NIPMOD_WITNESS_STATE_PATH=/data/witness-worker-state.json
+ENV NIPMOD_WITNESS_STATEMENTS_PATH=/data/witness-statements.json
+ENV NIPMOD_WITNESS_IDENTITY_PATH=/data/transparency-witness-identity.json
+
+EXPOSE 8080
+
+CMD ["node", "tools/witness-server.mjs"]

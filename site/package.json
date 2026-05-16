@@ -1,0 +1,27 @@
+{
+  "name": "nipmod-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "prebuild": "node scripts/verify-registry-before-build.mjs",
+    "registry:verified": "node ../tools/rebuild-verified-registry.mjs",
+    "security:secrets": "node ../tools/secret-scan.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.2.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.4",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6"
+  }
+}

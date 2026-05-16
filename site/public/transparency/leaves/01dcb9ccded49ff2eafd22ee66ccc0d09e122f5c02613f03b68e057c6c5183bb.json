@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+  "eventHash": "994009b1ac805522b247e949dee38d0243463693358cb74a5898ab90db35bba1",
+  "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+  "publisher": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+  "version": "0.1.0"
+}

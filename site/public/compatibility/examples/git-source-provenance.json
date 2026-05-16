@@ -1,0 +1,13 @@
+{
+  "artifact": {
+    "sha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d"
+  },
+  "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+  "source": {
+    "commit": "d763aee9761f18708d9b82cba65d92a056695862",
+    "repo": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+    "tag": "v0.1.0"
+  },
+  "type": "git-source-provenance.v1",
+  "version": "0.1.0"
+}

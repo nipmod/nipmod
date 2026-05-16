@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+  "eventHash": "759de3ebf2f8cf2a39052b4b33025c177f1c27b6f7af80b329a9e90569139b42",
+  "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+  "publisher": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+  "version": "0.1.0"
+}

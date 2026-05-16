@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+  "eventHash": "65dd5971c4b95d2b93b4551f608e566b092294b496e3f2878acd0e653f64228a",
+  "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+  "publisher": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+  "version": "0.1.0"
+}

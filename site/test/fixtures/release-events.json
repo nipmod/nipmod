@@ -1,0 +1,302 @@
+{
+  "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "86e357ad1dabce0c465d3e98c1c60e4b4c9217a5cd3f0506c69aecdbebd434b8",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "publisher": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+      "signatureBase64": "a9h23rf8bvM2tdigLDDoPbHj0VOKXa9E7imlpPb1eRxklaipBU8FX/gRy8kWcMOc7mulonfrLOZsJYlQhLY2DA=="
+    }
+  },
+  "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "0912264d94aac4e3336bebb0190d562d6c0ce0bc0325705f2f10ba32d006fc85",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "publisher": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+      "signatureBase64": "VrXFRoLpiX99fMJGAxhpj59GBsyN9Y8lv1BReDCJcYEHndfiOydGE81Dxw1ATIPpLGqZA5uvCKdzjsDG5jxVCg=="
+    }
+  },
+  "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "fee196a8fc55e517b0e2ce366c0ddd5c5d6e259931bc2ab05fd18ad23c985c67",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "publisher": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+      "source": {
+        "repo": "gitlawb://did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+      "signatureBase64": "GzkjgGhuGXnbSN/4u+yDfSxaXcy5zT7AcXLKp3EAx19DpoMfb7i3Oysyg4NHX3Iq6di2E/QwLUIWjfC7qXLuBg=="
+    }
+  },
+  "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "de51f66829c74cd1ee813cffd16c42e47d101ec4cc15c3483894a47001b3d827",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "publisher": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+      "source": {
+        "repo": "gitlawb://did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+      "signatureBase64": "+zRl0Sa0KkiYxqDviY0JbGvivVz8Y/3h0e0fxPE0sz9S68vd1qAlaXr8OaxZyT9gjCmOJcyR11BfiESCVz26Aw=="
+    }
+  },
+  "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "9d267752bd2023a0f680ae42f1caad044fe71eb0c17f3b1371ad334fbe5aae74",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+      "source": {
+        "repo": "gitlawb://did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+      "signatureBase64": "wBJryvTA30ul2D1HYxZQ13f9poxEOc51rrfVTHTCrdiVPrbTpIYmxk5xj079gINgYzB/442W3l+/7Dyk+ny8CA=="
+    }
+  },
+  "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "5a582378fee739d105cf7e22c559688d767539a8be974038cbf3cf8f6bf00a3f",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "publisher": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+      "signatureBase64": "np2xA32fwsyPXyvle9GO1emXq4aUlPSFJFtP6nRhIT6Jtz+0gQTjLDp/fGD/w5dpPeU6qhkILf+3v0TjWjFqBg=="
+    }
+  },
+  "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "e942b332044f400c3285f140dd256f15f58147ed693fb78c4786c23aa83ccae8",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "publisher": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+      "signatureBase64": "V7PFfFHL1cigv+34LtFdGuiMbJovX46/Sl1PL8ySAMSRBTMGaiPzjzhWN6dH5yd0MfhnCfuUIWW5UghPOy9hDQ=="
+    }
+  },
+  "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "357c434df3ff206fdf37f7b78f78d525b7933c44edd925d88b6a4c0f6cf917c6",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+      "signatureBase64": "LS5sNtfnfu17dH84fUVJC3hlZl7FjkjhCkVPI1CBg5LJw6a77KFdRaDvNo+d+D909Pgku36yVMx+Kei/MJMYCA=="
+    }
+  },
+  "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "50ef24907f468c00c0a3f1715b97e747b4f413940832e077c2423aac6604ac90",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+      "signatureBase64": "B/aTIalC2nyQrezJBOS6ad1ntqJ9XesvXEKMVEQMGjDqJBMdtpNB7a30+md7zzxc/4qBnIsV3+w27DVn9p03AA=="
+    }
+  },
+  "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "6736f94d226dda2d612b1b073ccc260ae34a1baa56b70da7f5622a78d6f311f4",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "signatureBase64": "Kck99ABwDMZf7fs4lKL3gYOutNLuTyOdJ1Az8YxCFvVPHEckmPdVozFgYcFXC0jVfjoEN89ki7RVCy4n715mBA=="
+    }
+  },
+  "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "8a8bfe60f9ae8daed86269029906054470ec990c676cfe453b2ddfef39cd9d0f",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "publisher": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+      "source": {
+        "repo": "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+      "signatureBase64": "iKbBHvDPqBc7o4XdBIo3IUV0sSSxhSG3d4kDOAC2IORJQhEhQPxiE9ZCs1P46OfJny2m22Y8IoKbDLjfuXdtBg=="
+    }
+  },
+  "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review": {
+    "payload": {
+      "artifact": {
+        "manifestDigest": "c66eb6e4740a8c7361e79b642ae4e785be64fc5bdd0cecd6c2f0bf163f1ca93a",
+        "mediaType": "application/vnd.nipmod.bundle.v1+json",
+        "path": "releases/0.1.0/bundle.nipmod",
+        "sha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d"
+      },
+      "formatVersion": 1,
+      "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "publisher": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+      "source": {
+        "repo": "gitlawb://did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+        "tag": "v0.1.0",
+        "type": "gitlawb"
+      },
+      "type": "dev.nipmod.release.v1",
+      "version": "0.1.0"
+    },
+    "signature": {
+      "algorithm": "Ed25519",
+      "keyId": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+      "signatureBase64": "am+F2YpOm69+DxlMti80Z9rRDdrR55jjsxRQ1xBf0pRe6zSrsVSVDyJwUc7EikFx/XvAFbgn5KXH/tZ1yYTqAA=="
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "apm-import-example",
+  "canonical": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Show agents how to convert an APM package listing into nipmod trust metadata.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+    "provenance": "local"
+  }
+}

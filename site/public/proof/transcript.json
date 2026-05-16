@@ -1,0 +1,92 @@
+{
+  "blocked": [
+    {
+      "command": "postinstall",
+      "error": "manifest invalid: permissions.postinstall.allowed: Invalid input: expected false",
+      "exitCode": 1,
+      "expected": "postinstall.allowed must be false",
+      "label": "postinstall",
+      "ok": true
+    },
+    {
+      "command": "exec",
+      "error": "manifest invalid: permissions.exec.allowed: Invalid input: expected false",
+      "exitCode": 1,
+      "expected": "exec.allowed must be false",
+      "label": "exec",
+      "ok": true
+    },
+    {
+      "command": "broad network",
+      "error": "manifest invalid: permissions.network.0: network permission wildcards are not allowed",
+      "exitCode": 1,
+      "expected": "network wildcards are not allowed",
+      "label": "broad network",
+      "ok": true
+    },
+    {
+      "command": "secret env",
+      "error": "manifest invalid: permissions.env.0: env permissions must not request secret-like variables",
+      "exitCode": 1,
+      "expected": "secret like environment variables are rejected",
+      "label": "secret env",
+      "ok": true
+    },
+    {
+      "command": "secret scope",
+      "error": "manifest invalid: permissions.secrets.0: secrets permissions are not supported in manifest v1",
+      "exitCode": 1,
+      "expected": "secrets permissions are unsupported in v1",
+      "label": "secret scope",
+      "ok": true
+    },
+    {
+      "command": "write path",
+      "error": "manifest invalid: permissions.filesystem.0: filesystem write permissions are not allowed",
+      "exitCode": 1,
+      "expected": "filesystem write scopes are rejected",
+      "label": "write path",
+      "ok": true
+    }
+  ],
+  "checkedAt": "2026-05-16T16:04:39.369Z",
+  "package": {
+    "canonical": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+    "name": "gitlawb-release-review",
+    "subject": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0",
+    "trust": "verified/100",
+    "version": "0.1.0"
+  },
+  "registry": {
+    "packages": 12,
+    "source": "https://node.nipmod.com",
+    "treeSize": 16
+  },
+  "safe": [
+    {
+      "command": "inspect",
+      "error": null,
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "command": "add",
+      "error": null,
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "command": "audit",
+      "error": null,
+      "exitCode": 0,
+      "ok": true
+    },
+    {
+      "command": "ci",
+      "error": null,
+      "exitCode": 0,
+      "ok": true
+    }
+  ],
+  "type": "dev.nipmod.public-proof-loop.v1"
+}

@@ -1,0 +1,6 @@
+{
+  "algorithm": "Ed25519",
+  "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
+  "publicKeySpkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e",
+  "type": "dev.nipmod.release.public-key.v1"
+}

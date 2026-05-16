@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "nipmod-audit-ci",
+  "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Turn nipmod audit and policy output into CI decisions agents can explain and enforce.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+    "provenance": "local"
+  }
+}

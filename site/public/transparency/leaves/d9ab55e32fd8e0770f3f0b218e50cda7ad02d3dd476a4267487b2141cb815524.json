@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+  "eventHash": "2fa34ba9ae6b9543156add08356509b29428c8a29d5cc022bae9fe294f3e5949",
+  "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+  "publisher": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+  "version": "0.1.0"
+}
