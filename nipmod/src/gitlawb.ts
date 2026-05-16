@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { delimiter, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BUNDLE_MEDIA_TYPE, packProject } from "./bundle.js";
+import { readResponseBytes, readResponseText } from "./http.js";
 import { type Identity, signBytes } from "./identity.js";
 import { type ReleaseEvent } from "./protocol.js";
 import { signReleaseEvent } from "./release.js";
@@ -177,6 +178,8 @@ const REMOTE_SPECIFIER_PATTERN =
   /^(pkg:(did:key:z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*))@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/;
 const GITLAWB_REPO_NAME_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
 const BUNDLE_FILENAME = "bundle.nipmod";
+const REMOTE_BUNDLE_LIMIT = 50 * 1024 * 1024;
+const ERROR_BODY_LIMIT = 8 * 1024;
 const GITLAWB_INSTALL_COMMAND =
   "Install git-remote-gitlawb from Gitlawb with a verified checksum, then run nipmod doctor.";
 const HELPER_NAME = "git-remote-gitlawb";
@@ -273,7 +276,12 @@ export async function createGitlawbRepo(options: CreateGitlawbRepoOptions): Prom
   }
 
   if (!response.ok) {
-    throw new Error(`Gitlawb repo create failed (${response.status}): ${await response.text()}`);
+    throw new Error(
+      `Gitlawb repo create failed (${response.status}): ${await readResponseText(response, {
+        label: "Gitlawb error",
+        maxBytes: ERROR_BODY_LIMIT
+      })}`
+    );
   }
 
   return { created: true };
@@ -452,14 +460,22 @@ export async function fetchGitlawbBundle(options: FetchGitlawbBundleOptions): Pr
   const nodeUrl = normalizeNodeUrl(options.nodeUrl ?? DEFAULT_GITLAWB_NODE);
   const fetchImpl = options.fetchImpl ?? fetch;
   const resolved = gitlawbBlobUrl(nodeUrl, options.spec);
-  const response = await fetchImpl(resolved);
+  const response = await fetchImpl(resolved, {
+    redirect: "error",
+    signal: AbortSignal.timeout(30_000)
+  });
 
   if (!response.ok) {
-    throw new Error(`Gitlawb bundle fetch failed (${response.status}): ${await response.text()}`);
+    throw new Error(
+      `Gitlawb bundle fetch failed (${response.status}): ${await readResponseText(response, {
+        label: "Gitlawb error",
+        maxBytes: ERROR_BODY_LIMIT
+      })}`
+    );
   }
 
   return {
-    bytes: Buffer.from(await response.arrayBuffer()),
+    bytes: await readResponseBytes(response, { label: "Gitlawb bundle", maxBytes: REMOTE_BUNDLE_LIMIT }),
     resolved
   };
 }
@@ -489,7 +505,9 @@ async function checkPublishedVersion(options: {
       };
     }
 
-    const existingDigest = createHash("sha256").update(Buffer.from(await response.arrayBuffer())).digest("hex");
+    const existingDigest = createHash("sha256")
+      .update(await readResponseBytes(response, { label: "Gitlawb bundle", maxBytes: REMOTE_BUNDLE_LIMIT }))
+      .digest("hex");
     if (existingDigest === options.digest) {
       return {
         status: "same-artifact",

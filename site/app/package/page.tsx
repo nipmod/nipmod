@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { homeContent } from "../content";
-import { SiteHeader } from "../site-header";
 import { PackageDraftForm } from "./package-draft-form";
 
 export const metadata: Metadata = {
@@ -18,9 +17,7 @@ export const metadata: Metadata = {
 
 export default function PackagePage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="package-title">
         <p className="eyebrow">Package</p>
         <h1 id="package-title">{homeContent.repoToPackage.headline}</h1>

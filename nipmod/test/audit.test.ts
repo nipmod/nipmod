@@ -74,6 +74,38 @@ describe("installed package audit", () => {
     expect(result.packages[0]?.advisories).toEqual(["NIPMOD-2026-0001"]);
   });
 
+  test("fails when the registry marks a package version as actively quarantined", async () => {
+    const projectDir = await projectWithLockfile();
+
+    const result = await auditProject(projectDir, {
+      allowedLogIds: [transparency.log.treeHead.logId],
+      allowedWitnesses: [transparency.witness.witness],
+      ...signedAdvisoryOptions([]),
+      registry: registryIndex({
+        digest,
+        level: "verified",
+        quarantine: {
+          active: true,
+          advisoryId: "NIPMOD-2026-0007",
+          artifactSha256: digest,
+          package: canonical,
+          publishedAt: "2026-05-16T15:00:00.000Z",
+          reason: "Quarantined by registry metadata",
+          severity: "critical",
+          status: "active",
+          type: "dev.nipmod.quarantine.v1",
+          version
+        },
+        sourceProvenanceVerified: true
+      })
+    });
+
+    expect(result.ready).toBe(false);
+    expect(result.packages[0]?.status).toBe("fail");
+    expect(result.packages[0]?.advisories).toEqual(["NIPMOD-2026-0007"]);
+    expect(result.packages[0]?.findings).toContain("NIPMOD-2026-0007: Quarantined by registry metadata");
+  });
+
   test("verifies a signed advisory feed loaded from a URL source", async () => {
     const projectDir = await projectWithLockfile();
     const { feedPath, publicKey, signaturePath } = await signedAdvisoryFeed([]);
@@ -479,12 +511,25 @@ function registryIndex({
   digest: packageDigest,
   level,
   publisher = owner,
+  quarantine,
   sourceProvenanceVerified,
   transparency: registryTransparency = transparency
 }: {
   digest: string;
   level: "verified" | "signed" | "review" | "unknown";
   publisher?: string;
+  quarantine?: {
+    active: boolean;
+    advisoryId: string;
+    artifactSha256?: string;
+    package: string;
+    publishedAt: string;
+    reason: string;
+    severity: "low" | "moderate" | "high" | "critical";
+    status: "active" | "withdrawn";
+    type: "dev.nipmod.quarantine.v1";
+    version: string;
+  };
   sourceProvenanceVerified: boolean;
   transparency?: ReturnType<typeof testTransparency>;
 }) {
@@ -524,6 +569,7 @@ function registryIndex({
           witnesses: [registryTransparency.witness.witness],
           witnessUrls: [`/transparency/witnesses/${registryTransparency.witness.witness}.json`]
         },
+        ...(quarantine ? { quarantine } : {}),
         version
       }
     ],

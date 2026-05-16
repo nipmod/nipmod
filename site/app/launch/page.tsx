@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "../site-header";
 
 export const metadata: Metadata = {
   alternates: {
@@ -47,9 +46,7 @@ const tracks = [
 
 export default function LaunchPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="launch-title">
         <p className="eyebrow">Launch</p>
         <h1 id="launch-title">Use it. Publish into it. Review it.</h1>

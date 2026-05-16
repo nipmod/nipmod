@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import * as z from "zod";
+import { readResponseBytes } from "./http.js";
 
 export const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 
@@ -336,7 +337,7 @@ async function fetchBytes(url: URL, fetchImpl: typeof fetch): Promise<Buffer> {
   if (!contentType.toLowerCase().includes("application/json")) {
     throw new Error("registry response must be application/json");
   }
-  return Buffer.from(await response.arrayBuffer());
+  return readResponseBytes(response, { label: "registry", maxBytes: JSON_LIMIT });
 }
 
 function parseTrustedJsonUrl(source: string): URL {

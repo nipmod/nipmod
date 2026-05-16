@@ -9,7 +9,7 @@ import { generateIdentity } from "../src/identity.js";
 import { createTransparencyLogFromLeaves, signWitnessStatement } from "../src/transparency.js";
 
 describe("nipmod MCP server", () => {
-  test("initializes and lists only read-only default tools", async () => {
+  test("initializes and lists accurate default tool safety annotations", async () => {
     const server = createNipmodMcpServer();
     const packageJson = JSON.parse(await readFile(join(import.meta.dirname, "..", "package.json"), "utf8")) as {
       version: string;
@@ -44,12 +44,50 @@ describe("nipmod MCP server", () => {
       "nipmod.verify",
       "nipmod.audit"
     ]);
-    for (const tool of list.result.tools as Array<{ annotations: Record<string, boolean> }>) {
+    const tools = list.result.tools as Array<{ annotations: Record<string, boolean>; name: string }>;
+    for (const tool of tools) {
       expect(tool.annotations).toMatchObject({
-        destructiveHint: false,
-        readOnlyHint: true
+        destructiveHint: false
       });
     }
+    expect(
+      Object.fromEntries(tools.map((tool) => [tool.name, tool.annotations.readOnlyHint]))
+    ).toEqual({
+      "nipmod.search": true,
+      "nipmod.inspect": true,
+      "nipmod.install_plan": true,
+      "nipmod.publish_plan": false,
+      "nipmod.verify": true,
+      "nipmod.audit": true
+    });
+  });
+
+  test("rejects publish planning unless local signing is explicitly allowed", async () => {
+    const server = createNipmodMcpServer({
+      fetchImpl: async () => new Response("not found", { status: 404 })
+    });
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 9,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          projectDir: "/tmp/nipmod-mcp-signing-denied"
+        },
+        name: "nipmod.publish_plan"
+      }
+    });
+
+    expect(result).toMatchObject({
+      error: {
+        code: -32000,
+        message: "MCP publish_plan requires allowLocalSigning: true because it uses the local package signing identity"
+      },
+      id: 9,
+      jsonrpc: "2.0"
+    });
   });
 
   test("creates a publish plan without mutating Gitlawb", async () => {
@@ -103,6 +141,7 @@ describe("nipmod MCP server", () => {
       method: "tools/call",
       params: {
         arguments: {
+          allowLocalSigning: true,
           helperPath,
           nodeUrl: "https://node.example.test",
           projectDir: pkg
@@ -133,6 +172,7 @@ describe("nipmod MCP server", () => {
       method: "tools/call",
       params: {
         arguments: {
+          allowCustomRoots: true,
           limit: 5,
           query: "alpha",
           registryUrl: pathToFileURL(fixture.registryPath).href
@@ -218,8 +258,69 @@ describe("nipmod MCP server", () => {
 
     expect(result.error).toMatchObject({
       code: -32000,
-      message: "MCP custom trust roots require allowCustomRoots: true"
+      message: "MCP custom registry or trust roots require allowCustomRoots: true"
     });
+  });
+
+  test("requires explicit custom-root opt-in for MCP registry URLs", async () => {
+    const fixture = await writeRegistryFixture("custom-registry-agent");
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 10,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          query: "custom",
+          registryUrl: pathToFileURL(fixture.registryPath).href
+        },
+        name: "nipmod.search"
+      }
+    });
+
+    expect(result.error).toMatchObject({
+      code: -32000,
+      message: "MCP custom registry or trust roots require allowCustomRoots: true"
+    });
+  });
+
+  test("requires explicit custom-root opt-in for MCP audit discovery and advisory URLs", async () => {
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const discoveryResult = await server.handleRequest({
+      id: 11,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          discoveryUrl: "https://mirror.example.test/.well-known/nipmod.json",
+          projectDir: "/tmp/nipmod-mcp-audit"
+        },
+        name: "nipmod.audit"
+      }
+    });
+    const advisoriesResult = await server.handleRequest({
+      id: 12,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          advisoriesUrl: "https://mirror.example.test/advisories.json",
+          projectDir: "/tmp/nipmod-mcp-audit"
+        },
+        name: "nipmod.audit"
+      }
+    });
+
+    for (const result of [discoveryResult, advisoriesResult]) {
+      expect(result.error).toMatchObject({
+        code: -32000,
+        message: "MCP custom registry or trust roots require allowCustomRoots: true"
+      });
+    }
   });
 
   test("returns a JSON-RPC error for unknown tools", async () => {
@@ -275,6 +376,7 @@ describe("nipmod MCP server", () => {
       method: "tools/call",
       params: {
         arguments: {
+          allowCustomRoots: true,
           query: "alpha",
           registryUrl: "https://registry.example.test/packages.json"
         },

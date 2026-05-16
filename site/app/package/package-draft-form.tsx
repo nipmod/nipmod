@@ -12,8 +12,11 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
   const draft = useMemo(() => draftFromRepo(repo), [repo]);
 
   return (
-    <section className="package-draft" aria-labelledby="draft-title">
+    <section className="package-draft" aria-labelledby="draft-generator-title">
       <div className="draft-input">
+        <h2 className="sr-only" id="draft-generator-title">
+          Package draft generator
+        </h2>
         <label htmlFor="repo-input">{inputLabel}</label>
         <input
           autoComplete="off"

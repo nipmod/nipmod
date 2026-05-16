@@ -7,7 +7,7 @@ export const homeContent = {
     x: "https://x.com/Nipmod"
   },
   primaryAction: "Install",
-  secondaryAction: "X",
+  secondaryAction: "Updates on X",
   commands: [
     "curl -fL https://nipmod.com/install.sh -o install.sh",
     "curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256",

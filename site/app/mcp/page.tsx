@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "../site-header";
 import { mcpContent } from "./content";
 
 export const metadata: Metadata = {
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
 
 export default function McpPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="mcp-hero" aria-labelledby="mcp-title">
         <p className="eyebrow">MCP</p>
         <h1 id="mcp-title">{mcpContent.headline}</h1>

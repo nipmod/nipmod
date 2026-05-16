@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { homeContent } from "../content";
-import { SiteHeader } from "../site-header";
 
 export const metadata: Metadata = {
   alternates: {
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
 
 export default function QuickstartPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="quickstart-title">
         <p className="eyebrow">Start</p>
         <h1 id="quickstart-title">Install. Inspect. Add. Publish safely.</h1>

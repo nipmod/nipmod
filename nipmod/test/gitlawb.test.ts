@@ -7,6 +7,7 @@ import {
   createGitlawbRepo,
   createPublishDryRunPlan,
   doctorGitlawb,
+  fetchGitlawbBundle,
   gitlawbBlobUrl,
   parseRemoteSpecifier,
   publishGitlawbPackage,
@@ -100,6 +101,23 @@ describe("Gitlawb integration", () => {
     expect(gitlawbBlobUrl("https://node.nipmod.com/", spec)).toBe(
       `https://node.nipmod.com/api/v1/repos/${identity.did.split(":").at(-1)}/signed-skill/blob/releases/0.1.0/bundle.nipmod`
     );
+  });
+
+  test("rejects oversized Gitlawb bundles before buffering remote bodies", async () => {
+    const identity = generateIdentity();
+    const spec = parseRemoteSpecifier(`pkg:${identity.did}/signed-skill@0.1.0`);
+
+    await expect(
+      fetchGitlawbBundle({
+        fetchImpl: async () =>
+          new Response("oversized", {
+            headers: { "content-length": String(50 * 1024 * 1024 + 1) },
+            status: 200
+          }),
+        nodeUrl: "https://node.example",
+        spec
+      })
+    ).rejects.toThrow("Gitlawb bundle response is too large");
   });
 
   test("rejects package slugs Gitlawb cannot store as repository names", () => {

@@ -32,6 +32,10 @@ describe("public security policy", () => {
 
     expect(globalHeaders["Strict-Transport-Security"]).toContain("max-age=63072000");
     expect(globalHeaders["Content-Security-Policy"]).toContain("frame-ancestors 'none'");
+    expect(globalHeaders["Content-Security-Policy"]).not.toContain("'unsafe-eval'");
+    expect(globalHeaders["Content-Security-Policy"]).toContain(
+      "connect-src 'self' https://node.nipmod.com https://nipmod-witness.fly.dev"
+    );
     expect(globalHeaders["X-Content-Type-Options"]).toBe("nosniff");
     expect(globalHeaders["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
     expect(globalHeaders["Permissions-Policy"]).toContain("camera=()");

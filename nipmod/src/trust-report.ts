@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import * as z from "zod";
 import { verifyBundle } from "./bundle.js";
+import { readResponseBytes } from "./http.js";
 import { digestFromIntegrity, integrityFromDigest } from "./integrity.js";
 import { PermissionSchema } from "./protocol.js";
 import {
@@ -840,7 +841,7 @@ async function fetchBytes(url: URL, fetchImpl: typeof fetch): Promise<Buffer> {
   if (!contentType.toLowerCase().includes("application/json")) {
     throw new Error("registry response must be application/json");
   }
-  return Buffer.from(await response.arrayBuffer());
+  return readResponseBytes(response, { label: "registry", maxBytes: JSON_LIMIT });
 }
 
 function parseTrustedJsonUrl(source: string): URL {

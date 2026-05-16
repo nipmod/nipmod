@@ -262,6 +262,26 @@ export function installCommand(pkg: RegistryPackage): string {
   return `nipmod add ${pkg.canonical}@${pkg.version} --online`;
 }
 
+const allowedSourceRepoHosts = new Set([
+  "gitlawb.com",
+  "node.gitlawb.com",
+  "node2.gitlawb.com",
+  "node3.gitlawb.com",
+  "node.nipmod.com"
+]);
+
+export function safeSourceRepoHref(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || !allowedSourceRepoHosts.has(url.hostname)) {
+      return null;
+    }
+    return url.href;
+  } catch {
+    return null;
+  }
+}
+
 export function permissionHighlights(pkg: RegistryPackage): string[] {
   const details = pkg.permissionDetails;
   const highlights = [

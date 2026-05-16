@@ -3,6 +3,11 @@ import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
+const isDevelopment = process.env.NODE_ENV === "development";
+const scriptSrc = isDevelopment ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'";
+const connectSrc = isDevelopment
+  ? "connect-src 'self' https: ws: wss:"
+  : "connect-src 'self' https://node.nipmod.com https://nipmod-witness.fly.dev";
 
 const csp = [
   "default-src 'self'",
@@ -13,8 +18,8 @@ const csp = [
   "img-src 'self' data: https:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "connect-src 'self' https:"
+  scriptSrc,
+  connectSrc
 ].join("; ");
 
 const nextConfig: NextConfig = {

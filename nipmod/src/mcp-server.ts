@@ -39,7 +39,7 @@ interface ToolDefinition {
     destructiveHint: false;
     idempotentHint: true;
     openWorldHint: boolean;
-    readOnlyHint: true;
+    readOnlyHint: boolean;
   };
   description: string;
   inputSchema: JsonValue;
@@ -61,6 +61,9 @@ interface NipmodMcpServerOptions {
 const PROTOCOL_VERSION = "2025-11-25";
 const SERVER_VERSION = NIPMOD_VERSION;
 const MAX_MCP_REMOTE_BYTES = 1024 * 1024;
+const DEFAULT_DISCOVERY_URL = "https://nipmod.com/.well-known/nipmod.json";
+const DEFAULT_ADVISORIES_URL = "https://nipmod.com/advisories.json";
+const DEFAULT_ADVISORIES_SIGNATURE_URL = "https://nipmod.com/advisories.json.sig";
 
 const JsonRpcRequestSchema = z.strictObject({
   id: z.union([z.string(), z.number(), z.null()]).optional(),
@@ -70,6 +73,7 @@ const JsonRpcRequestSchema = z.strictObject({
 });
 
 const SearchArgumentsSchema = z.strictObject({
+  allowCustomRoots: z.boolean().optional(),
   includeQuarantined: z.boolean().optional(),
   limit: z.number().int().min(1).max(100).optional(),
   query: z.string(),
@@ -96,6 +100,7 @@ const InstallPlanArgumentsSchema = TrustPinsSchema.extend({
 });
 
 const PublishPlanArgumentsSchema = z.strictObject({
+  allowLocalSigning: z.boolean().optional(),
   helperPath: z.string().optional(),
   identityPath: z.string().optional(),
   nodeUrl: z.string().optional(),
@@ -207,6 +212,7 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
 
 async function searchTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
   const args = SearchArgumentsSchema.parse(raw);
+  assertCustomRootOptIn(args);
   const options = {
     limit: args.limit ?? 20,
     query: args.query,
@@ -260,6 +266,9 @@ async function installPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<J
 
 async function publishPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
   const args = PublishPlanArgumentsSchema.parse(raw);
+  if (args.allowLocalSigning !== true) {
+    throw new Error("MCP publish_plan requires allowLocalSigning: true because it uses the local package signing identity");
+  }
   const options = {
     fetchImpl,
     projectDir: args.projectDir ?? process.cwd(),
@@ -324,14 +333,27 @@ function assertCustomRootOptIn(args: {
   allowedWitnesses?: readonly string[] | undefined;
   advisoryPublicKeySpkiBase64?: string | undefined;
   advisoryPublicKeySpkiSha256?: string | undefined;
+  advisoriesSignatureUrl?: string | undefined;
+  advisoriesUrl?: string | undefined;
+  discoveryUrl?: string | undefined;
+  registryUrl?: string | undefined;
 }): void {
+  const hasCustomRegistry = args.registryUrl !== undefined && args.registryUrl !== DEFAULT_REGISTRY_URL;
+  const hasCustomDiscovery = args.discoveryUrl !== undefined && args.discoveryUrl !== DEFAULT_DISCOVERY_URL;
+  const hasCustomAdvisories = args.advisoriesUrl !== undefined && args.advisoriesUrl !== DEFAULT_ADVISORIES_URL;
+  const hasCustomAdvisoriesSignature =
+    args.advisoriesSignatureUrl !== undefined && args.advisoriesSignatureUrl !== DEFAULT_ADVISORIES_SIGNATURE_URL;
   const hasCustomRoots =
+    hasCustomRegistry ||
+    hasCustomDiscovery ||
+    hasCustomAdvisories ||
+    hasCustomAdvisoriesSignature ||
     (args.allowedLogIds?.length ?? 0) > 0 ||
     (args.allowedWitnesses?.length ?? 0) > 0 ||
     Boolean(args.advisoryPublicKeySpkiBase64) ||
     Boolean(args.advisoryPublicKeySpkiSha256);
   if (hasCustomRoots && args.allowCustomRoots !== true) {
-    throw new McpError(-32000, "MCP custom trust roots require allowCustomRoots: true");
+    throw new McpError(-32000, "MCP custom registry or trust roots require allowCustomRoots: true");
   }
   if (((args.allowedLogIds?.length ?? 0) > 0) !== ((args.allowedWitnesses?.length ?? 0) > 0)) {
     throw new McpError(-32000, "MCP transparency pins require both allowedLogIds and allowedWitnesses");
@@ -489,6 +511,7 @@ const MCP_TOOLS: ToolDefinition[] = [
     inputSchema: {
       additionalProperties: false,
       properties: {
+        allowCustomRoots: { type: "boolean" },
         includeQuarantined: { type: "boolean" },
         limit: { maximum: 100, minimum: 1, type: "integer" },
         query: { type: "string" },
@@ -547,18 +570,23 @@ const MCP_TOOLS: ToolDefinition[] = [
   },
   {
     annotations: {
-      ...COMMON_READONLY_ANNOTATIONS,
+      destructiveHint: false,
+      idempotentHint: true,
+      readOnlyHint: false,
       openWorldHint: true
     },
-    description: "Create a Gitlawb publish dry-run plan without writing to a remote repository.",
+    description:
+      "Create a Gitlawb publish dry-run plan without remote writes. Requires explicit allowLocalSigning because it uses the local package signing identity.",
     inputSchema: {
       additionalProperties: false,
       properties: {
+        allowLocalSigning: { type: "boolean" },
         helperPath: { type: "string" },
         identityPath: { type: "string" },
         nodeUrl: { type: "string" },
         projectDir: { type: "string" }
       },
+      required: ["allowLocalSigning"],
       type: "object"
     },
     name: "nipmod.publish_plan",

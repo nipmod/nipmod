@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as z from "zod";
+import { readResponseBytes } from "./http.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { PermissionSchema } from "./protocol.js";
 import {
@@ -161,6 +162,18 @@ const RegistryPackageSchema = z.strictObject({
   digest: Sha256Schema,
   proof: RegistryProofSchema.optional(),
   publisher: DidKeySchema,
+  quarantine: z.strictObject({
+    active: z.boolean().optional(),
+    advisoryId: z.string().min(1),
+    artifactSha256: Sha256Schema.optional(),
+    package: PackageIdSchema,
+    publishedAt: z.string().min(1),
+    reason: z.string().min(1),
+    severity: z.enum(["low", "moderate", "high", "critical"]),
+    status: z.enum(["active", "withdrawn"]),
+    type: z.literal("dev.nipmod.quarantine.v1"),
+    version: SemverSchema
+  }).passthrough().optional(),
   trust: z.strictObject({
     level: z.enum(["verified", "signed", "review", "unknown"]),
     score: z.number().int().min(0).max(100),
@@ -288,6 +301,7 @@ function auditLockedPackage(
   const registryPackage = registryByPackage.get(packageKey);
   let trustLevel = "missing";
   let trustScore = 0;
+  const registryQuarantineAdvisories: string[] = [];
 
   if (key !== packageKey) {
     status = "fail";
@@ -327,6 +341,12 @@ function auditLockedPackage(
       status = "fail";
       findings.push("transparency proof is invalid");
     }
+    const quarantine = activeRegistryQuarantine(registryPackage);
+    if (quarantine) {
+      status = "fail";
+      registryQuarantineAdvisories.push(quarantine.advisoryId);
+      findings.push(`${quarantine.advisoryId}: ${quarantine.reason}`);
+    }
   }
 
   for (const advisory of matchingAdvisories) {
@@ -344,9 +364,26 @@ function auditLockedPackage(
     status,
     trustLevel,
     trustScore,
-    advisories: matchingAdvisories.map((advisory) => advisory.id),
+    advisories: [...new Set([...matchingAdvisories.map((advisory) => advisory.id), ...registryQuarantineAdvisories])],
     findings
   };
+}
+
+function activeRegistryQuarantine(pkg: RegistryPackage): NonNullable<RegistryPackage["quarantine"]> | null {
+  const quarantine = pkg.quarantine;
+  if (!quarantine || quarantine.status !== "active" || quarantine.active === false) {
+    return null;
+  }
+  if (quarantine.package !== pkg.canonical || quarantine.version !== pkg.version) {
+    return null;
+  }
+  if (quarantine.artifactSha256 && quarantine.artifactSha256 !== pkg.digest) {
+    return null;
+  }
+  if (quarantine.severity !== "high" && quarantine.severity !== "critical") {
+    return null;
+  }
+  return quarantine;
 }
 
 function duplicateRegistryPackageKeys(packages: readonly RegistryPackage[]): Set<string> {
@@ -565,10 +602,7 @@ async function readJsonBytesSource(
   if (requireJsonContentType && !contentType.toLowerCase().includes("application/json")) {
     throw new Error(`${label} response must be application/json`);
   }
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (bytes.length > JSON_LIMIT) {
-    throw new Error(`${label} response is too large`);
-  }
+  const bytes = await readResponseBytes(response, { label, maxBytes: JSON_LIMIT });
   return { bytes, payload: JSON.parse(bytes.toString("utf8")) as unknown, url };
 }
 

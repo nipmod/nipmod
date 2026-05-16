@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "../site-header";
 import { proofContent } from "./content";
 
 export const metadata: Metadata = {
@@ -17,9 +16,7 @@ export const metadata: Metadata = {
 
 export default function ProofPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="proof-hero" aria-labelledby="proof-title">
         <p className="eyebrow">Proof</p>
         <h1 id="proof-title">{proofContent.headline}</h1>

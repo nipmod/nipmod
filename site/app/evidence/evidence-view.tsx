@@ -1,6 +1,5 @@
 import discoveryData from "../../public/.well-known/nipmod.json";
 import registryData from "../registry-data.json";
-import { SiteHeader } from "../site-header";
 import { registryTrustSummary, shortDid, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
 
 type DiscoveryManifest = typeof discoveryData;
@@ -15,15 +14,13 @@ export function EvidenceView({ selectedPackage }: { selectedPackage: RegistryPac
   const artifacts = evidenceArtifacts(selectedPackage);
 
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="trust-hero" aria-labelledby="evidence-title">
         <p className="eyebrow">Evidence</p>
         <h1 id="evidence-title">Proof humans can read.</h1>
         <p className="lead">
           The registry still publishes raw JSON for agents. The website now explains each proof first, then exposes the
-          raw artifact as an explicit data link.
+          machine file as an explicit verification link.
         </p>
         <div className={`status-pill ${summary.ready ? "status-ok" : "status-review"}`}>
           {summary.ready ? "Verified registry" : "Review required"}
@@ -53,8 +50,8 @@ export function EvidenceView({ selectedPackage }: { selectedPackage: RegistryPac
               <div>
                 <h3>{artifact.label}</h3>
                 <p>{artifact.text}</p>
-                <a className="data-link" href={artifact.href}>
-                  Open raw data
+                <a className="data-link" href={artifact.href} aria-label={`Open ${artifact.label} machine file`}>
+                  Machine file
                 </a>
               </div>
             </article>
@@ -131,8 +128,13 @@ function PackageEvidence({ pkg }: { pkg: RegistryPackage }) {
         {receipts.length > 0 ? (
           <div className="evidence-receipts" id="compatibility">
             {receipts.map((receipt) => (
-              <a className="data-link" href={receipt.receiptUrl} key={receipt.id}>
-                {receipt.label} raw receipt
+              <a
+                className="data-link"
+                href={receipt.receiptUrl}
+                key={receipt.id}
+                aria-label={`Open ${receipt.label} machine receipt`}
+              >
+                {receipt.label} machine receipt
               </a>
             ))}
           </div>

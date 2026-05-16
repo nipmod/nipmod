@@ -1,11 +1,11 @@
 import { homeContent } from "./content";
 import registryData from "./registry-data.json";
-import { SiteHeader } from "./site-header";
 import {
   installCommand,
   homepagePackages,
   permissionHighlights,
   registryStats,
+  safeSourceRepoHref,
   searchPackages,
   shortDid,
   type RegistryIndex,
@@ -27,9 +27,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const packages = searchPackages(publicRegistry.packages, query);
 
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
           <h1 id="hero-title">{homeContent.headline}</h1>
@@ -44,7 +42,13 @@ export default async function Home({ searchParams }: HomeProps) {
             <a className="button button-ghost" href="/package">
               Package
             </a>
-            <a className="button button-ghost" href={homeContent.links.x} rel="noreferrer" target="_blank">
+            <a
+              className="button button-ghost"
+              href={homeContent.links.x}
+              aria-label="Open nipmod updates on X in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
               {homeContent.secondaryAction}
             </a>
           </div>
@@ -207,6 +211,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
 function PackageCard({ pkg }: { pkg: RegistryPackage }) {
   const receipts = (pkg.compatibilityReceipts ?? []).filter((receipt) => receipt.provenanceLoss.length === 0).slice(0, 3);
+  const sourceRepoHref = safeSourceRepoHref(pkg.sourceRepo);
 
   return (
     <article className="package-card">
@@ -256,10 +261,19 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
       </pre>
 
       <div className="package-links">
-        <a href={pkg.sourceRepo} rel="noreferrer" target="_blank">
-          Repo
+        {sourceRepoHref ? (
+          <a
+            href={sourceRepoHref}
+            aria-label={`Open ${pkg.name} Git source in a new tab`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Git source
+          </a>
+        ) : null}
+        <a href={packageEvidenceHref(pkg, "package-proof")} aria-label={`View ${pkg.name} evidence`}>
+          Evidence
         </a>
-        <a href={packageEvidenceHref(pkg, "package-proof")}>Evidence</a>
       </div>
     </article>
   );

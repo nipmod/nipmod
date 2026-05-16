@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "../site-header";
 
 export const metadata: Metadata = {
   alternates: {
@@ -29,9 +28,7 @@ const capabilities = [
 
 export default function SecurityPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="trust-hero" aria-labelledby="security-title">
         <p className="eyebrow">Security</p>
         <h1 id="security-title">Report with proof.</h1>
@@ -46,7 +43,13 @@ export default function SecurityPage() {
           <a className="button button-ghost" href="/evidence#advisories">
             Advisories
           </a>
-          <a className="button button-ghost" href="https://x.com/Nipmod" rel="noreferrer" target="_blank">
+          <a
+            className="button button-ghost"
+            href="https://x.com/Nipmod"
+            aria-label="Open nipmod on X in a new tab"
+            rel="noreferrer"
+            target="_blank"
+          >
             X fallback
           </a>
         </div>

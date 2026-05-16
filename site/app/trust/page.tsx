@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import discoveryData from "../../public/.well-known/nipmod.json";
 import registryData from "../registry-data.json";
-import { SiteHeader } from "../site-header";
 import { registryTrustSummary, shortDid, type RegistryIndex } from "../../lib/registry";
 
 type DiscoveryManifest = typeof discoveryData;
@@ -29,9 +28,7 @@ export const metadata: Metadata = {
 
 export default function TrustPage() {
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
+    <main className="page-shell" id="main">
       <section className="trust-hero" aria-labelledby="trust-title">
         <p className="eyebrow">Trust</p>
         <h1 id="trust-title">Small surface. Hard proof.</h1>
@@ -93,27 +90,44 @@ export default function TrustPage() {
             { label: "Witness", value: shortDid(witness), href: discovery.witness.statements },
             { label: "Checkpoint", value: treeHead?.rootHash ?? "missing", href: discovery.transparency.checkpoint },
             { label: "Installer", value: installerHash, href: discovery.install.script },
-            { label: "Release key", value: releaseKey, href: discovery.install.release.artifact },
+            { label: "Release key", value: releaseKey, href: "/.well-known/nipmod.json", action: "Machine file" },
+            {
+              label: "Release artifact",
+              value: `nipmod-${discovery.install.release.version}.tgz`,
+              href: discovery.install.release.artifact,
+              action: "Download artifact"
+            },
+            {
+              label: "Release signature",
+              value: `nipmod-${discovery.install.release.version}.tgz.sig`,
+              href: discovery.install.release.signature,
+              action: "Machine signature"
+            },
             { label: "Discovery", value: discovery.homepage + "/.well-known/nipmod.json", href: "/.well-known/nipmod.json" },
             { label: "Advisories", value: discovery.advisories, href: "/advisories.json" },
-            { label: "Security", value: "https://nipmod.com/security", href: "/security" },
+            { label: "Security", value: "https://nipmod.com/security", href: "/security", action: "Security page" },
             { label: "Security metadata", value: "https://nipmod.com/.well-known/security.txt", href: "/.well-known/security.txt" }
-          ].map((pin) => (
-            <div key={pin.label}>
-              <dt>{pin.label}</dt>
-              <dd>
-                <span>{pin.value}</span>
-                <a
-                  className="data-link"
-                  href={pin.href}
-                  rel={pin.href.startsWith("http") ? "noreferrer" : undefined}
-                  target={pin.href.startsWith("http") ? "_blank" : undefined}
-                >
-                  Raw data
-                </a>
-              </dd>
-            </div>
-          ))}
+          ].map((pin) => {
+            const action = "action" in pin ? pin.action : "Machine file";
+            const opensNewTab = pin.href.startsWith("http");
+            return (
+              <div key={pin.label}>
+                <dt>{pin.label}</dt>
+                <dd>
+                  <span>{pin.value}</span>
+                  <a
+                    className="data-link"
+                    href={pin.href}
+                    aria-label={`Open ${pin.label} ${action.toLowerCase()}${opensNewTab ? " in a new tab" : ""}`}
+                    rel={opensNewTab ? "noreferrer" : undefined}
+                    target={opensNewTab ? "_blank" : undefined}
+                  >
+                    {action}
+                  </a>
+                </dd>
+              </div>
+            );
+          })}
         </dl>
       </section>
     </main>

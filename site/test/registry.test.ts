@@ -8,6 +8,7 @@ import {
   permissionHighlights,
   registryTrustSummary,
   registryStats,
+  safeSourceRepoHref,
   searchPackages,
   type RegistryIndex,
   type RegistryPackage
@@ -252,6 +253,17 @@ describe("registry data", () => {
     const pkg = packageFixture({ name: "blocked-agent", quarantine: quarantineFixture("blocked-agent") });
 
     expect(installCommand(pkg)).toBe("Install blocked: NIPMOD-2026-9001: Quarantine dry-run advisory");
+  });
+
+  test("only renders source repo links for known HTTPS Gitlawb hosts", () => {
+    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git")).toBe(
+      "https://node.nipmod.com/zalpha/alpha.git"
+    );
+    expect(safeSourceRepoHref("https://node.gitlawb.com/zalpha/alpha.git")).toBe(
+      "https://node.gitlawb.com/zalpha/alpha.git"
+    );
+    expect(safeSourceRepoHref("javascript:alert(1)")).toBeNull();
+    expect(safeSourceRepoHref("https://example.test/zalpha/alpha.git")).toBeNull();
   });
 
   test("surfaces dangerous permission details instead of only counts", () => {

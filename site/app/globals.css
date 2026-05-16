@@ -47,6 +47,26 @@ input:focus-visible {
   outline-offset: 4px;
 }
 
+.skip-link {
+  background: var(--text);
+  border-radius: 12px;
+  color: var(--background);
+  font-size: 14px;
+  font-weight: 760;
+  left: 20px;
+  min-height: 44px;
+  padding: 12px 14px;
+  position: absolute;
+  top: 12px;
+  transform: translateY(-160%);
+  transition: transform 160ms ease;
+  z-index: 5;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 .page-shell {
   display: grid;
   gap: 18px;
@@ -65,11 +85,14 @@ input:focus-visible {
   border: 1px solid var(--border-soft);
   border-radius: 18px;
   display: flex;
-  height: 56px;
+  height: 60px;
   justify-content: space-between;
+  margin: 22px auto 0;
+  max-width: min(1000px, calc(100vw - 40px));
   padding: 0 12px;
   position: sticky;
   top: 16px;
+  width: calc(100vw - 40px);
   z-index: 2;
 }
 
@@ -88,7 +111,7 @@ input:focus-visible {
   font-size: 15px;
   font-weight: 600;
   gap: 9px;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 10px;
 }
 
@@ -121,14 +144,59 @@ input:focus-visible {
   color: var(--muted);
   font-size: 13px;
   font-weight: 650;
-  min-height: 36px;
-  min-width: 42px;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .nav-actions {
   align-items: center;
   display: flex;
   gap: 8px;
+}
+
+.more-menu {
+  display: none;
+  position: relative;
+}
+
+.more-menu summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0 12px;
+}
+
+.more-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.more-menu-panel {
+  backdrop-filter: blur(24px) saturate(170%);
+  background: rgba(14, 14, 16, 0.94);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.34);
+  display: grid;
+  gap: 4px;
+  min-width: 150px;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+}
+
+.more-menu-panel a {
+  align-items: center;
+  border-radius: 10px;
+  color: var(--text);
+  display: flex;
+  font-size: 14px;
+  font-weight: 680;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.more-menu-panel a:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .nav-link-wide {
@@ -218,7 +286,7 @@ h1 {
 }
 
 .button-small {
-  min-height: 42px;
+  min-height: 44px;
   min-width: 92px;
   padding: 0 16px;
 }
@@ -353,7 +421,7 @@ h1 {
   color: var(--text);
   flex: 1;
   font: inherit;
-  min-height: 42px;
+  min-height: 44px;
   min-width: 0;
   outline: none;
   padding: 0 8px;
@@ -534,13 +602,16 @@ h1 {
 }
 
 .compatibility-row a {
+  align-items: center;
   background: rgba(155, 188, 255, 0.11);
   border: 1px solid rgba(155, 188, 255, 0.24);
   border-radius: 999px;
   color: var(--text);
+  display: inline-flex;
   font-size: 12px;
   font-weight: 720;
-  padding: 7px 9px;
+  min-height: 44px;
+  padding: 0 12px;
   transition: background 160ms ease, border-color 160ms ease;
 }
 
@@ -581,12 +652,15 @@ h1 {
 }
 
 .package-links a {
+  align-items: center;
   border: 1px solid var(--border-soft);
   border-radius: 12px;
   color: var(--muted);
+  display: inline-flex;
   font-size: 13px;
   font-weight: 700;
-  padding: 9px 12px;
+  min-height: 44px;
+  padding: 0 12px;
   transition: background 160ms ease, color 160ms ease;
 }
 
@@ -1097,6 +1171,7 @@ h1 {
 }
 
 .data-link {
+  align-items: center;
   color: var(--muted);
   display: inline-flex;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
@@ -1104,7 +1179,9 @@ h1 {
   font-size: 12px;
   font-weight: 760;
   justify-self: start;
-  margin-top: 10px;
+  margin-top: 6px;
+  min-height: 44px;
+  padding: 0 4px;
 }
 
 @media (max-width: 820px) {
@@ -1114,9 +1191,19 @@ h1 {
   }
 
   .topbar {
+    height: 64px;
+    margin-top: 14px;
     max-width: calc(100vw - 28px);
     top: 10px;
-    width: 100%;
+    width: calc(100vw - 28px);
+  }
+
+  .nav-secondary {
+    display: none;
+  }
+
+  .more-menu {
+    display: block;
   }
 
   .hero {
@@ -1207,12 +1294,8 @@ h1 {
   }
 }
 
-@media (max-width: 350px) {
-  .nav-actions .nav-link-wide:first-child {
-    display: none;
-  }
-
-  .nav-actions .nav-link-wide:nth-child(4) {
+@media (max-width: 520px) {
+  .nav-primary-optional {
     display: none;
   }
 }
