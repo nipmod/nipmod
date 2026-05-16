@@ -5,7 +5,7 @@ export function SiteHeader() {
     <header className="topbar" aria-label="Primary">
       <a className="brand" href="/" aria-label="nipmod home">
         <span className="brand-mark" aria-hidden="true">
-          <img alt="" height="26" src="/icon.svg" width="26" />
+          <img alt="" height="26" src="/nipmod-logo.jpg" width="26" />
         </span>
         <span>{homeContent.brand}</span>
       </a>

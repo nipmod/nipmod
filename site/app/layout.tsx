@@ -7,9 +7,14 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com"
   },
   description: "Verifiable packages for agents.",
+  icons: {
+    apple: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }],
+    icon: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }]
+  },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
     description: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+    images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
     siteName: "nipmod",
     title: "nipmod",
     type: "website",
@@ -20,6 +25,7 @@ export const metadata: Metadata = {
     card: "summary",
     creator: "@Nipmod",
     description: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+    images: ["/nipmod-logo.jpg"],
     site: "@Nipmod",
     title: "nipmod"
   }
