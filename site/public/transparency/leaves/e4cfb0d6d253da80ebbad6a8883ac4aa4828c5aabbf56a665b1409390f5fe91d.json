@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+  "eventHash": "74b1dbb47265194ae1295239574c1498fa36db50acbc14041014edc38e97c963",
+  "package": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+  "publisher": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+  "version": "0.1.0"
+}

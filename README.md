@@ -9,6 +9,12 @@ Public links:
 - X: https://x.com/Nipmod
 - Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 
+## Founder-facing pitch
+
+Gitlawb already gives agents decentralized source. nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
+
+The pitch is narrow: not a new Gitlawb authority, not a central upload gate. Gitlawb remains the source of repos and content. nipmod is the verification, discovery and lockfile layer that lets agents answer: who published this, what exact bytes am I installing, what source commit produced it, and is there current safety evidence against it?
+
 nipmod is a decentralized capability dependency layer for agents. It packages, signs, verifies and installs agent capabilities such as skills, MCP servers, tool bundles and workflow packs by DID, digest and policy.
 
 Current implementation status:
@@ -45,7 +51,7 @@ Current implementation status:
 curl -fLO https://nipmod.com/install.sh
 printf '%s  install.sh\n' 3695e9e22edad41e48498ce00b64a7bcde066dd18b13aa5383a61f5773678cc9 | shasum -a 256 -c -
 bash install.sh
-nipmod doctor
+nipmod doctor --online
 nipmod search skill --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
@@ -55,7 +61,7 @@ nipmod policy explain pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4f
 nipmod policy check
 nipmod audit --online
 nipmod ci --online
-nipmod package gitlawb://did:key:z6Mk.../repo --dir repo
+nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-demo-package
 nipmod init --name gitlawb-repo-reader --dir gitlawb-repo-reader
 nipmod manifest validate --dir gitlawb-repo-reader
 nipmod publish gitlawb-repo-reader --dry-run
@@ -92,6 +98,7 @@ See `SECURITY.md` and `docs/independent-review.md` for disclosure scope and exte
 See `docs/adoption.md`, `docs/self-service-publishing.md` and `docs/multi-source-registry.md` for the remaining ecosystem scale paths.
 See `docs/launch-demo.md` for the public demo script.
 See `docs/ecosystem-packages.md` for the first party package catalog.
+See `docs/public-launch-packet.md` for the public post, founder DM and review checklist.
 
 Canonical public brand:
 

@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "f1d1bf9e3df101cca7eb00294dc129e8958ae3dfc823d10665e29f491c084c0e",
+  "eventHash": "55cc373fd1040a060f79a9787cba2e3e494ba9fa9fcac3cbe85c967973f1cf0c",
+  "package": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+  "publisher": "did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu",
+  "version": "0.1.0"
+}

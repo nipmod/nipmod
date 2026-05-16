@@ -10,6 +10,8 @@ Read packages:
 - `repo-readme-audit`
 - `dependency-risk-review`
 - `gitlawb-release-review`
+- `gitlawb-diff-summarizer`
+- `release-notes-drafter`
 
 Guard packages:
 
@@ -18,12 +20,16 @@ Guard packages:
 - `strict-ci-policy`
 - `developer-default-policy`
 - `malicious-skill-fixtures`
+- `security-advisory-triage`
+- `agent-permission-review`
+- `mcp-tool-risk-review`
 
 Connect packages:
 
 - `mcp-server-import-example`
 - `apm-import-example`
 - `github-issue-triage`
+- `package-onboarding-checklist`
 
 ## What makes a package public ready
 

@@ -138,8 +138,10 @@ async function assertPackageSourceProvenance(pkg, fetchFn) {
     sourceTag: pkg.sourceTag,
     version: pkg.version
   });
-  if (signedRelease.payload.source.commit !== undefined && signedRelease.payload.source.commit !== pkg.sourceCommit) {
-    throw new Error(`${subject} release event source commit mismatch`);
+  // The signed release event is committed before the final metadata commit can be tagged.
+  // `sourceTag` plus Git ref verification below is the immutable source anchor.
+  if (signedRelease.payload.source.commit !== undefined && !isGitCommitHash(signedRelease.payload.source.commit)) {
+    throw new Error(`${subject} release event source commit is invalid`);
   }
 
   const refs = parseGitInfoRefs(await fetchBytesWith(fetchFn, sourceRefsUrl(pkg), SOURCE_REF_LIMIT, "source refs"));

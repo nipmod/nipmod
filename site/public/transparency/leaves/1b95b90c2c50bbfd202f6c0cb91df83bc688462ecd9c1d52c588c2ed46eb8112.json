@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
+  "eventHash": "d6cfbb8070f929f81bca969e045680167c991bb613cd718faf38db0b58f26378",
+  "package": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+  "publisher": "did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B",
+  "version": "0.1.0"
+}

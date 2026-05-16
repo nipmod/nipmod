@@ -19,7 +19,13 @@ const starterPackages = [
   "malicious-skill-fixtures",
   "mcp-server-import-example",
   "apm-import-example",
-  "gitlawb-release-review"
+  "gitlawb-release-review",
+  "gitlawb-diff-summarizer",
+  "release-notes-drafter",
+  "security-advisory-triage",
+  "agent-permission-review",
+  "mcp-tool-risk-review",
+  "package-onboarding-checklist"
 ];
 
 describe("first-party starter packages", () => {
@@ -67,7 +73,7 @@ describe("first-party starter packages", () => {
 
       await expectPackable(dir, name);
     }
-  }, 20_000);
+  }, 45_000);
 });
 
 async function expectPackable(dir, name) {

@@ -11,9 +11,9 @@ curl -fL https://nipmod.com/install.sh -o install.sh
 curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256
 shasum -a 256 -c install.sh.sha256
 bash install.sh
-nipmod doctor
+nipmod doctor --online
 nipmod search gitlawb --online
-nipmod inspect gitlawb-release-review --online
+nipmod inspect pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0 --online
 nipmod add gitlawb-release-review --online
 nipmod audit --online
 ```
@@ -21,10 +21,20 @@ nipmod audit --online
 Ask package authors to run:
 
 ```bash
-nipmod package gitlawb://did:key:z6Mk.../repo --dir repo
-nipmod manifest validate --dir repo
-nipmod publish repo --dry-run --json
+nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package
+cd gitlawb-demo-package
+nipmod manifest validate --dir .
+nipmod publish . --dry-run --json
 ```
+
+Ask Gitlawb repo owners to run the claim preview separately. The final dry run needs their matching DID identity.
+
+```bash
+nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
+nipmod manifest validate --dir gitlawb-repo-reader-draft
+```
+
+For founder review, send `docs/public-launch-packet.md` plus the live `/launch` page instead of a vague product description.
 
 ## Evidence To Collect
 

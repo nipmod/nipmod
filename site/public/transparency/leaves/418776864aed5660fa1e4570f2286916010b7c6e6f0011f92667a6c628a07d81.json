@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+  "eventHash": "d2701a2fc57389aed3478d536ccd66d318c62f7434f47210f6807b08192e39ff",
+  "package": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+  "publisher": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+  "version": "0.1.0"
+}

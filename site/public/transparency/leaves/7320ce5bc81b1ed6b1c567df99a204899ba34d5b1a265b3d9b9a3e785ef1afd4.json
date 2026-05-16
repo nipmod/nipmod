@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+  "eventHash": "4a78415b4aea393f01ba23521e9ffc1719fc539e2c8746235bad484acfd5d3df",
+  "package": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+  "publisher": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+  "version": "0.1.0"
+}

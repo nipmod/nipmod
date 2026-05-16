@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "60a18ebdeed5973bdd6000ce4ca54f8781ac8a17841bfe1b438c668fed2ae087",
+  "eventHash": "8eab0306e010de94d6566edf99de03bd6fcd03fcc84a5ff1e1b384356399e121",
+  "package": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+  "publisher": "did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j",
+  "version": "0.1.0"
+}

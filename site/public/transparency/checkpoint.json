@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
-  "generatedAt": "2026-05-16T15:46:44.454Z",
+  "generatedAt": "2026-05-16T21:03:56.372Z",
   "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
-  "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
-  "treeSize": 16,
+  "rootHash": "9d42e3fd953ad5df80bb416e72a435c8450238e6df06f1bed616cc4d475e81f6",
+  "treeSize": 22,
   "signature": {
     "algorithm": "Ed25519",
     "keyId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
-    "signatureBase64": "J7pYLqF5pQI9nZnEwIGFtQy8WXESwlw0ZLgfZLsb5nD2n2jIWrsu/9XHhMYjsb6IobAgyYEz2cYqmO7OrQd6DQ=="
+    "signatureBase64": "pDVBQx0x6CHE/6taL8RICbW3hEj9QWVFjwq8YPmx/MbRTipZ7GSVlMCMPxUQ+V+W7n+8OoM4zksK3I7qY2OnAA=="
   }
 }

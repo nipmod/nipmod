@@ -15,12 +15,22 @@ Public packages should include a clear README, a valid `nipmod.json`, quiet perm
 Use:
 
 ```sh
-nipmod package gitlawb://did:key:z6Mk.../repo --dir repo
-nipmod manifest validate --dir repo
-nipmod publish repo --dry-run --json
+nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package
+cd gitlawb-demo-package
+nipmod manifest validate --dir .
+nipmod publish . --dry-run --json
 ```
 
 The dry run output includes a registry candidate. That is the review object for indexing or founder feedback.
+
+For an existing Gitlawb repo, first create a claim preview:
+
+```sh
+nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
+nipmod manifest validate --dir gitlawb-repo-reader-draft
+```
+
+Publishing that draft requires the matching repo owner DID identity.
 
 ## Feedback
 
@@ -35,15 +45,12 @@ Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355x
 Primary public post:
 
 ```text
-We built nipmod, decentralized npm for Gitlawb agents.
+Gitlawb gives agents decentralized source.
 
-It turns Gitlawb repos into signed agent packages, verifies digest, DID signature, release event, transparency and witness evidence, and lets agents search, inspect, plan installs and publish dry runs without central publish control.
+nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
-Code and proof are public:
+Public demo: https://nipmod.com/launch
 https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
-https://nipmod.com
-
-Could you sanity check whether this fits Gitlawb's intended package layer?
 ```
 
 Short public post:
@@ -60,9 +67,9 @@ Site: https://nipmod.com
 Direct message:
 
 ```text
-We built nipmod as a package layer for Gitlawb agents. It does not control who can publish on Gitlawb. It gives agents verified package search, install planning, audit and publish dry runs over signed Gitlawb content.
+We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
-Could you sanity check the architecture and tell us whether this matches Gitlawb's direction?
+Could you sanity check whether this should be a Gitlawb-native package path, an independent verification layer, or something Gitlawb should expose directly?
 ```
 
 Review asks:

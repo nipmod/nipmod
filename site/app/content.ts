@@ -13,12 +13,13 @@ export const homeContent = {
     "curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256",
     "shasum -a 256 -c install.sh.sha256",
     "bash install.sh",
-    "nipmod doctor",
-    "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo",
+    "nipmod doctor --online",
     "nipmod search skill --online",
-    "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
+    "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
+    "nipmod add gitlawb-repo-reader --online",
     "nipmod audit --online",
-    "nipmod publish . --dry-run"
+    "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package",
+    "nipmod publish gitlawb-demo-package --dry-run"
   ],
   usage: [
     {
@@ -68,7 +69,8 @@ export const homeContent = {
     {
       label: "Publish",
       text: "Run the author preflight before any public write.",
-      command: "nipmod publish . --dry-run"
+      command:
+        "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\nnipmod publish gitlawb-demo-package --dry-run"
     }
   ],
   packageUseCases: [
@@ -119,30 +121,31 @@ export const homeContent = {
   ],
   founderOutreach: {
     post:
-      "We built nipmod, decentralized npm for Gitlawb agents. It turns Gitlawb repos into signed agent packages with digest, DID signature, release event, transparency and witness proof. Source and live installer are public.",
+      "Gitlawb gives agents decentralized source. nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
     dm:
-      "Could you sanity check whether nipmod fits Gitlawb as a package layer for agents? Code, proof and the live CLI are public."
+      "We built nipmod as a package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, add, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
   },
   demoFlow: [
     {
-      label: "Convert",
-      text: "Create a package draft from a Gitlawb repo URL or DID path.",
-      command: "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo"
+      label: "Find",
+      text: "Search the public registry without a nipmod account.",
+      command: "nipmod search gitlawb --online"
     },
     {
-      label: "Preflight",
-      text: "Validate manifest, permissions and the registry candidate before a public write.",
-      command: "nipmod publish repo --dry-run --json"
-    },
-    {
-      label: "Verify",
-      text: "Inspect digest, signer, source commit, witness and transparency evidence.",
-      command: "nipmod inspect repo --online"
+      label: "Inspect",
+      text: "Read digest, signer, source, witness and transparency evidence.",
+      command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online"
     },
     {
       label: "Install",
       text: "Pin the verified package in the workspace lockfile.",
-      command: "nipmod add repo --online"
+      command: "nipmod add gitlawb-repo-reader --online"
+    },
+    {
+      label: "Publish dry run",
+      text: "Create a Gitlawb package draft and registry candidate without mutating Gitlawb.",
+      command:
+        "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir .\nnipmod publish . --dry-run --json"
     }
   ],
   ecosystemPackages: [
@@ -155,6 +158,11 @@ export const homeContent = {
       name: "gitlawb-release-review",
       text: "Review immutable tags, signed release events and registry readiness.",
       command: "nipmod add gitlawb-release-review --online"
+    },
+    {
+      name: "repo-readme-audit",
+      text: "Audit repository README content for package clarity and untrusted instruction risk.",
+      command: "nipmod add repo-readme-audit --online"
     },
     {
       name: "dependency-risk-review",
@@ -200,6 +208,36 @@ export const homeContent = {
       name: "malicious-skill-fixtures",
       text: "Provide safe negative test fixtures for scanners and policy reviewers.",
       command: "nipmod add malicious-skill-fixtures --online"
+    },
+    {
+      name: "gitlawb-diff-summarizer",
+      text: "Summarize Gitlawb repository diffs with provenance, risk and next action clarity.",
+      command: "nipmod add gitlawb-diff-summarizer --online"
+    },
+    {
+      name: "release-notes-drafter",
+      text: "Draft release notes from verified package, Gitlawb tag and changelog evidence.",
+      command: "nipmod add release-notes-drafter --online"
+    },
+    {
+      name: "security-advisory-triage",
+      text: "Triage package security reports into advisory, quarantine and user action decisions.",
+      command: "nipmod add security-advisory-triage --online"
+    },
+    {
+      name: "agent-permission-review",
+      text: "Review agent package permissions for least privilege before install or publish.",
+      command: "nipmod add agent-permission-review --online"
+    },
+    {
+      name: "mcp-tool-risk-review",
+      text: "Review MCP server tools and manifests before agents expose them to package workflows.",
+      command: "nipmod add mcp-tool-risk-review --online"
+    },
+    {
+      name: "package-onboarding-checklist",
+      text: "Guide new package authors through a clean nipmod publish candidate.",
+      command: "nipmod add package-onboarding-checklist --online"
     }
   ],
   repoToPackage: {

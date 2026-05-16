@@ -60,12 +60,13 @@ describe("home content", () => {
       "curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",
       "bash install.sh",
-      "nipmod doctor",
-      "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo",
+      "nipmod doctor --online",
       "nipmod search skill --online",
-      "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
+      "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
+      "nipmod add gitlawb-repo-reader --online",
       "nipmod audit --online",
-      "nipmod publish . --dry-run"
+      "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package",
+      "nipmod publish gitlawb-demo-package --dry-run"
     ]);
   });
 
@@ -104,10 +105,10 @@ describe("home content", () => {
       "Public proof",
       "Agent setup"
     ]);
-    expect(homeContent.founderOutreach.post).toContain("decentralized npm for Gitlawb agents");
+    expect(homeContent.founderOutreach.post).toContain("package layer");
     expect(homeContent.founderOutreach.dm).toContain("sanity check");
-    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Convert", "Preflight", "Verify", "Install"]);
-    expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(6);
+    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Install", "Publish dry run"]);
+    expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(18);
     expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod add "))).toBe(true);
   });
 

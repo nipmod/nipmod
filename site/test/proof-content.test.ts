@@ -28,9 +28,9 @@ describe("public proof content", () => {
   });
 
   test("pins the current public proof state", () => {
-    expect(proofContent.registry.count).toBe(12);
+    expect(proofContent.registry.count).toBe(18);
     expect(proofContent.registry.trust).toBe("verified/100");
-    expect(proofContent.registry.treeSize).toBe(16);
+    expect(proofContent.registry.treeSize).toBe(22);
     expect(proofContent.registry.rootHash).toMatch(/^[a-f0-9]{64}$/);
     expect(proofContent.transcript).toBe("/proof/transcript.json");
   });

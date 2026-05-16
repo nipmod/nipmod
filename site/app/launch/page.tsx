@@ -19,14 +19,14 @@ const tracks = [
     title: "First install loop",
     text: "Install, run doctor, search, inspect, add and audit a verified package.",
     command:
-      "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh\nnipmod doctor\nnipmod add gitlawb-release-review --online"
+      "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod audit --online"
   },
   {
     label: "Publish",
     title: "Self service package candidate",
     text: "Create a Gitlawb package draft and produce the registry candidate before any public index decision.",
     command:
-      "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run --json"
+      "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir .\nnipmod publish . --dry-run --json"
   },
   {
     label: "Review",
@@ -43,6 +43,13 @@ const tracks = [
       "nipmod search policy --registries https://nipmod.com/registry/packages.json,https://mirror.example/packages.json"
   }
 ] as const;
+
+const founderCopy = {
+  post:
+    "Gitlawb gives agents decentralized source.\n\nnipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+  dm:
+    "We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this should be a Gitlawb native package path, an independent verification layer, or something Gitlawb should expose directly?"
+} as const;
 
 export default function LaunchPage() {
   return (
@@ -78,6 +85,27 @@ export default function LaunchPage() {
             </pre>
           </article>
         ))}
+      </section>
+
+      <section className="proof-section" aria-labelledby="founder-title">
+        <div>
+          <p className="eyebrow">Founder Review</p>
+          <h2 id="founder-title">Send this, then let the proof speak.</h2>
+        </div>
+        <div className="proof-panel">
+          <div className="demo-step">
+            <h3>Public post</h3>
+            <pre className="install-command">
+              <code>{founderCopy.post}</code>
+            </pre>
+          </div>
+          <div className="demo-step">
+            <h3>Direct message</h3>
+            <pre className="install-command">
+              <code>{founderCopy.dm}</code>
+            </pre>
+          </div>
+        </div>
       </section>
 
       <section className="trust-section" aria-labelledby="truth-title">

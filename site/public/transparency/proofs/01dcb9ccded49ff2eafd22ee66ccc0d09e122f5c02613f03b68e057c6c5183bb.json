@@ -15,10 +15,14 @@
     {
       "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
       "side": "left"
+    },
+    {
+      "hash": "9158833dc63f8f66c9f4f1cf201df5e07348b56dd21c7395ef1fc521975e0352",
+      "side": "right"
     }
   ],
   "leafHash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
   "leafIndex": 10,
-  "rootHash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
-  "treeSize": 16
+  "rootHash": "9d42e3fd953ad5df80bb416e72a435c8450238e6df06f1bed616cc4d475e81f6",
+  "treeSize": 22
 }
