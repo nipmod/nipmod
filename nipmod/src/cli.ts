@@ -32,7 +32,7 @@ import {
   resolveAddInstallPlan,
   type RegistryTrustOptions
 } from "./install-plan.js";
-import { installBundlePackage, installFilePackage } from "./install.js";
+import { installBundlePackage, installFilePackage, listInstalledPackages, uninstallPackage } from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
 import { DEFAULT_REGISTRY_URL, searchRegistries, searchRegistry, type RegistrySearchResult } from "./registry.js";
 import { startSetupServer } from "./setup-web.js";
@@ -59,6 +59,8 @@ const CLI_COMMANDS = [
   "verify",
   "install",
   "add",
+  "ls",
+  "uninstall",
   "doctor",
   "audit",
   "ci",
@@ -129,6 +131,10 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return installCommand(args);
     case "add":
       return addCommand(args);
+    case "ls":
+      return listCommand(args);
+    case "uninstall":
+      return uninstallCommand(args);
     case "doctor":
       return doctorCommand(args);
     case "audit":
@@ -496,6 +502,32 @@ async function addCommand(args: string[]): Promise<CliResult> {
       package: plan.package.canonical,
       resolved: plan.resolved,
       version: plan.package.version
+    }
+  };
+}
+
+async function listCommand(args: string[]): Promise<CliResult> {
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const packages = await listInstalledPackages(dir);
+  const lines = packages.length > 0 ? packages.map((pkg) => `${pkg.name}@${pkg.version} ${pkg.canonical}`) : ["no packages installed"];
+  return {
+    ok: true,
+    data: {
+      message: lines.join("\n"),
+      packages
+    }
+  };
+}
+
+async function uninstallCommand(args: string[]): Promise<CliResult> {
+  const query = firstPositional(args);
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const result = await uninstallPackage(query, dir);
+  return {
+    ok: true,
+    data: {
+      message: result.removed ? `uninstalled ${query}` : `package not installed: ${query}`,
+      ...result
     }
   };
 }

@@ -11,6 +11,21 @@ export interface InstallResult {
   lockfileChanged: boolean;
 }
 
+export interface InstalledPackageSummary {
+  canonical: string;
+  integrity: string;
+  name: string;
+  packageKey: string;
+  publisher: string;
+  version: string;
+}
+
+export interface UninstallResult {
+  lockfileChanged: boolean;
+  removed: boolean;
+  removedPackages: InstalledPackageSummary[];
+}
+
 export interface InstallOptions {
   integrity?: string;
   expected?: {
@@ -32,7 +47,8 @@ const LockfilePackageSchema = z.strictObject({
   manifestDigest: z.string().regex(/^[a-f0-9]{64}$/),
   publisher: z.string().regex(/^did:key:z[A-Za-z0-9]+$/),
   permissions: PermissionSchema,
-  files: z.array(z.string().min(1))
+  files: z.array(z.string().min(1)),
+  storePath: z.string().regex(/^\.nipmod\/store\/sha256\/[a-f0-9]{64}\/bundle\.nipmod$/).optional()
 });
 
 const LockfileSchema = z.strictObject({
@@ -84,6 +100,7 @@ export async function installBundlePackage(
   const lockfilePath = join(projectDir, "nipmod.lock.json");
   const lockfile = await readLockfile(lockfilePath);
   const packageKey = `${bundle.manifest.canonical}@${bundle.manifest.version}`;
+  const storePath = await writeStoreBundle(projectDir, expectedDigest, bundleBytes);
 
   lockfile.packages[packageKey] = {
     name: bundle.manifest.name,
@@ -94,7 +111,8 @@ export async function installBundlePackage(
     manifestDigest: bundle.manifestDigest,
     publisher: bundle.manifest.publish.signingKey,
     permissions: bundle.manifest.permissions,
-    files: bundle.files.map((file) => file.path)
+    files: bundle.files.map((file) => file.path),
+    storePath
   };
 
   const nextLockfile = `${canonicalJson(lockfile)}\n`;
@@ -106,6 +124,70 @@ export async function installBundlePackage(
   await mkdir(projectDir, { recursive: true });
   await writeFile(lockfilePath, nextLockfile);
   return { lockfileChanged: true };
+}
+
+export async function listInstalledPackages(projectDir: string): Promise<InstalledPackageSummary[]> {
+  const lockfile = await readLockfile(join(projectDir, "nipmod.lock.json"));
+  return Object.entries(lockfile.packages)
+    .map(([packageKey, pkg]) => ({
+      canonical: pkg.canonical,
+      integrity: pkg.integrity,
+      name: pkg.name,
+      packageKey,
+      publisher: pkg.publisher,
+      version: pkg.version
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name) || left.version.localeCompare(right.version));
+}
+
+export async function uninstallPackage(query: string, projectDir: string): Promise<UninstallResult> {
+  const lockfilePath = join(projectDir, "nipmod.lock.json");
+  const lockfile = await readLockfile(lockfilePath);
+  const matches = Object.entries(lockfile.packages).filter(([packageKey, pkg]) =>
+    [packageKey, pkg.name, pkg.canonical, `${pkg.canonical}@${pkg.version}`].includes(query)
+  );
+
+  if (matches.length > 1) {
+    throw new Error(`uninstall query is ambiguous: ${query}`);
+  }
+
+  if (matches.length === 0) {
+    return {
+      lockfileChanged: false,
+      removed: false,
+      removedPackages: []
+    };
+  }
+
+  const [packageKey, pkg] = matches[0] ?? [];
+  if (!packageKey || !pkg) {
+    throw new Error("uninstall failed to resolve package");
+  }
+
+  delete lockfile.packages[packageKey];
+  await writeFile(lockfilePath, `${canonicalJson(lockfile)}\n`);
+  return {
+    lockfileChanged: true,
+    removed: true,
+    removedPackages: [
+      {
+        canonical: pkg.canonical,
+        integrity: pkg.integrity,
+        name: pkg.name,
+        packageKey,
+        publisher: pkg.publisher,
+        version: pkg.version
+      }
+    ]
+  };
+}
+
+async function writeStoreBundle(projectDir: string, digest: string, bundleBytes: Uint8Array): Promise<string> {
+  const relativePath = `.nipmod/store/sha256/${digest}/bundle.nipmod`;
+  const absolutePath = join(projectDir, relativePath);
+  await mkdir(join(projectDir, ".nipmod", "store", "sha256", digest), { recursive: true });
+  await writeFile(absolutePath, bundleBytes);
+  return relativePath;
 }
 
 async function readLockfile(path: string): Promise<Lockfile> {

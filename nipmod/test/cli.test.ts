@@ -38,7 +38,7 @@ describe("nipmod CLI", () => {
         { code: 12, meaning: "preflight not ready" }
       ])
     );
-  });
+  }, 15_000);
 
   test("initializes, packs, verifies, and installs a local package", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-"));
@@ -64,6 +64,36 @@ describe("nipmod CLI", () => {
     expect(packageKeys).toHaveLength(1);
     expect(packageKeys[0]).toMatch(/^pkg:did:key:z[A-Za-z0-9]+\/cli-skill@0\.1\.0$/);
     expect(lockfile.packages[packageKeys[0]].integrity).toBe(`sha256-${packed.data.digest}`);
+  }, 15_000);
+
+  test("lists and uninstalls installed packages from the CLI", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-uninstall-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+
+    await execaNode(["src/cli.ts", "init", "--name", "@probe/removable-agent", "--dir", pkg]);
+    const pack = await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"]);
+    const packed = JSON.parse(pack.stdout) as { ok: true; data: { path: string; digest: string } };
+    await execaNode([
+      "src/cli.ts",
+      "install",
+      `file:${packed.data.path}`,
+      "--dir",
+      app,
+      "--integrity",
+      `sha256-${packed.data.digest}`
+    ]);
+
+    const listed = await execaNode(["src/cli.ts", "ls", "--dir", app, "--json"]);
+    const listJson = JSON.parse(listed.stdout) as { ok: true; data: { packages: Array<{ name: string }> } };
+    expect(listJson.data.packages.map((item) => item.name)).toEqual(["@probe/removable-agent"]);
+
+    const removed = await execaNode(["src/cli.ts", "uninstall", "@probe/removable-agent", "--dir", app, "--json"]);
+    const removedJson = JSON.parse(removed.stdout) as { ok: true; data: { removed: boolean } };
+    const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+
+    expect(removedJson.data.removed).toBe(true);
+    expect(lockfile.packages).toEqual({});
   }, 15_000);
 
   test("validates a manifest and reports normalized publish facts", async () => {

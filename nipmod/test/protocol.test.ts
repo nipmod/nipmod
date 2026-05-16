@@ -19,6 +19,66 @@ describe("manifest validation", () => {
     expect(result.permissions.postinstall.allowed).toBe(false);
   });
 
+  test("accepts npm-parity agent metadata and dependency maps", async () => {
+    const manifest = (await readJson(fixture("valid-skill", "nipmod.json"))) as Record<string, unknown>;
+    manifest.formatVersion = 2;
+    manifest.keywords = ["gitlawb", "agent-package"];
+    manifest.repository = {
+      type: "gitlawb",
+      url: "gitlawb://did:key:z6Mkprobevalid/valid-skill",
+      tag: "v0.1.0"
+    };
+    manifest.bugs = { url: "https://nipmod.com/security" };
+    manifest.funding = { type: "community", url: "https://nipmod.com" };
+    manifest.engines = {
+      nipmod: ">=0.1.0",
+      agentHosts: {
+        codex: ">=0.1.0"
+      }
+    };
+    manifest.publishConfig = {
+      access: "public",
+      tag: "latest"
+    };
+    manifest.dependencies = {
+      "gitlawb-repo-reader": "^0.1.0",
+      "pkg:did:key:z6Mkprobevalid/valid-skill": "0.1.0"
+    };
+    manifest.peerDependencies = {
+      "readonly-registry-mcp-server": "latest"
+    };
+    manifest.optionalDependencies = {
+      "package-safety-eval-pack": "stable"
+    };
+    manifest.devDependencies = {
+      "malicious-skill-fixtures": "~0.1.0"
+    };
+    manifest.peerDependenciesMeta = {
+      "readonly-registry-mcp-server": {
+        optional: true
+      }
+    };
+
+    const result = validateManifest(manifest);
+
+    expect(result.formatVersion).toBe(2);
+    expect(result.dependencies?.["gitlawb-repo-reader"]).toBe("^0.1.0");
+    expect(result.repository?.type).toBe("gitlawb");
+    expect(result.publishConfig?.tag).toBe("latest");
+  });
+
+  test.each([
+    ["dependency name", { dependencies: { "BadName": "^0.1.0" } }, /dependencies/i],
+    ["dependency range", { dependencies: { "valid-skill": "git+https://example.com/repo.git" } }, /dependencies/i],
+    ["dist tag", { publishConfig: { tag: "v1.0.0" } }, /publishConfig/i],
+    ["repository", { repository: { type: "gitlawb", url: "https://github.com/example/repo" } }, /repository/i]
+  ])("rejects unsafe npm-parity metadata for %s", async (_label, patch, errorPattern) => {
+    const manifest = (await readJson(fixture("valid-skill", "nipmod.json"))) as Record<string, unknown>;
+    Object.assign(manifest, patch);
+
+    expect(() => validateManifest(manifest)).toThrow(errorPattern);
+  });
+
   test("rejects manifests without explicit permissions", async () => {
     const manifest = await readJson(fixture("missing-permissions", "nipmod.json"));
 

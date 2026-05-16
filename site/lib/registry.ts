@@ -96,6 +96,9 @@ export interface RegistryPackage {
   permissionDetails: RegistryPermissionDetails;
   proof?: RegistryPackageProof;
   compatibilityReceipts?: CompatibilityReceipt[];
+  dependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
   quarantine?: {
     active?: boolean;
     advisoryId: string;

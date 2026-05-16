@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { packProject } from "../src/bundle.js";
-import { installBundlePackage, installFilePackage } from "../src/install.js";
+import { installBundlePackage, installFilePackage, listInstalledPackages, uninstallPackage } from "../src/install.js";
 import { createSignedSkillProject } from "./helpers/package.js";
 
 const fixture = (...parts: string[]) => join(import.meta.dirname, "fixtures", ...parts);
@@ -27,6 +27,25 @@ describe("local install", () => {
     expect(lockfile.packages[`${signedProject.manifest.canonical}@0.1.0`].integrity).toBe(
       `sha256-${packed.digest}`
     );
+  });
+
+  test("materializes installed bundles in the local content-addressed store", async () => {
+    const signedProject = await createSignedSkillProject();
+    const packed = await packProject(signedProject.dir, {
+      signingPrivateKeyPem: signedProject.identity.privateKeyPem
+    });
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-store-"));
+
+    await installBundlePackage(packed.bytes, "https://node.nipmod.com/api/v1/repos/z6MkProbe/signed-skill/blob/releases/0.1.0/bundle.nipmod", temp, {
+      integrity: `sha256-${packed.digest}`
+    });
+
+    const storePath = join(temp, ".nipmod", "store", "sha256", packed.digest, "bundle.nipmod");
+    const lockfile = JSON.parse(await readFile(join(temp, "nipmod.lock.json"), "utf8"));
+    const entry = lockfile.packages[`${signedProject.manifest.canonical}@0.1.0`];
+
+    expect(await readFile(storePath, "utf8")).toBe(packed.bytes.toString("utf8"));
+    expect(entry.storePath).toBe(`.nipmod/store/sha256/${packed.digest}/bundle.nipmod`);
   });
 
   test("rejects installs without an external integrity pin", async () => {
@@ -135,6 +154,34 @@ describe("local install", () => {
     const lockfile = JSON.parse(await readFile(join(temp, "nipmod.lock.json"), "utf8"));
 
     expect(lockfile.packages[`${signedProject.manifest.canonical}@0.1.0`].resolved).toBe(resolved);
+  });
+
+  test("lists and uninstalls lockfile packages without deleting the content store", async () => {
+    const signedProject = await createSignedSkillProject();
+    const packed = await packProject(signedProject.dir, {
+      signingPrivateKeyPem: signedProject.identity.privateKeyPem
+    });
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-uninstall-"));
+
+    await installBundlePackage(packed.bytes, "https://node.nipmod.com/api/v1/repos/z6MkProbe/signed-skill/blob/releases/0.1.0/bundle.nipmod", temp, {
+      integrity: `sha256-${packed.digest}`
+    });
+
+    expect(await listInstalledPackages(temp)).toEqual([
+      expect.objectContaining({
+        canonical: signedProject.manifest.canonical,
+        name: signedProject.manifest.name,
+        version: "0.1.0"
+      })
+    ]);
+
+    const result = await uninstallPackage(signedProject.manifest.name, temp);
+    const lockfile = JSON.parse(await readFile(join(temp, "nipmod.lock.json"), "utf8"));
+    const storePath = join(temp, ".nipmod", "store", "sha256", packed.digest, "bundle.nipmod");
+
+    expect(result).toMatchObject({ lockfileChanged: true, removed: true });
+    expect(lockfile.packages).toEqual({});
+    expect(await readFile(storePath, "utf8")).toBe(packed.bytes.toString("utf8"));
   });
 
   test("rejects remote bundles that do not match the requested package identity", async () => {

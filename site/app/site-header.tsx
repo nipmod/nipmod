@@ -16,6 +16,9 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/#registry">
           Registry
         </a>
+        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/packages">
+          Catalog
+        </a>
         <a className="nav-link nav-link-wide nav-secondary" href="/package">
           Package
         </a>
@@ -56,6 +59,7 @@ export function SiteHeader() {
           <summary className="nav-link">More</summary>
           <div className="more-menu-panel">
             <a href="/package">Package</a>
+            <a href="/packages">Catalog</a>
             <a href="/security">Security</a>
             <a href="/launch">Launch</a>
             <a href="/proof">Proof</a>

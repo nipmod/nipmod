@@ -10,6 +10,28 @@ const SemverTagSchema = z.string().regex(/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]
 const PackageNameSchema = z
   .string()
   .regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/, "expected npm-style package name");
+const DependencyNameSchema = z.union([PackageIdSchema, PackageNameSchema]);
+const DistTagSchema = z
+  .string()
+  .regex(/^[a-z][a-z0-9._-]{0,31}$/, "expected npm-style dist tag")
+  .refine((value) => !/^(?:v?\d|\d)/.test(value), "dist tag must not look like a version");
+const VersionRangeSchema = z
+  .string()
+  .regex(
+    /^(?:\*|(?:\^|~)?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)|[a-z][a-z0-9._-]{0,31})$/,
+    "expected semver range or dist tag"
+  )
+  .refine((value) => !value.startsWith("v"), "version ranges must not use v-prefixed tags");
+const EngineRangeSchema = z
+  .string()
+  .regex(
+    /^(?:>=|>|<=|<|\^|~)?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/,
+    "expected engine semver range"
+  );
+const SafeHttpsUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => new URL(value).protocol === "https:", "expected https URL");
 const SafeTextSchema = z
   .string()
   .min(1)
@@ -22,11 +44,41 @@ const SafeTextSchema = z
       });
     }
   });
+const DependencyMapSchema = z.record(DependencyNameSchema, VersionRangeSchema);
+const BugsSchema = z
+  .strictObject({
+    url: SafeHttpsUrlSchema.optional()
+  })
+  .refine((value) => Boolean(value.url), "bugs requires url");
+const FundingSchema = z.strictObject({
+  type: SafeTextSchema,
+  url: SafeHttpsUrlSchema
+});
+const EnginesSchema = z.strictObject({
+  nipmod: EngineRangeSchema.optional(),
+  agentHosts: z.record(z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/), EngineRangeSchema).optional()
+});
+const PeerDependenciesMetaSchema = z.record(
+  DependencyNameSchema,
+  z.strictObject({
+    optional: z.boolean()
+  })
+);
+const PublishConfigSchema = z.strictObject({
+  access: z.literal("public").optional(),
+  tag: DistTagSchema.optional()
+});
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/, "expected sha256 hex digest");
 const GitCommitSchema = z.string().regex(/^[a-f0-9]{40}$/, "expected git commit hash");
 const GitlawbRepoSchema = z
   .string()
   .regex(/^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/, "expected gitlawb repo");
+const RepositorySchema = z.strictObject({
+  type: z.literal("gitlawb"),
+  url: GitlawbRepoSchema,
+  commit: GitCommitSchema.optional(),
+  tag: SemverTagSchema.optional()
+});
 const ReleaseEventSignatureSchema = z.strictObject({
   keyId: DidKeySchema,
   algorithm: z.literal("Ed25519"),
@@ -75,7 +127,7 @@ export const PermissionSchema = z.strictObject({
 
 export const ManifestSchema = z
   .strictObject({
-    formatVersion: z.literal(1),
+    formatVersion: z.union([z.literal(1), z.literal(2)]),
     name: PackageNameSchema,
     canonical: PackageIdSchema,
     version: SemverSchema,
@@ -90,7 +142,18 @@ export const ManifestSchema = z
       "adapter"
     ]),
     description: SafeTextSchema.optional(),
+    keywords: z.array(SafeTextSchema).max(32).optional(),
     license: SafeTextSchema.optional(),
+    repository: RepositorySchema.optional(),
+    bugs: BugsSchema.optional(),
+    funding: FundingSchema.optional(),
+    engines: EnginesSchema.optional(),
+    publishConfig: PublishConfigSchema.optional(),
+    dependencies: DependencyMapSchema.optional(),
+    devDependencies: DependencyMapSchema.optional(),
+    optionalDependencies: DependencyMapSchema.optional(),
+    peerDependencies: DependencyMapSchema.optional(),
+    peerDependenciesMeta: PeerDependenciesMetaSchema.optional(),
     exports: z.record(z.string(), z.record(z.string(), z.string())),
     files: z.array(z.string().min(1)).min(1).optional(),
     permissions: PermissionSchema,

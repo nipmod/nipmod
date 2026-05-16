@@ -39,6 +39,9 @@ export default async function Home({ searchParams }: HomeProps) {
             <a className="button button-ghost" href="/quickstart">
               Start
             </a>
+            <a className="button button-ghost" href="/packages">
+              Packages
+            </a>
             <a className="button button-ghost" href="/package">
               Package
             </a>
@@ -147,7 +150,9 @@ export default async function Home({ searchParams }: HomeProps) {
             <article className="package-card" key={pkg.name}>
               <div className="package-card-top">
                 <div>
-                  <h3>{pkg.name}</h3>
+                  <h3>
+                    <a href={`/packages/${encodeURIComponent(pkg.name)}`}>{pkg.name}</a>
+                  </h3>
                   <p>{pkg.text}</p>
                 </div>
               </div>
@@ -217,7 +222,9 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
     <article className="package-card">
       <div className="package-card-top">
         <div>
-          <h3>{pkg.name}</h3>
+          <h3>
+            <a href={`/packages/${encodeURIComponent(pkg.name)}`}>{pkg.name}</a>
+          </h3>
           <p>{pkg.description}</p>
         </div>
         <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
@@ -271,6 +278,9 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
             Git source
           </a>
         ) : null}
+        <a href={`/packages/${encodeURIComponent(pkg.name)}`} aria-label={`View ${pkg.name} package page`}>
+          Package
+        </a>
         <a href={packageEvidenceHref(pkg, "package-proof")} aria-label={`View ${pkg.name} evidence`}>
           Evidence
         </a>

@@ -18,8 +18,20 @@ P0 commands:
 - `nipmod audit`
 - `nipmod ci`
 - `nipmod search`
+- `nipmod ls`
+- `nipmod uninstall`
 - `nipmod policy`
 - `nipmod mcp serve`
+
+Next npm parity commands:
+
+- `nipmod outdated`
+- `nipmod update`
+- `nipmod explain`
+- `nipmod version`
+- `nipmod dist-tag`
+- `nipmod deprecate`
+- `nipmod sbom`
 
 ## JSON output
 
