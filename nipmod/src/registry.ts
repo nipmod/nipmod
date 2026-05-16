@@ -7,6 +7,7 @@ export const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 const PackageIdSchema = z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/);
+const PackageNameSchema = z.string().regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/);
 const SemverSchema = z.string().regex(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
 const DependencyMapSchema = z.record(z.string().min(1), z.string().min(1));
 const JSON_LIMIT = 1024 * 1024;
@@ -60,7 +61,7 @@ const RegistrySearchPackageSchema = z.strictObject({
   description: z.string().optional(),
   devDependencies: DependencyMapSchema.optional(),
   digest: Sha256Schema,
-  name: z.string().min(1),
+  name: PackageNameSchema,
   owner: z.string().min(1).optional(),
   optionalDependencies: DependencyMapSchema.optional(),
   permissions: PermissionCountsSchema.optional(),
@@ -89,9 +90,11 @@ export interface RegistrySearchPackage {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   digest: string;
+  canonicalInstall?: string;
   install?: string;
   installBlockedReason?: string;
   name: string;
+  nameAmbiguous: boolean;
   optionalDependencies?: Record<string, string>;
   permissionSummary: string;
   peerDependencies?: Record<string, string>;
@@ -160,12 +163,14 @@ function searchParsedRegistries(options: {
   }>;
 }): RegistrySearchResult {
   const query = options.query.trim().toLowerCase();
-  const packages = dedupeRegistryPackages(options.registries)
+  const matched = dedupeRegistryPackages(options.registries)
     .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
-    .filter((pkg) => registryPackageMatches(pkg, query))
+    .filter((pkg) => registryPackageMatches(pkg, query));
+  const ambiguousNames = ambiguousPackageNames(matched);
+  const packages = matched
     .sort((left, right) => compareRegistryPackages(left, right, query))
     .slice(0, options.limit)
-    .map(toSearchPackage);
+    .map((pkg) => toSearchPackage(pkg, ambiguousNames.has(pkg.name)));
 
   return {
     packages,
@@ -177,6 +182,16 @@ function searchParsedRegistries(options: {
 
 function uniqueRegistryUrls(registryUrls: readonly string[]): string[] {
   return [...new Set(registryUrls.map((url) => url.trim()).filter(Boolean))];
+}
+
+function ambiguousPackageNames(packages: readonly RegistryPackageWithSource[]): Set<string> {
+  const canonicalsByName = new Map<string, Set<string>>();
+  for (const pkg of packages) {
+    const canonicals = canonicalsByName.get(pkg.name) ?? new Set<string>();
+    canonicals.add(pkg.canonical);
+    canonicalsByName.set(pkg.name, canonicals);
+  }
+  return new Set([...canonicalsByName.entries()].filter(([, canonicals]) => canonicals.size > 1).map(([name]) => name));
 }
 
 type RegistryPackageWithSource = z.infer<typeof RegistrySearchPackageSchema> & {
@@ -261,7 +276,7 @@ function registrySearchScore(pkg: z.infer<typeof RegistrySearchPackageSchema>, q
 
 const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "policy-pack", "mcp-server"]);
 
-function toSearchPackage(pkg: RegistryPackageWithSource): RegistrySearchPackage {
+function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean): RegistrySearchPackage {
   const quarantine = activeQuarantine(pkg);
   const installBlockedReason = quarantine ? quarantineBlockedReason(quarantine) : undefined;
   return {
@@ -272,8 +287,14 @@ function toSearchPackage(pkg: RegistryPackageWithSource): RegistrySearchPackage 
     ...(pkg.dependencies ? { dependencies: pkg.dependencies } : {}),
     ...(pkg.devDependencies ? { devDependencies: pkg.devDependencies } : {}),
     digest: pkg.digest,
-    ...(installBlockedReason ? { installBlockedReason } : { install: `nipmod add ${pkg.canonical}@${pkg.version} --online` }),
+    ...(installBlockedReason
+      ? { installBlockedReason }
+      : {
+          canonicalInstall: `nipmod add ${pkg.canonical}@${pkg.version} --online`,
+          install: `nipmod add ${pkg.name} --online`
+        }),
     name: pkg.name,
+    nameAmbiguous,
     ...(pkg.optionalDependencies ? { optionalDependencies: pkg.optionalDependencies } : {}),
     permissionSummary: permissionSummary(pkg.permissions),
     ...(pkg.peerDependencies ? { peerDependencies: pkg.peerDependencies } : {}),

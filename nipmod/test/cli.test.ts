@@ -324,7 +324,10 @@ describe("nipmod CLI", () => {
       }
     });
 
+    expect(result.stdout).toContain("nipmod ready");
+    expect(result.stdout).toContain("WARN Gitlawb helper: publish needs git-remote-gitlawb; install and add still work");
     expect(result.stdout).toContain("verified checksum");
+    expect(result.stdout).not.toContain("nipmod needs setup");
     expect(result.stdout).not.toContain("curl -fsSL");
     expect(result.stdout).not.toContain("| sh");
   });
@@ -395,14 +398,15 @@ describe("nipmod CLI", () => {
       data: {
         query: string;
         total: number;
-        packages: Array<{ install: string; name: string; trust: string }>;
+        packages: Array<{ canonicalInstall: string; install: string; name: string; trust: string }>;
       };
     };
 
     expect(parsed.data.query).toBe("alpha");
     expect(parsed.data.total).toBe(1);
     expect(parsed.data.packages[0]).toMatchObject({
-      install: `nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`,
+      canonicalInstall: `nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`,
+      install: "nipmod add alpha-agent --online",
       name: "alpha-agent",
       trust: "verified/100"
     });
@@ -410,7 +414,8 @@ describe("nipmod CLI", () => {
     const text = await execaNode(["src/cli.ts", "search", "alpha", "--registry", pathToFileURL(registryPath).href]);
     expect(text.stdout).toContain("alpha-agent 0.1.0 verified/100");
     expect(text.stdout).toContain("no permissions");
-    expect(text.stdout).toContain(`nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
+    expect(text.stdout).toContain("add: nipmod add alpha-agent --online");
+    expect(text.stdout).not.toContain(`security: nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
   });
 
   test("search ranking boosts exact agent-native matches", async () => {
@@ -441,6 +446,37 @@ describe("nipmod CLI", () => {
     const parsed = JSON.parse(result.stdout) as { data: { packages: Array<{ name: string }> } };
 
     expect(parsed.data.packages.map((pkg) => pkg.name)).toEqual(["policy", "policy-sidecar", "zzz"]);
+  });
+
+  test("search keeps canonical commands as security detail for duplicate names", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-duplicates-"));
+    const firstOwner = generateIdentity().did;
+    const secondOwner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          searchPackageFixture(firstOwner, "duplicate-agent", "tool", 100),
+          searchPackageFixture(secondOwner, "duplicate-agent", "tool", 90)
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const text = await execaNode([
+      "src/cli.ts",
+      "search",
+      "duplicate-agent",
+      "--limit",
+      "1",
+      "--registry",
+      pathToFileURL(registryPath).href
+    ]);
+
+    expect(text.stdout.match(/add: nipmod add duplicate-agent --online/g)?.length).toBe(1);
+    expect(text.stdout).toContain(`security: nipmod add pkg:${firstOwner}/duplicate-agent@0.1.0 --online`);
   });
 
   test("searches multiple registry sources and fails on digest conflicts", async () => {
@@ -590,7 +626,7 @@ describe("nipmod CLI", () => {
       "--include-quarantined"
     ]);
     expect(text.stdout).toContain("blocked: NIPMOD-2026-9001: Quarantine dry-run advisory");
-    expect(text.stdout).not.toContain("install: nipmod add");
+    expect(text.stdout).not.toContain("add: nipmod add");
   });
 
   test("search refuses implicit network access without online mode", async () => {
@@ -1142,6 +1178,373 @@ describe("nipmod CLI", () => {
     } finally {
       await server.close();
     }
+  });
+
+  test("adds a verified registry dependency graph atomically", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-"));
+    const app = join(workspace, "app");
+    const rootDir = join(workspace, "root");
+    const depDir = join(workspace, "dep");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "root-agent", "--dir", rootDir]);
+    await execaNode(["src/cli.ts", "init", "--name", "dep-agent", "--dir", depDir]);
+
+    const rootManifestPath = join(rootDir, "nipmod.json");
+    const rootManifest = JSON.parse(await readFile(rootManifestPath, "utf8")) as {
+      canonical: string;
+      dependencies?: Record<string, string>;
+      publish: { signingKey: string };
+      version: string;
+    };
+    rootManifest.dependencies = { "dep-agent": "^0.1.0" };
+    await writeFile(rootManifestPath, `${JSON.stringify(rootManifest, null, 2)}\n`);
+
+    const rootPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", rootDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const depPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", depDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const depManifest = JSON.parse(await readFile(join(depDir, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const rootServer = await serveBundle(await readFile(rootPack.data.path), rootManifest.canonical, rootManifest.version);
+    const depServer = await serveBundle(await readFile(depPack.data.path), depManifest.canonical, depManifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: rootManifest.canonical,
+          dependencies: { "dep-agent": "^0.1.0" },
+          digest: rootPack.data.digest,
+          owner: rootManifest.publish.signingKey,
+          resolved: rootServer.resolved,
+          sourceRepo: rootServer.sourceRepo
+        },
+        {
+          canonical: depManifest.canonical,
+          digest: depPack.data.digest,
+          owner: depManifest.publish.signingKey,
+          resolved: depServer.resolved,
+          sourceRepo: depServer.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+      const result = await execaNode([
+        "src/cli.ts",
+        "add",
+        "root-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { graphPackageCount: number; lockfileChanged: boolean; package: string; version: string };
+      };
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      const rootKey = `${rootManifest.canonical}@${rootManifest.version}`;
+      const depKey = `${depManifest.canonical}@${depManifest.version}`;
+
+      expect(parsed.data).toMatchObject({
+        graphPackageCount: 2,
+        lockfileChanged: true,
+        package: rootManifest.canonical,
+        version: rootManifest.version
+      });
+      expect(lockfile.root.dependencies).toEqual({ "root-agent": "latest" });
+      expect(Object.keys(lockfile.packages).sort()).toEqual([depKey, rootKey].sort());
+      expect(lockfile.snapshots[rootKey].dependencies).toEqual({ "dep-agent": depKey });
+      expect(lockfile.snapshots[depKey].dependencies).toEqual({});
+      await expect(readFile(join(app, lockfile.packages[rootKey].storePath))).resolves.toBeTruthy();
+      await expect(readFile(join(app, lockfile.packages[depKey].storePath))).resolves.toBeTruthy();
+    } finally {
+      await rootServer.close();
+      await depServer.close();
+    }
+  }, 30_000);
+
+  test("add blocks the whole graph when a dependency trust report fails", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-block-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const depOwner = generateIdentity().did;
+    const canonical = `pkg:${owner}/root-agent`;
+    const depCanonical = `pkg:${depOwner}/dep-agent`;
+    const registryPath = join(workspace, "registry.json");
+    const graphRegistry = cliGraphRegistry([
+      {
+        canonical,
+        dependencies: { "dep-agent": "^0.1.0" },
+        digest: "a".repeat(64),
+        owner
+      },
+      {
+        canonical: depCanonical,
+        digest: "b".repeat(64),
+        owner: depOwner,
+        trustEvidenceOverrides: { bundleSignatureVerified: false }
+      }
+    ]);
+    await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "add",
+      "root-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--allow-custom-roots",
+      "--log-id",
+      graphRegistry.log.treeHead.logId,
+      "--witness",
+      graphRegistry.witness.witness,
+      "--dir",
+      app,
+      "--json"
+    ]);
+
+    expect(failed).toMatchObject({
+      data: {
+        plan: {
+          graph: {
+            packageCount: 2
+          },
+          readyToInstall: false
+        }
+      },
+      ok: false
+    });
+    expect(failed.data?.plan?.trustReport.findings).toEqual(expect.arrayContaining(["bundle signature is missing"]));
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("add rejects dependencies injected by registry metadata but absent from signed manifests", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-injected-"));
+    const app = join(workspace, "app");
+    const rootDir = join(workspace, "root");
+    const depDir = join(workspace, "dep");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "root-agent", "--dir", rootDir]);
+    await execaNode(["src/cli.ts", "init", "--name", "dep-agent", "--dir", depDir]);
+    const rootPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", rootDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const depPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", depDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const rootManifest = JSON.parse(await readFile(join(rootDir, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const depManifest = JSON.parse(await readFile(join(depDir, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const rootServer = await serveBundle(await readFile(rootPack.data.path), rootManifest.canonical, rootManifest.version);
+    const depServer = await serveBundle(await readFile(depPack.data.path), depManifest.canonical, depManifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: rootManifest.canonical,
+          dependencies: { "dep-agent": "^0.1.0" },
+          digest: rootPack.data.digest,
+          owner: rootManifest.publish.signingKey,
+          resolved: rootServer.resolved,
+          sourceRepo: rootServer.sourceRepo
+        },
+        {
+          canonical: depManifest.canonical,
+          digest: depPack.data.digest,
+          owner: depManifest.publish.signingKey,
+          resolved: depServer.resolved,
+          sourceRepo: depServer.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+      await expect(
+        execaNode([
+          "src/cli.ts",
+          "add",
+          "root-agent",
+          "--registry",
+          pathToFileURL(registryPath).href,
+          "--allow-custom-roots",
+          "--log-id",
+          graphRegistry.log.treeHead.logId,
+          "--witness",
+          graphRegistry.witness.witness,
+          "--dir",
+          app,
+          "--json"
+        ])
+      ).rejects.toThrow(/not reachable from signed manifests/i);
+      await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rootServer.close();
+      await depServer.close();
+    }
+  }, 30_000);
+
+  test("canonical add stores root intent under package name so uninstall cleans it", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-canonical-root-"));
+    const app = join(workspace, "app");
+    const pkg = join(workspace, "pkg");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "root-agent", "--dir", pkg]);
+    const pack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const server = await serveBundle(await readFile(pack.data.path), manifest.canonical, manifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: pack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: server.resolved,
+          sourceRepo: server.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+      await execaNode([
+        "src/cli.ts",
+        "add",
+        `${manifest.canonical}@${manifest.version}`,
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      let lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      expect(lockfile.root.dependencies).toEqual({ "root-agent": "0.1.0" });
+
+      await execaNode(["src/cli.ts", "uninstall", "root-agent", "--dir", app, "--json"]);
+      lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      expect(lockfile.root.dependencies).toEqual({});
+    } finally {
+      await server.close();
+    }
+  }, 30_000);
+
+  test("add reports dependency policy failures as policy blocks", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-policy-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const depOwner = generateIdentity().did;
+    const canonical = `pkg:${owner}/root-agent`;
+    const depCanonical = `pkg:${depOwner}/dep-agent`;
+    const registryPath = join(workspace, "registry.json");
+    const graphRegistry = cliGraphRegistry([
+      {
+        canonical,
+        dependencies: { "dep-agent": "^0.1.0" },
+        digest: "a".repeat(64),
+        owner
+      },
+      {
+        canonical: depCanonical,
+        digest: "b".repeat(64),
+        owner: depOwner,
+        permissions: { exec: true }
+      }
+    ]);
+    await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "add",
+      "root-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--allow-custom-roots",
+      "--log-id",
+      graphRegistry.log.treeHead.logId,
+      "--witness",
+      graphRegistry.witness.witness,
+      "--profile",
+      "developer-default",
+      "--dir",
+      app,
+      "--json"
+    ]);
+
+    expect(failed).toMatchObject({
+      data: {
+        plan: {
+          policyDecision: {
+            allowed: false
+          },
+          readyToInstall: false
+        }
+      },
+      exitCode: 11,
+      ok: false
+    });
+    expect(failed.data?.plan?.policyDecision?.reasons).toEqual(
+      expect.arrayContaining(["permission exec is blocked by developer-default"])
+    );
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("add plan rejects oversized dependency graphs before trust inspection", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-limit-"));
+    const registryPath = join(workspace, "registry.json");
+    const entries = Array.from({ length: 129 }, (_, index) => {
+      const owner = generateIdentity().did;
+      const name = `graph-agent-${index}`;
+      const nextName = `graph-agent-${index + 1}`;
+      return {
+        canonical: `pkg:${owner}/${name}`,
+        ...(index < 128 ? { dependencies: { [nextName]: "0.1.0" } } : {}),
+        digest: `${index.toString(16).padStart(2, "0")}${"a".repeat(62)}`,
+        owner
+      };
+    });
+    const graphRegistry = cliGraphRegistry(entries);
+    await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+    await expect(
+      execaNode([
+        "src/cli.ts",
+        "add",
+        "graph-agent-0",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--dir",
+        workspace,
+        "--json"
+      ])
+    ).rejects.toThrow(/dependency graph exceeds 128 packages/);
   });
 
   test("add rejects registry file bundle URLs before mutating the lockfile", async () => {
@@ -2318,6 +2721,123 @@ function cliRegistry(
   };
 }
 
+function cliGraphRegistry(
+  entries: Array<{
+    canonical: string;
+    dependencies?: Record<string, string>;
+    digest: string;
+    owner: string;
+    permissions?: Partial<{
+      env: number;
+      exec: boolean;
+      filesystem: number;
+      mcpTools: number;
+      network: number;
+      postinstall: boolean;
+      secrets: number;
+    }>;
+    resolved?: string;
+    sourceRepo?: string;
+    trustEvidenceOverrides?: Partial<Record<string, boolean>>;
+  }>
+) {
+  const logIdentity = generateIdentity();
+  const witnessIdentity = generateIdentity();
+  const leaves = entries.map((entry) => ({
+    artifactSha256: entry.digest,
+    eventHash: createHash("sha256").update(`${entry.canonical}@0.1.0`).digest("hex"),
+    package: entry.canonical,
+    publisher: entry.owner,
+    version: "0.1.0"
+  }));
+  const log = createTransparencyLogFromLeaves(leaves, logIdentity, "2026-05-16T03:53:00.000Z");
+  const witness = signWitnessStatement(log.treeHead, witnessIdentity);
+  const packages = entries.map((entry, index) => {
+    const proofEntry = log.entries[index];
+    if (!proofEntry) {
+      throw new Error("missing graph transparency entry");
+    }
+    const name = entry.canonical.split("/").at(-1);
+    if (!name) {
+      throw new Error("missing graph package name");
+    }
+    const ownerSegment = entry.owner.slice("did:key:".length);
+    const evidence = {
+      artifactDigestVerified: true,
+      bundleSignatureVerified: true,
+      immutableSnapshotMatched: true,
+      publisherMatchesCanonical: true,
+      releaseEventSigned: true,
+      sourceProvenanceVerified: true,
+      transparencyLogIncluded: true,
+      transparencyLogVerified: true,
+      ...entry.trustEvidenceOverrides
+    };
+    return {
+      canonical: entry.canonical,
+      ...(entry.dependencies ? { dependencies: entry.dependencies } : {}),
+      description: "Inspectable agent package",
+      digest: entry.digest,
+      name,
+      owner: entry.owner,
+      permissions: {
+        env: 0,
+        exec: false,
+        filesystem: 0,
+        mcpTools: 0,
+        network: 0,
+        postinstall: false,
+        secrets: 0,
+        ...entry.permissions
+      },
+      proof: {
+        checkpointUrl: "/transparency/checkpoint.json",
+        eventHash: proofEntry.leaf.eventHash,
+        leafHash: proofEntry.leafHash,
+        leafIndex: proofEntry.leafIndex,
+        leafUrl: `/transparency/leaves/${proofEntry.leafHash}.json`,
+        proofUrl: `/transparency/proofs/${proofEntry.leafHash}.json`,
+        rootHash: log.treeHead.rootHash,
+        subject: `${entry.canonical}@0.1.0`,
+        treeSize: log.treeHead.treeSize,
+        type: "dev.nipmod.registry.proof.v1",
+        witnesses: [witness.witness],
+        witnessUrls: [`/transparency/witnesses/${witness.witness}.json`]
+      },
+      publisher: entry.owner,
+      resolved:
+        entry.resolved ??
+        `https://node.nipmod.com/api/v1/repos/${ownerSegment}/${name}/blob/releases/0.1.0/bundle.nipmod`,
+      sourceCommit: "a".repeat(40),
+      sourceTag: "v0.1.0",
+      sourceRepo: entry.sourceRepo ?? `https://node.nipmod.com/${ownerSegment}/${name}.git`,
+      trust: {
+        evidence,
+        level: "verified",
+        score: 100
+      },
+      type: "skill",
+      version: "0.1.0"
+    };
+  });
+
+  return {
+    log,
+    registry: {
+      formatVersion: 1,
+      generatedAt: "2026-05-16T03:32:00.000Z",
+      packages,
+      skipped: [],
+      source: "https://node.nipmod.com",
+      transparencyLog: {
+        ...log,
+        witnesses: [witness]
+      }
+    },
+    witness
+  };
+}
+
 function cliCompatibilityReceipt(canonical: string, owner: string, digest: string): Record<string, unknown> {
   const name = canonical.split("/").at(-1) ?? "package";
   return {
@@ -2433,6 +2953,7 @@ async function expectCliJsonFailure(args: string[]): Promise<{
       version?: string;
     }>;
     plan?: {
+      graph?: { packageCount: number };
       policyDecision?: { allowed: boolean; profile: string; reasons: string[] };
       readyToInstall: boolean;
       trustReport: { findings: string[] };

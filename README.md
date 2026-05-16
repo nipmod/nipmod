@@ -27,7 +27,7 @@ Current implementation status:
 - Public Gitlawb publish/install against `https://node.nipmod.com`
 - `nipmod doctor` setup checks for Git, Gitlawb helper and node health
 - Public installer at `https://nipmod.com/install.sh`
-- Standalone CLI release artifact at `/releases/nipmod-0.1.23.tgz`
+- Standalone CLI release artifact at `/releases/nipmod-0.1.26.tgz`
 - Detached Ed25519 release signatures for CLI artifacts
 - Signed public transparency log under `/transparency/*`
 - Live independent witness at `https://nipmod-witness.fly.dev`
@@ -47,11 +47,24 @@ Current implementation status:
 
 ## Current CLI flow
 
+Standard install:
+
+```bash
+curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+```
+
+Manual verification:
+
 ```bash
 curl -fLO https://nipmod.com/install.sh
 curl -fLO https://nipmod.com/install.sh.sha256
 shasum -a 256 -c install.sh.sha256
 bash install.sh
+```
+
+First package:
+
+```bash
 nipmod doctor --online
 nipmod search gitlawb --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online

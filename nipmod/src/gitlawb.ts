@@ -614,8 +614,8 @@ export async function doctorGitlawb(options: DoctorGitlawbOptions = {}): Promise
   const helperCheck: DoctorCheck = {
     id: "gitlawb-helper",
     label: "Gitlawb helper",
-    status: helper.ok ? "ok" : "fail",
-    message: helper.ok && helper.path ? `git-remote-gitlawb found at ${helper.path}` : helper.message
+    status: helper.ok ? "ok" : "warn",
+    message: helper.ok && helper.path ? `git-remote-gitlawb found at ${helper.path}` : "publish needs git-remote-gitlawb; install and add still work"
   };
   if (helper.ok) {
     if (helper.source) {

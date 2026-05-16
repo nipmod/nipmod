@@ -147,7 +147,7 @@ async function verifyProduction() {
       Array.isArray(payload.advisories),
     "advisory feed failed"
   );
-  await assertText("https://nipmod.com", (text) => text.includes("shasum -a 256 -c install.sh.sha256"), "homepage install flow missing");
+  await assertText("https://nipmod.com", (text) => text.includes("curl -fsSLO https://nipmod.com/install.sh && bash install.sh"), "homepage install flow missing");
   await assertText(
     "https://nipmod.com/trust",
     (text) =>

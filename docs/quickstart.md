@@ -5,15 +5,21 @@ This is the public first run path. It is designed for a clean macOS or Linux wor
 ## Install
 
 ```sh
-curl -fL https://nipmod.com/install.sh -o install.sh
-curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256
+curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+```
+
+Manual verification:
+
+```sh
+curl -fLO https://nipmod.com/install.sh
+curl -fLO https://nipmod.com/install.sh.sha256
 shasum -a 256 -c install.sh.sha256
 bash install.sh
 ```
 
 Expected result:
 
-- The checksum command prints `install.sh: OK`.
+- The installer finishes and prints the next `nipmod` command.
 - `nipmod help` prints the command list and exit codes.
 
 ## Check the environment
@@ -26,7 +32,7 @@ Expected result:
 
 - CLI is available.
 - Public registry is reachable.
-- Gitlawb helper is present or the output explains how to install it with a verified checksum.
+- Missing publish setup is shown as a warning, not an install blocker.
 
 ## Find a package
 

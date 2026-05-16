@@ -19,7 +19,7 @@ const tracks = [
     title: "First install loop",
     text: "Install, run doctor, search, inspect, add and audit a verified package.",
     command:
-      "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod audit --online"
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod audit --online"
   },
   {
     label: "Publish",

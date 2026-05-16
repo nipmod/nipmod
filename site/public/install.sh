@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${NIPMOD_VERSION:-0.1.23}"
+VERSION="${NIPMOD_VERSION:-0.1.26}"
 BASE_URL="${NIPMOD_BASE_URL:-https://nipmod.com}"
 PACKAGE_NAME="${NIPMOD_PACKAGE_NAME:-nipmod-${VERSION}.tgz}"
 PACKAGE_URL="${NIPMOD_PACKAGE_URL:-${BASE_URL}/releases/${PACKAGE_NAME}}"
@@ -260,8 +260,8 @@ if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && !
     sh "$helper_script"
   fi
 elif [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && ! command -v git-remote-gitlawb >/dev/null 2>&1; then
-  echo "Gitlawb helper not installed"
-  echo "Publish needs git-remote-gitlawb; install still works"
+  echo "Gitlawb publish helper not installed"
+  echo "Install and add work. Publish needs git-remote-gitlawb."
 fi
 
 if [ "$NIPMOD_DRY_RUN" != "1" ]; then
@@ -270,8 +270,9 @@ fi
 
 echo ""
 echo "Installed nipmod"
-echo "Run:"
-echo "  nipmod doctor"
+echo "Next:"
+echo "  nipmod doctor --online"
+echo "  nipmod search gitlawb --online"
 
 case ":$PATH:" in
   *":$NIPMOD_BIN_DIR:"*) ;;

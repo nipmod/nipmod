@@ -7,10 +7,7 @@ nipmod adoption is measured by real install, inspect, add, audit and publish dry
 Ask each user to run:
 
 ```bash
-curl -fL https://nipmod.com/install.sh -o install.sh
-curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256
-shasum -a 256 -c install.sh.sha256
-bash install.sh
+curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 nipmod doctor --online
 nipmod search gitlawb --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online

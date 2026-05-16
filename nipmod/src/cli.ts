@@ -497,6 +497,7 @@ async function addCommand(args: string[]): Promise<CliResult> {
     ok: true,
     data: {
       message: result.lockfileChanged ? "added package" : "package already installed",
+      ...(plan.graph ? { graphPackageCount: plan.graph.packageCount } : {}),
       integrity: plan.integrity,
       lockfileChanged: result.lockfileChanged,
       package: plan.package.canonical,
@@ -901,9 +902,11 @@ function formatSearch(result: RegistrySearchResult): string {
   const lines = [`nipmod search: ${result.total} package${result.total === 1 ? "" : "s"}`];
   for (const pkg of result.packages) {
     lines.push(`${pkg.name} ${pkg.version} ${pkg.trust} ${pkg.permissionSummary}`);
-    lines.push(pkg.canonical);
     if (pkg.install) {
-      lines.push(`install: ${pkg.install}`);
+      lines.push(`add: ${pkg.install}`);
+      if (pkg.nameAmbiguous && pkg.canonicalInstall) {
+        lines.push(`security: ${pkg.canonicalInstall}`);
+      }
     } else if (pkg.installBlockedReason) {
       lines.push(`blocked: ${pkg.installBlockedReason}`);
     }
@@ -1067,10 +1070,9 @@ function formatDoctor(doctor: DoctorGitlawbResult): string {
   const lines = [`nipmod ${doctor.ready ? "ready" : "needs setup"}`];
   for (const check of doctor.checks) {
     lines.push(`${check.status.toUpperCase()} ${check.label}: ${check.message}`);
-  }
-
-  if (!doctor.ready) {
-    lines.push(doctor.installCommand);
+    if (check.status !== "ok" && check.detail) {
+      lines.push(`  ${check.detail}`);
+    }
   }
 
   return lines.join("\n");

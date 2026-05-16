@@ -447,6 +447,31 @@ describe("Gitlawb integration", () => {
     ]);
   });
 
+  test("treats a missing Gitlawb helper as publish-only setup", async () => {
+    const helperDir = await mkdtemp(join(tmpdir(), "nipmod-doctor-no-helper-"));
+    const gitPath = join(helperDir, "git");
+    await writeFile(gitPath, "#!/bin/sh\nexit 0\n");
+    await chmod(gitPath, 0o755);
+
+    const doctor = await doctorGitlawb({
+      offline: true,
+      env: { PATH: helperDir },
+      nodeVersion: "v22.0.0"
+    });
+
+    expect(doctor.ready).toBe(true);
+    expect(doctor.checks.map((check) => `${check.id}:${check.status}`)).toEqual([
+      "node:ok",
+      "git:ok",
+      "gitlawb-helper:warn",
+      "gitlawb-node:warn"
+    ]);
+    expect(doctor.checks.find((check) => check.id === "gitlawb-helper")).toMatchObject({
+      detail: expect.stringContaining("verified checksum"),
+      message: "publish needs git-remote-gitlawb; install and add still work"
+    });
+  });
+
   test("publishes new versions by cloning an existing Gitlawb repo first", async () => {
     const signedProject = await createSignedSkillProject();
     const helperDir = await mkdtemp(join(tmpdir(), "nipmod-helper-"));

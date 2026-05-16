@@ -9,7 +9,7 @@ export const homeContent = {
   primaryAction: "Install",
   secondaryAction: "Updates on X",
   commands: [
-    "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "nipmod doctor --online",
     "mkdir -p nipmod-demo && cd nipmod-demo",
     "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
@@ -33,13 +33,12 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install",
-      text: "Fetch the installer and verify the checksum first.",
-      command:
-        "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh"
+      text: "Run the short installer. Use the README checksum path when you want manual verification.",
+      command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     },
     {
       label: "Check",
-      text: "Confirm the CLI, Gitlawb helper, node and registry are reachable.",
+      text: "Confirm the CLI, registry and any publish setup.",
       command: "nipmod doctor --online"
     },
     {

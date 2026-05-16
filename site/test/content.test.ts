@@ -56,7 +56,7 @@ describe("home content", () => {
   test("states what people can do on the site", () => {
     expect(homeContent.usage.map((item) => item.label)).toEqual(["Terminal", "Website", "Codex"]);
     expect(homeContent.commands).toEqual([
-      "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
       "nipmod doctor --online",
       "mkdir -p nipmod-demo && cd nipmod-demo",
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
@@ -80,7 +80,9 @@ describe("home content", () => {
       "Audit",
       "Publish"
     ]);
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Install")?.command).toContain("install.sh.sha256");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Install")?.command).toBe(
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
+    );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Inspect")?.command).toMatch(
       /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --online$/

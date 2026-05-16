@@ -16,11 +16,11 @@ const releaseSignaturePath = `${releasePath}.sig`;
 const doctorSuccess = {
   ok: true,
   data: {
-    ready: false,
+    ready: true,
     checks: [
       { id: "node", label: "Node.js", status: "ok", message: "Node v22.0.0" },
       { id: "git", label: "Git", status: "ok", message: "git found" },
-      { id: "gitlawb-helper", label: "Gitlawb helper", status: "fail", message: "helper missing" },
+      { id: "gitlawb-helper", label: "Gitlawb helper", status: "warn", message: "publish helper missing" },
       { id: "gitlawb-node", label: "Gitlawb node", status: "warn", message: "skipped" }
     ]
   }
