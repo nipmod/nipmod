@@ -27,7 +27,7 @@ export default function QuickstartPage() {
           A first run path for agents and developers who want useful packages with proof before workspace mutation.
         </p>
         <div className="actions" aria-label="Quickstart actions">
-          <a className="button button-primary" href="/install.sh">
+          <a className="button button-primary" href="#install">
             Install
           </a>
           <a className="button button-ghost" href="/proof">
@@ -38,7 +38,7 @@ export default function QuickstartPage() {
 
       <section className="quickstart-grid" aria-label="Quickstart steps">
         {homeContent.quickstartSteps.map((step, index) => (
-          <article className="quickstart-card" key={step.label}>
+          <article className="quickstart-card" id={step.label === "Install" ? "install" : undefined} key={step.label}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{step.label}</h2>
             <p>{step.text}</p>

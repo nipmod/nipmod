@@ -4,6 +4,7 @@ test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Verifiable packages for agents" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Security" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Install" }).first()).toHaveAttribute("href", "/quickstart#install");
 
   await page.getByLabel("Search packages").fill("repo");
   await page.getByRole("button", { name: "Search" }).click();
@@ -24,15 +25,27 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
 test("trust and security proof links are public", async ({ page }) => {
   await page.goto("/trust");
   await expect(page.getByRole("heading", { name: "Current public roots" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "https://nipmod.com/security" })).toBeVisible();
+  await page.getByRole("link", { name: "Checkpoint" }).click();
+  await expect(page).toHaveURL(/\/evidence#checkpoint/);
+  await expect(page.getByRole("heading", { name: "Proof humans can read." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Checkpoint" })).toBeVisible();
 
   await page.goto("/security");
   await expect(page.getByRole("heading", { name: "Report with proof." })).toBeVisible();
-  await expect(page.getByRole("link", { name: "security.txt" })).toHaveAttribute("href", "/.well-known/security.txt");
+  await expect(page.getByRole("link", { name: "security.txt" })).toHaveAttribute("href", "/evidence#security");
 
   const response = await page.request.get("/.well-known/security.txt");
   await expect(response).toBeOK();
   await expect(response.text()).resolves.toContain("Policy: https://nipmod.com/security");
+});
+
+test("package evidence links stay on the human site", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#registry .package-card").first().getByRole("link", { name: "Evidence" }).click();
+
+  await expect(page).toHaveURL(/\/evidence\/package\/.*#package-proof/);
+  await expect(page.getByRole("heading", { name: "Proof humans can read." })).toBeVisible();
+  await expect(page.getByText("Open raw data").first()).toBeVisible();
 });
 
 test("launch page exposes adoption, review and multi source paths", async ({ page }) => {

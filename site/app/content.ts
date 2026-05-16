@@ -3,7 +3,7 @@ export const homeContent = {
   headline: "Verifiable packages for agents",
   lead: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
   links: {
-    install: "/install.sh",
+    install: "/quickstart#install",
     x: "https://x.com/Nipmod"
   },
   primaryAction: "Install",

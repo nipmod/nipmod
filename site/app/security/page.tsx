@@ -40,10 +40,10 @@ export default function SecurityPage() {
           install surfaces when a package becomes risky.
         </p>
         <div className="actions" aria-label="Security actions">
-          <a className="button button-primary" href="/.well-known/security.txt">
+          <a className="button button-primary" href="/evidence#security">
             security.txt
           </a>
-          <a className="button button-ghost" href="/advisories.json">
+          <a className="button button-ghost" href="/evidence#advisories">
             Advisories
           </a>
           <a className="button button-ghost" href="https://x.com/Nipmod" rel="noreferrer" target="_blank">

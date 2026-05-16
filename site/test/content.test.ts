@@ -69,9 +69,9 @@ describe("home content", () => {
     ]);
   });
 
-  test("links to the installer script", () => {
+  test("links to the human install flow", () => {
     expect(homeContent.primaryAction).toBe("Install");
-    expect(homeContent.links.install).toBe("/install.sh");
+    expect(homeContent.links.install).toBe("/quickstart#install");
   });
 
   test("exposes a complete first run path", () => {

@@ -58,7 +58,7 @@ export default function LaunchPage() {
           independent reviewers running the same proof paths.
         </p>
         <div className="actions" aria-label="Launch actions">
-          <a className="button button-primary" href="/install.sh">
+          <a className="button button-primary" href="/quickstart#install">
             Install
           </a>
           <a className="button button-ghost" href="/package">

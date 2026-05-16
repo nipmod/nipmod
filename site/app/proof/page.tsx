@@ -25,13 +25,13 @@ export default function ProofPage() {
         <h1 id="proof-title">{proofContent.headline}</h1>
         <p className="lead">{proofContent.lead}</p>
         <div className="actions" aria-label="Proof actions">
-          <a className="button button-primary" href="/install.sh">
+          <a className="button button-primary" href="/quickstart#install">
             Install
           </a>
           <a className="button button-ghost" href="/trust">
             Trust
           </a>
-          <a className="button button-ghost" href={proofContent.transcript}>
+          <a className="button button-ghost" href="/evidence#transcript">
             Transcript
           </a>
         </div>

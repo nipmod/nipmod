@@ -671,6 +671,7 @@ h1 {
   gap: 12px;
   min-width: 0;
   padding: 18px;
+  scroll-margin-top: 96px;
 }
 
 .quickstart-card span {
@@ -1044,6 +1045,10 @@ h1 {
   margin: 0;
 }
 
+.evidence-row {
+  scroll-margin-top: 96px;
+}
+
 .pin-list {
   display: grid;
   margin: 0;
@@ -1071,20 +1076,35 @@ h1 {
   color: var(--text);
   font-family: "SF Mono", "Roboto Mono", ui-monospace, monospace;
   font-size: 12px;
+  display: grid;
+  gap: 8px;
   line-height: 1.5;
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-.pin-list a {
+.pin-list a,
+.data-link {
   border-radius: 8px;
   text-decoration: underline;
   text-decoration-color: rgba(255, 255, 255, 0.24);
   text-underline-offset: 3px;
 }
 
-.pin-list a:hover {
+.pin-list a:hover,
+.data-link:hover {
   text-decoration-color: rgba(255, 255, 255, 0.72);
+}
+
+.data-link {
+  color: var(--muted);
+  display: inline-flex;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    sans-serif;
+  font-size: 12px;
+  font-weight: 760;
+  justify-self: start;
+  margin-top: 10px;
 }
 
 @media (max-width: 820px) {

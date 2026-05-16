@@ -26,7 +26,7 @@ export default function PackagePage() {
         <h1 id="package-title">{homeContent.repoToPackage.headline}</h1>
         <p className="lead">{homeContent.repoToPackage.lead}</p>
         <div className="actions" aria-label="Package actions">
-          <a className="button button-primary" href="/install.sh">
+          <a className="button button-primary" href="/quickstart#install">
             Install
           </a>
           <a className="button button-ghost" href="/quickstart">

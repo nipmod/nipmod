@@ -242,7 +242,7 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
       {receipts.length > 0 ? (
         <div className="compatibility-row" aria-label={`${pkg.name} compatibility receipts`}>
           {receipts.map((receipt) => (
-            <a href={receipt.receiptUrl} key={receipt.id}>
+            <a href={packageEvidenceHref(pkg, "compatibility")} key={receipt.id}>
               {receipt.label}
             </a>
           ))}
@@ -259,22 +259,14 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
         <a href={pkg.sourceRepo} rel="noreferrer" target="_blank">
           Repo
         </a>
-        <a href={pkg.resolved} rel="noreferrer" target="_blank">
-          Bundle
-        </a>
-        {pkg.proof ? (
-          <a href={pkg.proof.proofUrl} rel="noreferrer" target="_blank">
-            Proof
-          </a>
-        ) : null}
-        {pkg.proof?.witnessUrls?.[0] ? (
-          <a href={pkg.proof.witnessUrls[0]} rel="noreferrer" target="_blank">
-            Witness
-          </a>
-        ) : null}
+        <a href={packageEvidenceHref(pkg, "package-proof")}>Evidence</a>
       </div>
     </article>
   );
+}
+
+function packageEvidenceHref(pkg: RegistryPackage, anchor: string): string {
+  return `/evidence/package/${encodeURIComponent(pkg.name)}#${anchor}`;
 }
 
 function firstParam(value: string | string[] | undefined): string {

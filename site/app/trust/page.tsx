@@ -43,13 +43,13 @@ export default function TrustPage() {
           {summary.ready ? "Verified registry" : "Review required"}
         </div>
         <div className="actions" aria-label="Machine discovery">
-          <a className="button button-primary" href="/.well-known/nipmod.json">
+          <a className="button button-primary" href="/evidence#discovery">
             Discovery
           </a>
-          <a className="button button-ghost" href="/registry/packages.json">
+          <a className="button button-ghost" href="/evidence#registry">
             Registry
           </a>
-          <a className="button button-ghost" href="/transparency/checkpoint.json">
+          <a className="button button-ghost" href="/evidence#checkpoint">
             Checkpoint
           </a>
         </div>
@@ -102,8 +102,14 @@ export default function TrustPage() {
             <div key={pin.label}>
               <dt>{pin.label}</dt>
               <dd>
-                <a href={pin.href} rel={pin.href.startsWith("http") ? "noreferrer" : undefined} target={pin.href.startsWith("http") ? "_blank" : undefined}>
-                  {pin.value}
+                <span>{pin.value}</span>
+                <a
+                  className="data-link"
+                  href={pin.href}
+                  rel={pin.href.startsWith("http") ? "noreferrer" : undefined}
+                  target={pin.href.startsWith("http") ? "_blank" : undefined}
+                >
+                  Raw data
                 </a>
               </dd>
             </div>
