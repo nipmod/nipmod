@@ -5,10 +5,23 @@ const DEFAULT_TARGETS = {
   home: "https://nipmod.com",
   nodeHealth: "https://node.nipmod.com/health",
   registry: "https://nipmod.com/registry/packages.json",
+  security: "https://nipmod.com/security",
   trust: "https://nipmod.com/trust"
 };
-const DEFAULT_ITERATIONS = 20;
-const DEFAULT_CONCURRENCY = 4;
+const PROFILES = {
+  default: {
+    concurrency: 12,
+    iterations: 120,
+    timeoutMs: 10_000
+  },
+  launch: {
+    concurrency: 24,
+    iterations: 360,
+    timeoutMs: 10_000
+  }
+};
+const DEFAULT_ITERATIONS = PROFILES.default.iterations;
+const DEFAULT_CONCURRENCY = PROFILES.default.concurrency;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_P95_MS = 2_500;
 
@@ -34,6 +47,8 @@ export async function runLoadSmoke({
     for (const marker of ["Verified registry", "Current public roots", "Release key"]) {
       assertIncludes(trust, marker, `trust page missing ${marker}`);
     }
+    const security = await fetchText(targets.security, timedFetch);
+    assertIncludes(security, "Report with proof", "security page missing report marker");
     return { discoveredLinks: links.length };
   });
 
@@ -107,6 +122,7 @@ export async function runLoadSmoke({
     config: {
       concurrency,
       iterations,
+      profile: inferProfile({ concurrency, iterations, timeoutMs }),
       timeoutMs
     },
     formatVersion: 1,
@@ -210,8 +226,51 @@ function assertIncludes(text, marker, message) {
   }
 }
 
+function numberFromEnv(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function optionValue(name) {
+  const prefix = `${name}=`;
+  const inline = process.argv.find((arg) => arg.startsWith(prefix));
+  if (inline) {
+    return inline.slice(prefix.length);
+  }
+  const index = process.argv.indexOf(name);
+  if (index !== -1) {
+    return process.argv[index + 1];
+  }
+  return undefined;
+}
+
+function configFromCli() {
+  const profileName = optionValue("--profile") ?? process.env.NIPMOD_LOAD_PROFILE ?? "default";
+  const profile = PROFILES[profileName];
+  if (!profile) {
+    throw new Error(`unknown load profile: ${profileName}`);
+  }
+  return {
+    concurrency: numberFromEnv(optionValue("--concurrency") ?? process.env.NIPMOD_LOAD_CONCURRENCY, profile.concurrency),
+    iterations: numberFromEnv(optionValue("--iterations") ?? process.env.NIPMOD_LOAD_ITERATIONS, profile.iterations),
+    timeoutMs: numberFromEnv(optionValue("--timeout-ms") ?? process.env.NIPMOD_LOAD_TIMEOUT_MS, profile.timeoutMs)
+  };
+}
+
+function inferProfile(config) {
+  for (const [name, profile] of Object.entries(PROFILES)) {
+    if (profile.concurrency === config.concurrency && profile.iterations === config.iterations && profile.timeoutMs === config.timeoutMs) {
+      return name;
+    }
+  }
+  return "custom";
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const result = await runLoadSmoke();
+  const result = await runLoadSmoke(configFromCli());
   console.log(JSON.stringify(result, null, 2));
   if (!result.ok) {
     process.exitCode = 1;

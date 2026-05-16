@@ -32,13 +32,16 @@ curl -fsS https://node.nipmod.com/health
 curl -fsS https://nipmod-witness.fly.dev/health
 curl -fsS https://nipmod.com/registry/packages.json
 curl -fsS https://nipmod.com/.well-known/nipmod.json
+curl -fsS https://nipmod.com/.well-known/security.txt
+curl -fsS https://nipmod.com/security
 curl -fsS https://nipmod.com/advisories.json
 vercel inspect https://nipmod.com --timeout 120s
 fly status --app nipmod-gitlawb-node-v2
 fly status --app nipmod-witness
 curl -i -X POST https://nipmod-witness.fly.dev/run
 node tools/prod-synthetic-monitor.mjs
-node tools/prod-load-smoke.mjs
+node tools/prod-load-smoke.mjs --profile launch
+node tools/supply-chain-check.mjs
 node tools/restore-drill.mjs
 node tools/node-edge-resilience-smoke.mjs
 node tools/verify-all.mjs --prod
@@ -51,6 +54,7 @@ The registry is public-ready only when:
 - unauthenticated `POST /run` fails closed with `401`, `403` or `503`
 - `registry/packages.json` reports `verified/100`
 - `.well-known/nipmod.json` points to the current registry, node, witness, checkpoint, installer and release key
+- `.well-known/security.txt` points to the public security policy and disclosure fallback
 - `advisories.json` is valid JSON with `type: "dev.nipmod.advisories.v1"`
 - `sourceCommit`, `sourceTag` and `sourceProvenanceVerified` are present
 - Vercel deployment status is Ready and aliased to `nipmod.com`
@@ -100,12 +104,18 @@ This does not prove real per-IP rate limits, DID rate limits or aggressive crawl
 It verifies:
 
 - homepage crawler can discover the Trust page
-- registry stays valid under 20 bounded requests
-- node health stays valid under 20 bounded requests
-- Trust page stays valid under 10 bounded requests
+- registry stays valid under the selected bounded request profile
+- node health stays valid under the selected bounded request profile
+- Trust page stays valid under half of the selected bounded request profile
 - p95 latency remains under 2500ms for each checked surface
 
-Default budget is 20 iterations with concurrency 4 and a 10 second request timeout. Run it before public posts and after deploys that touch registry, trust or node health.
+Default budget is 120 iterations with concurrency 12 and a 10 second request timeout. Launch budget is 360 iterations with concurrency 24 and a 10 second request timeout:
+
+```bash
+node tools/prod-load-smoke.mjs --profile launch
+```
+
+Run the launch profile before public posts and after deploys that touch registry, trust, security or node health.
 
 ## Alert Delivery
 
@@ -132,7 +142,7 @@ Current deployable monitor target:
 - health: `https://nipmod-monitor.fly.dev/health`
 - last cycle: `https://nipmod-monitor.fly.dev/last`
 
-The monitor uses `node tools/prod-alert-runner.mjs` every 60 seconds. The default checked in alert URLs hit the public Vercel alert sinks, which prove delivery wiring. For stronger independent paging, replace them with two external destinations before a large launch.
+The monitor uses `node tools/prod-alert-runner.mjs` every 60 seconds. Public `/last` returns only a redacted summary. The full cycle payload must stay in private logs. The Vercel alert sinks are development smoke targets only. A large public launch requires two external destinations outside Vercel and Fly plus separate primary and secondary sink tokens.
 
 ## Restore Drill
 

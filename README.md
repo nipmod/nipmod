@@ -26,6 +26,7 @@ Current implementation status:
 - Signed public transparency log under `/transparency/*`
 - Live independent witness at `https://nipmod-witness.fly.dev`
 - Agent discovery manifest at `https://nipmod.com/.well-known/nipmod.json`
+- Public security policy at `https://nipmod.com/security` and `https://nipmod.com/.well-known/security.txt`
 - Public advisory feed at `https://nipmod.com/advisories.json`
 - `nipmod audit` for installed package lockfiles
 - `nipmod ci` for strict lockfile enforcement in automation
@@ -80,12 +81,14 @@ pnpm --dir site test
 pnpm --dir site registry:verified
 pnpm --dir site build
 pnpm --dir site security:secrets
+node tools/supply-chain-check.mjs
 ```
 
 See `RUNBOOK.md` for deploy, recovery, witness and token-handling procedures.
 See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
 See `docs/community.md` for package expectations, feedback links and founder outreach copy.
+See `SECURITY.md` and `docs/independent-review.md` for disclosure scope and external review readiness.
 See `docs/launch-demo.md` for the public demo script.
 See `docs/ecosystem-packages.md` for the first party package catalog.
 

@@ -24,8 +24,10 @@ describe("production monitor server", () => {
       expect(last).toMatchObject({
         ok: true,
         status: "healthy",
-        type: "dev.nipmod.alert-delivery.v1"
+        type: "dev.nipmod.monitor-last-public.v1"
       });
+      expect(last.runId).toBeUndefined();
+      expect(last.suites).toBeUndefined();
     } finally {
       await server.close();
     }

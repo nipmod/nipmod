@@ -1,0 +1,6 @@
+Contact: https://nipmod.com/security
+Contact: https://x.com/Nipmod
+Expires: 2027-05-16T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://nipmod.com/.well-known/security.txt
+Policy: https://nipmod.com/security

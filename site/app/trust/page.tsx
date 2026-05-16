@@ -95,7 +95,9 @@ export default function TrustPage() {
             { label: "Installer", value: installerHash, href: discovery.install.script },
             { label: "Release key", value: releaseKey, href: discovery.install.release.artifact },
             { label: "Discovery", value: discovery.homepage + "/.well-known/nipmod.json", href: "/.well-known/nipmod.json" },
-            { label: "Advisories", value: discovery.advisories, href: "/advisories.json" }
+            { label: "Advisories", value: discovery.advisories, href: "/advisories.json" },
+            { label: "Security", value: "https://nipmod.com/security", href: "/security" },
+            { label: "Security metadata", value: "https://nipmod.com/.well-known/security.txt", href: "/.well-known/security.txt" }
           ].map((pin) => (
             <div key={pin.label}>
               <dt>{pin.label}</dt>

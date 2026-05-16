@@ -16,6 +16,7 @@ describe("production load smoke", () => {
         home: "https://nipmod.test",
         nodeHealth: "https://node.nipmod.test/health",
         registry: "https://nipmod.test/registry/packages.json",
+        security: "https://nipmod.test/security",
         trust: "https://nipmod.test/trust"
       }
     });
@@ -42,6 +43,7 @@ describe("production load smoke", () => {
         home: "https://nipmod.test",
         nodeHealth: "https://node.nipmod.test/health",
         registry: "https://nipmod.test/registry/packages.json",
+        security: "https://nipmod.test/security",
         trust: "https://nipmod.test/trust"
       }
     });
@@ -62,6 +64,11 @@ function responseFor(url) {
   }
   if (url.endsWith("/trust")) {
     return new Response("<main>Verified registry Current public roots Release key</main>", {
+      headers: { "content-type": "text/html" }
+    });
+  }
+  if (url.endsWith("/security")) {
+    return new Response("<main>Report with proof</main>", {
       headers: { "content-type": "text/html" }
     });
   }

@@ -51,7 +51,9 @@ await run("pnpm", ["--dir", "site", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "typecheck"]);
 await run("pnpm", ["--dir", "site", "build"]);
 await run("pnpm", ["--dir", "nipmod", "build"]);
+await run("pnpm", ["--dir", "site", "test:e2e"], { timeoutMs: 180_000 });
 await run(process.execPath, ["tools/secret-scan.mjs"]);
+await run(process.execPath, ["tools/supply-chain-check.mjs"], { timeoutMs: 120_000 });
 
 await verifyLocalArtifacts();
 await smokeLocalInstaller();
@@ -105,7 +107,7 @@ async function verifyProduction() {
   await run(process.execPath, ["tools/prod-synthetic-monitor.mjs"], { timeoutMs: 30_000 });
   await run(process.execPath, ["tools/restore-drill.mjs"], { timeoutMs: 30_000 });
   await run(process.execPath, ["tools/prod-alert-runner.mjs"], { timeoutMs: 60_000 });
-  await run(process.execPath, ["tools/prod-load-smoke.mjs"], { timeoutMs: 60_000 });
+  await run(process.execPath, ["tools/prod-load-smoke.mjs", "--profile", "launch"], { timeoutMs: 120_000 });
   await run(process.execPath, ["tools/node-edge-resilience-smoke.mjs"], { timeoutMs: 30_000 });
   await assertJson("https://node.nipmod.com/health", (payload) => payload.status === "ok", "node health failed");
   await assertUnauthenticatedReceivePackBlocked();

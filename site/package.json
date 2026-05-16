@@ -8,8 +8,10 @@
     "dev": "next dev",
     "prebuild": "node scripts/verify-registry-before-build.mjs",
     "registry:verified": "node ../tools/rebuild-verified-registry.mjs",
+    "security:deps": "pnpm audit --audit-level high",
     "security:secrets": "node ../tools/secret-scan.mjs",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -18,6 +20,7 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^24.12.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

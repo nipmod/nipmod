@@ -60,7 +60,7 @@ export async function startMonitorServer({
         sendJson(response, 404, { error: "no completed monitor cycle yet", ok: false });
         return;
       }
-      sendJson(response, state.lastCycle);
+      sendJson(response, redactedCycle(state.lastCycle));
       return;
     }
 
@@ -82,6 +82,19 @@ export async function startMonitorServer({
     },
     state,
     url: serverUrl(server)
+  };
+}
+
+function redactedCycle(cycle) {
+  return {
+    checkedAt: cycle.checkedAt,
+    deliverySummary: cycle.deliverySummary,
+    formatVersion: 1,
+    mode: cycle.mode,
+    ok: cycle.ok,
+    status: cycle.status,
+    summary: cycle.summary,
+    type: "dev.nipmod.monitor-last-public.v1"
   };
 }
 

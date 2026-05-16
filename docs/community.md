@@ -85,3 +85,4 @@ Follow up matrix:
 nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
 
 Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. Send the first report path through X DM to https://x.com/Nipmod until a dedicated security mailbox is published.
+Use the public security policy at https://nipmod.com/security and the well known metadata at https://nipmod.com/.well-known/security.txt. X is the fallback contact, not the only disclosure path.

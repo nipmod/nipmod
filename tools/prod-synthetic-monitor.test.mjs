@@ -15,10 +15,11 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 12, total: 12 });
+    expect(result.summary).toEqual({ fail: 0, pass: 13, total: 13 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
+      "security_disclosure",
       "discovery_manifest",
       "deploy_drift",
       "release_artifacts",
@@ -222,6 +223,8 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
     registry: "https://nipmod.test/registry/packages.json",
+    security: "https://nipmod.test/security",
+    securityTxt: "https://nipmod.test/.well-known/security.txt",
     trust: "https://nipmod.test/trust",
     witnessHealth: "https://witness.nipmod.test/health",
     witnessRun: "https://witness.nipmod.test/run"
@@ -287,6 +290,10 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
     [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key"),
+    [`GET ${endpoints.security}`]: textResponse("Report with proof No central deletion"),
+    [`GET ${endpoints.securityTxt}`]: textResponse(
+      `Contact: https://nipmod.test/security\nCanonical: ${endpoints.securityTxt}\nPolicy: ${endpoints.security}`
+    ),
     [`GET ${endpoints.discovery}`]: jsonResponse(discovery),
     [`GET ${endpoints.registry}`]: jsonResponse(registryFixture(checkpoint, registryPackagePatch)),
     [`GET ${endpoints.advisories}`]: bytesResponse(advisoryBytes),

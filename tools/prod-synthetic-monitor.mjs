@@ -15,6 +15,8 @@ const DEFAULT_ENDPOINTS = {
   nodeHealth: "https://node.nipmod.com/health",
   nodeUrl: "https://node.nipmod.com",
   registry: "https://nipmod.com/registry/packages.json",
+  security: "https://nipmod.com/security",
+  securityTxt: "https://nipmod.com/.well-known/security.txt",
   trust: "https://nipmod.com/trust",
   witnessHealth: "https://nipmod-witness.fly.dev/health",
   witnessRun: "https://nipmod-witness.fly.dev/run"
@@ -50,6 +52,16 @@ export async function runSyntheticMonitor({
       assertIncludes(text, marker, `trust page missing ${marker}`);
     }
     return { url: endpoints.trust };
+  });
+
+  await runCheck(checks, "security_disclosure", async () => {
+    const page = await fetchText(endpoints.security, timedFetch);
+    assertIncludes(page, "Report with proof", "security page missing disclosure marker");
+    assertIncludes(page, "No central deletion", "security page missing decentralized control marker");
+    const securityTxt = await fetchText(endpoints.securityTxt, timedFetch);
+    assertIncludes(securityTxt, `Canonical: ${endpoints.securityTxt}`, "security.txt canonical mismatch");
+    assertIncludes(securityTxt, `Policy: ${endpoints.security}`, "security.txt policy mismatch");
+    return { policy: endpoints.security, securityTxt: endpoints.securityTxt };
   });
 
   await runCheck(checks, "discovery_manifest", async () => {
