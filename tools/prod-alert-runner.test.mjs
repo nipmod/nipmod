@@ -100,6 +100,30 @@ describe("production alert runner", () => {
     expect(JSON.stringify(result)).not.toContain("alerts.example.test");
   });
 
+  test("uses destination specific bearer tokens without leaking them", async () => {
+    const deliveries = [];
+    const result = await runAlertCycle({
+      bearerToken: "fallback-token",
+      destinations: [
+        { bearerToken: "primary-token", url: "https://alerts.example.test/primary" },
+        { bearerToken: "secondary-token", url: "https://alerts.example.test/secondary" }
+      ],
+      fetchFn: recordDeliveries(deliveries),
+      mode: "probe",
+      now,
+      restoreDrillFn: async () => healthySuite("dev.nipmod.restore-drill.v1", "restore"),
+      syntheticMonitorFn: async () => healthySuite("dev.nipmod.prod-synthetic-monitor.v1", "monitor")
+    });
+
+    expect(result.ok).toBe(true);
+    expect(deliveries.map((delivery) => delivery.headers.authorization)).toEqual([
+      "Bearer primary-token",
+      "Bearer secondary-token"
+    ]);
+    expect(JSON.stringify(result)).not.toContain("primary-token");
+    expect(JSON.stringify(result)).not.toContain("secondary-token");
+  });
+
   test("fails closed when a firing alert has no configured destinations", async () => {
     const result = await runAlertCycle({
       destinations: [],

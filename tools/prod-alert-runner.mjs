@@ -135,17 +135,18 @@ async function deliverAlert({ alert, bearerToken, destinations, fetchFn, timeout
 }
 
 async function deliverOne({ alert, bearerToken, destination, fetchFn, timeoutMs }) {
-  const destinationHash = destinationId(destination);
+  const normalizedDestination = normalizeDestination(destination);
+  const destinationHash = destinationId(normalizedDestination.url);
   const headers = {
     "content-type": "application/json",
     "user-agent": "nipmod-alert-runner"
   };
-  const normalizedBearerToken = bearerToken?.trim();
+  const normalizedBearerToken = (normalizedDestination.bearerToken ?? bearerToken)?.trim();
   if (normalizedBearerToken) {
     headers.authorization = `Bearer ${normalizedBearerToken}`;
   }
   try {
-    const response = await fetchFn(destination, {
+    const response = await fetchFn(normalizedDestination.url, {
       body: JSON.stringify(alert),
       headers,
       method: "POST",
@@ -184,12 +185,28 @@ function summarizeDeliveries(deliveries, alert) {
 
 export function readDestinationsFromEnv(env) {
   return [
-    env.NIPMOD_ALERT_PRIMARY_WEBHOOK_URL,
-    env.NIPMOD_ALERT_SECONDARY_WEBHOOK_URL,
+    {
+      bearerToken: env.NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN,
+      url: env.NIPMOD_ALERT_PRIMARY_WEBHOOK_URL
+    },
+    {
+      bearerToken: env.NIPMOD_ALERT_SECONDARY_WEBHOOK_BEARER_TOKEN,
+      url: env.NIPMOD_ALERT_SECONDARY_WEBHOOK_URL
+    },
     ...(env.NIPMOD_ALERT_WEBHOOK_URLS ?? "").split(",")
   ]
-    .map((value) => value?.trim())
-    .filter(Boolean);
+    .map(normalizeDestination)
+    .filter((destination) => destination.url);
+}
+
+function normalizeDestination(destination) {
+  if (typeof destination === "string") {
+    return { url: destination.trim() };
+  }
+  return {
+    bearerToken: destination?.bearerToken?.trim(),
+    url: destination?.url?.trim() ?? ""
+  };
 }
 
 function destinationId(destination) {
