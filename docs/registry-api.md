@@ -23,6 +23,9 @@ Each canonical Gitlawb package should resolve to a document:
   "versions": {
     "1.2.0": {
       "digest": "sha256...",
+      "dependencies": {
+        "agent-logger": "^1.0.0"
+      },
       "publisher": "did:key:z6Mk...",
       "type": "skill",
       "trust": {
@@ -42,6 +45,7 @@ Each canonical Gitlawb package should resolve to a document:
 | `/registry/packages/<encoded-canonical>.json` | Package document with versions and dist tags. |
 | `/registry/packages/<encoded-canonical>/<version>.json` | Exact version metadata. |
 | `/registry/packages/<encoded-canonical>/readme` | README from the signed bundle. |
+| `/registry/packages/<encoded-canonical>/dependencies` | Direct dependency maps and resolved graph preview. |
 | `/registry/packages/<encoded-canonical>/provenance` | Source, release event, transparency and witness proof. |
 
 ## Dist tags
@@ -57,7 +61,7 @@ Dist tags are signed lifecycle events. `latest` can be derived only when no sign
 
 ## Next implementation steps
 
-1. Generate package documents from the verified flat registry.
+1. Generate public package documents from the verified flat registry.
 2. Add signed registry root metadata for package documents.
-3. Teach resolver and inspect to consume package documents.
+3. Teach resolver and inspect to consume package documents for registry driven graph install.
 4. Add lifecycle schemas for dist tag, deprecation, yank, owner and trusted publishing events.

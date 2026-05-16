@@ -4,7 +4,12 @@ import { buildPackageDocuments } from "../src/packument.js";
 describe("package document builder", () => {
   test("groups registry records into npm-style package documents with latest dist tag", () => {
     const documents = buildPackageDocuments([
-      registryPackage("pkg:did:key:z6Mka/example", "example", "1.0.0"),
+      {
+        ...registryPackage("pkg:did:key:z6Mka/example", "example", "1.0.0"),
+        dependencies: {
+          "agent-logger": "^1.0.0"
+        }
+      },
       registryPackage("pkg:did:key:z6Mka/example", "example", "1.10.0"),
       registryPackage("pkg:did:key:z6Mka/example", "example", "2.0.0")
     ]);
@@ -16,6 +21,9 @@ describe("package document builder", () => {
         latest: "2.0.0"
       },
       name: "example"
+    });
+    expect(documents[0]?.versions["1.0.0"]?.dependencies).toEqual({
+      "agent-logger": "^1.0.0"
     });
     expect(Object.keys(documents[0]?.versions ?? {})).toEqual(["1.0.0", "1.10.0", "2.0.0"]);
   });

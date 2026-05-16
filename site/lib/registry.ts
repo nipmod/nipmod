@@ -97,8 +97,10 @@ export interface RegistryPackage {
   proof?: RegistryPackageProof;
   compatibilityReceipts?: CompatibilityReceipt[];
   dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
   quarantine?: {
     active?: boolean;
     advisoryId: string;

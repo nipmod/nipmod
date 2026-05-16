@@ -78,6 +78,9 @@ Use `--offline` for checks that should never touch public services.
 ## Stability rules
 
 - Existing v1 lockfiles remain readable.
+- New installs write `nipmod.lock.json` `formatVersion: 2` with root dependency intent, verified package records and dependency snapshots.
+- Lockfile package keys remain `${canonical}@${version}`.
+- `.nipmod/store/sha256/<digest>/bundle.nipmod` is a cache. `uninstall` removes lockfile entries, not cached bundles.
 - Explicit integrity pins remain supported.
 - Public JSON field names are additive once released.
 - Registry data is an index. It is never the only proof source.

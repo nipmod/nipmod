@@ -5,14 +5,20 @@ export type DependencyKind = "dependencies" | "devDependencies" | "optionalDepen
 export interface DependencyRequest {
   kind: DependencyKind;
   name: string;
+  optional?: boolean;
   spec: string;
 }
 
 export interface RegistryResolverPackage {
   canonical: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   digest: string;
   distTags?: Record<string, string>;
   name: string;
+  optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
   trustScore?: number;
   version: string;
 }
@@ -50,6 +56,7 @@ export function dependencyEntriesFromManifest(manifest: Manifest): DependencyReq
     Object.entries(manifest[kind] ?? {}).map(([name, spec]) => ({
       kind,
       name,
+      ...(isOptionalDependency(kind, name, manifest) ? { optional: true } : {}),
       spec
     }))
   );
@@ -68,6 +75,49 @@ export function resolveDependencyGraph(options: {
       unresolved.push(result);
     } else {
       resolved.push(result);
+    }
+  }
+
+  return { resolved, unresolved };
+}
+
+export function resolveDependencyClosure(options: {
+  packages: readonly RegistryResolverPackage[];
+  requests: readonly DependencyRequest[];
+}): DependencyGraphResult {
+  const queue = [...options.requests];
+  const resolved: ResolvedDependency[] = [];
+  const unresolved: UnresolvedDependency[] = [];
+  const visitedPackages = new Set<string>();
+  const visitedRequests = new Set<string>();
+
+  while (queue.length > 0) {
+    const request = queue.shift();
+    if (!request) {
+      break;
+    }
+    const requestKey = `${request.kind}:${request.name}@${request.spec}`;
+    if (visitedRequests.has(requestKey)) {
+      continue;
+    }
+    visitedRequests.add(requestKey);
+
+    const result = resolveOne(request, options.packages);
+    if ("reason" in result) {
+      unresolved.push(result);
+      continue;
+    }
+
+    resolved.push(result);
+    const packageKey = `${result.canonical}@${result.version}`;
+    if (visitedPackages.has(packageKey)) {
+      continue;
+    }
+    visitedPackages.add(packageKey);
+
+    const pkg = options.packages.find((candidate) => candidate.canonical === result.canonical && candidate.version === result.version);
+    if (pkg) {
+      queue.push(...dependencyEntriesFromRegistryPackage(pkg));
     }
   }
 
@@ -152,6 +202,23 @@ function unresolved(request: DependencyRequest, reason: string): UnresolvedDepen
     reason,
     spec: request.spec
   };
+}
+
+function isOptionalDependency(kind: DependencyKind, name: string, manifest: Manifest): boolean {
+  return kind === "optionalDependencies" || (kind === "peerDependencies" && manifest.peerDependenciesMeta?.[name]?.optional === true);
+}
+
+function dependencyEntriesFromRegistryPackage(pkg: RegistryResolverPackage): DependencyRequest[] {
+  return DEPENDENCY_KINDS.filter((kind) => kind !== "devDependencies").flatMap((kind) =>
+    Object.entries(pkg[kind] ?? {}).map(([name, spec]) => ({
+      kind,
+      name,
+      ...(kind === "optionalDependencies" || (kind === "peerDependencies" && pkg.peerDependenciesMeta?.[name]?.optional === true)
+        ? { optional: true }
+        : {}),
+      spec
+    }))
+  );
 }
 
 function isDistTag(value: string): boolean {

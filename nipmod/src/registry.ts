@@ -8,6 +8,7 @@ export const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 const PackageIdSchema = z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/);
 const SemverSchema = z.string().regex(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+const DependencyMapSchema = z.record(z.string().min(1), z.string().min(1));
 const JSON_LIMIT = 1024 * 1024;
 
 const PermissionCountsSchema = z.strictObject({
@@ -55,11 +56,16 @@ const CompatibilityReceiptSchema = z.strictObject({
 const RegistrySearchPackageSchema = z.strictObject({
   canonical: PackageIdSchema,
   compatibilityReceipts: z.array(CompatibilityReceiptSchema).max(16).optional(),
+  dependencies: DependencyMapSchema.optional(),
   description: z.string().optional(),
+  devDependencies: DependencyMapSchema.optional(),
   digest: Sha256Schema,
   name: z.string().min(1),
   owner: z.string().min(1).optional(),
+  optionalDependencies: DependencyMapSchema.optional(),
   permissions: PermissionCountsSchema.optional(),
+  peerDependencies: DependencyMapSchema.optional(),
+  peerDependenciesMeta: z.record(z.string().min(1), z.strictObject({ optional: z.boolean().optional() })).optional(),
   quarantine: QuarantineSchema.optional(),
   trust: z.strictObject({
     level: z.enum(["verified", "signed", "review", "unknown"]),
@@ -80,11 +86,16 @@ export interface RegistrySearchPackage {
   canonical: string;
   compatibilityReceipts: string[];
   description: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   digest: string;
   install?: string;
   installBlockedReason?: string;
   name: string;
+  optionalDependencies?: Record<string, string>;
   permissionSummary: string;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
   quarantined: boolean;
   sourceRegistry: string;
   trust: string;
@@ -258,10 +269,15 @@ function toSearchPackage(pkg: RegistryPackageWithSource): RegistrySearchPackage 
     canonical: pkg.canonical,
     compatibilityReceipts: (pkg.compatibilityReceipts ?? []).map((receipt) => receipt.label),
     description: pkg.description ?? "",
+    ...(pkg.dependencies ? { dependencies: pkg.dependencies } : {}),
+    ...(pkg.devDependencies ? { devDependencies: pkg.devDependencies } : {}),
     digest: pkg.digest,
     ...(installBlockedReason ? { installBlockedReason } : { install: `nipmod add ${pkg.canonical}@${pkg.version} --online` }),
     name: pkg.name,
+    ...(pkg.optionalDependencies ? { optionalDependencies: pkg.optionalDependencies } : {}),
     permissionSummary: permissionSummary(pkg.permissions),
+    ...(pkg.peerDependencies ? { peerDependencies: pkg.peerDependencies } : {}),
+    ...(pkg.peerDependenciesMeta ? { peerDependenciesMeta: pkg.peerDependenciesMeta } : {}),
     quarantined: Boolean(quarantine),
     sourceRegistry: pkg.sourceRegistry,
     trust: `${pkg.trust.level}/${pkg.trust.score}`,

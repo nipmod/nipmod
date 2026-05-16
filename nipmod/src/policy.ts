@@ -91,13 +91,13 @@ const LockfilePackageSchema = z.strictObject({
   publisher: DidKeySchema,
   resolved: z.string().min(1),
   version: SemverSchema
-});
+}).passthrough();
 
 const LockfileSchema = z.strictObject({
-  formatVersion: z.literal(1),
+  formatVersion: z.union([z.literal(1), z.literal(2)]),
   generatedBy: z.string().min(1),
   packages: z.record(z.string(), LockfilePackageSchema)
-});
+}).passthrough();
 
 export type NipmodPolicy = z.infer<typeof PolicySchema>;
 type LockfilePackage = z.infer<typeof LockfilePackageSchema>;

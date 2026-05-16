@@ -224,6 +224,37 @@ describe("package indexer rules", () => {
     expect(result.skipped[0]?.reason).toMatch(/manifest digest/i);
   });
 
+  test("preserves signed manifest dependency maps in registry records", async () => {
+    const owner = "did:key:z6Mkowner";
+    const result = await buildRegistryFixture({
+      manifestDependencies: {
+        dependencies: { "agent-logger": "^1.0.0" },
+        devDependencies: { "fixture-pack": "0.1.0" },
+        optionalDependencies: { "browser-adapter": "~1.2.0" },
+        peerDependencies: { "codex-host": "latest" },
+        peerDependenciesMeta: {
+          "codex-host": {
+            optional: true
+          }
+        }
+      },
+      manifestOwner: owner,
+      repoOwner: owner
+    });
+
+    expect(result.packages[0]).toMatchObject({
+      dependencies: { "agent-logger": "^1.0.0" },
+      devDependencies: { "fixture-pack": "0.1.0" },
+      optionalDependencies: { "browser-adapter": "~1.2.0" },
+      peerDependencies: { "codex-host": "latest" },
+      peerDependenciesMeta: {
+        "codex-host": {
+          optional: true
+        }
+      }
+    });
+  });
+
   test("excludes internal probe packages from the public package list", async () => {
     const owner = "did:key:z6Mkowner";
     const result = await buildRegistryFixture({
@@ -578,6 +609,7 @@ async function buildRegistryFixture({
   compatibilityReceipts = [],
   indexManifestDigest = bundleManifestDigest,
   manifestName = "alpha",
+  manifestDependencies = {},
   manifestOwner,
   previousIndex,
   releaseEventVerifies = false,
@@ -650,6 +682,7 @@ async function buildRegistryFixture({
       manifest: {
         canonical,
         description: "alpha package",
+        ...manifestDependencies,
         name: manifestName,
         permissions: manifestPermissions(),
         publish: {

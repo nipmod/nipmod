@@ -1,8 +1,13 @@
 export interface RegistryPackageRecord {
   canonical: string;
+  dependencies?: Record<string, string>;
   description?: string;
+  devDependencies?: Record<string, string>;
   digest: string;
   name: string;
+  optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
   publisher: string;
   trust: {
     level: string;
@@ -14,8 +19,13 @@ export interface RegistryPackageRecord {
 
 export interface PackageVersionDocument {
   canonical: string;
+  dependencies?: Record<string, string>;
   description: string;
+  devDependencies?: Record<string, string>;
   digest: string;
+  optionalDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
   publisher: string;
   trust: {
     level: string;
@@ -51,6 +61,7 @@ export function buildPackageDocuments(packages: readonly RegistryPackageRecord[]
 
     document.versions[pkg.version] = {
       canonical: pkg.canonical,
+      ...dependencyMetadata(pkg),
       description: pkg.description ?? "",
       digest: pkg.digest,
       publisher: pkg.publisher,
@@ -63,6 +74,20 @@ export function buildPackageDocuments(packages: readonly RegistryPackageRecord[]
   }
 
   return [...byCanonical.values()].sort((left, right) => left.name.localeCompare(right.name) || left.canonical.localeCompare(right.canonical));
+}
+
+function dependencyMetadata(pkg: RegistryPackageRecord): Partial<PackageVersionDocument> {
+  return {
+    ...(nonEmpty(pkg.dependencies) ? { dependencies: pkg.dependencies } : {}),
+    ...(nonEmpty(pkg.devDependencies) ? { devDependencies: pkg.devDependencies } : {}),
+    ...(nonEmpty(pkg.optionalDependencies) ? { optionalDependencies: pkg.optionalDependencies } : {}),
+    ...(nonEmpty(pkg.peerDependencies) ? { peerDependencies: pkg.peerDependencies } : {}),
+    ...(nonEmpty(pkg.peerDependenciesMeta) ? { peerDependenciesMeta: pkg.peerDependenciesMeta } : {})
+  };
+}
+
+function nonEmpty(value: Record<string, unknown> | undefined): boolean {
+  return Boolean(value && Object.keys(value).length > 0);
 }
 
 function latestVersion(versions: readonly string[]): string {

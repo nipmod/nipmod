@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { dependencyEntriesFromManifest, resolveDependencyGraph, versionSatisfies } from "../src/resolver.js";
+import {
+  dependencyEntriesFromManifest,
+  resolveDependencyClosure,
+  resolveDependencyGraph,
+  versionSatisfies
+} from "../src/resolver.js";
 import { type Manifest } from "../src/protocol.js";
 
 const baseManifest: Manifest = {
@@ -46,7 +51,12 @@ describe("agent dependency resolver", () => {
       dependencies: { "gitlawb-repo-reader": "^0.1.0" },
       devDependencies: { "malicious-skill-fixtures": "~0.1.0" },
       optionalDependencies: { "package-safety-eval-pack": "stable" },
-      peerDependencies: { "readonly-registry-mcp-server": "latest" }
+      peerDependencies: { "readonly-registry-mcp-server": "latest" },
+      peerDependenciesMeta: {
+        "readonly-registry-mcp-server": {
+          optional: true
+        }
+      }
     });
 
     expect(entries.map((entry) => `${entry.kind}:${entry.name}@${entry.spec}`)).toEqual([
@@ -54,6 +64,10 @@ describe("agent dependency resolver", () => {
       "devDependencies:malicious-skill-fixtures@~0.1.0",
       "optionalDependencies:package-safety-eval-pack@stable",
       "peerDependencies:readonly-registry-mcp-server@latest"
+    ]);
+    expect(entries.filter((entry) => entry.optional).map((entry) => entry.name)).toEqual([
+      "package-safety-eval-pack",
+      "readonly-registry-mcp-server"
     ]);
   });
 
@@ -90,16 +104,56 @@ describe("agent dependency resolver", () => {
     expect(result.resolved).toEqual([]);
     expect(result.unresolved[0]?.reason).toMatch(/ambiguous/i);
   });
+
+  test("resolves transitive dependency closure deterministically", () => {
+    const result = resolveDependencyClosure({
+      requests: [{ kind: "dependencies", name: "workflow-runner", spec: "latest" }],
+      packages: [
+        registryPackage("pkg:did:key:z6Mka/workflow-runner", "workflow-runner", "0.1.0", { latest: "0.1.0" }, {
+          "agent-logger": "^1.0.0"
+        }),
+        registryPackage("pkg:did:key:z6Mkb/agent-logger", "agent-logger", "1.2.0", {}, {
+          dependencies: {
+            "safe-format": "~0.3.0"
+          },
+          devDependencies: {
+            "fixture-only": "0.1.0"
+          }
+        }),
+        registryPackage("pkg:did:key:z6Mkc/safe-format", "safe-format", "0.3.7"),
+        registryPackage("pkg:did:key:z6Mkd/fixture-only", "fixture-only", "0.1.0")
+      ]
+    });
+
+    expect(result.unresolved).toEqual([]);
+    expect(result.resolved.map((entry) => `${entry.name}@${entry.version}`)).toEqual([
+      "workflow-runner@0.1.0",
+      "agent-logger@1.2.0",
+      "safe-format@0.3.7"
+    ]);
+  });
 });
 
 function registryPackage(
   canonical: string,
   name: string,
   version: string,
-  distTags: Record<string, string> = {}
+  distTags: Record<string, string> = {},
+  dependencyOptions: Record<string, string> | {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  } = {}
 ) {
+  const dependencies = "dependencies" in dependencyOptions || "devDependencies" in dependencyOptions
+    ? dependencyOptions.dependencies ?? {}
+    : dependencyOptions;
+  const devDependencies = "dependencies" in dependencyOptions || "devDependencies" in dependencyOptions
+    ? dependencyOptions.devDependencies ?? {}
+    : {};
   return {
     canonical,
+    dependencies,
+    devDependencies,
     digest: "a".repeat(64),
     distTags,
     name,

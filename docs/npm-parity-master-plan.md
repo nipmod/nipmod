@@ -19,8 +19,8 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | --- | --- | --- | --- |
 | Package manifest | `package.json` | `nipmod.json` with package type, exports, permissions, dependencies and agent host metadata | in progress |
 | Version specifiers | exact, caret, tilde, tags | exact, caret, tilde, wildcard, dist tags | started |
-| Dependency graph | dependencies, dev, peer, optional | agent dependencies, dev dependencies, peer agent dependencies, optional capabilities | started |
-| Lockfile | `package-lock.json` | `nipmod.lock.json` with verified package records and dependency graph | partial |
+| Dependency graph | dependencies, dev, peer, optional | agent dependencies, dev dependencies, peer agent dependencies, optional capabilities | in progress |
+| Lockfile | `package-lock.json` | `nipmod.lock.json` with verified package records and dependency graph snapshots | in progress |
 | Local store | `node_modules` plus cache | `.nipmod/store/sha256/<digest>` plus host activation adapters | started |
 | Install | `npm install` | `nipmod add` and future graph install | partial |
 | Clean CI | `npm ci` | `nipmod ci` with trust, advisory and policy gates | partial |
@@ -129,4 +129,6 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 
 ## Current first slice
 
-The first slice establishes manifest dependency fields, a semver/dist tag resolver, an npm style package document builder, a content addressed local bundle store, package browse/detail pages and basic `ls`/`uninstall` package operations. This is the base for lockfile v2, graph install, `outdated`, `update` and signed lifecycle events.
+The first slice establishes manifest dependency fields, a semver/dist tag resolver, an npm style package document builder, a content addressed local bundle store, package browse/detail pages and basic `ls`/`uninstall` package operations.
+
+The second slice adds additive Registry dependency metadata, v1 readable / v2 written lockfiles, root dependency intent, package snapshots, direct dependency edges and an atomic graph install primitive for pre verified bundles. This is the base for registry driven transitive install, `outdated`, `update`, `explain`, `sbom` and signed lifecycle events.

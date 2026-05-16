@@ -70,6 +70,7 @@ export function packageInstallVariants(pkg: RegistryPackage): PackageInstallVari
 export function packageDependencyText(pkg: RegistryPackage): string {
   const dependencyCount =
     Object.keys(pkg.dependencies ?? {}).length +
+    Object.keys(pkg.devDependencies ?? {}).length +
     Object.keys(pkg.optionalDependencies ?? {}).length +
     Object.keys(pkg.peerDependencies ?? {}).length;
   if (dependencyCount === 0) {

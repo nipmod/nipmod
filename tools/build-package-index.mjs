@@ -158,6 +158,7 @@ export async function buildRegistryIndex(options = {}) {
         canonical: manifest.canonical,
         cloneUrl: buildCloneUrl(baseUrl, ownerSegment, repo.name),
         description: sanitizeText(manifest.description ?? repo.description ?? "", STRING_LIMITS.description),
+        ...dependencyMetadata(manifest),
         digest: artifactDigest,
         name: sanitizeText(manifest.name, STRING_LIMITS.name),
         owner: repo.owner_did,
@@ -636,6 +637,25 @@ function summarizePermissions(permissions) {
       postinstall: permissions.postinstall.allowed !== false,
       secrets: details.secrets.length
     }
+  };
+}
+
+function dependencyMetadata(manifest) {
+  return {
+    ...nonEmptyMap("dependencies", manifest.dependencies),
+    ...nonEmptyMap("devDependencies", manifest.devDependencies),
+    ...nonEmptyMap("optionalDependencies", manifest.optionalDependencies),
+    ...nonEmptyMap("peerDependencies", manifest.peerDependencies),
+    ...nonEmptyMap("peerDependenciesMeta", manifest.peerDependenciesMeta)
+  };
+}
+
+function nonEmptyMap(field, value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).length === 0) {
+    return {};
+  }
+  return {
+    [field]: value
   };
 }
 

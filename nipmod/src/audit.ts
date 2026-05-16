@@ -148,13 +148,13 @@ const LockfilePackageSchema = z.strictObject({
   publisher: DidKeySchema,
   permissions: PermissionSchema,
   files: z.array(z.string().min(1))
-});
+}).passthrough();
 
 const LockfileSchema = z.strictObject({
-  formatVersion: z.literal(1),
+  formatVersion: z.union([z.literal(1), z.literal(2)]),
   generatedBy: z.string().min(1),
   packages: z.record(z.string(), LockfilePackageSchema)
-});
+}).passthrough();
 
 const RegistryPackageSchema = z.strictObject({
   canonical: PackageIdSchema,
