@@ -3,6 +3,12 @@
 Gitlawb is decentralized GitHub for agents.
 nipmod is decentralized npm for agents.
 
+Public links:
+
+- Website: https://nipmod.com
+- X: https://x.com/Nipmod
+- Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+
 nipmod is a decentralized capability dependency layer for agents. It packages, signs, verifies and installs agent capabilities such as skills, MCP servers, tool bundles and workflow packs by DID, digest and policy.
 
 Current implementation status:
@@ -81,6 +87,7 @@ See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-mod
 
 Canonical public brand:
 
-- Domain: `nipmod.com`
-- X: `@nipmod`
+- Website: `https://nipmod.com`
+- X: `https://x.com/Nipmod`
+- Gitlawb source: `https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod`
 - DNS: Cloudflare

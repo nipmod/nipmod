@@ -4,7 +4,7 @@ export const homeContent = {
   lead: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
   links: {
     install: "/install.sh",
-    x: "https://x.com/nipmod"
+    x: "https://x.com/Nipmod"
   },
   primaryAction: "Install",
   secondaryAction: "X",

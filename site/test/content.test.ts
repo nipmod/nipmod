@@ -27,7 +27,7 @@ describe("home content", () => {
   });
 
   test("links to the canonical X handle", () => {
-    expect(homeContent.links.x).toBe("https://x.com/nipmod");
+    expect(homeContent.links.x).toBe("https://x.com/Nipmod");
   });
 
   test("uses clean English copy without hyphen punctuation or slop words", () => {
