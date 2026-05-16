@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import * as z from "zod";
 import { auditProject, type AuditProjectOptions } from "./audit.js";
 import { verifyBundle } from "./bundle.js";
+import { createPublishDryRunPlan } from "./gitlawb.js";
 import { createRegistryInstallPlan } from "./install-plan.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
@@ -92,6 +93,13 @@ const InstallPlanArgumentsSchema = TrustPinsSchema.extend({
   projectDir: z.string().optional(),
   registryUrl: z.string().optional(),
   specifier: z.string().min(1)
+});
+
+const PublishPlanArgumentsSchema = z.strictObject({
+  helperPath: z.string().optional(),
+  identityPath: z.string().optional(),
+  nodeUrl: z.string().optional(),
+  projectDir: z.string().optional()
 });
 
 const VerifyArgumentsSchema = z.strictObject({
@@ -186,6 +194,8 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await inspectTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.install_plan":
       return toolResult(await installPlanTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.publish_plan":
+      return toolResult(await publishPlanTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.verify":
       return toolResult(await verifyTool(parsed.arguments ?? {}));
     case "nipmod.audit":
@@ -246,6 +256,18 @@ async function installPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<J
       specifier: args.specifier
     })
   );
+}
+
+async function publishPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
+  const args = PublishPlanArgumentsSchema.parse(raw);
+  const options = {
+    fetchImpl,
+    projectDir: args.projectDir ?? process.cwd(),
+    ...(args.helperPath ? { helperPath: args.helperPath } : {}),
+    ...(args.identityPath ? { identityPath: args.identityPath } : {}),
+    ...(args.nodeUrl ? { nodeUrl: args.nodeUrl } : {})
+  };
+  return toJsonValue(await createPublishDryRunPlan(options));
 }
 
 async function verifyTool(raw: unknown): Promise<JsonValue> {
@@ -522,6 +544,25 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.install_plan",
     title: "Plan nipmod install"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: true
+    },
+    description: "Create a Gitlawb publish dry-run plan without writing to a remote repository.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        helperPath: { type: "string" },
+        identityPath: { type: "string" },
+        nodeUrl: { type: "string" },
+        projectDir: { type: "string" }
+      },
+      type: "object"
+    },
+    name: "nipmod.publish_plan",
+    title: "Plan nipmod publish"
   },
   {
     annotations: {

@@ -226,6 +226,7 @@ export function registryTrustSummary(index: RegistryIndex): {
   const verified = index.packages.filter((item) => item.trust.level === "verified");
   const witnesses = index.transparencyLog?.witnesses ?? [];
   const rootHash = index.transparencyLog?.treeHead.rootHash ?? "";
+  const activeQuarantines = index.packages.filter(isActivelyQuarantined).length;
   const checks = [
     {
       label: "Signed bundles",
@@ -246,13 +247,19 @@ export function registryTrustSummary(index: RegistryIndex): {
       label: "Quiet permissions",
       ok: index.packages.every((item) => hasNoRequestedPermissions(item.permissions)),
       text: "No listed package declares network, secrets, exec or install scripts."
+    },
+    {
+      label: "No active quarantine",
+      ok: activeQuarantines === 0,
+      text: "High and critical advisories block public readiness."
     }
   ];
   return {
     cards: [
       { label: "Packages", value: String(index.packages.length) },
       { label: "Witnesses", value: String(witnesses.length) },
-      { label: "Root hash", value: rootHash ? `${rootHash.slice(0, 10)}...${rootHash.slice(-8)}` : "missing" }
+      { label: "Root hash", value: rootHash ? `${rootHash.slice(0, 10)}...${rootHash.slice(-8)}` : "missing" },
+      { label: "Quarantine", value: String(activeQuarantines) }
     ],
     checks,
     ready: verified.length === index.packages.length && index.packages.length > 0 && checks.every((check) => check.ok)

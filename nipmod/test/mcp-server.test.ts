@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -40,6 +40,7 @@ describe("nipmod MCP server", () => {
       "nipmod.search",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.publish_plan",
       "nipmod.verify",
       "nipmod.audit"
     ]);
@@ -49,6 +50,76 @@ describe("nipmod MCP server", () => {
         readOnlyHint: true
       });
     }
+  });
+
+  test("creates a publish plan without mutating Gitlawb", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-publish-plan-"));
+    const pkg = join(workspace, "pkg");
+    const binDir = join(workspace, "bin");
+    const helperPath = join(binDir, "git-remote-gitlawb");
+    const gitPath = join(binDir, "git");
+    const identity = generateIdentity();
+    await mkdir(join(pkg, ".nipmod"), { recursive: true });
+    await mkdir(binDir, { recursive: true });
+    await writeFile(helperPath, "#!/bin/sh\nexit 0\n");
+    await writeFile(gitPath, "#!/bin/sh\nexit 0\n");
+    await chmod(helperPath, 0o755);
+    await chmod(gitPath, 0o755);
+    await writeFile(join(pkg, "README.md"), "# publish-plan-agent\n");
+    await writeFile(join(pkg, "SKILL.md"), "# publish-plan-agent\n");
+    await writeFile(join(pkg, ".nipmod", "identity.json"), `${JSON.stringify(identity)}\n`);
+    await writeFile(
+      join(pkg, "nipmod.json"),
+      `${JSON.stringify({
+        canonical: `pkg:${identity.did}/publish-plan-agent`,
+        description: "Publish plan package",
+        exports: { ".": { skill: "./SKILL.md" } },
+        files: ["README.md", "SKILL.md", "nipmod.json"],
+        formatVersion: 1,
+        license: "MIT",
+        name: "publish-plan-agent",
+        permissions: {
+          env: [],
+          exec: { allowed: false },
+          filesystem: [],
+          mcpTools: [],
+          network: [],
+          postinstall: { allowed: false },
+          secrets: []
+        },
+        publish: { provenance: "local", signingKey: identity.did },
+        type: "skill",
+        version: "0.1.0"
+      })}\n`
+    );
+    const server = createNipmodMcpServer({
+      fetchImpl: async () => new Response("not found", { status: 404 })
+    });
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 8,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          helperPath,
+          nodeUrl: "https://node.example.test",
+          projectDir: pkg
+        },
+        name: "nipmod.publish_plan"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      package: `pkg:${identity.did}/publish-plan-agent`,
+      ready: true,
+      repoName: "publish-plan-agent",
+      version: "0.1.0",
+      versionCheck: { status: "available" }
+    });
+    expect(JSON.stringify(result.result)).not.toContain("privateKey");
   });
 
   test("searches a file-backed registry through tools/call", async () => {
@@ -253,6 +324,7 @@ describe("nipmod MCP server", () => {
       "nipmod.search",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.publish_plan",
       "nipmod.verify",
       "nipmod.audit"
     ]);

@@ -14,6 +14,7 @@ export const homeContent = {
     "shasum -a 256 -c install.sh.sha256",
     "bash install.sh",
     "nipmod doctor",
+    "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo",
     "nipmod search skill --online",
     "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
     "nipmod audit --online",
@@ -104,7 +105,7 @@ export const homeContent = {
     inputLabel: "Gitlawb repo",
     inputPlaceholder: "gitlawb://did:key:z6Mk.../repo",
     outputTitle: "Draft output",
-    outputCommand: "nipmod init --name repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run",
+    outputCommand: "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run",
     steps: [
       {
         label: "Paste",

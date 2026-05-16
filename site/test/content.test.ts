@@ -56,6 +56,7 @@ describe("home content", () => {
       "shasum -a 256 -c install.sh.sha256",
       "bash install.sh",
       "nipmod doctor",
+      "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo",
       "nipmod search skill --online",
       "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "nipmod audit --online",
@@ -96,5 +97,6 @@ describe("home content", () => {
     expect(homeContent.repoToPackage.steps.map((step) => step.label)).toEqual(["Paste", "Draft", "Claim"]);
     expect(homeContent.repoToPackage.claim.text).toContain("DID signature");
     expect(homeContent.repoToPackage.claim.text).not.toContain("login");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package gitlawb://did:key:z6Mk.../repo --dir repo");
   });
 });

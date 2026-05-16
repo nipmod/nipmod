@@ -53,6 +53,7 @@ interface CliResult {
 const CLI_COMMANDS = [
   "init",
   "pack",
+  "package",
   "publish",
   "manifest",
   "verify",
@@ -116,6 +117,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return initCommand(args);
     case "pack":
       return packCommand(args);
+    case "package":
+      return packageCommand(args);
     case "publish":
       return publishCommand(args);
     case "manifest":
@@ -244,6 +247,79 @@ async function packCommand(args: string[]): Promise<CliResult> {
       message: `packed ${packed.manifest.name}`,
       path,
       digest: packed.digest
+    }
+  };
+}
+
+async function packageCommand(args: string[]): Promise<CliResult> {
+  const input = firstPositional(args);
+  const repo = parseGitlawbRepoInput(input);
+  const dir = optionalFlagValue(args, "--dir") ?? repo.repoName;
+  const version = optionalFlagValue(args, "--version") ?? "0.1.0";
+  const packageType = packageDraftType(optionalFlagValue(args, "--type") ?? "tool-bundle");
+  const manifest: Manifest = {
+    formatVersion: 1,
+    name: repo.repoName,
+    canonical: `pkg:${repo.ownerDid}/${repo.repoName}`,
+    version,
+    type: packageType,
+    description: `${repo.repoName} package draft from Gitlawb source`,
+    license: "NOASSERTION",
+    exports: {
+      ".": {
+        source: "./README.md"
+      }
+    },
+    files: ["README.md", "nipmod.json"],
+    permissions: {
+      filesystem: [],
+      network: [],
+      mcpTools: [],
+      env: [],
+      secrets: [],
+      exec: {
+        allowed: false
+      },
+      postinstall: {
+        allowed: false
+      }
+    },
+    publish: {
+      signingKey: repo.ownerDid,
+      provenance: repo.source
+    }
+  };
+  const validated = validateManifest(manifest);
+
+  await mkdir(dir, { recursive: true });
+  await writeFile(
+    join(dir, "README.md"),
+    [
+      `# ${repo.repoName}`,
+      "",
+      `Gitlawb source: ${repo.source}`,
+      "",
+      "This is an unsigned nipmod package draft. The repo owner must claim it with the matching DID identity before publish.",
+      ""
+    ].join("\n")
+  );
+  await writeFile(join(dir, "nipmod.json"), `${JSON.stringify(validated, null, 2)}\n`);
+
+  const claimCommand = `nipmod publish ${dir} --dry-run`;
+  return {
+    ok: true,
+    data: {
+      message: `created package draft ${validated.canonical}`,
+      claimCommand,
+      draft: {
+        canonical: validated.canonical,
+        dir,
+        manifestPath: join(dir, "nipmod.json"),
+        repo: repo.repoName,
+        source: repo.source,
+        version: validated.version
+      },
+      nextCommands: [`nipmod manifest validate --dir ${dir}`, claimCommand]
     }
   };
 }
@@ -995,8 +1071,76 @@ const VALUE_FLAGS = new Set([
   "--port",
   "--profile",
   "--registry",
+  "--type",
+  "--version",
   "--witness"
 ]);
+
+const PACKAGE_DRAFT_TYPES = new Set<Manifest["type"]>([
+  "skill",
+  "mcp-server",
+  "tool-bundle",
+  "agent-profile",
+  "workflow-pack",
+  "eval-pack",
+  "policy-pack",
+  "adapter"
+]);
+
+function packageDraftType(value: string): Manifest["type"] {
+  if (PACKAGE_DRAFT_TYPES.has(value as Manifest["type"])) {
+    return value as Manifest["type"];
+  }
+
+  throw new Error("--type must be skill, mcp-server, tool-bundle, agent-profile, workflow-pack, eval-pack, policy-pack, or adapter");
+}
+
+function parseGitlawbRepoInput(input: string): { ownerDid: string; ownerSegment: string; repoName: string; source: string } {
+  const trimmed = input.trim().replace(/\.git$/, "");
+  const direct = /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+|z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9_-]*)$/.exec(trimmed);
+  if (direct) {
+    return gitlawbRepoFromParts(requireMatch(direct[1], "owner"), requireMatch(direct[2], "repo"));
+  }
+
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("package input must be a gitlawb:// repo or Gitlawb web URL");
+  }
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash) {
+    throw new Error("Gitlawb web URL must be a clean https URL");
+  }
+  const segments = url.pathname.split("/").filter(Boolean);
+  const [owner, repo] =
+    segments[0] === "node" && segments[1] === "repos" ? [segments[2], segments[3]] : [segments[0], segments[1]];
+  return gitlawbRepoFromParts(requireMatch(owner, "owner"), requireMatch(repo, "repo"));
+}
+
+function requireMatch(value: string | undefined, label: string): string {
+  if (!value) {
+    throw new Error(`Gitlawb repo URL is missing ${label}`);
+  }
+
+  return value;
+}
+
+function gitlawbRepoFromParts(owner: string, repo: string): { ownerDid: string; ownerSegment: string; repoName: string; source: string } {
+  const ownerDid = owner.startsWith("did:key:") ? owner : `did:key:${owner}`;
+  if (!/^did:key:z[A-Za-z0-9]+$/.test(ownerDid)) {
+    throw new Error("Gitlawb owner must be did:key or z-base DID segment");
+  }
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(repo)) {
+    throw new Error("Gitlawb repo names currently allow only lowercase letters, numbers, hyphens, and underscores");
+  }
+
+  return {
+    ownerDid,
+    ownerSegment: ownerDid.slice(ownerDid.lastIndexOf(":") + 1),
+    repoName: repo,
+    source: `gitlawb://${ownerDid}/${repo}`
+  };
+}
 
 function unscopedName(name: string): string {
   return name.split("/").at(-1) ?? name;

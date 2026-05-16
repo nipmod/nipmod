@@ -118,8 +118,71 @@ describe("registry data", () => {
     );
 
     expect(summary.ready).toBe(true);
-    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Witnesses", "Root hash"]);
+    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Witnesses", "Root hash", "Quarantine"]);
     expect(summary.checks.every((check) => check.ok)).toBe(true);
+  });
+
+  test("blocks public trust readiness when a high severity quarantine is active", () => {
+    const pkg = packageFixture({
+      name: "blocked-agent",
+      releaseEventSigned: true,
+      trust: deriveTrust(
+        {
+          ...baseEvidence,
+          releaseEventSigned: true,
+          sourceProvenanceVerified: true,
+          transparencyLogIncluded: true,
+          transparencyLogVerified: true
+        },
+        emptyPermissions()
+      )
+    });
+    pkg.quarantine = quarantineFixture("blocked-agent");
+    pkg.quarantine.package = pkg.canonical;
+    pkg.quarantine.version = pkg.version;
+    pkg.quarantine.artifactSha256 = pkg.digest;
+
+    const summary = registryTrustSummary(
+      indexFixture([pkg], {
+        transparencyLog: {
+          entries: [{ leafHash: "a".repeat(64), leafIndex: 0 }],
+          formatVersion: 1,
+          treeHead: {
+            generatedAt: "2026-05-15T00:00:00.000Z",
+            logId: "did:key:z6Mklog",
+            rootHash: "b".repeat(64),
+            treeSize: 1
+          },
+          witnesses: [
+            {
+              formatVersion: 1,
+              signature: {
+                algorithm: "Ed25519",
+                keyId: "did:key:z6Mkwitness",
+                signatureBase64: "signed"
+              },
+              treeHead: {
+                formatVersion: 1,
+                generatedAt: "2026-05-15T00:00:00.000Z",
+                logId: "did:key:z6Mklog",
+                rootHash: "b".repeat(64),
+                treeSize: 1
+              },
+              type: "dev.nipmod.transparency.witness.v1",
+              witness: "did:key:z6Mkwitness"
+            }
+          ]
+        }
+      })
+    );
+
+    expect(summary.ready).toBe(false);
+    expect(summary.cards).toContainEqual({ label: "Quarantine", value: "1" });
+    expect(summary.checks).toContainEqual({
+      label: "No active quarantine",
+      ok: false,
+      text: "High and critical advisories block public readiness."
+    });
   });
 
   test("search filters direct package fields and sorts by trust score", () => {

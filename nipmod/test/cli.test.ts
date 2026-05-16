@@ -29,7 +29,7 @@ describe("nipmod CLI", () => {
 
     expect(parsed.ok).toBe(true);
     expect(parsed.data.commands).toEqual(
-      expect.arrayContaining(["inspect", "add", "ci", "publish", "manifest", "mcp"])
+      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "mcp"])
     );
     expect(parsed.data.exitCodes).toEqual(
       expect.arrayContaining([
@@ -94,6 +94,59 @@ describe("nipmod CLI", () => {
     expect(parsed.data.manifest.permissions.exec.allowed).toBe(false);
     expect(parsed.data.manifest.permissions.postinstall.allowed).toBe(false);
     expect(result.stdout).not.toContain("privateKey");
+  });
+
+  test("creates a Gitlawb repo package draft without requiring a private key", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-package-draft-"));
+    const owner = generateIdentity().did;
+    const repo = "claimable-agent";
+    const outDir = join(workspace, "draft");
+    const result = await execaNode([
+      "src/cli.ts",
+      "package",
+      `https://gitlawb.com/${owner.slice(owner.lastIndexOf(":") + 1)}/${repo}`,
+      "--dir",
+      outDir,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        claimCommand: string;
+        draft: {
+          canonical: string;
+          manifestPath: string;
+          repo: string;
+          source: string;
+        };
+      };
+    };
+
+    expect(parsed.ok).toBe(true);
+    expect(parsed.data.draft).toMatchObject({
+      canonical: `pkg:${owner}/${repo}`,
+      manifestPath: join(outDir, "nipmod.json"),
+      repo,
+      source: `gitlawb://${owner}/${repo}`
+    });
+    expect(parsed.data.claimCommand).toBe(`nipmod publish ${outDir} --dry-run`);
+    expect(result.stdout).not.toContain("privateKey");
+
+    const manifest = JSON.parse(await readFile(join(outDir, "nipmod.json"), "utf8"));
+    expect(manifest).toMatchObject({
+      canonical: `pkg:${owner}/${repo}`,
+      name: repo,
+      publish: {
+        provenance: `gitlawb://${owner}/${repo}`,
+        signingKey: owner
+      },
+      type: "tool-bundle",
+      version: "0.1.0"
+    });
+    expect(manifest.files).toEqual(["README.md", "nipmod.json"]);
+
+    const validated = await execaNode(["src/cli.ts", "manifest", "validate", "--dir", outDir, "--json"]);
+    expect(JSON.parse(validated.stdout).ok).toBe(true);
   });
 
   test("manifest validate rejects unsafe permissions before packing", async () => {

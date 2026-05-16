@@ -28,9 +28,9 @@ task_plan.md
 
 # Keep only current public release artifact in git
 site/public/releases/*
-!site/public/releases/nipmod-0.1.21.tgz
-!site/public/releases/nipmod-0.1.21.tgz.sha256
-!site/public/releases/nipmod-0.1.21.tgz.sig
+!site/public/releases/nipmod-0.1.22.tgz
+!site/public/releases/nipmod-0.1.22.tgz.sha256
+!site/public/releases/nipmod-0.1.22.tgz.sig
 
 # Secrets
 .env
