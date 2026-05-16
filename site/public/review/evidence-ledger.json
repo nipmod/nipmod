@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T00:00:00.000Z",
+  "type": "dev.nipmod.external-evidence-ledger.v1",
+  "counts": {
+    "firstUserReceipts": 0,
+    "packageAuthorDryRuns": 0,
+    "externalPackagesAccepted": 0,
+    "signedIndependentReviews": 0
+  },
+  "receipts": [],
+  "rules": [
+    "No secrets, tokens, private keys, local secret paths or unrelated data.",
+    "Page views do not count as adoption.",
+    "Receipts require redacted command evidence."
+  ]
+}

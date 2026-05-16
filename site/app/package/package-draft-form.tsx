@@ -10,6 +10,7 @@ type PackageDraftFormProps = {
 export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftFormProps) {
   const [repo, setRepo] = useState("");
   const draft = useMemo(() => draftFromRepo(repo), [repo]);
+  const invalid = draft.status === "invalid";
 
   return (
     <section className="package-draft" aria-labelledby="draft-generator-title">
@@ -20,6 +21,8 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
         <label htmlFor="repo-input">{inputLabel}</label>
         <input
           autoComplete="off"
+          aria-describedby="repo-input-help"
+          aria-invalid={invalid}
           id="repo-input"
           name="repo"
           onChange={(event) => setRepo(event.target.value)}
@@ -27,7 +30,7 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
           type="text"
           value={repo}
         />
-        <p>{draft.helper}</p>
+        <p id="repo-input-help">{draft.helper}</p>
       </div>
       <div className="proof-panel">
         <h2 id="draft-title">Draft output</h2>
@@ -42,13 +45,22 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
   );
 }
 
-function draftFromRepo(input: string) {
+export function draftFromRepo(input: string) {
   const trimmed = input.trim();
   if (trimmed.length === 0) {
     return {
       commands:
         "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run --json",
-      helper: "Paste a public Gitlawb repo to generate exact commands."
+      helper: "Paste a public Gitlawb repo to generate exact commands.",
+      status: "empty" as const
+    };
+  }
+
+  if (!isValidGitlawbRepo(trimmed)) {
+    return {
+      commands: "No draft yet.",
+      helper: "Enter a Gitlawb DID path or gitlawb.com repo URL.",
+      status: "invalid" as const
     };
   }
 
@@ -58,11 +70,22 @@ function draftFromRepo(input: string) {
 
   return {
     commands: `nipmod package ${quotedInput} --dir ${quotedDir}\nnipmod manifest validate --dir ${quotedDir}\nnipmod publish ${quotedDir} --dry-run --json`,
-    helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`
+    helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`,
+    status: "valid" as const
   };
 }
 
-function inferRepoName(input: string): string {
+export function isValidGitlawbRepo(input: string): boolean {
+  const trimmed = input.trim().replace(/\.git$/i, "");
+  return (
+    /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+|z[A-Za-z0-9]+)\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
+    /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
+    /^https:\/\/node(?:2|3)?\.gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
+    /^https:\/\/node\.nipmod\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed)
+  );
+}
+
+export function inferRepoName(input: string): string {
   const lastPathPart = input.replace(/\/+$/, "").split("/").at(-1) ?? "repo";
   const clean = lastPathPart
     .replace(/\.git$/i, "")
@@ -73,7 +96,7 @@ function inferRepoName(input: string): string {
   return clean || "repo";
 }
 
-function shellQuote(value: string): string {
+export function shellQuote(value: string): string {
   if (/^[a-zA-Z0-9_./:@-]+$/.test(value)) {
     return value;
   }

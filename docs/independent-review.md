@@ -21,12 +21,16 @@ Attach or link:
 - `node tools/restore-drill.mjs` output
 - `node tools/supply-chain-check.mjs` output
 - browser test output for the public site
+- public proof loop transcript
+- catalog depth matrix
+- trust model mapping
 - known limitations and accepted risks
 
 Generate the packet:
 
 ```bash
 node tools/generate-review-packet.mjs /tmp/nipmod-review-packet.md
+node tools/generate-review-packet.mjs /tmp/nipmod-review-packet.md --evidence-dir /tmp/nipmod-review-evidence
 ```
 
 ## Threat Model Focus
@@ -41,6 +45,8 @@ Reviewers should focus on:
 - public node unauthenticated write probes
 - monitor and alert disclosure
 - Gitlawb dependency and decentralized content limits
+- package type coverage and proof consistency across the catalog
+- reviewer ability to reproduce every public proof claim
 
 ## Sign Off
 

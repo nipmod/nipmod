@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+  "eventHash": "86111d58daa5769f9e34287265130e50d408a0e5119f6de823ac0a8044f1fc07",
+  "package": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+  "publisher": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+  "version": "0.1.0"
+}

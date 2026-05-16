@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+  "eventHash": "dc5c6c3d6eed0a49eb968e8df1deec63a8bff42f397a2c3131b175f69d0f516b",
+  "package": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+  "publisher": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+  "version": "0.1.0"
+}

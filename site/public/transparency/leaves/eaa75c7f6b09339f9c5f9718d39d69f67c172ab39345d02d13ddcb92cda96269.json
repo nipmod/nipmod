@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+  "eventHash": "f98502c8595d96ae8957eecc50d14706f729b74fd132afbae2341d0f00a5f3f6",
+  "package": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+  "publisher": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+  "version": "0.1.0"
+}

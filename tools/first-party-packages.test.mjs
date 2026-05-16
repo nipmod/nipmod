@@ -25,7 +25,41 @@ const starterPackages = [
   "security-advisory-triage",
   "agent-permission-review",
   "mcp-tool-risk-review",
-  "package-onboarding-checklist"
+  "package-onboarding-checklist",
+  "registry-mirror-compare",
+  "package-evidence-brief",
+  "agent-runtime-compat-check",
+  "external-review-packet",
+  "first-user-onboarding",
+  "package-migration-planner",
+  "readonly-registry-mcp-server",
+  "launch-strict-policy-pack",
+  "package-safety-eval-pack",
+  "gitlawb-review-tool-bundle"
+];
+
+const expectedPackageTypes = new Map([
+  ["registry-mirror-compare", "adapter"],
+  ["package-evidence-brief", "workflow-pack"],
+  ["agent-runtime-compat-check", "agent-profile"],
+  ["external-review-packet", "workflow-pack"],
+  ["first-user-onboarding", "workflow-pack"],
+  ["package-migration-planner", "adapter"],
+  ["readonly-registry-mcp-server", "mcp-server"],
+  ["launch-strict-policy-pack", "policy-pack"],
+  ["package-safety-eval-pack", "eval-pack"],
+  ["gitlawb-review-tool-bundle", "tool-bundle"]
+]);
+
+const launchRequiredTypes = [
+  "skill",
+  "mcp-server",
+  "tool-bundle",
+  "agent-profile",
+  "workflow-pack",
+  "eval-pack",
+  "policy-pack",
+  "adapter"
 ];
 
 describe("first-party starter packages", () => {
@@ -38,7 +72,7 @@ describe("first-party starter packages", () => {
       expect(manifest).toMatchObject({
         formatVersion: 1,
         name,
-        type: "skill",
+        type: expectedPackageTypes.get(name) ?? "skill",
         version: "0.1.0"
       });
       expect(manifest.name).not.toContain("probe");
@@ -73,7 +107,17 @@ describe("first-party starter packages", () => {
 
       await expectPackable(dir, name);
     }
-  }, 45_000);
+  }, 90_000);
+
+  test("covers every launch package type supported by the protocol", async () => {
+    const types = new Set();
+    for (const name of starterPackages) {
+      const manifest = JSON.parse(await readFile(join(packageRoot, name, "nipmod.json"), "utf8"));
+      types.add(manifest.type);
+    }
+
+    expect([...types].sort()).toEqual([...launchRequiredTypes].sort());
+  });
 });
 
 async function expectPackable(dir, name) {

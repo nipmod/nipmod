@@ -56,17 +56,12 @@ describe("home content", () => {
   test("states what people can do on the site", () => {
     expect(homeContent.usage.map((item) => item.label)).toEqual(["Terminal", "Website", "Codex"]);
     expect(homeContent.commands).toEqual([
-      "curl -fL https://nipmod.com/install.sh -o install.sh",
-      "curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256",
-      "shasum -a 256 -c install.sh.sha256",
-      "bash install.sh",
+      "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
       "nipmod doctor --online",
-      "nipmod search skill --online",
+      "mkdir -p nipmod-demo && cd nipmod-demo",
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "nipmod add gitlawb-repo-reader --online",
-      "nipmod audit --online",
-      "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package",
-      "nipmod publish gitlawb-demo-package --dry-run"
+      "nipmod audit --online"
     ]);
   });
 
@@ -85,9 +80,8 @@ describe("home content", () => {
       "Audit",
       "Publish"
     ]);
-    expect(homeContent.quickstartSteps.every((step) => step.command.startsWith("nipmod") || step.command.startsWith("bash"))).toBe(
-      true
-    );
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Install")?.command).toContain("install.sh.sha256");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Inspect")?.command).toMatch(
       /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --online$/
     );
@@ -108,7 +102,7 @@ describe("home content", () => {
     expect(homeContent.founderOutreach.post).toContain("package layer");
     expect(homeContent.founderOutreach.dm).toContain("sanity check");
     expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Install", "Publish dry run"]);
-    expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(18);
+    expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(28);
     expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod add "))).toBe(true);
   });
 

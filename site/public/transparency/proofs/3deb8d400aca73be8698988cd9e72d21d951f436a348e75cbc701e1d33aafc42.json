@@ -1,0 +1,28 @@
+{
+  "auditPath": [
+    {
+      "hash": "e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077",
+      "side": "right"
+    },
+    {
+      "hash": "e4eb1e2cab2f37464094e5ac39a4339131f95e39ccf3ebab31dfe61e205a092a",
+      "side": "right"
+    },
+    {
+      "hash": "79eca7a93886030efa8f783be7fbe02b2d29298dc9c80444b72b953a559f52e4",
+      "side": "left"
+    },
+    {
+      "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+      "side": "left"
+    },
+    {
+      "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+      "side": "left"
+    }
+  ],
+  "leafHash": "3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42",
+  "leafIndex": 28,
+  "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+  "treeSize": 32
+}

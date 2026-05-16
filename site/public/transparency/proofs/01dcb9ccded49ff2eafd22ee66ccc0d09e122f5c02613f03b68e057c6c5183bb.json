@@ -17,12 +17,12 @@
       "side": "left"
     },
     {
-      "hash": "9158833dc63f8f66c9f4f1cf201df5e07348b56dd21c7395ef1fc521975e0352",
+      "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
       "side": "right"
     }
   ],
   "leafHash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
   "leafIndex": 10,
-  "rootHash": "9d42e3fd953ad5df80bb416e72a435c8450238e6df06f1bed616cc4d475e81f6",
-  "treeSize": 22
+  "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+  "treeSize": 32
 }

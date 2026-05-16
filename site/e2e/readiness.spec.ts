@@ -34,11 +34,17 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {
   await page.goto("/package");
-  await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("gitlawb://did:key:z6Mktest/Nip Mod.git");
+  await page.getByRole("textbox", { name: "Gitlawb repo" }).fill(
+    "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
+  );
 
-  await expect(page.getByText("Drafting as nip-mod")).toBeVisible();
-  await expect(page.getByText("nipmod package 'gitlawb://did:key:z6Mktest/Nip Mod.git' --dir nip-mod")).toBeVisible();
-  await expect(page.getByText("nipmod publish nip-mod --dry-run --json")).toBeVisible();
+  await expect(page.getByText("Drafting as gitlawb-repo-reader")).toBeVisible();
+  await expect(page.getByText("nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader")).toBeVisible();
+  await expect(page.getByText("nipmod publish gitlawb-repo-reader --dry-run --json")).toBeVisible();
+
+  await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("not a repo");
+  await expect(page.getByText("Enter a Gitlawb DID path or gitlawb.com repo URL.")).toBeVisible();
+  await expect(page.getByText("No draft yet.")).toBeVisible();
 });
 
 test("trust and security proof links are public", async ({ page }) => {
@@ -124,8 +130,10 @@ test("launch page exposes adoption, review and multi source paths", async ({ pag
   await page.goto("/launch");
 
   await expect(page.getByRole("heading", { name: "Use it. Publish into it. Review it." })).toBeVisible();
+  await expect(page.getByText("Package catalog depth", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adoption readiness", { exact: true })).toBeVisible();
   await expect(page.getByText("nipmod publish . --dry-run --json")).toBeVisible();
   await expect(page.getByText("node tools/verify-all.mjs --prod")).toBeVisible();
   await expect(page.getByText("nipmod search policy --registries")).toBeVisible();
-  await expect(page.getByText("2 alert destinations outside Vercel and Fly")).toBeVisible();
+  await expect(page.getByText("redacted external evidence ledger")).toBeVisible();
 });

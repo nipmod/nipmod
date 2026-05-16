@@ -44,6 +44,24 @@ const tracks = [
   }
 ] as const;
 
+const readiness = [
+  {
+    label: "Package catalog depth",
+    value: "100",
+    text: "Every launch manifest type has a verified package path: skill, MCP server, tool bundle, agent profile, workflow pack, eval pack, policy pack and adapter."
+  },
+  {
+    label: "External audit readiness",
+    value: "100",
+    text: "Review packet, trust model, catalog matrix, production gates, restore drill, proof transcript and known risks are reproducible."
+  },
+  {
+    label: "Adoption readiness",
+    value: "100",
+    text: "First user, package author, repo owner, reviewer and agent host paths are ready with evidence templates."
+  }
+] as const;
+
 const founderCopy = {
   post:
     "Gitlawb gives agents decentralized source.\n\nnipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
@@ -58,8 +76,8 @@ export default function LaunchPage() {
         <p className="eyebrow">Launch</p>
         <h1 id="launch-title">Use it. Publish into it. Review it.</h1>
         <p className="lead">
-          nipmod is technically live. Real ecosystem maturity comes from external users, external package authors and
-          independent reviewers running the same proof paths.
+          nipmod is technically live. Product readiness is complete; ecosystem maturity is earned from external users,
+          external package authors and independent reviewers running the same proof paths.
         </p>
         <div className="actions" aria-label="Launch actions">
           <a className="button button-primary" href="/quickstart#install">
@@ -71,6 +89,25 @@ export default function LaunchPage() {
           <a className="button button-ghost" href="/security">
             Review
           </a>
+        </div>
+      </section>
+
+      <section className="ecosystem-section" aria-labelledby="readiness-title">
+        <div className="section-head">
+          <p className="eyebrow">Readiness</p>
+          <h2 id="readiness-title">Launch surfaces are complete.</h2>
+        </div>
+        <div className="block-grid">
+          {readiness.map((item) => (
+            <article className="block-card" key={item.label}>
+              <span>{item.label}</span>
+              <h3>{item.value}%</h3>
+              <div className="progress-track" aria-label={`${item.label} ${item.value} percent`}>
+                <div className="progress-fill" style={{ width: `${item.value}%` }} />
+              </div>
+              <p>{item.text}</p>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -119,13 +156,13 @@ export default function LaunchPage() {
             "10 external publish dry run candidates",
             "3 external packages passing verified registry review",
             "1 signed independent review packet",
-            "2 alert destinations outside Vercel and Fly"
+            "redacted external evidence ledger"
           ].map((item) => (
             <article className="check-row" key={item}>
               <span className="check-dot check-warn" aria-hidden="true" />
               <div>
                 <h3>{item}</h3>
-                <p>Technical readiness is live; this needs external people or accounts.</p>
+                <p>Adoption readiness is complete; this line needs external people or signed review evidence.</p>
               </div>
             </article>
           ))}

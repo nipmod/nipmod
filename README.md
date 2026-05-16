@@ -49,23 +49,37 @@ Current implementation status:
 
 ```bash
 curl -fLO https://nipmod.com/install.sh
-printf '%s  install.sh\n' 3695e9e22edad41e48498ce00b64a7bcde066dd18b13aa5383a61f5773678cc9 | shasum -a 256 -c -
+curl -fLO https://nipmod.com/install.sh.sha256
+shasum -a 256 -c install.sh.sha256
 bash install.sh
 nipmod doctor --online
-nipmod search skill --online
+nipmod search gitlawb --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
-nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
+mkdir -p nipmod-demo
+cd nipmod-demo
+nipmod add gitlawb-repo-reader --online
+nipmod audit --online
+nipmod ci --online
+```
+
+Author dry run:
+
+```bash
+nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package
+cd gitlawb-demo-package
+nipmod manifest validate --dir . --json
+nipmod publish . --dry-run --json
+```
+
+Advanced local policy flow:
+
+```bash
+nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod policy init
 nipmod policy explain pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod policy check
-nipmod audit --online
-nipmod ci --online
 nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-demo-package
-nipmod init --name gitlawb-repo-reader --dir gitlawb-repo-reader
-nipmod manifest validate --dir gitlawb-repo-reader
-nipmod publish gitlawb-repo-reader --dry-run
-nipmod publish gitlawb-repo-reader
 ```
 
 Publish returns the canonical package id and digest. `add` verifies registry evidence, fetches the signed bundle and writes `nipmod.lock.json`. Low-level installs remain direct from Gitlawb and digest-strict:
@@ -95,6 +109,7 @@ See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
 See `docs/community.md` for package expectations, feedback links and founder outreach copy.
 See `SECURITY.md` and `docs/independent-review.md` for disclosure scope and external review readiness.
+See `docs/catalog-depth.md`, `docs/audit-readiness.md`, `docs/adoption-readiness.md` and `docs/external-evidence-ledger.md` for launch readiness evidence.
 See `docs/adoption.md`, `docs/self-service-publishing.md` and `docs/multi-source-registry.md` for the remaining ecosystem scale paths.
 See `docs/launch-demo.md` for the public demo script.
 See `docs/ecosystem-packages.md` for the first party package catalog.

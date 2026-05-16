@@ -47,9 +47,17 @@
       "expected": "filesystem write scopes are rejected",
       "label": "write path",
       "ok": true
+    },
+    {
+      "command": "prompt injection metadata",
+      "error": "manifest invalid: description: unsafe instruction-like metadata text is not allowed",
+      "exitCode": 1,
+      "expected": "prompt-injection metadata is rejected",
+      "label": "prompt injection metadata",
+      "ok": true
     }
   ],
-  "checkedAt": "2026-05-16T16:04:39.369Z",
+  "checkedAt": "2026-05-16T21:46:04.863Z",
   "package": {
     "canonical": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
     "name": "gitlawb-release-review",
@@ -58,9 +66,9 @@
     "version": "0.1.0"
   },
   "registry": {
-    "packages": 12,
+    "packages": 28,
     "source": "https://node.nipmod.com",
-    "treeSize": 16
+    "treeSize": 32
   },
   "safe": [
     {

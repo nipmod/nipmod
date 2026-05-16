@@ -156,7 +156,7 @@ function evidenceArtifacts(pkg: RegistryPackage | null): Array<{ id: string; hre
       href: "/registry/packages.json",
       id: "registry",
       label: "Registry",
-      text: "The signed package index with digests, source commits, trust evidence, compatibility receipts and warnings."
+      text: "The package index carrying signed package evidence, digests, source commits, compatibility receipts and warnings."
     },
     {
       href: "/transparency/checkpoint.json",

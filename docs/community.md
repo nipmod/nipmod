@@ -40,6 +40,26 @@ X: https://x.com/Nipmod
 
 Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 
+First user evidence:
+
+```text
+Persona:
+OS:
+Node:
+Git:
+nipmod version:
+Commands run:
+Package:
+Doctor result:
+Add result:
+Audit result:
+Blocker:
+May quote anonymously: yes or no
+Redacted output:
+```
+
+Send only redacted output. Do not include tokens, private keys, local secret paths or unrelated data.
+
 ## Founder review kit
 
 Primary public post:

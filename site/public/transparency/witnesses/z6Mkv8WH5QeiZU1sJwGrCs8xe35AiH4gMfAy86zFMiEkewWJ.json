@@ -2,16 +2,16 @@
   "formatVersion": 1,
   "treeHead": {
     "formatVersion": 1,
-    "generatedAt": "2026-05-16T21:03:56.372Z",
+    "generatedAt": "2026-05-16T21:44:02.000Z",
     "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
-    "rootHash": "9d42e3fd953ad5df80bb416e72a435c8450238e6df06f1bed616cc4d475e81f6",
-    "treeSize": 22
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "treeSize": 32
   },
   "type": "dev.nipmod.transparency.witness.v1",
   "witness": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
   "signature": {
     "algorithm": "Ed25519",
     "keyId": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
-    "signatureBase64": "iyZIqQN5yNGJ3xsPqbunfNOxQBq9CqjiHVVt49aOUJP0gUNwdbT9aCfSm8lVNRVOfffdmJ51hRa4jqLhjgxLAQ=="
+    "signatureBase64": "LZgoBWz2iKOUauWaxELen3p084h+FoPf+cPs5wEJ+QPUfXgjmsaCl2qHsMzFGRKioR6gDD1HUysQ09CQSWk6Aw=="
   }
 }

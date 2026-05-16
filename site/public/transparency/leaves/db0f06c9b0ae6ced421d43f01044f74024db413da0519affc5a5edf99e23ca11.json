@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+  "eventHash": "72a3d6e147cfbd0c7e2066e37d1658b7f535a4facfd4ec17402c18d6fb6f3a23",
+  "package": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+  "publisher": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+  "version": "0.1.0"
+}

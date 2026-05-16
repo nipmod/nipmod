@@ -962,6 +962,21 @@ h1 {
   text-transform: uppercase;
 }
 
+.progress-track {
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #f6f7f8, #9bbcff);
+  border-radius: inherit;
+  height: 100%;
+}
+
 .host-grid {
   display: grid;
   gap: 14px;

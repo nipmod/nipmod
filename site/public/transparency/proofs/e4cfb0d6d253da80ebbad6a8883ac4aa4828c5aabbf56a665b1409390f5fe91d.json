@@ -5,8 +5,16 @@
       "side": "left"
     },
     {
+      "hash": "0958b73a3de3fcd16b9f2436c2418c23ad0f7d2a96294db5f0f01b00af1ffaaf",
+      "side": "right"
+    },
+    {
       "hash": "c5cfb4874a2dffa1e2348051a0aff1653f6a59c235b1830df12c49de5961169f",
       "side": "left"
+    },
+    {
+      "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+      "side": "right"
     },
     {
       "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
@@ -15,6 +23,6 @@
   ],
   "leafHash": "e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d",
   "leafIndex": 21,
-  "rootHash": "9d42e3fd953ad5df80bb416e72a435c8450238e6df06f1bed616cc4d475e81f6",
-  "treeSize": 22
+  "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+  "treeSize": 32
 }

@@ -37,10 +37,13 @@ describe("install script", () => {
 
   test("keeps README installer hash pinned to the published script", async () => {
     const script = await readFile(scriptPath);
+    const checksum = await readFile(scriptChecksumPath, "utf8");
     const readme = await readFile(readmePath, "utf8");
     const digest = createHash("sha256").update(script).digest("hex");
 
-    expect(readme).toContain(`printf '%s  install.sh\\n' ${digest} | shasum -a 256 -c -`);
+    expect(checksum).toBe(`${digest}  install.sh\n`);
+    expect(readme).toContain("curl -fLO https://nipmod.com/install.sh.sha256");
+    expect(readme).toContain("shasum -a 256 -c install.sh.sha256");
   });
 
   test("installs the committed signed release artifact", async () => {

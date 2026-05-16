@@ -13,9 +13,12 @@ shasum -a 256 -c install.sh.sha256
 bash install.sh
 nipmod doctor --online
 nipmod search gitlawb --online
-nipmod inspect pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0 --online
-nipmod add gitlawb-release-review --online
+nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
+mkdir -p nipmod-demo
+cd nipmod-demo
+nipmod add gitlawb-repo-reader --online
 nipmod audit --online
+nipmod ci --online
 ```
 
 Ask package authors to run:
@@ -44,10 +47,32 @@ For founder review, send `docs/public-launch-packet.md` plus the live `/launch` 
 - package inspected or added
 - dry run registry candidate for authors
 - failure message if anything blocked
+- permission to quote the result anonymously
+- which persona ran it: user, package author, reviewer or Gitlawb maintainer
+
+## First User Evidence Template
+
+```text
+Persona:
+OS:
+Node:
+Git:
+nipmod version:
+Commands run:
+Package:
+Doctor result:
+Add result:
+Audit result:
+Blocker:
+May quote anonymously: yes or no
+Redacted output:
+```
 
 ## Launch Definition
 
-Real adoption reaches 100% only after:
+Adoption readiness reaches 100% when the public path, demo workspace, first user evidence template, persona asks and review packet all exist and pass production gates.
+
+Real adoption is different. It reaches external proof only after:
 
 - 100 unique external users or agents complete the first user loop
 - 10 external package authors produce publish dry run candidates

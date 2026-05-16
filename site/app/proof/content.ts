@@ -55,6 +55,11 @@ export const proofContent = {
       blockedBy: "permission grammar",
       expected: "filesystem write scopes are rejected",
       label: "write path"
+    },
+    {
+      blockedBy: "safe text schema",
+      expected: "prompt-injection metadata is rejected",
+      label: "prompt injection metadata"
     }
   ]
 } as const;

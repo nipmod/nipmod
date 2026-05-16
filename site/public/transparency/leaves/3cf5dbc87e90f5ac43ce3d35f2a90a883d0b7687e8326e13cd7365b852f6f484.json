@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+  "eventHash": "605b0129005e64e789ec5e84a2849c844bd9848daa5317b81b00a5cbe09161f2",
+  "package": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+  "publisher": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+  "version": "0.1.0"
+}

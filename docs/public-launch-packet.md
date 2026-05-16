@@ -67,6 +67,10 @@ Could you sanity check whether this should be a Gitlawb-native package path, an 
 - Registry: https://nipmod.com/registry/packages.json
 - Transparency checkpoint: https://nipmod.com/transparency/checkpoint.json
 - Security policy: https://nipmod.com/security
+- Review packet source: docs/independent-review.md
+- Catalog depth: docs/catalog-depth.md
+- Adoption readiness: docs/adoption-readiness.md
+- External evidence ledger: docs/external-evidence-ledger.md
 
 ## What not to claim
 

@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
+  "eventHash": "b8af64565bc471b287d15cd7e5a7243c5f57da457838417e9e8f8a0608975aeb",
+  "package": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+  "publisher": "did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z",
+  "version": "0.1.0"
+}

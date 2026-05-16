@@ -9,17 +9,12 @@ export const homeContent = {
   primaryAction: "Install",
   secondaryAction: "Updates on X",
   commands: [
-    "curl -fL https://nipmod.com/install.sh -o install.sh",
-    "curl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256",
-    "shasum -a 256 -c install.sh.sha256",
-    "bash install.sh",
+    "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "nipmod doctor --online",
-    "nipmod search skill --online",
+    "mkdir -p nipmod-demo && cd nipmod-demo",
     "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
     "nipmod add gitlawb-repo-reader --online",
-    "nipmod audit --online",
-    "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package",
-    "nipmod publish gitlawb-demo-package --dry-run"
+    "nipmod audit --online"
   ],
   usage: [
     {
@@ -39,7 +34,8 @@ export const homeContent = {
     {
       label: "Install",
       text: "Fetch the installer and verify the checksum first.",
-      command: "bash install.sh"
+      command:
+        "curl -fL https://nipmod.com/install.sh -o install.sh\ncurl -fL https://nipmod.com/install.sh.sha256 -o install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh"
     },
     {
       label: "Check",
@@ -58,13 +54,13 @@ export const homeContent = {
     },
     {
       label: "Add",
-      text: "Write the verified package into the workspace lockfile.",
-      command: "nipmod add gitlawb-repo-reader --online"
+      text: "Create a demo workspace first so the first lockfile mutation is isolated.",
+      command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod add gitlawb-repo-reader --online"
     },
     {
       label: "Audit",
       text: "Verify the lockfile against current trust and advisory data.",
-      command: "nipmod audit --online"
+      command: "nipmod audit --online\nnipmod ci --online"
     },
     {
       label: "Publish",
@@ -238,6 +234,56 @@ export const homeContent = {
       name: "package-onboarding-checklist",
       text: "Guide new package authors through a clean nipmod publish candidate.",
       command: "nipmod add package-onboarding-checklist --online"
+    },
+    {
+      name: "registry-mirror-compare",
+      text: "Compare registry mirrors and fail closed on digest, root, witness or advisory drift.",
+      command: "nipmod add registry-mirror-compare --online"
+    },
+    {
+      name: "package-evidence-brief",
+      text: "Turn package proof into a short human review brief.",
+      command: "nipmod add package-evidence-brief --online"
+    },
+    {
+      name: "agent-runtime-compat-check",
+      text: "Check whether an agent host is ready for install, audit and MCP flows.",
+      command: "nipmod add agent-runtime-compat-check --online"
+    },
+    {
+      name: "external-review-packet",
+      text: "Prepare an external reviewer handoff from proof and gate output.",
+      command: "nipmod add external-review-packet --online"
+    },
+    {
+      name: "first-user-onboarding",
+      text: "Guide a new user through install, inspect, add, audit and publish dry run.",
+      command: "nipmod add first-user-onboarding --online"
+    },
+    {
+      name: "package-migration-planner",
+      text: "Plan a Gitlawb, MCP or APM source migration into a package candidate.",
+      command: "nipmod add package-migration-planner --online"
+    },
+    {
+      name: "readonly-registry-mcp-server",
+      text: "Expose read only registry search and inspect tools through MCP.",
+      command: "nipmod add readonly-registry-mcp-server --online"
+    },
+    {
+      name: "launch-strict-policy-pack",
+      text: "Apply launch strict install policy for verified agent packages.",
+      command: "nipmod add launch-strict-policy-pack --online"
+    },
+    {
+      name: "package-safety-eval-pack",
+      text: "Evaluate scanners against unsafe agent package fixtures.",
+      command: "nipmod add package-safety-eval-pack --online"
+    },
+    {
+      name: "gitlawb-review-tool-bundle",
+      text: "Bundle Gitlawb repo review, diff summary and release review guidance.",
+      command: "nipmod add gitlawb-review-tool-bundle --online"
     }
   ],
   repoToPackage: {

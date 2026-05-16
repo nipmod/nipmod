@@ -59,13 +59,17 @@ Check these fields before mutation:
 
 ## Add to a workspace
 
+Create a demo workspace first. The first lockfile mutation should not happen in an unrelated repo.
+
 ```sh
+mkdir -p nipmod-demo
+cd nipmod-demo
 nipmod add gitlawb-repo-reader --online
 ```
 
 Expected result:
 
-- `nipmod.lock.json` is written or updated.
+- `nipmod.lock.json` is written or updated inside `nipmod-demo`.
 - The lockfile pins the artifact digest.
 - A trust or advisory failure exits before lockfile mutation.
 
@@ -85,7 +89,7 @@ From a package workspace:
 ```sh
 nipmod init --name @you/example-agent --dir example-agent
 cd example-agent
-nipmod manifest validate --json
+nipmod manifest validate --dir . --json
 nipmod publish . --dry-run --json
 ```
 

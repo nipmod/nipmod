@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "23c94ad2278906090f031278fa12aed35f3f207dceabadfdaa8d92d66f721590",
+  "eventHash": "9507a30f4d0291687420ae33c1d3a685cff83ef374b0d7e0d3d8b21c46a4680e",
+  "package": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+  "publisher": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+  "version": "0.1.0"
+}

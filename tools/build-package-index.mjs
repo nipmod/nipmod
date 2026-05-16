@@ -45,8 +45,10 @@ export async function buildRegistryIndex(options = {}) {
   const skipped = [];
   const repos = await fetchJson(new URL("/api/v1/repos", baseUrl), { fetchFn, maxBytes: JSON_LIMIT });
   const compatibilityReceipts =
-    options.compatibilityReceipts === undefined
-      ? await loadCompatibilityReceipts(options.compatibilityReceiptsPath)
+    process.env.NIPMOD_SKIP_COMPATIBILITY_RECEIPTS === "1"
+      ? []
+      : options.compatibilityReceipts === undefined
+      ? await loadCompatibilityReceipts(options.compatibilityReceiptsPath ?? process.env.NIPMOD_COMPATIBILITY_RECEIPTS_PATH)
       : parseCompatibilityReceiptIndex(options.compatibilityReceipts);
   await assertCompatibilityReceiptExampleHashes(compatibilityReceipts);
 

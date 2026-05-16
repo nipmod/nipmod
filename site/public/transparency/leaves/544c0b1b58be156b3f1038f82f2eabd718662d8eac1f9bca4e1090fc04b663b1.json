@@ -1,0 +1,7 @@
+{
+  "artifactSha256": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+  "eventHash": "53b8d2626b140869f4214f8a6e3157d36f60af5e2f35b2c602d05907a8571888",
+  "package": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+  "publisher": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+  "version": "0.1.0"
+}
