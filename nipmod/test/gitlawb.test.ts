@@ -264,16 +264,17 @@ describe("Gitlawb integration", () => {
       },
       helper: { ok: true, path: helperPath, source: "PATH" },
       git: { ok: true, path: gitPath },
-      versionCheck: {
-        status: "available"
-      }
-    });
+	      versionCheck: {
+	        status: "available"
+	      },
+	      signing: { mode: "signed", releaseEventSigned: true }
+	    });
     expect(plan.resolved).toBe(
       `https://node.example/api/v1/repos/${signedProject.identity.did.split(":").at(-1)}/signed-skill/blob/releases/0.1.0/bundle.nipmod`
     );
-    expect(plan.releaseEvent.payload.artifact.sha256).toBe(packed.digest);
-    expect(plan.releaseEvent.payload.source.commit).toBeUndefined();
-    expect(plan.releaseEvent.signature.keyId).toBe(signedProject.identity.did);
+	    expect(plan.releaseEvent?.payload.artifact.sha256).toBe(packed.digest);
+	    expect(plan.releaseEvent?.payload.source.commit).toBeUndefined();
+	    expect(plan.releaseEvent?.signature.keyId).toBe(signedProject.identity.did);
     expect(requests).toEqual([
       {
         method: "GET",

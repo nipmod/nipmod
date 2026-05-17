@@ -35,6 +35,7 @@ import {
   executeInstallPlan,
   formatInstallPlan,
   InstallPolicyBlockedError,
+  isPackageVersionSpecifier,
   resolveAddInstallPlan,
   type RegistryTrustOptions
 } from "./install-plan.js";
@@ -1203,7 +1204,7 @@ async function inspectRegistryCommand(specifier: string, args: string[]): Promis
     specifier: string;
   } = {
     registryUrl: registryUrl ?? DEFAULT_REGISTRY_URL,
-    specifier
+    specifier: await resolveInspectRegistrySpecifier(specifier, registryUrl)
   };
   if (allowedLogIds.length > 0) {
     options.allowedLogIds = allowedLogIds;
@@ -1212,6 +1213,23 @@ async function inspectRegistryCommand(specifier: string, args: string[]): Promis
     options.allowedWitnesses = allowedWitnesses;
   }
   return inspectRegistryPackage(options);
+}
+
+async function resolveInspectRegistrySpecifier(specifier: string, registryUrl: string | undefined): Promise<string> {
+  if (isPackageVersionSpecifier(specifier)) {
+    return specifier;
+  }
+
+  const target = parseViewTarget(specifier);
+  const result = await searchRegistry({
+    includeQuarantined: true,
+    includeYanked: true,
+    limit: 10_000,
+    query: target.query,
+    registryUrl: registryUrl ?? DEFAULT_REGISTRY_URL
+  });
+  const pkg = selectViewPackage(specifier, target, result.packages);
+  return `${pkg.canonical}@${pkg.version}`;
 }
 
 function formatTrustReport(report: TrustReport): string {
@@ -2064,7 +2082,7 @@ const LOCKFILE_INSTALL_BOOLEAN_FLAGS = new Set(["--json", "--offline", "--online
 const LOCKFILE_INSTALL_VALUE_FLAGS = new Set(["--dir", "--policy", "--profile"]);
 const INSTALL_BOOLEAN_FLAGS = new Set(["--allow-custom-roots", "--dry-run", "--json", "--offline", "--online", "--plan"]);
 const INSTALL_VALUE_FLAGS = new Set(["--dir", "--integrity", "--log-id", "--node", "--policy", "--profile", "--registry", "--witness"]);
-const REGISTRY_MUTATION_BOOLEAN_FLAGS = new Set(["--allow-custom-roots", "--dry-run", "--json", "--plan"]);
+const REGISTRY_MUTATION_BOOLEAN_FLAGS = new Set(["--allow-custom-roots", "--dry-run", "--json", "--online", "--plan"]);
 const REGISTRY_MUTATION_VALUE_FLAGS = new Set(["--dir", "--log-id", "--node", "--policy", "--profile", "--registry", "--witness"]);
 
 const PACKAGE_DRAFT_TYPES = new Set<Manifest["type"]>([

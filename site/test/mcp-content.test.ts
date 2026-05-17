@@ -27,9 +27,10 @@ describe("MCP host content", () => {
       "nipmod.sbom",
       "nipmod.explain"
     ]);
-    expect(text).toContain("publish_plan");
-    expect(text).toContain("They cannot add or install through MCP.");
-    expect(text).toContain("Custom transparency or advisory roots require an opt in flag");
+	    expect(text).toContain("publish_plan");
+	    expect(text).toContain("They cannot add or install through MCP.");
+	    expect(text).toContain("without local signing");
+	    expect(text).toContain("Custom transparency or advisory roots require an opt in flag");
     expect(mcpContent.verifyCommand).toContain("tools/list");
   });
 

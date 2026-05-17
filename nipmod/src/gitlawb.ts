@@ -138,10 +138,16 @@ export interface PublishDryRunPlan {
     existingDigest?: string;
     message: string;
   };
-  releaseEvent: ReturnType<typeof signReleaseEvent>;
+  signing: {
+    mode: "signed" | "unsigned-preview";
+    releaseEventSigned: boolean;
+  };
+  releaseEvent?: ReturnType<typeof signReleaseEvent>;
 }
 
-export interface PublishDryRunOptions extends PublishGitlawbPackageOptions {}
+export interface PublishDryRunOptions extends PublishGitlawbPackageOptions {
+  signingMode?: "signed" | "unsigned-preview";
+}
 
 export interface FetchGitlawbBundleOptions {
   nodeUrl?: string;
@@ -508,13 +514,20 @@ export async function publishGitlawbLifecycleEvent(
 
 export async function createPublishDryRunPlan(options: PublishDryRunOptions): Promise<PublishDryRunPlan> {
   const nodeUrl = normalizeNodeUrl(options.nodeUrl ?? DEFAULT_GITLAWB_NODE);
-  const identity = await readLocalIdentity(options.projectDir, options.identityPath);
-  const packed = await packProject(options.projectDir, {
-    signingPrivateKeyPem: identity.privateKeyPem
-  });
+  const signingMode = options.signingMode ?? "signed";
+  const identity = signingMode === "signed" ? await readLocalIdentity(options.projectDir, options.identityPath) : null;
+  const packed =
+    signingMode === "signed" && identity
+      ? await packProject(options.projectDir, {
+          signingPrivateKeyPem: identity.privateKeyPem
+        })
+      : await packProject(options.projectDir);
   const spec = parseRemoteSpecifier(`${packed.manifest.canonical}@${packed.manifest.version}`);
 
-  if (spec.ownerDid !== identity.did) {
+  if (spec.ownerDid !== packed.manifest.publish.signingKey) {
+    throw new Error("package canonical owner must match manifest publish signing key");
+  }
+  if (identity && spec.ownerDid !== identity.did) {
     throw new Error("local identity must match package canonical owner");
   }
 
@@ -547,14 +560,13 @@ export async function createPublishDryRunPlan(options: PublishDryRunOptions): Pr
     versionCheckOptions.fetchImpl = options.fetchImpl;
   }
   const versionCheck = await checkPublishedVersion(versionCheckOptions);
-  const releaseEvent = signReleaseEvent(releaseEventForPackedBundle(packed), identity);
   const registryCandidate = registryCandidateForPackedBundle({
     nodeUrl,
     packed,
     sourceCommit: null
   });
 
-  return {
+  const plan: PublishDryRunPlan = {
     ready: helper.ok && git.ok && versionCheck.status === "available",
     package: packed.manifest.canonical,
     version: packed.manifest.version,
@@ -563,14 +575,21 @@ export async function createPublishDryRunPlan(options: PublishDryRunOptions): Pr
     resolved,
     repoName: spec.repoName,
     nodeUrl,
-    sourceRepo: `gitlawb://${identity.did}/${spec.repoName}`,
+    sourceRepo: `gitlawb://${spec.ownerDid}/${spec.repoName}`,
     sourceTag: `v${packed.manifest.version}`,
     registryCandidate,
     helper,
     git,
     versionCheck,
-    releaseEvent
+    signing:
+      signingMode === "signed"
+        ? { mode: "signed", releaseEventSigned: true }
+        : { mode: "unsigned-preview", releaseEventSigned: false }
   };
+  if (identity) {
+    plan.releaseEvent = signReleaseEvent(releaseEventForPackedBundle(packed), identity);
+  }
+  return plan;
 }
 
 export async function fetchGitlawbBundle(options: FetchGitlawbBundleOptions): Promise<FetchGitlawbBundleResult> {

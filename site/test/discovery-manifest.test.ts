@@ -1,5 +1,5 @@
-import { createHash, createPublicKey, verify } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { createHash, createPublicKey, verify } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -14,6 +14,9 @@ const checkpoint = JSON.parse(readFileSync(join(siteRoot, "public", "transparenc
 const releaseKey = JSON.parse(readFileSync(join(root, "tools", "release-signing-public-key.json"), "utf8"));
 const advisoryKey = JSON.parse(readFileSync(join(root, "tools", "advisory-signing-public-key.json"), "utf8"));
 const version = JSON.parse(readFileSync(join(root, "nipmod", "package.json"), "utf8")).version;
+const agentDemoPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
+const verifiedInstallerCommand =
+  "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh";
 
 describe("nipmod discovery manifest", () => {
   test("publishes a small stable agent discovery document", () => {
@@ -25,12 +28,15 @@ describe("nipmod discovery manifest", () => {
       type: "dev.nipmod.discovery.v1"
     });
     expect(Object.keys(manifest).sort()).toEqual([
-	      "advisories",
-	      "advisoriesPublicKey",
-	      "advisoriesSignature",
-	      "formatVersion",
+      "advisories",
+      "advisoriesPublicKey",
+      "advisoriesSignature",
+      "agent",
+      "docs",
+      "formatVersion",
       "homepage",
       "install",
+      "mcp",
       "name",
       "node",
       "registry",
@@ -43,21 +49,44 @@ describe("nipmod discovery manifest", () => {
   });
 
   test("keeps nested objects exact and discovery only", () => {
-	    expect(Object.keys(manifest.registry).sort()).toEqual([
-	      "dependenciesTemplate",
-	      "packageDocumentTemplate",
-	      "packageVersionTemplate",
-	      "provenanceTemplate",
-	      "source",
-	      "url"
-	    ]);
-	    expect(manifest.advisories).toBe("https://nipmod.com/advisories.json");
-	    expect(manifest.advisoriesSignature).toBe("https://nipmod.com/advisories.json.sig");
-	    expect(Object.keys(manifest.advisoriesPublicKey).sort()).toEqual([
-	      "algorithm",
-	      "publicKeySpkiBase64",
-	      "spkiSha256"
-	    ]);
+    expect(Object.keys(manifest.registry).sort()).toEqual([
+      "canonicalEncoding",
+      "dependenciesTemplate",
+      "packageDocumentTemplate",
+      "packageVersionTemplate",
+      "provenanceTemplate",
+      "source",
+      "url"
+    ]);
+    expect(manifest.advisories).toBe("https://nipmod.com/advisories.json");
+    expect(manifest.advisoriesSignature).toBe("https://nipmod.com/advisories.json.sig");
+    expect(Object.keys(manifest.advisoriesPublicKey).sort()).toEqual([
+      "algorithm",
+      "publicKeySpkiBase64",
+      "spkiSha256"
+    ]);
+    expect(Object.keys(manifest.docs).sort()).toEqual([
+      "createPackage",
+      "docs",
+      "install",
+      "mcp",
+      "packages",
+      "security",
+      "trust"
+    ]);
+    expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
+    expect(Object.keys(manifest.agent.commands).sort()).toEqual([
+      "addPackage",
+      "audit",
+      "doctor",
+      "inspect",
+      "install",
+      "installPackage",
+      "publishDryRun",
+      "sbom",
+      "search"
+    ]);
+    expect(Object.keys(manifest.mcp).sort()).toEqual(["docs", "serverCommand", "tools"]);
     expect(Object.keys(manifest.node).sort()).toEqual(["health", "url"]);
     expect(Object.keys(manifest.witness).sort()).toEqual(["did", "health", "statements"]);
     expect(Object.keys(manifest.transparency).sort()).toEqual(["checkpoint", "log", "logId"]);
@@ -101,7 +130,7 @@ describe("nipmod discovery manifest", () => {
     });
   });
 
-	  test("manifest release signature can be verified from published manifest key material", () => {
+  test("manifest release signature can be verified from published manifest key material", () => {
     const artifactName = `nipmod-${version}.tgz`;
     const artifact = readFileSync(join(siteRoot, "public", "releases", artifactName));
     const signature = JSON.parse(readFileSync(join(siteRoot, "public", "releases", `${artifactName}.sig`), "utf8"));
@@ -125,37 +154,37 @@ describe("nipmod discovery manifest", () => {
         Buffer.from(signature.signatureBase64, "base64")
       )
     ).toBe(true);
-	  });
+  });
 
-	  test("manifest advisory signature can be verified from published manifest key material", () => {
-	    const advisories = readFileSync(join(siteRoot, "public", "advisories.json"));
-	    const signature = JSON.parse(readFileSync(join(siteRoot, "public", "advisories.json.sig"), "utf8"));
-	    const publicKeyDer = Buffer.from(manifest.advisoriesPublicKey.publicKeySpkiBase64, "base64");
+  test("manifest advisory signature can be verified from published manifest key material", () => {
+    const advisories = readFileSync(join(siteRoot, "public", "advisories.json"));
+    const signature = JSON.parse(readFileSync(join(siteRoot, "public", "advisories.json.sig"), "utf8"));
+    const publicKeyDer = Buffer.from(manifest.advisoriesPublicKey.publicKeySpkiBase64, "base64");
 
-	    expect(signature).toMatchObject({
-	      algorithm: "Ed25519",
-	      artifact: "advisories.json",
-	      publicKeySpkiSha256: advisoryKey.publicKeySpkiSha256,
-	      type: "dev.nipmod.advisory.signature.v1"
-	    });
-	    expect(manifest.advisoriesPublicKey).toEqual({
-	      algorithm: advisoryKey.algorithm,
-	      publicKeySpkiBase64: advisoryKey.publicKeySpkiBase64,
-	      spkiSha256: advisoryKey.publicKeySpkiSha256
-	    });
-	    expect(
-	      verify(
-	        null,
-	        advisories,
-	        createPublicKey({
-	          format: "der",
-	          key: publicKeyDer,
-	          type: "spki"
-	        }),
-	        Buffer.from(signature.signatureBase64, "base64")
-	      )
-	    ).toBe(true);
-	  });
+    expect(signature).toMatchObject({
+      algorithm: "Ed25519",
+      artifact: "advisories.json",
+      publicKeySpkiSha256: advisoryKey.publicKeySpkiSha256,
+      type: "dev.nipmod.advisory.signature.v1"
+    });
+    expect(manifest.advisoriesPublicKey).toEqual({
+      algorithm: advisoryKey.algorithm,
+      publicKeySpkiBase64: advisoryKey.publicKeySpkiBase64,
+      spkiSha256: advisoryKey.publicKeySpkiSha256
+    });
+    expect(
+      verify(
+        null,
+        advisories,
+        createPublicKey({
+          format: "der",
+          key: publicKeyDer,
+          type: "spki"
+        }),
+        Buffer.from(signature.signatureBase64, "base64")
+      )
+    ).toBe(true);
+  });
 
   test("installer dry run matches the manifest release", () => {
     const output = execFileSync("bash", [join(siteRoot, "public", "install.sh")], {
@@ -173,6 +202,7 @@ describe("nipmod discovery manifest", () => {
 
   test("matches the verified registry and transparency roots", () => {
     expect(manifest.registry).toEqual({
+      canonicalEncoding: "base64url(canonical package id), no padding",
       dependenciesTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
       packageDocumentTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}.json",
       packageVersionTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
@@ -192,6 +222,58 @@ describe("nipmod discovery manifest", () => {
       packet: "https://nipmod.com/review/packet.json",
       packetMarkdown: "https://nipmod.com/review/packet.md",
       proofTranscript: "https://nipmod.com/proof/transcript.json"
+    });
+  });
+
+  test("publishes a complete agent runbook from the machine manifest", () => {
+    expect(manifest.docs).toEqual({
+      createPackage: "https://nipmod.com/package",
+      docs: "https://nipmod.com/quickstart#docs",
+      install: "https://nipmod.com/quickstart#install",
+      mcp: "https://nipmod.com/mcp",
+      packages: "https://nipmod.com/packages",
+      security: "https://nipmod.com/security",
+      trust: "https://nipmod.com/trust"
+    });
+    expect(manifest.agent.llms).toBe("https://nipmod.com/llms.txt");
+    expect(manifest.agent.runbook).toBe("https://nipmod.com/quickstart#agents");
+    expect(manifest.agent.workflow).toEqual([
+      "install",
+      "doctor",
+      "search",
+      "inspect",
+      "installPackage",
+      "addPackage",
+      "audit",
+      "sbom",
+      "publishDryRun"
+    ]);
+    expect(manifest.agent.commands).toEqual({
+      addPackage: `nipmod add ${agentDemoPackage} --online`,
+      audit: "nipmod audit --online",
+      doctor: "nipmod doctor --online",
+      inspect: `nipmod inspect ${agentDemoPackage} --json`,
+      install: verifiedInstallerCommand,
+      installPackage: `nipmod install ${agentDemoPackage}`,
+      publishDryRun: "nipmod publish . --dry-run --json",
+      sbom: "nipmod sbom --json",
+      search: "nipmod search gitlawb --online"
+    });
+    expect(manifest.mcp).toEqual({
+      docs: "https://nipmod.com/mcp",
+      serverCommand: "nipmod mcp serve",
+      tools: [
+        "nipmod.search",
+        "nipmod.view",
+        "nipmod.inspect",
+        "nipmod.install_plan",
+        "nipmod.update_plan",
+        "nipmod.publish_plan",
+        "nipmod.verify",
+        "nipmod.audit",
+        "nipmod.sbom",
+        "nipmod.explain"
+      ]
     });
   });
 

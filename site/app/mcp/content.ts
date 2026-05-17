@@ -9,8 +9,8 @@ export const mcpContent = {
       text: "Hosts can ask for package facts, exact metadata, trust reports and install plans. They cannot add or install through MCP."
     },
     {
-      label: "Gated dry run",
-      text: "publish_plan is exposed as a non-read-only dry run and requires explicit local signing opt in."
+      label: "Unsigned preview",
+      text: "publish_plan previews package metadata without remote writes and without local signing."
     },
     {
       label: "Proof first",

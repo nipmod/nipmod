@@ -11,7 +11,7 @@ export const homeContent = {
   primaryAction: "Install",
   secondaryAction: "X",
   commands: [
-    "nipmod search gitlawb",
+    "nipmod search gitlawb --online",
     "nipmod inspect gitlawb-repo-reader",
     "nipmod install gitlawb-repo-reader",
     "nipmod audit --online"
@@ -50,7 +50,7 @@ export const homeContent = {
     {
       label: "Find",
       text: "Search the public registry.",
-      command: "nipmod search gitlawb"
+      command: "nipmod search gitlawb --online"
     },
     {
       label: "Inspect",
@@ -61,6 +61,11 @@ export const homeContent = {
       label: "Install package",
       text: "Create a demo workspace first so the first lockfile mutation is isolated.",
       command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod install gitlawb-repo-reader"
+    },
+    {
+      label: "Add package",
+      text: "Add the package to the workspace dependency graph.",
+      command: "nipmod add gitlawb-repo-reader --online"
     },
     {
       label: "Restore",
@@ -150,7 +155,7 @@ export const homeContent = {
     {
       label: "Find",
       text: "Search the public registry without a Nipmod account.",
-      command: "nipmod search gitlawb"
+      command: "nipmod search gitlawb --online"
     },
     {
       label: "Inspect",

@@ -4151,6 +4151,40 @@ describe("nipmod CLI", () => {
 	    expect(pinned.data.summary).toEqual({ fail: 0, ok: 1, total: 1, warn: 0 });
 	  });
 
+	  test("inspects an exact package name from the configured default registry", async () => {
+	    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-inspect-short-name-"));
+	    const owner = generateIdentity().did;
+	    const canonical = `pkg:${owner}/short-inspect-agent`;
+	    const digest = "b".repeat(64);
+	    const registryPath = join(workspace, "registry.json");
+	    const transparency = cliTransparency(canonical, owner, digest);
+	    await writeFile(registryPath, `${JSON.stringify(cliRegistry(canonical, owner, digest, transparency))}\n`);
+
+	    const result = await execaNode(
+	      [
+	        "src/cli.ts",
+	        "inspect",
+	        "short-inspect-agent",
+	        "--allow-custom-roots",
+	        "--log-id",
+	        transparency.log.treeHead.logId,
+	        "--witness",
+	        transparency.witness.witness,
+	        "--json"
+	      ],
+	      {
+	        env: { NIPMOD_REGISTRY_URL: pathToFileURL(registryPath).href }
+	      }
+	    );
+	    const parsed = JSON.parse(result.stdout) as { ok: true; data: { report: { canonical: string; installCommand: string; version: string } } };
+
+	    expect(parsed.data.report).toMatchObject({
+	      canonical,
+	      installCommand: `nipmod install ${canonical}@0.1.0`,
+	      version: "0.1.0"
+	    });
+	  });
+
   test("audit refuses implicit network access without explicit online mode", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-audit-offline-"));
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${NIPMOD_VERSION:-0.1.35}"
+VERSION="${NIPMOD_VERSION:-0.1.36}"
 BASE_URL="${NIPMOD_BASE_URL:-https://nipmod.com}"
 PACKAGE_NAME="${NIPMOD_PACKAGE_NAME:-nipmod-${VERSION}.tgz}"
 PACKAGE_URL="${NIPMOD_PACKAGE_URL:-${BASE_URL}/releases/${PACKAGE_NAME}}"
@@ -272,7 +272,7 @@ echo ""
 echo "Installed nipmod"
 echo "Next:"
 echo "  nipmod doctor --online"
-echo "  nipmod search gitlawb"
+echo "  nipmod search gitlawb --online"
 
 case ":$INITIAL_PATH:" in
   *":$NIPMOD_BIN_DIR:"*) ;;

@@ -37,6 +37,11 @@ const docSections = [
     text: "Run the safe author preflight before any public write."
   },
   {
+    href: "#agents",
+    label: "Agents",
+    text: "Give agent hosts one machine runbook."
+  },
+  {
     href: "/mcp",
     label: "MCP",
     text: "Connect Nipmod to agent hosts."
@@ -49,6 +54,7 @@ const docSections = [
 ] as const;
 
 const stepIds: Record<string, string> = {
+  "Add package": "add-package",
   Audit: "audit",
   Check: "doctor",
   Explain: "explain",
@@ -115,6 +121,29 @@ export default function QuickstartPage() {
           <pre className="install-command">
             <code>{"curl -fsSLO https://nipmod.com/install.sh && bash install.sh"}</code>
           </pre>
+        </div>
+      </section>
+
+      <section className="proof-section" id="agents" aria-labelledby="agents-title">
+        <div>
+          <p className="eyebrow">Agents</p>
+          <h2 id="agents-title">Give agents one link.</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">
+            Agents should fetch the text runbook, then the JSON manifest for exact endpoints, commands, trust roots and MCP tools.
+          </p>
+          <pre className="install-command">
+            <code>{"curl -fsSL https://nipmod.com/llms.txt\ncurl -fsSL https://nipmod.com/.well-known/nipmod.json\nnipmod mcp serve"}</code>
+          </pre>
+          <div className="actions">
+            <a className="button button-primary" href="/mcp">
+              MCP
+            </a>
+            <a className="button button-ghost" href="/trust">
+              Trust
+            </a>
+          </div>
         </div>
       </section>
 

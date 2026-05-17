@@ -119,9 +119,7 @@ const UpdatePlanArgumentsSchema = TrustPinsSchema.extend({
 });
 
 const PublishPlanArgumentsSchema = z.strictObject({
-  allowLocalSigning: z.boolean().optional(),
   helperPath: z.string().optional(),
-  identityPath: z.string().optional(),
   nodeUrl: z.string().optional(),
   projectDir: z.string().optional()
 });
@@ -331,16 +329,16 @@ async function updatePlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<Js
 }
 
 async function publishPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
-  const args = PublishPlanArgumentsSchema.parse(raw);
-  if (args.allowLocalSigning !== true) {
-    throw new Error("MCP publish_plan requires allowLocalSigning: true because it uses the local package signing identity");
+  if (raw && typeof raw === "object" && ("allowLocalSigning" in raw || "identityPath" in raw)) {
+    throw new Error("MCP publish_plan never uses local signing; run nipmod publish --dry-run in a terminal to sign locally");
   }
+  const args = PublishPlanArgumentsSchema.parse(raw);
   const options = {
     fetchImpl,
     projectDir: args.projectDir ?? process.cwd(),
     ...(args.helperPath ? { helperPath: args.helperPath } : {}),
-    ...(args.identityPath ? { identityPath: args.identityPath } : {}),
-    ...(args.nodeUrl ? { nodeUrl: args.nodeUrl } : {})
+    ...(args.nodeUrl ? { nodeUrl: args.nodeUrl } : {}),
+    signingMode: "unsigned-preview" as const
   };
   return toJsonValue(await createPublishDryRunPlan(options));
 }
@@ -737,21 +735,17 @@ const MCP_TOOLS: ToolDefinition[] = [
     annotations: {
       destructiveHint: false,
       idempotentHint: true,
-      readOnlyHint: false,
+      readOnlyHint: true,
       openWorldHint: true
     },
-    description:
-      "Create a Gitlawb publish dry-run plan without remote writes. Requires explicit allowLocalSigning because it uses the local package signing identity.",
+    description: "Create an unsigned Gitlawb publish preview without remote writes or local signing.",
     inputSchema: {
       additionalProperties: false,
       properties: {
-        allowLocalSigning: { type: "boolean" },
         helperPath: { type: "string" },
-        identityPath: { type: "string" },
         nodeUrl: { type: "string" },
         projectDir: { type: "string" }
       },
-      required: ["allowLocalSigning"],
       type: "object"
     },
     name: "nipmod.publish_plan",

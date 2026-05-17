@@ -55,13 +55,30 @@ test("docs and install navigation have distinct, correct destinations", async ({
   await expect(page.locator("#docs")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Docs" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Install the CLI" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "MCP" })).toHaveAttribute("href", "/mcp");
+  await expect(page.getByLabel("Docs sections").getByRole("link", { name: "MCP" })).toHaveAttribute("href", "/mcp");
 
   await page.goto("/");
   await page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Install" }).click();
   await expect(page).toHaveURL(/\/quickstart#install$/);
   await expect(page.locator("#install")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Install CLI" })).toBeVisible();
+});
+
+test("homepage exposes machine readable agent discovery", async ({ page, request }) => {
+  await page.goto("/");
+
+  await expect(page.locator('head link[rel="alternate"][type="text/plain"][href="/llms.txt"]')).toHaveCount(1);
+  await expect(page.locator('head link[rel="alternate"][type="application/json"][href="/.well-known/nipmod.json"]')).toHaveCount(1);
+
+  const llms = await request.get("/llms.txt");
+  await expect(llms).toBeOK();
+  await expect(llms.text()).resolves.toContain("Agent runbook: https://nipmod.com/quickstart#agents");
+
+  const manifest = await request.get("/.well-known/nipmod.json");
+  await expect(manifest).toBeOK();
+  const body = await manifest.json();
+  expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
+  expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
 });
 
 test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }, testInfo) => {
@@ -251,7 +268,7 @@ test("launch page exposes adoption, review and multi source paths", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Use it. Publish into it. Review it." })).toBeVisible();
   await expect(page.getByText("Catalog type coverage", { exact: true })).toBeVisible();
-  await expect(page.getByText("Adoption workflow ready", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adoption workflow prepared", { exact: true })).toBeVisible();
   await expect(page.getByText("Gitlawb review signal", { exact: true })).toBeVisible();
   await expect(page.getByText("External human audit", { exact: true })).toBeVisible();
   await expect(page.getByText("Current ledger count is zero.")).toBeVisible();

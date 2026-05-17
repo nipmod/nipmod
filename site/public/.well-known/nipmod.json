@@ -4,6 +4,57 @@
   "name": "nipmod",
   "homepage": "https://nipmod.com",
   "trustPage": "https://nipmod.com/trust",
+  "docs": {
+    "docs": "https://nipmod.com/quickstart#docs",
+    "install": "https://nipmod.com/quickstart#install",
+    "packages": "https://nipmod.com/packages",
+    "createPackage": "https://nipmod.com/package",
+    "mcp": "https://nipmod.com/mcp",
+    "trust": "https://nipmod.com/trust",
+    "security": "https://nipmod.com/security"
+  },
+  "agent": {
+    "llms": "https://nipmod.com/llms.txt",
+    "runbook": "https://nipmod.com/quickstart#agents",
+    "workflow": [
+      "install",
+      "doctor",
+      "search",
+      "inspect",
+      "installPackage",
+      "addPackage",
+      "audit",
+      "sbom",
+      "publishDryRun"
+    ],
+    "commands": {
+      "install": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+      "doctor": "nipmod doctor --online",
+      "search": "nipmod search gitlawb --online",
+      "inspect": "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "installPackage": "nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+      "addPackage": "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
+      "audit": "nipmod audit --online",
+      "sbom": "nipmod sbom --json",
+      "publishDryRun": "nipmod publish . --dry-run --json"
+    }
+  },
+  "mcp": {
+    "docs": "https://nipmod.com/mcp",
+    "serverCommand": "nipmod mcp serve",
+    "tools": [
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.update_plan",
+      "nipmod.publish_plan",
+      "nipmod.verify",
+      "nipmod.audit",
+      "nipmod.sbom",
+      "nipmod.explain"
+    ]
+  },
   "advisories": "https://nipmod.com/advisories.json",
   "advisoriesSignature": "https://nipmod.com/advisories.json.sig",
   "advisoriesPublicKey": {
@@ -14,6 +65,7 @@
   "registry": {
     "url": "https://nipmod.com/registry/packages.json",
     "source": "https://node.nipmod.com",
+    "canonicalEncoding": "base64url(canonical package id), no padding",
     "packageDocumentTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}.json",
     "packageVersionTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
     "dependenciesTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
@@ -44,16 +96,16 @@
   "install": {
     "script": "https://nipmod.com/install.sh",
     "release": {
-      "version": "0.1.35",
-      "artifact": "https://nipmod.com/releases/nipmod-0.1.35.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-0.1.35.tgz.sig",
+      "version": "0.1.36",
+      "artifact": "https://nipmod.com/releases/nipmod-0.1.36.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-0.1.36.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
         "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
       },
-      "artifactSha256": "6bc34aa351ba9e20ca33f0110e930dfe1218ec96ab69384b4e5f076f0a87903f"
+      "artifactSha256": "b573574d4d536b5faef3b5ff8450ecae505b83b2b92e63b815c49dbd62ce95ef"
     },
-    "scriptSha256": "0308d0903fa5ee5223892a38170e9a7a7467088388d34fdab1e1446483511dba"
+    "scriptSha256": "d2016464b319262c13e102fe9926bb3ca9d82a357de1d969133ffc0447f9a628"
   }
 }

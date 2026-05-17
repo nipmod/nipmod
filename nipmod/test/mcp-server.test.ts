@@ -59,10 +59,10 @@ describe("nipmod MCP server", () => {
     ).toEqual({
       "nipmod.search": true,
       "nipmod.view": true,
-      "nipmod.inspect": true,
-      "nipmod.install_plan": true,
-      "nipmod.update_plan": true,
-      "nipmod.publish_plan": false,
+	      "nipmod.inspect": true,
+	      "nipmod.install_plan": true,
+	      "nipmod.update_plan": true,
+	      "nipmod.publish_plan": true,
       "nipmod.verify": true,
       "nipmod.audit": true,
       "nipmod.sbom": true,
@@ -128,7 +128,7 @@ describe("nipmod MCP server", () => {
     expect(result.result.content[0].text).toContain("dev.nipmod.sbom.v1");
   });
 
-  test("rejects publish planning unless local signing is explicitly allowed", async () => {
+  test("rejects local signing arguments in publish planning", async () => {
     const server = createNipmodMcpServer({
       fetchImpl: async () => new Response("not found", { status: 404 })
     });
@@ -139,24 +139,25 @@ describe("nipmod MCP server", () => {
       jsonrpc: "2.0",
       method: "tools/call",
       params: {
-        arguments: {
-          projectDir: "/tmp/nipmod-mcp-signing-denied"
-        },
+	        arguments: {
+	          allowLocalSigning: true,
+	          projectDir: "/tmp/nipmod-mcp-signing-denied"
+	        },
         name: "nipmod.publish_plan"
       }
     });
 
     expect(result).toMatchObject({
       error: {
-        code: -32000,
-        message: "MCP publish_plan requires allowLocalSigning: true because it uses the local package signing identity"
-      },
+	        code: -32000,
+	        message: "MCP publish_plan never uses local signing; run nipmod publish --dry-run in a terminal to sign locally"
+	      },
       id: 9,
       jsonrpc: "2.0"
     });
   });
 
-  test("creates a publish plan without mutating Gitlawb", async () => {
+  test("creates an unsigned publish plan without mutating Gitlawb", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-publish-plan-"));
     const pkg = join(workspace, "pkg");
     const binDir = join(workspace, "bin");
@@ -206,10 +207,9 @@ describe("nipmod MCP server", () => {
       jsonrpc: "2.0",
       method: "tools/call",
       params: {
-        arguments: {
-          allowLocalSigning: true,
-          helperPath,
-          nodeUrl: "https://node.example.test",
+	        arguments: {
+	          helperPath,
+	          nodeUrl: "https://node.example.test",
           projectDir: pkg
         },
         name: "nipmod.publish_plan"
@@ -221,11 +221,14 @@ describe("nipmod MCP server", () => {
       package: `pkg:${identity.did}/publish-plan-agent`,
       ready: true,
       repoName: "publish-plan-agent",
-      version: "0.1.0",
-      versionCheck: { status: "available" }
-    });
-    expect(JSON.stringify(result.result)).not.toContain("privateKey");
-  });
+	      version: "0.1.0",
+	      versionCheck: { status: "available" },
+	      signing: { mode: "unsigned-preview", releaseEventSigned: false }
+	    });
+	    expect(result.result.structuredContent).not.toHaveProperty("releaseEvent");
+	    expect(JSON.stringify(result.result)).not.toContain("signatureBase64");
+	    expect(JSON.stringify(result.result)).not.toContain("privateKey");
+	  });
 
   test("searches a file-backed registry through tools/call", async () => {
     const fixture = await writeRegistryFixture("alpha-agent");

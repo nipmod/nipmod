@@ -55,10 +55,10 @@ describe("home content", () => {
 
   test("states what people can do on the site", () => {
     expect(homeContent.usage.map((item) => item.label)).toEqual(["Search", "Inspect", "Install"]);
-    expect(homeContent.commands).toEqual([
-      "nipmod search gitlawb",
-      "nipmod inspect gitlawb-repo-reader",
-      "nipmod install gitlawb-repo-reader",
+	    expect(homeContent.commands).toEqual([
+	      "nipmod search gitlawb --online",
+	      "nipmod inspect gitlawb-repo-reader",
+	      "nipmod install gitlawb-repo-reader",
       "nipmod audit --online"
     ]);
   });
@@ -74,9 +74,10 @@ describe("home content", () => {
       "Verify",
       "Check",
       "Find",
-      "Inspect",
-      "Install package",
-      "Restore",
+	      "Inspect",
+	      "Install package",
+	      "Add package",
+	      "Restore",
       "Update",
       "SBOM",
       "Explain",
@@ -87,7 +88,10 @@ describe("home content", () => {
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
+	    expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
+	    expect(homeContent.quickstartSteps.find((step) => step.label === "Add package")?.command).toBe(
+	      "nipmod add gitlawb-repo-reader --online"
+	    );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Update")?.command).toBe(
       "nipmod update --plan\nnipmod update"
