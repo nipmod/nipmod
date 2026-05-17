@@ -10,6 +10,9 @@ Default tools:
 - `nipmod.install_plan`
 - `nipmod.update_plan`
 - `nipmod.publish_plan`
+- `nipmod.claim_verify`
+- `nipmod.claim_index`
+- `nipmod.package_patch`
 - `nipmod.verify`
 - `nipmod.audit`
 - `nipmod.sbom`
@@ -17,7 +20,7 @@ Default tools:
 
 Safety model:
 
-- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `update_plan`, `verify`, `audit`, `sbom` and `explain`.
+- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `update_plan`, `claim_verify`, `claim_index`, `package_patch`, `verify`, `audit`, `sbom` and `explain`.
 - Gated dry run: `publish_plan`; it previews package metadata without local signing and without remote writes.
 - Not exposed through MCP: mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`.
 
@@ -105,7 +108,7 @@ Add to `opencode.json`:
 printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0.0"}}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n' | nipmod mcp serve
 ```
 
-The response must list the ten tools above. Host approval UI should show nine read-only tools plus the gated `nipmod.publish_plan` dry run.
+The response must list the thirteen tools above. Host approval UI should show twelve read-only tools plus the gated `nipmod.publish_plan` dry run.
 
 Use `nipmod publish . --dry-run --json` in a terminal when you need a signed local publish preflight.
 

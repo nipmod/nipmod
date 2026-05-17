@@ -764,6 +764,11 @@ h1 {
   border-color: rgba(143, 255, 193, 0.28);
 }
 
+.candidate-published {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
 .candidate-unclaimed {
   background: rgba(41, 151, 255, 0.14);
   border-color: rgba(41, 151, 255, 0.3);

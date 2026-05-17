@@ -138,6 +138,7 @@ describe("home content", () => {
     expect(homeContent.repoToPackage.steps.map((step) => step.label)).toEqual(["Paste", "Draft", "Claim"]);
     expect(homeContent.repoToPackage.claim.text).toContain("DID signature");
     expect(homeContent.repoToPackage.claim.text).not.toContain("login");
-    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package gitlawb://did:key:z6Mk.../repo --dir repo");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod claim verify gitlawb://did:key:z6Mk.../repo --json");
   });
 });

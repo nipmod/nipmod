@@ -13,6 +13,12 @@
     "trust": "https://nipmod.com/trust",
     "security": "https://nipmod.com/security"
   },
+  "claims": {
+    "index": "https://nipmod.com/claims/index.json",
+    "candidatePage": "https://nipmod.com/candidates",
+    "verifyCommand": "nipmod claim verify gitlawb://did:key:.../repo --json",
+    "indexCommand": "nipmod claim index --node https://node.nipmod.com --json"
+  },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",
     "runbook": "https://nipmod.com/quickstart#agents",
@@ -27,7 +33,10 @@
       "addPackage",
       "audit",
       "sbom",
-      "publishDryRun"
+      "publishDryRun",
+      "claimVerify",
+      "claimIndex",
+      "packagePr"
     ],
     "commands": {
       "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
@@ -40,7 +49,10 @@
       "addPackage": "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "audit": "nipmod audit --online",
       "sbom": "nipmod sbom --json",
-      "publishDryRun": "nipmod publish . --dry-run --json"
+      "publishDryRun": "nipmod publish . --dry-run --json",
+      "claimVerify": "nipmod claim verify gitlawb://did:key:.../repo --json",
+      "claimIndex": "nipmod claim index --node https://node.nipmod.com --json",
+      "packagePr": "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json"
     }
   },
   "mcp": {
@@ -53,6 +65,9 @@
       "nipmod.install_plan",
       "nipmod.update_plan",
       "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",
@@ -102,16 +117,16 @@
     "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.1.0",
-      "artifact": "https://nipmod.com/releases/nipmod-1.1.0.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.1.0.tgz.sig",
+      "version": "1.2.0",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.0.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.0.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
         "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
       },
-      "artifactSha256": "75f69215a238fb2503959e26a85700ab1e1438e3fbe14a8fef1a5fc48f0883e3"
+      "artifactSha256": "4f64a21bea2cae04464c971418ac6e12b14628ec1254eddbe660e9853c07e0cb"
     },
-    "scriptSha256": "f94b335e92bcd06124466cfeeb9488f6792530576ff2f8c6d74f630a1ec9d325"
+    "scriptSha256": "54e65d52355a3065f6a947e9dcedd24df521015dfa51234019db7f7d18d993b8"
   }
 }

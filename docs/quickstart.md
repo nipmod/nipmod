@@ -162,7 +162,7 @@ nipmod mcp serve
 
 Expected result:
 
-- Agent hosts can call read only package search, view, inspect, install plan, update plan, verify, audit, SBOM and explain tools.
+- Agent hosts can call read only package search, view, inspect, install plan, update plan, claim verify, claim index, package patch, verify, audit, SBOM and explain tools.
 - `nipmod.publish_plan` is an unsigned dry run preview. It does not sign locally and does not write to Gitlawb.
 - Host setup examples live at `https://nipmod.com/mcp`.
 

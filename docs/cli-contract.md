@@ -17,7 +17,10 @@ P0 commands:
 - `nipmod package scan`
 - `nipmod package doctor <gitlawb-repo>`
 - `nipmod package <gitlawb-repo>`
+- `nipmod package pr <gitlawb-repo>`
 - `nipmod claim <gitlawb-repo>`
+- `nipmod claim verify <gitlawb-repo>`
+- `nipmod claim index`
 - `nipmod inspect`
 - `nipmod view`
 - `nipmod install`
@@ -92,6 +95,11 @@ id, canonical package id with version, or the exact lockfile package key. Path e
 `nipmod sbom` reports `type`, `generator`, `root`, `summary` and `packages` from the installed lockfile. When local
 store bundles exist, it verifies each signed bundle before including manifest exports, dependency maps and package
 type. It does not fetch network data.
+`nipmod package pr <gitlawb-repo>` writes a local PR-ready package patch and never opens remote issues or pull requests.
+`nipmod claim verify <gitlawb-repo>` fetches `.nipmod/package-claim.json` from the configured Gitlawb node and only
+returns success when the proof signature, owner DID, repo name, repo URL and package id all match the target repo.
+`nipmod claim index` scans public Gitlawb repos, verifies their claim proofs and writes a machine-readable index when
+`--out` is provided. Missing proofs are candidates, not claims.
 
 ## Exit codes
 

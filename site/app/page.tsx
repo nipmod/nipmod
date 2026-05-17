@@ -132,7 +132,7 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="proof-panel">
           <p className="panel-copy">Paste a repo and dry run the publish path.</p>
           <pre className="install-command">
-            <code>{"nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod publish repo --dry-run --json"}</code>
+            <code>{"nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod publish repo-pr --dry-run --json"}</code>
           </pre>
           <a className="button button-primary" href="/package">
             Create package

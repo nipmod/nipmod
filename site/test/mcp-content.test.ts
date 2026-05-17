@@ -22,12 +22,17 @@ describe("MCP host content", () => {
       "nipmod.install_plan",
       "nipmod.update_plan",
       "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",
       "nipmod.explain"
     ]);
 	    expect(text).toContain("publish_plan");
+    expect(text).toContain("claim_verify");
+    expect(text).toContain("package_patch");
 	    expect(text).toContain("They cannot add or install through MCP.");
 	    expect(text).toContain("without local signing");
 	    expect(text).toContain("Custom transparency or advisory roots require an opt in flag");

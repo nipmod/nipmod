@@ -13,7 +13,10 @@ describe("candidate content", () => {
   };
 
   test("turns a Gitlawb repo into a claimable package candidate", () => {
-    const candidate = candidateFromRepo(repo, new Set());
+    const candidate = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set()
+    });
 
     expect(candidate).toMatchObject({
       claimCommand:
@@ -26,15 +29,31 @@ describe("candidate content", () => {
     expect(candidate.readinessScore).toBeGreaterThanOrEqual(60);
   });
 
-  test("marks registry packages as already claimed", () => {
-    const candidate = candidateFromRepo(repo, new Set([`pkg:${repo.owner_did}/${repo.name}`]));
+  test("does not mark registry packages as claimed without a verified proof", () => {
+    const candidate = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`])
+    });
+
+    expect(candidate.status).toBe("published");
+    expect(candidate.readinessScore).toBe(100);
+  });
+
+  test("marks verified claim proof packages as claimed", () => {
+    const candidate = candidateFromRepo(repo, {
+      claimedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`]),
+      publishedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`])
+    });
 
     expect(candidate.status).toBe("claimed");
     expect(candidate.readinessScore).toBe(100);
   });
 
   test("searches candidates by repo, package and description", () => {
-    const candidate = candidateFromRepo(repo, new Set());
+    const candidate = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set()
+    });
 
     expect(searchCandidates([candidate], "reader")).toHaveLength(1);
     expect(searchCandidates([candidate], "agent")).toHaveLength(1);
@@ -42,12 +61,23 @@ describe("candidate content", () => {
   });
 
   test("summarizes candidate states", () => {
-    const unclaimed = candidateFromRepo(repo, new Set());
-    const claimed = candidateFromRepo(repo, new Set([`pkg:${repo.owner_did}/${repo.name}`]));
+    const unclaimed = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set()
+    });
+    const published = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`])
+    });
+    const claimed = candidateFromRepo(repo, {
+      claimedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`]),
+      publishedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`])
+    });
 
-    expect(candidateStats([unclaimed, claimed])).toEqual([
-      { label: "Candidates", value: "2" },
+    expect(candidateStats([unclaimed, published, claimed])).toEqual([
+      { label: "Candidates", value: "3" },
       { label: "Claimed", value: "1" },
+      { label: "Published", value: "1" },
       { label: "Unclaimed", value: "1" }
     ]);
   });

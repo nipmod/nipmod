@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
+import claimIndexData from "../claim-index.json";
 import registryData from "../registry-data.json";
 import {
+  candidateClaimState,
   candidateFromRepo,
   candidateStats,
   fetchGitlawbRepos,
   searchCandidates,
   type PackageCandidate
 } from "../../lib/candidates";
+import type { PackageClaimIndex } from "../../lib/candidates";
 import type { RegistryIndex } from "../../lib/registry";
 
 type CandidatesPageProps = {
@@ -16,6 +19,7 @@ type CandidatesPageProps = {
 };
 
 const registry = registryData as RegistryIndex;
+const claimIndex = claimIndexData as PackageClaimIndex;
 
 export const metadata: Metadata = {
   alternates: {
@@ -99,10 +103,13 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
 }
 
 async function loadCandidates(): Promise<PackageCandidate[]> {
-  const claimedPackages = new Set(registry.packages.map((pkg) => pkg.canonical));
+  const state = candidateClaimState({
+    claimIndex,
+    publishedPackages: new Set(registry.packages.map((pkg) => pkg.canonical))
+  });
   try {
     const repos = await fetchGitlawbRepos({ nodeUrl: registry.source || "https://node.nipmod.com" });
-    return repos.map((repo) => candidateFromRepo(repo, claimedPackages));
+    return repos.map((repo) => candidateFromRepo(repo, state));
   } catch {
     return registry.packages.map((pkg) =>
       candidateFromRepo(
@@ -115,7 +122,7 @@ async function loadCandidates(): Promise<PackageCandidate[]> {
           owner_did: pkg.publisher,
           updated_at: pkg.updatedAt
         },
-        claimedPackages
+        state
       )
     );
   }
@@ -123,7 +130,13 @@ async function loadCandidates(): Promise<PackageCandidate[]> {
 
 function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
   const statusLabel =
-    candidate.status === "claimed" ? "claimed" : candidate.status === "unclaimed" ? "unclaimed" : "needs work";
+    candidate.status === "claimed"
+      ? "claimed"
+      : candidate.status === "published"
+        ? "published"
+        : candidate.status === "unclaimed"
+          ? "unclaimed"
+          : "needs work";
 
   return (
     <article className="package-card candidate-card">
@@ -155,7 +168,7 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
       </dl>
 
       <pre className="install-command">
-        <code>{candidate.status === "claimed" ? `nipmod add ${candidate.packageId}` : candidate.claimCommand}</code>
+        <code>{candidate.status === "claimed" || candidate.status === "published" ? `nipmod add ${candidate.packageId}` : candidate.claimCommand}</code>
       </pre>
 
       <div className="package-links">

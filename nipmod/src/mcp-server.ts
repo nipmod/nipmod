@@ -6,10 +6,15 @@ import * as z from "zod";
 import { auditProject, type AuditProjectOptions } from "./audit.js";
 import { verifyBundle } from "./bundle.js";
 import { explainPackage } from "./explain.js";
-import { createPublishDryRunPlan } from "./gitlawb.js";
+import { DEFAULT_GITLAWB_NODE, createPublishDryRunPlan } from "./gitlawb.js";
 import { resolveAddInstallPlan } from "./install-plan.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
+import {
+  buildPackageClaimIndex,
+  createAssistedPackagePatch,
+  fetchGitlawbPackageClaimVerification
+} from "./package-claim.js";
 import { DEFAULT_REGISTRY_URL, searchRegistry, viewRegistryPackages, type RegistrySearchPackage } from "./registry.js";
 import { generateSbom } from "./sbom.js";
 import { inspectBundleFile, inspectRegistryPackage } from "./trust-report.js";
@@ -124,6 +129,25 @@ const PublishPlanArgumentsSchema = z.strictObject({
   projectDir: z.string().optional()
 });
 
+const ClaimVerifyArgumentsSchema = z.strictObject({
+  nodeUrl: z.string().optional(),
+  repo: z.string().min(1)
+});
+
+const ClaimIndexArgumentsSchema = z.strictObject({
+  limit: z.number().int().min(1).max(100).optional(),
+  nodeUrl: z.string().optional()
+});
+
+const PackagePatchArgumentsSchema = z.strictObject({
+  nodeUrl: z.string().optional(),
+  repo: z.string().min(1),
+  type: z
+    .enum(["skill", "mcp-server", "tool-bundle", "agent-profile", "workflow-pack", "eval-pack", "policy-pack", "adapter"])
+    .optional(),
+  version: z.string().optional()
+});
+
 const VerifyArgumentsSchema = z.strictObject({
   integrity: z.string(),
   path: z.string().min(1)
@@ -231,6 +255,12 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await updatePlanTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.publish_plan":
       return toolResult(await publishPlanTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.claim_verify":
+      return toolResult(await claimVerifyTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.claim_index":
+      return toolResult(await claimIndexTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.package_patch":
+      return toolResult(await packagePatchTool(parsed.arguments ?? {}));
     case "nipmod.verify":
       return toolResult(await verifyTool(parsed.arguments ?? {}));
     case "nipmod.audit":
@@ -341,6 +371,51 @@ async function publishPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<J
     signingMode: "unsigned-preview" as const
   };
   return toJsonValue(await createPublishDryRunPlan(options));
+}
+
+async function claimVerifyTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
+  const args = ClaimVerifyArgumentsSchema.parse(raw);
+  const repo = parseMcpGitlawbRepo(args.repo);
+  return toJsonValue(
+    await fetchGitlawbPackageClaimVerification({
+      fetchImpl,
+      nodeUrl: args.nodeUrl ?? DEFAULT_GITLAWB_NODE,
+      ownerDid: repo.ownerDid,
+      repoName: repo.repoName
+    })
+  );
+}
+
+async function claimIndexTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
+  const args = ClaimIndexArgumentsSchema.parse(raw);
+  return toJsonValue(
+    await buildPackageClaimIndex({
+      fetchImpl,
+      limit: args.limit ?? 20,
+      nodeUrl: args.nodeUrl ?? DEFAULT_GITLAWB_NODE
+    })
+  );
+}
+
+async function packagePatchTool(raw: unknown): Promise<JsonValue> {
+  const args = PackagePatchArgumentsSchema.parse(raw);
+  const repo = parseMcpGitlawbRepo(args.repo);
+  const nodeUrl = args.nodeUrl ?? DEFAULT_GITLAWB_NODE;
+  return toJsonValue(
+    createAssistedPackagePatch({
+      repo: {
+        cloneUrl: `${nodeUrl.replace(/\/$/, "")}/${repo.ownerSegment}/${repo.repoName}.git`,
+        defaultBranch: "main",
+        description: "",
+        isPublic: true,
+        name: repo.repoName,
+        ownerDid: repo.ownerDid,
+        updatedAt: new Date(0).toISOString()
+      },
+      ...(args.type ? { type: args.type } : {}),
+      ...(args.version ? { version: args.version } : {})
+    })
+  );
 }
 
 async function verifyTool(raw: unknown): Promise<JsonValue> {
@@ -503,6 +578,26 @@ function parseFileSpecifier(specifier: string): string {
     throw new Error("file URL host is not supported");
   }
   return fileURLToPath(url);
+}
+
+function parseMcpGitlawbRepo(input: string): { ownerDid: string; ownerSegment: string; repoName: string } {
+  const trimmed = input.trim().replace(/\.git$/, "");
+  const direct = /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+|z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*)$/.exec(trimmed);
+  const web = /^https:\/\/(?:gitlawb\.com\/(?:node\/repos\/)?|node(?:2|3)?\.gitlawb\.com\/|node\.nipmod\.com\/)(z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*)$/.exec(
+    trimmed
+  );
+  const match = direct ?? web;
+  if (!match) {
+    throw new McpError(-32602, "repo must be a gitlawb:// repo or supported Gitlawb web URL");
+  }
+  const owner = match[1]!;
+  const repoName = match[2]!;
+  const ownerDid = owner.startsWith("did:key:") ? owner : `did:key:${owner}`;
+  return {
+    ownerDid,
+    ownerSegment: ownerDid.slice("did:key:".length),
+    repoName
+  };
 }
 
 function createBoundedFetch(fetchImpl: typeof fetch, maxBytes: number): typeof fetch {
@@ -750,6 +845,64 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.publish_plan",
     title: "Plan Nipmod publish"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: true
+    },
+    description: "Verify a Gitlawb repo package claim proof without mutating local or remote state.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        nodeUrl: { type: "string" },
+        repo: { type: "string" }
+      },
+      required: ["repo"],
+      type: "object"
+    },
+    name: "nipmod.claim_verify",
+    title: "Verify Nipmod package claim"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: true
+    },
+    description: "Build a verified package claim index from a Gitlawb node.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        limit: { maximum: 100, minimum: 1, type: "integer" },
+        nodeUrl: { type: "string" }
+      },
+      type: "object"
+    },
+    name: "nipmod.claim_index",
+    title: "Build Nipmod claim index"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: false
+    },
+    description: "Return PR-ready package patch files for a Gitlawb repo without opening remote issues or pull requests.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        nodeUrl: { type: "string" },
+        repo: { type: "string" },
+        type: {
+          enum: ["skill", "mcp-server", "tool-bundle", "agent-profile", "workflow-pack", "eval-pack", "policy-pack", "adapter"],
+          type: "string"
+        },
+        version: { type: "string" }
+      },
+      required: ["repo"],
+      type: "object"
+    },
+    name: "nipmod.package_patch",
+    title: "Create Nipmod package patch"
   },
   {
     annotations: {

@@ -10,6 +10,23 @@ Nipmod posts public updates only when the update changes what users or agents ca
 
 Patch releases do not need a public post unless they fix security, install reliability or production availability.
 
+## `v1.2.0` Verified Claim Index post
+
+```text
+Nipmod v1.2.0 ships verified Package Claim.
+
+Registry presence is no longer treated as ownership.
+
+Nipmod now checks Gitlawb repos for signed claim proofs:
+
+nipmod claim verify gitlawb://did:key:.../repo --json
+nipmod claim index --node https://node.nipmod.com --json
+nipmod package pr gitlawb://did:key:.../repo --dir repo-pr
+
+Published means installable.
+Claimed means the Gitlawb owner DID signed and pushed proof.
+```
+
 ## `v1.1.0` Package Claim post
 
 ```text

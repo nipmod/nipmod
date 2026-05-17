@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { isAbsolute, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { auditProject, type AuditProjectOptions, type AuditResult } from "./audit.js";
 import { packProject, verifyBundle } from "./bundle.js";
@@ -52,10 +52,14 @@ import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from
 import { generateSbom, type AgentSbom } from "./sbom.js";
 import {
   analyzeLocalPackageCandidate,
+  buildPackageClaimIndex,
+  createAssistedPackagePatch,
   createPackageClaimProof,
+  fetchGitlawbPackageClaimVerification,
   fetchGitlawbPackageCandidate,
   fetchGitlawbPackageCandidates,
   formatPackageCandidateReport,
+  formatPackageClaimVerification,
   writePackageClaimProof,
   type PackageCandidateReport
 } from "./package-claim.js";
@@ -345,6 +349,9 @@ async function packageCommand(args: string[]): Promise<CliResult> {
   if (subcommand === "scan") {
     return packageScanCommand(args.slice(1));
   }
+  if (subcommand === "pr") {
+    return packagePrCommand(args.slice(1));
+  }
 
   const input = firstPositional(args);
   const repo = parseGitlawbRepoInput(input);
@@ -418,6 +425,58 @@ async function packageCommand(args: string[]): Promise<CliResult> {
   };
 }
 
+async function packagePrCommand(args: string[]): Promise<CliResult> {
+  const input = firstPositional(args);
+  const repo = parseGitlawbRepoInput(input);
+  const dir = optionalFlagValue(args, "--dir") ?? `${repo.repoName}-nipmod-pr`;
+  const nodeUrl = configuredNodeUrl(args);
+  const repoInput = gitlawbCandidateInput(repo, nodeUrl);
+  const version = optionalFlagValue(args, "--version") ?? "0.1.0";
+  const packageType = packageDraftType(optionalFlagValue(args, "--type") ?? "tool-bundle");
+  const identityPath = optionalFlagValue(args, "--identity");
+  const createdAt = optionalFlagValue(args, "--created-at");
+  const identity = identityPath
+    ? await readLocalIdentity(process.cwd(), isAbsolute(identityPath) ? identityPath : join(process.cwd(), identityPath))
+    : null;
+  const proof = identity
+    ? createPackageClaimProof({
+        ...(createdAt ? { createdAt } : {}),
+        identity,
+        ownerDid: repo.ownerDid,
+        repoName: repo.repoName
+      })
+    : undefined;
+  const patch = createAssistedPackagePatch({
+    ...(proof ? { proof } : {}),
+    repo: repoInput,
+    type: packageType,
+    version
+  });
+
+  for (const file of patch.files) {
+    const target = join(dir, file.path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, file.content, file.path.endsWith("package-claim.json") ? { mode: 0o600 } : undefined);
+  }
+
+  return {
+    ok: true,
+    data: {
+      message: [
+        `created PR-ready package patch ${patch.package}`,
+        `dir: ${dir}`,
+        "remote writes: none",
+        "next:",
+        ...patch.nextCommands.map((command) => `  ${command}`)
+      ].join("\n"),
+      patch: {
+        ...patch,
+        dir
+      }
+    }
+  };
+}
+
 async function packageDoctorCommand(args: string[]): Promise<CliResult> {
   const input = firstPositional(args);
   const repo = parseGitlawbRepoInput(input);
@@ -452,6 +511,14 @@ async function packageScanCommand(args: string[]): Promise<CliResult> {
 }
 
 async function claimCommand(args: string[]): Promise<CliResult> {
+  const subcommand = args[0];
+  if (subcommand === "verify") {
+    return claimVerifyCommand(args.slice(1));
+  }
+  if (subcommand === "index") {
+    return claimIndexCommand(args.slice(1));
+  }
+
   const input = firstPositional(args);
   const repo = parseGitlawbRepoInput(input);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
@@ -506,6 +573,50 @@ async function claimCommand(args: string[]): Promise<CliResult> {
         ready: true,
         repo: proof.repo
       }
+    }
+  };
+}
+
+async function claimVerifyCommand(args: string[]): Promise<CliResult> {
+  const input = firstPositional(args);
+  const repo = parseGitlawbRepoInput(input);
+  const verification = await fetchGitlawbPackageClaimVerification({
+    nodeUrl: configuredNodeUrl(args),
+    ownerDid: repo.ownerDid,
+    repoName: repo.repoName
+  });
+
+  return {
+    ok: verification.claimed,
+    data: {
+      message: formatPackageClaimVerification(verification),
+      verification
+    },
+    exitCode: verification.claimed ? 0 : 7
+  };
+}
+
+async function claimIndexCommand(args: string[]): Promise<CliResult> {
+  const nodeUrl = configuredNodeUrl(args);
+  const limit = searchLimit(args);
+  const index = await buildPackageClaimIndex({ limit, nodeUrl });
+  const outPath = optionalFlagValue(args, "--out");
+  if (outPath) {
+    await mkdir(dirname(outPath), { recursive: true });
+    await writeFile(outPath, `${JSON.stringify(index, null, 2)}\n`);
+  }
+
+  return {
+    ok: true,
+    data: {
+      message: [
+        `claim index: ${index.verifiedClaims.length} verified`,
+        `invalid: ${index.invalidClaims.length}`,
+        `candidates: ${index.total}`,
+        ...(outPath ? [`out: ${outPath}`] : [])
+      ].join("\n"),
+      index,
+      outPath
     }
   };
 }

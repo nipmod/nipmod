@@ -1,0 +1,380 @@
+{
+  "candidates": [
+    {
+      "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+      "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "repoName": "nipmod",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+      "package": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "repoName": "gitlawb-review-tool-bundle",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+      "package": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+      "repoName": "package-safety-eval-pack",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+      "package": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+      "readinessScore": 60,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+      "repoName": "launch-strict-policy-pack",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+      "package": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+      "repoName": "readonly-registry-mcp-server",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z",
+      "package": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+      "readinessScore": 60,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+      "repoName": "package-migration-planner",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+      "package": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "readinessScore": 46,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "repoName": "first-user-onboarding",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+      "package": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+      "repoName": "external-review-packet",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ",
+      "package": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+      "readinessScore": 60,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+      "repoName": "agent-runtime-compat-check",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK",
+      "package": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+      "repoName": "package-evidence-brief",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+      "package": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+      "readinessScore": 36,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+      "repoName": "registry-mirror-compare",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B",
+      "package": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+      "repoName": "package-onboarding-checklist",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+      "package": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "repoName": "mcp-tool-risk-review",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+      "package": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "readinessScore": 60,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "repoName": "agent-permission-review",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j",
+      "package": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+      "repoName": "security-advisory-triage",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+      "package": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "repoName": "release-notes-drafter",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu",
+      "package": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+      "repoName": "gitlawb-diff-summarizer",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+      "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "repoName": "gitlawb-release-review",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+      "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "repoName": "apm-import-example",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+      "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "readinessScore": 60,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "repoName": "mcp-server-import-example",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+      "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "repoName": "malicious-skill-fixtures",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+      "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "repoName": "developer-default-policy",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+      "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "repoName": "strict-ci-policy",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+      "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "repoName": "nipmod-audit-ci",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+      "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "repoName": "prompt-injection-scan",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+      "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "readinessScore": 36,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "repoName": "github-issue-triage",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "repoName": "repo-readme-audit",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "repoName": "gitlawb-repo-reader",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+      "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "repoName": "dependency-risk-review",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em",
+      "package": "pkg:did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em/dependency-risk-review",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em/dependency-risk-review",
+      "repoName": "dependency-risk-review",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h",
+      "package": "pkg:did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h/gitlawb-repo-reader",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h/gitlawb-repo-reader",
+      "repoName": "gitlawb-repo-reader",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5",
+      "package": "pkg:did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5/repo-readme-audit",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5/repo-readme-audit",
+      "repoName": "repo-readme-audit",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK",
+      "package": "pkg:did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617",
+      "repoName": "source-bound-probe-1778883617",
+      "status": "missing"
+    }
+  ],
+  "formatVersion": 1,
+  "generatedAt": "2026-05-17T20:27:35.517Z",
+  "invalidClaims": [],
+  "nodeUrl": "https://node.nipmod.com",
+  "policy": {
+    "autoOpenRemoteIssues": false,
+    "autoOpenRemotePullRequests": false,
+    "maxScanLimit": 100,
+    "maxVerifyConcurrency": 1,
+    "remoteWritesRequireHumanAction": true
+  },
+  "total": 33,
+  "verifiedClaims": []
+}

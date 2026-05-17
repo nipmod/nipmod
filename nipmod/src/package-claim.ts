@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import * as z from "zod";
 import { type Identity, publicKeyPemFromDidKey, signBytes, verifyBytes } from "./identity.js";
-import { validateManifest } from "./protocol.js";
+import { validateManifest, type Manifest } from "./protocol.js";
 import { canonicalJson } from "./verifier.js";
 
 export type PackageCandidateStatus = "ready" | "almost" | "needs-work";
@@ -66,6 +66,58 @@ export interface PackageClaimProof {
   type: "dev.nipmod.package-claim.v1";
 }
 
+export type PackageClaimVerificationStatus = "verified" | "missing" | "invalid" | "mismatch";
+
+export interface PackageClaimVerification {
+  claimed: boolean;
+  ownerDid: string;
+  package: string;
+  proof?: PackageClaimProof;
+  proofPath: ".nipmod/package-claim.json";
+  reasons: string[];
+  repo: string;
+  repoName: string;
+  status: PackageClaimVerificationStatus;
+}
+
+export interface PackageClaimIndexCandidate {
+  ownerDid: string;
+  package: string;
+  readinessScore: number;
+  reasons: string[];
+  repo: string;
+  repoName: string;
+  status: PackageClaimVerificationStatus;
+}
+
+export interface PackageClaimIndex {
+  candidates: PackageClaimIndexCandidate[];
+  formatVersion: 1;
+  generatedAt: string;
+  invalidClaims: PackageClaimVerification[];
+  nodeUrl: string;
+  policy: typeof PACKAGE_CLAIM_AUTOMATION_POLICY;
+  total: number;
+  verifiedClaims: PackageClaimVerification[];
+}
+
+export interface AssistedPackagePatch {
+  files: Array<{ content: string; path: string }>;
+  nextCommands: string[];
+  package: string;
+  remoteWrites: false;
+  repo: string;
+}
+
+export const PACKAGE_CLAIM_PROOF_PATH = ".nipmod/package-claim.json" as const;
+export const PACKAGE_CLAIM_AUTOMATION_POLICY = {
+  autoOpenRemoteIssues: false,
+  autoOpenRemotePullRequests: false,
+  maxScanLimit: 100,
+  maxVerifyConcurrency: 1,
+  remoteWritesRequireHumanAction: true
+} as const;
+
 const TEXT_FILE_LIMIT = 256 * 1024;
 
 const GitlawbRepoSchema = z.strictObject({
@@ -80,6 +132,20 @@ const GitlawbRepoSchema = z.strictObject({
 
 const GitlawbRepoListSchema = z.array(GitlawbRepoSchema);
 
+const PackageClaimProofSchema = z.strictObject({
+  createdAt: z.string().datetime(),
+  ownerDid: z.string().regex(/^did:key:z[A-Za-z0-9]+$/),
+  package: z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/),
+  repo: z.string().regex(/^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/),
+  repoName: z.string().regex(/^[a-z0-9][a-z0-9._-]*$/),
+  signature: z.strictObject({
+    algorithm: z.literal("Ed25519"),
+    keyId: z.string().regex(/^did:key:z[A-Za-z0-9]+$/),
+    signatureBase64: z.string().min(1)
+  }),
+  type: z.literal("dev.nipmod.package-claim.v1")
+});
+
 export async function fetchGitlawbPackageCandidates(options: {
   fetchImpl?: typeof fetch;
   limit?: number;
@@ -92,7 +158,7 @@ export async function fetchGitlawbPackageCandidates(options: {
   }
   const repos = GitlawbRepoListSchema.parse(await response.json())
     .filter((repo) => repo.is_public)
-    .slice(0, options.limit ?? 100);
+    .slice(0, Math.min(options.limit ?? PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit, PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit));
 
   const candidates = repos.map((repo) =>
     analyzePackageCandidate({
@@ -105,6 +171,114 @@ export async function fetchGitlawbPackageCandidates(options: {
     candidates,
     nodeUrl,
     total: candidates.length
+  };
+}
+
+export async function fetchGitlawbPackageClaimVerification(options: {
+  fetchImpl?: typeof fetch;
+  nodeUrl: string;
+  ownerDid: string;
+  repoName: string;
+}): Promise<PackageClaimVerification> {
+  const nodeUrl = normalizeNodeUrl(options.nodeUrl);
+  const ownerSegment = ownerSegmentFromDid(options.ownerDid);
+  const repo = `gitlawb://${options.ownerDid}/${options.repoName}`;
+  const packageId = `pkg:${options.ownerDid}/${options.repoName}`;
+  const proofText = await fetchGitlawbTextFile(
+    options.fetchImpl ?? fetch,
+    nodeUrl,
+    ownerSegment,
+    options.repoName,
+    PACKAGE_CLAIM_PROOF_PATH
+  );
+  if (!proofText) {
+    return {
+      claimed: false,
+      ownerDid: options.ownerDid,
+      package: packageId,
+      proofPath: PACKAGE_CLAIM_PROOF_PATH,
+      reasons: ["claim proof missing"],
+      repo,
+      repoName: options.repoName,
+      status: "missing"
+    };
+  }
+
+  try {
+    return verifyPackageClaimProofForRepo(JSON.parse(proofText) as unknown, {
+      ownerDid: options.ownerDid,
+      repoName: options.repoName
+    });
+  } catch (error) {
+    return {
+      claimed: false,
+      ownerDid: options.ownerDid,
+      package: packageId,
+      proofPath: PACKAGE_CLAIM_PROOF_PATH,
+      reasons: [error instanceof Error ? error.message : "claim proof is invalid JSON"],
+      repo,
+      repoName: options.repoName,
+      status: "invalid"
+    };
+  }
+}
+
+export async function buildPackageClaimIndex(options: {
+  fetchImpl?: typeof fetch;
+  generatedAt?: string;
+  limit?: number;
+  nodeUrl: string;
+}): Promise<PackageClaimIndex> {
+  const nodeUrl = normalizeNodeUrl(options.nodeUrl);
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const response = await fetchImpl(`${nodeUrl}/api/v1/repos`);
+  if (!response.ok) {
+    throw new Error(`Gitlawb repo scan failed: HTTP ${response.status}`);
+  }
+  const repos = GitlawbRepoListSchema.parse(await response.json())
+    .filter((repo) => repo.is_public)
+    .slice(0, Math.min(options.limit ?? PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit, PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit));
+  const candidates: PackageClaimIndexCandidate[] = [];
+  const verifiedClaims: PackageClaimVerification[] = [];
+  const invalidClaims: PackageClaimVerification[] = [];
+
+  for (const repo of repos) {
+    const input = repoInputFromApi(repo);
+    const report = analyzePackageCandidate({
+      readme: repo.description,
+      repo: input
+    });
+    const verification = await fetchGitlawbPackageClaimVerification({
+      fetchImpl,
+      nodeUrl,
+      ownerDid: input.ownerDid,
+      repoName: input.name
+    });
+    candidates.push({
+      ownerDid: input.ownerDid,
+      package: verification.package,
+      readinessScore: verification.claimed ? 100 : report.readinessScore,
+      reasons: verification.reasons,
+      repo: verification.repo,
+      repoName: verification.repoName,
+      status: verification.status
+    });
+    if (verification.status === "verified") {
+      verifiedClaims.push(verification);
+    } else if (verification.status === "invalid" || verification.status === "mismatch") {
+      invalidClaims.push(verification);
+    }
+  }
+
+  return {
+    candidates,
+    formatVersion: 1,
+    generatedAt: options.generatedAt ?? new Date().toISOString(),
+    invalidClaims,
+    nodeUrl,
+    policy: PACKAGE_CLAIM_AUTOMATION_POLICY,
+    total: candidates.length,
+    verifiedClaims
   };
 }
 
@@ -275,21 +449,183 @@ export function createPackageClaimProof(options: {
   };
 }
 
-export function verifyPackageClaimProof(proof: PackageClaimProof): boolean {
+export function verifyPackageClaimProof(proof: PackageClaimProof | unknown): boolean {
   try {
-    if (proof.type !== "dev.nipmod.package-claim.v1" || proof.signature.keyId !== proof.ownerDid) {
+    const parsed = PackageClaimProofSchema.parse(proof);
+    if (parsed.signature.keyId !== parsed.ownerDid) {
       return false;
     }
-    const { signature, ...unsigned } = proof;
+    const { signature, ...unsigned } = parsed;
     const signatureBase = canonicalJson(unsigned);
     return verifyBytes(
-      publicKeyPemFromDidKey(proof.ownerDid),
+      publicKeyPemFromDidKey(parsed.ownerDid),
       Buffer.from(signatureBase),
       Buffer.from(signature.signatureBase64, "base64")
     );
   } catch {
     return false;
   }
+}
+
+export function verifyPackageClaimProofForRepo(
+  proof: PackageClaimProof | unknown,
+  expected: { ownerDid: string; repoName: string }
+): PackageClaimVerification {
+  const expectedRepo = `gitlawb://${expected.ownerDid}/${expected.repoName}`;
+  const expectedPackage = `pkg:${expected.ownerDid}/${expected.repoName}`;
+  let parsed: PackageClaimProof;
+  try {
+    parsed = PackageClaimProofSchema.parse(proof);
+  } catch (error) {
+    return {
+      claimed: false,
+      ownerDid: expected.ownerDid,
+      package: expectedPackage,
+      proofPath: PACKAGE_CLAIM_PROOF_PATH,
+      reasons: [error instanceof Error ? error.message : "claim proof schema invalid"],
+      repo: expectedRepo,
+      repoName: expected.repoName,
+      status: "invalid"
+    };
+  }
+
+  if (!verifyPackageClaimProof(parsed)) {
+    return {
+      claimed: false,
+      ownerDid: expected.ownerDid,
+      package: expectedPackage,
+      proof: parsed,
+      proofPath: PACKAGE_CLAIM_PROOF_PATH,
+      reasons: ["signature invalid"],
+      repo: expectedRepo,
+      repoName: expected.repoName,
+      status: "invalid"
+    };
+  }
+
+  const reasons: string[] = [];
+  if (parsed.ownerDid !== expected.ownerDid) reasons.push("ownerDid mismatch");
+  if (parsed.repoName !== expected.repoName) reasons.push("repoName mismatch");
+  if (parsed.package !== expectedPackage) reasons.push("package mismatch");
+  if (parsed.repo !== expectedRepo) reasons.push("repo mismatch");
+  if (reasons.length > 0) {
+    return {
+      claimed: false,
+      ownerDid: expected.ownerDid,
+      package: expectedPackage,
+      proof: parsed,
+      proofPath: PACKAGE_CLAIM_PROOF_PATH,
+      reasons,
+      repo: expectedRepo,
+      repoName: expected.repoName,
+      status: "mismatch"
+    };
+  }
+
+  return {
+    claimed: true,
+    ownerDid: expected.ownerDid,
+    package: expectedPackage,
+    proof: parsed,
+    proofPath: PACKAGE_CLAIM_PROOF_PATH,
+    reasons: [],
+    repo: expectedRepo,
+    repoName: expected.repoName,
+    status: "verified"
+  };
+}
+
+export function formatPackageClaimVerification(verification: PackageClaimVerification): string {
+  const lines = [
+    `claim ${verification.status}`,
+    `repo: ${verification.repo}`,
+    `package: ${verification.package}`,
+    `proof: ${verification.proofPath}`
+  ];
+  for (const reason of verification.reasons) {
+    lines.push(`reason: ${reason}`);
+  }
+  return lines.join("\n");
+}
+
+export function createAssistedPackagePatch(options: {
+  proof?: PackageClaimProof;
+  repo: GitlawbRepoCandidateInput;
+  type?: Manifest["type"];
+  version?: string;
+}): AssistedPackagePatch {
+  const source = `gitlawb://${options.repo.ownerDid}/${options.repo.name}`;
+  const canonical = `pkg:${options.repo.ownerDid}/${options.repo.name}`;
+  const manifest = validateManifest({
+    formatVersion: 1,
+    name: options.repo.name,
+    canonical,
+    version: options.version ?? "0.1.0",
+    type: options.type ?? "tool-bundle",
+    description: options.repo.description || `${options.repo.name} package from Gitlawb source`,
+    license: "NOASSERTION",
+    exports: {
+      ".": {
+        source: "./README.nipmod.md"
+      }
+    },
+    files: ["README.nipmod.md", "nipmod.json"],
+    permissions: {
+      filesystem: [],
+      network: [],
+      mcpTools: [],
+      env: [],
+      secrets: [],
+      exec: {
+        allowed: false
+      },
+      postinstall: {
+        allowed: false
+      }
+    },
+    publish: {
+      signingKey: options.repo.ownerDid,
+      provenance: source
+    }
+  });
+  const files: AssistedPackagePatch["files"] = [
+    {
+      content: `${JSON.stringify(manifest, null, 2)}\n`,
+      path: "nipmod.json"
+    },
+    {
+      content: [
+        `# ${options.repo.name}`,
+        "",
+        "Install this Gitlawb repo as a Nipmod package for agents.",
+        "",
+        "```sh",
+        `nipmod add ${canonical}`,
+        "```",
+        "",
+        `Source: ${source}`,
+        ""
+      ].join("\n"),
+      path: "README.nipmod.md"
+    }
+  ];
+  if (options.proof) {
+    files.push({
+      content: `${JSON.stringify(options.proof, null, 2)}\n`,
+      path: PACKAGE_CLAIM_PROOF_PATH
+    });
+  }
+  return {
+    files,
+    nextCommands: [
+      `git add ${files.map((file) => file.path).join(" ")}`,
+      'git commit -m "feat: add nipmod package manifest"',
+      "GITLAWB_NODE=https://node.nipmod.com git push"
+    ],
+    package: canonical,
+    remoteWrites: false,
+    repo: source
+  };
 }
 
 export async function writePackageClaimProof(options: {

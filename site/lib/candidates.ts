@@ -1,4 +1,4 @@
-export type CandidateStatus = "claimed" | "unclaimed" | "needs-work";
+export type CandidateStatus = "claimed" | "published" | "unclaimed" | "needs-work";
 
 export interface GitlawbRepoSummary {
   clone_url: string;
@@ -25,12 +25,42 @@ export interface PackageCandidate {
   updatedAt: string;
 }
 
-export function candidateFromRepo(repo: GitlawbRepoSummary, claimedPackages: ReadonlySet<string>): PackageCandidate {
+export interface CandidateClaimState {
+  claimedPackages: ReadonlySet<string>;
+  publishedPackages: ReadonlySet<string>;
+}
+
+export interface PackageClaimIndex {
+  verifiedClaims?: Array<{ package: string; status: string }>;
+}
+
+export function candidateClaimState(options: {
+  claimIndex: PackageClaimIndex;
+  publishedPackages: ReadonlySet<string>;
+}): CandidateClaimState {
+  return {
+    claimedPackages: new Set(
+      (options.claimIndex.verifiedClaims ?? [])
+        .filter((claim) => claim.status === "verified")
+        .map((claim) => claim.package)
+    ),
+    publishedPackages: options.publishedPackages
+  };
+}
+
+export function candidateFromRepo(repo: GitlawbRepoSummary, state: CandidateClaimState): PackageCandidate {
   const packageId = `pkg:${repo.owner_did}/${repo.name}`;
   const source = `gitlawb://${repo.owner_did}/${repo.name}`;
-  const claimed = claimedPackages.has(packageId);
-  const readinessScore = claimed ? 100 : scoreRepoCandidate(repo);
-  const status: CandidateStatus = claimed ? "claimed" : readinessScore >= 50 ? "unclaimed" : "needs-work";
+  const claimed = state.claimedPackages.has(packageId);
+  const published = state.publishedPackages.has(packageId);
+  const readinessScore = claimed || published ? 100 : scoreRepoCandidate(repo);
+  const status: CandidateStatus = claimed
+    ? "claimed"
+    : published
+      ? "published"
+      : readinessScore >= 50
+        ? "unclaimed"
+        : "needs-work";
 
   return {
     claimCommand: `nipmod claim ${source}`,
@@ -64,10 +94,12 @@ export function searchCandidates(candidates: readonly PackageCandidate[], query:
 
 export function candidateStats(candidates: readonly PackageCandidate[]): Array<{ label: string; value: string }> {
   const claimed = candidates.filter((candidate) => candidate.status === "claimed").length;
+  const published = candidates.filter((candidate) => candidate.status === "published").length;
   const unclaimed = candidates.filter((candidate) => candidate.status === "unclaimed").length;
   return [
     { label: "Candidates", value: String(candidates.length) },
     { label: "Claimed", value: String(claimed) },
+    { label: "Published", value: String(published) },
     { label: "Unclaimed", value: String(unclaimed) }
   ];
 }
@@ -108,6 +140,7 @@ function compareCandidates(left: PackageCandidate, right: PackageCandidate): num
 function statusWeight(status: CandidateStatus): number {
   if (status === "unclaimed") return 3;
   if (status === "claimed") return 2;
+  if (status === "published") return 2;
   return 1;
 }
 

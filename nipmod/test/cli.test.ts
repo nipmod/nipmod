@@ -1012,6 +1012,199 @@ describe("nipmod CLI", () => {
     }
   }, 15_000);
 
+  test("builds a verified package claim index from a Gitlawb node", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-claim-index-"));
+    const identity = generateIdentity();
+    const proof = JSON.parse(
+      (
+        await execaNode([
+          "src/cli.ts",
+          "claim",
+          `gitlawb://${identity.did}/repo-reader`,
+          "--dir",
+          workspace,
+          "--identity",
+          await writeTestIdentity(workspace, identity),
+          "--created-at",
+          "2026-05-17T00:00:00.000Z",
+          "--dry-run",
+          "--json"
+        ])
+      ).stdout
+    ).data.claim.proof;
+    const server = createServer((request, response) => {
+      if (request.url === "/api/v1/repos") {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(
+          JSON.stringify([
+            {
+              clone_url: "http://127.0.0.1/repo-reader.git",
+              default_branch: "main",
+              description: "Read Gitlawb repos for agents",
+              is_public: true,
+              name: "repo-reader",
+              owner_did: identity.did,
+              updated_at: "2026-05-17T00:00:00.000Z"
+            }
+          ])
+        );
+        return;
+      }
+      if (request.url === `/api/v1/repos/${identity.did.slice("did:key:".length)}/repo-reader/blob/.nipmod/package-claim.json`) {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(JSON.stringify(proof));
+        return;
+      }
+      response.writeHead(404);
+      response.end("not found");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("test server did not bind to a TCP port");
+    }
+    const indexPath = join(workspace, "claims.json");
+
+    try {
+      const result = await execaNode([
+        "src/cli.ts",
+        "claim",
+        "index",
+        "--node",
+        `http://127.0.0.1:${address.port}`,
+        "--limit",
+        "5",
+        "--out",
+        indexPath,
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { index: { verifiedClaims: Array<{ package: string }> }; outPath: string };
+      };
+      const written = JSON.parse(await readFile(indexPath, "utf8")) as { verifiedClaims: Array<{ package: string }> };
+
+      expect(parsed.ok).toBe(true);
+      expect(parsed.data.outPath).toBe(indexPath);
+      expect(parsed.data.index.verifiedClaims).toEqual([
+        expect.objectContaining({
+          package: `pkg:${identity.did}/repo-reader`,
+          repo: `gitlawb://${identity.did}/repo-reader`,
+          status: "verified"
+        })
+      ]);
+      expect(written.verifiedClaims).toHaveLength(1);
+      expect(result.stdout).not.toContain("privateKey");
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  }, 20_000);
+
+  test("verifies a pushed package claim proof from Gitlawb", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-claim-verify-"));
+    const identity = generateIdentity();
+    const claim = JSON.parse(
+      (
+        await execaNode([
+          "src/cli.ts",
+          "claim",
+          `gitlawb://${identity.did}/repo-reader`,
+          "--dir",
+          workspace,
+          "--identity",
+          await writeTestIdentity(workspace, identity),
+          "--created-at",
+          "2026-05-17T00:00:00.000Z",
+          "--dry-run",
+          "--json"
+        ])
+      ).stdout
+    ).data.claim.proof;
+    const server = createServer((request, response) => {
+      if (request.url === `/api/v1/repos/${identity.did.slice("did:key:".length)}/repo-reader/blob/.nipmod/package-claim.json`) {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(JSON.stringify(claim));
+        return;
+      }
+      response.writeHead(404);
+      response.end("not found");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("test server did not bind to a TCP port");
+    }
+
+    try {
+      const result = await execaNode([
+        "src/cli.ts",
+        "claim",
+        "verify",
+        `gitlawb://${identity.did}/repo-reader`,
+        "--node",
+        `http://127.0.0.1:${address.port}`,
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { verification: { claimed: boolean; package: string; status: string } };
+      };
+
+      expect(parsed.data.verification).toMatchObject({
+        claimed: true,
+        package: `pkg:${identity.did}/repo-reader`,
+        status: "verified"
+      });
+      expect(result.stdout).not.toContain("privateKey");
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  }, 20_000);
+
+  test("creates a local PR-ready patch for package claim without remote writes", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-pr-patch-"));
+    const identity = generateIdentity();
+    const identityPath = await writeTestIdentity(workspace, identity);
+    const patchDir = join(workspace, "patch");
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "package",
+      "pr",
+      `gitlawb://${identity.did}/repo-reader`,
+      "--dir",
+      patchDir,
+      "--identity",
+      identityPath,
+      "--created-at",
+      "2026-05-17T00:00:00.000Z",
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        patch: {
+          files: Array<{ path: string }>;
+          remoteWrites: boolean;
+        };
+      };
+    };
+
+    expect(parsed.data.patch.remoteWrites).toBe(false);
+    expect(parsed.data.patch.files.map((file) => file.path)).toEqual([
+      "nipmod.json",
+      "README.nipmod.md",
+      ".nipmod/package-claim.json"
+    ]);
+    await expect(readFile(join(patchDir, "nipmod.json"), "utf8")).resolves.toContain(`"canonical": "pkg:${identity.did}/repo-reader"`);
+    await expect(readFile(join(patchDir, ".nipmod", "package-claim.json"), "utf8")).resolves.toContain(`"ownerDid": "${identity.did}"`);
+    expect(result.stdout).not.toContain("privateKey");
+  }, 20_000);
+
   test("writes a signed package claim proof without exposing private key material", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-claim-"));
     const identity = generateIdentity();
@@ -4946,6 +5139,13 @@ function developerPolicyFixture() {
     },
     type: "dev.nipmod.policy.v1"
   };
+}
+
+async function writeTestIdentity(workspace: string, identity: ReturnType<typeof generateIdentity>): Promise<string> {
+  const identityPath = join(workspace, ".nipmod", "identity.json");
+  await mkdir(join(workspace, ".nipmod"), { recursive: true });
+  await writeFile(identityPath, `${JSON.stringify(identity, null, 2)}\n`, { mode: 0o600 });
+  return identityPath;
 }
 
 async function expectCliJsonFailure(args: string[]): Promise<{

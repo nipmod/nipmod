@@ -33,6 +33,7 @@ describe("nipmod discovery manifest", () => {
       "advisoriesPublicKey",
       "advisoriesSignature",
       "agent",
+      "claims",
       "docs",
       "formatVersion",
       "homepage",
@@ -75,15 +76,24 @@ describe("nipmod discovery manifest", () => {
       "security",
       "trust"
     ]);
+    expect(Object.keys(manifest.claims).sort()).toEqual([
+      "candidatePage",
+      "index",
+      "indexCommand",
+      "verifyCommand"
+    ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",
       "audit",
+      "claimIndex",
+      "claimVerify",
       "doctor",
       "inspect",
       "install",
       "installPackage",
       "installPlan",
+      "packagePr",
       "publishDryRun",
       "sbom",
       "search",
@@ -251,16 +261,22 @@ describe("nipmod discovery manifest", () => {
       "addPackage",
       "audit",
       "sbom",
-      "publishDryRun"
+      "publishDryRun",
+      "claimVerify",
+      "claimIndex",
+      "packagePr"
     ]);
     expect(manifest.agent.commands).toEqual({
       addPackage: `nipmod add ${agentDemoPackage} --online`,
       audit: "nipmod audit --online",
+      claimIndex: "nipmod claim index --node https://node.nipmod.com --json",
+      claimVerify: "nipmod claim verify gitlawb://did:key:.../repo --json",
       doctor: "nipmod doctor --online",
       inspect: `nipmod inspect ${agentDemoPackage} --json`,
       install: shortInstallerCommand,
       installPlan: `nipmod install --plan ${agentDemoPackage} --json`,
       installPackage: `nipmod install ${agentDemoPackage}`,
+      packagePr: "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json",
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
@@ -276,6 +292,9 @@ describe("nipmod discovery manifest", () => {
         "nipmod.install_plan",
         "nipmod.update_plan",
         "nipmod.publish_plan",
+        "nipmod.claim_verify",
+        "nipmod.claim_index",
+        "nipmod.package_patch",
         "nipmod.verify",
         "nipmod.audit",
         "nipmod.sbom",

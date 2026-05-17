@@ -1,6 +1,6 @@
 export const mcpContent = {
   headline: "Connect Nipmod to agents",
-  lead: "Run the CLI as MCP for search, view, trust reports, install and update plans, verify, audit, SBOM and explain.",
+  lead: "Run the CLI as MCP for search, view, trust reports, install and update plans, claim proof, verify, audit, SBOM and explain.",
   primaryAction: "Install",
   secondaryAction: "Trust",
   safety: [
@@ -11,6 +11,10 @@ export const mcpContent = {
     {
       label: "Unsigned preview",
       text: "publish_plan previews package metadata without remote writes and without local signing."
+    },
+    {
+      label: "Claim proof",
+      text: "claim_verify checks Gitlawb owner proof. package_patch returns files only and never opens remote PRs."
     },
     {
       label: "Proof first",
@@ -28,6 +32,9 @@ export const mcpContent = {
     { name: "nipmod.install_plan", safety: "read only" },
     { name: "nipmod.update_plan", safety: "read only" },
     { name: "nipmod.publish_plan", safety: "gated dry run" },
+    { name: "nipmod.claim_verify", safety: "read only" },
+    { name: "nipmod.claim_index", safety: "read only" },
+    { name: "nipmod.package_patch", safety: "read only" },
     { name: "nipmod.verify", safety: "read only" },
     { name: "nipmod.audit", safety: "read only" },
     { name: "nipmod.sbom", safety: "read only" },
@@ -44,12 +51,17 @@ export const mcpContent = {
     {
       label: "Plan install",
       command:
-        '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"package":"gitlawb-repo-reader"}}}'
+        '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"specifier":"gitlawb-repo-reader"}}}'
+    },
+    {
+      label: "Verify claim",
+      command:
+        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.claim_verify","arguments":{"repo":"gitlawb://did:key:z6Mk.../repo"}}}'
     },
     {
       label: "Audit",
       command:
-        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.audit","arguments":{"online":true}}}'
+        '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"nipmod.audit","arguments":{"online":true}}}'
     }
   ],
   hosts: [

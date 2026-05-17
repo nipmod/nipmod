@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, test } from "vitest";
 import { createNipmodMcpServer } from "../src/mcp-server.js";
 import { generateIdentity } from "../src/identity.js";
+import { createPackageClaimProof } from "../src/package-claim.js";
 import { createTransparencyLogFromLeaves, signWitnessStatement } from "../src/transparency.js";
 
 describe("nipmod MCP server", () => {
@@ -43,6 +44,9 @@ describe("nipmod MCP server", () => {
       "nipmod.install_plan",
       "nipmod.update_plan",
       "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",
@@ -63,10 +67,143 @@ describe("nipmod MCP server", () => {
 	      "nipmod.install_plan": true,
 	      "nipmod.update_plan": true,
 	      "nipmod.publish_plan": true,
+      "nipmod.claim_verify": true,
+      "nipmod.claim_index": true,
+      "nipmod.package_patch": true,
       "nipmod.verify": true,
       "nipmod.audit": true,
       "nipmod.sbom": true,
       "nipmod.explain": true
+    });
+  });
+
+  test("verifies a Gitlawb package claim proof through tools/call", async () => {
+    const identity = generateIdentity();
+    const proof = createPackageClaimProof({
+      createdAt: "2026-05-17T00:00:00.000Z",
+      identity,
+      repoName: "repo-reader"
+    });
+    const server = createNipmodMcpServer({
+      fetchImpl: async (input) => {
+        const url = String(input);
+        if (url.endsWith(`/${identity.did.slice("did:key:".length)}/repo-reader/blob/.nipmod/package-claim.json`)) {
+          return new Response(JSON.stringify(proof), {
+            headers: { "content-type": "application/json" },
+            status: 200
+          });
+        }
+        return new Response("not found", { status: 404 });
+      }
+    });
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 21,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          nodeUrl: "https://node.example",
+          repo: `gitlawb://${identity.did}/repo-reader`
+        },
+        name: "nipmod.claim_verify"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      claimed: true,
+      package: `pkg:${identity.did}/repo-reader`,
+      status: "verified"
+    });
+  });
+
+  test("builds a Gitlawb claim index through tools/call", async () => {
+    const identity = generateIdentity();
+    const proof = createPackageClaimProof({
+      createdAt: "2026-05-17T00:00:00.000Z",
+      identity,
+      repoName: "repo-reader"
+    });
+    const server = createNipmodMcpServer({
+      fetchImpl: async (input) => {
+        const url = String(input);
+        if (url.endsWith("/api/v1/repos")) {
+          return new Response(
+            JSON.stringify([
+              {
+                clone_url: "https://node.example/z6Owner/repo-reader.git",
+                default_branch: "main",
+                description: "Read Gitlawb repos for agents",
+                is_public: true,
+                name: "repo-reader",
+                owner_did: identity.did,
+                updated_at: "2026-05-17T00:00:00.000Z"
+              }
+            ]),
+            { headers: { "content-type": "application/json" }, status: 200 }
+          );
+        }
+        if (url.endsWith(`/${identity.did.slice("did:key:".length)}/repo-reader/blob/.nipmod/package-claim.json`)) {
+          return new Response(JSON.stringify(proof), {
+            headers: { "content-type": "application/json" },
+            status: 200
+          });
+        }
+        return new Response("not found", { status: 404 });
+      }
+    });
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 22,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          limit: 5,
+          nodeUrl: "https://node.example"
+        },
+        name: "nipmod.claim_index"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      total: 1,
+      verifiedClaims: [
+        {
+          package: `pkg:${identity.did}/repo-reader`,
+          status: "verified"
+        }
+      ]
+    });
+  });
+
+  test("creates a package patch through tools/call without remote writes", async () => {
+    const identity = generateIdentity();
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 23,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          repo: `gitlawb://${identity.did}/repo-reader`,
+          version: "0.1.0"
+        },
+        name: "nipmod.package_patch"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      package: `pkg:${identity.did}/repo-reader`,
+      remoteWrites: false,
+      repo: `gitlawb://${identity.did}/repo-reader`
     });
   });
 
@@ -658,6 +795,9 @@ describe("nipmod MCP server", () => {
       "nipmod.install_plan",
       "nipmod.update_plan",
       "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",

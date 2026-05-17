@@ -12,6 +12,9 @@ Package Claim makes that concrete:
 Gitlawb repo -> package candidate -> owner claim -> package doctor -> verified package
 ```
 
+The hard boundary is simple: published is not claimed. A registry package can be installable, but the `/candidates`
+surface only marks it `claimed` after a Gitlawb-pushed `.nipmod/package-claim.json` verifies against the repo owner DID.
+
 ## Core Concepts
 
 ### Package Candidate
@@ -46,6 +49,36 @@ Package Claim verifies that the repo owner DID controls the package claim.
 The owner proves control by signing a Nipmod claim with the same DID that owns the Gitlawb repo. The proof can then be committed and pushed through Gitlawb.
 
 No Nipmod account is required.
+
+### Claim Proof Index
+
+Nipmod builds a public claim index from Gitlawb repos:
+
+```bash
+nipmod claim index --node https://node.nipmod.com --out claim-index.json
+```
+
+Each repo is checked for:
+
+```text
+.nipmod/package-claim.json
+```
+
+The proof is accepted only when:
+
+- The proof schema is valid.
+- The Ed25519 signature verifies.
+- `signature.keyId` equals `ownerDid`.
+- `ownerDid` equals the Gitlawb repo owner DID.
+- `repoName`, `repo` and `package` match the exact repo being checked.
+
+Machines can verify one repo directly:
+
+```bash
+nipmod claim verify gitlawb://did:key:.../repo --json
+```
+
+Exit code `0` means verified. Exit code `7` means missing, invalid or mismatched proof.
 
 ### Verified Package
 
@@ -138,16 +171,33 @@ The file contains a canonical signed proof:
 
 ### 5. Assisted Package PR
 
-When the repo is missing packaging files, Nipmod can create a package-ready patch:
+When the repo is missing packaging files, Nipmod can create a package-ready patch without opening a remote issue or PR:
 
 ```bash
 nipmod package gitlawb://did:key:.../repo --dir repo-package
+nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr
 ```
 
-Later, when Gitlawb issue/PR APIs are stable, Nipmod can open an assisted Gitlawb PR with:
+`package pr` writes a local PR-ready folder:
 
 - `nipmod.json`
-- package README block
+- `README.nipmod.md`
+- optional `.nipmod/package-claim.json` when the matching owner identity is supplied
+
+It also prints the exact Gitlawb-safe commands:
+
+```bash
+git add nipmod.json README.nipmod.md .nipmod/package-claim.json
+git commit -m "feat: add nipmod package manifest"
+GITLAWB_NODE=https://node.nipmod.com git push
+```
+
+Remote writes stay human controlled until Gitlawb PR and issue APIs are stable and explicit approval exists.
+
+Later, a Gitlawb PR assistant can use the same local patch to open:
+
+- `nipmod.json`
+- package README companion file
 - install command
 - Package Claim badge
 - permission summary
@@ -158,7 +208,10 @@ Later, when Gitlawb issue/PR APIs are stable, Nipmod can open an assisted Gitlaw
 nipmod package scan --node https://node.nipmod.com
 nipmod package doctor gitlawb://did:key:.../repo
 nipmod package gitlawb://did:key:.../repo --dir repo-package
+nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr
 nipmod claim gitlawb://did:key:.../repo --dir . --identity .nipmod/identity.json
+nipmod claim verify gitlawb://did:key:.../repo --json
+nipmod claim index --node https://node.nipmod.com --out claim-index.json --json
 ```
 
 JSON mode is required for agents:
@@ -166,6 +219,8 @@ JSON mode is required for agents:
 ```bash
 nipmod package doctor gitlawb://did:key:.../repo --json
 nipmod claim gitlawb://did:key:.../repo --json
+nipmod claim verify gitlawb://did:key:.../repo --json
+nipmod claim index --json
 ```
 
 ## Website Surface
@@ -187,8 +242,10 @@ Claim it with Gitlawb ownership proof.
 
 - Never label unclaimed repos as verified packages.
 - Never open mass issues or PRs automatically.
+- Never open remote issues or PRs from `package pr`; it is a local patch generator only.
 - Never claim ownership through X, GitHub or email.
 - Never accept a claim proof unless `signature.keyId` matches the Gitlawb repo owner DID.
+- Never accept a claim proof unless it matches the exact repo and package id being checked.
 - Never publish without a signed artifact and manifest validation.
 - Outreach must be opt-in or targeted, not spam.
 

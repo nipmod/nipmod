@@ -333,7 +333,7 @@ export const homeContent = {
     inputLabel: "Gitlawb repo",
     inputPlaceholder: "gitlawb://did:key:z6Mk.../repo",
     outputTitle: "Draft output",
-    outputCommand: "nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod manifest validate --dir repo\nnipmod publish repo --dry-run",
+    outputCommand: "nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
     steps: [
       {
         label: "Paste",
