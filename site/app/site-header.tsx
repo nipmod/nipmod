@@ -13,58 +13,18 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide nav-primary" href="/packages">
           Packages
         </a>
-        <a className="nav-link nav-link-wide nav-primary" href="/trust">
-          Proof
-        </a>
         <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/quickstart">
           Docs
         </a>
         <a className="nav-link nav-link-wide nav-install" href="/quickstart#install">
           Install
         </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/security">
-          Security
-        </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/package">
-          Create
-        </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/launch">
-          Launch
-        </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/proof">
-          Proof
-        </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/mcp">
-          MCP
-        </a>
-        <a
-          className="nav-link nav-link-wide nav-secondary"
-          href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod"
-          aria-label="Open nipmod source on Gitlawb in a new tab"
-          rel="noreferrer"
-          target="_blank"
-        >
-          Source
-        </a>
-        <a
-          className="nav-link nav-secondary"
-          href={homeContent.links.x}
-          aria-label="Open nipmod on X in a new tab"
-          rel="noreferrer"
-          target="_blank"
-        >
-          X
-        </a>
         <details className="more-menu">
           <summary className="nav-more-button">More</summary>
           <div className="more-menu-panel">
             <a href="/package">Create</a>
-            <a href="/quickstart">Docs</a>
-            <a href="/packages">Catalog</a>
-            <a href="/trust">Proof</a>
+            <a href="/trust">Trust</a>
             <a href="/security">Security</a>
-            <a href="/launch">Launch</a>
-            <a href="/proof">Transcript</a>
             <a href="/mcp">MCP</a>
             <a
               href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod"

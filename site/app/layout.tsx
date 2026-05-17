@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
-    description: "Install Gitlawb packages with source, signature, digest and proof visible first.",
+    description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
     images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
     siteName: "nipmod",
     title: "nipmod",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     creator: "@Nipmod",
-    description: "Install Gitlawb packages with source, signature, digest and proof visible first.",
+    description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
     images: ["/nipmod-logo.jpg"],
     site: "@Nipmod",
     title: "nipmod"

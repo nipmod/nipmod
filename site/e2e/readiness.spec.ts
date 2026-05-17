@@ -7,7 +7,7 @@ test("home registry search stays usable", async ({ page }) => {
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.getByRole("link", { name: "Install" })).toBeVisible();
   const viewport = page.viewportSize();
-  await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 2 : 4);
+  await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 2 : 3);
   if ((await page.locator('a[href="/security"]:visible').count()) === 0) {
     await page.locator(".more-menu summary").click();
   }
@@ -40,9 +40,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   const panel = page.locator(".more-menu-panel");
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
-  await expect(panel.getByRole("link", { name: "Launch" })).toBeVisible();
-  await expect(panel.getByRole("link", { name: "Proof" })).toHaveAttribute("href", "/trust");
-  await expect(panel.getByRole("link", { name: "Transcript" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "X" })).toBeVisible();
