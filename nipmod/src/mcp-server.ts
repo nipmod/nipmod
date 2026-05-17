@@ -10,6 +10,7 @@ import { createRegistryInstallPlan } from "./install-plan.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
 import { DEFAULT_REGISTRY_URL, searchRegistry, viewRegistryPackages, type RegistrySearchPackage } from "./registry.js";
+import { generateSbom } from "./sbom.js";
 import { inspectBundleFile, inspectRegistryPackage } from "./trust-report.js";
 import { sha256Hex } from "./verifier.js";
 import { NIPMOD_VERSION } from "./version.js";
@@ -129,6 +130,10 @@ const AuditArgumentsSchema = TrustPinsSchema.extend({
   registryUrl: z.string().optional()
 });
 
+const SbomArgumentsSchema = z.strictObject({
+  projectDir: z.string().optional()
+});
+
 const CallToolParamsSchema = z.strictObject({
   arguments: z.record(z.string(), z.unknown()).optional(),
   name: z.string().min(1)
@@ -214,6 +219,8 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await verifyTool(parsed.arguments ?? {}));
     case "nipmod.audit":
       return toolResult(await auditTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.sbom":
+      return toolResult(await sbomTool(parsed.arguments ?? {}));
     default:
       throw new McpError(-32602, `unknown tool: ${parsed.name}`);
   }
@@ -347,6 +354,11 @@ async function auditTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonVal
     options.allowedWitnesses = [...trust.allowedWitnesses];
   }
   return toJsonValue(await auditProject(args.projectDir ?? process.cwd(), options));
+}
+
+async function sbomTool(raw: unknown): Promise<JsonValue> {
+  const args = SbomArgumentsSchema.parse(raw);
+  return toJsonValue(await generateSbom(args.projectDir ?? process.cwd()));
 }
 
 function assertCustomRootOptIn(args: {
@@ -720,5 +732,22 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.audit",
     title: "Audit nipmod lockfile"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: false
+    },
+    description:
+      "Return an agent capability SBOM from a project's nipmod lockfile and verified local store bundles without network fetches.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        projectDir: { type: "string" }
+      },
+      type: "object"
+    },
+    name: "nipmod.sbom",
+    title: "Export nipmod SBOM"
   }
 ];

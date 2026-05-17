@@ -11,10 +11,11 @@ Default tools:
 - `nipmod.publish_plan`
 - `nipmod.verify`
 - `nipmod.audit`
+- `nipmod.sbom`
 
 Safety model:
 
-- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `verify` and `audit`.
+- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `verify`, `audit` and `sbom`.
 - Gated non-read-only dry run: `publish_plan`; it may read local package files and local signing material only when `allowLocalSigning: true` is set.
 - Not exposed through MCP: mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`.
 
@@ -102,7 +103,7 @@ Add to `opencode.json`:
 printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0.0"}}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n' | nipmod mcp serve
 ```
 
-The response must list the seven tools above. Host approval UI should show six read-only tools plus the gated `nipmod.publish_plan` dry run.
+The response must list the eight tools above. Host approval UI should show seven read-only tools plus the gated `nipmod.publish_plan` dry run.
 
 Host syntax references:
 

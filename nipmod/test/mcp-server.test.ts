@@ -43,7 +43,8 @@ describe("nipmod MCP server", () => {
       "nipmod.install_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
-      "nipmod.audit"
+      "nipmod.audit",
+      "nipmod.sbom"
     ]);
     const tools = list.result.tools as Array<{ annotations: Record<string, boolean>; name: string }>;
     for (const tool of tools) {
@@ -60,8 +61,37 @@ describe("nipmod MCP server", () => {
       "nipmod.install_plan": true,
       "nipmod.publish_plan": false,
       "nipmod.verify": true,
-      "nipmod.audit": true
+      "nipmod.audit": true,
+      "nipmod.sbom": true
     });
+  });
+
+  test("returns a lockfile SBOM through tools/call", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-sbom-"));
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 18,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          projectDir: workspace
+        },
+        name: "nipmod.sbom"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      packages: [],
+      summary: {
+        packageCount: 0
+      },
+      type: "dev.nipmod.sbom.v1"
+    });
+    expect(result.result.content[0].text).toContain("dev.nipmod.sbom.v1");
   });
 
   test("rejects publish planning unless local signing is explicitly allowed", async () => {
@@ -462,7 +492,8 @@ describe("nipmod MCP server", () => {
       "nipmod.install_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
-      "nipmod.audit"
+      "nipmod.audit",
+      "nipmod.sbom"
     ]);
   });
 

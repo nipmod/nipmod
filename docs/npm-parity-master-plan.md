@@ -38,7 +38,7 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | Auth tokens | npm tokens/OIDC | no long lived registry tokens for public packages; trusted Gitlawb publishing receipts | missing |
 | Audit | npm audit | signed advisories, quarantine, transparency and witness checks | partial |
 | Provenance | npm provenance | Gitlawb source tag, release event, transparency inclusion and witness proof | partial |
-| SBOM | `npm sbom` | agent capability SBOM with manifests, exports, permissions and dependency graph | missing |
+| SBOM | `npm sbom` | agent capability SBOM with manifests, exports, permissions and dependency graph | done |
 | Runtime | `npm exec`, scripts | explicit host adapters only; no arbitrary postinstall or default exec | missing |
 | Workspaces | npm workspaces | multi package agent workspace and monorepo publishing | missing |
 
@@ -133,3 +133,5 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 The first slice establishes manifest dependency fields, a semver/dist tag resolver, an npm style package document builder, a content addressed local bundle store, package browse/detail pages and basic `ls`/`uninstall` package operations.
 
 The second slice adds additive Registry dependency metadata, v1 readable / v2 written lockfiles, root dependency intent, package snapshots, direct dependency edges and an atomic graph install primitive for pre verified bundles. This is the base for registry driven transitive install, `outdated`, `update`, `explain`, `sbom` and signed lifecycle events.
+
+The third slice adds `nipmod sbom` for verified agent capability inventories from lockfiles and local store bundles. It gives agents one JSON surface for package identity, manifest exports, permission counts and dependency edges without fetching network data.

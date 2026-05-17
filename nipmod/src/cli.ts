@@ -45,6 +45,7 @@ import {
 } from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
 import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
+import { generateSbom, type AgentSbom } from "./sbom.js";
 import {
   DEFAULT_REGISTRY_URL,
   searchRegistries,
@@ -81,6 +82,7 @@ const CLI_COMMANDS = [
   "ls",
   "uninstall",
   "outdated",
+  "sbom",
   "doctor",
   "audit",
   "ci",
@@ -159,6 +161,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return uninstallCommand(args);
     case "outdated":
       return outdatedCommand(args);
+    case "sbom":
+      return sbomCommand(args);
     case "doctor":
       return doctorCommand(args);
     case "audit":
@@ -658,6 +662,18 @@ async function outdatedCommand(args: string[]): Promise<CliResult> {
     data: {
       message: formatOutdated(report),
       ...report
+    }
+  };
+}
+
+async function sbomCommand(args: string[]): Promise<CliResult> {
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const sbom = await generateSbom(dir);
+  return {
+    ok: true,
+    data: {
+      message: formatSbom(sbom),
+      ...sbom
     }
   };
 }
@@ -1226,6 +1242,37 @@ function formatLockfileInstall(result: InstallLockfileResult): string {
     `fetched: ${result.fetched}`,
     `lockfile: ${result.lockfileChanged ? "updated" : "unchanged"}`
   ];
+  return lines.join("\n");
+}
+
+function formatSbom(sbom: AgentSbom): string {
+  const lines = [
+    `nipmod sbom: ${sbom.summary.packageCount} package${sbom.summary.packageCount === 1 ? "" : "s"}`,
+    `dependency edges: ${sbom.summary.dependencyEdges}`,
+    [
+      "permissions:",
+      `network ${sbom.summary.permissions.network}`,
+      `filesystem ${sbom.summary.permissions.filesystem}`,
+      `env ${sbom.summary.permissions.env}`,
+      `mcp ${sbom.summary.permissions.mcpTools}`,
+      `secrets ${sbom.summary.permissions.secrets}`,
+      `exec ${sbom.summary.permissions.exec}`,
+      `postinstall ${sbom.summary.permissions.postinstall}`
+    ].join(" ")
+  ];
+  for (const pkg of sbom.packages) {
+    const dependencyCount = ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"].reduce(
+      (total, kind) => total + pkg.dependencies[kind as keyof typeof pkg.dependencies].length,
+      0
+    );
+    lines.push(
+      "",
+      `${pkg.name}@${pkg.version}`,
+      `id: ${pkg.canonical}`,
+      `manifest: ${pkg.manifestStatus}`,
+      `dependencies: ${dependencyCount}`
+    );
+  }
   return lines.join("\n");
 }
 

@@ -27,7 +27,7 @@ Current implementation status:
 - Public Gitlawb publish/install against `https://node.nipmod.com`
 - `nipmod doctor` setup checks for Git, Gitlawb helper and node health
 - Public installer at `https://nipmod.com/install.sh`
-- Standalone CLI release artifact at `/releases/nipmod-0.1.28.tgz`
+- Standalone CLI release artifact at `/releases/nipmod-0.1.31.tgz`
 - Detached Ed25519 release signatures for CLI artifacts
 - Signed public transparency log under `/transparency/*`
 - Live independent witness at `https://nipmod-witness.fly.dev`
@@ -36,9 +36,10 @@ Current implementation status:
 - Public advisory feed at `https://nipmod.com/advisories.json`
 - `nipmod audit` for installed package lockfiles
 - `nipmod ci` for strict lockfile enforcement in automation
+- `nipmod sbom` for verified agent capability SBOM output from lockfiles
 - `nipmod view`, `inspect`, `install --plan` and `add` for verified registry packages
 - `nipmod policy init`, `policy check` and `policy explain` for local install policy decisions
-- `nipmod mcp serve` with read-only agent tools for search, view, inspect, install plans, verify and audit plus a gated publish dry run
+- `nipmod mcp serve` with read-only agent tools for search, view, inspect, install plans, SBOM, verify and audit plus a gated publish dry run
 - Public MCP host setup guide at `https://nipmod.com/mcp` and `docs/mcp-hosts.md`
 - Public compatibility receipts for MCP server JSON, APM package JSON and Git source provenance examples
 - Verified registry build guard for the Vercel site
@@ -73,6 +74,7 @@ mkdir -p nipmod-demo
 cd nipmod-demo
 nipmod add gitlawb-repo-reader --online
 nipmod install
+nipmod sbom --json
 nipmod audit --online
 nipmod ci --online
 ```

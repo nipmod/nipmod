@@ -22,7 +22,8 @@ describe("MCP host content", () => {
       "nipmod.install_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
-      "nipmod.audit"
+      "nipmod.audit",
+      "nipmod.sbom"
     ]);
     expect(text).toContain("publish_plan");
     expect(text).toContain("They cannot add or install through MCP.");

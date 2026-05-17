@@ -94,11 +94,21 @@ Expected result:
 ## Audit
 
 ```sh
+nipmod sbom --json
+```
+
+Expected result:
+
+- The SBOM lists installed package records from the lockfile.
+- Local store bundles are verified before manifest details are included.
+- Permission counts and dependency edges are visible for agents and reviewers.
+
+```sh
 nipmod audit --online
 nipmod ci --online
 ```
 
-Use `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
+Use `sbom` for inventory, `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
 
 ## Publish dry run
 

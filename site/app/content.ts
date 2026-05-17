@@ -15,6 +15,7 @@ export const homeContent = {
     "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
     "nipmod add gitlawb-repo-reader --online",
     "nipmod install",
+    "nipmod sbom --json",
     "nipmod audit --online"
   ],
   usage: [
@@ -67,6 +68,11 @@ export const homeContent = {
       label: "Restore",
       text: "Restore the local store from the lockfile or confirm it is current.",
       command: "nipmod install"
+    },
+    {
+      label: "SBOM",
+      text: "Export the lockfile, permissions and dependency graph for agents.",
+      command: "nipmod sbom --json"
     },
     {
       label: "Audit",

@@ -23,6 +23,7 @@ P0 commands:
 - `nipmod ls`
 - `nipmod uninstall`
 - `nipmod outdated`
+- `nipmod sbom`
 - `nipmod policy`
 - `nipmod mcp serve`
 
@@ -33,7 +34,6 @@ Next npm parity commands:
 - `nipmod version`
 - `nipmod dist-tag`
 - `nipmod deprecate`
-- `nipmod sbom`
 
 ## JSON output
 
@@ -70,6 +70,9 @@ package metadata and refuses ambiguous names unless the canonical package id is 
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
+`nipmod sbom` reports `type`, `generator`, `root`, `summary` and `packages` from the installed lockfile. When local
+store bundles exist, it verifies each signed bundle before including manifest exports, dependency maps and package
+type. It does not fetch network data.
 
 ## Exit codes
 
@@ -99,5 +102,6 @@ Use `--offline` for checks that should never touch public services.
 - Public JSON field names are additive once released.
 - Registry data is an index. It is never the only proof source.
 - Installs recheck fetched signed bundle manifests before lockfile mutation. Registry permission counts cannot downgrade real package permissions.
+- SBOM manifest details come from verified local store bundles. Missing cache entries are reported without network fetch.
 - HTTPS registry mirrors that are not `https://nipmod.com` must prove signed advisory state before install; otherwise trust reports fail closed.
 - Custom trust roots require explicit opt in.
