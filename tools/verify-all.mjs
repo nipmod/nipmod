@@ -152,8 +152,13 @@ async function verifyProduction() {
   );
   await assertText(
     "https://nipmod.com",
+    (text) => text.includes("Packages agents can verify") && text.includes("https://x.com/Nipmod"),
+    "homepage product surface missing"
+  );
+  await assertText(
+    "https://nipmod.com/quickstart",
     (text) => text.includes("curl -fsSLO https://nipmod.com/install.sh") && text.includes("bash install.sh"),
-    "homepage install flow missing"
+    "quickstart install flow missing"
   );
   await assertText(
     "https://nipmod.com/trust",

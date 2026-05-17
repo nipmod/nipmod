@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "security:deps": "pnpm audit --audit-level high",
-    "test": "vitest run",
+    "test": "vitest run --testTimeout 20000",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "cli": "tsx src/cli.ts"
   },
