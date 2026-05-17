@@ -69,11 +69,38 @@ const readiness = [
   }
 ] as const;
 
+const externalProofTracks = [
+  {
+    label: "Gitlawb review signal",
+    value: "60",
+    ready: "Public source, launch demo, founder post, founder DM and non endorsement language are ready.",
+    blockedOn: "Needs a Gitlawb founder or maintainer response."
+  },
+  {
+    label: "External human audit",
+    value: "90",
+    ready: "Review packet, gates, proof loop, threat model and sign off template are ready.",
+    blockedOn: "Needs an independent reviewer signature or published findings."
+  },
+  {
+    label: "Real user adoption",
+    value: "45",
+    ready: "First user loop, author dry run, repo claim preview and receipt template are ready.",
+    blockedOn: "Needs external redacted user receipts. Current ledger count is zero."
+  },
+  {
+    label: "Ecosystem depth",
+    value: "85",
+    ready: "Verified first party packages cover every launch manifest type.",
+    blockedOn: "Needs external package authors accepted into the registry."
+  }
+] as const;
+
 const founderCopy = {
   post:
-    "Gitlawb gives agents decentralized source.\n\nnipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+    "Gitlawb gives agents decentralized source.\n\nnipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
   dm:
-    "We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this should be a Gitlawb native package path, an independent verification layer, or something Gitlawb should expose directly?"
+    "We built nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
 } as const;
 
 export default function LaunchPage() {
@@ -118,6 +145,26 @@ export default function LaunchPage() {
         </div>
       </section>
 
+      <section className="ecosystem-section" aria-labelledby="external-proof-title">
+        <div className="section-head">
+          <p className="eyebrow">External Proof</p>
+          <h2 id="external-proof-title">Prepared here. Completed by others.</h2>
+        </div>
+        <div className="block-grid">
+          {externalProofTracks.map((item) => (
+            <article className="block-card" key={item.label}>
+              <span>{item.label}</span>
+              <h3>{item.value}%</h3>
+              <div className="progress-track" aria-label={`${item.label} ${item.value} percent`}>
+                <div className="progress-fill" style={{ width: `${item.value}%` }} />
+              </div>
+              <p>{item.ready}</p>
+              <p>{item.blockedOn}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="quickstart-grid" aria-label="Launch tracks">
         {tracks.map((track) => (
           <article className="quickstart-card" key={track.label}>
@@ -147,6 +194,16 @@ export default function LaunchPage() {
             <h3>Direct message</h3>
             <pre className="install-command">
               <code>{founderCopy.dm}</code>
+            </pre>
+          </div>
+          <div className="demo-step">
+            <h3>Reply template</h3>
+            <pre className="install-command">
+              <code>
+                {
+                  "Persona:\nCommands run:\nPackage:\nResult:\nBlocker:\nMay quote anonymously: yes or no\nRedacted output:"
+                }
+              </code>
             </pre>
           </div>
         </div>

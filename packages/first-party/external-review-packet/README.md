@@ -15,7 +15,7 @@ This package requests no runtime permissions. It contains instructions only. Any
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet@0.1.0 --online
+nipmod install pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet@0.1.0 --online
 ```
 
 ## Trust report

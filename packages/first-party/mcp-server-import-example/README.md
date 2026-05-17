@@ -15,7 +15,7 @@ This skill package requests no runtime permissions. It contains instructions onl
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example@0.1.0 --online
+nipmod install pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example@0.1.0 --online
 ```
 
 ## Trust report

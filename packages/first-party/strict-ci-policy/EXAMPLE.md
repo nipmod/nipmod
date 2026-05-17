@@ -9,7 +9,7 @@ nipmod.lock.json plus registry evidence.
 Command:
 
 ```bash
-nipmod add strict-ci-policy --online
+nipmod install strict-ci-policy --online
 ```
 
 Expected output:

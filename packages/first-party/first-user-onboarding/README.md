@@ -15,7 +15,7 @@ This package requests no runtime permissions. It contains instructions only. Any
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding@0.1.0 --online
+nipmod install pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding@0.1.0 --online
 ```
 
 ## Trust report

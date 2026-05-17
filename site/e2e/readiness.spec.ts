@@ -86,7 +86,7 @@ test("human pages do not promote raw artifact links", async ({ page }) => {
     "/evidence",
     "/evidence/package/gitlawb-release-review"
   ];
-  const rawPath = /^(\/install\.sh|\/\.well-known\/(?:nipmod\.json|security\.txt)|\/registry\/|\/transparency\/|\/releases\/.*(?:\.tgz|\.tgz\.sig)|\/advisories\.json|\/proof\/transcript\.json|\/compatibility\/.*\.json)/;
+  const rawPath = /^(\/install\.sh|\/\.well-known\/(?:nipmod\.json|security\.txt)|\/registry\/|\/transparency\/|\/releases\/.*(?:\.tgz|\.tgz\.sig)|\/advisories\.json|\/proof\/transcript\.json|\/review\/.*\.json|\/compatibility\/.*\.json)/;
 
   for (const route of routes) {
     await page.goto(route);
@@ -132,6 +132,9 @@ test("launch page exposes adoption, review and multi source paths", async ({ pag
   await expect(page.getByRole("heading", { name: "Use it. Publish into it. Review it." })).toBeVisible();
   await expect(page.getByText("Catalog type coverage", { exact: true })).toBeVisible();
   await expect(page.getByText("Adoption path readiness", { exact: true })).toBeVisible();
+  await expect(page.getByText("Gitlawb review signal", { exact: true })).toBeVisible();
+  await expect(page.getByText("External human audit", { exact: true })).toBeVisible();
+  await expect(page.getByText("Current ledger count is zero.")).toBeVisible();
   await expect(page.getByText("nipmod publish . --dry-run --json")).toBeVisible();
   await expect(page.getByText("node tools/verify-all.mjs --prod")).toBeVisible();
   await expect(page.getByText("nipmod search policy --registries")).toBeVisible();

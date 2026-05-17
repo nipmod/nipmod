@@ -9,7 +9,7 @@ gitlawb://did:key:z6Mk.../nipmod
 Command:
 
 ```bash
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 ```
 
 Expected output:

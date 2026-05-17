@@ -135,6 +135,9 @@ async function verifyProduction() {
 	      payload.install?.release?.signature === `https://nipmod.com/releases/${releaseName}.sig` &&
 	      payload.transparency?.logId === localCheckpointSync().logId &&
 	      payload.transparency?.checkpoint === "https://nipmod.com/transparency/checkpoint.json" &&
+	      payload.review?.packet === "https://nipmod.com/review/packet.json" &&
+	      payload.review?.evidenceManifest === "https://nipmod.com/review/evidence-manifest.json" &&
+	      payload.review?.evidenceLedger === "https://nipmod.com/review/evidence-ledger.json" &&
 	      payload.install?.release?.publicKey?.publicKeySpkiBase64 === localReleaseKeySync().publicKeySpkiBase64 &&
 	      payload.install?.release?.publicKey?.spkiSha256 === localReleaseKeySync().publicKeySpkiSha256,
 	    "discovery manifest failed"
@@ -147,7 +150,11 @@ async function verifyProduction() {
       Array.isArray(payload.advisories),
     "advisory feed failed"
   );
-  await assertText("https://nipmod.com", (text) => text.includes("curl -fsSLO https://nipmod.com/install.sh && bash install.sh"), "homepage install flow missing");
+  await assertText(
+    "https://nipmod.com",
+    (text) => text.includes("curl -fsSLO https://nipmod.com/install.sh") && text.includes("bash install.sh"),
+    "homepage install flow missing"
+  );
   await assertText(
     "https://nipmod.com/trust",
     (text) =>

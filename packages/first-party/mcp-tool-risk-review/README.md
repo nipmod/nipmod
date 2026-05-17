@@ -15,7 +15,7 @@ This skill package requests no runtime permissions. It contains instructions onl
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review@0.1.0 --online
+nipmod install pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review@0.1.0 --online
 ```
 
 ## Trust report

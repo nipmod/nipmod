@@ -50,6 +50,8 @@ Current implementation status:
 
 ## Current CLI flow
 
+Requirements: Node.js 22 or newer, npm, Git, curl and tar. The CLI is not published to npm; install uses the signed release installer from `nipmod.com`.
+
 Standard install:
 
 ```bash
@@ -129,7 +131,7 @@ See `docs/mcp-hosts.md` for Codex, Claude Code and OpenCode MCP setup.
 See `docs/quickstart.md`, `docs/publish.md`, `docs/packages.md`, `docs/trust-model.md` and `docs/cli-contract.md` for public launch onboarding.
 See `docs/community.md` for package expectations, feedback links and founder outreach copy.
 See `SECURITY.md` and `docs/independent-review.md` for disclosure scope and external review readiness.
-See `docs/catalog-depth.md`, `docs/audit-readiness.md`, `docs/adoption-readiness.md` and `docs/external-evidence-ledger.md` for launch readiness evidence.
+See `docs/catalog-depth.md`, `docs/audit-readiness.md`, `docs/adoption-readiness.md`, `docs/external-proof-tracks.md` and `docs/external-evidence-ledger.md` for launch readiness evidence.
 See `docs/adoption.md`, `docs/self-service-publishing.md` and `docs/multi-source-registry.md` for the remaining ecosystem scale paths.
 See `docs/launch-demo.md` for the public demo script.
 See `docs/ecosystem-packages.md` for the first party package catalog.

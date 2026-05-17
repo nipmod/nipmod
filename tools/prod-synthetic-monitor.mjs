@@ -75,6 +75,17 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
+    assertEqual(state.discovery.review?.packet, `${endpoints.home}/review/packet.json`, "discovery review packet URL mismatch");
+    assertEqual(
+      state.discovery.review?.evidenceManifest,
+      `${endpoints.home}/review/evidence-manifest.json`,
+      "discovery review evidence manifest URL mismatch"
+    );
+    assertEqual(
+      state.discovery.review?.evidenceLedger,
+      `${endpoints.home}/review/evidence-ledger.json`,
+      "discovery review evidence ledger URL mismatch"
+    );
     return { url: endpoints.discovery };
   });
 

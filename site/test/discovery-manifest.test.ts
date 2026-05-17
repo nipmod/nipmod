@@ -34,6 +34,7 @@ describe("nipmod discovery manifest", () => {
       "name",
       "node",
       "registry",
+      "review",
       "transparency",
       "trustPage",
       "type",
@@ -60,6 +61,14 @@ describe("nipmod discovery manifest", () => {
     expect(Object.keys(manifest.node).sort()).toEqual(["health", "url"]);
     expect(Object.keys(manifest.witness).sort()).toEqual(["did", "health", "statements"]);
     expect(Object.keys(manifest.transparency).sort()).toEqual(["checkpoint", "log", "logId"]);
+    expect(Object.keys(manifest.review).sort()).toEqual([
+      "evidenceLedger",
+      "evidenceManifest",
+      "launch",
+      "packet",
+      "packetMarkdown",
+      "proofTranscript"
+    ]);
     expect(Object.keys(manifest.install).sort()).toEqual(["release", "script", "scriptSha256"]);
     expect(Object.keys(manifest.install.release).sort()).toEqual([
       "artifact",
@@ -175,6 +184,14 @@ describe("nipmod discovery manifest", () => {
       checkpoint: "https://nipmod.com/transparency/checkpoint.json",
       log: "https://nipmod.com/transparency/log.json",
       logId: checkpoint.logId
+    });
+    expect(manifest.review).toEqual({
+      evidenceLedger: "https://nipmod.com/review/evidence-ledger.json",
+      evidenceManifest: "https://nipmod.com/review/evidence-manifest.json",
+      launch: "https://nipmod.com/launch",
+      packet: "https://nipmod.com/review/packet.json",
+      packetMarkdown: "https://nipmod.com/review/packet.md",
+      proofTranscript: "https://nipmod.com/proof/transcript.json"
     });
   });
 

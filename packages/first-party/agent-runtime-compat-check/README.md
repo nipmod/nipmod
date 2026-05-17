@@ -15,7 +15,7 @@ This package requests no runtime permissions. It contains instructions only. Any
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check@0.1.0 --online
+nipmod install pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check@0.1.0 --online
 ```
 
 ## Trust report

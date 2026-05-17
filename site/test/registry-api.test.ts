@@ -11,7 +11,13 @@ const registry = JSON.parse(readFileSync(join(registryRoot, "packages.json"), "u
 interface RegistryPackageLike {
   canonical: string;
   digest: string;
+  proof?: {
+    witnesses?: string[];
+  };
   sourceRepo: string;
+  trust?: {
+    level?: string;
+  };
   version: string;
 }
 
@@ -78,6 +84,21 @@ describe("static registry API", () => {
         type: "dev.nipmod.package-provenance.v1",
         version: pkg.version
       });
+    }
+  });
+
+  test("requires witness evidence for every verified registry package", () => {
+    const witnesses = new Set(
+      (registry as { transparencyLog?: { witnesses?: Array<{ witness?: string }> } }).transparencyLog?.witnesses
+        ?.map((statement) => statement.witness)
+        .filter((witness): witness is string => Boolean(witness)) ?? []
+    );
+
+    expect(witnesses.size).toBeGreaterThan(0);
+    for (const pkg of registry.packages.filter((candidate) => candidate.trust?.level === "verified")) {
+      expect(pkg.proof?.witnesses?.some((witness) => witnesses.has(witness)), `${pkg.canonical}@${pkg.version}`).toBe(
+        true
+      );
     }
   });
 });

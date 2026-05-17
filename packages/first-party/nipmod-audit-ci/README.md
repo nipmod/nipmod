@@ -15,7 +15,7 @@ This skill package requests no runtime permissions. It contains instructions onl
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci@0.1.0 --online
+nipmod install pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci@0.1.0 --online
 ```
 
 ## Trust report

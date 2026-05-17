@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/packages"
   },
-  description: "Browse verified Gitlawb-native agent packages with trust, install and provenance context.",
+  description: "Browse verified Gitlawb-sourced agent packages with trust, install and provenance context.",
   openGraph: {
-    description: "Browse verified Gitlawb-native agent packages with trust, install and provenance context.",
+    description: "Browse verified Gitlawb-sourced agent packages with trust, install and provenance context.",
     title: "nipmod packages",
     url: "https://nipmod.com/packages"
   },

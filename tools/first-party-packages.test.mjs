@@ -118,6 +118,23 @@ describe("first-party starter packages", () => {
 
     expect([...types].sort()).toEqual([...launchRequiredTypes].sort());
   });
+
+  test("keeps ecosystem docs, registry and package smoke commands aligned", async () => {
+    const docs = await readFile(join(root, "docs", "ecosystem-packages.md"), "utf8");
+    const registry = JSON.parse(await readFile(join(root, "site", "public", "registry", "packages.json"), "utf8"));
+    const registryNames = new Set(registry.packages.map((pkg) => pkg.name));
+
+    for (const name of starterPackages) {
+      expect(docs).toContain(`\`${name}\``);
+      expect(registryNames.has(name), `${name} is missing from public registry`).toBe(true);
+
+      const readme = await readFile(join(packageRoot, name, "README.md"), "utf8");
+      const smoke = await readFile(join(packageRoot, name, "SMOKE.md"), "utf8");
+      expect(readme).toContain("nipmod install");
+      expect(smoke).toContain("nipmod install");
+      expect(`${readme}\n${smoke}`).not.toContain("nipmod add");
+    }
+  });
 });
 
 async function expectPackable(dir, name) {

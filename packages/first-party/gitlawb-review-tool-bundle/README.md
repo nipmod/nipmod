@@ -15,7 +15,7 @@ This package requests no runtime permissions. It contains instructions only. Any
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle@0.1.0 --online
+nipmod install pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle@0.1.0 --online
 ```
 
 ## Trust report

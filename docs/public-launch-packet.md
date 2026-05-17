@@ -58,6 +58,9 @@ Gitlawb gives agents decentralized source.
 
 nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
+Independent project asking for Gitlawb review, not claiming endorsement.
+
+Run the demo and send the strongest objection.
 Public demo: https://nipmod.com/launch
 Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 ```
@@ -67,7 +70,9 @@ Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nip
 ```text
 We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
-Could you review the trust model against Gitlawb's goals and tell us the strongest objection: should this stay an independent package-verification layer, become a Gitlawb-native package path, or expose a smaller Gitlawb package primitive directly?
+Independent project asking for Gitlawb review, not claiming endorsement.
+
+Could you review the trust model against Gitlawb's goals and tell us the strongest objection: should this stay an independent package-verification layer, become a Gitlawb maintained package path, or expose a smaller Gitlawb package primitive directly?
 ```
 
 ## Review links
@@ -78,11 +83,25 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 - Registry: https://nipmod.com/registry/packages.json
 - Transparency checkpoint: https://nipmod.com/transparency/checkpoint.json
 - Security policy: https://nipmod.com/security
+- Review packet: https://nipmod.com/review/packet.json
+- Review packet markdown: https://nipmod.com/review/packet.md
+- Evidence manifest: https://nipmod.com/review/evidence-manifest.json
+- Evidence ledger: https://nipmod.com/review/evidence-ledger.json
 - Review packet source: docs/independent-review.md
 - Review packet generator: `node tools/generate-review-packet.mjs review-packet.md --evidence-dir <dir>`
 - Catalog depth: docs/catalog-depth.md
 - Adoption readiness: docs/adoption-readiness.md
+- External proof tracks: docs/external-proof-tracks.md
 - External evidence ledger: docs/external-evidence-ledger.md
+
+## External proof tracks
+
+| Track | Current | What is ready | What still needs outside proof |
+| --- | ---: | --- | --- |
+| Gitlawb review signal | 60% | Founder post, DM, public source and demo. | Gitlawb founder or maintainer response. |
+| External human audit | 90% | Review packet, gates, proof loop and sign off template. | Independent reviewer signature or published findings. |
+| Real user adoption | 45% | First user loop, author dry run, repo claim preview and receipt template. | External redacted user receipts. |
+| Ecosystem depth | 85% | Verified first party packages cover every launch manifest type. | External packages accepted into the registry. |
 
 ## What not to claim
 

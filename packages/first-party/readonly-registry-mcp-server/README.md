@@ -15,7 +15,7 @@ This package requests no runtime permissions. It contains instructions only. Any
 ## Install
 
 ```bash
-nipmod add pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server@0.1.0 --online
+nipmod install pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server@0.1.0 --online
 ```
 
 ## Trust report

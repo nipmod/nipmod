@@ -8,6 +8,24 @@
     "externalPackagesAccepted": 0,
     "signedIndependentReviews": 0
   },
+  "artifacts": [
+    {
+      "type": "review-packet",
+      "url": "https://nipmod.com/review/packet.json"
+    },
+    {
+      "type": "evidence-manifest",
+      "url": "https://nipmod.com/review/evidence-manifest.json"
+    },
+    {
+      "type": "proof-transcript",
+      "url": "https://nipmod.com/proof/transcript.json"
+    },
+    {
+      "type": "synthetic-monitor",
+      "url": "https://nipmod-monitor.fly.dev/last"
+    }
+  ],
   "receipts": [],
   "rules": [
     "No secrets, tokens, private keys, local secret paths or unrelated data.",

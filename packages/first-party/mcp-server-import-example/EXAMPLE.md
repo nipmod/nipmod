@@ -16,7 +16,7 @@ Input:
 Command:
 
 ```bash
-nipmod add mcp-server-import-example --online
+nipmod install mcp-server-import-example --online
 ```
 
 Expected output:

@@ -9,7 +9,7 @@ nipmod.lock.json
 Command:
 
 ```bash
-nipmod add dependency-risk-review --online
+nipmod install dependency-risk-review --online
 ```
 
 Expected output:

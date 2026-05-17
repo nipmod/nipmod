@@ -519,7 +519,16 @@ function packageSearchFields(pkg: RegistryPackage): string[] {
   ];
 }
 
-const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "policy-pack", "mcp-server"]);
+const agentNativeTypes = new Set([
+  "adapter",
+  "agent-profile",
+  "eval-pack",
+  "mcp-server",
+  "policy-pack",
+  "skill",
+  "tool-bundle",
+  "workflow-pack"
+]);
 
 function packageVersionKey(pkg: Pick<RegistryPackage, "canonical" | "version">): string {
   return `${pkg.canonical}@${pkg.version}`;

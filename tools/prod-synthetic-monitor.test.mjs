@@ -324,6 +324,14 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
         source: endpoints.nodeUrl,
         url: endpoints.registry
       },
+      review: {
+        evidenceLedger: "https://nipmod.test/review/evidence-ledger.json",
+        evidenceManifest: "https://nipmod.test/review/evidence-manifest.json",
+        launch: "https://nipmod.test/launch",
+        packet: "https://nipmod.test/review/packet.json",
+        packetMarkdown: "https://nipmod.test/review/packet.md",
+        proofTranscript: "https://nipmod.test/proof/transcript.json"
+      },
       transparency: {
         checkpoint: endpoints.checkpoint,
         log: "https://nipmod.test/transparency/log.json",

@@ -8,5 +8,5 @@ Expected:
 
 - `trust: verified/100` after publication and witness rebuild
 - permissions show `no permissions`
-- install command uses `nipmod add ... --online`
+- install command uses `nipmod install ... --online`
 - package output matches the developer-default-policy README and SKILL scope

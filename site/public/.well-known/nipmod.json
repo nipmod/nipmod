@@ -33,6 +33,14 @@
     "log": "https://nipmod.com/transparency/log.json",
     "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk"
   },
+  "review": {
+    "packet": "https://nipmod.com/review/packet.json",
+    "packetMarkdown": "https://nipmod.com/review/packet.md",
+    "evidenceLedger": "https://nipmod.com/review/evidence-ledger.json",
+    "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json",
+    "proofTranscript": "https://nipmod.com/proof/transcript.json",
+    "launch": "https://nipmod.com/launch"
+  },
   "install": {
     "script": "https://nipmod.com/install.sh",
     "release": {

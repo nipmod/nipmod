@@ -9,7 +9,7 @@ pkg:did:key:z6Mk.../agent-tool@0.1.0
 Command:
 
 ```bash
-nipmod add gitlawb-release-review --online
+nipmod install gitlawb-release-review --online
 ```
 
 Expected output:

@@ -5,7 +5,7 @@ Date: 2026-05-17
 
 ## Goal
 
-nipmod should become the Gitlawb native package manager for agents: npm level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default.
+nipmod should become a package layer for Gitlawb sourced agent capabilities: npm level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default. Any claim that it is the primary Gitlawb package path requires Gitlawb review first.
 
 The target is not a literal npm clone. npm parity means users and agents get the same product primitives people expect from npm, but with DID identity, signed Gitlawb artifacts, permission manifests, transparency proofs, witness evidence and policy gated activation.
 

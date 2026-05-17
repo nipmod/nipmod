@@ -37,6 +37,22 @@ export default function PackagePage() {
         inputPlaceholder={homeContent.repoToPackage.inputPlaceholder}
       />
 
+      <section className="proof-section" aria-labelledby="publish-requirements-title">
+        <div>
+          <p className="eyebrow">Publish Requirements</p>
+          <h2 id="publish-requirements-title">Dry run is open. Public publish needs ownership.</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">
+            A draft is safe to create from any public Gitlawb repo. A verified publish requires the matching DID
+            identity, the Gitlawb helper, a valid manifest and a dry run registry candidate.
+          </p>
+          <pre className="install-command">
+            <code>{"nipmod manifest validate --dir repo --json\nnipmod publish repo --dry-run --json"}</code>
+          </pre>
+        </div>
+      </section>
+
       <section className="usage-strip" aria-label="Repo to package steps">
         {homeContent.repoToPackage.steps.map((step) => (
           <article className="usage-item" key={step.label}>

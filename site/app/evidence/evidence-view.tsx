@@ -181,6 +181,30 @@ function evidenceArtifacts(pkg: RegistryPackage | null): Array<{ id: string; hre
       id: "transcript",
       label: "Proof transcript",
       text: "A machine readable record of the demo path: inspect, install, audit and blocked unsafe manifests."
+    },
+    {
+      href: "/review/packet.json",
+      id: "review-packet",
+      label: "Review packet",
+      text: "The machine readable audit handoff with targets, commands, claim boundaries and sign off fields."
+    },
+    {
+      href: "/review/evidence-manifest.json",
+      id: "review-evidence",
+      label: "Evidence manifest",
+      text: "The index of public review artifacts, live health endpoints and proof files reviewers can reproduce."
+    },
+    {
+      href: "/review/evidence-ledger.json",
+      id: "evidence-ledger",
+      label: "Evidence ledger",
+      text: "The adoption and review receipt ledger. It stays at zero until external redacted evidence exists."
+    },
+    {
+      href: "https://nipmod-monitor.fly.dev/last",
+      id: "synthetic-monitor",
+      label: "Synthetic monitor",
+      text: "The public monitor cycle for site, registry, advisories, witness, node and Gitlawb receive pack probes."
     }
   ];
 

@@ -25,6 +25,7 @@ const adoptionReadiness = await readText("docs/adoption-readiness.md");
 const auditReadiness = await readText("docs/audit-readiness.md");
 const catalogDepth = await readText("docs/catalog-depth.md");
 const externalEvidenceLedger = await readText("docs/external-evidence-ledger.md");
+const externalProofTracks = await readText("docs/external-proof-tracks.md");
 const multiSource = await readText("docs/multi-source-registry.md");
 const trustModel = await readText("docs/trust-model.md");
 const evidenceAttachments = evidenceDir ? await loadEvidenceAttachments(evidenceDir) : null;
@@ -44,6 +45,8 @@ Evidence directory: ${evidenceDir ? resolve(evidenceDir) : "not attached"}
 - security.txt: https://nipmod.com/.well-known/security.txt
 - Registry: https://nipmod.com/registry/packages.json
 - Discovery: https://nipmod.com/.well-known/nipmod.json
+- Public review packet: https://nipmod.com/review/packet.json
+- Public evidence manifest: https://nipmod.com/review/evidence-manifest.json
 
 ## Required Commands
 
@@ -95,6 +98,10 @@ ${adoptionReadiness}
 ## External Evidence Ledger
 
 ${externalEvidenceLedger}
+
+## External Proof Tracks
+
+${externalProofTracks}
 
 ## Multi Source Registry Notes
 

@@ -2,6 +2,14 @@
 
 This is the public first run path. It is designed for a clean macOS or Linux workspace.
 
+## Requirements
+
+- Node.js 22 or newer
+- npm
+- Git
+- curl
+- tar
+
 ## Install
 
 ```sh
@@ -21,6 +29,12 @@ Expected result:
 
 - The installer finishes and prints the next `nipmod` command.
 - `nipmod help` prints the command list and exit codes.
+
+If `nipmod` is not found after install, add the printed binary directory to `PATH`, then rerun:
+
+```sh
+nipmod doctor --online
+```
 
 ## Check the environment
 

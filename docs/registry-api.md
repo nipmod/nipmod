@@ -46,7 +46,6 @@ Each canonical Gitlawb package should resolve to a document:
 | `/registry/packages/<encoded-canonical>/<version>.json` | Exact version metadata. |
 | `/registry/packages/<encoded-canonical>/dependencies.json` | Direct dependency maps for the current `latest` dist tag. |
 | `/registry/packages/<encoded-canonical>/provenance.json` | Source, artifact, release, transparency and witness proof for the current `latest` dist tag. |
-| `/registry/packages/<encoded-canonical>/readme` | README from the signed bundle. Pending signed README extraction. |
 
 `<encoded-canonical>` is base64url over the UTF-8 canonical package id. This keeps `pkg:did:key:.../name` usable in static file paths without decoded slashes breaking routing.
 

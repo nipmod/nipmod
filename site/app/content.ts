@@ -37,7 +37,7 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install CLI",
-      text: "Run the short installer.",
+      text: "Run the short installer. It expects Node.js 22 or newer, npm, Git, curl and tar.",
       command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     },
     {
@@ -95,7 +95,7 @@ export const homeContent = {
       label: "Publish",
       text: "Run the author preflight before any public write.",
       command:
-        "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\nnipmod publish gitlawb-demo-package --dry-run"
+        "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir . --json\nnipmod publish . --dry-run --json"
     }
   ],
   packageUseCases: [
@@ -146,9 +146,9 @@ export const homeContent = {
   ],
   founderOutreach: {
     post:
-      "Gitlawb gives agents decentralized source. nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "Gitlawb gives agents decentralized source. nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
     dm:
-      "We built nipmod as a package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
+      "We built nipmod as an independent package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
   },
   demoFlow: [
     {

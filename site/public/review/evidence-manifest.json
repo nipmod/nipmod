@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.review-evidence-manifest.v1",
+  "generatedAt": "2026-05-17T00:00:00.000Z",
+  "artifacts": [
+    {
+      "id": "review-packet",
+      "label": "Review packet",
+      "url": "https://nipmod.com/review/packet.json",
+      "humanUrl": "https://nipmod.com/review/packet.md"
+    },
+    {
+      "id": "external-evidence-ledger",
+      "label": "External evidence ledger",
+      "url": "https://nipmod.com/review/evidence-ledger.json"
+    },
+    {
+      "id": "public-proof-loop",
+      "label": "Public proof transcript",
+      "url": "https://nipmod.com/proof/transcript.json",
+      "command": "node tools/public-proof-loop.mjs --registry https://nipmod.com/registry/packages.json"
+    },
+    {
+      "id": "synthetic-monitor",
+      "label": "Live synthetic monitor",
+      "url": "https://nipmod-monitor.fly.dev/last",
+      "command": "node tools/prod-synthetic-monitor.mjs"
+    },
+    {
+      "id": "monitor-health",
+      "label": "Monitor health",
+      "url": "https://nipmod-monitor.fly.dev/health"
+    },
+    {
+      "id": "witness-health",
+      "label": "Witness health",
+      "url": "https://nipmod-witness.fly.dev/health"
+    },
+    {
+      "id": "registry",
+      "label": "Verified registry",
+      "url": "https://nipmod.com/registry/packages.json"
+    },
+    {
+      "id": "checkpoint",
+      "label": "Transparency checkpoint",
+      "url": "https://nipmod.com/transparency/checkpoint.json"
+    }
+  ],
+  "freshness": {
+    "liveEndpoints": ["synthetic-monitor", "monitor-health", "witness-health"],
+    "staticProof": ["review-packet", "external-evidence-ledger", "public-proof-loop", "registry", "checkpoint"]
+  }
+}

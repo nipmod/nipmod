@@ -69,6 +69,9 @@ Gitlawb gives agents decentralized source.
 
 nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
+Independent project asking for Gitlawb review, not claiming endorsement.
+
+Run the demo and send the strongest objection.
 Public demo: https://nipmod.com/launch
 https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 ```
@@ -87,9 +90,11 @@ Site: https://nipmod.com
 Direct message:
 
 ```text
-We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
+We built nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
-Could you sanity check whether this should be a Gitlawb-native package path, an independent verification layer, or something Gitlawb should expose directly?
+Independent project asking for Gitlawb review, not claiming endorsement.
+
+Could you sanity check whether this should be a Gitlawb maintained package path, an independent verification layer, or something Gitlawb should expose directly?
 ```
 
 Review asks:
@@ -111,5 +116,5 @@ Follow up matrix:
 
 nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
 
-Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. Send the first report path through X DM to https://x.com/Nipmod until a dedicated security mailbox is published.
-Use the public security policy at https://nipmod.com/security and the well known metadata at https://nipmod.com/.well-known/security.txt. X is the fallback contact, not the only disclosure path.
+Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. X DM to https://x.com/Nipmod is the current public contact path until a dedicated security mailbox is published.
+Use the public security policy at https://nipmod.com/security and the well known metadata at https://nipmod.com/.well-known/security.txt.

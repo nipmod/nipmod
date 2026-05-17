@@ -9,7 +9,7 @@ Package README and skill prompt text.
 Command:
 
 ```bash
-nipmod add prompt-injection-scan --online
+nipmod install prompt-injection-scan --online
 ```
 
 Expected output:

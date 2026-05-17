@@ -12,6 +12,7 @@ const rawHrefPatterns = [
   /^\/releases\/.*(?:\.tgz|\.tgz\.sig)(?:$|[?#])/,
   /^\/advisories\.json(?:$|[?#])/,
   /^\/proof\/transcript\.json(?:$|[?#])/,
+  /^\/review\/.*\.json(?:$|[?#])/,
   /^\/compatibility\/.*\.json(?:$|[?#])/
 ];
 

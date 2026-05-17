@@ -82,6 +82,9 @@ Gitlawb gives agents decentralized source.
 
 nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
+Independent project asking for Gitlawb review, not claiming endorsement.
+
+Run the demo and send the strongest objection.
 Public demo: https://nipmod.com/launch
 Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 ```
