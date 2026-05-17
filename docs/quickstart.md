@@ -1,4 +1,4 @@
-# nipmod quickstart
+# Nipmod quickstart
 
 This is the public first run path. It is designed for a clean macOS or Linux workspace.
 

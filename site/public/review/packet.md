@@ -1,6 +1,6 @@
-# nipmod Review Packet
+# Nipmod Review Packet
 
-nipmod is technically live and ready for external review. It is not officially endorsed by Gitlawb and is not yet independently audited.
+Nipmod is technically live and ready for external review. It is not officially endorsed by Gitlawb and is not yet independently audited.
 
 ## Public targets
 

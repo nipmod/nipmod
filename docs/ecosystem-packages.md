@@ -14,14 +14,14 @@ First party packages exist to prove real agent use cases before external publish
 | `developer-default-policy` | `skill` | Apply a practical default policy for trying packages safely before production use. | `nipmod install developer-default-policy` |
 | `github-issue-triage` | `skill` | Triage GitHub issues from untrusted issue text without package permissions. | `nipmod install github-issue-triage` |
 | `malicious-skill-fixtures` | `skill` | Provide safe negative test fixtures for scanners and policy reviewers. | `nipmod install malicious-skill-fixtures` |
-| `mcp-server-import-example` | `skill` | Map MCP server metadata into nipmod compatibility receipts. | `nipmod install mcp-server-import-example` |
-| `apm-import-example` | `skill` | Map an APM package listing into nipmod trust metadata. | `nipmod install apm-import-example` |
+| `mcp-server-import-example` | `skill` | Map MCP server metadata into Nipmod compatibility receipts. | `nipmod install mcp-server-import-example` |
+| `apm-import-example` | `skill` | Map an APM package listing into Nipmod trust metadata. | `nipmod install apm-import-example` |
 | `gitlawb-diff-summarizer` | `skill` | Summarize Gitlawb repository diffs with provenance, risk and next action clarity. | `nipmod install gitlawb-diff-summarizer` |
 | `release-notes-drafter` | `skill` | Draft release notes from verified package, Gitlawb tag and changelog evidence. | `nipmod install release-notes-drafter` |
 | `security-advisory-triage` | `skill` | Triage package security reports into advisory, quarantine and user action decisions. | `nipmod install security-advisory-triage` |
 | `agent-permission-review` | `skill` | Review agent package permissions for least privilege before install or publish. | `nipmod install agent-permission-review` |
 | `mcp-tool-risk-review` | `skill` | Review MCP server tools and manifests before agents expose them to package workflows. | `nipmod install mcp-tool-risk-review` |
-| `package-onboarding-checklist` | `skill` | Guide new package authors through a clean nipmod publish candidate. | `nipmod install package-onboarding-checklist` |
+| `package-onboarding-checklist` | `skill` | Guide new package authors through a clean Nipmod publish candidate. | `nipmod install package-onboarding-checklist` |
 | `registry-mirror-compare` | `adapter` | Compare registry mirrors and fail closed on digest, root, witness or advisory drift. | `nipmod install registry-mirror-compare` |
 | `package-evidence-brief` | `workflow-pack` | Turn package proof into a short human review brief. | `nipmod install package-evidence-brief` |
 | `agent-runtime-compat-check` | `agent-profile` | Check whether an agent host is ready for install, audit and MCP flows. | `nipmod install agent-runtime-compat-check` |
@@ -47,4 +47,4 @@ Every package must have:
 - witness evidence
 - smoke notes or a reproducible example
 
-Packages without this evidence can exist on Gitlawb, but nipmod should not rank them as verified.
+Packages without this evidence can exist on Gitlawb, but Nipmod should not rank them as verified.

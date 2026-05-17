@@ -20,7 +20,7 @@ describe("public security policy", () => {
   test("root security policy documents decentralized quarantine limits", async () => {
     const policy = await readFile(join(root, "SECURITY.md"), "utf8");
 
-    expect(policy).toContain("nipmod cannot delete decentralized Gitlawb content");
+    expect(policy).toContain("Nipmod cannot delete decentralized Gitlawb content");
     expect(policy).toContain("publish signed advisories");
     expect(policy).toContain("quarantined");
     expect(policy).toContain("third party audit status");

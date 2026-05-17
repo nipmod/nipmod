@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/quickstart"
   },
-  description: "Install nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
+  description: "Install Nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
   openGraph: {
-    description: "Install nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
-    title: "nipmod quickstart",
+    description: "Install Nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
+    title: "Nipmod quickstart",
     url: "https://nipmod.com/quickstart"
   },
-  title: "nipmod quickstart"
+  title: "Nipmod quickstart"
 };
 
 export default function QuickstartPage() {

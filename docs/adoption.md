@@ -1,6 +1,6 @@
 # Adoption
 
-nipmod adoption is measured by real setup, inspect, package install, restore, audit and publish dry run evidence. Do not claim adoption from page views alone.
+Nipmod adoption is measured by real setup, inspect, package install, restore, audit and publish dry run evidence. Do not claim adoption from page views alone.
 
 ## First 100 User Loop
 
@@ -55,7 +55,7 @@ Persona:
 OS:
 Node:
 Git:
-nipmod version:
+Nipmod version:
 Commands run:
 Package:
 Doctor result:

@@ -1,6 +1,6 @@
 # Trust model
 
-nipmod treats Gitlawb as decentralized transport and storage. Package truth comes from signed evidence.
+Nipmod treats Gitlawb as decentralized transport and storage. Package truth comes from signed evidence.
 
 ## Roles
 
@@ -58,12 +58,12 @@ CI exits nonzero when a lockfile can no longer be verified.
 
 ## Decentralization boundary
 
-nipmod should not need privileged access to Gitlawb publishing. Anyone can publish to the underlying transport if Gitlawb allows it. nipmod can refuse to recommend, install or mark a package green.
+Nipmod should not need privileged access to Gitlawb publishing. Anyone can publish to the underlying transport if Gitlawb allows it. Nipmod can refuse to recommend, install or mark a package green.
 
 That is the same boundary as a market data layer: it can rate and warn, but it does not become the exchange.
 
 ## Gitlawb boundary
 
-Gitlawb stores repos, refs and blobs. nipmod does not treat a moving Gitlawb ref as enough trust by itself. Install trust comes from the package digest, bundle signature, signed release event, transparency inclusion, witness statement and advisory state.
+Gitlawb stores repos, refs and blobs. Nipmod does not treat a moving Gitlawb ref as enough trust by itself. Install trust comes from the package digest, bundle signature, signed release event, transparency inclusion, witness statement and advisory state.
 
 Publish currently needs `git-remote-gitlawb` and a package slug that Gitlawb can store as a repo name. Dotted or scoped names can be used for local drafts only when their canonical slug resolves to a Gitlawb compatible repo name.

@@ -34,7 +34,7 @@ describe("MCP host content", () => {
   });
 
   test("keeps the page message direct", () => {
-    expect(mcpContent.headline).toBe("Connect nipmod to agents");
+    expect(mcpContent.headline).toBe("Connect Nipmod to agents");
     expect(mcpContent.lead.length).toBeLessThanOrEqual(130);
   });
 });

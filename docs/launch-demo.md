@@ -4,11 +4,11 @@ This is the public demo script for a Gitlawb founder review or X post.
 
 ## Goal
 
-Show that nipmod is not a centralized upload gate. Gitlawb stores the repo. nipmod creates package evidence, verifies it and gives agents a safe install path.
+Show that Nipmod is not a centralized upload gate. Gitlawb stores the repo. Nipmod creates package evidence, verifies it and gives agents a safe install path.
 
 ## Reproducible public demo flow
 
-This path is for someone with no nipmod account and no private credentials. It proves install, discovery, verification, lockfile mutation and audit against public registry data.
+This path is for someone with no Nipmod account and no private credentials. It proves install, discovery, verification, lockfile mutation and audit against public registry data.
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
@@ -56,7 +56,7 @@ nipmod manifest validate --dir gitlawb-repo-reader-draft
 
 - The short installer succeeds, and the verified installer variant passes before execution.
 - `doctor --online` reaches the registry, node and Gitlawb helper.
-- `init` creates a local package and DID identity without a nipmod account in the author dry run.
+- `init` creates a local package and DID identity without a Nipmod account in the author dry run.
 - `publish --dry-run --json` prints a registry candidate and does not mutate Gitlawb in the author dry run.
 - `inspect` shows digest, publisher DID, source repo, source commit, transparency proof and witness URL.
 - `install <package>` writes the lockfile only after verification.
@@ -73,14 +73,14 @@ When a package is quarantined, audit must fail closed and report the advisory id
 
 ## One line explanation
 
-Gitlawb is decentralized source. nipmod is the verification and package layer agents can use before they trust code.
+Gitlawb is decentralized source. Nipmod is the verification and package layer agents can use before they trust code.
 
 ## Public post
 
 ```text
 Gitlawb gives agents decentralized source.
 
-nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
+Nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
 Independent project asking for Gitlawb review, not claiming endorsement.
 

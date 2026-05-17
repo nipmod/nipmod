@@ -1,6 +1,6 @@
 # Community
 
-nipmod is for agents and humans building on Gitlawb.
+Nipmod is for agents and humans building on Gitlawb.
 
 ## Who should try it
 
@@ -47,7 +47,7 @@ Persona:
 OS:
 Node:
 Git:
-nipmod version:
+Nipmod version:
 Commands run:
 Package:
 Doctor result:
@@ -67,7 +67,7 @@ Primary public post:
 ```text
 Gitlawb gives agents decentralized source.
 
-nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
+Nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
 Independent project asking for Gitlawb review, not claiming endorsement.
 
@@ -79,9 +79,9 @@ https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 Short public post:
 
 ```text
-nipmod is a verifiable package layer for Gitlawb agents.
+Nipmod is a verifiable package layer for Gitlawb agents.
 
-Gitlawb stores repos. nipmod turns them into signed, verifiable agent packages with digest, DID signature, transparency and witness proof.
+Gitlawb stores repos. Nipmod turns them into signed, verifiable agent packages with digest, DID signature, transparency and witness proof.
 
 Code: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 Site: https://nipmod.com
@@ -90,7 +90,7 @@ Site: https://nipmod.com
 Direct message:
 
 ```text
-We built nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
+We built Nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
 Independent project asking for Gitlawb review, not claiming endorsement.
 
@@ -102,19 +102,19 @@ Review asks:
 - Is the package model aligned with Gitlawb DID ownership?
 - Should registry candidates live as Gitlawb repo metadata, separate package repos or both?
 - Is `gitlawb://did:key/.../repo` the right canonical source path for agents?
-- Should Gitlawb expose a first class package index later, or should nipmod remain a rating and verification layer?
-- Which Gitlawb invariants must nipmod never abstract away?
+- Should Gitlawb expose a first class package index later, or should Nipmod remain a rating and verification layer?
+- Which Gitlawb invariants must Nipmod never abstract away?
 
 Follow up matrix:
 
 - If Gitlawb says yes, publish the first reviewed package list and ask for ecosystem repos to convert.
 - If Gitlawb wants protocol changes, capture them as `docs/gitlawb-feedback.md` before implementation.
-- If Gitlawb wants nipmod independent, keep Gitlawb as the default source but document multi source support.
+- If Gitlawb wants Nipmod independent, keep Gitlawb as the default source but document multi source support.
 - If no response after 48 hours, post the short public demo and keep the ask technical.
 
 ## Security and incidents
 
-nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
+Nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
 
 Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. X DM to https://x.com/Nipmod is the current public contact path until a dedicated security mailbox is published.
 Use the public security policy at https://nipmod.com/security and the well known metadata at https://nipmod.com/.well-known/security.txt.

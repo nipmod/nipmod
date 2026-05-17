@@ -5,17 +5,17 @@ Date: 2026-05-17
 
 ## Goal
 
-nipmod should become a package layer for Gitlawb sourced agent capabilities: npm level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default. Any claim that it is the primary Gitlawb package path requires Gitlawb review first.
+Nipmod should become a package layer for Gitlawb sourced agent capabilities: npm level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default. Any claim that it is the primary Gitlawb package path requires Gitlawb review first.
 
 The target is not a literal npm clone. npm parity means users and agents get the same product primitives people expect from npm, but with DID identity, signed Gitlawb artifacts, permission manifests, transparency proofs, witness evidence and policy gated activation.
 
 ## Non negotiable boundary
 
-Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, verify, cache, rank, warn, quarantine and activate packages. It must not become a central publishing authority that can delete or grant Gitlawb publishing rights.
+Gitlawb owns source, refs and package artifacts. Nipmod can index, resolve, verify, cache, rank, warn, quarantine and activate packages. It must not become a central publishing authority that can delete or grant Gitlawb publishing rights.
 
 ## Parity matrix
 
-| Layer | npm primitive | nipmod equivalent | Status |
+| Layer | npm primitive | Nipmod equivalent | Status |
 | --- | --- | --- | --- |
 | Package manifest | `package.json` | `nipmod.json` with package type, exports, permissions, dependencies and agent host metadata | in progress |
 | Version specifiers | exact, caret, tilde, tags | exact, caret, tilde, wildcard, dist tags | started |
@@ -115,7 +115,7 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
    - public reviewer receipts
 
 3. Enterprise surfaces
-   - private mirror support without central nipmod secrets
+   - private mirror support without central Nipmod secrets
    - org policy packs
    - signed allowlists
    - offline registry snapshots
@@ -140,4 +140,4 @@ The fourth slice adds `nipmod explain` for lockfile root intent, dependent recor
 
 The fifth slice adds `nipmod update` and MCP `nipmod.update_plan` for verified root package updates. Plans are read only, execution reuses the signed graph install path and stale package records are pruned only when they are unreachable from all root dependencies.
 
-The sixth slice adds the public static Registry API: base64url canonical package documents, exact version documents, latest dependency sidecars, latest provenance sidecars and discovery-manifest templates. This moves nipmod closer to npm packuments while preserving Gitlawb canonical IDs and static auditability.
+The sixth slice adds the public static Registry API: base64url canonical package documents, exact version documents, latest dependency sidecars, latest provenance sidecars and discovery-manifest templates. This moves Nipmod closer to npm packuments while preserving Gitlawb canonical IDs and static auditability.

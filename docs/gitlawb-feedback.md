@@ -1,6 +1,6 @@
 # Gitlawb Feedback
 
-This document tracks protocol and node issues found while operating nipmod on Gitlawb.
+This document tracks protocol and node issues found while operating Nipmod on Gitlawb.
 
 ## Profile duplicate for mirrored repos
 
@@ -88,11 +88,11 @@ Relevant Gitlawb source findings:
 
 Operator-safe recommendation:
 
-- Do not attempt client-side deletion from nipmod.
+- Do not attempt client-side deletion from Nipmod.
 - Add normalized owner/repo dedupe to list/profile surfaces, or migrate mirror rows when a canonical `did:key:` owner record exists.
 - If an operator cleanup is needed, remove only the short-owner mirror row after backup and after verifying the canonical `did:key:` repo still resolves.
 
 Launch impact:
 
 - Code source remains correct because both cards resolve to the same public repo path.
-- The profile count and duplicate card look unprofessional for founder review, so nipmod public links should prefer the direct repo URL until Gitlawb dedupes this upstream.
+- The profile count and duplicate card look unprofessional for founder review, so Nipmod public links should prefer the direct repo URL until Gitlawb dedupes this upstream.

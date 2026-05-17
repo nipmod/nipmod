@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
   "version": "0.1.0",
   "type": "skill",
-  "description": "Show agents how to convert an APM package listing into nipmod trust metadata.",
+  "description": "Show agents how to convert an APM package listing into Nipmod trust metadata.",
   "license": "MIT",
   "exports": {
     ".": {

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description: "Browse verified Gitlawb-sourced agent packages with trust, install and provenance context.",
   openGraph: {
     description: "Browse verified Gitlawb-sourced agent packages with trust, install and provenance context.",
-    title: "nipmod packages",
+    title: "Nipmod packages",
     url: "https://nipmod.com/packages"
   },
   title: "packages"

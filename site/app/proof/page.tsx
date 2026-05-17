@@ -5,13 +5,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/proof"
   },
-  description: "Run the nipmod public proof loop for verified install, audit and unsafe manifest blocking.",
+  description: "Run the Nipmod public proof loop for verified install, audit and unsafe manifest blocking.",
   openGraph: {
     description: "A public package installs cleanly, audits cleanly and unsafe manifests fail before release.",
-    title: "nipmod proof",
+    title: "Nipmod proof",
     url: "https://nipmod.com/proof"
   },
-  title: "nipmod proof"
+  title: "Nipmod proof"
 };
 
 export default function ProofPage() {

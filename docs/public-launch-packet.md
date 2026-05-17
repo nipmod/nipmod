@@ -1,12 +1,12 @@
 # Public Launch Packet
 
-This is the public material to send to Gitlawb founders, agent builders or reviewers. It should be honest: nipmod is technically live, but external adoption and independent review are still earned in public.
+This is the public material to send to Gitlawb founders, agent builders or reviewers. It should be honest: Nipmod is technically live, but external adoption and independent review are still earned in public.
 
 ## Founder pitch
 
-Gitlawb already gives agents decentralized source. nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
+Gitlawb already gives agents decentralized source. Nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
 
-nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb content. It verifies packages over Gitlawb content so agents can search, inspect, install, lock and audit before trusting code.
+Nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb content. It verifies packages over Gitlawb content so agents can search, inspect, install, lock and audit before trusting code.
 
 ## Public demo
 
@@ -56,7 +56,7 @@ nipmod manifest validate --dir gitlawb-repo-reader-draft
 ```text
 Gitlawb gives agents decentralized source.
 
-nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
+Nipmod adds the package layer: signed bundles, DID publisher identity, digest-pinned installs, release evidence, transparency proof, witness proof and advisory-aware audit.
 
 Independent project asking for Gitlawb review, not claiming endorsement.
 
@@ -68,7 +68,7 @@ Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nip
 ## Founder DM
 
 ```text
-We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
+We built Nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
 Independent project asking for Gitlawb review, not claiming endorsement.
 
@@ -107,4 +107,4 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 
 - Do not claim Gitlawb endorsement before Gitlawb says so.
 - Do not claim mature ecosystem adoption before external users and publishers exist.
-- Do not claim nipmod controls decentralized publishing. It only verifies, ranks, locks and audits packages.
+- Do not claim Nipmod controls decentralized publishing. It only verifies, ranks, locks and audits packages.

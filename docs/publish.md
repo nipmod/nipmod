@@ -1,6 +1,6 @@
-# Publishing with nipmod
+# Publishing with Nipmod
 
-nipmod publishes agent packages through Gitlawb while keeping package truth outside registry control.
+Nipmod publishes agent packages through Gitlawb while keeping package truth outside registry control.
 
 ## Author flow
 

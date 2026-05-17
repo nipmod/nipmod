@@ -1,5 +1,5 @@
 export const mcpContent = {
-  headline: "Connect nipmod to agents",
+  headline: "Connect Nipmod to agents",
   lead: "Run the CLI as MCP for search, view, trust reports, install and update plans, verify, audit, SBOM and explain.",
   primaryAction: "Install",
   secondaryAction: "Trust",

@@ -1,6 +1,6 @@
 # Incident Publication
 
-This is the operator path for a real package quarantine. It separates decentralized package storage from nipmod's rating layer: Gitlawb content is not deleted, but nipmod can publish signed advisory and registry quarantine metadata so agents stop installing the affected package.
+This is the operator path for a real package quarantine. It separates decentralized package storage from Nipmod's rating layer: Gitlawb content is not deleted, but Nipmod can publish signed advisory and registry quarantine metadata so agents stop installing the affected package.
 
 ## Inputs
 
@@ -17,7 +17,7 @@ This is the operator path for a real package quarantine. It separates decentrali
 - Use `high` when install or runtime behavior can materially harm a workspace but requires a narrower precondition.
 - Use `moderate` or `low` for documentation, provenance or compatibility defects that should warn but not block installs.
 - Only `high` and `critical` active quarantine metadata blocks install commands by default.
-- Never edit package blobs on Gitlawb as part of incident response. Publish signed nipmod advisories and quarantine metadata instead.
+- Never edit package blobs on Gitlawb as part of incident response. Publish signed Nipmod advisories and quarantine metadata instead.
 
 ## Dry Run
 

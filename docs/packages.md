@@ -16,7 +16,7 @@ The public catalog is useful because every package is verified and every launch 
 | `developer-default-policy` | `skill` | no permissions | Apply safe developer defaults for package trials. |
 | `malicious-skill-fixtures` | `skill` | no permissions | Provide safe negative fixtures for scanners. |
 | `mcp-server-import-example` | `skill` | no permissions | Map MCP server metadata into compatibility receipts. |
-| `apm-import-example` | `skill` | no permissions | Map an APM listing into nipmod trust metadata. |
+| `apm-import-example` | `skill` | no permissions | Map an APM listing into Nipmod trust metadata. |
 | `github-issue-triage` | `skill` | no permissions | Triage issue text as untrusted input. |
 | `gitlawb-diff-summarizer` | `skill` | no permissions | Summarize Gitlawb diffs with risk context. |
 | `release-notes-drafter` | `skill` | no permissions | Draft release notes from verified source evidence. |
@@ -71,8 +71,8 @@ Search ranks by trust first, then exact package name, name prefix, agent native 
 
 The ranking is advice, not authority. Agents should still run `nipmod inspect` before install.
 
-## What nipmod Does Not Control
+## What Nipmod Does Not Control
 
-nipmod does not decide who can publish to Gitlawb. It rates, indexes, quarantines, warns and blocks in nipmod surfaces based on signed evidence and advisories.
+Nipmod does not decide who can publish to Gitlawb. It rates, indexes, quarantines, warns and blocks in Nipmod surfaces based on signed evidence and advisories.
 
 This keeps publishing decentralized while making discovery safer for agents.

@@ -3,11 +3,11 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Packages agents can trust" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open nipmod Gitlawb profile in a new tab" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveAttribute(
     "href",
     "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R"
   );
-  await expect(page.getByRole("link", { name: "Open nipmod on X in a new tab" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Open Nipmod on X in a new tab" })).toHaveAttribute(
     "href",
     "https://x.com/Nipmod"
   );

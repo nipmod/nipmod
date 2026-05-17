@@ -5,7 +5,7 @@ Date: 2026-05-17
 
 ## Why this exists
 
-npm has package documents, often called packuments, that group all versions and dist tags for one package. nipmod currently publishes a flat search index. That is enough for launch search, but not enough for npm parity because `latest`, `beta`, version ranges, package pages, `outdated`, `update`, `view`, deprecation and dependency resolution need a package document contract.
+npm has package documents, often called packuments, that group all versions and dist tags for one package. Nipmod currently publishes a flat search index. That is enough for launch search, but not enough for npm parity because `latest`, `beta`, version ranges, package pages, `outdated`, `update`, `view`, deprecation and dependency resolution need a package document contract.
 
 ## Package document
 

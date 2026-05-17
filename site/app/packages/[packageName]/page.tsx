@@ -37,9 +37,9 @@ export async function generateMetadata({ params }: PackagePageProps): Promise<Me
     alternates: {
       canonical: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
     },
-    description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified nipmod package.",
+    description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
     openGraph: {
-      description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified nipmod package.",
+      description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
       title,
       url: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
     },

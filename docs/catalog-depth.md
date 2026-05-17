@@ -1,6 +1,6 @@
 # Catalog Depth
 
-nipmod launch depth is measured by verified packages, manifest type coverage and proof quality. Volume alone does not count.
+Nipmod launch depth is measured by verified packages, manifest type coverage and proof quality. Volume alone does not count.
 
 ## Launch Type Coverage
 
@@ -13,7 +13,7 @@ nipmod launch depth is measured by verified packages, manifest type coverage and
 | `workflow-pack` | `external-review-packet` | Prepare an external reviewer handoff from proof and gate output. |
 | `eval-pack` | `package-safety-eval-pack` | Evaluate scanners against unsafe package fixtures. |
 | `policy-pack` | `launch-strict-policy-pack` | Apply launch strict install policy for verified agent packages. |
-| `adapter` | `package-migration-planner` | Plan migration from Gitlawb, MCP or APM sources into nipmod packages. |
+| `adapter` | `package-migration-planner` | Plan migration from Gitlawb, MCP or APM sources into Nipmod packages. |
 
 ## Readiness Rule
 

@@ -1,5 +1,5 @@
 export const homeContent = {
-  brand: "nipmod",
+  brand: "Nipmod",
   headline: "Packages agents can trust",
   lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
   links: {
@@ -104,7 +104,7 @@ export const homeContent = {
     },
     {
       label: "Connect",
-      text: "MCP, APM and source provenance receipts let existing agent formats map into nipmod proof."
+      text: "MCP, APM and source provenance receipts let existing agent formats map into Nipmod proof."
     }
   ],
   operatorChecks: [
@@ -141,14 +141,14 @@ export const homeContent = {
   ],
   founderOutreach: {
     post:
-      "Gitlawb gives agents decentralized source. nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "Gitlawb gives agents decentralized source. Nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
     dm:
-      "We built nipmod as an independent package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
+      "We built Nipmod as an independent package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
   },
   demoFlow: [
     {
       label: "Find",
-      text: "Search the public registry without a nipmod account.",
+      text: "Search the public registry without a Nipmod account.",
       command: "nipmod search gitlawb"
     },
     {
@@ -221,12 +221,12 @@ export const homeContent = {
     },
     {
       name: "mcp-server-import-example",
-      text: "Map MCP server metadata into nipmod compatibility receipts.",
+      text: "Map MCP server metadata into Nipmod compatibility receipts.",
       command: "nipmod install mcp-server-import-example"
     },
     {
       name: "apm-import-example",
-      text: "Map an APM package listing into nipmod trust metadata.",
+      text: "Map an APM package listing into Nipmod trust metadata.",
       command: "nipmod install apm-import-example"
     },
     {
@@ -261,7 +261,7 @@ export const homeContent = {
     },
     {
       name: "package-onboarding-checklist",
-      text: "Guide new package authors through a clean nipmod publish candidate.",
+      text: "Guide new package authors through a clean Nipmod publish candidate.",
       command: "nipmod install package-onboarding-checklist"
     },
     {
@@ -329,7 +329,7 @@ export const homeContent = {
       },
       {
         label: "Draft",
-        text: "nipmod creates a package manifest, permissions checklist and install preview."
+        text: "Nipmod creates a package manifest, permissions checklist and install preview."
       },
       {
         label: "Claim",

@@ -5,13 +5,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/mcp"
   },
-  description: "Connect nipmod to Codex, Claude Code and OpenCode.",
+  description: "Connect Nipmod to Codex, Claude Code and OpenCode.",
   openGraph: {
-    description: "Use nipmod as a local MCP server for package search, exact metadata, inspect, plans, verify and audit.",
-    title: "nipmod MCP",
+    description: "Use Nipmod as a local MCP server for package search, exact metadata, inspect, plans, verify and audit.",
+    title: "Nipmod MCP",
     url: "https://nipmod.com/mcp"
   },
-  title: "nipmod MCP"
+  title: "Nipmod MCP"
 };
 
 export default function McpPage() {

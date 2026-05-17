@@ -24,7 +24,7 @@ Expected output:
 ```json
 {
   "format": "mcp",
-  "mappedTo": "nipmod compatibility receipt",
+  "mappedTo": "Nipmod compatibility receipt",
   "provenanceLoss": []
 }
 ```

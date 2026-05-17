@@ -1,6 +1,6 @@
 # external-review-packet
 
-Prepare a complete external review packet from nipmod proof and gate output.
+Prepare a complete external review packet from Nipmod proof and gate output.
 
 ## What it does
 

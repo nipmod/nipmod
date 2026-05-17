@@ -5,13 +5,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/evidence"
   },
-  description: "Human readable nipmod proof for discovery, registry, checkpoint, witness, advisories and package evidence.",
+  description: "Human readable Nipmod proof for discovery, registry, checkpoint, witness, advisories and package evidence.",
   openGraph: {
-    description: "Human readable nipmod proof with explicit links to the machine artifacts agents verify.",
-    title: "nipmod evidence",
+    description: "Human readable Nipmod proof with explicit links to the machine artifacts agents verify.",
+    title: "Nipmod evidence",
     url: "https://nipmod.com/evidence"
   },
-  title: "nipmod evidence"
+  title: "Nipmod evidence"
 };
 
 export default function EvidencePage() {

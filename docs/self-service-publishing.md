@@ -1,6 +1,6 @@
 # Self Service Publishing
 
-nipmod publishing is decentralized. Gitlawb stores the package repo and artifact; nipmod verifies and indexes evidence.
+Nipmod publishing is decentralized. Gitlawb stores the package repo and artifact; Nipmod verifies and indexes evidence.
 
 ## Author Flow
 
@@ -37,6 +37,6 @@ It must include:
 
 ## Public Indexing Policy
 
-nipmod does not decide who can publish on Gitlawb. The public registry indexes packages only when the package passes digest, signature, release event, source provenance, transparency and witness checks.
+Nipmod does not decide who can publish on Gitlawb. The public registry indexes packages only when the package passes digest, signature, release event, source provenance, transparency and witness checks.
 
 Failed candidates can still exist on Gitlawb, but they should not appear as `verified/100`.

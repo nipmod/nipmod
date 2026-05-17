@@ -1,6 +1,6 @@
 # Audit Readiness
 
-nipmod is audit ready when an external reviewer can reproduce source, deployment, package, registry, witness and recovery claims without private context.
+Nipmod is audit ready when an external reviewer can reproduce source, deployment, package, registry, witness and recovery claims without private context.
 
 ## Required Packet Contents
 

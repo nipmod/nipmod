@@ -1,6 +1,6 @@
 # Independent Review Packet
 
-nipmod must not claim third party audit status until an independent reviewer has signed this packet.
+Nipmod must not claim third party audit status until an independent reviewer has signed this packet.
 
 ## Review Target
 

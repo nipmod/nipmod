@@ -1,11 +1,11 @@
 # apm-import-example
 
-Show agents how to convert an APM package listing into nipmod trust metadata.
+Show agents how to convert an APM package listing into Nipmod trust metadata.
 
 ## What it does
 
-- Documents a safe APM-to-nipmod compatibility review.
-- Separates external package metadata from signed nipmod evidence.
+- Documents a safe APM-to-Nipmod compatibility review.
+- Separates external package metadata from signed Nipmod evidence.
 - Gives agents a template for migration and duplicate-risk checks.
 
 ## Permissions

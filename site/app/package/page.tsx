@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/package"
   },
-  description: "Create a nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
+  description: "Create a Nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
   openGraph: {
-    description: "Create a nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
+    description: "Create a Nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
     title: "Package a Gitlawb repo",
     url: "https://nipmod.com/package"
   },
@@ -65,7 +65,7 @@ export default function PackagePage() {
       <section className="proof-section" aria-labelledby="boundary-title">
         <div>
           <p className="eyebrow">Boundary</p>
-          <h2 id="boundary-title">Gitlawb stores it. nipmod verifies it.</h2>
+          <h2 id="boundary-title">Gitlawb stores it. Nipmod verifies it.</h2>
         </div>
         <div className="proof-panel">
           <p className="panel-copy">

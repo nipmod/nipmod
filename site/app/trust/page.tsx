@@ -17,13 +17,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/trust"
   },
-  description: "Verify nipmod registry trust roots, transparency, witness, advisories and release pins.",
+  description: "Verify Nipmod registry trust roots, transparency, witness, advisories and release pins.",
   openGraph: {
-    description: "Public trust roots for nipmod packages, releases, advisories, transparency and witness state.",
-    title: "nipmod trust",
+    description: "Public trust roots for Nipmod packages, releases, advisories, transparency and witness state.",
+    title: "Nipmod trust",
     url: "https://nipmod.com/trust"
   },
-  title: "nipmod trust"
+  title: "Nipmod trust"
 };
 
 export default function TrustPage() {
@@ -33,7 +33,7 @@ export default function TrustPage() {
         <p className="eyebrow">Trust</p>
         <h1 id="trust-title">Small surface. Hard proof.</h1>
         <p className="lead">
-          nipmod verifies packages by digest, signature, source tag, transparency log and external witness before they
+          Nipmod verifies packages by digest, signature, source tag, transparency log and external witness before they
           appear as verified.
         </p>
         <div className={`status-pill ${summary.ready ? "status-ok" : "status-review"}`}>

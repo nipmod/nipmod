@@ -52,7 +52,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <i />
               <i />
             </span>
-            <span>nipmod</span>
+            <span>Nipmod</span>
           </div>
           <pre>
             {homeContent.commands.map((command) => (
@@ -65,7 +65,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
-      <section className="usage-strip" aria-label="Where nipmod is used">
+      <section className="usage-strip" aria-label="Where Nipmod is used">
         {homeContent.usage.map((item) => (
           <article className="usage-item" key={item.label}>
             <h2>{item.label}</h2>

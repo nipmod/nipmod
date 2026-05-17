@@ -1,6 +1,6 @@
 # Multi Source Registry
 
-nipmod defaults to `https://nipmod.com/registry/packages.json`, but search can already read multiple registry indexes.
+Nipmod defaults to `https://nipmod.com/registry/packages.json`, but search can already read multiple registry indexes.
 
 ```bash
 nipmod search policy --registries https://nipmod.com/registry/packages.json,https://mirror.example/packages.json

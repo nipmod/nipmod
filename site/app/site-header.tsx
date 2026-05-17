@@ -4,17 +4,17 @@ export function SiteHeader() {
   return (
     <header className="topbar" aria-label="Primary">
       <div className="brand-cluster">
-        <a className="brand" href="/" aria-label="nipmod home">
+        <a className="brand" href="/" aria-label="Nipmod home">
           <span className="brand-mark" aria-hidden="true">
             <img alt="" height="26" src="/nipmod-logo.jpg" width="26" />
           </span>
           <span>{homeContent.brand}</span>
         </a>
-        <div className="brand-socials" aria-label="nipmod links">
+        <div className="brand-socials" aria-label="Nipmod links">
           <a
             className="brand-icon-button"
             href={homeContent.links.gitlawbProfile}
-            aria-label="Open nipmod Gitlawb profile in a new tab"
+            aria-label="Open Nipmod Gitlawb profile in a new tab"
             rel="noreferrer"
             target="_blank"
             title="Gitlawb"
@@ -24,7 +24,7 @@ export function SiteHeader() {
           <a
             className="brand-icon-button"
             href={homeContent.links.x}
-            aria-label="Open nipmod on X in a new tab"
+            aria-label="Open Nipmod on X in a new tab"
             rel="noreferrer"
             target="_blank"
             title="X"
@@ -57,7 +57,7 @@ export function SiteHeader() {
             <a href="/mcp">MCP</a>
             <a
               href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod"
-              aria-label="Open nipmod source on Gitlawb in a new tab"
+              aria-label="Open Nipmod source on Gitlawb in a new tab"
               rel="noreferrer"
               target="_blank"
             >

@@ -6,7 +6,7 @@ Guide new package authors through a clean nipmod publish candidate.
 
 - Turns a Gitlawb repo or local package folder into an author checklist.
 - Checks manifest, README, permissions, smoke proof, source provenance and publish dry run readiness.
-- Produces a clear claim path for humans and agents without requiring a nipmod account.
+- Produces a clear claim path for humans and agents without requiring a Nipmod account.
 
 ## Permissions
 

@@ -1,7 +1,7 @@
-# nipmod
+# Nipmod
 
 Gitlawb is decentralized GitHub for agents.
-nipmod is a verifiable package layer for Gitlawb agents.
+Nipmod is a verifiable package layer for Gitlawb agents.
 
 Public links:
 
@@ -11,11 +11,11 @@ Public links:
 
 ## Founder-facing pitch
 
-Gitlawb already gives agents decentralized source. nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
+Gitlawb already gives agents decentralized source. Nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
 
-The pitch is narrow: not a new Gitlawb authority, not a central upload gate. Gitlawb remains the source of repos and content. nipmod is the verification, discovery and lockfile layer that lets agents answer: who published this, what exact bytes am I installing, what source commit produced it, and is there current safety evidence against it?
+The pitch is narrow: not a new Gitlawb authority, not a central upload gate. Gitlawb remains the source of repos and content. Nipmod is the verification, discovery and lockfile layer that lets agents answer: who published this, what exact bytes am I installing, what source commit produced it, and is there current safety evidence against it?
 
-nipmod is a decentralized capability dependency layer for agents. It packages, signs, verifies and installs agent capabilities such as skills, MCP servers, tool bundles and workflow packs by DID, digest and policy.
+Nipmod is a decentralized capability dependency layer for agents. It packages, signs, verifies and installs agent capabilities such as skills, MCP servers, tool bundles and workflow packs by DID, digest and policy.
 
 Current implementation status:
 
@@ -106,7 +106,7 @@ nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fb
 
 Publish returns the canonical package id and digest. `add` verifies registry evidence, fetches the signed bundle and writes `nipmod.lock.json`. Low-level installs remain direct from Gitlawb and digest-strict:
 
-Compatibility receipts are published at `https://nipmod.com/compatibility/receipts.json`. They bind external package formats to the exact verified nipmod package digest, Gitlawb source repo, source commit and source tag without claiming conversion if provenance was lost.
+Compatibility receipts are published at `https://nipmod.com/compatibility/receipts.json`. They bind external package formats to the exact verified Nipmod package digest, Gitlawb source repo, source commit and source tag without claiming conversion if provenance was lost.
 
 ```bash
 nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 \

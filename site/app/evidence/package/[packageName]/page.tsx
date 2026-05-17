@@ -22,9 +22,9 @@ export async function generateMetadata({ params }: PackageEvidencePageProps): Pr
     alternates: {
       canonical: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
     },
-    description: pkg ? `Human readable nipmod proof for ${pkg.name}.` : "Human readable nipmod package proof.",
+    description: pkg ? `Human readable Nipmod proof for ${pkg.name}.` : "Human readable Nipmod package proof.",
     openGraph: {
-      description: pkg ? `Digest, signer, source, witness and raw proof links for ${pkg.name}.` : "Human readable nipmod package proof.",
+      description: pkg ? `Digest, signer, source, witness and raw proof links for ${pkg.name}.` : "Human readable Nipmod package proof.",
       title,
       url: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
     },

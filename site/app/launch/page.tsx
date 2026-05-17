@@ -4,13 +4,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/launch"
   },
-  description: "Launch, adoption, review, publishing and multi source registry readiness for nipmod.",
+  description: "Launch, adoption, review, publishing and multi source registry readiness for Nipmod.",
   openGraph: {
-    description: "The public paths for using, reviewing and publishing nipmod packages.",
-    title: "nipmod launch",
+    description: "The public paths for using, reviewing and publishing Nipmod packages.",
+    title: "Nipmod launch",
     url: "https://nipmod.com/launch"
   },
-  title: "nipmod launch"
+  title: "Nipmod launch"
 };
 
 const tracks = [
@@ -98,9 +98,9 @@ const externalProofTracks = [
 
 const founderCopy = {
   post:
-    "Gitlawb gives agents decentralized source.\n\nnipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+    "Gitlawb gives agents decentralized source.\n\nNipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
   dm:
-    "We built nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
+    "We built Nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
 } as const;
 
 export default function LaunchPage() {
@@ -110,7 +110,7 @@ export default function LaunchPage() {
         <p className="eyebrow">Launch</p>
         <h1 id="launch-title">Use it. Publish into it. Review it.</h1>
         <p className="lead">
-          nipmod is technically live. The public paths are ready; ecosystem maturity is earned from external users,
+          Nipmod is technically live. The public paths are ready; ecosystem maturity is earned from external users,
           external package authors and independent reviewers running the same proof paths.
         </p>
         <div className="actions" aria-label="Launch actions">

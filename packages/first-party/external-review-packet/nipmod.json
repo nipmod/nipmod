@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
   "version": "0.1.0",
   "type": "workflow-pack",
-  "description": "Prepare a complete external review packet from nipmod proof and gate output.",
+  "description": "Prepare a complete external review packet from Nipmod proof and gate output.",
   "license": "MIT",
   "exports": {
     ".": {

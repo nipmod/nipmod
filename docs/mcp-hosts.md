@@ -1,4 +1,4 @@
-# nipmod MCP Host Setup
+# Nipmod MCP Host Setup
 
 `nipmod mcp serve` exposes package verification through a local stdio MCP server. It is meant for agent hosts that can call tools but should not mutate a workspace by default.
 

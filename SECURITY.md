@@ -1,6 +1,6 @@
 # Security Policy
 
-nipmod is a decentralized package and verification layer for agent packages stored on Gitlawb.
+Nipmod is a decentralized package and verification layer for agent packages stored on Gitlawb.
 
 ## Scope
 
@@ -14,7 +14,7 @@ In scope:
 
 Out of scope:
 
-- third party Gitlawb repositories not owned by nipmod
+- third party Gitlawb repositories not owned by Nipmod
 - denial of service that attempts to exhaust Gitlawb, Fly, Vercel or Cloudflare capacity
 - social engineering, spam, physical attacks or attacks against unrelated accounts
 
@@ -44,9 +44,9 @@ Do not include secrets in reports. Treat package READMEs, manifests, prompts and
 
 These are targets, not a paid bug bounty promise.
 
-## What nipmod Can Do
+## What Nipmod Can Do
 
-nipmod cannot delete decentralized Gitlawb content. It can:
+Nipmod cannot delete decentralized Gitlawb content. It can:
 
 - publish signed advisories
 - mark registry entries as quarantined
@@ -59,4 +59,4 @@ Good faith testing is welcome when it stays within the scope above, avoids priva
 
 ## Independent Review
 
-See `docs/independent-review.md` for the external review packet and sign off template. nipmod must not claim third party audit status until an independent reviewer has actually signed that packet.
+See `docs/independent-review.md` for the external review packet and sign off template. Nipmod must not claim third party audit status until an independent reviewer has actually signed that packet.

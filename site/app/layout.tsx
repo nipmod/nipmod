@@ -15,19 +15,19 @@ export const metadata: Metadata = {
   openGraph: {
     description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
     images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
-    siteName: "nipmod",
-    title: "nipmod",
+    siteName: "Nipmod",
+    title: "Nipmod",
     type: "website",
     url: "https://nipmod.com"
   },
-  title: "nipmod",
+  title: "Nipmod",
   twitter: {
     card: "summary",
     creator: "@Nipmod",
     description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
     images: ["/nipmod-logo.jpg"],
     site: "@Nipmod",
-    title: "nipmod"
+    title: "Nipmod"
   }
 };
 

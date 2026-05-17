@@ -4,13 +4,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/security"
   },
-  description: "Security policy, vulnerability reporting and incident response for nipmod.",
+  description: "Security policy, vulnerability reporting and incident response for Nipmod.",
   openGraph: {
-    description: "Report nipmod vulnerabilities and verify the public security policy.",
-    title: "nipmod security",
+    description: "Report Nipmod vulnerabilities and verify the public security policy.",
+    title: "Nipmod security",
     url: "https://nipmod.com/security"
   },
-  title: "nipmod security"
+  title: "Nipmod security"
 };
 
 const responseTargets = [
@@ -33,7 +33,7 @@ export default function SecurityPage() {
         <p className="eyebrow">Security</p>
         <h1 id="security-title">Report with proof.</h1>
         <p className="lead">
-          nipmod does not control Gitlawb content. It verifies packages, publishes signed advisories and blocks unsafe
+          Nipmod does not control Gitlawb content. It verifies packages, publishes signed advisories and blocks unsafe
           install surfaces when a package becomes risky.
         </p>
         <div className="actions" aria-label="Security actions">
@@ -46,7 +46,7 @@ export default function SecurityPage() {
           <a
             className="button button-ghost"
             href="https://x.com/Nipmod"
-            aria-label="Open nipmod on X in a new tab"
+            aria-label="Open Nipmod on X in a new tab"
             rel="noreferrer"
             target="_blank"
           >
@@ -104,7 +104,7 @@ export default function SecurityPage() {
               <span className="check-dot check-ok" aria-hidden="true" />
               <div>
                 <h3>{item}</h3>
-                <p>Content remains on Gitlawb; nipmod changes verification, warnings and install decisions.</p>
+                <p>Content remains on Gitlawb; Nipmod changes verification, warnings and install decisions.</p>
               </div>
             </article>
           ))}

@@ -14,7 +14,7 @@
       "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
       "canonical": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
       "cloneUrl": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
-      "description": "Prepare a complete external review packet from nipmod proof and gate output.",
+      "description": "Prepare a complete external review packet from Nipmod proof and gate output.",
       "digest": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
       "documentType": "dev.nipmod.package-version.v1",
       "formatVersion": 1,
