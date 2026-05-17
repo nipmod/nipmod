@@ -13,6 +13,9 @@ import {
   type RegistryIndex,
   type RegistryPackage
 } from "../lib/registry";
+import registryData from "../app/registry-data.json";
+
+const currentRegistry = registryData as RegistryIndex;
 
 const baseEvidence = {
   artifactDigestVerified: true,
@@ -255,15 +258,19 @@ describe("registry data", () => {
     expect(installCommand(pkg)).toBe("Install blocked: NIPMOD-2026-9001: Quarantine dry-run advisory");
   });
 
-  test("only renders source repo links for known HTTPS Gitlawb hosts", () => {
-    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git")).toBe(
-      "https://node.nipmod.com/zalpha/alpha.git"
-    );
-    expect(safeSourceRepoHref("https://node.gitlawb.com/zalpha/alpha.git")).toBe(
-      "https://node.gitlawb.com/zalpha/alpha.git"
-    );
+  test("renders clone repo URLs as Gitlawb web source links", () => {
+    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
+    expect(safeSourceRepoHref("https://node.gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
+    expect(safeSourceRepoHref("https://gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
     expect(safeSourceRepoHref("javascript:alert(1)")).toBeNull();
     expect(safeSourceRepoHref("https://example.test/zalpha/alpha.git")).toBeNull();
+    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git/info/refs")).toBeNull();
+  });
+
+  test("current package source links are browser safe Gitlawb URLs", () => {
+    expect(currentRegistry.packages.map((pkg) => safeSourceRepoHref(pkg.sourceRepo))).toEqual(
+      currentRegistry.packages.map((pkg) => `https://gitlawb.com/${pkg.owner.split(":").at(-1)}/${pkg.repo}`)
+    );
   });
 
   test("surfaces dangerous permission details instead of only counts", () => {

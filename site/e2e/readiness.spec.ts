@@ -21,6 +21,10 @@ test("home registry search stays usable", async ({ page }) => {
 
   await expect(page).toHaveURL(/q=repo/);
   await expect(page.locator("#registry .package-card").first()).toContainText("verified");
+  await expect(page.locator("#registry .package-card").first().getByRole("link", { name: "Git source" })).toHaveAttribute(
+    "href",
+    /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
+  );
 });
 
 test("mobile more menu exposes secondary navigation", async ({ page }) => {
@@ -95,6 +99,15 @@ test("package evidence links stay on the human site", async ({ page }) => {
   await expect(page).toHaveURL(/\/evidence\/package\/.*#package-proof/);
   await expect(page.getByRole("heading", { name: "Proof humans can read." })).toBeVisible();
   await expect(page.getByText("Machine file").first()).toBeVisible();
+});
+
+test("package source links open Gitlawb human repo pages", async ({ page }) => {
+  await page.goto("/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader");
+
+  await expect(page.getByRole("link", { name: "Open gitlawb-repo-reader Git source in a new tab" })).toHaveAttribute(
+    "href",
+    "https://gitlawb.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
+  );
 });
 
 test("human pages do not promote raw artifact links", async ({ page }) => {

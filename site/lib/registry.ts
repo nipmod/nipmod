@@ -325,10 +325,32 @@ export function safeSourceRepoHref(value: string): string | null {
     if (url.protocol !== "https:" || !allowedSourceRepoHosts.has(url.hostname)) {
       return null;
     }
-    return url.href;
+    const sourcePath = parseSourceRepoPath(url);
+    if (!sourcePath) {
+      return null;
+    }
+    return `https://gitlawb.com/${sourcePath.owner}/${sourcePath.repo}`;
   } catch {
     return null;
   }
+}
+
+function parseSourceRepoPath(url: URL): { owner: string; repo: string } | null {
+  const segments = url.pathname.split("/").filter(Boolean);
+  const nodeRepoPath = url.hostname === "gitlawb.com" && segments[0] === "node" && segments[1] === "repos";
+  const expectedLength = nodeRepoPath ? 4 : 2;
+  if (segments.length !== expectedLength) {
+    return null;
+  }
+
+  const [owner, repoWithOptionalGit] = nodeRepoPath ? [segments[2], segments[3]] : [segments[0], segments[1]];
+  const repo = repoWithOptionalGit?.replace(/\.git$/i, "");
+
+  if (!owner || !repo || !/^z[A-Za-z0-9]+$/.test(owner) || !/^[a-z0-9][a-z0-9._-]*$/i.test(repo)) {
+    return null;
+  }
+
+  return { owner, repo };
 }
 
 export function permissionHighlights(pkg: RegistryPackage): string[] {
