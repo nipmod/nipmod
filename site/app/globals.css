@@ -105,6 +105,7 @@ summary:focus-visible {
 }
 
 .brand,
+.brand-icon-button,
 .nav-link,
 .nav-more-button,
 .button {
@@ -113,6 +114,13 @@ summary:focus-visible {
   display: inline-flex;
   justify-content: center;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.brand-cluster {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  min-width: 0;
 }
 
 .brand {
@@ -125,6 +133,7 @@ summary:focus-visible {
 }
 
 .brand:hover,
+.brand-icon-button:hover,
 .nav-link:hover,
 .nav-more-button:hover,
 .button-ghost:hover,
@@ -147,6 +156,32 @@ summary:focus-visible {
   display: block;
   height: 28px;
   width: 28px;
+}
+
+.brand-socials {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.brand-icon-button {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  height: 34px;
+  overflow: hidden;
+  width: 34px;
+}
+
+.brand-icon-button img,
+.brand-icon-button svg {
+  display: block;
+  height: 17px;
+  width: 17px;
+}
+
+.brand-icon-button img {
+  border-radius: 5px;
 }
 
 .nav-actions {
@@ -1185,6 +1220,15 @@ h1 {
 @media (max-width: 560px) {
   .brand span:last-child {
     display: none;
+  }
+
+  .brand {
+    padding: 0 7px;
+  }
+
+  .brand-icon-button {
+    height: 32px;
+    width: 32px;
   }
 
   .nav-actions {

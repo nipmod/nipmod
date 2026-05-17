@@ -3,6 +3,14 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Packages agents can trust" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open nipmod Gitlawb profile in a new tab" })).toHaveAttribute(
+    "href",
+    "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R"
+  );
+  await expect(page.getByRole("link", { name: "Open nipmod on X in a new tab" })).toHaveAttribute(
+    "href",
+    "https://x.com/Nipmod"
+  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.getByRole("link", { name: "Install" })).toBeVisible();
@@ -43,7 +51,6 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
-  await expect(panel.getByRole("link", { name: "X" })).toBeVisible();
 });
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {
