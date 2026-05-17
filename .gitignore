@@ -4,6 +4,7 @@
 node_modules/
 dist/
 .next/
+.next.stale.*/
 out/
 target/
 
@@ -34,6 +35,9 @@ site/public/releases/*
 !site/public/releases/nipmod-0.1.26.tgz
 !site/public/releases/nipmod-0.1.26.tgz.sha256
 !site/public/releases/nipmod-0.1.26.tgz.sig
+!site/public/releases/nipmod-0.1.27.tgz
+!site/public/releases/nipmod-0.1.27.tgz.sha256
+!site/public/releases/nipmod-0.1.27.tgz.sig
 
 # Secrets
 .env

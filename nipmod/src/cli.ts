@@ -807,7 +807,7 @@ async function searchCommand(args: string[]): Promise<CliResult> {
   return {
     ok: true,
     data: {
-      message: formatSearch(result),
+      message: formatSearch(result, { details: hasFlag(args, "--details") }),
       ...result
     }
   };
@@ -895,23 +895,68 @@ async function policyCheckCommand(args: string[]): Promise<CliResult> {
   };
 }
 
-function formatSearch(result: RegistrySearchResult): string {
+function formatSearch(result: RegistrySearchResult, options: { details: boolean } = { details: false }): string {
   if (result.total === 0) {
     return `No packages found for "${result.query}"`;
   }
-  const lines = [`nipmod search: ${result.total} package${result.total === 1 ? "" : "s"}`];
-  for (const pkg of result.packages) {
-    lines.push(`${pkg.name} ${pkg.version} ${pkg.trust} ${pkg.permissionSummary}`);
+  const lines = [`nipmod search ${quotedSearchQuery(result.query)} - ${result.total} package${result.total === 1 ? "" : "s"}`, ""];
+  lines.push(
+    [
+      "No.",
+      padCell("Package", 28),
+      padCell("Version", 8),
+      padCell("Trust", 12),
+      padCell("Kind", 13),
+      "Permissions"
+    ].join(" ")
+  );
+  for (const [index, pkg] of result.packages.entries()) {
+    lines.push(
+      [
+        `${String(index + 1).padStart(2)}.`,
+        padCell(pkg.name, 28),
+        padCell(pkg.version, 8),
+        padCell(pkg.trust, 12),
+        padCell(pkg.type, 13),
+        pkg.permissionSummary
+      ].join(" ")
+    );
+    if (pkg.description) {
+      lines.push(`    ${clipCell(pkg.description, 96)}`);
+    }
     if (pkg.install) {
-      lines.push(`add: ${pkg.install}`);
+      lines.push(`    add: ${pkg.install}`);
       if (pkg.nameAmbiguous && pkg.canonicalInstall) {
-        lines.push(`security: ${pkg.canonicalInstall}`);
+        lines.push(`    security: ${pkg.canonicalInstall}`);
       }
     } else if (pkg.installBlockedReason) {
-      lines.push(`blocked: ${pkg.installBlockedReason}`);
+      lines.push(`    blocked: ${pkg.installBlockedReason}`);
+    }
+    if (options.details) {
+      lines.push(`    id: ${pkg.canonical}`);
+      lines.push(`    source: ${pkg.sourceRegistry}`);
     }
   }
+  lines.push("", "Agents: use --json or nipmod mcp for structured output.");
   return lines.join("\n");
+}
+
+function quotedSearchQuery(query: string): string {
+  return `"${query.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+}
+
+function padCell(value: string, width: number): string {
+  return clipCell(value, width).padEnd(width, " ");
+}
+
+function clipCell(value: string, width: number): string {
+  if (value.length <= width) {
+    return value;
+  }
+  if (width <= 3) {
+    return value.slice(0, width);
+  }
+  return `${value.slice(0, width - 3)}...`;
 }
 
 async function policyFromFlags(args: readonly string[]): Promise<NipmodPolicy> {
@@ -1067,15 +1112,24 @@ function configuredNodeUrl(args: readonly string[]): string {
 }
 
 function formatDoctor(doctor: DoctorGitlawbResult): string {
-  const lines = [`nipmod ${doctor.ready ? "ready" : "needs setup"}`];
+  const lines = [`nipmod ${doctor.ready ? "ready" : "needs setup"}`, ""];
   for (const check of doctor.checks) {
-    lines.push(`${check.status.toUpperCase()} ${check.label}: ${check.message}`);
-    if (check.status !== "ok" && check.detail) {
-      lines.push(`  ${check.detail}`);
+    lines.push(`${padCell(check.status.toUpperCase(), 4)} ${padCell(doctorCheckLabel(check), 16)} ${check.message}`);
+    if (check.id !== "gitlawb-helper" && check.status !== "ok" && check.detail) {
+      lines.push(`     ${check.detail}`);
     }
   }
 
+  const helper = doctor.checks.find((check) => check.id === "gitlawb-helper");
+  if (helper?.status === "warn") {
+    lines.push("", "install and add are ready. Publish later:", `  ${helper.detail ?? doctor.installCommand}`);
+  }
+
   return lines.join("\n");
+}
+
+function doctorCheckLabel(check: DoctorGitlawbResult["checks"][number]): string {
+  return check.id === "gitlawb-helper" ? "Publish helper" : check.label;
 }
 
 function formatPublishDryRunPlan(plan: Awaited<ReturnType<typeof createPublishDryRunPlan>>): string {

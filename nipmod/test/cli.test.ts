@@ -325,9 +325,13 @@ describe("nipmod CLI", () => {
     });
 
     expect(result.stdout).toContain("nipmod ready");
-    expect(result.stdout).toContain("WARN Gitlawb helper: publish needs git-remote-gitlawb; install and add still work");
+    expect(result.stdout).toContain("WARN Publish helper");
+    expect(result.stdout).toContain("install and add are ready");
     expect(result.stdout).toContain("verified checksum");
+    expect(result.stdout).toContain("Publish later:");
     expect(result.stdout).not.toContain("nipmod needs setup");
+    expect(result.stdout).not.toContain("FAIL Gitlawb helper");
+    expect(result.stdout).not.toContain("Then run: nipmod doctor");
     expect(result.stdout).not.toContain("curl -fsSL");
     expect(result.stdout).not.toContain("| sh");
   });
@@ -412,10 +416,26 @@ describe("nipmod CLI", () => {
     });
 
     const text = await execaNode(["src/cli.ts", "search", "alpha", "--registry", pathToFileURL(registryPath).href]);
-    expect(text.stdout).toContain("alpha-agent 0.1.0 verified/100");
+    expect(text.stdout).toContain('nipmod search "alpha" - 1 package');
+    expect(text.stdout).toContain("Package");
+    expect(text.stdout).toContain("Trust");
+    expect(text.stdout).toContain("1. alpha-agent");
+    expect(text.stdout).toContain("0.1.0");
+    expect(text.stdout).toContain("verified/100");
     expect(text.stdout).toContain("no permissions");
     expect(text.stdout).toContain("add: nipmod add alpha-agent --online");
+    expect(text.stdout).not.toContain(`id: pkg:${owner}/alpha-agent`);
     expect(text.stdout).not.toContain(`security: nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
+
+    const detailed = await execaNode([
+      "src/cli.ts",
+      "search",
+      "alpha",
+      "--details",
+      "--registry",
+      pathToFileURL(registryPath).href
+    ]);
+    expect(detailed.stdout).toContain(`id: pkg:${owner}/alpha-agent`);
   });
 
   test("search ranking boosts exact agent-native matches", async () => {

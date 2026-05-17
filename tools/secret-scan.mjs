@@ -77,6 +77,9 @@ export function scanTextForSecrets(path, text) {
 export function shouldSkipPath(path) {
   const normalized = path.replaceAll("\\", "/").replace(/^\.\//, "");
   const segments = normalized.split("/");
+  if (segments.some((segment) => segment.startsWith(".next.stale."))) {
+    return true;
+  }
   if (SKIP_SUFFIXES.some((suffix) => normalized.endsWith(suffix))) {
     return true;
   }
@@ -166,6 +169,9 @@ function listWorkspaceFiles() {
     "-o",
     "-name",
     ".next",
+    "-o",
+    "-name",
+    ".next.stale.*",
     "-o",
     "-name",
     "dist",

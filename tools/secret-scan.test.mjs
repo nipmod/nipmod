@@ -42,6 +42,7 @@ describe("secret scanner", () => {
     expect(shouldSkipPath("packages/first-party/pkg/.nipmod/identity.json")).toBe(false);
     expect(shouldSkipPath("site/public/releases/nipmod-0.1.9.tgz")).toBe(false);
     expect(shouldSkipPath("site/node_modules/pkg/index.js")).toBe(true);
+    expect(shouldSkipPath("site/.next.stale.123/server/app.js")).toBe(true);
     expect(shouldSkipPath("site/app/page.tsx")).toBe(false);
   });
 

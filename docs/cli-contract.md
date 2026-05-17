@@ -60,6 +60,10 @@ Trust and advisory blocks can return `ok: false` with structured `data` and a no
 
 Command specific data lives under `data`. Scripts should check `ok` and `exitCode` first.
 
+Human terminal output is optimized for scanning and may change between releases. Agents and scripts should use
+`--json` or `nipmod mcp serve`. `nipmod search --details` prints canonical package ids and source registry URLs
+for humans who want the security detail that is hidden from the default search view.
+
 ## Exit codes
 
 | Code | Meaning |

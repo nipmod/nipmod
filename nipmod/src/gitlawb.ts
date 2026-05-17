@@ -181,7 +181,7 @@ const BUNDLE_FILENAME = "bundle.nipmod";
 const REMOTE_BUNDLE_LIMIT = 50 * 1024 * 1024;
 const ERROR_BODY_LIMIT = 8 * 1024;
 const GITLAWB_INSTALL_COMMAND =
-  "Install git-remote-gitlawb from Gitlawb with a verified checksum, then run nipmod doctor.";
+  "Install git-remote-gitlawb from Gitlawb with a verified checksum.";
 const HELPER_NAME = "git-remote-gitlawb";
 
 export function parseRemoteSpecifier(spec: string): RemoteSpecifier {
