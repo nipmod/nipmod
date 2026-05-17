@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { CommandBlock } from "../../command-block";
 import {
   installCommand,
   permissionHighlights,
@@ -136,9 +137,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
               <span className="check-dot check-ok" aria-hidden="true" />
               <div>
                 <h3>{variant.label}</h3>
-                <pre className="install-command">
-                  <code>{variant.command}</code>
-                </pre>
+                <CommandBlock command={variant.command} label={`Copy ${variant.label} command`} />
               </div>
             </article>
           ))}

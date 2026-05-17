@@ -39,17 +39,15 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="packages-title">
         <p className="eyebrow">Packages</p>
-        <h1 id="packages-title">Agent capabilities from Gitlawb.</h1>
-        <p className="lead">
-          Browse signed packages by type, inspect provenance and install only after trust, permissions and policy are clear.
-        </p>
+        <h1 id="packages-title">Find tools worth installing.</h1>
+        <p className="lead">Search signed Gitlawb packages. Check proof, permissions and source before install.</p>
       </section>
 
       <section className="registry-section" aria-labelledby="packages-browse-title">
         <div className="registry-head">
           <div>
             <p className="eyebrow">Browse</p>
-            <h2 id="packages-browse-title">Search the verified catalog.</h2>
+            <h2 id="packages-browse-title">A registry for agent work.</h2>
           </div>
           <form className="search-form" action="/packages">
             <label className="sr-only" htmlFor="package-search">

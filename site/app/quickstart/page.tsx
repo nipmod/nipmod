@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 
 export const metadata: Metadata = {
@@ -19,10 +20,8 @@ export default function QuickstartPage() {
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="quickstart-title">
         <p className="eyebrow">Start</p>
-        <h1 id="quickstart-title">Install. Inspect. Lock. Publish safely.</h1>
-        <p className="lead">
-          A first run path for agents and developers who want useful packages with proof before workspace mutation.
-        </p>
+        <h1 id="quickstart-title">Start with one command.</h1>
+        <p className="lead">Install the CLI, inspect a package, then lock exact bytes into your workspace.</p>
         <div className="actions" aria-label="Quickstart actions">
           <a className="button button-primary" href="#install">
             Install
@@ -39,9 +38,7 @@ export default function QuickstartPage() {
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{step.label}</h2>
             <p>{step.text}</p>
-            <pre className="install-command">
-              <code>{step.command}</code>
-            </pre>
+            <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
           </article>
         ))}
       </section>

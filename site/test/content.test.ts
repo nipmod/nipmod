@@ -22,7 +22,7 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("nipmod");
-    expect(homeContent.headline).toBe("Verifiable packages for agents");
+    expect(homeContent.headline).toBe("Packages agents can trust");
     expect(homeContent.lead.length).toBeLessThanOrEqual(110);
   });
 
@@ -54,17 +54,11 @@ describe("home content", () => {
   });
 
   test("states what people can do on the site", () => {
-    expect(homeContent.usage.map((item) => item.label)).toEqual(["Terminal", "Website", "Codex"]);
+    expect(homeContent.usage.map((item) => item.label)).toEqual(["Search", "Inspect", "Install"]);
     expect(homeContent.commands).toEqual([
-      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-      "nipmod doctor --online",
-      "mkdir -p nipmod-demo && cd nipmod-demo",
-      "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+      "nipmod search gitlawb",
+      "nipmod inspect gitlawb-repo-reader",
       "nipmod install gitlawb-repo-reader",
-      "nipmod install",
-      "nipmod update --plan",
-      "nipmod sbom --json",
-      "nipmod explain gitlawb-repo-reader --json",
       "nipmod audit --online"
     ]);
   });

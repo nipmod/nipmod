@@ -1,5 +1,5 @@
 import { homeContent } from "./content";
-import { packageEvidenceHref, packagePageHref, packagePageHrefByName } from "./packages/content";
+import { packageEvidenceHref, packagePageHref } from "./packages/content";
 import registryData from "./registry-data.json";
 import {
   installCommand,
@@ -25,47 +25,45 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = searchParams ? await searchParams : {};
   const query = firstParam(params.q);
   const publicRegistry = { ...registry, packages: homepagePackages(registry.packages) };
-  const packages = searchPackages(publicRegistry.packages, query);
+  const packageResults = searchPackages(publicRegistry.packages, query);
+  const packages = query ? packageResults : packageResults.slice(0, 6);
 
   return (
     <main className="page-shell" id="main">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
+          <p className="product-line">Built on Gitlawb</p>
           <h1 id="hero-title">{homeContent.headline}</h1>
           <p className="lead">{homeContent.lead}</p>
+          <div className="proof-chips" aria-label="Proof included">
+            {["Signed", "Digest pinned", "Witnessed", "Advisory checked"].map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
           <div className="actions" aria-label="Actions">
             <a className="button button-primary" href={homeContent.links.install}>
               {homeContent.primaryAction}
             </a>
-            <a className="button button-ghost" href="/quickstart">
-              Start
-            </a>
             <a className="button button-ghost" href="/packages">
-              Packages
+              Browse packages
             </a>
-            <a className="button button-ghost" href="/package">
-              Package
-            </a>
-            <a
-              className="button button-ghost"
-              href={homeContent.links.x}
-              aria-label="Open nipmod updates on X in a new tab"
-              rel="noreferrer"
-              target="_blank"
-            >
-              {homeContent.secondaryAction}
+            <a className="button button-ghost" href="/trust">
+              View proof
             </a>
           </div>
         </div>
 
         <div className="terminal-panel" id="flow" aria-label="Terminal flow">
           <div className="terminal-top">
-            <span>flow</span>
-            <span>gitlawb</span>
+            <span>nipmod</span>
+            <span>verified</span>
           </div>
           <pre>
             {homeContent.commands.map((command) => (
-              <code key={command}>{command}</code>
+              <code key={command}>
+                <span aria-hidden="true">$ </span>
+                {command}
+              </code>
             ))}
           </pre>
         </div>
@@ -80,96 +78,11 @@ export default async function Home({ searchParams }: HomeProps) {
         ))}
       </section>
 
-      <section className="ecosystem-section" aria-labelledby="ecosystem-title">
-        <div className="section-head">
-          <p className="eyebrow">Packages</p>
-          <h2 id="ecosystem-title">Useful capabilities. Verifiable proof.</h2>
-        </div>
-        <div className="usage-strip">
-          {homeContent.packageUseCases.map((item) => (
-            <article className="usage-item" key={item.label}>
-              <h2>{item.label}</h2>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="proof-section" aria-labelledby="package-title">
-        <div>
-          <p className="eyebrow">Gitlawb</p>
-          <h2 id="package-title">{homeContent.repoToPackage.headline}</h2>
-        </div>
-        <div className="proof-panel">
-          <p className="panel-copy">{homeContent.repoToPackage.lead}</p>
-          <a className="button button-primary" href="/package">
-            Package
-          </a>
-        </div>
-      </section>
-
-      <section className="ecosystem-section" aria-labelledby="launch-title">
-        <div className="section-head">
-          <p className="eyebrow">Launch</p>
-          <h2 id="launch-title">Ready to review in public.</h2>
-        </div>
-        <div className="block-grid">
-          {homeContent.launchReadiness.map((item) => (
-            <article className="block-card" key={item.label}>
-              <span>{item.label}</span>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="proof-section" aria-labelledby="demo-title">
-        <div>
-          <p className="eyebrow">Demo</p>
-          <h2 id="demo-title">Repo to package without an account.</h2>
-        </div>
-        <div className="proof-panel">
-          {homeContent.demoFlow.map((item) => (
-            <div className="demo-step" key={item.label}>
-              <h3>{item.label}</h3>
-              <p>{item.text}</p>
-              <pre className="install-command">
-                <code>{item.command}</code>
-              </pre>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="ecosystem-section" aria-labelledby="ecosystem-packages-title">
-        <div className="section-head">
-          <p className="eyebrow">Ecosystem</p>
-          <h2 id="ecosystem-packages-title">First packages are already useful.</h2>
-        </div>
-        <div className="package-grid">
-          {homeContent.ecosystemPackages.map((pkg) => (
-            <article className="package-card" key={pkg.name}>
-              <div className="package-card-top">
-                <div>
-                  <h3>
-                    <a href={packagePageHrefByName(pkg.name)}>{pkg.name}</a>
-                  </h3>
-                  <p>{pkg.text}</p>
-                </div>
-              </div>
-              <pre className="install-command">
-                <code>{pkg.command}</code>
-              </pre>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="registry-section" id="registry" aria-labelledby="registry-title">
         <div className="registry-head">
           <div>
             <p className="eyebrow">Registry</p>
-            <h2 id="registry-title">Install from Gitlawb. Inspect the proof.</h2>
+            <h2 id="registry-title">Find the package. Check the proof. Install.</h2>
           </div>
           <form className="search-form" action="/#registry">
             <label className="sr-only" htmlFor="package-search">
@@ -197,9 +110,7 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           ))}
         </div>
-        <p className="ranking-note">
-          Ranked by trust, exact match, agent native type, quiet permissions, compatibility proof and freshness.
-        </p>
+        <p className="ranking-note">Ranked by trust, exact match, permissions, proof and freshness.</p>
 
         <div className="package-grid" aria-live="polite">
           {packages.length > 0 ? (
@@ -209,6 +120,52 @@ export default async function Home({ searchParams }: HomeProps) {
               <p>No packages found.</p>
             </div>
           )}
+        </div>
+        {!query ? (
+          <div className="registry-more">
+            <a className="button button-primary" href="/packages">
+              Browse all packages
+            </a>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="proof-section" aria-labelledby="trust-home-title">
+        <div>
+          <p className="eyebrow">Proof</p>
+          <h2 id="trust-home-title">Trust stays visible.</h2>
+        </div>
+        <div className="proof-panel proof-stack">
+          {[
+            ["Source", "Gitlawb repo and commit"],
+            ["Bytes", "Digest pinned bundle"],
+            ["Identity", "DID publisher signature"],
+            ["Safety", "Advisory aware audit"]
+          ].map(([label, text]) => (
+            <div className="proof-mini" key={label}>
+              <span>{label}</span>
+              <p>{text}</p>
+            </div>
+          ))}
+          <a className="button button-primary" href="/trust">
+            View proof
+          </a>
+        </div>
+      </section>
+
+      <section className="proof-section" aria-labelledby="package-title">
+        <div>
+          <p className="eyebrow">Create</p>
+          <h2 id="package-title">Turn a Gitlawb repo into a package.</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">Paste a repo. Get a manifest, trust checklist and publish dry run.</p>
+          <pre className="install-command">
+            <code>{"nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod publish repo --dry-run --json"}</code>
+          </pre>
+          <a className="button button-primary" href="/package">
+            Create package
+          </a>
         </div>
       </section>
     </main>

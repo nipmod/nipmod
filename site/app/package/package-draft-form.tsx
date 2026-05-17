@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CommandBlock } from "../command-block";
 
 type PackageDraftFormProps = {
   inputLabel: string;
@@ -37,12 +38,8 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
       </div>
       <div className="proof-panel">
         <h2 id="draft-title">Draft output</h2>
-        <pre className="install-command">
-          <code>{draft.commands}</code>
-        </pre>
-        <p className="panel-copy">
-          The dry run returns the registry candidate, permissions checklist and source commit before any public write.
-        </p>
+        <CommandBlock command={draft.commands} label="Copy draft commands" />
+        <p className="panel-copy">Dry run shows the package candidate before any public write.</p>
       </div>
     </section>
   );

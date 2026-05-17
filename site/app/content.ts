@@ -1,43 +1,37 @@
 export const homeContent = {
   brand: "nipmod",
-  headline: "Verifiable packages for agents",
-  lead: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+  headline: "Packages agents can trust",
+  lead: "Install Gitlawb packages from the terminal. See source, signature, digest and proof before anything runs.",
   links: {
     install: "/quickstart#install",
     x: "https://x.com/Nipmod"
   },
   primaryAction: "Install",
-  secondaryAction: "Updates on X",
+  secondaryAction: "X",
   commands: [
-    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-    "nipmod doctor --online",
-    "mkdir -p nipmod-demo && cd nipmod-demo",
-    "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+    "nipmod search gitlawb",
+    "nipmod inspect gitlawb-repo-reader",
     "nipmod install gitlawb-repo-reader",
-    "nipmod install",
-    "nipmod update --plan",
-    "nipmod sbom --json",
-    "nipmod explain gitlawb-repo-reader --json",
     "nipmod audit --online"
   ],
   usage: [
     {
-      label: "Terminal",
-      text: "Install and pin packages."
+      label: "Search",
+      text: "Find agent packages without an account."
     },
     {
-      label: "Website",
-      text: "Find packages and inspect trust."
+      label: "Inspect",
+      text: "Check source, digest, witness and permissions."
     },
     {
-      label: "Codex",
-      text: "Run nipmod inside a workspace."
+      label: "Install",
+      text: "Pin exact bytes in a workspace lockfile."
     }
   ],
   quickstartSteps: [
     {
       label: "Install CLI",
-      text: "Run the short installer. It expects Node.js 22 or newer, npm, Git, curl and tar.",
+      text: "Run the short installer. Node.js 22, npm, Git, curl and tar are required.",
       command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     },
     {
@@ -53,12 +47,12 @@ export const homeContent = {
     },
     {
       label: "Find",
-      text: "Search the public registry for a useful agent package.",
+      text: "Search the public registry.",
       command: "nipmod search gitlawb"
     },
     {
       label: "Inspect",
-      text: "Read the digest, signer, source, witness and permissions.",
+      text: "Read digest, signer, source, witness and permissions.",
       command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0"
     },
     {

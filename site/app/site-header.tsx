@@ -10,23 +10,23 @@ export function SiteHeader() {
         <span>{homeContent.brand}</span>
       </a>
       <nav className="nav-actions" aria-label="Site">
-        <a className="nav-link nav-link-wide nav-primary" href="/quickstart">
-          Start
-        </a>
-        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/#registry">
-          Registry
-        </a>
-        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/packages">
-          Catalog
-        </a>
-        <a className="nav-link nav-link-wide nav-secondary" href="/package">
-          Package
+        <a className="nav-link nav-link-wide nav-primary" href="/packages">
+          Packages
         </a>
         <a className="nav-link nav-link-wide nav-primary" href="/trust">
-          Trust
+          Proof
+        </a>
+        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/quickstart">
+          Docs
+        </a>
+        <a className="nav-link nav-link-wide nav-install" href="/quickstart#install">
+          Install
         </a>
         <a className="nav-link nav-link-wide nav-secondary" href="/security">
           Security
+        </a>
+        <a className="nav-link nav-link-wide nav-secondary" href="/package">
+          Create
         </a>
         <a className="nav-link nav-link-wide nav-secondary" href="/launch">
           Launch
@@ -56,13 +56,15 @@ export function SiteHeader() {
           X
         </a>
         <details className="more-menu">
-          <summary className="nav-link">More</summary>
+          <summary className="nav-more-button">More</summary>
           <div className="more-menu-panel">
-            <a href="/package">Package</a>
+            <a href="/package">Create</a>
+            <a href="/quickstart">Docs</a>
             <a href="/packages">Catalog</a>
+            <a href="/trust">Proof</a>
             <a href="/security">Security</a>
             <a href="/launch">Launch</a>
-            <a href="/proof">Proof</a>
+            <a href="/proof">Transcript</a>
             <a href="/mcp">MCP</a>
             <a
               href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod"

@@ -19,9 +19,9 @@ export default function PackagePage() {
   return (
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="package-title">
-        <p className="eyebrow">Package</p>
-        <h1 id="package-title">{homeContent.repoToPackage.headline}</h1>
-        <p className="lead">{homeContent.repoToPackage.lead}</p>
+        <p className="eyebrow">Create</p>
+        <h1 id="package-title">Package a Gitlawb repo.</h1>
+        <p className="lead">Paste a repo. Get commands, manifest checks and a safe publish dry run.</p>
         <div className="actions" aria-label="Package actions">
           <a className="button button-primary" href="/quickstart#install">
             Install
@@ -39,13 +39,13 @@ export default function PackagePage() {
 
       <section className="proof-section" aria-labelledby="publish-requirements-title">
         <div>
-          <p className="eyebrow">Publish Requirements</p>
-          <h2 id="publish-requirements-title">Dry run is open. Public publish needs ownership.</h2>
+          <p className="eyebrow">Publish</p>
+          <h2 id="publish-requirements-title">Dry run first. Ownership before public listing.</h2>
         </div>
         <div className="proof-panel">
           <p className="panel-copy">
-            A draft is safe to create from any public Gitlawb repo. A verified publish requires the matching DID
-            identity, the Gitlawb helper, a valid manifest and a dry run registry candidate.
+            A draft is safe for any public Gitlawb repo. A verified publish needs the matching DID identity, helper,
+            manifest and registry candidate.
           </p>
           <pre className="install-command">
             <code>{"nipmod manifest validate --dir repo --json\nnipmod publish repo --dry-run --json"}</code>
