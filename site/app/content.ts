@@ -33,8 +33,14 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install",
-      text: "Run the short installer. Use the README checksum path when you want manual verification.",
+      text: "Run the short installer.",
       command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
+    },
+    {
+      label: "Verify",
+      text: "Use the checksum path when you want manual verification before execution.",
+      command:
+        "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh"
     },
     {
       label: "Check",

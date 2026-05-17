@@ -73,6 +73,7 @@ describe("home content", () => {
   test("exposes a complete first run path", () => {
     expect(homeContent.quickstartSteps.map((step) => step.label)).toEqual([
       "Install",
+      "Verify",
       "Check",
       "Find",
       "Inspect",
@@ -83,6 +84,7 @@ describe("home content", () => {
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install")?.command).toBe(
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     );
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Inspect")?.command).toMatch(
       /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --online$/

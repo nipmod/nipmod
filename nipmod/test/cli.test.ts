@@ -96,6 +96,134 @@ describe("nipmod CLI", () => {
     expect(lockfile.packages).toEqual({});
   }, 15_000);
 
+  test("reports outdated installed packages with wanted and latest versions", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-outdated-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/outdated-agent`;
+    const currentKey = `${canonical}@0.1.0`;
+    const registryPath = join(workspace, "registry.json");
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {
+          [currentKey]: lockfilePackageFixture(owner, "outdated-agent", "0.1.0", "a".repeat(64))
+        },
+        root: {
+          dependencies: {
+            "outdated-agent": "^0.1.0"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {
+          [currentKey]: emptyLockfileSnapshot()
+        }
+      })}\n`
+    );
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          searchPackageFixture(owner, "outdated-agent", "skill", 100),
+          {
+            ...searchPackageFixture(owner, "outdated-agent", "skill", 100),
+            digest: "b".repeat(64),
+            version: "0.1.3"
+          },
+          {
+            ...searchPackageFixture(owner, "outdated-agent", "skill", 100),
+            digest: "c".repeat(64),
+            version: "0.2.0"
+          }
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const text = await execaNode(["src/cli.ts", "outdated", "--dir", app, "--registry", pathToFileURL(registryPath).href]);
+    expect(text.stdout).toContain("nipmod outdated - 1 package");
+    expect(text.stdout).toContain("outdated-agent");
+    expect(text.stdout).toContain("0.1.0");
+    expect(text.stdout).toContain("0.1.3");
+    expect(text.stdout).toContain("0.2.0");
+    expect(text.stdout).toContain("^0.1.0");
+
+    const json = await execaNode([
+      "src/cli.ts",
+      "outdated",
+      "--dir",
+      app,
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const parsed = JSON.parse(json.stdout) as {
+      ok: true;
+      data: {
+        outdated: Array<{ current: string; latest: string; name: string; spec: string; wanted: string }>;
+        summary: { checked: number; outdated: number };
+      };
+    };
+    expect(parsed.data.summary).toMatchObject({ checked: 1, outdated: 1 });
+    expect(parsed.data.outdated).toEqual([
+      expect.objectContaining({
+        current: "0.1.0",
+        latest: "0.2.0",
+        name: "outdated-agent",
+        spec: "^0.1.0",
+        wanted: "0.1.3"
+      })
+    ]);
+  });
+
+  test("outdated stays quiet when installed packages are current", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-outdated-current-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/fresh-agent`;
+    const packageKey = `${canonical}@1.0.0`;
+    const registryPath = join(workspace, "registry.json");
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {
+          [packageKey]: lockfilePackageFixture(owner, "fresh-agent", "1.0.0", "a".repeat(64))
+        },
+        root: {
+          dependencies: {
+            "fresh-agent": "latest"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {
+          [packageKey]: emptyLockfileSnapshot()
+        }
+      })}\n`
+    );
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [searchPackageFixture(owner, "fresh-agent", "skill", 100, "Fresh agent")],
+        source: "file-test"
+      })}\n`
+    );
+
+    const result = await execaNode(["src/cli.ts", "outdated", "--dir", app, "--registry", pathToFileURL(registryPath).href]);
+    expect(result.stdout).toBe("all installed packages are current\n");
+  });
+
   test("validates a manifest and reports normalized publish facts", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-manifest-"));
     const pkg = join(workspace, "pkg");
@@ -326,9 +454,9 @@ describe("nipmod CLI", () => {
 
     expect(result.stdout).toContain("nipmod ready");
     expect(result.stdout).toContain("WARN Publish helper");
-    expect(result.stdout).toContain("install and add are ready");
+    expect(result.stdout).toContain("Install and add are ready");
     expect(result.stdout).toContain("verified checksum");
-    expect(result.stdout).toContain("Publish later:");
+    expect(result.stdout).toContain("Publish needs the Gitlawb helper:");
     expect(result.stdout).not.toContain("nipmod needs setup");
     expect(result.stdout).not.toContain("FAIL Gitlawb helper");
     expect(result.stdout).not.toContain("Then run: nipmod doctor");
@@ -940,9 +1068,11 @@ describe("nipmod CLI", () => {
       specifier: `${canonical}@0.1.0`
     });
 
-    expect(report.verdict).toBe("verified");
+    expect(report.verdict).toBe("failed");
+    expect(report.readyToInstall).toBe(false);
     expect(report.compatibilityReceipts).toBeUndefined();
     expect(report.findings).not.toContain("compatibility receipt does not match package evidence");
+    expect(report.findings).toEqual(expect.arrayContaining(["registry cannot prove signed advisory state"]));
   });
 
   test("inspect refuses custom trust roots unless explicitly enabled", async () => {
@@ -1647,6 +1777,101 @@ describe("nipmod CLI", () => {
     );
     await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
+
+  test("add rechecks signed manifest permissions before graph install", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-signed-policy-"));
+    const app = join(workspace, "app");
+    const rootDir = join(workspace, "root");
+    const depDir = join(workspace, "dep");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "root-agent", "--dir", rootDir]);
+    await execaNode(["src/cli.ts", "init", "--name", "dep-agent", "--dir", depDir]);
+
+    const rootManifestPath = join(rootDir, "nipmod.json");
+    const rootManifest = JSON.parse(await readFile(rootManifestPath, "utf8")) as {
+      canonical: string;
+      dependencies?: Record<string, string>;
+      publish: { signingKey: string };
+      version: string;
+    };
+    rootManifest.dependencies = { "dep-agent": "^0.1.0" };
+    await writeFile(rootManifestPath, `${JSON.stringify(rootManifest, null, 2)}\n`);
+
+    const depManifestPath = join(depDir, "nipmod.json");
+    const depManifest = JSON.parse(await readFile(depManifestPath, "utf8")) as {
+      canonical: string;
+      permissions: { mcpTools: string[] };
+      publish: { signingKey: string };
+      version: string;
+    };
+    depManifest.permissions.mcpTools = ["github.search"];
+    await writeFile(depManifestPath, `${JSON.stringify(depManifest, null, 2)}\n`);
+
+    const rootPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", rootDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const depPack = JSON.parse(
+      (await execaNode(["src/cli.ts", "pack", depDir, "--out", workspace, "--json"])).stdout
+    ) as { ok: true; data: { digest: string; path: string } };
+    const rootServer = await serveBundle(await readFile(rootPack.data.path), rootManifest.canonical, rootManifest.version);
+    const depServer = await serveBundle(await readFile(depPack.data.path), depManifest.canonical, depManifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: rootManifest.canonical,
+          dependencies: { "dep-agent": "^0.1.0" },
+          digest: rootPack.data.digest,
+          owner: rootManifest.publish.signingKey,
+          resolved: rootServer.resolved,
+          sourceRepo: rootServer.sourceRepo
+        },
+        {
+          canonical: depManifest.canonical,
+          digest: depPack.data.digest,
+          owner: depManifest.publish.signingKey,
+          resolved: depServer.resolved,
+          sourceRepo: depServer.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+
+      const failed = await expectCliJsonFailure([
+        "src/cli.ts",
+        "add",
+        "root-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--profile",
+        "developer-default",
+        "--dir",
+        app,
+        "--json"
+      ]);
+
+      expect(failed).toMatchObject({
+        data: {
+          policyDecision: {
+            allowed: false,
+            profile: "developer-default"
+          }
+        },
+        exitCode: 11,
+        ok: false
+      });
+      expect(failed.data?.policyDecision?.reasons).toEqual(
+        expect.arrayContaining(["permission mcpTools is blocked by developer-default"])
+      );
+      await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rootServer.close();
+      await depServer.close();
+    }
+  }, 30_000);
 
   test("add plan rejects oversized dependency graphs before trust inspection", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-limit-"));
@@ -3057,6 +3282,37 @@ function searchPackageFixture(
     trust: { level: "verified", score },
     type,
     version: "0.1.0"
+  };
+}
+
+function lockfilePackageFixture(owner: string, name: string, version: string, digest: string) {
+  return {
+    canonical: `pkg:${owner}/${name}`,
+    files: ["nipmod.json"],
+    integrity: `sha256-${digest}`,
+    manifestDigest: digest,
+    name,
+    permissions: {
+      env: [],
+      exec: { allowed: false },
+      filesystem: [],
+      mcpTools: [],
+      network: [],
+      postinstall: { allowed: false },
+      secrets: []
+    },
+    publisher: owner,
+    resolved: `https://node.nipmod.com/api/v1/repos/${owner.slice("did:key:".length)}/${name}/blob/releases/${version}/bundle.nipmod`,
+    version
+  };
+}
+
+function emptyLockfileSnapshot() {
+  return {
+    dependencies: {},
+    devDependencies: {},
+    optionalDependencies: {},
+    peerDependencies: {}
   };
 }
 

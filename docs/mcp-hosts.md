@@ -1,17 +1,24 @@
 # nipmod MCP Host Setup
 
-`nipmod mcp serve` exposes the public registry through a local stdio MCP server. It is meant for agent hosts that can call tools but should not mutate a workspace by default.
+`nipmod mcp serve` exposes package verification through a local stdio MCP server. It is meant for agent hosts that can call tools but should not mutate a workspace by default.
 
 Default tools:
 
 - `nipmod.search`
+- `nipmod.view`
 - `nipmod.inspect`
 - `nipmod.install_plan`
 - `nipmod.publish_plan`
 - `nipmod.verify`
 - `nipmod.audit`
 
-The server does not expose mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`. `nipmod.publish_plan` is a dry run only. Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
+Safety model:
+
+- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `verify` and `audit`.
+- Gated non-read-only dry run: `publish_plan`; it may read local package files and local signing material only when `allowLocalSigning: true` is set.
+- Not exposed through MCP: mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`.
+
+Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
 
 ## Install
 
@@ -86,7 +93,7 @@ Add to `opencode.json`:
 printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0.0"}}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n' | nipmod mcp serve
 ```
 
-The response must list only the six read only tools above.
+The response must list the seven tools above. Host approval UI should show six read-only tools plus the gated `nipmod.publish_plan` dry run.
 
 Host syntax references:
 

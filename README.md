@@ -38,7 +38,7 @@ Current implementation status:
 - `nipmod ci` for strict lockfile enforcement in automation
 - `nipmod view`, `inspect`, `install --plan` and `add` for verified registry packages
 - `nipmod policy init`, `policy check` and `policy explain` for local install policy decisions
-- `nipmod mcp serve` with read-only agent tools for search, view, inspect, install plans, publish plans, verify and audit
+- `nipmod mcp serve` with read-only agent tools for search, view, inspect, install plans, verify and audit plus a gated publish dry run
 - Public MCP host setup guide at `https://nipmod.com/mcp` and `docs/mcp-hosts.md`
 - Public compatibility receipts for MCP server JSON, APM package JSON and Git source provenance examples
 - Verified registry build guard for the Vercel site

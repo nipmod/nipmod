@@ -29,11 +29,13 @@ import {
   createRegistryInstallPlan,
   executeInstallPlan,
   formatInstallPlan,
+  InstallPolicyBlockedError,
   resolveAddInstallPlan,
   type RegistryTrustOptions
 } from "./install-plan.js";
 import { installBundlePackage, installFilePackage, listInstalledPackages, uninstallPackage } from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
+import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
 import {
   DEFAULT_REGISTRY_URL,
   searchRegistries,
@@ -69,6 +71,7 @@ const CLI_COMMANDS = [
   "add",
   "ls",
   "uninstall",
+  "outdated",
   "doctor",
   "audit",
   "ci",
@@ -144,6 +147,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return listCommand(args);
     case "uninstall":
       return uninstallCommand(args);
+    case "outdated":
+      return outdatedCommand(args);
     case "doctor":
       return doctorCommand(args);
     case "audit":
@@ -483,9 +488,10 @@ async function installCommand(args: string[]): Promise<CliResult> {
 async function addCommand(args: string[]): Promise<CliResult> {
   const query = firstPositional(args);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const policy = await optionalPolicyFromFlags(args);
   const plan = await resolveAddInstallPlan({
     ...registryTrustFlags(args, "add"),
-    policy: await optionalPolicyFromFlags(args),
+    policy,
     projectDir: dir,
     query
   });
@@ -500,10 +506,26 @@ async function addCommand(args: string[]): Promise<CliResult> {
     };
   }
 
-  const result = await executeInstallPlan(plan, {
-    nodeUrl: configuredNodeUrl(args),
-    projectDir: dir
-  });
+  let result: Awaited<ReturnType<typeof executeInstallPlan>>;
+  try {
+    result = await executeInstallPlan(plan, {
+      nodeUrl: configuredNodeUrl(args),
+      policy,
+      projectDir: dir
+    });
+  } catch (error) {
+    if (error instanceof InstallPolicyBlockedError) {
+      return {
+        ok: false,
+        data: {
+          message: formatPolicyDecision(error.policyDecision),
+          policyDecision: error.policyDecision
+        },
+        exitCode: 11
+      };
+    }
+    throw error;
+  }
   return {
     ok: true,
     data: {
@@ -540,6 +562,26 @@ async function uninstallCommand(args: string[]): Promise<CliResult> {
     data: {
       message: result.removed ? `uninstalled ${query}` : `package not installed: ${query}`,
       ...result
+    }
+  };
+}
+
+async function outdatedCommand(args: string[]): Promise<CliResult> {
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const registryUrls = registrySearchUrls(args);
+  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
+    throw new Error("outdated network access requires --online, --registry or --registries");
+  }
+  const report = await checkOutdatedPackages({
+    includeQuarantined: hasFlag(args, "--include-quarantined"),
+    projectDir: dir,
+    registryUrls: registryUrls.length > 0 ? registryUrls : [DEFAULT_REGISTRY_URL]
+  });
+  return {
+    ok: true,
+    data: {
+      message: formatOutdated(report),
+      ...report
     }
   };
 }
@@ -1064,6 +1106,40 @@ function appendDependencyBlock(lines: string[], label: string, dependencies: Rec
   }
 }
 
+function formatOutdated(report: OutdatedReport): string {
+  if (report.outdated.length === 0) {
+    return "all installed packages are current";
+  }
+  const lines = [
+    `nipmod outdated - ${report.outdated.length} package${report.outdated.length === 1 ? "" : "s"}`,
+    "",
+    [
+      padCell("Package", 28),
+      padCell("Current", 8),
+      padCell("Wanted", 8),
+      padCell("Latest", 8),
+      padCell("Spec", 12),
+      "Status"
+    ].join(" ")
+  ];
+  for (const pkg of report.outdated) {
+    lines.push(formatOutdatedPackage(pkg));
+  }
+  lines.push("", "Agents: use --json for structured output.");
+  return lines.join("\n");
+}
+
+function formatOutdatedPackage(pkg: OutdatedPackage): string {
+  return [
+    padCell(pkg.name, 28),
+    padCell(pkg.current, 8),
+    padCell(pkg.wanted ?? "-", 8),
+    padCell(pkg.latest ?? "-", 8),
+    padCell(pkg.spec, 12),
+    pkg.status
+  ].join(" ");
+}
+
 function quotedSearchQuery(query: string): string {
   return `"${query.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 }
@@ -1245,7 +1321,7 @@ function formatDoctor(doctor: DoctorGitlawbResult): string {
 
   const helper = doctor.checks.find((check) => check.id === "gitlawb-helper");
   if (helper?.status === "warn") {
-    lines.push("", "install and add are ready. Publish later:", `  ${helper.detail ?? doctor.installCommand}`);
+    lines.push("", "Install and add are ready. Publish needs the Gitlawb helper:", `  ${helper.detail ?? doctor.installCommand}`);
   }
 
   return lines.join("\n");

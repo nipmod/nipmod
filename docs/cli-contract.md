@@ -21,12 +21,12 @@ P0 commands:
 - `nipmod search`
 - `nipmod ls`
 - `nipmod uninstall`
+- `nipmod outdated`
 - `nipmod policy`
 - `nipmod mcp serve`
 
 Next npm parity commands:
 
-- `nipmod outdated`
 - `nipmod update`
 - `nipmod explain`
 - `nipmod version`
@@ -65,6 +65,8 @@ Human terminal output is optimized for scanning and may change between releases.
 `--json` or `nipmod mcp serve`. `nipmod search --details` prints canonical package ids and source registry URLs
 for humans who want the security detail that is hidden from the default search view. `nipmod view` returns exact
 package metadata and refuses ambiguous names unless the canonical package id is used.
+`nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
+`wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
 
 ## Exit codes
 
@@ -90,4 +92,6 @@ Use `--offline` for checks that should never touch public services.
 - Explicit integrity pins remain supported.
 - Public JSON field names are additive once released.
 - Registry data is an index. It is never the only proof source.
+- Installs recheck fetched signed bundle manifests before lockfile mutation. Registry permission counts cannot downgrade real package permissions.
+- HTTPS registry mirrors that are not `https://nipmod.com` must prove signed advisory state before install; otherwise trust reports fail closed.
 - Custom trust roots require explicit opt in.

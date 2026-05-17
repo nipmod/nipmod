@@ -1,12 +1,16 @@
 export const mcpContent = {
   headline: "Connect nipmod to agents",
-  lead: "Run the live CLI as a read only MCP server for search, inspect, plans, verify and audit.",
+  lead: "Run the live CLI as a local MCP server for package search, exact metadata, trust reports, plans, verify and audit.",
   primaryAction: "Install",
   secondaryAction: "Trust",
   safety: [
     {
-      label: "Read only",
-      text: "Hosts can ask for package facts and dry run plans. They cannot mutate Gitlawb, add or install through MCP."
+      label: "Default safe",
+      text: "Hosts can ask for package facts, exact metadata, trust reports and install plans. They cannot add or install through MCP."
+    },
+    {
+      label: "Gated dry run",
+      text: "publish_plan is exposed as a non-read-only dry run and requires explicit local signing opt in."
     },
     {
       label: "Proof first",
@@ -17,6 +21,17 @@ export const mcpContent = {
       text: "Custom transparency or advisory roots require an opt in flag inside the tool call."
     }
   ],
+  tools: [
+    { name: "nipmod.search", safety: "read only" },
+    { name: "nipmod.view", safety: "read only" },
+    { name: "nipmod.inspect", safety: "read only" },
+    { name: "nipmod.install_plan", safety: "read only" },
+    { name: "nipmod.publish_plan", safety: "gated dry run" },
+    { name: "nipmod.verify", safety: "read only" },
+    { name: "nipmod.audit", safety: "read only" }
+  ],
+  verifyCommand:
+    "printf '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{},\"clientInfo\":{\"name\":\"smoke\",\"version\":\"1.0.0\"}}}\\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\\n' | nipmod mcp serve",
   hosts: [
     {
       name: "Codex",

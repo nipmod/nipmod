@@ -14,7 +14,7 @@ import {
   type ResolvedDependency,
   type UnresolvedDependency
 } from "./resolver.js";
-import { inspectRegistryPackage, type TrustReport } from "./trust-report.js";
+import { inspectRegistryPackage, trustReportWithManifestPermissions, type TrustReport } from "./trust-report.js";
 
 export type InstallPlanAction = "install" | "add";
 
@@ -41,6 +41,7 @@ export interface ResolveAddPlanOptions extends RegistryTrustOptions {
 export interface ExecuteInstallPlanOptions {
   fetchImpl?: typeof fetch;
   nodeUrl: string;
+  policy?: NipmodPolicy | undefined;
   projectDir: string;
 }
 
@@ -88,6 +89,16 @@ const GRAPH_PACKAGE_LIMIT = 128;
 const GRAPH_FETCH_CONCURRENCY = 4;
 const GRAPH_FETCH_BYTE_LIMIT = 512 * 1024 * 1024;
 const PACKAGE_VERSION_SPECIFIER = /^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*@(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+
+export class InstallPolicyBlockedError extends Error {
+  readonly policyDecision: PolicyDecision;
+
+  constructor(policyDecision: PolicyDecision) {
+    super(`package is not installable: ${policyDecision.reasons.join("; ") || "policy blocked install"}`);
+    this.name = "InstallPolicyBlockedError";
+    this.policyDecision = policyDecision;
+  }
+}
 
 export async function createRegistryInstallPlan(options: CreateInstallPlanOptions): Promise<InstallPlan> {
   const report = await inspectRegistryPackage(inspectOptions(options));
@@ -147,10 +158,39 @@ export async function executeInstallPlan(plan: InstallPlan, options: ExecuteInst
     }
     const packages = await fetchGraphPackages(plan.graph, options);
     assertSignedManifestGraph(plan.graph, packages);
+    enforceSignedManifestPolicy(plan.graph.packages, packages, options.policy);
     return installPackageGraph(packages.map((pkg) => pkg.graphPackage), options.projectDir);
   }
 
   const fetched = await fetchPlanPackage(plan.trustReport, options);
+  const bundle = verifyBundle(fetched.bytes, digestFromIntegrity(plan.integrity), { requireSignature: true });
+  enforceSignedManifestPolicy(
+    [
+      {
+        canonical: plan.package.canonical,
+        integrity: plan.integrity,
+        name: plan.package.name,
+        root: true,
+        trustReport: plan.trustReport,
+        version: plan.package.version
+      }
+    ],
+    [
+      {
+        bundle,
+        graphPackage: {
+          bundleBytes: fetched.bytes,
+          expected: {
+            canonical: plan.package.canonical,
+            version: plan.package.version
+          },
+          integrity: plan.integrity,
+          resolved: fetched.resolved
+        }
+      }
+    ],
+    options.policy
+  );
 
   return installBundlePackage(fetched.bytes, fetched.resolved, options.projectDir, {
     expected: {
@@ -490,6 +530,30 @@ function assertSignedManifestGraph(
     .filter((key) => !reachable.has(key));
   if (extra.length > 0) {
     throw new Error(`registry graph includes packages not reachable from signed manifests: ${extra.join(", ")}`);
+  }
+}
+
+function enforceSignedManifestPolicy(
+  graphPackages: readonly GraphInstallPlanPackage[],
+  fetchedPackages: readonly FetchedGraphPackage[],
+  policy: NipmodPolicy | undefined
+): void {
+  if (!policy) {
+    return;
+  }
+  const fetchedByKey = new Map(
+    fetchedPackages.map((pkg) => [`${pkg.bundle.manifest.canonical}@${pkg.bundle.manifest.version}`, pkg])
+  );
+  for (const entry of graphPackages) {
+    const fetched = fetchedByKey.get(`${entry.canonical}@${entry.version}`);
+    if (!fetched) {
+      throw new Error(`signed manifest is missing for ${entry.canonical}@${entry.version}`);
+    }
+    const report = trustReportWithManifestPermissions(entry.trustReport, fetched.bundle.manifest.permissions);
+    const decision = evaluateTrustReportPolicy(report, policy);
+    if (!decision.allowed) {
+      throw new InstallPolicyBlockedError(decision);
+    }
   }
 }
 

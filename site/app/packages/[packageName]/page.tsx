@@ -8,6 +8,7 @@ import {
 } from "../../../lib/registry";
 import {
   findPackage,
+  packageDependencyEntries,
   packageDependencyText,
   packageInstallVariants,
   packagePageHref,
@@ -96,7 +97,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
       </section>
 
       <nav className="package-tabs" aria-label="Package sections">
-        {["readme", "install", "versions", "dependencies", "provenance", "agent-use"].map((item) => (
+        {["readme", "install", "versions", "dependencies", "trust", "advisories", "provenance", "agent-use"].map((item) => (
           <a href={`#${item}`} key={item}>
             {item.replace("-", " ")}
           </a>
@@ -112,7 +113,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
           <p className="panel-copy">{pkg.description}</p>
           <p className="panel-copy">
             The signed bundle is stored on Gitlawb, pinned by digest and checked against transparency evidence before
-            install. README rendering will use the signed bundle contents once the package metadata API lands.
+            install. Use the evidence page for the exact source, release and witness proof for this package version.
           </p>
         </div>
       </section>
@@ -161,6 +162,56 @@ export default async function PackagePage({ params }: PackagePageProps) {
         </div>
         <div className="proof-panel">
           <p className="panel-copy">{packageDependencyText(pkg)}</p>
+          {packageDependencyEntries(pkg).length > 0 ? (
+            <dl className="proof-facts">
+              {packageDependencyEntries(pkg).map((dependency) => (
+                <div key={`${dependency.kind}:${dependency.name}`}>
+                  <dt>{dependency.name}</dt>
+                  <dd>
+                    {dependency.spec} · {dependency.kind}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="trust-section" id="trust" aria-labelledby="trust-title">
+        <div>
+          <p className="eyebrow">Trust</p>
+          <h2 id="trust-title">Verification status</h2>
+        </div>
+        <div className="proof-panel">
+          <dl className="proof-facts">
+            {[
+              { label: "Level", value: pkg.trust.level },
+              { label: "Score", value: String(pkg.trust.score) },
+              { label: "Artifact digest", value: pkg.trust.evidence.artifactDigestVerified ? "verified" : "missing" },
+              { label: "Bundle signature", value: pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing" },
+              { label: "Source provenance", value: pkg.trust.evidence.sourceProvenanceVerified ? "verified" : "missing" },
+              { label: "Transparency", value: pkg.trust.evidence.transparencyLogVerified ? "verified" : "missing" }
+            ].map((fact) => (
+              <div key={fact.label}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="trust-section" id="advisories" aria-labelledby="advisories-title">
+        <div>
+          <p className="eyebrow">Advisories</p>
+          <h2 id="advisories-title">Install risk</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">
+            {pkg.quarantine?.status === "active"
+              ? `${pkg.quarantine.advisoryId}: ${pkg.quarantine.reason}`
+              : "No active high or critical quarantine blocks this package version."}
+          </p>
           <pre className="install-command">
             <code>{installCommand(pkg)}</code>
           </pre>

@@ -360,6 +360,16 @@ export async function inspectBundleFile(options: InspectBundleFileOptions): Prom
   };
 }
 
+export function trustReportWithManifestPermissions(
+  report: TrustReport,
+  permissions: z.infer<typeof PermissionSchema>
+): TrustReport {
+  return {
+    ...report,
+    permissions: manifestPermissionReport(permissions)
+  };
+}
+
 function registryPackageReport(
   subject: string,
   registryUrl: string,
@@ -410,6 +420,9 @@ function registryPackageReport(
   const quarantine = activeQuarantine(pkg);
   if (quarantine) {
     findings.push(`package is quarantined: ${quarantine.advisoryId}: ${quarantine.reason}`);
+  }
+  if (!quarantine && !registryCanProveSignedAdvisoryState(registryUrl)) {
+    findings.push("registry cannot prove signed advisory state");
   }
   const registryUrlTrustedForCompatibility = trustsRegistryCompatibilityReceipts(registryUrl);
   const compatibilityReceipts = registryUrlTrustedForCompatibility ? matchingCompatibilityReceipts(pkg) : [];
@@ -528,6 +541,14 @@ function compatibilityReceiptMatchesPackage(receipt: z.infer<typeof Compatibilit
 }
 
 function trustsRegistryCompatibilityReceipts(registryUrl: string): boolean {
+  const url = parseTrustedJsonUrl(registryUrl);
+  if (url.protocol === "file:") {
+    return true;
+  }
+  return url.origin === "https://nipmod.com";
+}
+
+function registryCanProveSignedAdvisoryState(registryUrl: string): boolean {
   const url = parseTrustedJsonUrl(registryUrl);
   if (url.protocol === "file:") {
     return true;

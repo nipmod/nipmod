@@ -14,8 +14,10 @@ nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb co
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 nipmod doctor --online
 nipmod search gitlawb --online
+mkdir -p nipmod-demo && cd nipmod-demo
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod add gitlawb-repo-reader --online
+nipmod outdated --online
 nipmod audit --online
 ```
 
@@ -53,7 +55,7 @@ Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nip
 ```text
 We built nipmod as a package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest-pinned lockfiles, release evidence, transparency proof, witness proof and advisory-aware audit.
 
-Could you sanity check whether this should be a Gitlawb-native package path, an independent verification layer, or something Gitlawb should expose directly?
+Could you review the trust model against Gitlawb's goals and tell us the strongest objection: should this stay an independent package-verification layer, become a Gitlawb-native package path, or expose a smaller Gitlawb package primitive directly?
 ```
 
 ## Review links
@@ -65,6 +67,7 @@ Could you sanity check whether this should be a Gitlawb-native package path, an 
 - Transparency checkpoint: https://nipmod.com/transparency/checkpoint.json
 - Security policy: https://nipmod.com/security
 - Review packet source: docs/independent-review.md
+- Review packet generator: `node tools/generate-review-packet.mjs review-packet.md --evidence-dir <dir>`
 - Catalog depth: docs/catalog-depth.md
 - Adoption readiness: docs/adoption-readiness.md
 - External evidence ledger: docs/external-evidence-ledger.md

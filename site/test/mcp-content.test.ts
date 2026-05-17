@@ -12,16 +12,26 @@ describe("MCP host content", () => {
     expect(mcpContent.hosts[2].config).toContain('"command": ["nipmod", "mcp", "serve"]');
   });
 
-  test("keeps MCP setup read only by default", () => {
+  test("documents MCP setup safety and tool contract", () => {
     const text = JSON.stringify(mcpContent);
 
-    expect(text).toContain("Read only");
-    expect(text).toContain("They cannot mutate Gitlawb, add or install through MCP.");
+    expect(mcpContent.tools.map((tool) => tool.name)).toEqual([
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.publish_plan",
+      "nipmod.verify",
+      "nipmod.audit"
+    ]);
+    expect(text).toContain("publish_plan");
+    expect(text).toContain("They cannot add or install through MCP.");
     expect(text).toContain("Custom transparency or advisory roots require an opt in flag");
+    expect(mcpContent.verifyCommand).toContain("tools/list");
   });
 
   test("keeps the page message direct", () => {
     expect(mcpContent.headline).toBe("Connect nipmod to agents");
-    expect(mcpContent.lead.length).toBeLessThanOrEqual(100);
+    expect(mcpContent.lead.length).toBeLessThanOrEqual(130);
   });
 });

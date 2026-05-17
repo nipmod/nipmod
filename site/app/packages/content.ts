@@ -11,14 +11,25 @@ export type PackageInstallVariant = {
   command: string;
 };
 
+export type PackageDependencyEntry = {
+  kind: string;
+  name: string;
+  spec: string;
+};
+
 const registry = registryData as RegistryIndex;
 
 export function packagePageParams(): Array<{ packageName: string }> {
-  return registry.packages.map((pkg) => ({ packageName: pkg.name }));
+  return registry.packages.map((pkg) => ({ packageName: packagePageSlug(pkg) }));
 }
 
-export function packagePageHref(pkg: Pick<RegistryPackage, "name">): string {
-  return `/packages/${encodeURIComponent(pkg.name)}`;
+export function packagePageHref(pkg: Pick<RegistryPackage, "canonical">): string {
+  return `/packages/${packagePageSlug(pkg)}`;
+}
+
+export function packagePageHrefByName(name: string): string {
+  const pkg = findPackage(name);
+  return pkg ? packagePageHref(pkg) : `/packages?q=${encodeURIComponent(name)}`;
 }
 
 export function findPackage(value: string): RegistryPackage | null {
@@ -28,7 +39,12 @@ export function findPackage(value: string): RegistryPackage | null {
   }
 
   return (
-    registry.packages.find((pkg) => pkg.name.toLowerCase() === normalized || pkg.canonical.toLowerCase() === normalized) ?? null
+    registry.packages.find(
+      (pkg) =>
+        pkg.name.toLowerCase() === normalized ||
+        pkg.canonical.toLowerCase() === normalized ||
+        packagePageSlug(pkg).toLowerCase() === normalized
+    ) ?? null
   );
 }
 
@@ -68,13 +84,32 @@ export function packageInstallVariants(pkg: RegistryPackage): PackageInstallVari
 }
 
 export function packageDependencyText(pkg: RegistryPackage): string {
-  const dependencyCount =
-    Object.keys(pkg.dependencies ?? {}).length +
-    Object.keys(pkg.devDependencies ?? {}).length +
-    Object.keys(pkg.optionalDependencies ?? {}).length +
-    Object.keys(pkg.peerDependencies ?? {}).length;
+  const dependencyCount = packageDependencyEntries(pkg).length;
   if (dependencyCount === 0) {
-    return "No dependency metadata is published for this package version yet.";
+    return "No dependency metadata is published for this package version.";
   }
   return `${dependencyCount} dependency entries are published for this package version.`;
+}
+
+export function packageDependencyEntries(pkg: RegistryPackage): PackageDependencyEntry[] {
+  return [
+    ...dependencyEntries("dependencies", pkg.dependencies),
+    ...dependencyEntries("peer", pkg.peerDependencies),
+    ...dependencyEntries("optional", pkg.optionalDependencies),
+    ...dependencyEntries("dev", pkg.devDependencies)
+  ];
+}
+
+function dependencyEntries(kind: string, dependencies: Record<string, string> | undefined): PackageDependencyEntry[] {
+  return Object.entries(dependencies ?? {})
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([name, spec]) => ({ kind, name, spec }));
+}
+
+function packagePageSlug(pkg: Pick<RegistryPackage, "canonical">): string {
+  const match = /^pkg:did:key:([^/]+)\/([a-z0-9][a-z0-9._-]*)$/.exec(pkg.canonical);
+  if (!match) {
+    throw new Error(`invalid package canonical: ${pkg.canonical}`);
+  }
+  return `${match[1]}-${match[2]}`;
 }

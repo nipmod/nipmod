@@ -10,6 +10,7 @@ const PackageIdSchema = z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a
 const PackageNameSchema = z.string().regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/);
 const SemverSchema = z.string().regex(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
 const DependencyMapSchema = z.record(z.string().min(1), z.string().min(1));
+const DistTagsSchema = z.record(z.string().regex(/^[a-z][a-z0-9._-]{0,31}$/), SemverSchema);
 const JSON_LIMIT = 1024 * 1024;
 
 const PermissionCountsSchema = z.strictObject({
@@ -61,6 +62,7 @@ const RegistrySearchPackageSchema = z.strictObject({
   description: z.string().optional(),
   devDependencies: DependencyMapSchema.optional(),
   digest: Sha256Schema,
+  distTags: DistTagsSchema.optional(),
   name: PackageNameSchema,
   owner: z.string().min(1).optional(),
   optionalDependencies: DependencyMapSchema.optional(),
@@ -90,6 +92,7 @@ export interface RegistrySearchPackage {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   digest: string;
+  distTags?: Record<string, string>;
   canonicalInstall?: string;
   install?: string;
   installBlockedReason?: string;
@@ -363,6 +366,7 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     ...(pkg.dependencies ? { dependencies: pkg.dependencies } : {}),
     ...(pkg.devDependencies ? { devDependencies: pkg.devDependencies } : {}),
     digest: pkg.digest,
+    ...(pkg.distTags ? { distTags: pkg.distTags } : {}),
     ...(installBlockedReason
       ? { installBlockedReason }
       : {

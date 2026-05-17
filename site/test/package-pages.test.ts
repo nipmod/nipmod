@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   findPackage,
   packageBrowseData,
+  packageDependencyEntries,
   packageDependencyText,
   packageInstallVariants,
   packagePageHref,
@@ -16,7 +17,7 @@ describe("package pages", () => {
 
     expect(params.length).toBeGreaterThan(0);
     expect(pkg).not.toBeNull();
-    expect(pkg ? packagePageHref(pkg) : "").toMatch(/^\/packages\/[a-z0-9._-]+$/);
+    expect(pkg ? packagePageHref(pkg) : "").toMatch(/^\/packages\/z[A-Za-z0-9]+-[a-z0-9._-]+$/);
   });
 
   test("filters browse data by query and package type", () => {
@@ -39,6 +40,7 @@ describe("package pages", () => {
     expect(packageInstallVariants(pkg).map((item) => item.label)).toEqual(["Add", "Inspect first", "Plan only"]);
     expect(packageInstallVariants(pkg)[0]?.command).toContain(pkg.canonical);
     expect(packageVersions(pkg)[0]?.version).toBe(pkg.version);
-    expect(packageDependencyText(pkg)).toContain("dependency metadata");
+    expect(packageDependencyText(pkg)).toContain("dependency");
+    expect(Array.isArray(packageDependencyEntries(pkg))).toBe(true);
   });
 });

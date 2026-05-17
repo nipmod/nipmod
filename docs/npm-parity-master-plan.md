@@ -27,6 +27,7 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | Search | `npm search`, website search | trust ranked package search across signed registries | partial |
 | View | `npm view`, npm package pages | exact package metadata CLI/API and `/packages/[name]` pages | started |
 | Publish | `npm publish` | signed bundle and release event published through Gitlawb | partial |
+| Outdated | `npm outdated` | lockfile versus registry report with current, wanted, latest and policy-safe status | done |
 | Pack | `npm pack` | signed `.nipmod` bundle | done |
 | Dist tags | `npm dist-tag` | signed lifecycle event mapping tags to versions | missing |
 | Version bump | `npm version` | signed version update and immutable Gitlawb release tag | missing |

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   },
   description: "Connect nipmod to Codex, Claude Code and OpenCode.",
   openGraph: {
-    description: "Use nipmod as a read only MCP server for package search, inspect, install plans, publish plans, verify and audit.",
+    description: "Use nipmod as a local MCP server for package search, exact metadata, inspect, plans, verify and audit.",
     title: "nipmod MCP",
     url: "https://nipmod.com/mcp"
   },
@@ -38,6 +38,27 @@ export default function McpPage() {
             <p>{item.text}</p>
           </article>
         ))}
+      </section>
+
+      <section className="trust-section" aria-labelledby="tools-title">
+        <div>
+          <p className="eyebrow">Tools</p>
+          <h2 id="tools-title">Exact tool contract</h2>
+        </div>
+        <div className="check-list">
+          {mcpContent.tools.map((tool) => (
+            <article className="check-row" key={tool.name}>
+              <span className="check-dot check-ok" aria-hidden="true" />
+              <div>
+                <h3>{tool.name}</h3>
+                <p>{tool.safety}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <pre className="install-command">
+          <code>{mcpContent.verifyCommand}</code>
+        </pre>
       </section>
 
       <section className="host-section" aria-labelledby="hosts-title">

@@ -1,4 +1,5 @@
 import { homeContent } from "./content";
+import { packagePageHref, packagePageHrefByName } from "./packages/content";
 import registryData from "./registry-data.json";
 import {
   installCommand,
@@ -151,7 +152,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <div className="package-card-top">
                 <div>
                   <h3>
-                    <a href={`/packages/${encodeURIComponent(pkg.name)}`}>{pkg.name}</a>
+                    <a href={packagePageHrefByName(pkg.name)}>{pkg.name}</a>
                   </h3>
                   <p>{pkg.text}</p>
                 </div>
@@ -223,7 +224,7 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
       <div className="package-card-top">
         <div>
           <h3>
-            <a href={`/packages/${encodeURIComponent(pkg.name)}`}>{pkg.name}</a>
+            <a href={packagePageHref(pkg)}>{pkg.name}</a>
           </h3>
           <p>{pkg.description}</p>
         </div>
@@ -278,7 +279,7 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
             Git source
           </a>
         ) : null}
-        <a href={`/packages/${encodeURIComponent(pkg.name)}`} aria-label={`View ${pkg.name} package page`}>
+        <a href={packagePageHref(pkg)} aria-label={`View ${pkg.name} package page`}>
           Package
         </a>
         <a href={packageEvidenceHref(pkg, "package-proof")} aria-label={`View ${pkg.name} evidence`}>

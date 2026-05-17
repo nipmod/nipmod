@@ -19,7 +19,7 @@ const tracks = [
     title: "First install loop",
     text: "Install, run doctor, search, inspect, add and audit a verified package.",
     command:
-      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod audit --online"
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nmkdir -p nipmod-demo && cd nipmod-demo\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod outdated --online\nnipmod audit --online"
   },
   {
     label: "Publish",
@@ -46,19 +46,19 @@ const tracks = [
 
 const readiness = [
   {
-    label: "Package catalog depth",
+    label: "Catalog type coverage",
     value: "100",
     text: "Every launch manifest type has a verified package path: skill, MCP server, tool bundle, agent profile, workflow pack, eval pack, policy pack and adapter."
   },
   {
-    label: "External audit readiness",
+    label: "Audit reproduction path",
     value: "100",
-    text: "Review packet, trust model, catalog matrix, production gates, restore drill, proof transcript and known risks are reproducible."
+    text: "Trust model, catalog matrix, production gates, restore drill, proof transcript, review packet generator and known risks are reproducible."
   },
   {
-    label: "Adoption readiness",
+    label: "Adoption path readiness",
     value: "100",
-    text: "First user, package author, repo owner, reviewer and agent host paths are ready with evidence templates."
+    text: "First user, package author, repo owner, reviewer and agent host paths are ready. Real adoption evidence is tracked separately."
   }
 ] as const;
 
@@ -76,7 +76,7 @@ export default function LaunchPage() {
         <p className="eyebrow">Launch</p>
         <h1 id="launch-title">Use it. Publish into it. Review it.</h1>
         <p className="lead">
-          nipmod is technically live. Product readiness is complete; ecosystem maturity is earned from external users,
+          nipmod is technically live. The public paths are ready; ecosystem maturity is earned from external users,
           external package authors and independent reviewers running the same proof paths.
         </p>
         <div className="actions" aria-label="Launch actions">
@@ -95,7 +95,7 @@ export default function LaunchPage() {
       <section className="ecosystem-section" aria-labelledby="readiness-title">
         <div className="section-head">
           <p className="eyebrow">Readiness</p>
-          <h2 id="readiness-title">Launch surfaces are complete.</h2>
+          <h2 id="readiness-title">Launch paths are reproducible.</h2>
         </div>
         <div className="block-grid">
           {readiness.map((item) => (
@@ -162,7 +162,7 @@ export default function LaunchPage() {
               <span className="check-dot check-warn" aria-hidden="true" />
               <div>
                 <h3>{item}</h3>
-                <p>Adoption readiness is complete; this line needs external people or signed review evidence.</p>
+                <p>The path exists. This line reaches 100 only with external people or signed review evidence.</p>
               </div>
             </article>
           ))}
