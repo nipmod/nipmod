@@ -160,12 +160,16 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
   );
 
   await expect(page.getByText("Drafting as gitlawb-repo-reader")).toBeVisible();
-  await expect(page.getByText("nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader")).toBeVisible();
-  await expect(page.getByText("nipmod publish gitlawb-repo-reader --dry-run --json")).toBeVisible();
+  await expect(
+    page.getByText(
+      "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr"
+    )
+  ).toBeVisible();
+  await expect(page.getByText("nipmod publish gitlawb-repo-reader-pr --dry-run --json")).toBeVisible();
   await page.getByRole("button", { name: "Copy draft commands" }).click();
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => (window as Window & { __nipmodCopied?: string }).__nipmodCopied ?? "")).toContain(
-    "nipmod publish gitlawb-repo-reader --dry-run --json"
+    "nipmod publish gitlawb-repo-reader-pr --dry-run --json"
   );
 
   await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("not a repo");

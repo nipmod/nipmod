@@ -19,6 +19,14 @@
     "verifyCommand": "nipmod claim verify gitlawb://did:key:.../repo --json",
     "indexCommand": "nipmod claim index --node https://node.nipmod.com --json"
   },
+  "scout": {
+    "health": "https://nipmod.com/scout/health",
+    "last": "https://nipmod.com/scout/last",
+    "candidates": "https://nipmod.com/scout/candidates",
+    "patch": "https://nipmod.com/scout/patch",
+    "patchParam": "repo",
+    "intervalMs": 300000
+  },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",
     "runbook": "https://nipmod.com/quickstart#agents",

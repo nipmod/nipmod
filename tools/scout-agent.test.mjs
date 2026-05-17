@@ -1,0 +1,126 @@
+import { describe, expect, test } from "vitest";
+import { createPackagePatch, runScoutCycle } from "./scout-agent.mjs";
+
+const owner = "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD";
+
+describe("nipmod scout agent", () => {
+  test("scans public Gitlawb repos into package candidates without remote writes", async () => {
+    const result = await runScoutCycle({
+      fetchFn: async (url) => {
+        if (String(url) === "https://node.example/api/v1/repos") {
+          return jsonResponse([
+            repoFixture({ description: "Read Gitlawb repos for agents", name: "repo-reader" }),
+            repoFixture({ is_public: false, name: "private-agent" }),
+            repoFixture({ description: "Internal probe", name: "source-bound-probe-123" })
+          ]);
+        }
+        if (String(url) === "https://claims.example/index.json") {
+          return jsonResponse({
+            verifiedClaims: [
+              {
+                package: `pkg:${owner}/repo-reader`,
+                status: "verified"
+              }
+            ]
+          });
+        }
+        return new Response("not found", { status: 404 });
+      },
+      claimIndexUrl: "https://claims.example/index.json",
+      generatedAt: "2026-05-17T21:00:00.000Z",
+      nodeUrl: "https://node.example",
+      scoutUrl: "https://scout.example"
+    });
+
+    expect(result).toMatchObject({
+      formatVersion: 1,
+      generatedAt: "2026-05-17T21:00:00.000Z",
+      ok: true,
+      summary: {
+        claimed: 1,
+        patchable: 1,
+        scanned: 1
+      },
+      type: "dev.nipmod.scout-cycle.v1"
+    });
+    expect(result.candidates).toEqual([
+      expect.objectContaining({
+        claimStatus: "claimed",
+        commands: {
+          claim: `nipmod claim gitlawb://${owner}/repo-reader --dir . --identity .nipmod/identity.json`,
+          claimVerify: `nipmod claim verify gitlawb://${owner}/repo-reader --json`,
+          packagePr: `nipmod package pr gitlawb://${owner}/repo-reader --dir repo-reader-pr --json`
+        },
+        package: `pkg:${owner}/repo-reader`,
+        patch: {
+          endpoint: `https://scout.example/patch?repo=${encodeURIComponent(`gitlawb://${owner}/repo-reader`)}`,
+          remoteWrites: false
+        },
+        source: `gitlawb://${owner}/repo-reader`
+      })
+    ]);
+  });
+
+  test("creates a package-ready patch for a Gitlawb repo", () => {
+    const patch = createPackagePatch({
+      default_branch: "main",
+      description: "Read Gitlawb repos for agents",
+      is_public: true,
+      name: "repo-reader",
+      owner_did: owner,
+      updated_at: "2026-05-17T00:00:00.000Z"
+    });
+
+    expect(patch.remoteWrites).toBe(false);
+    expect(patch.files.map((file) => file.path)).toEqual(["nipmod.json", "README.nipmod.md"]);
+    expect(patch.files[0].content).toContain(`"canonical": "pkg:${owner}/repo-reader"`);
+    expect(patch.nextCommands).toEqual([
+      "git add nipmod.json README.nipmod.md",
+      "git commit -m \"feat: add nipmod package manifest\"",
+      "GITLAWB_NODE=https://node.nipmod.com git push"
+    ]);
+  });
+
+  test("surfaces claim index failure without failing candidate generation", async () => {
+    const result = await runScoutCycle({
+      fetchFn: async (url) => {
+        if (String(url).endsWith("/api/v1/repos")) {
+          return jsonResponse([repoFixture({ name: "repo-reader" })]);
+        }
+        return new Response("unavailable", { status: 503 });
+      },
+      claimIndexUrl: "https://claims.example/index.json",
+      nodeUrl: "https://node.example"
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.claimIndex).toMatchObject({
+      ok: false,
+      verifiedClaims: 0
+    });
+    expect(result.candidates[0]).toMatchObject({
+      claimStatus: "unclaimed",
+      package: `pkg:${owner}/repo-reader`
+    });
+  });
+});
+
+function repoFixture(overrides = {}) {
+  return {
+    clone_url: `https://node.example/${owner.slice("did:key:".length)}/${overrides.name ?? "repo-reader"}.git`,
+    default_branch: "main",
+    description: "",
+    is_public: true,
+    name: "repo-reader",
+    owner_did: owner,
+    updated_at: "2026-05-17T00:00:00.000Z",
+    ...overrides
+  };
+}
+
+function jsonResponse(payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    headers: { "content-type": "application/json" },
+    status
+  });
+}

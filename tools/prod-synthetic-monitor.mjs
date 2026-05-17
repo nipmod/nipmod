@@ -15,6 +15,8 @@ const DEFAULT_ENDPOINTS = {
   nodeHealth: "https://node.nipmod.com/health",
   nodeUrl: "https://node.nipmod.com",
   registry: "https://nipmod.com/registry/packages.json",
+  scoutCandidates: "https://nipmod.com/scout/candidates",
+  scoutHealth: "https://nipmod.com/scout/health",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
   trust: "https://nipmod.com/trust",
@@ -72,6 +74,8 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.registry?.url, endpoints.registry, "discovery registry URL mismatch");
     assertEqual(state.discovery.node?.health, endpoints.nodeHealth, "discovery node health URL mismatch");
     assertEqual(state.discovery.witness?.health, endpoints.witnessHealth, "discovery witness health URL mismatch");
+    assertEqual(state.discovery.scout?.health, endpoints.scoutHealth, "discovery scout health URL mismatch");
+    assertEqual(state.discovery.scout?.candidates, endpoints.scoutCandidates, "discovery scout candidates URL mismatch");
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
@@ -205,6 +209,37 @@ export async function runSyntheticMonitor({
     const payload = await fetchJson(endpoints.nodeHealth, timedFetch);
     assertEqual(payload.status, "ok", "node health status mismatch");
     return { url: endpoints.nodeHealth };
+  });
+
+  await runCheck(checks, "scout_health", async () => {
+    const payload = await fetchJson(endpoints.scoutHealth, timedFetch);
+    if (payload.ok !== true) {
+      throw new Error("scout health is not ok");
+    }
+    if (payload.lastError !== null) {
+      throw new Error(`scout has lastError: ${payload.lastError}`);
+    }
+    if (!Number.isInteger(payload.runs) || payload.runs < 1) {
+      throw new Error("scout has not completed a cycle");
+    }
+    return {
+      candidates: payload.summary?.scanned ?? 0,
+      lastRunAt: payload.lastRunAt,
+      runs: payload.runs
+    };
+  });
+
+  await runCheck(checks, "scout_candidates", async () => {
+    const payload = await fetchJson(endpoints.scoutCandidates, timedFetch);
+    if (payload.type !== "dev.nipmod.scout-candidates.v1") {
+      throw new Error("scout candidates type mismatch");
+    }
+    if (!Array.isArray(payload.candidates)) {
+      throw new Error("scout candidates payload is invalid");
+    }
+    return {
+      candidates: payload.candidates.length
+    };
   });
 
   await runCheck(checks, "receive_pack_auth", async () => {

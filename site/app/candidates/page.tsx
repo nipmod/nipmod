@@ -3,9 +3,11 @@ import claimIndexData from "../claim-index.json";
 import registryData from "../registry-data.json";
 import {
   candidateClaimState,
+  candidateFromScout,
   candidateFromRepo,
   candidateStats,
   fetchGitlawbRepos,
+  fetchScoutCandidates,
   searchCandidates,
   type PackageCandidate
 } from "../../lib/candidates";
@@ -107,6 +109,14 @@ async function loadCandidates(): Promise<PackageCandidate[]> {
     claimIndex,
     publishedPackages: new Set(registry.packages.map((pkg) => pkg.canonical))
   });
+  try {
+    const scoutCandidates = await fetchScoutCandidates({ scoutUrl: "https://nipmod.com/scout" });
+    if (scoutCandidates.length > 0) {
+      return scoutCandidates.map(candidateFromScout);
+    }
+  } catch {
+    // Fall back to direct node scan below when the long-running scout service is unavailable.
+  }
   try {
     const repos = await fetchGitlawbRepos({ nodeUrl: registry.source || "https://node.nipmod.com" });
     return repos.map((repo) => candidateFromRepo(repo, state));

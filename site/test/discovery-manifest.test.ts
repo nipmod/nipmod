@@ -43,6 +43,7 @@ describe("nipmod discovery manifest", () => {
       "node",
       "registry",
       "review",
+      "scout",
       "transparency",
       "trustPage",
       "type",
@@ -82,6 +83,7 @@ describe("nipmod discovery manifest", () => {
       "indexCommand",
       "verifyCommand"
     ]);
+    expect(Object.keys(manifest.scout).sort()).toEqual(["candidates", "health", "intervalMs", "last", "patch", "patchParam"]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",
@@ -236,6 +238,14 @@ describe("nipmod discovery manifest", () => {
       packetMarkdown: "https://nipmod.com/review/packet.md",
       proofTranscript: "https://nipmod.com/proof/transcript.json"
     });
+    expect(manifest.scout).toEqual({
+      candidates: "https://nipmod.com/scout/candidates",
+      health: "https://nipmod.com/scout/health",
+      intervalMs: 300000,
+      last: "https://nipmod.com/scout/last",
+      patch: "https://nipmod.com/scout/patch",
+      patchParam: "repo"
+    });
   });
 
   test("publishes a complete agent runbook from the machine manifest", () => {
@@ -312,7 +322,7 @@ describe("nipmod discovery manifest", () => {
       expect(url.username).toBe("");
       expect(url.password).toBe("");
       expect(url.search).toBe("");
-      expect(["nipmod.com", "node.nipmod.com", "nipmod-witness.fly.dev"]).toContain(url.hostname);
+      expect(["nipmod.com", "node.nipmod.com", "nipmod-witness.fly.dev", "nipmod-scout.fly.dev"]).toContain(url.hostname);
     }
   });
 

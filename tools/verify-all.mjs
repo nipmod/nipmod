@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
+import { createServer as createNetServer } from "node:net";
 import { readFileSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -40,6 +41,8 @@ await run("pnpm", [
 	  "../tools/restore-drill.test.mjs",
 	  "../tools/prod-alert-runner.test.mjs",
 	  "../tools/monitor-server.test.mjs",
+	  "../tools/scout-agent.test.mjs",
+	  "../tools/scout-server.test.mjs",
 	  "../tools/prod-load-smoke.test.mjs",
 	  "../tools/node-edge-resilience-smoke.test.mjs",
 	  "../tools/first-party-packages.test.mjs",
@@ -52,7 +55,12 @@ await run("pnpm", ["--dir", "site", "build"]);
 await run("pnpm", ["--dir", "site", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "build"]);
-await run("pnpm", ["--dir", "site", "test:e2e"], { timeoutMs: 180_000 });
+await run("pnpm", ["--dir", "site", "test:e2e"], {
+  env: {
+    NIPMOD_E2E_PORT: String(await freePort())
+  },
+  timeoutMs: 180_000
+});
 await run(process.execPath, ["tools/secret-scan.mjs"]);
 await run(process.execPath, ["tools/supply-chain-check.mjs"], { timeoutMs: 120_000 });
 
@@ -113,6 +121,12 @@ async function verifyProduction() {
   await assertJson("https://node.nipmod.com/health", (payload) => payload.status === "ok", "node health failed");
   await assertUnauthenticatedReceivePackBlocked();
   await assertJson("https://nipmod-witness.fly.dev/health", (payload) => payload.ok === true, "witness health failed");
+  await assertJson("https://nipmod.com/scout/health", (payload) => payload.ok === true && payload.runs > 0, "scout health failed");
+  await assertJson(
+    "https://nipmod.com/scout/candidates",
+    (payload) => payload.type === "dev.nipmod.scout-candidates.v1" && Array.isArray(payload.candidates),
+    "scout candidates failed"
+  );
   await assertJson(
     "https://nipmod.com/registry/packages.json",
     (payload) =>
@@ -127,7 +141,9 @@ async function verifyProduction() {
 	      payload.type === "dev.nipmod.discovery.v1" &&
 	      payload.advisories === "https://nipmod.com/advisories.json" &&
 	      payload.advisoriesSignature === "https://nipmod.com/advisories.json.sig" &&
-		      payload.registry?.url === "https://nipmod.com/registry/packages.json" &&
+	      payload.registry?.url === "https://nipmod.com/registry/packages.json" &&
+	      payload.scout?.health === "https://nipmod.com/scout/health" &&
+	      payload.scout?.candidates === "https://nipmod.com/scout/candidates" &&
 	      payload.install?.scriptSha256 === expectedDigestFromShaFileSync(join(root, "site", "public", "install.sh.sha256")) &&
 	      payload.install?.release?.version === version &&
 	      payload.install?.release?.artifact === `https://nipmod.com/releases/${releaseName}` &&
@@ -359,4 +375,20 @@ async function run(command, args, options = {}) {
   if (code !== 0) {
     throw new Error(`${command} ${args.join(" ")} failed with ${code}`);
   }
+}
+
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const server = createNetServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close(() => reject(new Error("could not allocate e2e port")));
+        return;
+      }
+      const { port } = address;
+      server.close((error) => (error ? reject(error) : resolve(port)));
+    });
+  });
 }

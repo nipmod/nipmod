@@ -95,10 +95,10 @@ A candidate becomes a verified package only after:
 
 ### 1. Scanner Finds Repos
 
-Nipmod periodically reads public Gitlawb repos from configured nodes.
+Nipmod Scout Agent continuously reads public Gitlawb repos from configured nodes and publishes a read only candidate index.
 
-```bash
-nipmod package scan --node https://node.nipmod.com
+```text
+https://nipmod.com/scout/candidates
 ```
 
 Output:
@@ -109,6 +109,8 @@ ready 5
 almost 11
 needs-work 8
 ```
+
+The Scout service runs 24/7. It never creates issues, pull requests, claims or packages on behalf of another owner.
 
 ### 2. Candidate Page Exists
 

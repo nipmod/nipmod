@@ -25,6 +25,23 @@ export interface PackageCandidate {
   updatedAt: string;
 }
 
+export interface ScoutCandidateSummary {
+  claimStatus: "claimed" | "unclaimed";
+  commands?: {
+    claim?: string;
+    packagePr?: string;
+  };
+  description?: string;
+  gitlawbUrl?: string;
+  package: string;
+  readinessScore?: number;
+  repoName: string;
+  shortOwner?: string;
+  source: string;
+  status?: string;
+  updatedAt?: string;
+}
+
 export interface CandidateClaimState {
   claimedPackages: ReadonlySet<string>;
   publishedPackages: ReadonlySet<string>;
@@ -78,6 +95,25 @@ export function candidateFromRepo(repo: GitlawbRepoSummary, state: CandidateClai
   };
 }
 
+export function candidateFromScout(candidate: ScoutCandidateSummary): PackageCandidate {
+  const repoName = candidate.repoName;
+  const status: CandidateStatus = candidate.claimStatus === "claimed" ? "claimed" : "unclaimed";
+  return {
+    claimCommand: candidate.commands?.claim ?? `nipmod claim ${candidate.source}`,
+    description: candidate.description || "Public Gitlawb repo",
+    doctorCommand: `nipmod package doctor ${candidate.source}`,
+    gitlawbHref: candidate.gitlawbUrl ?? "https://gitlawb.com",
+    packageCommand: candidate.commands?.packagePr ?? `nipmod package pr ${candidate.source} --dir ${repoName}-pr`,
+    packageId: candidate.package,
+    readinessScore: candidate.readinessScore ?? (status === "claimed" ? 100 : 50),
+    repoName,
+    shortOwner: candidate.shortOwner ?? candidate.package.replace(/^pkg:did:key:/, "").slice(0, 8),
+    source: candidate.source,
+    status,
+    updatedAt: candidate.updatedAt ?? new Date(0).toISOString()
+  };
+}
+
 export function searchCandidates(candidates: readonly PackageCandidate[], query: string): PackageCandidate[] {
   const normalized = query.trim().toLowerCase();
   const sorted = [...candidates].sort(compareCandidates);
@@ -113,6 +149,19 @@ export async function fetchGitlawbRepos(options: { nodeUrl: string }): Promise<G
   }
   const data = (await response.json()) as GitlawbRepoSummary[];
   return data.filter((repo) => repo.is_public && isDidKey(repo.owner_did) && isRepoName(repo.name) && !isProbeRepo(repo));
+}
+
+export async function fetchScoutCandidates(options: { scoutUrl: string }): Promise<ScoutCandidateSummary[]> {
+  const response = await fetch(`${options.scoutUrl.replace(/\/$/, "")}/candidates`, {
+    next: { revalidate: 300 }
+  });
+  if (!response.ok) {
+    throw new Error(`Nipmod scout candidate fetch failed with HTTP ${response.status}`);
+  }
+  const data = (await response.json()) as { candidates?: ScoutCandidateSummary[] };
+  return Array.isArray(data.candidates)
+    ? data.candidates.filter((candidate) => isPackageId(candidate.package) && isGitlawbSource(candidate.source) && isRepoName(candidate.repoName))
+    : [];
 }
 
 function scoreRepoCandidate(repo: GitlawbRepoSummary): number {
@@ -154,6 +203,14 @@ function isDidKey(value: string): boolean {
 
 function isRepoName(value: string): boolean {
   return /^[a-z0-9][a-z0-9._-]*$/.test(value);
+}
+
+function isPackageId(value: string): boolean {
+  return /^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(value);
+}
+
+function isGitlawbSource(value: string): boolean {
+  return /^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(value);
 }
 
 function isProbeRepo(repo: GitlawbRepoSummary): boolean {

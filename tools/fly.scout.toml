@@ -1,0 +1,26 @@
+app = "nipmod-scout"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile.scout"
+
+[env]
+  PORT = "8080"
+  NIPMOD_SCOUT_CLAIM_INDEX_URL = "https://nipmod.com/claims/index.json"
+  NIPMOD_SCOUT_INTERVAL_MS = "300000"
+  NIPMOD_SCOUT_NODE_URL = "https://node.nipmod.com"
+  NIPMOD_SCOUT_PUBLIC_URL = "https://nipmod-scout.fly.dev"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/health"

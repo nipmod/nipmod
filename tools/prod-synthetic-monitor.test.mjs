@@ -15,7 +15,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 13, total: 13 });
+    expect(result.summary).toEqual({ fail: 0, pass: 15, total: 15 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
@@ -29,6 +29,8 @@ describe("production synthetic monitor", () => {
       "witness_health",
       "witness_run_auth",
       "node_health",
+      "scout_health",
+      "scout_candidates",
       "receive_pack_auth"
     ]);
   });
@@ -275,6 +277,8 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
     registry: "https://nipmod.test/registry/packages.json",
+    scoutCandidates: "https://scout.nipmod.test/candidates",
+    scoutHealth: "https://scout.nipmod.test/health",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
     trust: "https://nipmod.test/trust",
@@ -323,6 +327,14 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
       registry: {
         source: endpoints.nodeUrl,
         url: endpoints.registry
+      },
+      scout: {
+        candidates: endpoints.scoutCandidates,
+        health: endpoints.scoutHealth,
+        intervalMs: 300000,
+        last: "https://scout.nipmod.test/last",
+        patch: "https://scout.nipmod.test/patch",
+        patchParam: "repo"
       },
       review: {
         evidenceLedger: "https://nipmod.test/review/evidence-ledger.json",
@@ -374,6 +386,26 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     }),
     [`POST ${endpoints.witnessRun}`]: jsonResponse({ error: "missing run authorization" }, 401),
     [`GET ${endpoints.nodeHealth}`]: jsonResponse({ status: "ok" }),
+    [`GET ${endpoints.scoutHealth}`]: jsonResponse({
+      ok: true,
+      lastError: null,
+      lastRunAt: "2026-05-16T12:41:00.000Z",
+      runs: 4,
+      summary: {
+        claimed: 1,
+        patchable: 3,
+        scanned: 3
+      }
+    }),
+    [`GET ${endpoints.scoutCandidates}`]: jsonResponse({
+      candidates: [
+        {
+          package: "pkg:did:key:z6Mkpkg/example",
+          source: "gitlawb://did:key:z6Mkpkg/example"
+        }
+      ],
+      type: "dev.nipmod.scout-candidates.v1"
+    }),
     "POST https://node.nipmod.test/z6MknipmodUnauthProbe/receive-pack-abuse/git-receive-pack": jsonResponse(
       { error: "missing Signature-Input or Signature headers" },
       401,
