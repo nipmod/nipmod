@@ -30,7 +30,7 @@ describe("nipmod CLI", () => {
 
     expect(parsed.ok).toBe(true);
     expect(parsed.data.commands).toEqual(
-      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "mcp"])
+      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "dist-tag", "deprecate", "yank", "mcp"])
     );
     expect(parsed.data.exitCodes).toEqual(
       expect.arrayContaining([
@@ -993,6 +993,83 @@ describe("nipmod CLI", () => {
     }
   });
 
+  test("creates signed lifecycle dry-run events without leaking local identity secrets", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-lifecycle-"));
+    const pkg = join(workspace, "pkg");
+
+    await execaNode(["src/cli.ts", "init", "--name", "@probe/lifecycle-agent", "--dir", pkg]);
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+    };
+
+    const distTag = await execaNode([
+      "src/cli.ts",
+      "dist-tag",
+      "add",
+      `${manifest.canonical}@0.1.0`,
+      "latest",
+      "--dir",
+      pkg,
+      "--dry-run",
+      "--json"
+    ]);
+    const deprecated = await execaNode([
+      "src/cli.ts",
+      "deprecate",
+      `${manifest.canonical}@0.1.0`,
+      "Use lifecycle-agent@0.2.0",
+      "--dir",
+      pkg,
+      "--dry-run",
+      "--json"
+    ]);
+    const yanked = await execaNode([
+      "src/cli.ts",
+      "yank",
+      `${manifest.canonical}@0.1.0`,
+      "Broken package release",
+      "--dir",
+      pkg,
+      "--dry-run",
+      "--json"
+    ]);
+
+    const parsedTag = JSON.parse(distTag.stdout) as {
+      ok: true;
+      data: {
+        event: {
+          payload: { action: { kind: string; tag: string; version: string }; package: string; publisher: string };
+          signature: { keyId: string };
+        };
+      };
+    };
+    const parsedDeprecated = JSON.parse(deprecated.stdout) as {
+      ok: true;
+      data: { event: { payload: { action: { kind: string; reason: string } } } };
+    };
+    const parsedYanked = JSON.parse(yanked.stdout) as {
+      ok: true;
+      data: { event: { payload: { action: { kind: string; reason: string } } } };
+    };
+
+    expect(parsedTag.data.event.payload).toMatchObject({
+      action: { kind: "dist-tag.set", tag: "latest", version: "0.1.0" },
+      package: manifest.canonical,
+      publisher: manifest.publish.signingKey
+    });
+    expect(parsedTag.data.event.signature.keyId).toBe(manifest.publish.signingKey);
+    expect(parsedDeprecated.data.event.payload.action).toMatchObject({
+      kind: "deprecate",
+      reason: "Use lifecycle-agent@0.2.0"
+    });
+    expect(parsedYanked.data.event.payload.action).toMatchObject({
+      kind: "yank",
+      reason: "Broken package release"
+    });
+    expect(`${distTag.stdout}${deprecated.stdout}${yanked.stdout}`).not.toContain("privateKey");
+  });
+
   test("rejects file URLs with remote hosts", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-host-"));
 
@@ -1339,6 +1416,55 @@ describe("nipmod CLI", () => {
     });
   });
 
+  test("view resolves package names through the effective latest dist-tag", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-view-dist-tag-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          {
+            ...searchPackageFixture(owner, "tagged-agent", "skill", 100, "Stable tagged release"),
+            distTags: { latest: "0.1.0", next: "0.2.0" },
+            digest: "a".repeat(64),
+            version: "0.1.0"
+          },
+          {
+            ...searchPackageFixture(owner, "tagged-agent", "skill", 100, "Next tagged release"),
+            distTags: { latest: "0.1.0", next: "0.2.0" },
+            digest: "b".repeat(64),
+            version: "0.2.0"
+          }
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const latest = await execaNode([
+      "src/cli.ts",
+      "view",
+      "tagged-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const next = await execaNode([
+      "src/cli.ts",
+      "view",
+      "tagged-agent@next",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const latestParsed = JSON.parse(latest.stdout) as { data: { package: { version: string } } };
+    const nextParsed = JSON.parse(next.stdout) as { data: { package: { version: string } } };
+
+    expect(latestParsed.data.package.version).toBe("0.1.0");
+    expect(nextParsed.data.package.version).toBe("0.2.0");
+  });
+
   test("view refuses ambiguous package names", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-view-ambiguous-"));
     const firstOwner = generateIdentity().did;
@@ -1540,6 +1666,89 @@ describe("nipmod CLI", () => {
     ]);
     expect(text.stdout).toContain("blocked: NIPMOD-2026-9001: Quarantine dry-run advisory");
     expect(text.stdout).not.toContain("add: nipmod add");
+  });
+
+  test("search hides yanked packages by default and warns for deprecated packages", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-lifecycle-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          {
+            ...searchPackageFixture(owner, "deprecated-agent", "skill", 100, "Deprecated package"),
+            deprecated: {
+              active: true,
+              package: `pkg:${owner}/deprecated-agent`,
+              publishedAt: "2026-05-17T00:00:00.000Z",
+              reason: "Use maintained-agent instead",
+              type: "dev.nipmod.deprecation.v1",
+              version: "0.1.0"
+            }
+          },
+          {
+            ...searchPackageFixture(owner, "yanked-agent", "skill", 100, "Yanked package"),
+            yanked: {
+              active: true,
+              package: `pkg:${owner}/yanked-agent`,
+              publishedAt: "2026-05-17T00:00:00.000Z",
+              reason: "Broken package release",
+              type: "dev.nipmod.yank.v1",
+              version: "0.1.0"
+            }
+          }
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const deprecated = await execaNode([
+      "src/cli.ts",
+      "search",
+      "deprecated-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const deprecatedParsed = JSON.parse(deprecated.stdout) as {
+      data: { packages: Array<{ deprecated: boolean; deprecationReason: string; install: string }> };
+    };
+    expect(deprecatedParsed.data.packages[0]).toMatchObject({
+      deprecated: true,
+      deprecationReason: "Use maintained-agent instead",
+      install: "nipmod install deprecated-agent"
+    });
+
+    const hidden = await execaNode([
+      "src/cli.ts",
+      "search",
+      "yanked-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    expect((JSON.parse(hidden.stdout) as { data: { total: number } }).data.total).toBe(0);
+
+    const included = await execaNode([
+      "src/cli.ts",
+      "search",
+      "yanked-agent",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--include-yanked",
+      "--json"
+    ]);
+    const includedParsed = JSON.parse(included.stdout) as {
+      data: { packages: Array<{ install?: string; installBlockedReason: string; yanked: boolean; yankReason: string }> };
+    };
+    expect(includedParsed.data.packages[0]).toMatchObject({
+      installBlockedReason: "yanked: Broken package release",
+      yanked: true,
+      yankReason: "Broken package release"
+    });
+    expect(includedParsed.data.packages[0]?.install).toBeUndefined();
   });
 
   test("search uses the configured registry without an online flag", async () => {

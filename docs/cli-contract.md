@@ -29,13 +29,16 @@ P0 commands:
 - `nipmod explain`
 - `nipmod sbom`
 - `nipmod policy`
+- `nipmod dist-tag add pkg:<publisher>/<name>@<version> <tag>`
+- `nipmod dist-tag rm pkg:<publisher>/<name> <tag>`
+- `nipmod deprecate pkg:<publisher>/<name>@<version> <reason>`
+- `nipmod yank pkg:<publisher>/<name>@<version> <reason>`
 - `nipmod mcp serve`
 
 Next npm parity commands:
 
 - signed `nipmod version <semver>` release bump
-- `nipmod dist-tag`
-- `nipmod deprecate`
+- owner and maintainer key lifecycle commands
 
 ## JSON output
 

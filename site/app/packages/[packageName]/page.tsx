@@ -148,7 +148,16 @@ export default async function PackagePage({ params }: PackagePageProps) {
             {versions.map((version) => (
               <div key={`${version.canonical}@${version.version}`}>
                 <dt>{version.version}</dt>
-                <dd>{version.digest}</dd>
+                <dd>
+                  {version.distTags
+                    ? Object.entries(version.distTags)
+                        .filter(([, taggedVersion]) => taggedVersion === version.version)
+                        .map(([tag]) => tag)
+                        .join(", ") || version.digest
+                    : version.digest}
+                  {version.deprecated?.active !== false && version.deprecated ? ` deprecated: ${version.deprecated.reason}` : ""}
+                  {version.yanked?.active !== false && version.yanked ? ` yanked: ${version.yanked.reason}` : ""}
+                </dd>
               </div>
             ))}
           </dl>
@@ -210,6 +219,10 @@ export default async function PackagePage({ params }: PackagePageProps) {
           <p className="panel-copy">
             {pkg.quarantine?.status === "active"
               ? `${pkg.quarantine.advisoryId}: ${pkg.quarantine.reason}`
+              : pkg.yanked?.active !== false && pkg.yanked
+              ? `Yanked: ${pkg.yanked.reason}`
+              : pkg.deprecated?.active !== false && pkg.deprecated
+              ? `Deprecated: ${pkg.deprecated.reason}`
               : "No active high or critical quarantine blocks this package version."}
           </p>
           <pre className="install-command">

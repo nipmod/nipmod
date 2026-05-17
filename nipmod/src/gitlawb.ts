@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 import { BUNDLE_MEDIA_TYPE, packProject } from "./bundle.js";
 import { readResponseBytes, readResponseText } from "./http.js";
 import { type Identity, signBytes } from "./identity.js";
-import { type ReleaseEvent } from "./protocol.js";
+import { signLifecycleEvent } from "./lifecycle.js";
+import { type LifecycleAction, type LifecycleEvent, type ReleaseEvent, type SignedLifecycleEvent } from "./protocol.js";
 import { signReleaseEvent } from "./release.js";
 import { DEFAULT_REGISTRY_URL } from "./registry.js";
 import { canonicalJson } from "./verifier.js";
@@ -95,6 +96,26 @@ export interface PublishGitlawbPackageResult {
   registryCandidate: RegistryCandidate;
 }
 
+export interface PublishGitlawbLifecycleEventOptions {
+  action: LifecycleAction;
+  env?: Record<string, string | undefined>;
+  helperPath?: string;
+  identityPath?: string;
+  package: string;
+  projectDir: string;
+  nodeUrl?: string;
+  runCommand?: CommandRunner;
+}
+
+export interface PublishGitlawbLifecycleEventResult {
+  action: LifecycleAction;
+  event: SignedLifecycleEvent;
+  eventPath: string;
+  package: string;
+  repoName: string;
+  sourceRepo: string;
+}
+
 export type PublishVersionCheckStatus = "available" | "same-artifact" | "blocked-existing-version" | "unknown";
 
 export interface PublishDryRunPlan {
@@ -178,6 +199,7 @@ export interface DoctorGitlawbResult {
 
 const REMOTE_SPECIFIER_PATTERN =
   /^(pkg:(did:key:z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*))@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/;
+const REMOTE_PACKAGE_PATTERN = /^(pkg:(did:key:z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*))$/;
 const GITLAWB_REPO_NAME_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
 const BUNDLE_FILENAME = "bundle.nipmod";
 const REMOTE_BUNDLE_LIMIT = 50 * 1024 * 1024;
@@ -204,6 +226,24 @@ export function parseRemoteSpecifier(spec: string): RemoteSpecifier {
     ownerSegment: ownerSegmentFromDid(ownerDid),
     repoName,
     version
+  };
+}
+
+function parseCanonicalPackageId(canonical: string): Omit<RemoteSpecifier, "version"> {
+  const match = REMOTE_PACKAGE_PATTERN.exec(canonical);
+  if (!match) {
+    throw new Error("remote package id must be pkg:did:key:<owner>/<name>");
+  }
+
+  const packageId = requireMatch(match[1], "canonical");
+  const ownerDid = requireMatch(match[2], "owner");
+  const repoName = requireMatch(match[3], "repo");
+  assertGitlawbRepoName(repoName);
+  return {
+    canonical: packageId,
+    ownerDid,
+    ownerSegment: ownerSegmentFromDid(ownerDid),
+    repoName
   };
 }
 
@@ -385,6 +425,81 @@ export async function publishGitlawbPackage(
         packed,
         sourceCommit
       })
+    };
+  } finally {
+    await rm(stagingDir, { recursive: true, force: true });
+  }
+}
+
+export async function publishGitlawbLifecycleEvent(
+  options: PublishGitlawbLifecycleEventOptions
+): Promise<PublishGitlawbLifecycleEventResult> {
+  const nodeUrl = normalizeNodeUrl(options.nodeUrl ?? DEFAULT_GITLAWB_NODE);
+  const identity = await readLocalIdentity(options.projectDir, options.identityPath);
+  const spec = parseCanonicalPackageId(options.package);
+  if (spec.ownerDid !== identity.did) {
+    throw new Error("local identity must match package canonical owner");
+  }
+
+  const helperOptions: ResolveGitlawbHelperOptions = {
+    cwd: options.projectDir
+  };
+  if (options.helperPath) {
+    helperOptions.explicitPath = options.helperPath;
+  }
+  if (options.env) {
+    helperOptions.env = options.env;
+  }
+  const helper = await resolveGitlawbHelper(helperOptions);
+  if (!helper.ok || !helper.path) {
+    throw new Error(helper.message);
+  }
+
+  const stagingDir = await mkdtemp(join(tmpdir(), "nipmod-lifecycle-"));
+  const repoDir = join(stagingDir, "repo");
+  const keyPath = join(stagingDir, "identity.pem");
+  const env = gitEnvironment(nodeUrl, keyPath, helper.path, options.env);
+  const git = await resolveCommand("git", { env, cwd: options.projectDir });
+  if (!git.ok) {
+    throw new Error("git is required for lifecycle publish. Install git, then run: nipmod doctor");
+  }
+
+  const event = signLifecycleEvent(
+    lifecycleEventForAction({
+      action: options.action,
+      canonical: options.package,
+      identity,
+      repoName: spec.repoName
+    }),
+    identity
+  );
+  const eventPath = lifecycleEventPath(event.payload);
+
+  try {
+    await mkdir(repoDir, { recursive: true });
+    await writeFile(keyPath, identity.privateKeyPem, { mode: 0o600 });
+    const runCommand = options.runCommand ?? defaultRunCommand;
+    await runCommand("git", ["clone", `gitlawb://${identity.did}/${spec.repoName}`, repoDir], { cwd: stagingDir, env });
+    await runCommand("git", ["checkout", "-B", "main"], { cwd: repoDir, env });
+    const indexPath = join(repoDir, "index.json");
+    const index = JSON.parse(await readFile(indexPath, "utf8")) as PackageIndexFile;
+    assertLifecycleActionTargetsExistingRelease(index, options.action);
+    await mkdir(join(repoDir, dirname(eventPath)), { recursive: true });
+    await writeFile(join(repoDir, eventPath), `${canonicalJson(event)}\n`);
+    await writeFile(indexPath, `${canonicalJson(indexWithLifecycleEvent(index, eventPath, options.action))}\n`);
+    await runCommand("git", ["config", "user.email", "bot@nipmod.local"], { cwd: repoDir, env });
+    await runCommand("git", ["config", "user.name", "nipmod"], { cwd: repoDir, env });
+    await runCommand("git", ["add", eventPath, "index.json"], { cwd: repoDir, env });
+    await runCommand("git", ["commit", "-m", lifecycleCommitMessage(options.action, spec.repoName)], { cwd: repoDir, env });
+    await runCommand("git", ["push", `gitlawb://${identity.did}/${spec.repoName}`, "HEAD:main"], { cwd: repoDir, env });
+
+    return {
+      action: options.action,
+      event,
+      eventPath,
+      package: options.package,
+      repoName: spec.repoName,
+      sourceRepo: `gitlawb://${identity.did}/${spec.repoName}`
     };
   } finally {
     await rm(stagingDir, { recursive: true, force: true });
@@ -722,6 +837,88 @@ function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProje
       sha256: packed.digest
     }
   };
+}
+
+interface PackageIndexFile {
+  formatVersion?: number;
+  latest?: string;
+  lifecycle?: {
+    events?: Array<{ path: string }>;
+  };
+  releases?: Record<string, unknown>;
+}
+
+function lifecycleEventForAction(options: {
+  action: LifecycleAction;
+  canonical: string;
+  identity: Identity;
+  repoName: string;
+}): LifecycleEvent {
+  return {
+    type: "dev.nipmod.lifecycle.v1",
+    formatVersion: 1,
+    package: options.canonical,
+    publisher: options.identity.did,
+    source: {
+      type: "gitlawb",
+      repo: `gitlawb://${options.identity.did}/${options.repoName}`
+    },
+    publishedAt: new Date().toISOString(),
+    action: options.action
+  };
+}
+
+function lifecycleEventPath(event: LifecycleEvent): string {
+  const action = event.action.kind.replaceAll(".", "-");
+  const target =
+    event.action.kind === "dist-tag.remove"
+      ? event.action.tag
+      : event.action.kind === "dist-tag.set"
+      ? `${event.action.tag}-${event.action.version}`
+      : event.action.version;
+  const timestamp = event.publishedAt.replace(/[^0-9TZ]/g, "");
+  return `lifecycle/events/${timestamp}-${action}-${target}.json`;
+}
+
+function assertLifecycleActionTargetsExistingRelease(index: PackageIndexFile, action: LifecycleAction): void {
+  const version = "version" in action ? action.version : undefined;
+  if (!version) {
+    return;
+  }
+  if (!index.releases || !Object.prototype.hasOwnProperty.call(index.releases, version)) {
+    throw new Error(`lifecycle event target version is not in package index: ${version}`);
+  }
+}
+
+function indexWithLifecycleEvent(index: PackageIndexFile, eventPath: string, action: LifecycleAction): PackageIndexFile {
+  const events = [...(index.lifecycle?.events ?? [])];
+  if (!events.some((event) => event.path === eventPath)) {
+    events.push({ path: eventPath });
+  }
+  const next: PackageIndexFile = {
+    ...index,
+    lifecycle: {
+      ...(index.lifecycle ?? {}),
+      events
+    }
+  };
+  if (action.kind === "dist-tag.set" && action.tag === "latest") {
+    next.latest = action.version;
+  }
+  return next;
+}
+
+function lifecycleCommitMessage(action: LifecycleAction, repoName: string): string {
+  switch (action.kind) {
+    case "dist-tag.set":
+      return `Set ${repoName} dist-tag ${action.tag}`;
+    case "dist-tag.remove":
+      return `Remove ${repoName} dist-tag ${action.tag}`;
+    case "deprecate":
+      return `Deprecate ${repoName} ${action.version}`;
+    case "yank":
+      return `Yank ${repoName} ${action.version}`;
+  }
 }
 
 function indexForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>, sourceCommit?: string | null): unknown {

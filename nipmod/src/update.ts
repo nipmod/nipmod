@@ -84,6 +84,7 @@ export async function createUpdatePlan(options: CreateUpdatePlanOptions): Promis
   const registry = await searchRegistry({
     ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
     includeQuarantined: true,
+    includeYanked: true,
     limit: 10_000,
     query: "",
     registryUrl

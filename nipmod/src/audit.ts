@@ -160,6 +160,14 @@ const RegistryPackageSchema = z.strictObject({
   canonical: PackageIdSchema,
   version: SemverSchema,
   digest: Sha256Schema,
+  yanked: z.strictObject({
+    active: z.boolean().optional(),
+    package: PackageIdSchema,
+    publishedAt: z.string().min(1),
+    reason: z.string().min(1),
+    type: z.literal("dev.nipmod.yank.v1"),
+    version: SemverSchema
+  }).passthrough().optional(),
   proof: RegistryProofSchema.optional(),
   publisher: DidKeySchema,
   quarantine: z.strictObject({
@@ -347,6 +355,11 @@ function auditLockedPackage(
       registryQuarantineAdvisories.push(quarantine.advisoryId);
       findings.push(`${quarantine.advisoryId}: ${quarantine.reason}`);
     }
+    const yank = activeRegistryYank(registryPackage);
+    if (yank) {
+      status = "fail";
+      findings.push(`yanked: ${yank.reason}`);
+    }
   }
 
   for (const advisory of matchingAdvisories) {
@@ -384,6 +397,17 @@ function activeRegistryQuarantine(pkg: RegistryPackage): NonNullable<RegistryPac
     return null;
   }
   return quarantine;
+}
+
+function activeRegistryYank(pkg: RegistryPackage): NonNullable<RegistryPackage["yanked"]> | null {
+  const yank = pkg.yanked;
+  if (!yank || yank.active === false) {
+    return null;
+  }
+  if (yank.package !== pkg.canonical || yank.version !== pkg.version) {
+    return null;
+  }
+  return yank;
 }
 
 function duplicateRegistryPackageKeys(packages: readonly RegistryPackage[]): Set<string> {

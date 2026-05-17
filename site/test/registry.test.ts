@@ -119,7 +119,7 @@ describe("registry data", () => {
     );
 
     expect(summary.ready).toBe(true);
-    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Witnesses", "Root hash", "Quarantine"]);
+    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Witnesses", "Root hash", "Quarantine", "Yanked"]);
     expect(summary.checks.every((check) => check.ok)).toBe(true);
   });
 
@@ -182,7 +182,7 @@ describe("registry data", () => {
     expect(summary.checks).toContainEqual({
       label: "No active quarantine",
       ok: false,
-      text: "High and critical advisories block public readiness."
+      text: "High risk advisories and yanked releases block public readiness."
     });
   });
 

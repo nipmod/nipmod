@@ -90,6 +90,32 @@ const ReleaseEventSourceSchema = z.strictObject({
   commit: GitCommitSchema.optional(),
   tag: SemverTagSchema
 });
+const LifecycleEventSourceSchema = z.strictObject({
+  type: z.literal("gitlawb"),
+  repo: GitlawbRepoSchema,
+  commit: GitCommitSchema.optional()
+});
+const LifecycleActionSchema = z.discriminatedUnion("kind", [
+  z.strictObject({
+    kind: z.literal("dist-tag.set"),
+    tag: DistTagSchema,
+    version: SemverSchema
+  }),
+  z.strictObject({
+    kind: z.literal("dist-tag.remove"),
+    tag: DistTagSchema
+  }),
+  z.strictObject({
+    kind: z.literal("deprecate"),
+    version: SemverSchema,
+    reason: SafeTextSchema.max(280)
+  }),
+  z.strictObject({
+    kind: z.literal("yank"),
+    version: SemverSchema,
+    reason: SafeTextSchema.max(280)
+  })
+]);
 
 export type PermissionScopeKind = "env" | "filesystem" | "mcpTools" | "network" | "secrets";
 export type PermissionScopeIssueCode =
@@ -435,6 +461,57 @@ const SignedReleaseEventEnvelopeSchema = z.strictObject({
   signature: ReleaseEventSignatureSchema
 });
 
+export const LifecycleEventSchema = z
+  .strictObject({
+    type: z.literal("dev.nipmod.lifecycle.v1"),
+    formatVersion: z.literal(1),
+    package: PackageIdSchema,
+    publisher: DidKeySchema,
+    source: LifecycleEventSourceSchema,
+    publishedAt: z.string().datetime(),
+    action: LifecycleActionSchema
+  })
+  .superRefine((event, ctx) => {
+    const canonical = splitCanonicalPackage(event.package);
+    if (canonical.owner !== event.publisher) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["publisher"],
+        message: "publisher must match package owner"
+      });
+    }
+
+    const source = splitGitlawbRepo(event.source.repo);
+    if (source.owner !== event.publisher) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["source", "repo"],
+        message: "source repo owner must match publisher"
+      });
+    }
+
+    if (source.repo !== canonical.slug) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["source", "repo"],
+        message: "source repo must match canonical package slug"
+      });
+    }
+  });
+
+export type LifecycleEvent = z.infer<typeof LifecycleEventSchema>;
+export type LifecycleAction = z.infer<typeof LifecycleActionSchema>;
+export type LifecycleEventSignature = z.infer<typeof ReleaseEventSignatureSchema>;
+export interface SignedLifecycleEvent {
+  payload: LifecycleEvent;
+  signature: LifecycleEventSignature;
+}
+
+const SignedLifecycleEventEnvelopeSchema = z.strictObject({
+  payload: z.unknown(),
+  signature: ReleaseEventSignatureSchema
+});
+
 export function validateManifest(value: unknown): Manifest {
   return parseOrThrow(ManifestSchema, value, "manifest");
 }
@@ -448,6 +525,23 @@ export function validateSignedReleaseEvent(value: unknown): SignedReleaseEvent {
   const payload = validateReleaseEvent(envelope.payload);
   if (envelope.signature.keyId !== payload.publisher) {
     throw new Error("signed release event invalid: signature key must match publisher");
+  }
+
+  return {
+    payload,
+    signature: envelope.signature
+  };
+}
+
+export function validateLifecycleEvent(value: unknown): LifecycleEvent {
+  return parseOrThrow(LifecycleEventSchema, value, "lifecycle event");
+}
+
+export function validateSignedLifecycleEvent(value: unknown): SignedLifecycleEvent {
+  const envelope = parseOrThrow(SignedLifecycleEventEnvelopeSchema, value, "signed lifecycle event");
+  const payload = validateLifecycleEvent(envelope.payload);
+  if (envelope.signature.keyId !== payload.publisher) {
+    throw new Error("signed lifecycle event invalid: signature key must match publisher");
   }
 
   return {

@@ -125,7 +125,11 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
       <dl className="package-meta">
         <div>
           <dt>Version</dt>
-          <dd>{pkg.version}</dd>
+          <dd>
+            {pkg.version}
+            {pkg.distTags?.latest === pkg.version ? " latest" : ""}
+            {pkg.deprecated?.active !== false && pkg.deprecated ? " deprecated" : ""}
+          </dd>
         </div>
         <div>
           <dt>Publisher</dt>

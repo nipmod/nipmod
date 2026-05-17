@@ -38,14 +38,13 @@ export function findPackage(value: string): RegistryPackage | null {
     return null;
   }
 
-  return (
-    registry.packages.find(
-      (pkg) =>
-        pkg.name.toLowerCase() === normalized ||
-        pkg.canonical.toLowerCase() === normalized ||
-        packagePageSlug(pkg).toLowerCase() === normalized
-    ) ?? null
+  const matches = registry.packages.filter(
+    (pkg) =>
+      pkg.name.toLowerCase() === normalized ||
+      pkg.canonical.toLowerCase() === normalized ||
+      packagePageSlug(pkg).toLowerCase() === normalized
   );
+  return matches.find((pkg) => pkg.distTags?.latest === pkg.version) ?? matches[0] ?? null;
 }
 
 export function packageBrowseData(options: { query: string; type: string }) {

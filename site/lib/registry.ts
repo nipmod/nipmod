@@ -98,6 +98,17 @@ export interface RegistryPackage {
   compatibilityReceipts?: CompatibilityReceipt[];
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  deprecated?: {
+    active?: boolean;
+    eventPath?: string;
+    package: string;
+    publishedAt: string;
+    reason: string;
+    signer?: string;
+    type: "dev.nipmod.deprecation.v1";
+    version: string;
+  };
+  distTags?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
@@ -111,6 +122,16 @@ export interface RegistryPackage {
     severity: "low" | "moderate" | "high" | "critical";
     status: "active" | "withdrawn";
     type: "dev.nipmod.quarantine.v1";
+    version: string;
+  };
+  yanked?: {
+    active?: boolean;
+    eventPath?: string;
+    package: string;
+    publishedAt: string;
+    reason: string;
+    signer?: string;
+    type: "dev.nipmod.yank.v1";
     version: string;
   };
 }
@@ -159,10 +180,12 @@ export interface RegistryIndex {
 export function searchPackages(
   packages: readonly RegistryPackage[],
   query: string,
-  options: { includeQuarantined?: boolean } = {}
+  options: { includeQuarantined?: boolean; includeYanked?: boolean } = {}
 ): RegistryPackage[] {
   const normalized = query.trim().toLowerCase();
-  const publicPackages = packages.filter((item) => options.includeQuarantined === true || !isActivelyQuarantined(item));
+  const publicPackages = packages
+    .filter((item) => options.includeQuarantined === true || !isActivelyQuarantined(item))
+    .filter((item) => options.includeYanked === true || !isActivelyYanked(item));
   if (!normalized) {
     return [...publicPackages].sort(comparePackages);
   }
@@ -173,7 +196,7 @@ export function searchPackages(
 }
 
 export function homepagePackages(packages: readonly RegistryPackage[]): RegistryPackage[] {
-  return packages.filter((pkg) => !isProbePackage(pkg) && !isActivelyQuarantined(pkg));
+  return packages.filter((pkg) => !isProbePackage(pkg) && !isActivelyQuarantined(pkg) && !isActivelyYanked(pkg));
 }
 
 export function registryStats(index: RegistryIndex): Array<{ label: string; value: string }> {
@@ -194,6 +217,10 @@ function isActivelyQuarantined(pkg: RegistryPackage): boolean {
   return activeQuarantine(pkg) !== null;
 }
 
+function isActivelyYanked(pkg: RegistryPackage): boolean {
+  return activeYank(pkg) !== null;
+}
+
 function activeQuarantine(pkg: RegistryPackage): NonNullable<RegistryPackage["quarantine"]> | null {
   const quarantine = pkg.quarantine;
   if (!quarantine || quarantine.status !== "active" || quarantine.active === false) {
@@ -211,6 +238,17 @@ function activeQuarantine(pkg: RegistryPackage): NonNullable<RegistryPackage["qu
   return quarantine;
 }
 
+function activeYank(pkg: RegistryPackage): NonNullable<RegistryPackage["yanked"]> | null {
+  const yank = pkg.yanked;
+  if (!yank || yank.active === false) {
+    return null;
+  }
+  if (yank.package !== pkg.canonical || yank.version !== pkg.version) {
+    return null;
+  }
+  return yank;
+}
+
 export function registryTrustSummary(index: RegistryIndex): {
   cards: Array<{ label: string; value: string }>;
   checks: Array<{ label: string; ok: boolean; text: string }>;
@@ -220,6 +258,7 @@ export function registryTrustSummary(index: RegistryIndex): {
   const witnesses = index.transparencyLog?.witnesses ?? [];
   const rootHash = index.transparencyLog?.treeHead.rootHash ?? "";
   const activeQuarantines = index.packages.filter(isActivelyQuarantined).length;
+  const activeYanks = index.packages.filter(isActivelyYanked).length;
   const checks = [
     {
       label: "Signed bundles",
@@ -243,8 +282,8 @@ export function registryTrustSummary(index: RegistryIndex): {
     },
     {
       label: "No active quarantine",
-      ok: activeQuarantines === 0,
-      text: "High and critical advisories block public readiness."
+      ok: activeQuarantines === 0 && activeYanks === 0,
+      text: "High risk advisories and yanked releases block public readiness."
     }
   ];
   return {
@@ -252,7 +291,8 @@ export function registryTrustSummary(index: RegistryIndex): {
       { label: "Packages", value: String(index.packages.length) },
       { label: "Witnesses", value: String(witnesses.length) },
       { label: "Root hash", value: rootHash ? `${rootHash.slice(0, 10)}...${rootHash.slice(-8)}` : "missing" },
-      { label: "Quarantine", value: String(activeQuarantines) }
+      { label: "Quarantine", value: String(activeQuarantines) },
+      { label: "Yanked", value: String(activeYanks) }
     ],
     checks,
     ready: verified.length === index.packages.length && index.packages.length > 0 && checks.every((check) => check.ok)
@@ -263,6 +303,10 @@ export function installCommand(pkg: RegistryPackage): string {
   const quarantine = activeQuarantine(pkg);
   if (quarantine) {
     return `Install blocked: ${quarantine.advisoryId}: ${quarantine.reason}`;
+  }
+  const yank = activeYank(pkg);
+  if (yank) {
+    return `Install blocked: yanked: ${yank.reason}`;
   }
   return `nipmod install ${pkg.name}`;
 }
@@ -467,6 +511,9 @@ function packageSearchFields(pkg: RegistryPackage): string[] {
     pkg.description,
     pkg.type,
     pkg.publisher,
+    ...(pkg.distTags ? Object.keys(pkg.distTags) : []),
+    pkg.deprecated?.reason ?? "",
+    pkg.yanked?.reason ?? "",
     ...compatibilityHighlights(pkg),
     ...(pkg.compatibilityReceipts ?? []).map((receipt) => receipt.externalFormat)
   ];

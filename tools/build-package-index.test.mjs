@@ -419,6 +419,67 @@ describe("package indexer rules", () => {
     expect(documents[0].provenanceDocument.version).toBe("0.1.0");
   });
 
+  test("materializes verified lifecycle events into registry and package documents", async () => {
+    const owner = "did:key:z6Mkowner";
+    const canonical = `pkg:${owner}/alpha`;
+    const lifecycleEvents = [
+      lifecycleEventFixture({
+        canonical,
+        owner,
+        action: { kind: "dist-tag.set", tag: "latest", version: "0.1.0" }
+      }),
+      lifecycleEventFixture({
+        canonical,
+        owner,
+        action: { kind: "deprecate", version: "0.1.0", reason: "Use alpha@0.2.0" }
+      }),
+      lifecycleEventFixture({
+        canonical,
+        owner,
+        action: { kind: "yank", version: "0.2.0", reason: "Broken package release" }
+      })
+    ];
+    const result = await buildRegistryFixture({
+      latestVersion: "0.2.0",
+      lifecycleEvents,
+      manifestOwner: owner,
+      releaseVersions: ["0.1.0", "0.2.0"],
+      repoOwner: owner,
+      verifySignedLifecycleEvent: (event) => event
+    });
+    const documents = buildPublicPackageDocuments(result);
+    const stable = result.packages.find((pkg) => pkg.version === "0.1.0");
+    const broken = result.packages.find((pkg) => pkg.version === "0.2.0");
+
+    expect(stable).toMatchObject({
+      deprecated: {
+        reason: "Use alpha@0.2.0",
+        type: "dev.nipmod.deprecation.v1"
+      },
+      distTags: {
+        latest: "0.1.0"
+      }
+    });
+    expect(broken).toMatchObject({
+      yanked: {
+        reason: "Broken package release",
+        type: "dev.nipmod.yank.v1"
+      }
+    });
+    expect(documents[0].packageDocument.distTags).toEqual({ latest: "0.1.0" });
+    expect(documents[0].packageDocument.lifecycleEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ action: "dist-tag.set", package: canonical, tag: "latest", version: "0.1.0" }),
+        expect.objectContaining({ action: "deprecate", package: canonical, version: "0.1.0" }),
+        expect.objectContaining({ action: "yank", package: canonical, version: "0.2.0" })
+      ])
+    );
+    expect(documents[0].packageDocument.versions["0.1.0"].deprecated.reason).toBe("Use alpha@0.2.0");
+    expect(documents[0].packageDocument.versions["0.2.0"].yanked.reason).toBe("Broken package release");
+    expect(documents[0].dependenciesDocument.version).toBe("0.1.0");
+    expect(documents[0].provenanceDocument.version).toBe("0.1.0");
+  });
+
   test("skips malformed package release keys before reading bad payloads", async () => {
     const owner = "did:key:z6Mkowner";
     const result = await buildRegistryFixture({
@@ -836,6 +897,7 @@ async function buildRegistryFixture({
   extraMalformedReleases = [],
   indexManifestDigest = bundleManifestDigest,
   latestVersion = "0.1.0",
+  lifecycleEvents = [],
   manifestName = "alpha",
   manifestDependencies = {},
   manifestOwner,
@@ -848,7 +910,8 @@ async function buildRegistryFixture({
   sourceTagCommit = sourceHeadCommit,
   transparency,
   witnessIdentity,
-  witnessStatements
+  witnessStatements,
+  verifySignedLifecycleEvent
 }) {
   const canonical = `pkg:${manifestOwner}/${manifestName}`;
   const releaseFixtures = new Map(
@@ -898,6 +961,11 @@ async function buildRegistryFixture({
       return jsonResponse({
         formatVersion: 1,
         latest: latestVersion,
+        lifecycle: {
+          events: lifecycleEvents.map((event, index) => ({
+            path: event.path ?? `lifecycle/events/event-${index}.json`
+          }))
+        },
         package: canonical,
         releases: {
 	          ...Object.fromEntries(
@@ -929,6 +997,13 @@ async function buildRegistryFixture({
             ])
           )
         }
+      });
+    }
+    const lifecycleEvent = lifecycleEvents.find((event, index) => path.endsWith(`/blob/${event.path ?? `lifecycle/events/event-${index}.json`}`));
+    if (lifecycleEvent) {
+      return jsonResponse({
+        payload: lifecycleEvent.payload,
+        signature: lifecycleEvent.signature
       });
     }
     const releaseMatch = /\/blob\/releases\/([^/]+)\/(release\.json|bundle\.nipmod)$/.exec(path);
@@ -978,6 +1053,7 @@ async function buildRegistryFixture({
     verifySignedReleaseEvent: releaseEventVerifies ? () => ({ ok: true }) : () => {
       throw new Error("not signed");
     },
+    ...(verifySignedLifecycleEvent ? { verifySignedLifecycleEvent } : {}),
     logIdentity: {
       did: "did:key:z6Mklog",
       privateKeyPem: "",
@@ -991,6 +1067,30 @@ async function buildRegistryFixture({
     witnessIdentity,
     witnessStatements
   });
+}
+
+function lifecycleEventFixture({ action, canonical, owner, path } = {}) {
+  const name = canonical?.split("/").at(-1) ?? "alpha";
+  return {
+    path,
+    payload: {
+      action,
+      formatVersion: 1,
+      package: canonical,
+      publishedAt: "2026-05-17T00:00:00.000Z",
+      publisher: owner,
+      source: {
+        type: "gitlawb",
+        repo: `gitlawb://${owner}/${name}`
+      },
+      type: "dev.nipmod.lifecycle.v1"
+    },
+    signature: {
+      algorithm: "Ed25519",
+      keyId: owner,
+      signatureBase64: "signed"
+    }
+  };
 }
 
 function compatibilityReceiptFixture(overrides = {}) {

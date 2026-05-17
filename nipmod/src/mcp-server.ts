@@ -78,6 +78,7 @@ const JsonRpcRequestSchema = z.strictObject({
 const SearchArgumentsSchema = z.strictObject({
   allowCustomRoots: z.boolean().optional(),
   includeQuarantined: z.boolean().optional(),
+  includeYanked: z.boolean().optional(),
   limit: z.number().int().min(1).max(100).optional(),
   query: z.string(),
   registryUrl: z.string().optional()
@@ -86,6 +87,7 @@ const SearchArgumentsSchema = z.strictObject({
 const ViewArgumentsSchema = z.strictObject({
   allowCustomRoots: z.boolean().optional(),
   includeQuarantined: z.boolean().optional(),
+  includeYanked: z.boolean().optional(),
   registryUrl: z.string().optional(),
   specifier: z.string().min(1)
 });
@@ -252,7 +254,8 @@ async function searchTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonVa
     query: args.query,
     fetchImpl,
     registryUrl: args.registryUrl ?? DEFAULT_REGISTRY_URL,
-    ...(args.includeQuarantined === undefined ? {} : { includeQuarantined: args.includeQuarantined })
+    ...(args.includeQuarantined === undefined ? {} : { includeQuarantined: args.includeQuarantined }),
+    ...(args.includeYanked === undefined ? {} : { includeYanked: args.includeYanked })
   };
   return toJsonValue(
     await searchRegistry(options)
@@ -267,7 +270,8 @@ async function viewTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValu
     fetchImpl,
     query: target.query,
     registryUrl: args.registryUrl ?? DEFAULT_REGISTRY_URL,
-    ...(args.includeQuarantined === undefined ? {} : { includeQuarantined: args.includeQuarantined })
+    ...(args.includeQuarantined === undefined ? {} : { includeQuarantined: args.includeQuarantined }),
+    ...(args.includeYanked === undefined ? {} : { includeYanked: args.includeYanked })
   });
   return toJsonValue(selectMcpViewPackage(args.specifier, target, result.packages));
 }
@@ -447,27 +451,27 @@ function registryTrustOptions(args: {
   };
 }
 
-function parseMcpViewTarget(rawTarget: string): { query: string; version?: string } {
-  const match = /^(.*)@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/.exec(rawTarget);
+function parseMcpViewTarget(rawTarget: string): { query: string; tag?: string; version?: string } {
+  const match = /^(.*)@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)|[a-z][a-z0-9._-]{0,31})$/.exec(rawTarget);
   if (!match || !match[1]) {
     return { query: rawTarget };
   }
   const query = match[1];
-  const version = match[2];
-  if (!query || !version) {
+  const spec = match[2];
+  if (!query || !spec) {
     throw new McpError(-32602, "invalid package view specifier");
   }
-  return { query, version };
+  return /^\d+\.\d+\.\d+$/.test(spec) ? { query, version: spec } : { query, tag: spec };
 }
 
 function selectMcpViewPackage(
   rawTarget: string,
-  target: { query: string; version?: string },
+  target: { query: string; tag?: string; version?: string },
   packages: readonly RegistrySearchPackage[]
 ): RegistrySearchPackage {
   const matches = packages.filter((pkg) => {
     const targetMatches = pkg.name === target.query || pkg.canonical === target.query;
-    return targetMatches && (!target.version || pkg.version === target.version);
+    return targetMatches && (!target.version || pkg.version === target.version) && (!target.tag || pkg.distTags?.[target.tag] === pkg.version);
   });
   if (matches.length === 0) {
     throw new McpError(-32602, `no exact package found for ${rawTarget}`);
@@ -476,7 +480,8 @@ function selectMcpViewPackage(
   if (canonicals.size > 1) {
     throw new McpError(-32602, `ambiguous package name ${target.query}; use the canonical package id`);
   }
-  return [...matches].sort((left, right) => compareMcpSemverDesc(left.version, right.version))[0]!;
+  const latestTagged = !target.version && !target.tag ? matches.find((pkg) => pkg.distTags?.latest === pkg.version) : undefined;
+  return latestTagged ?? [...matches].sort((left, right) => compareMcpSemverDesc(left.version, right.version))[0]!;
 }
 
 function compareMcpSemverDesc(left: string, right: string): number {
@@ -629,6 +634,7 @@ const MCP_TOOLS: ToolDefinition[] = [
       properties: {
         allowCustomRoots: { type: "boolean" },
         includeQuarantined: { type: "boolean" },
+        includeYanked: { type: "boolean" },
         limit: { maximum: 100, minimum: 1, type: "integer" },
         query: { type: "string" },
         registryUrl: { type: "string" }
@@ -650,6 +656,7 @@ const MCP_TOOLS: ToolDefinition[] = [
       properties: {
         allowCustomRoots: { type: "boolean" },
         includeQuarantined: { type: "boolean" },
+        includeYanked: { type: "boolean" },
         registryUrl: { type: "string" },
         specifier: { type: "string" }
       },

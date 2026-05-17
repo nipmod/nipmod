@@ -1,1 +1,1 @@
-export const NIPMOD_VERSION = "0.1.34";
+export const NIPMOD_VERSION = "0.1.35";

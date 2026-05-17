@@ -12,12 +12,15 @@ import {
   doctorGitlawb,
   fetchGitlawbBundle,
   parseRemoteSpecifier,
+  publishGitlawbLifecycleEvent,
   publishGitlawbPackage,
   type DoctorGitlawbResult,
+  type PublishGitlawbLifecycleEventResult,
   type PublishGitlawbPackageOptions
 } from "./gitlawb.js";
 import { generateIdentity, type Identity } from "./identity.js";
 import { digestFromIntegrity } from "./integrity.js";
+import { signLifecycleEvent } from "./lifecycle.js";
 import {
   checkLockfilePolicy,
   checkInstalledPolicy,
@@ -43,7 +46,7 @@ import {
   uninstallPackage,
   type InstallLockfileResult
 } from "./install.js";
-import { validateManifest, type Manifest } from "./protocol.js";
+import { type LifecycleAction, type SignedLifecycleEvent, validateManifest, type Manifest } from "./protocol.js";
 import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
 import { generateSbom, type AgentSbom } from "./sbom.js";
 import {
@@ -77,6 +80,9 @@ const CLI_COMMANDS = [
   "pack",
   "package",
   "publish",
+  "dist-tag",
+  "deprecate",
+  "yank",
   "manifest",
   "verify",
   "install",
@@ -156,6 +162,12 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return packageCommand(args);
     case "publish":
       return publishCommand(args);
+    case "dist-tag":
+      return distTagCommand(args);
+    case "deprecate":
+      return deprecateCommand(args);
+    case "yank":
+      return yankCommand(args);
     case "manifest":
       return manifestCommand(args);
     case "verify":
@@ -442,6 +454,149 @@ async function publishCommand(args: string[]): Promise<CliResult> {
       sourceCommit: result.sourceCommit,
       registryCandidate: result.registryCandidate
     }
+  };
+}
+
+async function distTagCommand(args: string[]): Promise<CliResult> {
+  const subcommand = args[0];
+  const rest = args.slice(1);
+  switch (subcommand) {
+    case "add": {
+      const [specifier, tag] = positionalArgs(rest);
+      if (!specifier || !tag) {
+        throw new Error("usage: nipmod dist-tag add pkg:<publisher>/<name>@<version> <tag>");
+      }
+      const spec = parseRemoteSpecifier(specifier);
+      return lifecycleCommand(rest, {
+        action: {
+          kind: "dist-tag.set",
+          tag,
+          version: spec.version
+        },
+        package: spec.canonical
+      });
+    }
+    case "rm": {
+      const [canonical, tag] = positionalArgs(rest);
+      if (!canonical || !tag) {
+        throw new Error("usage: nipmod dist-tag rm pkg:<publisher>/<name> <tag>");
+      }
+      return lifecycleCommand(rest, {
+        action: {
+          kind: "dist-tag.remove",
+          tag
+        },
+        package: canonical
+      });
+    }
+    default:
+      throw new Error("usage: nipmod dist-tag add pkg:<publisher>/<name>@<version> <tag>");
+  }
+}
+
+async function deprecateCommand(args: string[]): Promise<CliResult> {
+  const [specifier, reason] = positionalArgs(args);
+  if (!specifier || !reason) {
+    throw new Error("usage: nipmod deprecate pkg:<publisher>/<name>@<version> <reason>");
+  }
+  const spec = parseRemoteSpecifier(specifier);
+  return lifecycleCommand(args, {
+    action: {
+      kind: "deprecate",
+      version: spec.version,
+      reason
+    },
+    package: spec.canonical
+  });
+}
+
+async function yankCommand(args: string[]): Promise<CliResult> {
+  const [specifier, reason] = positionalArgs(args);
+  if (!specifier || !reason) {
+    throw new Error("usage: nipmod yank pkg:<publisher>/<name>@<version> <reason>");
+  }
+  const spec = parseRemoteSpecifier(specifier);
+  return lifecycleCommand(args, {
+    action: {
+      kind: "yank",
+      version: spec.version,
+      reason
+    },
+    package: spec.canonical
+  });
+}
+
+async function lifecycleCommand(
+  args: string[],
+  input: {
+    action: LifecycleAction;
+    package: string;
+  }
+): Promise<CliResult> {
+  const projectDir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const helperPath = optionalFlagValue(args, "--helper");
+  const identityPath = optionalFlagValue(args, "--identity");
+  const outPath = optionalFlagValue(args, "--out");
+  const result = hasFlag(args, "--dry-run")
+    ? await createLifecycleDryRunResult({
+        ...input,
+        projectDir,
+        ...(identityPath ? { identityPath } : {})
+      })
+    : await publishGitlawbLifecycleEvent({
+        ...input,
+        projectDir,
+        nodeUrl: configuredNodeUrl(args),
+        ...(helperPath ? { helperPath } : {}),
+        ...(identityPath ? { identityPath } : {})
+      });
+  if (outPath) {
+    await writeFile(outPath, `${JSON.stringify(result.event, null, 2)}\n`, { mode: 0o600 });
+  }
+
+  return {
+    ok: true,
+    data: {
+      message: formatLifecycleResult(result),
+      ...result
+    }
+  };
+}
+
+async function createLifecycleDryRunResult(options: {
+  action: LifecycleAction;
+  identityPath?: string;
+  package: string;
+  projectDir: string;
+}): Promise<PublishGitlawbLifecycleEventResult> {
+  const identity = await readLocalIdentity(options.projectDir, options.identityPath);
+  const spec = parseLifecyclePackage(options.package);
+  if (spec.ownerDid !== identity.did) {
+    throw new Error("local identity must match package canonical owner");
+  }
+  const event = signLifecycleEvent(
+    {
+      type: "dev.nipmod.lifecycle.v1",
+      formatVersion: 1,
+      package: options.package,
+      publisher: identity.did,
+      source: {
+        type: "gitlawb",
+        repo: `gitlawb://${identity.did}/${spec.repoName}`
+      },
+      publishedAt: new Date().toISOString(),
+      action: options.action
+    },
+    identity
+  );
+
+  return {
+    action: options.action,
+    event,
+    eventPath: "",
+    package: options.package,
+    repoName: spec.repoName,
+    sourceRepo: `gitlawb://${identity.did}/${spec.repoName}`
   };
 }
 
@@ -1056,6 +1211,12 @@ function formatTrustReport(report: TrustReport): string {
   if (report.compatibilityReceipts && report.compatibilityReceipts.length > 0) {
     lines.push(`compatibility: ${report.compatibilityReceipts.map((receipt) => receipt.label).join(", ")}`);
   }
+  if (report.deprecation?.active) {
+    lines.push(`deprecated: ${report.deprecation.reason}`);
+  }
+  if (report.yank?.active) {
+    lines.push(`yanked: ${report.yank.reason}`);
+  }
   for (const check of report.evidence) {
     lines.push(`${check.status.toUpperCase()} ${check.label}: ${check.detail}`);
   }
@@ -1086,12 +1247,14 @@ async function searchCommand(args: string[]): Promise<CliResult> {
     registryUrls.length > 1
       ? await searchRegistries({
           includeQuarantined: hasFlag(args, "--include-quarantined"),
+          includeYanked: hasFlag(args, "--include-yanked"),
           limit: searchLimit(args),
           query,
           registryUrls
         })
       : await searchRegistry({
           includeQuarantined: hasFlag(args, "--include-quarantined"),
+          includeYanked: hasFlag(args, "--include-yanked"),
           limit: searchLimit(args),
           query,
           registryUrl: registryUrls[0] ?? DEFAULT_REGISTRY_URL
@@ -1114,11 +1277,13 @@ async function viewCommand(args: string[]): Promise<CliResult> {
     registryUrls.length > 1
       ? await viewRegistriesPackages({
           includeQuarantined: hasFlag(args, "--include-quarantined"),
+          includeYanked: hasFlag(args, "--include-yanked"),
           query: target.query,
           registryUrls
         })
       : await viewRegistryPackages({
           includeQuarantined: hasFlag(args, "--include-quarantined"),
+          includeYanked: hasFlag(args, "--include-yanked"),
           query: target.query,
           registryUrl: registryUrls[0] ?? DEFAULT_REGISTRY_URL
         });
@@ -1249,6 +1414,9 @@ function formatSearch(result: RegistrySearchResult, options: { details: boolean 
     if (pkg.description) {
       lines.push(`    ${clipCell(pkg.description, 96)}`);
     }
+    if (pkg.deprecated && pkg.deprecationReason) {
+      lines.push(`    deprecated: ${pkg.deprecationReason}`);
+    }
     if (pkg.install) {
       lines.push(`    install: ${pkg.install}`);
       if (pkg.nameAmbiguous && pkg.canonicalInstall) {
@@ -1266,22 +1434,25 @@ function formatSearch(result: RegistrySearchResult, options: { details: boolean 
   return lines.join("\n");
 }
 
-function parseViewTarget(rawTarget: string): { query: string; version?: string } {
-  const match = /^(.*)@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/.exec(rawTarget);
+function parseViewTarget(rawTarget: string): { query: string; tag?: string; version?: string } {
+  const match = /^(.*)@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)|[a-z][a-z0-9._-]{0,31})$/.exec(rawTarget);
   if (!match || !match[1]) {
     return { query: rawTarget };
   }
-  return { query: requireMatch(match[1], "view target"), version: requireMatch(match[2], "view version") };
+  const spec = requireMatch(match[2], "view version");
+  return /^\d+\.\d+\.\d+$/.test(spec)
+    ? { query: requireMatch(match[1], "view target"), version: spec }
+    : { query: requireMatch(match[1], "view target"), tag: spec };
 }
 
 function selectViewPackage(
   rawTarget: string,
-  target: { query: string; version?: string },
+  target: { query: string; tag?: string; version?: string },
   packages: readonly RegistrySearchPackage[]
 ): RegistrySearchPackage {
   const matches = packages.filter((pkg) => {
     const targetMatches = pkg.name === target.query || pkg.canonical === target.query;
-    return targetMatches && (!target.version || pkg.version === target.version);
+    return targetMatches && (!target.version || pkg.version === target.version) && (!target.tag || pkg.distTags?.[target.tag] === pkg.version);
   });
   if (matches.length === 0) {
     throw new Error(`no exact package found for ${rawTarget}; run nipmod search ${quotedSearchQuery(target.query)}`);
@@ -1291,7 +1462,8 @@ function selectViewPackage(
   if (canonicals.size > 1) {
     throw new Error(`ambiguous package name ${target.query}; run nipmod view pkg:<publisher>/<name>@<version>`);
   }
-  return [...matches].sort(comparePackageVersionsDesc)[0]!;
+  const latestTagged = !target.version && !target.tag ? matches.find((pkg) => pkg.distTags?.latest === pkg.version) : undefined;
+  return latestTagged ?? [...matches].sort(comparePackageVersionsDesc)[0]!;
 }
 
 function comparePackageVersionsDesc(left: RegistrySearchPackage, right: RegistrySearchPackage): number {
@@ -1319,6 +1491,9 @@ function formatView(pkg: RegistrySearchPackage): string {
   lines.push(`source: ${pkg.sourceRegistry}`);
   if (pkg.description) {
     lines.push(`description: ${pkg.description}`);
+  }
+  if (pkg.deprecated && pkg.deprecationReason) {
+    lines.push(`deprecated: ${pkg.deprecationReason}`);
   }
   if (pkg.compatibilityReceipts.length > 0) {
     lines.push(`compatibility: ${pkg.compatibilityReceipts.join(", ")}`);
@@ -1762,6 +1937,35 @@ function formatPublishDryRunPlan(plan: Awaited<ReturnType<typeof createPublishDr
   return lines.join("\n");
 }
 
+function formatLifecycleResult(result: Pick<PublishGitlawbLifecycleEventResult, "action" | "eventPath" | "package">): string {
+  const suffix = result.eventPath ? `\nevent: ${result.eventPath}` : "\ndry-run: no remote write";
+  switch (result.action.kind) {
+    case "dist-tag.set":
+      return `dist-tag ${result.action.tag} -> ${result.package}@${result.action.version}${suffix}`;
+    case "dist-tag.remove":
+      return `removed dist-tag ${result.action.tag} from ${result.package}${suffix}`;
+    case "deprecate":
+      return `deprecated ${result.package}@${result.action.version}: ${result.action.reason}${suffix}`;
+    case "yank":
+      return `yanked ${result.package}@${result.action.version}: ${result.action.reason}${suffix}`;
+  }
+}
+
+function parseLifecyclePackage(canonical: string): { ownerDid: string; repoName: string } {
+  const match = /^pkg:(did:key:z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*)$/.exec(canonical);
+  if (!match) {
+    throw new Error("remote package id must be pkg:did:key:<owner>/<name>");
+  }
+  const repoName = requireMatch(match[2], "repo");
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(repoName)) {
+    throw new Error("Gitlawb repo names currently allow only lowercase letters, numbers, hyphens, and underscores");
+  }
+  return {
+    ownerDid: requireMatch(match[1], "owner"),
+    repoName
+  };
+}
+
 function firstPositional(args: readonly string[]): string {
   const value = optionalFirstPositional(args);
   if (value) {
@@ -1769,6 +1973,24 @@ function firstPositional(args: readonly string[]): string {
   }
 
   throw new Error("missing positional argument");
+}
+
+function positionalArgs(args: readonly string[]): string[] {
+  const values: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const value = args[index];
+    if (!value) {
+      continue;
+    }
+    if (value.startsWith("--")) {
+      if (flagTakesValue(value)) {
+        index += 1;
+      }
+      continue;
+    }
+    values.push(value);
+  }
+  return values;
 }
 
 function optionalFirstPositional(args: readonly string[]): string | null {

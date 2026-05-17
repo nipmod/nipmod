@@ -56,6 +56,8 @@ Agents can discover the templates from `https://nipmod.com/.well-known/nipmod.js
 
 Dist tags are signed lifecycle events. `latest` can be derived only when no signed tag event exists. Published tag events must be verified before a resolver trusts them.
 
+Lifecycle events use `dev.nipmod.lifecycle.v1` signed envelopes. Supported actions are `dist-tag.set`, `dist-tag.remove`, `deprecate` and `yank`. The registry materializes verified events into `distTags`, `deprecated` and `yanked` fields. Search hides yanked releases unless explicitly included; install, inspect, audit and CI fail closed on yanked releases.
+
 ## Decentralized differences from npm
 
 - Global names are not authoritative. Canonical identity is `pkg:<did>/<slug>`.
@@ -68,4 +70,4 @@ Dist tags are signed lifecycle events. `latest` can be derived only when no sign
 1. Add signed registry root metadata for package documents.
 2. Teach resolver and inspect to consume package documents for registry driven graph install.
 3. Add signed README extraction from bundles.
-4. Add lifecycle schemas for dist tag, deprecation, yank, owner and trusted publishing events.
+4. Add owner, maintainer-key and trusted-publishing lifecycle events.

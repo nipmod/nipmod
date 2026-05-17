@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { validateManifest, validateReleaseEvent } from "../src/protocol.js";
+import { validateLifecycleEvent, validateManifest, validateReleaseEvent } from "../src/protocol.js";
 
 const fixture = (...parts: string[]) => join(import.meta.dirname, "fixtures", ...parts);
 
@@ -241,5 +241,68 @@ describe("release event validation", () => {
         }
       })
     ).toThrow(/source/i);
+  });
+});
+
+describe("lifecycle event validation", () => {
+  test("accepts signed-owner lifecycle dist-tags and rejects version-like tags", () => {
+    expect(
+      validateLifecycleEvent({
+        type: "dev.nipmod.lifecycle.v1",
+        formatVersion: 1,
+        package: "pkg:did:key:z6Mkprobevalid/valid-skill",
+        publisher: "did:key:z6Mkprobevalid",
+        source: {
+          type: "gitlawb",
+          repo: "gitlawb://did:key:z6Mkprobevalid/valid-skill"
+        },
+        publishedAt: "2026-05-17T00:00:00.000Z",
+        action: {
+          kind: "dist-tag.set",
+          tag: "latest",
+          version: "0.2.0"
+        }
+      }).action
+    ).toEqual({ kind: "dist-tag.set", tag: "latest", version: "0.2.0" });
+
+    expect(() =>
+      validateLifecycleEvent({
+        type: "dev.nipmod.lifecycle.v1",
+        formatVersion: 1,
+        package: "pkg:did:key:z6Mkprobevalid/valid-skill",
+        publisher: "did:key:z6Mkprobevalid",
+        source: {
+          type: "gitlawb",
+          repo: "gitlawb://did:key:z6Mkprobevalid/valid-skill"
+        },
+        publishedAt: "2026-05-17T00:00:00.000Z",
+        action: {
+          kind: "dist-tag.set",
+          tag: "1.0.0",
+          version: "0.2.0"
+        }
+      })
+    ).toThrow(/dist tag/i);
+  });
+
+  test("requires lifecycle source repo to match the package owner and slug", () => {
+    expect(() =>
+      validateLifecycleEvent({
+        type: "dev.nipmod.lifecycle.v1",
+        formatVersion: 1,
+        package: "pkg:did:key:z6Mkprobevalid/valid-skill",
+        publisher: "did:key:z6Mkprobevalid",
+        source: {
+          type: "gitlawb",
+          repo: "gitlawb://did:key:z6Mkotherowner/other-skill"
+        },
+        publishedAt: "2026-05-17T00:00:00.000Z",
+        action: {
+          kind: "yank",
+          version: "0.1.0",
+          reason: "Unsafe package release"
+        }
+      })
+    ).toThrow(/source repo/i);
   });
 });

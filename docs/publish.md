@@ -32,6 +32,17 @@ nipmod publish .
 
 The public registry indexes this data. It does not own the package and cannot grant itself publish rights.
 
+## Lifecycle writes
+
+Package owners can publish signed lifecycle events without deleting Gitlawb content:
+
+- `nipmod dist-tag add pkg:<publisher>/<name>@<version> latest`
+- `nipmod dist-tag rm pkg:<publisher>/<name> next`
+- `nipmod deprecate pkg:<publisher>/<name>@<version> "Use a newer release"`
+- `nipmod yank pkg:<publisher>/<name>@<version> "Broken release"`
+
+Use `--dry-run --json` to inspect the signed event before a remote write. Published events are appended under `lifecycle/events/` and referenced from `index.json`.
+
 ## Name limits
 
 Gitlawb repo names currently allow lowercase letters, numbers, hyphens and underscores. A package can look npm style while drafting, but the canonical slug that gets published must map to a Gitlawb repo name.

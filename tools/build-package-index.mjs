@@ -40,6 +40,7 @@ export async function buildRegistryIndex(options = {}) {
   const fetchFn = options.fetchFn ?? fetch;
   const verifyBundle = options.verifyBundle ?? (await loadVerifyBundle());
   const verifySignedReleaseEvent = options.verifySignedReleaseEvent ?? (await loadVerifySignedReleaseEvent());
+  const verifySignedLifecycleEvent = options.verifySignedLifecycleEvent ?? (await loadVerifySignedLifecycleEvent());
   const previousIndex = options.previousIndex ?? emptyRegistry(baseUrl.href.replace(/\/$/, ""));
   const previousDigests = packageDigestMap(previousIndex);
   const packages = [];
@@ -74,6 +75,16 @@ export async function buildRegistryIndex(options = {}) {
           maxBytes: JSON_LIMIT
         })
       );
+      const gitlawbSourceRepo = `gitlawb://${repo.owner_did}/${repo.name}`;
+      const lifecycleState = await buildLifecycleState({
+        baseUrl,
+        fetchFn,
+        ownerSegment,
+        packageIndex,
+        repo,
+        sourceRepo: gitlawbSourceRepo,
+        verifySignedLifecycleEvent
+      });
       for (const skippedRelease of packageIndex.skippedReleases) {
         skipped.push({
           reason: `release ${skippedRelease.version}: ${skippedRelease.reason}`,
@@ -125,7 +136,6 @@ export async function buildRegistryIndex(options = {}) {
             throw new Error("package index manifest digest does not match bundle manifest");
           }
           const permissions = summarizePermissions(manifest.permissions);
-          const gitlawbSourceRepo = `gitlawb://${repo.owner_did}/${repo.name}`;
           const releaseEventSigned = hasVerifiedReleaseEvent(
             releaseEvent,
             {
@@ -169,9 +179,10 @@ export async function buildRegistryIndex(options = {}) {
             description: sanitizeText(manifest.description ?? repo.description ?? "", STRING_LIMITS.description),
             ...dependencyMetadata(manifest),
             digest: artifactDigest,
-            distTags: {
-              latest: packageIndex.latest
-            },
+            distTags: lifecycleState.distTags,
+            ...(lifecycleState.deprecations[manifest.version] ? { deprecated: lifecycleState.deprecations[manifest.version] } : {}),
+            ...(lifecycleState.yanks[manifest.version] ? { yanked: lifecycleState.yanks[manifest.version] } : {}),
+            ...(lifecycleState.events.length > 0 ? { lifecycleEvents: lifecycleState.events } : {}),
             name: sanitizeText(manifest.name, STRING_LIMITS.name),
             owner: repo.owner_did,
             permissionDetails: permissions.details,
@@ -609,6 +620,7 @@ function parsePackageIndex(value) {
   if (!value.releases || typeof value.releases !== "object" || Array.isArray(value.releases)) {
     throw new Error("package index releases are invalid");
   }
+  const lifecycleEvents = parseLifecycleEventRefs(value.lifecycle);
   const releases = {};
   const skippedReleases = [];
   for (const [version, releaseValue] of Object.entries(value.releases)) {
@@ -642,10 +654,35 @@ function parsePackageIndex(value) {
   return {
     formatVersion: 1,
     latest,
+    lifecycleEvents,
     package: packageId,
     releases,
     skippedReleases
   };
+}
+
+function parseLifecycleEventRefs(value) {
+  if (value === undefined) {
+    return [];
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("package index lifecycle is invalid");
+  }
+  const events = value.events;
+  if (events === undefined) {
+    return [];
+  }
+  if (!Array.isArray(events)) {
+    throw new Error("package index lifecycle events are invalid");
+  }
+  return events.map((event, index) => {
+    if (!event || typeof event !== "object" || Array.isArray(event)) {
+      throw new Error(`package index lifecycle event ${index} is invalid`);
+    }
+    return {
+      path: safeBlobPath(requiredString(event.path, "lifecycle.events.path", 240))
+    };
+  });
 }
 
 function summarizePermissions(permissions) {
@@ -700,6 +737,117 @@ export function hasVerifiedReleaseEvent(releaseEvent, expected, verifySignedRele
   } catch {
     return false;
   }
+}
+
+async function buildLifecycleState({
+  baseUrl,
+  fetchFn,
+  ownerSegment,
+  packageIndex,
+  repo,
+  sourceRepo,
+  verifySignedLifecycleEvent
+}) {
+  const distTags = { latest: packageIndex.latest };
+  const deprecations = {};
+  const yanks = {};
+  const events = [];
+
+  for (const ref of packageIndex.lifecycleEvents ?? []) {
+    const rawEvent = await fetchJson(buildBlobUrl(baseUrl, ownerSegment, repo.name, ref.path), {
+      fetchFn,
+      maxBytes: JSON_LIMIT
+    });
+    const signed = verifySignedLifecycleEvent(rawEvent, {
+      package: packageIndex.package,
+      publisher: repo.owner_did,
+      sourceRepo
+    });
+    const event = signed.payload;
+    assertLifecycleEventTarget(event, packageIndex);
+    const summary = lifecycleEventSummary(event, ref.path, signed.signature.keyId);
+    events.push(summary);
+
+    switch (event.action.kind) {
+      case "dist-tag.set":
+        distTags[event.action.tag] = event.action.version;
+        break;
+      case "dist-tag.remove":
+        delete distTags[event.action.tag];
+        break;
+      case "deprecate":
+        deprecations[event.action.version] = {
+          active: true,
+          eventPath: ref.path,
+          package: event.package,
+          publishedAt: event.publishedAt,
+          reason: event.action.reason,
+          signer: signed.signature.keyId,
+          type: "dev.nipmod.deprecation.v1",
+          version: event.action.version
+        };
+        break;
+      case "yank":
+        yanks[event.action.version] = {
+          active: true,
+          eventPath: ref.path,
+          package: event.package,
+          publishedAt: event.publishedAt,
+          reason: event.action.reason,
+          signer: signed.signature.keyId,
+          type: "dev.nipmod.yank.v1",
+          version: event.action.version
+        };
+        break;
+    }
+  }
+
+  if (!distTags.latest) {
+    distTags.latest = packageIndex.latest;
+  }
+  assertLifecycleDistTags(distTags, packageIndex);
+  return { deprecations, distTags, events, yanks };
+}
+
+function assertLifecycleEventTarget(event, packageIndex) {
+  if (event.package !== packageIndex.package) {
+    throw new Error("lifecycle event package mismatch");
+  }
+  const version = event.action?.version;
+  if (version && !packageIndex.releases[version]) {
+    throw new Error(`lifecycle event target version is not in package index: ${version}`);
+  }
+}
+
+function assertLifecycleDistTags(distTags, packageIndex) {
+  for (const [tag, version] of Object.entries(distTags)) {
+    if (!/^[a-z][a-z0-9._-]{0,31}$/.test(tag) || /^(?:v?\d|\d)/.test(tag)) {
+      throw new Error(`lifecycle dist-tag is invalid: ${tag}`);
+    }
+    if (!packageIndex.releases[version]) {
+      throw new Error(`lifecycle dist-tag ${tag} points at missing version ${version}`);
+    }
+  }
+}
+
+function lifecycleEventSummary(event, path, signer) {
+  const base = {
+    action: event.action.kind,
+    package: event.package,
+    path,
+    publishedAt: event.publishedAt,
+    signer
+  };
+  if ("tag" in event.action) {
+    base.tag = event.action.tag;
+  }
+  if ("version" in event.action) {
+    base.version = event.action.version;
+  }
+  if ("reason" in event.action) {
+    base.reason = event.action.reason;
+  }
+  return base;
 }
 
 export async function verifySourceTag(baseUrl, owner, repo, defaultBranch, tag, fetchFn = fetch) {
@@ -1067,6 +1215,14 @@ async function loadVerifySignedReleaseEvent() {
   return releaseModule.verifySignedReleaseEvent;
 }
 
+async function loadVerifySignedLifecycleEvent() {
+  const lifecyclePath = join(ROOT, "nipmod", "dist", "lifecycle.js");
+  ensureNipmodBuilt();
+  await access(lifecyclePath);
+  const lifecycleModule = await import(pathToFileURL(lifecyclePath).href);
+  return lifecycleModule.verifySignedLifecycleEvent;
+}
+
 async function loadTransparency() {
   const transparencyPath = join(ROOT, "nipmod", "dist", "transparency.js");
   ensureNipmodBuilt();
@@ -1318,6 +1474,7 @@ export function buildPublicPackageDocuments(index) {
     .map(([canonical, packages]) => {
       const encoded = encodeCanonicalForRegistryPath(canonical);
       const sortedPackages = [...packages].sort(comparePackageVersionAsc);
+      const distTags = sourceDistTags(sortedPackages);
       const versions = {};
       const versionDocuments = [];
       for (const pkg of sortedPackages) {
@@ -1326,21 +1483,21 @@ export function buildPublicPackageDocuments(index) {
         if (existing && existing.digest !== pkg.digest) {
           throw new Error(`conflicting package document version for ${pkg.canonical}@${pkg.version}`);
         }
-        const versionDocument = buildPackageVersionDocument(pkg, encoded);
+        const versionDocument = buildPackageVersionDocument(pkg, encoded, distTags);
         versions[pkg.version] = versionDocument;
         versionDocuments.push(versionDocument);
       }
-      const latest = sourceLatestVersion(sortedPackages) ?? latestVersion(sortedPackages.map((pkg) => pkg.version));
+      const latest = distTags.latest;
       const latestPackage = sortedPackages.find((pkg) => pkg.version === latest);
       if (!latestPackage) {
         throw new Error(`package document has no latest version: ${canonical}`);
       }
-      const distTags = { latest };
       const packageDocument = {
         canonical,
         distTags,
         formatVersion: 1,
         generatedAt: index.generatedAt,
+        lifecycleEvents: latestPackage.lifecycleEvents ?? [],
         name: latestPackage.name,
         source: index.source,
         type: "dev.nipmod.package-document.v1",
@@ -1379,7 +1536,7 @@ export async function writePackageDocuments(index, options = {}) {
   }
 }
 
-function buildPackageVersionDocument(pkg, encoded) {
+function buildPackageVersionDocument(pkg, encoded, distTags = {}) {
   return {
     artifactPath: pkg.artifactPath,
     artifactSha256: pkg.artifactSha256,
@@ -1398,6 +1555,7 @@ function buildPackageVersionDocument(pkg, encoded) {
     proof: pkg.proof,
     publisher: pkg.publisher,
     quarantine: pkg.quarantine,
+    deprecated: pkg.deprecated,
     releasePath: pkg.releasePath,
     repo: pkg.repo,
     resolved: pkg.resolved,
@@ -1405,6 +1563,7 @@ function buildPackageVersionDocument(pkg, encoded) {
     sourceRepo: pkg.sourceRepo,
     sourceTag: pkg.sourceTag ?? null,
     stars: pkg.stars,
+    tags: tagsForVersion(distTags, pkg.version),
     trust: pkg.trust,
     type: pkg.type ?? "unknown",
     updatedAt: pkg.updatedAt,
@@ -1414,7 +1573,8 @@ function buildPackageVersionDocument(pkg, encoded) {
       provenance: `/registry/packages/${encoded}/provenance.json`,
       version: `/registry/packages/${encoded}/${pkg.version}.json`
     },
-    version: pkg.version
+    version: pkg.version,
+    yanked: pkg.yanked
   };
 }
 
@@ -1443,6 +1603,7 @@ function buildProvenanceDocument(pkg) {
     publisher: pkg.publisher,
     releasePath: pkg.releasePath,
     resolved: pkg.resolved,
+    lifecycleEvents: pkg.lifecycleEvents ?? [],
     sourceCommit: pkg.sourceCommit ?? null,
     sourceRepo: pkg.sourceRepo,
     sourceTag: pkg.sourceTag ?? null,
@@ -1460,25 +1621,37 @@ function latestVersion(versions) {
   return latest;
 }
 
-function sourceLatestVersion(packages) {
-  const latestValues = new Set();
+function sourceDistTags(packages) {
+  const tagValues = new Map();
   for (const pkg of packages) {
-    const latest = pkg?.distTags?.latest;
-    if (typeof latest === "string" && latest.length > 0) {
-      latestValues.add(latest);
+    for (const [tag, version] of Object.entries(pkg?.distTags ?? {})) {
+      if (typeof version !== "string" || version.length === 0) {
+        continue;
+      }
+      const existing = tagValues.get(tag);
+      if (existing !== undefined && existing !== version) {
+        throw new Error(`conflicting ${tag} dist tags for ${pkg.canonical}`);
+      }
+      tagValues.set(tag, version);
     }
   }
-  if (latestValues.size === 0) {
-    return null;
+  const distTags = Object.fromEntries([...tagValues.entries()].sort(([left], [right]) => left.localeCompare(right)));
+  if (!distTags.latest) {
+    distTags.latest = latestVersion(packages.map((pkg) => pkg.version));
   }
-  if (latestValues.size > 1) {
-    throw new Error(`conflicting latest dist tags for ${packages[0]?.canonical ?? "package"}`);
+  for (const [tag, version] of Object.entries(distTags)) {
+    if (!packages.some((pkg) => pkg.version === version)) {
+      throw new Error(`${tag} dist tag ${version} is missing from ${packages[0]?.canonical ?? "package"} versions`);
+    }
   }
-  const latest = [...latestValues][0];
-  if (!packages.some((pkg) => pkg.version === latest)) {
-    throw new Error(`latest dist tag ${latest} is missing from ${packages[0]?.canonical ?? "package"} versions`);
-  }
-  return latest;
+  return distTags;
+}
+
+function tagsForVersion(distTags, version) {
+  return Object.entries(distTags)
+    .filter(([, taggedVersion]) => taggedVersion === version)
+    .map(([tag]) => tag)
+    .sort();
 }
 
 function comparePackageVersionAsc(left, right) {

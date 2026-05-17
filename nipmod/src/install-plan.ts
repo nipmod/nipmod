@@ -136,6 +136,7 @@ export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Pro
   const search = await searchRegistry({
     ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
     includeQuarantined: true,
+    includeYanked: true,
     limit: 10_000,
     query: "",
     registryUrl
@@ -276,6 +277,7 @@ export async function createRegistryGraphInstallPlan(
   const search = await searchRegistry({
     ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
     includeQuarantined: true,
+    includeYanked: true,
     limit: 10_000,
     query: "",
     registryUrl

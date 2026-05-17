@@ -2,6 +2,10 @@ export interface RegistryPackageRecord {
   canonical: string;
   dependencies?: Record<string, string>;
   description?: string;
+  deprecated?: {
+    active?: boolean;
+    reason: string;
+  };
   devDependencies?: Record<string, string>;
   digest: string;
   distTags?: Record<string, string>;
@@ -16,12 +20,20 @@ export interface RegistryPackageRecord {
   };
   type?: string;
   version: string;
+  yanked?: {
+    active?: boolean;
+    reason: string;
+  };
 }
 
 export interface PackageVersionDocument {
   canonical: string;
   dependencies?: Record<string, string>;
   description: string;
+  deprecated?: {
+    active?: boolean;
+    reason: string;
+  };
   devDependencies?: Record<string, string>;
   digest: string;
   optionalDependencies?: Record<string, string>;
@@ -34,6 +46,10 @@ export interface PackageVersionDocument {
   };
   type: string;
   version: string;
+  yanked?: {
+    active?: boolean;
+    reason: string;
+  };
 }
 
 export interface PackageDocument {
@@ -66,12 +82,15 @@ export function buildPackageDocuments(packages: readonly RegistryPackageRecord[]
       canonical: pkg.canonical,
       ...dependencyMetadata(pkg),
       description: pkg.description ?? "",
+      ...(pkg.deprecated ? { deprecated: pkg.deprecated } : {}),
       digest: pkg.digest,
       publisher: pkg.publisher,
       trust: pkg.trust,
       type: pkg.type ?? "unknown",
-      version: pkg.version
+      version: pkg.version,
+      ...(pkg.yanked ? { yanked: pkg.yanked } : {})
     };
+    recordSourceDistTags(pkg, document);
     recordSourceLatest(pkg, sourceLatestByCanonical);
     byCanonical.set(pkg.canonical, document);
   }
@@ -114,6 +133,16 @@ function recordSourceLatest(pkg: RegistryPackageRecord, sourceLatestByCanonical:
     throw new Error(`conflicting latest dist tags for ${pkg.canonical}`);
   }
   sourceLatestByCanonical.set(pkg.canonical, latest);
+}
+
+function recordSourceDistTags(pkg: RegistryPackageRecord, document: PackageDocument): void {
+  for (const [tag, version] of Object.entries(pkg.distTags ?? {})) {
+    const existing = document.distTags[tag];
+    if (existing !== undefined && existing !== version) {
+      throw new Error(`conflicting ${tag} dist tags for ${pkg.canonical}`);
+    }
+    document.distTags[tag] = version;
+  }
 }
 
 function applyLatestDistTag(document: PackageDocument, sourceLatest: string | undefined): PackageDocument {

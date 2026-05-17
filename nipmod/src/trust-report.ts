@@ -53,12 +53,20 @@ export interface TrustReport {
   findings: string[];
   installCommand?: string;
   compatibilityReceipts?: CompatibilityReceipt[];
+  deprecation?: {
+    active: boolean;
+    reason: string;
+  };
   quarantine?: {
     active: boolean;
     advisoryId: string;
     reason: string;
     severity: string;
     status: string;
+  };
+  yank?: {
+    active: boolean;
+    reason: string;
   };
   resolved?: string;
   source?: {
@@ -154,6 +162,24 @@ const QuarantineSchema = z.strictObject({
   version: SemverSchema
 });
 
+const DeprecationSchema = z.strictObject({
+  active: z.boolean().optional(),
+  package: PackageIdSchema,
+  publishedAt: z.string().datetime(),
+  reason: z.string().min(1).max(280),
+  type: z.literal("dev.nipmod.deprecation.v1"),
+  version: SemverSchema
+});
+
+const YankSchema = z.strictObject({
+  active: z.boolean().optional(),
+  package: PackageIdSchema,
+  publishedAt: z.string().datetime(),
+  reason: z.string().min(1).max(280),
+  type: z.literal("dev.nipmod.yank.v1"),
+  version: SemverSchema
+});
+
 const CompatibilityReceiptSchema = z.strictObject({
   exampleUrl: z.string().url().startsWith("https://nipmod.com/compatibility/"),
   externalFormat: z.enum(["apm-package", "git-source-provenance", "mcp-server-json"]),
@@ -228,6 +254,7 @@ const TransparencyLogSchema = z.strictObject({
 const RegistryPackageSchema = z.strictObject({
   canonical: PackageIdSchema,
   description: z.string().optional(),
+  deprecated: DeprecationSchema.optional(),
   digest: Sha256Schema,
   name: z.string().min(1).optional(),
   owner: DidKeySchema.optional(),
@@ -255,7 +282,8 @@ const RegistryPackageSchema = z.strictObject({
     score: z.number().int().min(0).max(100)
   }).passthrough(),
   type: z.string().min(1).optional(),
-  version: SemverSchema
+  version: SemverSchema,
+  yanked: YankSchema.optional()
 }).passthrough();
 
 const RegistrySchema = z.strictObject({
@@ -421,9 +449,14 @@ function registryPackageReport(
   if (quarantine) {
     findings.push(`package is quarantined: ${quarantine.advisoryId}: ${quarantine.reason}`);
   }
+  const yank = activeYank(pkg);
+  if (yank) {
+    findings.push(`package is yanked: ${yank.reason}`);
+  }
   if (!quarantine && !registryCanProveSignedAdvisoryState(registryUrl)) {
     findings.push("registry cannot prove signed advisory state");
   }
+  const deprecation = activeDeprecation(pkg);
   const registryUrlTrustedForCompatibility = trustsRegistryCompatibilityReceipts(registryUrl);
   const compatibilityReceipts = registryUrlTrustedForCompatibility ? matchingCompatibilityReceipts(pkg) : [];
   if (registryUrlTrustedForCompatibility && (pkg.compatibilityReceipts?.length ?? 0) !== compatibilityReceipts.length) {
@@ -494,6 +527,18 @@ function registryPackageReport(
       reason: quarantine.reason,
       severity: quarantine.severity,
       status: quarantine.status
+    };
+  }
+  if (deprecation) {
+    report.deprecation = {
+      active: true,
+      reason: deprecation.reason
+    };
+  }
+  if (yank) {
+    report.yank = {
+      active: true,
+      reason: yank.reason
     };
   }
   if (transparencyReport) {
@@ -570,6 +615,26 @@ function activeQuarantine(pkg: RegistryPackage): z.infer<typeof QuarantineSchema
     return undefined;
   }
   return pkg.quarantine;
+}
+
+function activeDeprecation(pkg: RegistryPackage): z.infer<typeof DeprecationSchema> | undefined {
+  if (!pkg.deprecated || pkg.deprecated.active === false) {
+    return undefined;
+  }
+  if (pkg.deprecated.package !== pkg.canonical || pkg.deprecated.version !== pkg.version) {
+    return undefined;
+  }
+  return pkg.deprecated;
+}
+
+function activeYank(pkg: RegistryPackage): z.infer<typeof YankSchema> | undefined {
+  if (!pkg.yanked || pkg.yanked.active === false) {
+    return undefined;
+  }
+  if (pkg.yanked.package !== pkg.canonical || pkg.yanked.version !== pkg.version) {
+    return undefined;
+  }
+  return pkg.yanked;
 }
 
 function verifyPackageTransparency(

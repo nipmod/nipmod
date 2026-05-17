@@ -30,10 +30,10 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | Outdated | `npm outdated` | lockfile versus registry report with current, wanted, latest and policy-safe status | done |
 | Update | `npm update` | verified root dependency update plans, signed bundle fetch and stale lockfile prune | done |
 | Pack | `npm pack` | signed `.nipmod` bundle | done |
-| Dist tags | `npm dist-tag` | signed lifecycle event mapping tags to versions | missing |
+| Dist tags | `npm dist-tag` | signed lifecycle event mapping tags to versions, consumed by registry/search/view | shipped |
 | Version bump | `npm version` | signed version update and immutable Gitlawb release tag | missing |
-| Deprecation | `npm deprecate` | signed deprecation advisory/lifecycle event, hidden in install plans | missing |
-| Removal | `npm unpublish` | no destructive delete; signed yank/deprecate/quarantine events only | missing |
+| Deprecation | `npm deprecate` | signed deprecation lifecycle event surfaced in CLI, MCP and package pages | shipped |
+| Removal | `npm unpublish` | no destructive delete; signed yank/deprecate/quarantine events only; yanked releases are hidden and blocked | shipped |
 | Ownership | npm owner/collaborator | DID owner, maintainer keys, org DIDs, key rotation and recovery | missing |
 | Orgs and teams | npm org/team/access | Gitlawb DID org/team proof with package policy | missing |
 | Auth tokens | npm tokens/OIDC | no long lived registry tokens for public packages; trusted Gitlawb publishing receipts | missing |

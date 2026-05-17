@@ -36,6 +36,24 @@ const QuarantineSchema = z.strictObject({
   version: SemverSchema
 });
 
+const DeprecationSchema = z.strictObject({
+  active: z.boolean().optional(),
+  package: PackageIdSchema,
+  publishedAt: z.string().datetime(),
+  reason: z.string().min(1).max(280),
+  type: z.literal("dev.nipmod.deprecation.v1"),
+  version: SemverSchema
+});
+
+const YankSchema = z.strictObject({
+  active: z.boolean().optional(),
+  package: PackageIdSchema,
+  publishedAt: z.string().datetime(),
+  reason: z.string().min(1).max(280),
+  type: z.literal("dev.nipmod.yank.v1"),
+  version: SemverSchema
+});
+
 const CompatibilityReceiptSchema = z.strictObject({
   exampleUrl: z.string().url().startsWith("https://nipmod.com/compatibility/"),
   externalFormat: z.enum(["apm-package", "git-source-provenance", "mcp-server-json"]),
@@ -61,6 +79,7 @@ const RegistrySearchPackageSchema = z.strictObject({
   dependencies: DependencyMapSchema.optional(),
   description: z.string().optional(),
   devDependencies: DependencyMapSchema.optional(),
+  deprecated: DeprecationSchema.optional(),
   digest: Sha256Schema,
   distTags: DistTagsSchema.optional(),
   name: PackageNameSchema,
@@ -75,7 +94,8 @@ const RegistrySearchPackageSchema = z.strictObject({
     score: z.number().int().min(0).max(100)
   }).passthrough(),
   type: z.string().min(1).optional(),
-  version: SemverSchema
+  version: SemverSchema,
+  yanked: YankSchema.optional()
 }).passthrough();
 
 const RegistrySearchIndexSchema = z.strictObject({
@@ -92,6 +112,8 @@ export interface RegistrySearchPackage {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   digest: string;
+  deprecated: boolean;
+  deprecationReason?: string;
   distTags?: Record<string, string>;
   canonicalInstall?: string;
   install?: string;
@@ -109,6 +131,8 @@ export interface RegistrySearchPackage {
   trustScore: number;
   type: string;
   version: string;
+  yanked: boolean;
+  yankReason?: string;
 }
 
 export interface RegistrySearchResult {
@@ -121,6 +145,7 @@ export interface RegistrySearchResult {
 export async function searchRegistry(options: {
   fetchImpl?: typeof fetch;
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   limit: number;
   query: string;
   registryUrl: string;
@@ -128,6 +153,7 @@ export async function searchRegistry(options: {
   const registry = RegistrySearchIndexSchema.parse(await readJsonSource(options.registryUrl, options.fetchImpl ?? fetch));
   return searchParsedRegistries({
     ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    ...(options.includeYanked === undefined ? {} : { includeYanked: options.includeYanked }),
     limit: options.limit,
     query: options.query,
     registries: [{ registry, sourceRegistry: options.registryUrl }]
@@ -137,6 +163,7 @@ export async function searchRegistry(options: {
 export async function searchRegistries(options: {
   fetchImpl?: typeof fetch;
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   limit: number;
   query: string;
   registryUrls: readonly string[];
@@ -150,6 +177,7 @@ export async function searchRegistries(options: {
   );
   return searchParsedRegistries({
     ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    ...(options.includeYanked === undefined ? {} : { includeYanked: options.includeYanked }),
     limit: options.limit,
     query: options.query,
     registries
@@ -159,12 +187,14 @@ export async function searchRegistries(options: {
 export async function viewRegistryPackages(options: {
   fetchImpl?: typeof fetch;
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   query: string;
   registryUrl: string;
 }): Promise<RegistrySearchResult> {
   const registry = RegistrySearchIndexSchema.parse(await readJsonSource(options.registryUrl, options.fetchImpl ?? fetch));
   return viewParsedRegistries({
     ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    ...(options.includeYanked === undefined ? {} : { includeYanked: options.includeYanked }),
     query: options.query,
     registries: [{ registry, sourceRegistry: options.registryUrl }]
   });
@@ -173,6 +203,7 @@ export async function viewRegistryPackages(options: {
 export async function viewRegistriesPackages(options: {
   fetchImpl?: typeof fetch;
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   query: string;
   registryUrls: readonly string[];
 }): Promise<RegistrySearchResult> {
@@ -185,6 +216,7 @@ export async function viewRegistriesPackages(options: {
   );
   return viewParsedRegistries({
     ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    ...(options.includeYanked === undefined ? {} : { includeYanked: options.includeYanked }),
     query: options.query,
     registries
   });
@@ -192,6 +224,7 @@ export async function viewRegistriesPackages(options: {
 
 function searchParsedRegistries(options: {
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   limit: number;
   query: string;
   registries: Array<{
@@ -202,6 +235,7 @@ function searchParsedRegistries(options: {
   const query = options.query.trim().toLowerCase();
   const matched = dedupeRegistryPackages(options.registries)
     .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
+    .filter((pkg) => options.includeYanked === true || !isActivelyYanked(pkg))
     .filter((pkg) => registryPackageMatches(pkg, query));
   const ambiguousNames = ambiguousPackageNames(matched);
   const packages = matched
@@ -219,6 +253,7 @@ function searchParsedRegistries(options: {
 
 function viewParsedRegistries(options: {
   includeQuarantined?: boolean;
+  includeYanked?: boolean;
   query: string;
   registries: Array<{
     registry: z.infer<typeof RegistrySearchIndexSchema>;
@@ -229,6 +264,7 @@ function viewParsedRegistries(options: {
   const nameQuery = rawQuery.toLowerCase();
   const matched = dedupeRegistryPackages(options.registries)
     .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
+    .filter((pkg) => options.includeYanked === true || !isActivelyYanked(pkg))
     .filter((pkg) => pkg.name === nameQuery || pkg.canonical === rawQuery);
   const ambiguousNames = ambiguousPackageNames(matched);
   const packages = matched
@@ -357,7 +393,13 @@ const agentNativeTypes = new Set(["skill", "agent-profile", "workflow-pack", "po
 
 function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean): RegistrySearchPackage {
   const quarantine = activeQuarantine(pkg);
-  const installBlockedReason = quarantine ? quarantineBlockedReason(quarantine) : undefined;
+  const yanked = activeYank(pkg);
+  const deprecated = activeDeprecation(pkg);
+  const installBlockedReason = quarantine
+    ? quarantineBlockedReason(quarantine)
+    : yanked
+    ? yankBlockedReason(yanked)
+    : undefined;
   return {
     advisories: quarantine ? [quarantine.advisoryId] : [],
     canonical: pkg.canonical,
@@ -365,6 +407,8 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     description: pkg.description ?? "",
     ...(pkg.dependencies ? { dependencies: pkg.dependencies } : {}),
     ...(pkg.devDependencies ? { devDependencies: pkg.devDependencies } : {}),
+    deprecated: Boolean(deprecated),
+    ...(deprecated ? { deprecationReason: deprecated.reason } : {}),
     digest: pkg.digest,
     ...(pkg.distTags ? { distTags: pkg.distTags } : {}),
     ...(installBlockedReason
@@ -385,12 +429,18 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     trustLevel: pkg.trust.level,
     trustScore: pkg.trust.score,
     type: pkg.type ?? "package",
-    version: pkg.version
+    version: pkg.version,
+    yanked: Boolean(yanked),
+    ...(yanked ? { yankReason: yanked.reason } : {})
   };
 }
 
 function isActivelyQuarantined(pkg: z.infer<typeof RegistrySearchPackageSchema>): boolean {
   return activeQuarantine(pkg) !== undefined;
+}
+
+function isActivelyYanked(pkg: z.infer<typeof RegistrySearchPackageSchema>): boolean {
+  return activeYank(pkg) !== undefined;
 }
 
 function activeQuarantine(pkg: z.infer<typeof RegistrySearchPackageSchema>): z.infer<typeof QuarantineSchema> | undefined {
@@ -411,6 +461,30 @@ function activeQuarantine(pkg: z.infer<typeof RegistrySearchPackageSchema>): z.i
 
 function quarantineBlockedReason(quarantine: z.infer<typeof QuarantineSchema>): string {
   return `${quarantine.advisoryId}: ${quarantine.reason}`;
+}
+
+function activeDeprecation(pkg: z.infer<typeof RegistrySearchPackageSchema>): z.infer<typeof DeprecationSchema> | undefined {
+  if (!pkg.deprecated || pkg.deprecated.active === false) {
+    return undefined;
+  }
+  if (pkg.deprecated.package !== pkg.canonical || pkg.deprecated.version !== pkg.version) {
+    return undefined;
+  }
+  return pkg.deprecated;
+}
+
+function activeYank(pkg: z.infer<typeof RegistrySearchPackageSchema>): z.infer<typeof YankSchema> | undefined {
+  if (!pkg.yanked || pkg.yanked.active === false) {
+    return undefined;
+  }
+  if (pkg.yanked.package !== pkg.canonical || pkg.yanked.version !== pkg.version) {
+    return undefined;
+  }
+  return pkg.yanked;
+}
+
+function yankBlockedReason(yanked: z.infer<typeof YankSchema>): string {
+  return `yanked: ${yanked.reason}`;
 }
 
 function permissionSummary(permissions: z.infer<typeof PermissionCountsSchema> | undefined): string {
