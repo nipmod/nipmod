@@ -59,7 +59,7 @@ export function draftFromRepo(input: string) {
   if (!isValidGitlawbRepo(trimmed)) {
     return {
       commands: "No draft yet.",
-      helper: "Enter a Gitlawb DID path or gitlawb.com repo URL.",
+      helper: "Enter a Gitlawb DID path or Gitlawb repo URL.",
       status: "invalid" as const
     };
   }
@@ -78,10 +78,11 @@ export function draftFromRepo(input: string) {
 export function isValidGitlawbRepo(input: string): boolean {
   const trimmed = input.trim().replace(/\.git$/i, "");
   return (
-    /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+|z[A-Za-z0-9]+)\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
-    /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
-    /^https:\/\/node(?:2|3)?\.gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed) ||
-    /^https:\/\/node\.nipmod\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9_-]*$/.test(trimmed)
+    /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+|z[A-Za-z0-9]+)\/[a-z0-9][a-z0-9._-]*$/.test(trimmed) ||
+    /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(trimmed) ||
+    /^https:\/\/gitlawb\.com\/node\/repos\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(trimmed) ||
+    /^https:\/\/node(?:2|3)?\.gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(trimmed) ||
+    /^https:\/\/node\.nipmod\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(trimmed)
   );
 }
 

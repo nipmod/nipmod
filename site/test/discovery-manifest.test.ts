@@ -15,7 +15,8 @@ const releaseKey = JSON.parse(readFileSync(join(root, "tools", "release-signing-
 const advisoryKey = JSON.parse(readFileSync(join(root, "tools", "advisory-signing-public-key.json"), "utf8"));
 const version = JSON.parse(readFileSync(join(root, "nipmod", "package.json"), "utf8")).version;
 const agentDemoPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
-const verifiedInstallerCommand =
+const shortInstallerCommand = "curl -fsSLO https://nipmod.com/install.sh && bash install.sh";
+const verifyInstallerCommand =
   "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh";
 
 describe("nipmod discovery manifest", () => {
@@ -23,7 +24,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest).toMatchObject({
       formatVersion: 1,
       homepage: "https://nipmod.com",
-      name: "nipmod",
+      name: "Nipmod",
       trustPage: "https://nipmod.com/trust",
       type: "dev.nipmod.discovery.v1"
     });
@@ -82,9 +83,11 @@ describe("nipmod discovery manifest", () => {
       "inspect",
       "install",
       "installPackage",
+      "installPlan",
       "publishDryRun",
       "sbom",
-      "search"
+      "search",
+      "verifyInstaller"
     ]);
     expect(Object.keys(manifest.mcp).sort()).toEqual(["docs", "serverCommand", "tools"]);
     expect(Object.keys(manifest.node).sort()).toEqual(["health", "url"]);
@@ -98,7 +101,7 @@ describe("nipmod discovery manifest", () => {
       "packetMarkdown",
       "proofTranscript"
     ]);
-    expect(Object.keys(manifest.install).sort()).toEqual(["release", "script", "scriptSha256"]);
+    expect(Object.keys(manifest.install).sort()).toEqual(["release", "script", "scriptSha256", "shortCommand", "verifyCommand"]);
     expect(Object.keys(manifest.install.release).sort()).toEqual([
       "artifact",
       "artifactSha256",
@@ -239,9 +242,11 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.agent.runbook).toBe("https://nipmod.com/quickstart#agents");
     expect(manifest.agent.workflow).toEqual([
       "install",
+      "verifyInstaller",
       "doctor",
       "search",
       "inspect",
+      "installPlan",
       "installPackage",
       "addPackage",
       "audit",
@@ -253,11 +258,13 @@ describe("nipmod discovery manifest", () => {
       audit: "nipmod audit --online",
       doctor: "nipmod doctor --online",
       inspect: `nipmod inspect ${agentDemoPackage} --json`,
-      install: verifiedInstallerCommand,
+      install: shortInstallerCommand,
+      installPlan: `nipmod install --plan ${agentDemoPackage} --json`,
       installPackage: `nipmod install ${agentDemoPackage}`,
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
-      search: "nipmod search gitlawb --online"
+      search: "nipmod search gitlawb --online",
+      verifyInstaller: verifyInstallerCommand
     });
     expect(manifest.mcp).toEqual({
       docs: "https://nipmod.com/mcp",

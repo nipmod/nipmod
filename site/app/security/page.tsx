@@ -33,15 +33,18 @@ export default function SecurityPage() {
         <p className="eyebrow">Security</p>
         <h1 id="security-title">Report with proof.</h1>
         <p className="lead">
-          Nipmod does not control Gitlawb content. It verifies packages, publishes signed advisories and blocks unsafe
-          install surfaces when a package becomes risky.
+          Nipmod does not control Gitlawb content. Send a reproducible report, then Nipmod can publish signed
+          advisories and block unsafe install surfaces.
         </p>
         <div className="actions" aria-label="Security actions">
           <a className="button button-primary" href="/evidence#security">
-            security.txt
+            Report via security.txt
           </a>
           <a className="button button-ghost" href="/evidence#advisories">
             Advisories
+          </a>
+          <a className="button button-ghost" href="#report">
+            Report template
           </a>
           <a
             className="button button-ghost"
@@ -50,17 +53,24 @@ export default function SecurityPage() {
             rel="noreferrer"
             target="_blank"
           >
-            X fallback
+            Contact on X
           </a>
         </div>
       </section>
 
-      <section className="trust-section" aria-labelledby="report-title">
+      <section className="trust-section" id="report" aria-labelledby="report-title">
         <div>
           <p className="eyebrow">Report</p>
           <h2 id="report-title">What to include</h2>
         </div>
         <div className="check-list">
+          <article className="check-row">
+            <span className="check-dot check-ok" aria-hidden="true" />
+            <div>
+              <h3>contact path</h3>
+              <p>Use security.txt first. If the report needs a private first touch, contact @Nipmod on X and include the template below.</p>
+            </div>
+          </article>
           {[
             "package id, version, digest, source repo and source commit",
             "proof URL, witness URL, advisory URL and exact reproduction command",

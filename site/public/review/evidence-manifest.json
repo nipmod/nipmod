@@ -22,14 +22,9 @@
     },
     {
       "id": "synthetic-monitor",
-      "label": "Live synthetic monitor",
-      "url": "https://nipmod-monitor.fly.dev/last",
+      "label": "Synthetic monitor command",
+      "url": "https://nipmod.com/review/evidence-manifest.json",
       "command": "node tools/prod-synthetic-monitor.mjs"
-    },
-    {
-      "id": "monitor-health",
-      "label": "Monitor health",
-      "url": "https://nipmod-monitor.fly.dev/health"
     },
     {
       "id": "witness-health",
@@ -48,7 +43,7 @@
     }
   ],
   "freshness": {
-    "liveEndpoints": ["synthetic-monitor", "monitor-health", "witness-health"],
-    "staticProof": ["review-packet", "external-evidence-ledger", "public-proof-loop", "registry", "checkpoint"]
+    "liveEndpoints": ["witness-health"],
+    "staticProof": ["review-packet", "external-evidence-ledger", "public-proof-loop", "synthetic-monitor", "registry", "checkpoint"]
   }
 }

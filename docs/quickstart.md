@@ -77,6 +77,18 @@ Check these fields before mutation:
 - Permissions.
 - Advisory status.
 
+## Plan before mutation
+
+```sh
+nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
+```
+
+Expected result:
+
+- The dependency graph is verified before lockfile mutation.
+- The command exits before writing `nipmod.lock.json`.
+- Agents can pass the JSON plan to a human or policy check.
+
 ## Install into a workspace
 
 Create a demo workspace first. The first lockfile mutation should not happen in an unrelated repo.
@@ -92,6 +104,8 @@ Expected result:
 - `nipmod.lock.json` is written or updated inside `nipmod-demo`.
 - The lockfile pins the artifact digest.
 - A trust or advisory failure exits before lockfile mutation.
+
+`nipmod add gitlawb-repo-reader --online` is a compatibility alias for `nipmod install gitlawb-repo-reader`. Do not run both in the same walkthrough.
 
 ## Restore from the lockfile
 
@@ -139,6 +153,18 @@ nipmod ci --online
 ```
 
 Use `sbom` for inventory, `explain` for lockfile reasons, `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
+
+## Use MCP
+
+```sh
+nipmod mcp serve
+```
+
+Expected result:
+
+- Agent hosts can call read only package search, view, inspect, install plan, update plan, verify, audit, SBOM and explain tools.
+- `nipmod.publish_plan` is an unsigned dry run preview. It does not sign locally and does not write to Gitlawb.
+- Host setup examples live at `https://nipmod.com/mcp`.
 
 ## Publish dry run
 

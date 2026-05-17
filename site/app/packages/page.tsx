@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import {
   installCommand,
-  permissionHighlights,
   registryStats,
   safeSourceRepoHref,
-  shortDid,
   type RegistryPackage
 } from "../../lib/registry";
 import { packageBrowseData, packageEvidenceHref, packagePageHref } from "./content";
@@ -26,7 +24,7 @@ export const metadata: Metadata = {
     title: "Nipmod packages",
     url: "https://nipmod.com/packages"
   },
-  title: "packages"
+  title: "Nipmod packages"
 };
 
 export default async function PackagesPage({ searchParams }: PackagesPageProps) {
@@ -134,20 +132,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
           </dd>
         </div>
         <div>
-          <dt>Publisher</dt>
-          <dd>{shortDid(pkg.publisher)}</dd>
-        </div>
-        <div>
           <dt>Type</dt>
           <dd>{pkg.type}</dd>
         </div>
       </dl>
-
-      <div className="permission-row" aria-label={`${pkg.name} permissions`}>
-        {permissionHighlights(pkg).map((item) => (
-          <span key={item}>{item}</span>
-        ))}
-      </div>
 
       <pre className="install-command">
         <code>{installCommand(pkg)}</code>

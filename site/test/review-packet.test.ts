@@ -24,7 +24,17 @@ describe("public review packet", () => {
     expect(packet.targets).toMatchObject({
       evidenceLedger: "https://nipmod.com/review/evidence-ledger.json",
       proofTranscript: "https://nipmod.com/proof/transcript.json",
-      registry: "https://nipmod.com/registry/packages.json"
+      registry: "https://nipmod.com/registry/packages.json",
+      source: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
+    });
+    expect(packet.reviewScope).toMatchObject({
+      commitPolicy: "Reviewer resolves the exact Gitlawb commit before signing external evidence.",
+      evidenceStatus: "checklist-and-public-proof-links",
+      sourceRef: "main",
+      externalReceipts: {
+        firstUserReceipts: 0,
+        signedIndependentReviews: 0
+      }
     });
     expect(packet.commands.map((command: { id: string }) => command.id)).toContain("prod-synthetic-monitor");
     expect(packet.externalProofTracks.map((track: { id: string }) => track.id)).toEqual([
@@ -37,6 +47,7 @@ describe("public review packet", () => {
     expect(manifest.artifacts.map((artifact: { id: string }) => artifact.id)).toEqual(
       expect.arrayContaining(["review-packet", "synthetic-monitor", "witness-health", "registry", "checkpoint"])
     );
+    expect(manifest.freshness.liveEndpoints).toEqual(["witness-health"]);
     expect(JSON.stringify({ manifest, packet })).not.toMatch(/sk-[A-Za-z0-9]|BEGIN PRIVATE KEY|TOKEN=/);
   });
 });

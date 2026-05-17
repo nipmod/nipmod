@@ -17,13 +17,15 @@ describe("agent discovery text", () => {
 
   test("lists the commands an agent needs for the full lifecycle", () => {
     for (const command of [
-      "curl -fLO https://nipmod.com/install.sh",
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+      "Manual verification path:",
       "curl -fLO https://nipmod.com/install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",
       "bash install.sh",
       "nipmod doctor --online",
       "nipmod search gitlawb --online",
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
       "nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
       "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "nipmod audit --online",

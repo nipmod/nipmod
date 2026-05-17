@@ -72,25 +72,25 @@ const readiness = [
 const externalProofTracks = [
   {
     label: "Gitlawb review signal",
-    value: "60",
+    state: "Prepared",
     ready: "Public source, launch demo, founder post, founder DM and non endorsement language are ready.",
     blockedOn: "Needs a Gitlawb founder or maintainer response."
   },
   {
     label: "External human audit",
-    value: "90",
+    state: "Prepared",
     ready: "Review packet, gates, proof loop, threat model and sign off template are ready.",
     blockedOn: "Needs an independent reviewer signature or published findings."
   },
   {
     label: "Real user adoption",
-    value: "45",
+    state: "Waiting",
     ready: "First user loop, author dry run, repo claim preview and receipt template are ready.",
     blockedOn: "Needs external redacted user receipts. Current ledger count is zero."
   },
   {
     label: "Ecosystem depth",
-    value: "85",
+    state: "First party ready",
     ready: "Verified first party packages cover every launch manifest type.",
     blockedOn: "Needs external package authors accepted into the registry."
   }
@@ -98,9 +98,9 @@ const externalProofTracks = [
 
 const founderCopy = {
   post:
-    "Gitlawb gives agents decentralized source.\n\nNipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+    "Gitlawb gives agents decentralized source.\n\nNipmod is the package layer: signed bundles, DID publisher identity, pinned installs, public advisories and witness backed audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
   dm:
-    "We built Nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
+    "We built Nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, pinned lockfiles, public advisories and witness backed audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
 } as const;
 
 export default function LaunchPage() {
@@ -161,17 +161,7 @@ export default function LaunchPage() {
           {externalProofTracks.map((item) => (
             <article className="block-card" key={item.label}>
               <span>{item.label}</span>
-              <h3>{item.value}%</h3>
-              <div
-                className="progress-track"
-                aria-label={`${item.label} ${item.value} percent`}
-                aria-valuemax={100}
-                aria-valuemin={0}
-                aria-valuenow={Number(item.value)}
-                role="progressbar"
-              >
-                <div className="progress-fill" style={{ width: `${item.value}%` }} />
-              </div>
+              <h3>{item.state}</h3>
               <p>{item.ready}</p>
               <p>{item.blockedOn}</p>
             </article>

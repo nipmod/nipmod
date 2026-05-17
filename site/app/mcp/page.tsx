@@ -59,6 +59,17 @@ export default function McpPage() {
         <pre className="install-command">
           <code>{mcpContent.verifyCommand}</code>
         </pre>
+        <div className="quickstart-grid" aria-label="MCP tool call examples">
+          {mcpContent.examples.map((example) => (
+            <article className="quickstart-card" key={example.label}>
+              <span>{example.label}</span>
+              <h2>{example.label}</h2>
+              <pre className="install-command">
+                <code>{example.command}</code>
+              </pre>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="host-section" aria-labelledby="hosts-title">

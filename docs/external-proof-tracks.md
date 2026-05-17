@@ -2,12 +2,12 @@
 
 Nipmod can be technically launch ready before external proof is complete. These tracks separate what is already prepared from what only outside people can provide.
 
-| Track | Current | Local work complete | External proof required |
-| --- | ---: | --- | --- |
-| Gitlawb review signal | 60% | Public source, launch demo, founder post, founder DM, clear non endorsement language. | Gitlawb founder or maintainer explicitly says Nipmod fits Gitlawb or links to it. |
-| External human audit | 90% | Review packet, reproducible gates, public proof loop, threat model, sign off template. | Independent reviewer signs the packet or publishes findings. |
-| Real user adoption | 45% | First user loop, author dry run, repo claim preview, receipt template, redaction rules. | External users submit redacted install/audit/publish evidence. |
-| Ecosystem depth | 85% | Verified first party packages cover every launch manifest type. | External package authors publish accepted packages. |
+| Track | State | Local work complete | External proof required |
+| --- | --- | --- | --- |
+| Gitlawb review signal | Prepared, 0 maintainer responses | Public source, launch demo, founder post, founder DM, clear non endorsement language. | Gitlawb founder or maintainer explicitly says Nipmod fits Gitlawb or links to it. |
+| External human audit | Prepared, 0 signed reviews | Review packet, reproducible gates, public proof loop, threat model, sign off template. | Independent reviewer signs the packet or publishes findings. |
+| Real user adoption | Waiting, 0 receipts | First user loop, author dry run, repo claim preview, receipt template, redaction rules. | External users submit redacted install/audit/publish evidence. |
+| Ecosystem depth | First party ready, 0 external packages | Verified first party packages cover every launch manifest type. | External package authors publish accepted packages. |
 
 ## Prepared asks
 

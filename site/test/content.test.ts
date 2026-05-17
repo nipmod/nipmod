@@ -22,7 +22,7 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("Nipmod");
-    expect(homeContent.headline).toBe("Packages agents can trust");
+    expect(homeContent.headline).toBe("Packages agents can verify");
     expect(homeContent.lead.length).toBeLessThanOrEqual(110);
   });
 
@@ -69,7 +69,7 @@ describe("home content", () => {
   });
 
   test("links to the human install flow", () => {
-    expect(homeContent.primaryAction).toBe("Install");
+    expect(homeContent.primaryAction).toBe("Install CLI");
     expect(homeContent.links.install).toBe("/quickstart#install");
   });
 
@@ -80,8 +80,9 @@ describe("home content", () => {
       "Check",
       "Find",
 	      "Inspect",
+      "Plan install",
 	      "Install package",
-	      "Add package",
+	      "Add alias",
 	      "Restore",
       "Update",
       "SBOM",
@@ -93,8 +94,11 @@ describe("home content", () => {
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
-	    expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
-	    expect(homeContent.quickstartSteps.find((step) => step.label === "Add package")?.command).toBe(
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Plan install")?.command).toMatch(
+      /^nipmod install --plan pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --json$/
+    );
+	    expect(homeContent.quickstartSteps.find((step) => step.label === "Add alias")?.command).toBe(
 	      "nipmod add gitlawb-repo-reader --online"
 	    );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");

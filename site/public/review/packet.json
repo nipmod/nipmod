@@ -11,7 +11,7 @@
   },
   "targets": {
     "website": "https://nipmod.com",
-    "source": "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+    "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     "launch": "https://nipmod.com/launch",
     "security": "https://nipmod.com/security",
     "discovery": "https://nipmod.com/.well-known/nipmod.json",
@@ -19,6 +19,17 @@
     "proofTranscript": "https://nipmod.com/proof/transcript.json",
     "evidenceLedger": "https://nipmod.com/review/evidence-ledger.json",
     "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json"
+  },
+  "reviewScope": {
+    "sourceRef": "main",
+    "commitPolicy": "Reviewer resolves the exact Gitlawb commit before signing external evidence.",
+    "evidenceStatus": "checklist-and-public-proof-links",
+    "externalReceipts": {
+      "firstUserReceipts": 0,
+      "packageAuthorDryRuns": 0,
+      "externalPackagesAccepted": 0,
+      "signedIndependentReviews": 0
+    }
   },
   "commands": [
     {
@@ -53,25 +64,29 @@
   "externalProofTracks": [
     {
       "id": "gitlawb-review-signal",
-      "currentPercent": 60,
+      "state": "prepared",
+      "count": 0,
       "ready": "Public source, launch demo, founder post, founder DM and non endorsement language are ready.",
       "blockedOn": "Gitlawb founder or maintainer response."
     },
     {
       "id": "external-human-audit",
-      "currentPercent": 90,
+      "state": "prepared",
+      "count": 0,
       "ready": "Review packet, gates, proof loop, threat model and sign off template are ready.",
       "blockedOn": "Independent reviewer signature or published findings."
     },
     {
       "id": "real-user-adoption",
-      "currentPercent": 45,
+      "state": "waiting-for-receipts",
+      "count": 0,
       "ready": "First user loop, author dry run, repo claim preview and receipt template are ready.",
       "blockedOn": "External redacted user receipts."
     },
     {
       "id": "ecosystem-depth",
-      "currentPercent": 85,
+      "state": "first-party-ready",
+      "count": 0,
       "ready": "Verified first party packages cover every launch manifest type.",
       "blockedOn": "External packages accepted into the registry."
     }

@@ -1,6 +1,6 @@
 export const homeContent = {
   brand: "Nipmod",
-  headline: "Packages agents can trust",
+  headline: "Packages agents can verify",
   lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
   links: {
     docs: "/quickstart#docs",
@@ -9,7 +9,7 @@ export const homeContent = {
     install: "/quickstart#install",
     x: "https://x.com/Nipmod"
   },
-  primaryAction: "Install",
+  primaryAction: "Install CLI",
   secondaryAction: "X",
   commands: [
     "nipmod search gitlawb --online",
@@ -59,13 +59,18 @@ export const homeContent = {
       command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0"
     },
     {
+      label: "Plan install",
+      text: "Preview the verified dependency graph before the lockfile changes.",
+      command: "nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json"
+    },
+    {
       label: "Install package",
       text: "Create a demo workspace first so the first lockfile mutation is isolated.",
       command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod install gitlawb-repo-reader"
     },
     {
-      label: "Add package",
-      text: "Add the package to the workspace dependency graph.",
+      label: "Add alias",
+      text: "Use add only when you want the npm style alias for install.",
       command: "nipmod add gitlawb-repo-reader --online"
     },
     {
@@ -148,7 +153,7 @@ export const homeContent = {
   ],
   founderOutreach: {
     post:
-      "Gitlawb gives agents decentralized source. Nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+      "Gitlawb gives agents decentralized source. Nipmod is the package layer: signed bundles, DID publisher identity, pinned installs, public advisories and witness backed audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     dm:
       "We built Nipmod as an independent package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
   },

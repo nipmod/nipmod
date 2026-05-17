@@ -13,7 +13,10 @@ Security docs: https://nipmod.com/security
 
 Use this order for a fresh agent workspace.
 
-Install the CLI with checksum verification:
+Install the CLI:
+curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+
+Manual verification path:
 curl -fLO https://nipmod.com/install.sh
 curl -fLO https://nipmod.com/install.sh.sha256
 shasum -a 256 -c install.sh.sha256
@@ -28,10 +31,13 @@ nipmod search gitlawb --online
 Inspect before install:
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
 
+Plan before mutation:
+nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
+
 Install into a workspace:
 nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0
 
-Add as a dependency:
+Optional npm style alias:
 nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 
 Audit the workspace:

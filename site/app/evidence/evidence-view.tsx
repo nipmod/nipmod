@@ -211,10 +211,10 @@ function evidenceArtifacts(pkg: RegistryPackage | null): Array<{ id: string; hre
       text: "The adoption and review receipt ledger. It stays at zero until external redacted evidence exists."
     },
     {
-      href: "https://nipmod-monitor.fly.dev/last",
+      href: "/review/evidence-manifest.json",
       id: "synthetic-monitor",
       label: "Synthetic monitor",
-      text: "The public monitor cycle for site, registry, advisories, witness, node and Gitlawb receive pack probes."
+      text: "The reproducible monitor command for site, registry, advisories, witness, node and Gitlawb receive pack probes."
     }
   ];
 

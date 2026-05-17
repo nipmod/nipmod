@@ -48,9 +48,9 @@ await run("pnpm", [
 	]);
 await run("pnpm", ["--dir", "nipmod", "test"]);
 await cleanBuildArtifacts();
+await run("pnpm", ["--dir", "site", "build"]);
 await run("pnpm", ["--dir", "site", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "typecheck"]);
-await run("pnpm", ["--dir", "site", "build"]);
 await run("pnpm", ["--dir", "nipmod", "build"]);
 await run("pnpm", ["--dir", "site", "test:e2e"], { timeoutMs: 180_000 });
 await run(process.execPath, ["tools/secret-scan.mjs"]);

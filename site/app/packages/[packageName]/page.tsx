@@ -4,8 +4,7 @@ import { CommandBlock } from "../../command-block";
 import {
   installCommand,
   permissionHighlights,
-  safeSourceRepoHref,
-  shortDid
+  safeSourceRepoHref
 } from "../../../lib/registry";
 import {
   findPackage,
@@ -93,12 +92,8 @@ export default async function PackagePage({ params }: PackagePageProps) {
               <dd>{pkg.version}</dd>
             </div>
             <div>
-              <dt>Publisher</dt>
-              <dd>{shortDid(pkg.publisher)}</dd>
-            </div>
-            <div>
-              <dt>Score</dt>
-              <dd>{pkg.trust.score}</dd>
+              <dt>Type</dt>
+              <dd>{pkg.type}</dd>
             </div>
           </dl>
         </aside>

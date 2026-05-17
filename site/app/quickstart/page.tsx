@@ -56,12 +56,14 @@ const docSections = [
 const stepIds: Record<string, string> = {
   "Add package": "add-package",
   Audit: "audit",
+  "Add alias": "add-alias",
   Check: "doctor",
   Explain: "explain",
   Find: "find",
   Inspect: "inspect",
   "Install CLI": "install",
   "Install package": "install-package",
+  "Plan install": "install-plan",
   Publish: "publish",
   Restore: "restore",
   SBOM: "sbom",
@@ -69,13 +71,18 @@ const stepIds: Record<string, string> = {
   Verify: "verify"
 };
 
+const firstRunLabels = new Set(["Install CLI", "Find", "Inspect", "Plan install", "Install package", "Audit"]);
+
 export default function QuickstartPage() {
+  const firstRunSteps = homeContent.quickstartSteps.filter((step) => firstRunLabels.has(step.label));
+  const advancedSteps = homeContent.quickstartSteps.filter((step) => !firstRunLabels.has(step.label));
+
   return (
     <main className="page-shell" id="main">
       <section className="quickstart-hero" id="docs" aria-labelledby="docs-title">
         <p className="eyebrow">Docs</p>
         <h1 id="docs-title">Docs</h1>
-        <p className="lead">Install, search, inspect, publish and connect agent hosts from one clean path.</p>
+        <p className="lead">Install, search, inspect and audit from one terminal path.</p>
         <div className="actions" aria-label="Quickstart actions">
           <a className="button button-primary" href="#install">
             Install CLI
@@ -147,8 +154,8 @@ export default function QuickstartPage() {
         </div>
       </section>
 
-      <section className="quickstart-grid" aria-label="Quickstart steps">
-        {homeContent.quickstartSteps.map((step, index) => (
+      <section className="quickstart-grid" aria-label="First run steps">
+        {firstRunSteps.map((step, index) => (
           <article className="quickstart-card" id={stepIds[step.label]} key={step.label}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{step.label}</h2>
@@ -156,6 +163,23 @@ export default function QuickstartPage() {
             <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
           </article>
         ))}
+      </section>
+
+      <section className="ecosystem-section" aria-labelledby="advanced-title">
+        <div className="section-head">
+          <p className="eyebrow">Advanced</p>
+          <h2 id="advanced-title">Use these when the workspace needs them.</h2>
+        </div>
+        <div className="quickstart-grid" aria-label="Advanced steps">
+          {advancedSteps.map((step) => (
+            <article className="quickstart-card" id={stepIds[step.label]} key={step.label}>
+              <span>{step.label}</span>
+              <h2>{step.label}</h2>
+              <p>{step.text}</p>
+              <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="ecosystem-section" aria-labelledby="ops-title">

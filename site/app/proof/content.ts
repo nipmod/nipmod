@@ -10,7 +10,7 @@ const proofSubject = proofPackage ? `${proofPackage.canonical}@${proofPackage.ve
 
 export const proofContent = {
   headline: "Proof you can run",
-  lead: "A public package installs cleanly, audits cleanly and unsafe package manifests fail before release.",
+  lead: "Install a public package, audit the workspace and verify unsafe manifests fail before release.",
   packageName: proofPackageName,
   registry: {
     count: registry.packages.length,

@@ -4,7 +4,7 @@ const config: PlaywrightTestConfig = {
   expect: {
     timeout: 5_000
   },
-  fullyParallel: true,
+  fullyParallel: false,
   projects: [
     {
       name: "desktop",
@@ -20,13 +20,14 @@ const config: PlaywrightTestConfig = {
   use: {
     baseURL: process.env.NIPMOD_E2E_BASE_URL ?? "http://127.0.0.1:3000",
     trace: "retain-on-failure"
-  }
+  },
+  workers: 1
 };
 
 if (!process.env.NIPMOD_E2E_BASE_URL) {
   config.webServer = {
     command: "pnpm dev --hostname 127.0.0.1 --port 3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: process.env.NIPMOD_E2E_REUSE_SERVER === "1",
     timeout: 120_000,
     url: "http://127.0.0.1:3000"
   };

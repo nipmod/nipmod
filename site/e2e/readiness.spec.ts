@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Packages agents can trust" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Packages agents can verify" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveAttribute(
     "href",
     "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R"
@@ -81,8 +81,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
 });
 
-test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }, testInfo) => {
-  test.skip(testInfo.project.name === "mobile", "link target audit is viewport independent");
+test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }) => {
   test.setTimeout(60_000);
 
   const routes = [
@@ -106,7 +105,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     }
 
     const hrefs = await page
-      .locator('a.button, nav[aria-label="Site"] a, .package-tabs a')
+      .locator("a[href]")
       .evaluateAll((links) =>
         [...new Set(links.map((link) => link.getAttribute("href")).filter((href): href is string => Boolean(href)))]
       );
@@ -136,6 +135,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await page.locator(".more-menu summary").click();
   const panel = page.locator(".more-menu-panel");
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Launch" })).toHaveAttribute("href", "/launch");
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
@@ -169,7 +169,7 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
   );
 
   await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("not a repo");
-  await expect(page.getByText("Enter a Gitlawb DID path or gitlawb.com repo URL.")).toBeVisible();
+  await expect(page.getByText("Enter a Gitlawb DID path or Gitlawb repo URL.")).toBeVisible();
   await expect(page.getByText("No draft yet.")).toBeVisible();
 });
 
@@ -204,7 +204,7 @@ test("package source links open Gitlawb human repo pages", async ({ page }) => {
 
   await expect(page.getByRole("link", { name: "Open gitlawb-repo-reader Git source in a new tab" })).toHaveAttribute(
     "href",
-    "https://gitlawb.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
+    "https://gitlawb.com/node/repos/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
   );
 });
 

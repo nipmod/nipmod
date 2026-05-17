@@ -16,7 +16,7 @@ describe("external evidence ledger", () => {
       expect.arrayContaining([
         expect.objectContaining({ type: "review-packet", url: "https://nipmod.com/review/packet.json" }),
         expect.objectContaining({ type: "evidence-manifest", url: "https://nipmod.com/review/evidence-manifest.json" }),
-        expect.objectContaining({ type: "synthetic-monitor", url: "https://nipmod-monitor.fly.dev/last" })
+        expect.objectContaining({ type: "synthetic-monitor", url: "https://nipmod.com/review/evidence-manifest.json" })
       ])
     );
     expect(JSON.stringify(ledger)).not.toMatch(/sk-[A-Za-z0-9]|BEGIN PRIVATE KEY|TOKEN=/);

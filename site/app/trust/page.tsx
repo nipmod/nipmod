@@ -31,7 +31,7 @@ export default function TrustPage() {
     <main className="page-shell" id="main">
       <section className="trust-hero" aria-labelledby="trust-title">
         <p className="eyebrow">Trust</p>
-        <h1 id="trust-title">Small surface. Hard proof.</h1>
+        <h1 id="trust-title">Verify the registry.</h1>
         <p className="lead">
           Nipmod verifies packages by digest, signature, source tag, transparency log and external witness before they
           appear as verified.
@@ -41,10 +41,10 @@ export default function TrustPage() {
         </div>
         <div className="actions" aria-label="Machine discovery">
           <a className="button button-primary" href="/evidence#discovery">
-            Discovery
+            View public proof
           </a>
           <a className="button button-ghost" href="/evidence#registry">
-            Registry
+            Registry evidence
           </a>
           <a className="button button-ghost" href="/evidence#checkpoint">
             Checkpoint

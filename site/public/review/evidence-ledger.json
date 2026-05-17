@@ -23,7 +23,7 @@
     },
     {
       "type": "synthetic-monitor",
-      "url": "https://nipmod-monitor.fly.dev/last"
+      "url": "https://nipmod.com/review/evidence-manifest.json"
     }
   ],
   "receipts": [],

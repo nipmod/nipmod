@@ -18,7 +18,7 @@ Default tools:
 Safety model:
 
 - Read-only tools: `search`, `view`, `inspect`, `install_plan`, `update_plan`, `verify`, `audit`, `sbom` and `explain`.
-- Gated non-read-only dry run: `publish_plan`; it may read local package files and local signing material only when `allowLocalSigning: true` is set.
+- Gated dry run: `publish_plan`; it previews package metadata without local signing and without remote writes.
 - Not exposed through MCP: mutating `publish`, `add`, `install`, `pack`, `init`, `policy init` or `setup-cloudflare`.
 
 Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
@@ -106,6 +106,8 @@ printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion
 ```
 
 The response must list the ten tools above. Host approval UI should show nine read-only tools plus the gated `nipmod.publish_plan` dry run.
+
+Use `nipmod publish . --dry-run --json` in a terminal when you need a signed local publish preflight.
 
 Host syntax references:
 

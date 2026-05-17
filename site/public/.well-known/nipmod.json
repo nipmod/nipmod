@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.discovery.v1",
-  "name": "nipmod",
+  "name": "Nipmod",
   "homepage": "https://nipmod.com",
   "trustPage": "https://nipmod.com/trust",
   "docs": {
@@ -18,9 +18,11 @@
     "runbook": "https://nipmod.com/quickstart#agents",
     "workflow": [
       "install",
+      "verifyInstaller",
       "doctor",
       "search",
       "inspect",
+      "installPlan",
       "installPackage",
       "addPackage",
       "audit",
@@ -28,10 +30,12 @@
       "publishDryRun"
     ],
     "commands": {
-      "install": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+      "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+      "verifyInstaller": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
       "doctor": "nipmod doctor --online",
       "search": "nipmod search gitlawb --online",
       "inspect": "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "installPlan": "nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
       "installPackage": "nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
       "addPackage": "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "audit": "nipmod audit --online",
@@ -95,6 +99,8 @@
   },
   "install": {
     "script": "https://nipmod.com/install.sh",
+    "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
       "version": "0.1.36",
       "artifact": "https://nipmod.com/releases/nipmod-0.1.36.tgz",

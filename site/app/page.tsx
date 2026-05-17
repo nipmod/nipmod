@@ -4,11 +4,9 @@ import registryData from "./registry-data.json";
 import {
   installCommand,
   homepagePackages,
-  permissionHighlights,
   registryStats,
   safeSourceRepoHref,
   searchPackages,
-  shortDid,
   type RegistryIndex,
   type RegistryPackage
 } from "../lib/registry";
@@ -159,27 +157,6 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
           <p>{pkg.description}</p>
         </div>
         <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
-      </div>
-
-      <dl className="package-meta">
-        <div>
-          <dt>Version</dt>
-          <dd>{pkg.version}</dd>
-        </div>
-        <div>
-          <dt>Publisher</dt>
-          <dd>{shortDid(pkg.publisher)}</dd>
-        </div>
-        <div>
-          <dt>Score</dt>
-          <dd>{pkg.trust.score}</dd>
-        </div>
-      </dl>
-
-      <div className="permission-row" aria-label={`${pkg.name} permissions`}>
-        {permissionHighlights(pkg).map((item) => (
-          <span key={item}>{item}</span>
-        ))}
       </div>
 
       {receipts.length > 0 ? (

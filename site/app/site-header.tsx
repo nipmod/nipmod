@@ -53,9 +53,21 @@ export function SiteHeader() {
           <div className="more-menu-panel">
             <a href={homeContent.links.docs}>Docs</a>
             <a href="/package">Create</a>
+            <a href="/launch">Launch</a>
             <a href="/trust">Trust</a>
             <a href="/security">Security</a>
             <a href="/mcp">MCP</a>
+            <a
+              href={homeContent.links.gitlawbProfile}
+              aria-label="Open Nipmod Gitlawb profile in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Gitlawb
+            </a>
+            <a href={homeContent.links.x} aria-label="Open Nipmod on X in a new tab" rel="noreferrer" target="_blank">
+              X
+            </a>
             <a
               href={homeContent.links.gitlawbSource}
               aria-label="Open Nipmod source on Gitlawb in a new tab"

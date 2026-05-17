@@ -1,11 +1,11 @@
 # Nipmod Review Packet
 
-Nipmod is technically live and ready for external review. It is not officially endorsed by Gitlawb and is not yet independently audited.
+Nipmod is technically live and ready for an external review. It is not officially endorsed by Gitlawb and is not yet independently audited.
 
 ## Public targets
 
 - Website: https://nipmod.com
-- Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+- Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Launch: https://nipmod.com/launch
 - Security: https://nipmod.com/security
 - Discovery: https://nipmod.com/.well-known/nipmod.json
@@ -13,6 +13,13 @@ Nipmod is technically live and ready for external review. It is not officially e
 - Proof transcript: https://nipmod.com/proof/transcript.json
 - Evidence ledger: https://nipmod.com/review/evidence-ledger.json
 - Evidence manifest: https://nipmod.com/review/evidence-manifest.json
+
+## Review scope
+
+- Source ref: main
+- Commit policy: reviewer resolves the exact Gitlawb commit before signing external evidence.
+- Evidence status: checklist and public proof links, not an external audit result.
+- External receipt count: zero first user receipts, zero signed independent reviews.
 
 ## Required commands
 

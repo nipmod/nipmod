@@ -96,12 +96,12 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 
 ## External proof tracks
 
-| Track | Current | What is ready | What still needs outside proof |
-| --- | ---: | --- | --- |
-| Gitlawb review signal | 60% | Founder post, DM, public source and demo. | Gitlawb founder or maintainer response. |
-| External human audit | 90% | Review packet, gates, proof loop and sign off template. | Independent reviewer signature or published findings. |
-| Real user adoption | 45% | First user loop, author dry run, repo claim preview and receipt template. | External redacted user receipts. |
-| Ecosystem depth | 85% | Verified first party packages cover every launch manifest type. | External packages accepted into the registry. |
+| Track | State | What is ready | What still needs outside proof |
+| --- | --- | --- | --- |
+| Gitlawb review signal | Prepared, 0 maintainer responses | Founder post, DM, public source and demo. | Gitlawb founder or maintainer response. |
+| External human audit | Prepared, 0 signed reviews | Review packet, gates, proof loop and sign off template. | Independent reviewer signature or published findings. |
+| Real user adoption | Waiting, 0 receipts | First user loop, author dry run, repo claim preview and receipt template. | External redacted user receipts. |
+| Ecosystem depth | First party ready, 0 external packages | Verified first party packages cover every launch manifest type. | External packages accepted into the registry. |
 
 ## What not to claim
 

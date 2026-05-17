@@ -40,7 +40,7 @@ Evidence directory: ${evidenceDir ? resolve(evidenceDir) : "not attached"}
 ## Public Targets
 
 - Website: https://nipmod.com
-- Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+- Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Security: https://nipmod.com/security
 - security.txt: https://nipmod.com/.well-known/security.txt
 - Registry: https://nipmod.com/registry/packages.json

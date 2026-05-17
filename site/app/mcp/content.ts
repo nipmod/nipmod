@@ -35,6 +35,23 @@ export const mcpContent = {
   ],
   verifyCommand:
     "printf '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{},\"clientInfo\":{\"name\":\"smoke\",\"version\":\"1.0.0\"}}}\\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\\n' | nipmod mcp serve",
+  examples: [
+    {
+      label: "Search",
+      command:
+        '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb"}}}'
+    },
+    {
+      label: "Plan install",
+      command:
+        '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"package":"gitlawb-repo-reader"}}}'
+    },
+    {
+      label: "Audit",
+      command:
+        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.audit","arguments":{"online":true}}}'
+    }
+  ],
   hosts: [
     {
       name: "Codex",
