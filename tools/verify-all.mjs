@@ -107,7 +107,7 @@ async function smokeLocalInstaller() {
 async function verifyProduction() {
   await run(process.execPath, ["tools/prod-synthetic-monitor.mjs"], { timeoutMs: 30_000 });
   await run(process.execPath, ["tools/restore-drill.mjs"], { timeoutMs: 30_000 });
-  await run(process.execPath, ["tools/prod-alert-runner.mjs", "--probe"], { timeoutMs: 60_000 });
+  await verifyAlertProbe();
   await run(process.execPath, ["tools/prod-load-smoke.mjs", "--profile", "launch"], { timeoutMs: 120_000 });
   await run(process.execPath, ["tools/node-edge-resilience-smoke.mjs"], { timeoutMs: 30_000 });
   await assertJson("https://node.nipmod.com/health", (payload) => payload.status === "ok", "node health failed");
@@ -179,6 +179,25 @@ async function verifyProduction() {
   await smokeLiveInstalledAudit();
   await run(process.execPath, ["tools/public-proof-loop.mjs", "--registry", "https://nipmod.com/registry/packages.json", "--quiet"]);
   await run(process.execPath, ["tools/advisory-drill.mjs", "--registry", "https://nipmod.com/registry/packages.json", "--quiet"]);
+}
+
+async function verifyAlertProbe() {
+  if (hasLocalAlertDestination()) {
+    await run(process.execPath, ["tools/prod-alert-runner.mjs", "--probe"], { timeoutMs: 60_000 });
+    return;
+  }
+
+  await run("flyctl", ["ssh", "console", "--config", "tools/fly.monitor.toml", "--command", "node tools/prod-alert-runner.mjs --probe"], {
+    timeoutMs: 120_000
+  });
+}
+
+function hasLocalAlertDestination() {
+  return Boolean(
+    process.env.NIPMOD_ALERT_PRIMARY_WEBHOOK_URL ||
+      process.env.NIPMOD_ALERT_SECONDARY_WEBHOOK_URL ||
+      process.env.NIPMOD_ALERT_WEBHOOK_URLS
+  );
 }
 
 function isInternalArtifact(pkg) {
