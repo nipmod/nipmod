@@ -140,10 +140,62 @@ describe("production synthetic monitor", () => {
     });
   });
 
-  test("fails when the transparency checkpoint is stale", async () => {
+  test("passes when an old static checkpoint is freshly observed by the witness", async () => {
     const fixture = createFixture({
       checkpointPatch: {
         generatedAt: "2026-05-15T12:41:00.000Z"
+      }
+    });
+
+    const result = await runSyntheticMonitor({
+      endpoints: fixture.endpoints,
+      expected: fixture.expected,
+      fetchFn: fixture.fetchFn,
+      now
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.checks.find((check) => check.name === "transparency_checkpoint")).toMatchObject({
+      status: "pass"
+    });
+    expect(result.checks.find((check) => check.name === "witness_health")).toMatchObject({
+      status: "pass"
+    });
+  });
+
+  test("fails when the witness has not freshly observed the checkpoint", async () => {
+    const fixture = createFixture({
+      routeOverrides: {
+        "GET https://witness.nipmod.test/health": jsonResponse({
+          ok: true,
+          lastError: null,
+          lastRunAt: "2026-05-16T10:41:00.000Z",
+          lastWitness: {
+            rootHash: "c".repeat(64),
+            treeSize: 7,
+            witness: "did:key:z6Mkwitness"
+          }
+        })
+      }
+    });
+
+    const result = await runSyntheticMonitor({
+      endpoints: fixture.endpoints,
+      expected: fixture.expected,
+      fetchFn: fixture.fetchFn,
+      now
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.checks.find((check) => check.name === "witness_health")).toMatchObject({
+      status: "fail"
+    });
+  });
+
+  test("fails when the checkpoint timestamp is invalid", async () => {
+    const fixture = createFixture({
+      checkpointPatch: {
+        generatedAt: "not-a-date"
       }
     });
 

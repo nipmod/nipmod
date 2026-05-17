@@ -908,7 +908,7 @@ async function buildRegistryFixture({
   repoOwner,
   sourceHeadCommit = "1".repeat(40),
   sourceTagCommit = sourceHeadCommit,
-  transparency,
+  transparency = fakeTransparency(),
   witnessIdentity,
   witnessStatements,
   verifySignedLifecycleEvent

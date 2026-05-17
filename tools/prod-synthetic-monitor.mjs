@@ -142,7 +142,7 @@ export async function runSyntheticMonitor({
     state.checkpoint = await fetchJson(endpoints.checkpoint, timedFetch);
     assertEqual(state.checkpoint.formatVersion, 1, "checkpoint format mismatch");
     assertEqual(state.checkpoint.logId, config.logId, "checkpoint log ID drifted");
-    assertFresh(state.checkpoint.generatedAt, now, config.checkpointMaxAgeMs, "checkpoint");
+    assertTimestampNotFuture(state.checkpoint.generatedAt, now, "checkpoint");
     if (!HEX_SHA256.test(state.checkpoint.rootHash ?? "")) {
       throw new Error("checkpoint root hash is invalid");
     }
@@ -342,6 +342,14 @@ async function verifyReleaseSignatureBytes({ artifactName, publicKeyInfo, releas
 }
 
 function assertFresh(timestamp, now, maxAgeMs, label) {
+  const parsed = assertTimestampNotFuture(timestamp, now, label);
+  const ageMs = now - parsed;
+  if (ageMs > maxAgeMs) {
+    throw new Error(`${label} is stale: ${Math.round(ageMs / 1000)}s old`);
+  }
+}
+
+function assertTimestampNotFuture(timestamp, now, label) {
   const parsed = Date.parse(timestamp);
   if (!Number.isFinite(parsed)) {
     throw new Error(`${label} timestamp is invalid`);
@@ -349,10 +357,7 @@ function assertFresh(timestamp, now, maxAgeMs, label) {
   if (parsed > now + 5 * 60 * 1000) {
     throw new Error(`${label} timestamp is in the future`);
   }
-  const ageMs = now - parsed;
-  if (ageMs > maxAgeMs) {
-    throw new Error(`${label} is stale: ${Math.round(ageMs / 1000)}s old`);
-  }
+  return parsed;
 }
 
 function requireState(value, label) {
