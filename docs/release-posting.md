@@ -10,6 +10,21 @@ Nipmod posts public updates only when the update changes what users or agents ca
 
 Patch releases do not need a public post unless they fix security, install reliability or production availability.
 
+## `v1.1.0` Package Claim post
+
+```text
+Nipmod v1.1.0 ships Package Claim.
+
+Turn a public Gitlawb repo into an installable agent package:
+
+nipmod package scan
+nipmod package doctor gitlawb://did:key:.../repo
+nipmod claim gitlawb://did:key:.../repo
+
+Gitlawb repos are source.
+Nipmod makes them packages.
+```
+
 ## First `v1.0.0` post
 
 ```text

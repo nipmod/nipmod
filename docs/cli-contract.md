@@ -14,6 +14,10 @@ P0 commands:
 - `nipmod pack`
 - `nipmod verify`
 - `nipmod publish --dry-run`
+- `nipmod package scan`
+- `nipmod package doctor <gitlawb-repo>`
+- `nipmod package <gitlawb-repo>`
+- `nipmod claim <gitlawb-repo>`
 - `nipmod inspect`
 - `nipmod view`
 - `nipmod install`

@@ -759,6 +759,44 @@ h1 {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.candidate-claimed {
+  background: rgba(143, 255, 193, 0.13);
+  border-color: rgba(143, 255, 193, 0.28);
+}
+
+.candidate-unclaimed {
+  background: rgba(41, 151, 255, 0.14);
+  border-color: rgba(41, 151, 255, 0.3);
+}
+
+.candidate-needs-work {
+  background: rgba(255, 217, 138, 0.12);
+  border-color: rgba(255, 217, 138, 0.25);
+}
+
+.candidate-flow {
+  backdrop-filter: blur(30px) saturate(180%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 10px;
+}
+
+.candidate-flow span {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 720;
+  min-height: 46px;
+  padding: 14px;
+  text-align: center;
+}
+
 .package-meta {
   display: grid;
   gap: 8px;
@@ -1159,6 +1197,7 @@ h1 {
   .usage-strip,
   .registry-head,
   .registry-stats,
+  .candidate-flow,
   .package-grid,
   .trust-grid,
   .safety-strip,

@@ -52,6 +52,7 @@ export function SiteHeader() {
           <summary className="nav-more-button">More</summary>
           <div className="more-menu-panel">
             <a href={homeContent.links.docs}>Docs</a>
+            <a href="/candidates">Package Claim</a>
             <a href="/package">Create</a>
             <a href="/launch">Launch</a>
             <a href="/trust">Trust</a>

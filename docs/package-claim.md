@@ -1,0 +1,214 @@
+# Nipmod Package Claim
+
+Package Claim is the growth and ownership flow that turns public Gitlawb repos into installable Nipmod packages without asking owners to create a Nipmod account.
+
+## Product Promise
+
+Gitlawb is the source layer for agent-built code. Nipmod is the package layer on top.
+
+Package Claim makes that concrete:
+
+```text
+Gitlawb repo -> package candidate -> owner claim -> package doctor -> verified package
+```
+
+## Core Concepts
+
+### Package Candidate
+
+A Package Candidate is a public Gitlawb repo that Nipmod can describe as a possible agent package before the owner has claimed it.
+
+Candidates are not official packages. The UI must clearly label them as unclaimed until a Gitlawb owner proof exists.
+
+### Readiness Score
+
+Readiness is a deterministic score from 0 to 100. It answers one question:
+
+```text
+How close is this repo to becoming installable by agents?
+```
+
+Signals:
+
+- Public Gitlawb repo exists.
+- Repo has a useful description.
+- Repo has README or agent-facing docs.
+- Repo has agent/package signals in name, description or docs.
+- Repo already has `nipmod.json`.
+- Manifest has explicit permissions.
+- Repo has install or usage examples.
+- Repo has license metadata.
+
+### Package Claim
+
+Package Claim verifies that the repo owner DID controls the package claim.
+
+The owner proves control by signing a Nipmod claim with the same DID that owns the Gitlawb repo. The proof can then be committed and pushed through Gitlawb.
+
+No Nipmod account is required.
+
+### Verified Package
+
+A candidate becomes a verified package only after:
+
+- Owner DID matches the Gitlawb repo owner.
+- Claim proof is valid.
+- `nipmod.json` validates.
+- Package can be packed.
+- Release artifact is signed.
+- Registry candidate passes trust and policy checks.
+
+## User Flow
+
+### 1. Scanner Finds Repos
+
+Nipmod periodically reads public Gitlawb repos from configured nodes.
+
+```bash
+nipmod package scan --node https://node.nipmod.com
+```
+
+Output:
+
+```text
+package candidates: 24
+ready 5
+almost 11
+needs-work 8
+```
+
+### 2. Candidate Page Exists
+
+Every candidate gets a page:
+
+```text
+Unclaimed package candidate
+Readiness: 82%
+Missing: nipmod.json, permissions, examples
+```
+
+CTA:
+
+```bash
+nipmod claim gitlawb://did:key:.../repo
+```
+
+### 3. Owner Runs Doctor
+
+```bash
+nipmod package doctor gitlawb://did:key:.../repo
+```
+
+Doctor prints:
+
+- Readiness score.
+- Missing files.
+- Suggested package type.
+- Exact commands.
+- Whether it is safe to claim.
+
+### 4. Owner Claims
+
+```bash
+nipmod claim gitlawb://did:key:.../repo --dir . --identity .nipmod/identity.json
+```
+
+Claim writes:
+
+```text
+.nipmod/package-claim.json
+```
+
+The file contains a canonical signed proof:
+
+```json
+{
+  "type": "dev.nipmod.package-claim.v1",
+  "repo": "gitlawb://did:key:.../repo",
+  "package": "pkg:did:key:.../repo",
+  "ownerDid": "did:key:...",
+  "createdAt": "2026-05-17T00:00:00.000Z",
+  "signature": {
+    "algorithm": "Ed25519",
+    "keyId": "did:key:...",
+    "signatureBase64": "..."
+  }
+}
+```
+
+### 5. Assisted Package PR
+
+When the repo is missing packaging files, Nipmod can create a package-ready patch:
+
+```bash
+nipmod package gitlawb://did:key:.../repo --dir repo-package
+```
+
+Later, when Gitlawb issue/PR APIs are stable, Nipmod can open an assisted Gitlawb PR with:
+
+- `nipmod.json`
+- package README block
+- install command
+- Package Claim badge
+- permission summary
+
+## CLI Surface
+
+```bash
+nipmod package scan --node https://node.nipmod.com
+nipmod package doctor gitlawb://did:key:.../repo
+nipmod package gitlawb://did:key:.../repo --dir repo-package
+nipmod claim gitlawb://did:key:.../repo --dir . --identity .nipmod/identity.json
+```
+
+JSON mode is required for agents:
+
+```bash
+nipmod package doctor gitlawb://did:key:.../repo --json
+nipmod claim gitlawb://did:key:.../repo --json
+```
+
+## Website Surface
+
+Routes:
+
+- `/packages` keeps verified packages first.
+- `/candidates` lists unclaimed Gitlawb package candidates.
+- `/candidates/[owner]/[repo]` explains readiness and claim steps.
+
+Page copy:
+
+```text
+Your Gitlawb repo is almost an agent package.
+Claim it with Gitlawb ownership proof.
+```
+
+## Safety Rules
+
+- Never label unclaimed repos as verified packages.
+- Never open mass issues or PRs automatically.
+- Never claim ownership through X, GitHub or email.
+- Never accept a claim proof unless `signature.keyId` matches the Gitlawb repo owner DID.
+- Never publish without a signed artifact and manifest validation.
+- Outreach must be opt-in or targeted, not spam.
+
+## Growth Loop
+
+1. Scanner discovers a repo.
+2. Candidate page creates a useful public artifact.
+3. Owner sees readiness and missing steps.
+4. Owner claims without creating a Nipmod account.
+5. Package becomes installable.
+6. Package page and badge bring other agents back to Nipmod.
+
+The loop turns Gitlawb itself into the distribution channel.
+
+## What Needs User Credentials
+
+No credentials are needed for local doctor, candidate scoring, candidate pages or claim proof generation.
+
+Credentials are needed only for:
+
+- Writing to a real Gitlawb repo.
+- Opening Gitlawb issues or PRs.
+- Running a production scanner job against private or rate-limited nodes.

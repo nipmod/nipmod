@@ -102,16 +102,16 @@
     "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.0.0",
-      "artifact": "https://nipmod.com/releases/nipmod-1.0.0.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.0.0.tgz.sig",
+      "version": "1.1.0",
+      "artifact": "https://nipmod.com/releases/nipmod-1.1.0.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.1.0.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
         "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
       },
-      "artifactSha256": "e2eb23160609ba8a9eff395be94e27b0b052d9d7be6c679db3914cdd13e3e15e"
+      "artifactSha256": "75f69215a238fb2503959e26a85700ab1e1438e3fbe14a8fef1a5fc48f0883e3"
     },
-    "scriptSha256": "4f3b02a582c27d9568aed7e7eca9dc6b7f04901ff399de70d1e2f76213b5048b"
+    "scriptSha256": "f94b335e92bcd06124466cfeeb9488f6792530576ff2f8c6d74f630a1ec9d325"
   }
 }

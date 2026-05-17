@@ -1,0 +1,54 @@
+import { describe, expect, test } from "vitest";
+import { candidateFromRepo, candidateStats, searchCandidates, type GitlawbRepoSummary } from "../lib/candidates";
+
+describe("candidate content", () => {
+  const repo: GitlawbRepoSummary = {
+    clone_url: "https://node.example/z6Owner/repo-reader.git",
+    default_branch: "main",
+    description: "Read Gitlawb repos for agents",
+    is_public: true,
+    name: "repo-reader",
+    owner_did: "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+    updated_at: "2026-05-17T00:00:00.000Z"
+  };
+
+  test("turns a Gitlawb repo into a claimable package candidate", () => {
+    const candidate = candidateFromRepo(repo, new Set());
+
+    expect(candidate).toMatchObject({
+      claimCommand:
+        "nipmod claim gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
+      packageId: "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
+      repoName: "repo-reader",
+      source: "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
+      status: "unclaimed"
+    });
+    expect(candidate.readinessScore).toBeGreaterThanOrEqual(60);
+  });
+
+  test("marks registry packages as already claimed", () => {
+    const candidate = candidateFromRepo(repo, new Set([`pkg:${repo.owner_did}/${repo.name}`]));
+
+    expect(candidate.status).toBe("claimed");
+    expect(candidate.readinessScore).toBe(100);
+  });
+
+  test("searches candidates by repo, package and description", () => {
+    const candidate = candidateFromRepo(repo, new Set());
+
+    expect(searchCandidates([candidate], "reader")).toHaveLength(1);
+    expect(searchCandidates([candidate], "agent")).toHaveLength(1);
+    expect(searchCandidates([candidate], "missing")).toHaveLength(0);
+  });
+
+  test("summarizes candidate states", () => {
+    const unclaimed = candidateFromRepo(repo, new Set());
+    const claimed = candidateFromRepo(repo, new Set([`pkg:${repo.owner_did}/${repo.name}`]));
+
+    expect(candidateStats([unclaimed, claimed])).toEqual([
+      { label: "Candidates", value: "2" },
+      { label: "Claimed", value: "1" },
+      { label: "Unclaimed", value: "1" }
+    ]);
+  });
+});

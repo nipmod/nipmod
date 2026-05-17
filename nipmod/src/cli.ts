@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { auditProject, type AuditProjectOptions, type AuditResult } from "./audit.js";
 import { packProject, verifyBundle } from "./bundle.js";
@@ -51,6 +51,15 @@ import { type LifecycleAction, type SignedLifecycleEvent, validateManifest, type
 import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
 import { generateSbom, type AgentSbom } from "./sbom.js";
 import {
+  analyzeLocalPackageCandidate,
+  createPackageClaimProof,
+  fetchGitlawbPackageCandidate,
+  fetchGitlawbPackageCandidates,
+  formatPackageCandidateReport,
+  writePackageClaimProof,
+  type PackageCandidateReport
+} from "./package-claim.js";
+import {
   DEFAULT_REGISTRY_URL,
   searchRegistries,
   searchRegistry,
@@ -80,6 +89,7 @@ const CLI_COMMANDS = [
   "init",
   "pack",
   "package",
+  "claim",
   "publish",
   "dist-tag",
   "deprecate",
@@ -163,6 +173,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return packCommand(args);
     case "package":
       return packageCommand(args);
+    case "claim":
+      return claimCommand(args);
     case "publish":
       return publishCommand(args);
     case "dist-tag":
@@ -326,6 +338,14 @@ async function packCommand(args: string[]): Promise<CliResult> {
 }
 
 async function packageCommand(args: string[]): Promise<CliResult> {
+  const subcommand = args[0];
+  if (subcommand === "doctor") {
+    return packageDoctorCommand(args.slice(1));
+  }
+  if (subcommand === "scan") {
+    return packageScanCommand(args.slice(1));
+  }
+
   const input = firstPositional(args);
   const repo = parseGitlawbRepoInput(input);
   const dir = optionalFlagValue(args, "--dir") ?? repo.repoName;
@@ -394,6 +414,98 @@ async function packageCommand(args: string[]): Promise<CliResult> {
         version: validated.version
       },
       nextCommands: [`nipmod manifest validate --dir ${dir}`, claimCommand]
+    }
+  };
+}
+
+async function packageDoctorCommand(args: string[]): Promise<CliResult> {
+  const input = firstPositional(args);
+  const repo = parseGitlawbRepoInput(input);
+  const dir = optionalFlagValue(args, "--dir");
+  const nodeUrl = configuredNodeUrl(args);
+  const repoInput = gitlawbCandidateInput(repo, nodeUrl);
+  const report = dir
+    ? await analyzeLocalPackageCandidate({ dir, repo: repoInput })
+    : await fetchGitlawbPackageCandidate({ nodeUrl, ownerDid: repo.ownerDid, repoName: repo.repoName });
+
+  return {
+    ok: true,
+    data: {
+      message: formatPackageCandidateReport(report),
+      report
+    }
+  };
+}
+
+async function packageScanCommand(args: string[]): Promise<CliResult> {
+  const nodeUrl = configuredNodeUrl(args);
+  const limit = searchLimit(args);
+  const result = await fetchGitlawbPackageCandidates({ limit, nodeUrl });
+
+  return {
+    ok: true,
+    data: {
+      message: formatPackageScan(result.candidates),
+      ...result
+    }
+  };
+}
+
+async function claimCommand(args: string[]): Promise<CliResult> {
+  const input = firstPositional(args);
+  const repo = parseGitlawbRepoInput(input);
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const identityPath = optionalFlagValue(args, "--identity");
+  if (!identityPath) {
+    const message = [
+      `claim plan for ${repo.source}`,
+      "",
+      "Claim requires the Gitlawb repo owner DID identity.",
+      `Run: nipmod claim ${repo.source} --dir . --identity .nipmod/identity.json`
+    ].join("\n");
+    return {
+      ok: true,
+      data: {
+        message,
+        claim: {
+          package: `pkg:${repo.ownerDid}/${repo.repoName}`,
+          ready: false,
+          repo: repo.source,
+          requiredIdentity: repo.ownerDid
+        }
+      }
+    };
+  }
+
+  const resolvedIdentityPath = isAbsolute(identityPath) ? identityPath : join(dir, identityPath);
+  const identity = await readLocalIdentity(dir, resolvedIdentityPath);
+  const createdAt = optionalFlagValue(args, "--created-at");
+  const proof = createPackageClaimProof({
+    ...(createdAt ? { createdAt } : {}),
+    identity,
+    ownerDid: repo.ownerDid,
+    repoName: repo.repoName
+  });
+  const dryRun = hasFlag(args, "--dry-run");
+  const proofPath = dryRun ? null : await writePackageClaimProof({ dir, proof });
+  const message = [
+    `claimed ${proof.package}`,
+    `repo: ${proof.repo}`,
+    proofPath ? `proof: ${proofPath}` : "dry-run: proof not written",
+    "next: commit and push the proof with Gitlawb"
+  ].join("\n");
+
+  return {
+    ok: true,
+    data: {
+      message,
+      claim: {
+        package: proof.package,
+        proof,
+        proofPath,
+        ready: true,
+        repo: proof.repo
+      }
     }
   };
 }
@@ -1956,6 +2068,28 @@ function formatDoctor(doctor: DoctorGitlawbResult): string {
   return lines.join("\n");
 }
 
+function formatPackageScan(candidates: PackageCandidateReport[]): string {
+  const ready = candidates.filter((candidate) => candidate.status === "ready").length;
+  const almost = candidates.filter((candidate) => candidate.status === "almost").length;
+  const needsWork = candidates.filter((candidate) => candidate.status === "needs-work").length;
+  const lines = [
+    `nipmod package scan: ${candidates.length} candidate${candidates.length === 1 ? "" : "s"}`,
+    `ready ${ready} almost ${almost} needs-work ${needsWork}`,
+    ""
+  ];
+  for (const candidate of candidates.slice(0, 20)) {
+    lines.push(
+      `${padCell(candidate.status.toUpperCase(), 10)} ${padCell(String(candidate.readinessScore), 3)}/100 ${candidate.repo.name}`,
+      `  ${candidate.source}`,
+      `  ${candidate.commands.claim}`
+    );
+  }
+  if (candidates.length > 20) {
+    lines.push(`... ${candidates.length - 20} more`);
+  }
+  return lines.join("\n");
+}
+
 function doctorCheckLabel(check: DoctorGitlawbResult["checks"][number]): string {
   return check.id === "gitlawb-helper" ? "Publish helper" : check.label;
 }
@@ -2057,6 +2191,7 @@ const VALUE_FLAGS = new Set([
   "--advisories-signature",
   "--advisory-key",
   "--advisory-key-sha256",
+  "--created-at",
   "--dir",
   "--discovery",
   "--env",
@@ -2124,6 +2259,29 @@ function parseGitlawbRepoInput(input: string): { ownerDid: string; ownerSegment:
   const [owner, repo] =
     segments[0] === "node" && segments[1] === "repos" ? [segments[2], segments[3]] : [segments[0], segments[1]];
   return gitlawbRepoFromParts(requireMatch(owner, "owner"), requireMatch(repo, "repo"));
+}
+
+function gitlawbCandidateInput(
+  repo: { ownerDid: string; ownerSegment: string; repoName: string },
+  nodeUrl: string
+): {
+  cloneUrl: string;
+  defaultBranch: string;
+  description: string;
+  isPublic: boolean;
+  name: string;
+  ownerDid: string;
+  updatedAt: string;
+} {
+  return {
+    cloneUrl: `${nodeUrl.replace(/\/$/, "")}/${repo.ownerSegment}/${repo.repoName}.git`,
+    defaultBranch: "main",
+    description: "",
+    isPublic: true,
+    name: repo.repoName,
+    ownerDid: repo.ownerDid,
+    updatedAt: new Date(0).toISOString()
+  };
 }
 
 function requireMatch(value: string | undefined, label: string): string {

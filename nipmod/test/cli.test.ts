@@ -914,6 +914,157 @@ describe("nipmod CLI", () => {
     expect(JSON.parse(validated.stdout).ok).toBe(true);
   });
 
+  test("doctors a Gitlawb repo package candidate from local files", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-package-doctor-"));
+    const owner = generateIdentity().did;
+    const repo = "doctor-agent";
+    await writeFile(
+      join(workspace, "README.md"),
+      "# Doctor agent\n\nA Gitlawb agent package candidate.\n\n## Usage\n\nRun it from an agent workflow.\n"
+    );
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "package",
+      "doctor",
+      `gitlawb://${owner}/${repo}`,
+      "--dir",
+      workspace,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        report: {
+          commands: { claim: string };
+          missing: Array<{ id: string }>;
+          package: string;
+          readinessScore: number;
+          status: string;
+        };
+      };
+    };
+
+    expect(parsed.ok).toBe(true);
+    expect(parsed.data.report.package).toBe(`pkg:${owner}/${repo}`);
+    expect(parsed.data.report.status).toBe("almost");
+    expect(parsed.data.report.readinessScore).toBeGreaterThanOrEqual(50);
+    expect(parsed.data.report.missing.map((item) => item.id)).toContain("manifest");
+    expect(parsed.data.report.commands.claim).toBe(`nipmod claim gitlawb://${owner}/${repo}`);
+    expect(result.stdout).not.toContain("privateKey");
+  }, 15_000);
+
+  test("scans Gitlawb node repos as package candidates", async () => {
+    const owner = generateIdentity().did;
+    const server = createServer((request, response) => {
+      if (request.url !== "/api/v1/repos") {
+        response.writeHead(404);
+        response.end("not found");
+        return;
+      }
+      response.writeHead(200, { "content-type": "application/json" });
+      response.end(
+        JSON.stringify([
+          {
+            clone_url: "http://127.0.0.1/repo-reader.git",
+            default_branch: "main",
+            description: "Read Gitlawb repos for agents",
+            is_public: true,
+            name: "repo-reader",
+            owner_did: owner,
+            updated_at: "2026-05-17T00:00:00.000Z"
+          }
+        ])
+      );
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("test server did not bind to a TCP port");
+    }
+
+    try {
+      const result = await execaNode([
+        "src/cli.ts",
+        "package",
+        "scan",
+        "--node",
+        `http://127.0.0.1:${address.port}`,
+        "--limit",
+        "5",
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { candidates: Array<{ source: string; status: string }>; total: number };
+      };
+
+      expect(parsed.ok).toBe(true);
+      expect(parsed.data.total).toBe(1);
+      expect(parsed.data.candidates[0]).toMatchObject({
+        source: `gitlawb://${owner}/repo-reader`,
+        status: "almost"
+      });
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      });
+    }
+  }, 15_000);
+
+  test("writes a signed package claim proof without exposing private key material", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-claim-"));
+    const identity = generateIdentity();
+    const repo = "claimed-agent";
+    await mkdir(join(workspace, ".nipmod"), { recursive: true });
+    await writeFile(join(workspace, ".nipmod", "identity.json"), `${JSON.stringify(identity, null, 2)}\n`, {
+      mode: 0o600
+    });
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "claim",
+      `gitlawb://${identity.did}/${repo}`,
+      "--dir",
+      workspace,
+      "--identity",
+      ".nipmod/identity.json",
+      "--created-at",
+      "2026-05-17T00:00:00.000Z",
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        claim: {
+          package: string;
+          proofPath: string;
+          ready: boolean;
+          repo: string;
+        };
+      };
+    };
+    const proof = JSON.parse(await readFile(join(workspace, ".nipmod", "package-claim.json"), "utf8"));
+
+    expect(parsed.ok).toBe(true);
+    expect(parsed.data.claim).toMatchObject({
+      package: `pkg:${identity.did}/${repo}`,
+      proofPath: join(workspace, ".nipmod", "package-claim.json"),
+      ready: true,
+      repo: `gitlawb://${identity.did}/${repo}`
+    });
+    expect(proof).toMatchObject({
+      ownerDid: identity.did,
+      package: `pkg:${identity.did}/${repo}`,
+      repo: `gitlawb://${identity.did}/${repo}`,
+      signature: {
+        algorithm: "Ed25519",
+        keyId: identity.did
+      }
+    });
+    expect(result.stdout).not.toContain("privateKey");
+  }, 15_000);
+
   test("manifest validate rejects unsafe permissions before packing", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-manifest-bad-"));
     const pkg = join(workspace, "pkg");
