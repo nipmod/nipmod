@@ -60,6 +60,7 @@ nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitl
 mkdir -p nipmod-demo
 cd nipmod-demo
 nipmod add gitlawb-repo-reader --online
+nipmod install
 ```
 
 Policy packs should be installed before broad capability packs. This makes risky permissions fail before workspace mutation.

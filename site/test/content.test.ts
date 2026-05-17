@@ -61,6 +61,7 @@ describe("home content", () => {
       "mkdir -p nipmod-demo && cd nipmod-demo",
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "nipmod add gitlawb-repo-reader --online",
+      "nipmod install",
       "nipmod audit --online"
     ]);
   });
@@ -78,6 +79,7 @@ describe("home content", () => {
       "Find",
       "Inspect",
       "Add",
+      "Restore",
       "Audit",
       "Publish"
     ]);
@@ -86,6 +88,7 @@ describe("home content", () => {
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Inspect")?.command).toMatch(
       /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --online$/
     );
@@ -105,7 +108,7 @@ describe("home content", () => {
     ]);
     expect(homeContent.founderOutreach.post).toContain("package layer");
     expect(homeContent.founderOutreach.dm).toContain("sanity check");
-    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Install", "Publish dry run"]);
+    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Add", "Restore", "Publish dry run"]);
     expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(28);
     expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod add "))).toBe(true);
   });

@@ -1,5 +1,5 @@
 import { createHash, generateKeyPairSync, sign } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -65,6 +65,274 @@ describe("nipmod CLI", () => {
     expect(packageKeys[0]).toMatch(/^pkg:did:key:z[A-Za-z0-9]+\/cli-skill@0\.1\.0$/);
     expect(lockfile.packages[packageKeys[0]].integrity).toBe(`sha256-${packed.data.digest}`);
   }, 15_000);
+
+  test("restores installed packages from the lockfile with nipmod install", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-lockfile-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+
+    await execaNode(["src/cli.ts", "init", "--name", "restored-agent", "--dir", pkg]);
+    const pack = await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"]);
+    const packed = JSON.parse(pack.stdout) as { ok: true; data: { path: string; digest: string } };
+    await execaNode([
+      "src/cli.ts",
+      "install",
+      `file:${packed.data.path}`,
+      "--dir",
+      app,
+      "--integrity",
+      `sha256-${packed.data.digest}`
+    ]);
+    await rm(join(app, ".nipmod"), { force: true, recursive: true });
+
+    const restored = await execaNode(["src/cli.ts", "install", "--dir", app, "--json"]);
+    const parsed = JSON.parse(restored.stdout) as {
+      ok: true;
+      data: { fetched: number; lockfileChanged: boolean; packageCount: number; restored: number };
+    };
+    const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+    const packageKey = Object.keys(lockfile.packages)[0];
+
+    expect(parsed.data).toMatchObject({
+      fetched: 0,
+      lockfileChanged: false,
+      packageCount: 1,
+      restored: 1
+    });
+    await expect(readFile(join(app, lockfile.packages[packageKey].storePath))).resolves.toBeTruthy();
+  }, 15_000);
+
+  test("offline lockfile install refuses to fetch missing remote bundles", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-lockfile-offline-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+
+    await execaNode(["src/cli.ts", "init", "--name", "remote-agent", "--dir", pkg]);
+    const pack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const server = await serveBundle(await readFile(pack.data.path), manifest.canonical, manifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: pack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: server.resolved,
+          sourceRepo: server.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+      await execaNode([
+        "src/cli.ts",
+        "add",
+        "remote-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      await rm(join(app, ".nipmod"), { force: true, recursive: true });
+
+      const failed = await expectCliJsonFailure(["src/cli.ts", "install", "--dir", app, "--offline", "--json"]);
+      expect(failed).toMatchObject({
+        error: {
+          message: expect.stringContaining("requires network access")
+        },
+        exitCode: 1,
+        ok: false
+      });
+      await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).resolves.toBeTruthy();
+    } finally {
+      await server.close();
+    }
+  }, 30_000);
+
+  test("lockfile install rechecks signed manifest permissions before restore", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-lockfile-policy-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+
+    await execaNode(["src/cli.ts", "init", "--name", "policy-restore-agent", "--dir", pkg]);
+    const manifestPath = join(pkg, "nipmod.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      permissions: { mcpTools: string[] };
+    };
+    manifest.permissions.mcpTools = ["github.search"];
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const pack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    await execaNode([
+      "src/cli.ts",
+      "install",
+      `file:${pack.data.path}`,
+      "--dir",
+      app,
+      "--integrity",
+      `sha256-${pack.data.digest}`
+    ]);
+
+    const lockfilePath = join(app, "nipmod.lock.json");
+    const lockfile = JSON.parse(await readFile(lockfilePath, "utf8")) as {
+      packages: Record<string, { permissions: { mcpTools: string[] }; storePath: string }>;
+    };
+    const packageKey = Object.keys(lockfile.packages)[0]!;
+    lockfile.packages[packageKey]!.permissions.mcpTools = [];
+    await writeFile(lockfilePath, `${JSON.stringify(lockfile, null, 2)}\n`);
+    await rm(join(app, ".nipmod"), { force: true, recursive: true });
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "install",
+      "--dir",
+      app,
+      "--profile",
+      "developer-default",
+      "--json"
+    ]);
+    const after = JSON.parse(await readFile(lockfilePath, "utf8")) as {
+      packages: Record<string, { permissions: { mcpTools: string[] }; storePath: string }>;
+    };
+
+    expect(failed).toMatchObject({
+      data: {
+        policyCheck: {
+          allowed: false
+        }
+      },
+      exitCode: 11,
+      ok: false
+    });
+    expect(failed.data?.policyCheck?.packages?.[0]?.decision?.reasons).toEqual(
+      expect.arrayContaining(["permission mcpTools is blocked by developer-default"])
+    );
+    expect(after.packages[packageKey]!.permissions.mcpTools).toEqual([]);
+    await expect(readFile(join(app, after.packages[packageKey]!.storePath))).rejects.toMatchObject({ code: "ENOENT" });
+  }, 15_000);
+
+  test("online lockfile install refetches a corrupt remote bundle cache", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-lockfile-refetch-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+
+    await execaNode(["src/cli.ts", "init", "--name", "refetch-agent", "--dir", pkg]);
+    const pack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const server = await serveBundle(await readFile(pack.data.path), manifest.canonical, manifest.version);
+    try {
+      const graphRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: pack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: server.resolved,
+          sourceRepo: server.sourceRepo
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(graphRegistry.registry)}\n`);
+      await execaNode([
+        "src/cli.ts",
+        "add",
+        "refetch-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        graphRegistry.log.treeHead.logId,
+        "--witness",
+        graphRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8")) as {
+        packages: Record<string, { storePath: string }>;
+      };
+      const packageKey = Object.keys(lockfile.packages)[0]!;
+      const storePath = join(app, lockfile.packages[packageKey]!.storePath);
+      await writeFile(storePath, "corrupt bundle");
+
+      const restored = await execaNode(["src/cli.ts", "install", "--dir", app, "--json"]);
+      const parsed = JSON.parse(restored.stdout) as {
+        ok: true;
+        data: { fetched: number; restored: number };
+      };
+
+      expect(parsed.data).toMatchObject({ fetched: 1, restored: 1 });
+      expect(Buffer.compare(await readFile(storePath), await readFile(pack.data.path))).toBe(0);
+    } finally {
+      await server.close();
+    }
+  }, 30_000);
+
+  test("lockfile install with policy handles a missing lockfile as empty", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-empty-policy-"));
+    const app = join(workspace, "app");
+
+    const restored = await execaNode([
+      "src/cli.ts",
+      "install",
+      "--dir",
+      app,
+      "--profile",
+      "developer-default",
+      "--json"
+    ]);
+    const parsed = JSON.parse(restored.stdout) as {
+      ok: true;
+      data: { packageCount: number; policyCheck: { allowed: boolean; summary: { total: number } }; restored: number };
+    };
+
+    expect(parsed.data).toMatchObject({
+      packageCount: 0,
+      policyCheck: { allowed: true, summary: { total: 0 } },
+      restored: 0
+    });
+  });
+
+  test("lockfile install rejects package install flags when no package is provided", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-flags-"));
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "install",
+      "--dir",
+      workspace,
+      "--integrity",
+      `sha256-${"a".repeat(64)}`,
+      "--json"
+    ]);
+
+    expect(failed).toMatchObject({
+      error: {
+        message: "install without a package specifier does not accept --integrity"
+      },
+      exitCode: 1,
+      ok: false
+    });
+  });
 
   test("lists and uninstalls installed packages from the CLI", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-uninstall-"));

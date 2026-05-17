@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import * as z from "zod";
+import { readOptionalFile, type Lockfile } from "./lockfile.js";
 import { permissionScopeIssue, type PermissionScopeIssue, type PermissionScopeKind } from "./protocol.js";
 import { type TrustReport } from "./trust-report.js";
 
@@ -43,26 +44,9 @@ export interface PolicyCheckResult {
   };
 }
 
-const DidKeySchema = z.string().regex(/^did:key:z[A-Za-z0-9]+$/);
+const PolicyProfileSchema = z.enum(["developer-default", "strict-ci", "research-permissive"]);
 const PackageIdSchema = z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/);
 const SemverSchema = z.string().regex(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
-const IntegritySchema = z.string().regex(/^sha256-[a-f0-9]{64}$/);
-
-const PolicyProfileSchema = z.enum(["developer-default", "strict-ci", "research-permissive"]);
-
-const PolicyPermissionSchema = z.strictObject({
-  env: z.array(z.string()),
-  exec: z.strictObject({
-    allowed: z.boolean()
-  }),
-  filesystem: z.array(z.string()),
-  mcpTools: z.array(z.string()),
-  network: z.array(z.string()),
-  postinstall: z.strictObject({
-    allowed: z.boolean()
-  }),
-  secrets: z.array(z.string())
-});
 
 const PolicySchema = z.strictObject({
   formatVersion: z.literal(1),
@@ -81,26 +65,35 @@ const PolicySchema = z.strictObject({
   type: z.literal("dev.nipmod.policy.v1")
 });
 
-const LockfilePackageSchema = z.strictObject({
+const PolicyPermissionSchema = z.strictObject({
+  env: z.array(z.string()),
+  exec: z.strictObject({
+    allowed: z.boolean()
+  }),
+  filesystem: z.array(z.string()),
+  mcpTools: z.array(z.string()),
+  network: z.array(z.string()),
+  postinstall: z.strictObject({
+    allowed: z.boolean()
+  }),
+  secrets: z.array(z.string())
+});
+
+const PolicyLockfilePackageSchema = z.strictObject({
   canonical: PackageIdSchema,
-  files: z.array(z.string().min(1)),
-  integrity: IntegritySchema,
-  manifestDigest: z.string().regex(/^[a-f0-9]{64}$/),
   name: z.string().min(1),
   permissions: PolicyPermissionSchema,
-  publisher: DidKeySchema,
-  resolved: z.string().min(1),
   version: SemverSchema
 }).passthrough();
 
-const LockfileSchema = z.strictObject({
+const PolicyLockfileSchema = z.strictObject({
   formatVersion: z.union([z.literal(1), z.literal(2)]),
   generatedBy: z.string().min(1),
-  packages: z.record(z.string(), LockfilePackageSchema)
+  packages: z.record(z.string(), PolicyLockfilePackageSchema)
 }).passthrough();
 
 export type NipmodPolicy = z.infer<typeof PolicySchema>;
-type LockfilePackage = z.infer<typeof LockfilePackageSchema>;
+type PolicyLockfilePackage = z.infer<typeof PolicyLockfilePackageSchema>;
 
 export function defaultPolicy(profile: PolicyProfile = "developer-default"): NipmodPolicy {
   switch (profile) {
@@ -232,8 +225,23 @@ export function evaluateTrustReportPolicy(report: TrustReport, policy: NipmodPol
 }
 
 export async function checkInstalledPolicy(projectDir: string, policy: NipmodPolicy = defaultPolicy()): Promise<PolicyCheckResult> {
-  const lockfile = LockfileSchema.parse(JSON.parse(await readFile(join(projectDir, "nipmod.lock.json"), "utf8")) as unknown);
-  const packages = Object.entries(lockfile.packages).map(([key, pkg]) => {
+  const text = await readOptionalFile(join(projectDir, "nipmod.lock.json"));
+  if (!text) {
+    return checkPolicyPackages({}, policy);
+  }
+  const lockfile = PolicyLockfileSchema.parse(JSON.parse(text) as unknown);
+  return checkPolicyPackages(lockfile.packages, policy);
+}
+
+export function checkLockfilePolicy(lockfile: Lockfile, policy: NipmodPolicy = defaultPolicy()): PolicyCheckResult {
+  return checkPolicyPackages(lockfile.packages, policy);
+}
+
+function checkPolicyPackages(
+  lockfilePackages: Record<string, PolicyLockfilePackage>,
+  policy: NipmodPolicy = defaultPolicy()
+): PolicyCheckResult {
+  const packages = Object.entries(lockfilePackages).map(([key, pkg]) => {
     const expectedKey = `${pkg.canonical}@${pkg.version}`;
     const permissionDecision = evaluatePermissionPolicy(pkg, policy);
     const keyRule = ruleResult({
@@ -265,7 +273,7 @@ export async function checkInstalledPolicy(projectDir: string, policy: NipmodPol
   };
 }
 
-function evaluatePermissionPolicy(pkg: LockfilePackage, policy: NipmodPolicy): PolicyDecision {
+function evaluatePermissionPolicy(pkg: PolicyLockfilePackage, policy: NipmodPolicy): PolicyDecision {
   const rules = [
     ruleResult({
       actual: pkg.permissions.exec.allowed,

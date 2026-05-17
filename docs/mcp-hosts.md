@@ -27,6 +27,15 @@ curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 nipmod doctor
 ```
 
+For a checksum verified installer step:
+
+```bash
+curl -fLO https://nipmod.com/install.sh
+curl -fLO https://nipmod.com/install.sh.sha256
+shasum -a 256 -c install.sh.sha256
+bash install.sh
+```
+
 ## Codex
 
 Command:

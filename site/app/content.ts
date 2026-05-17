@@ -14,6 +14,7 @@ export const homeContent = {
     "mkdir -p nipmod-demo && cd nipmod-demo",
     "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
     "nipmod add gitlawb-repo-reader --online",
+    "nipmod install",
     "nipmod audit --online"
   ],
   usage: [
@@ -61,6 +62,11 @@ export const homeContent = {
       label: "Add",
       text: "Create a demo workspace first so the first lockfile mutation is isolated.",
       command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod add gitlawb-repo-reader --online"
+    },
+    {
+      label: "Restore",
+      text: "Restore the local store from the lockfile or confirm it is current.",
+      command: "nipmod install"
     },
     {
       label: "Audit",
@@ -138,9 +144,14 @@ export const homeContent = {
       command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online"
     },
     {
-      label: "Install",
+      label: "Add",
       text: "Pin the verified package in the workspace lockfile.",
       command: "nipmod add gitlawb-repo-reader --online"
+    },
+    {
+      label: "Restore",
+      text: "Restore the package store from the lockfile.",
+      command: "nipmod install"
     },
     {
       label: "Publish dry run",

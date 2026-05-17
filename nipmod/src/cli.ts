@@ -18,12 +18,14 @@ import {
 import { generateIdentity, type Identity } from "./identity.js";
 import { digestFromIntegrity } from "./integrity.js";
 import {
+  checkLockfilePolicy,
   checkInstalledPolicy,
   defaultPolicy,
   evaluateTrustReportPolicy,
   parsePolicyProfile,
   readPolicyFile,
-  type NipmodPolicy
+  type NipmodPolicy,
+  type PolicyCheckResult
 } from "./policy.js";
 import {
   createRegistryInstallPlan,
@@ -33,7 +35,14 @@ import {
   resolveAddInstallPlan,
   type RegistryTrustOptions
 } from "./install-plan.js";
-import { installBundlePackage, installFilePackage, listInstalledPackages, uninstallPackage } from "./install.js";
+import {
+  installBundlePackage,
+  installFilePackage,
+  installLockfilePackages,
+  listInstalledPackages,
+  uninstallPackage,
+  type InstallLockfileResult
+} from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
 import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
 import {
@@ -87,6 +96,7 @@ const CLI_EXIT_CODES = [
   { code: 0, meaning: "ok" },
   { code: 1, meaning: "usage or unexpected error" },
   { code: 7, meaning: "trust or advisory block" },
+  { code: 11, meaning: "install policy block" },
   { code: 12, meaning: "preflight not ready" }
 ] as const;
 
@@ -432,9 +442,12 @@ async function manifestValidateCommand(args: string[]): Promise<CliResult> {
 }
 
 async function installCommand(args: string[]): Promise<CliResult> {
-  const spec = firstPositional(args);
+  const spec = optionalFirstPositional(args);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
   if (hasFlag(args, "--plan")) {
+    if (!spec) {
+      throw new Error("install --plan requires a package specifier");
+    }
     const plan = await createRegistryInstallPlan({
       ...registryTrustFlags(args, "install --plan"),
       action: "install",
@@ -450,6 +463,9 @@ async function installCommand(args: string[]): Promise<CliResult> {
       },
       exitCode: plan.readyToInstall ? 0 : installPlanExitCode(plan)
     };
+  }
+  if (!spec) {
+    return installLockfileCommand(args, dir);
   }
 
   const integrity = requireFlagValue(args, "--integrity");
@@ -483,6 +499,66 @@ async function installCommand(args: string[]): Promise<CliResult> {
       lockfileChanged: result.lockfileChanged
     }
   };
+}
+
+async function installLockfileCommand(args: string[], dir: string): Promise<CliResult> {
+  assertLockfileInstallFlags(args);
+  const policy = await optionalPolicyFromFlags(args);
+  let policyCheck: PolicyCheckResult | undefined;
+  let result: InstallLockfileResult;
+  try {
+    const installOptions: Parameters<typeof installLockfilePackages>[1] = {
+      allowNetwork: !hasFlag(args, "--offline")
+    };
+    if (policy) {
+      installOptions.validateLockfile = (lockfile) => {
+        const check = checkLockfilePolicy(lockfile, policy);
+        policyCheck = check;
+        if (!check.allowed) {
+          throw new PolicyBlockError(check);
+        }
+      };
+    }
+    result = await installLockfilePackages(dir, installOptions);
+  } catch (error) {
+    if (error instanceof PolicyBlockError) {
+      const blockedCheck = error.policyCheck;
+      return {
+        ok: false,
+        data: {
+          message: formatPolicyCheck(blockedCheck),
+          policyCheck: blockedCheck
+        },
+        exitCode: 11
+      };
+    }
+    throw error;
+  }
+  if (policyCheck && !policyCheck.allowed) {
+    return {
+      ok: false,
+      data: {
+        message: formatPolicyCheck(policyCheck),
+        policyCheck
+      },
+      exitCode: 11
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      message: formatLockfileInstall(result),
+      ...(policyCheck ? { policyCheck } : {}),
+      ...result
+    }
+  };
+}
+
+class PolicyBlockError extends Error {
+  constructor(readonly policyCheck: PolicyCheckResult) {
+    super("install policy blocked");
+  }
 }
 
 async function addCommand(args: string[]): Promise<CliResult> {
@@ -1140,6 +1216,19 @@ function formatOutdatedPackage(pkg: OutdatedPackage): string {
   ].join(" ");
 }
 
+function formatLockfileInstall(result: InstallLockfileResult): string {
+  if (result.packageCount === 0) {
+    return "no packages in lockfile";
+  }
+  const lines = [
+    `verified ${result.packageCount} package${result.packageCount === 1 ? "" : "s"} from lockfile`,
+    `restored: ${result.restored}`,
+    `fetched: ${result.fetched}`,
+    `lockfile: ${result.lockfileChanged ? "updated" : "unchanged"}`
+  ];
+  return lines.join("\n");
+}
+
 function quotedSearchQuery(query: string): string {
   return `"${query.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 }
@@ -1192,7 +1281,7 @@ function formatPolicyDecision(decision: { allowed: boolean; profile: string; rea
   return lines.join("\n");
 }
 
-function formatPolicyCheck(result: Awaited<ReturnType<typeof checkInstalledPolicy>>): string {
+function formatPolicyCheck(result: PolicyCheckResult): string {
   const lines = [`nipmod policy check ${result.allowed ? "passed" : "blocked"} (${result.policy.profile})`];
   lines.push(`ALLOW ${result.summary.allow} BLOCK ${result.summary.block} TOTAL ${result.summary.total}`);
   for (const pkg of result.packages) {
@@ -1202,6 +1291,26 @@ function formatPolicyCheck(result: Awaited<ReturnType<typeof checkInstalledPolic
     }
   }
   return lines.join("\n");
+}
+
+function assertLockfileInstallFlags(args: readonly string[]): void {
+  if (hasFlag(args, "--offline") && hasFlag(args, "--online")) {
+    throw new Error("install cannot use both --offline and --online");
+  }
+  for (let index = 0; index < args.length; index += 1) {
+    const value = args[index];
+    if (!value?.startsWith("--")) {
+      continue;
+    }
+    if (LOCKFILE_INSTALL_BOOLEAN_FLAGS.has(value)) {
+      continue;
+    }
+    if (LOCKFILE_INSTALL_VALUE_FLAGS.has(value)) {
+      index += 1;
+      continue;
+    }
+    throw new Error(`install without a package specifier does not accept ${value}`);
+  }
 }
 
 function searchLimit(args: readonly string[]): number {
@@ -1346,6 +1455,15 @@ function formatPublishDryRunPlan(plan: Awaited<ReturnType<typeof createPublishDr
 }
 
 function firstPositional(args: readonly string[]): string {
+  const value = optionalFirstPositional(args);
+  if (value) {
+    return value;
+  }
+
+  throw new Error("missing positional argument");
+}
+
+function optionalFirstPositional(args: readonly string[]): string | null {
   for (let index = 0; index < args.length; index += 1) {
     const value = args[index];
     if (!value) {
@@ -1360,7 +1478,7 @@ function firstPositional(args: readonly string[]): string {
     return value;
   }
 
-  throw new Error("missing positional argument");
+  return null;
 }
 
 function flagTakesValue(flag: string): boolean {
@@ -1392,6 +1510,9 @@ const VALUE_FLAGS = new Set([
   "--version",
   "--witness"
 ]);
+
+const LOCKFILE_INSTALL_BOOLEAN_FLAGS = new Set(["--json", "--offline", "--online"]);
+const LOCKFILE_INSTALL_VALUE_FLAGS = new Set(["--dir", "--policy", "--profile"]);
 
 const PACKAGE_DRAFT_TYPES = new Set<Manifest["type"]>([
   "skill",

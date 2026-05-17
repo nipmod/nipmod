@@ -72,6 +72,7 @@ nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4f
 mkdir -p nipmod-demo
 cd nipmod-demo
 nipmod add gitlawb-repo-reader --online
+nipmod install
 nipmod audit --online
 nipmod ci --online
 ```

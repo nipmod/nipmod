@@ -79,6 +79,18 @@ Expected result:
 - The lockfile pins the artifact digest.
 - A trust or advisory failure exits before lockfile mutation.
 
+## Restore from the lockfile
+
+```sh
+nipmod install
+```
+
+Expected result:
+
+- `.nipmod/store` is restored from the lockfile.
+- Existing verified store entries are reused.
+- `--offline` refuses remote fetches and only uses local store or file URLs.
+
 ## Audit
 
 ```sh
@@ -109,7 +121,7 @@ Expected result:
 
 If install fails, rerun the checksum step and do not pipe the installer into a shell.
 
-If search or inspect fails with a network message, rerun with `--online`. nipmod does not silently use network access for commands that can run offline.
+If search or inspect fails with a network message, rerun with `--online`. `nipmod install` may fetch digest-pinned remote bundles when the local store is missing or corrupt; pass `--offline` to force local store and file URL use only.
 
 If inspect fails with a custom root message, use public roots or pass `--allow-custom-roots` only for a local test registry.
 

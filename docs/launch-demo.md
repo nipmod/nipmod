@@ -14,9 +14,22 @@ This path is for someone with no nipmod account and no private credentials. It p
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 nipmod doctor --online
 nipmod search gitlawb --online
+mkdir -p nipmod-demo && cd nipmod-demo
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 nipmod add gitlawb-repo-reader --online
+nipmod install
 nipmod audit --online
+```
+
+## Verified installer variant
+
+Use this installer step when the reviewer wants to verify the script checksum before execution.
+
+```bash
+curl -fLO https://nipmod.com/install.sh
+curl -fLO https://nipmod.com/install.sh.sha256
+shasum -a 256 -c install.sh.sha256
+bash install.sh
 ```
 
 ## Author dry run
@@ -41,12 +54,13 @@ nipmod manifest validate --dir gitlawb-repo-reader-draft
 
 ## Expected proof
 
-- Installer checksum passes before execution.
+- The short installer succeeds, and the verified installer variant passes before execution.
 - `doctor --online` reaches the registry, node and Gitlawb helper.
 - `init` creates a local package and DID identity without a nipmod account in the author dry run.
 - `publish --dry-run --json` prints a registry candidate and does not mutate Gitlawb in the author dry run.
 - `inspect` shows digest, publisher DID, source repo, source commit, transparency proof and witness URL.
 - `add` writes the lockfile only after verification.
+- `install` restores the local store from the digest-pinned lockfile.
 - `audit` exits clean when advisories and proof are current.
 
 ## Bad case

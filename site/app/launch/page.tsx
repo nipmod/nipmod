@@ -17,9 +17,16 @@ const tracks = [
   {
     label: "Use",
     title: "First install loop",
-    text: "Install, run doctor, search, inspect, add and audit a verified package.",
+    text: "Install, run doctor, search, inspect, add, restore and audit a verified package.",
     command:
-      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nmkdir -p nipmod-demo && cd nipmod-demo\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod outdated --online\nnipmod audit --online"
+      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod doctor --online\nnipmod search gitlawb --online\nmkdir -p nipmod-demo && cd nipmod-demo\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online\nnipmod add gitlawb-repo-reader --online\nnipmod install\nnipmod outdated --online\nnipmod audit --online"
+  },
+  {
+    label: "Verify",
+    title: "Checksum installer path",
+    text: "Use this when a reviewer wants to verify the installer before execution.",
+    command:
+      "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh"
   },
   {
     label: "Publish",

@@ -14,6 +14,7 @@ P0 commands:
 - `nipmod publish --dry-run`
 - `nipmod inspect`
 - `nipmod view`
+- `nipmod install`
 - `nipmod install --plan`
 - `nipmod add`
 - `nipmod audit`
@@ -65,6 +66,8 @@ Human terminal output is optimized for scanning and may change between releases.
 `--json` or `nipmod mcp serve`. `nipmod search --details` prints canonical package ids and source registry URLs
 for humans who want the security detail that is hidden from the default search view. `nipmod view` returns exact
 package metadata and refuses ambiguous names unless the canonical package id is used.
+`nipmod install` without a package specifier restores `.nipmod/store` from the existing lockfile and reports
+`packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
 
@@ -75,11 +78,14 @@ package metadata and refuses ambiguous names unless the canonical package id is 
 | 0 | ok |
 | 1 | usage or unexpected error |
 | 7 | trust or advisory block |
+| 11 | install policy block |
 | 12 | preflight not ready |
 
 ## Network mode
 
-Commands that need public data require `--online`. Commands that can run locally must not silently use network access.
+Commands that need registry or advisory data require `--online`. Lockfile restore is an install command: it may fetch
+digest-pinned remote bundles when the local store is missing or corrupt. Pass `--offline` to force local store and
+file URL use only.
 
 Use `--offline` for checks that should never touch public services.
 
