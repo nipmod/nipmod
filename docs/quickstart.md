@@ -91,10 +91,11 @@ Expected result:
 - Existing verified store entries are reused.
 - `--offline` refuses remote fetches and only uses local store or file URLs.
 
-## Audit
+## Explain and audit
 
 ```sh
 nipmod sbom --json
+nipmod explain gitlawb-repo-reader --json
 ```
 
 Expected result:
@@ -102,13 +103,14 @@ Expected result:
 - The SBOM lists installed package records from the lockfile.
 - Local store bundles are verified before manifest details are included.
 - Permission counts and dependency edges are visible for agents and reviewers.
+- Explain shows whether the package is root, transitive or orphaned.
 
 ```sh
 nipmod audit --online
 nipmod ci --online
 ```
 
-Use `sbom` for inventory, `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
+Use `sbom` for inventory, `explain` for lockfile reasons, `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
 
 ## Publish dry run
 

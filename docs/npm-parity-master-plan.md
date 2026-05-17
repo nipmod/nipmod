@@ -135,3 +135,5 @@ The first slice establishes manifest dependency fields, a semver/dist tag resolv
 The second slice adds additive Registry dependency metadata, v1 readable / v2 written lockfiles, root dependency intent, package snapshots, direct dependency edges and an atomic graph install primitive for pre verified bundles. This is the base for registry driven transitive install, `outdated`, `update`, `explain`, `sbom` and signed lifecycle events.
 
 The third slice adds `nipmod sbom` for verified agent capability inventories from lockfiles and local store bundles. It gives agents one JSON surface for package identity, manifest exports, permission counts and dependency edges without fetching network data.
+
+The fourth slice adds `nipmod explain` for lockfile root intent, dependent records and dependency paths. It gives agents the missing npm style answer to why a package is installed without network access or package execution.

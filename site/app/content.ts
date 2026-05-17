@@ -16,6 +16,7 @@ export const homeContent = {
     "nipmod add gitlawb-repo-reader --online",
     "nipmod install",
     "nipmod sbom --json",
+    "nipmod explain gitlawb-repo-reader --json",
     "nipmod audit --online"
   ],
   usage: [
@@ -73,6 +74,11 @@ export const homeContent = {
       label: "SBOM",
       text: "Export the lockfile, permissions and dependency graph for agents.",
       command: "nipmod sbom --json"
+    },
+    {
+      label: "Explain",
+      text: "Show why a package exists in the lockfile.",
+      command: "nipmod explain gitlawb-repo-reader --json"
     },
     {
       label: "Audit",

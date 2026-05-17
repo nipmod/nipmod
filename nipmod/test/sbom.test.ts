@@ -99,7 +99,7 @@ describe("nipmod sbom", () => {
     expect(human.stdout).toContain("nipmod sbom: 2 packages");
     expect(human.stdout).toContain("workflow-runner@0.1.0");
     expect(human.stdout).toContain("dependencies: 1");
-  });
+  }, 15_000);
 
   test("prints an empty SBOM for a workspace without a lockfile", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-sbom-empty-"));

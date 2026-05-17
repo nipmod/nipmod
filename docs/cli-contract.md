@@ -23,6 +23,7 @@ P0 commands:
 - `nipmod ls`
 - `nipmod uninstall`
 - `nipmod outdated`
+- `nipmod explain`
 - `nipmod sbom`
 - `nipmod policy`
 - `nipmod mcp serve`
@@ -30,7 +31,6 @@ P0 commands:
 Next npm parity commands:
 
 - `nipmod update`
-- `nipmod explain`
 - `nipmod version`
 - `nipmod dist-tag`
 - `nipmod deprecate`
@@ -70,6 +70,10 @@ package metadata and refuses ambiguous names unless the canonical package id is 
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
+`nipmod explain <package>` reads the lockfile without network access and returns root reasons, dependents and
+dependency paths for matching installed package records. `<package>` accepts `name`, `name@version`, canonical package
+id, canonical package id with version, or the exact lockfile package key. Path enumeration is capped and reports
+`pathsTruncated` when a dense lockfile has more paths than the response limit.
 `nipmod sbom` reports `type`, `generator`, `root`, `summary` and `packages` from the installed lockfile. When local
 store bundles exist, it verifies each signed bundle before including manifest exports, dependency maps and package
 type. It does not fetch network data.
@@ -102,6 +106,7 @@ Use `--offline` for checks that should never touch public services.
 - Public JSON field names are additive once released.
 - Registry data is an index. It is never the only proof source.
 - Installs recheck fetched signed bundle manifests before lockfile mutation. Registry permission counts cannot downgrade real package permissions.
+- Explain data comes from lockfile root intent and snapshots only. It does not inspect package text or execute code.
 - SBOM manifest details come from verified local store bundles. Missing cache entries are reported without network fetch.
 - HTTPS registry mirrors that are not `https://nipmod.com` must prove signed advisory state before install; otherwise trust reports fail closed.
 - Custom trust roots require explicit opt in.

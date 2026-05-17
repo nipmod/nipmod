@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { auditProject, type AuditProjectOptions, type AuditResult } from "./audit.js";
 import { packProject, verifyBundle } from "./bundle.js";
 import { ciProject, type CiPolicyProfile, type CiResult } from "./ci.js";
+import { explainPackage, type ExplainReport } from "./explain.js";
 import {
   DEFAULT_GITLAWB_NODE,
   createPublishDryRunPlan,
@@ -82,6 +83,7 @@ const CLI_COMMANDS = [
   "ls",
   "uninstall",
   "outdated",
+  "explain",
   "sbom",
   "doctor",
   "audit",
@@ -161,6 +163,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return uninstallCommand(args);
     case "outdated":
       return outdatedCommand(args);
+    case "explain":
+      return explainCommand(args);
     case "sbom":
       return sbomCommand(args);
     case "doctor":
@@ -661,6 +665,19 @@ async function outdatedCommand(args: string[]): Promise<CliResult> {
     ok: true,
     data: {
       message: formatOutdated(report),
+      ...report
+    }
+  };
+}
+
+async function explainCommand(args: string[]): Promise<CliResult> {
+  const query = positionalArg(args, "explain");
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const report = await explainPackage(query, dir);
+  return {
+    ok: true,
+    data: {
+      message: formatExplain(report),
       ...report
     }
   };
@@ -1245,6 +1262,33 @@ function formatLockfileInstall(result: InstallLockfileResult): string {
   return lines.join("\n");
 }
 
+function formatExplain(report: ExplainReport): string {
+  const lines = [`nipmod explain: ${report.summary.packageCount} package${report.summary.packageCount === 1 ? "" : "s"}`];
+  if (report.matches.length === 0) {
+    lines.push(`not installed: ${report.query}`);
+    return lines.join("\n");
+  }
+  for (const pkg of report.matches) {
+    lines.push("", `${pkg.name}@${pkg.version}`, `id: ${pkg.canonical}`);
+    for (const reason of pkg.rootReasons) {
+      lines.push(`root: ${reason.dependencyKind}.${reason.dependencyName}@${reason.spec}`);
+    }
+    for (const dependent of pkg.dependents) {
+      lines.push(`required by ${dependent.name}@${dependent.version} via ${dependent.dependencyKind}.${dependent.dependencyName}`);
+    }
+    for (const path of pkg.paths) {
+      lines.push(`path: ${path.nodes.map((node) => `${node.name}@${node.version}`).join(" > ")}`);
+    }
+    if (pkg.pathsTruncated) {
+      lines.push("paths: truncated");
+    }
+    if (pkg.orphan) {
+      lines.push("orphan: no root or dependent path in lockfile");
+    }
+  }
+  return lines.join("\n");
+}
+
 function formatSbom(sbom: AgentSbom): string {
   const lines = [
     `nipmod sbom: ${sbom.summary.packageCount} package${sbom.summary.packageCount === 1 ? "" : "s"}`,
@@ -1436,6 +1480,14 @@ function optionalFlagValues(args: readonly string[], flag: string): string[] {
 
 function hasFlag(args: readonly string[], flag: string): boolean {
   return args.includes(flag);
+}
+
+function positionalArg(args: readonly string[], commandName: string): string {
+  const value = optionalFirstPositional(args);
+  if (!value) {
+    throw new Error(`usage: nipmod ${commandName} <package>`);
+  }
+  return value;
 }
 
 function registryTrustFlags(args: readonly string[], commandName: string): RegistryTrustOptions {

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import * as z from "zod";
 import { auditProject, type AuditProjectOptions } from "./audit.js";
 import { verifyBundle } from "./bundle.js";
+import { explainPackage } from "./explain.js";
 import { createPublishDryRunPlan } from "./gitlawb.js";
 import { createRegistryInstallPlan } from "./install-plan.js";
 import { digestFromIntegrity } from "./integrity.js";
@@ -134,6 +135,11 @@ const SbomArgumentsSchema = z.strictObject({
   projectDir: z.string().optional()
 });
 
+const ExplainArgumentsSchema = z.strictObject({
+  projectDir: z.string().optional(),
+  query: z.string().min(1)
+});
+
 const CallToolParamsSchema = z.strictObject({
   arguments: z.record(z.string(), z.unknown()).optional(),
   name: z.string().min(1)
@@ -221,6 +227,8 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await auditTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.sbom":
       return toolResult(await sbomTool(parsed.arguments ?? {}));
+    case "nipmod.explain":
+      return toolResult(await explainTool(parsed.arguments ?? {}));
     default:
       throw new McpError(-32602, `unknown tool: ${parsed.name}`);
   }
@@ -359,6 +367,11 @@ async function auditTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonVal
 async function sbomTool(raw: unknown): Promise<JsonValue> {
   const args = SbomArgumentsSchema.parse(raw);
   return toJsonValue(await generateSbom(args.projectDir ?? process.cwd()));
+}
+
+async function explainTool(raw: unknown): Promise<JsonValue> {
+  const args = ExplainArgumentsSchema.parse(raw);
+  return toJsonValue(await explainPackage(args.query, args.projectDir ?? process.cwd()));
 }
 
 function assertCustomRootOptIn(args: {
@@ -749,5 +762,26 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.sbom",
     title: "Export nipmod SBOM"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: false
+    },
+    description: "Explain why a package is present in a project's nipmod lockfile without network fetches.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        projectDir: { type: "string" },
+        query: {
+          description: "Installed package name, name@version, canonical package id, canonical@version, or lockfile package key.",
+          type: "string"
+        }
+      },
+      required: ["query"],
+      type: "object"
+    },
+    name: "nipmod.explain",
+    title: "Explain nipmod package"
   }
 ];

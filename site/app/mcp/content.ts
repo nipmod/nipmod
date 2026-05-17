@@ -1,6 +1,6 @@
 export const mcpContent = {
   headline: "Connect nipmod to agents",
-  lead: "Run the live CLI as a local MCP server for package search, metadata, trust reports, install plans, SBOM, verify and audit.",
+  lead: "Run the live CLI as a local MCP server for search, metadata, trust reports, install plans, explain, SBOM, verify and audit.",
   primaryAction: "Install",
   secondaryAction: "Trust",
   safety: [
@@ -29,7 +29,8 @@ export const mcpContent = {
     { name: "nipmod.publish_plan", safety: "gated dry run" },
     { name: "nipmod.verify", safety: "read only" },
     { name: "nipmod.audit", safety: "read only" },
-    { name: "nipmod.sbom", safety: "read only" }
+    { name: "nipmod.sbom", safety: "read only" },
+    { name: "nipmod.explain", safety: "read only" }
   ],
   verifyCommand:
     "printf '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{},\"clientInfo\":{\"name\":\"smoke\",\"version\":\"1.0.0\"}}}\\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\\n' | nipmod mcp serve",
