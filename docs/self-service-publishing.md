@@ -14,9 +14,9 @@ nipmod publish my-agent-package
 For an existing Gitlawb repo:
 
 ```bash
-nipmod package gitlawb://did:key:z6Mk.../repo --dir repo
-nipmod manifest validate --dir repo
-nipmod publish repo --dry-run --json
+nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr
+nipmod claim verify gitlawb://did:key:z6Mk.../repo --json
+nipmod publish repo-pr --dry-run --json
 ```
 
 ## Registry Candidate

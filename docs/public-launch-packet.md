@@ -42,13 +42,13 @@ nipmod manifest validate --dir .
 nipmod publish . --dry-run --json
 ```
 
-## Gitlawb repo claim preview
+## Gitlawb repo package patch preview
 
-This path creates a package draft for an existing Gitlawb repo without claiming ownership. Publishing the draft requires the matching owner DID identity.
+This path creates a PR-ready local package patch for an existing Gitlawb repo without remote writes. Publishing the package still requires the matching owner DID identity.
 
 ```bash
-nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
-nipmod manifest validate --dir gitlawb-repo-reader-draft
+nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
+nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 ```
 
 ## Public post
@@ -100,7 +100,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 | --- | --- | --- | --- |
 | Gitlawb review signal | Prepared, 0 maintainer responses | Founder post, DM, public source and demo. | Gitlawb founder or maintainer response. |
 | External human audit | Prepared, 0 signed reviews | Review packet, gates, proof loop and sign off template. | Independent reviewer signature or published findings. |
-| Real user adoption | Waiting, 0 receipts | First user loop, author dry run, repo claim preview and receipt template. | External redacted user receipts. |
+| Real user adoption | Waiting, 0 receipts | First user loop, author dry run, repo package patch preview and receipt template. | External redacted user receipts. |
 | Ecosystem depth | First party ready, 0 external packages | Verified first party packages cover every launch manifest type. | External packages accepted into the registry. |
 
 ## What not to claim

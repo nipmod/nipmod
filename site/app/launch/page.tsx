@@ -85,7 +85,7 @@ const externalProofTracks = [
   {
     label: "Real user adoption",
     state: "Waiting",
-    ready: "First user loop, author dry run, repo claim preview and receipt template are ready.",
+    ready: "First user loop, author dry run, repo package patch preview and receipt template are ready.",
     blockedOn: "Needs external redacted user receipts. Current ledger count is zero."
   },
   {

@@ -43,13 +43,13 @@ nipmod manifest validate --dir .
 nipmod publish . --dry-run --json
 ```
 
-## Gitlawb repo claim preview
+## Gitlawb repo package patch preview
 
-This path creates an unsigned draft for an existing Gitlawb repo. It does not prove publish readiness until the repo owner signs with the matching DID identity.
+This path creates a PR-ready local package patch for an existing Gitlawb repo. It does not prove publish readiness until the repo owner signs with the matching DID identity.
 
 ```bash
-nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
-nipmod manifest validate --dir gitlawb-repo-reader-draft
+nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
+nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 ```
 
 ## Expected proof

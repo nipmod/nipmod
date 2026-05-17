@@ -23,14 +23,14 @@ nipmod publish . --dry-run --json
 
 The dry run output includes a registry candidate. That is the review object for indexing or founder feedback.
 
-For an existing Gitlawb repo, first create a claim preview:
+For an existing Gitlawb repo, first create a local package patch:
 
 ```sh
-nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
-nipmod manifest validate --dir gitlawb-repo-reader-draft
+nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
+nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 ```
 
-Publishing that draft requires the matching repo owner DID identity.
+Publishing that patch requires the matching repo owner DID identity.
 
 ## Feedback
 

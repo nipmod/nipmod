@@ -176,7 +176,6 @@ The file contains a canonical signed proof:
 When the repo is missing packaging files, Nipmod can create a package-ready patch without opening a remote issue or PR:
 
 ```bash
-nipmod package gitlawb://did:key:.../repo --dir repo-package
 nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr
 ```
 
@@ -209,7 +208,6 @@ Later, a Gitlawb PR assistant can use the same local patch to open:
 ```bash
 nipmod package scan --node https://node.nipmod.com
 nipmod package doctor gitlawb://did:key:.../repo
-nipmod package gitlawb://did:key:.../repo --dir repo-package
 nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr
 nipmod claim gitlawb://did:key:.../repo --dir . --identity .nipmod/identity.json
 nipmod claim verify gitlawb://did:key:.../repo --json

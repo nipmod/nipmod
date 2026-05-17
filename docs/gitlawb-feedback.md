@@ -4,7 +4,7 @@ This document tracks protocol and node issues found while operating Nipmod on Gi
 
 ## Profile duplicate for mirrored repos
 
-Status: reported upstream.
+Status: reported upstream, still visible on the Gitlawb profile as of 2026-05-17.
 
 Upstream issue:
 
@@ -78,6 +78,17 @@ Observed behavior:
 - `node.nipmod.com` has one canonical record.
 - `node.gitlawb.com` has one canonical record and one short-owner mirror record.
 - `gitlawb.com` profile renders both records as separate repos.
+- The profile still shows `0 pushes` and `newcomer` even when commit activity is present and the canonical repo resolves to a pushed main branch.
+- The direct repo page can show an older latest commit and README while its drift panel already sees the newer `node.gitlawb.com` commit hash.
+
+Latest Nipmod-side read-only check:
+
+```text
+GITLAWB_NODE=https://node.nipmod.com git ls-remote gitlawb refs/heads/main
+336df2a4b571484a95ca662164d33539efe50be5 refs/heads/main
+```
+
+`https://node.nipmod.com/api/v1/repos` currently returns one Nipmod repo record for the canonical owner DID. The duplicate is therefore not caused by an extra Nipmod repo on `node.nipmod.com`.
 
 Relevant Gitlawb source findings:
 

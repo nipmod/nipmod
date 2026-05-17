@@ -28,11 +28,11 @@ nipmod manifest validate --dir .
 nipmod publish . --dry-run --json
 ```
 
-Ask Gitlawb repo owners to run the claim preview separately. The final dry run needs their matching DID identity.
+Ask Gitlawb repo owners to run the package patch preview separately. The final dry run needs their matching DID identity.
 
 ```bash
-nipmod package gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-draft
-nipmod manifest validate --dir gitlawb-repo-reader-draft
+nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
+nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 ```
 
 For founder review, send `docs/public-launch-packet.md` plus the live `/launch` page instead of a vague product description.
