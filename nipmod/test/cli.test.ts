@@ -499,6 +499,123 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain(`security: nipmod add pkg:${firstOwner}/duplicate-agent@0.1.0 --online`);
   });
 
+  test("views exact registry package metadata for humans and agents", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-view-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          {
+            ...searchPackageFixture(owner, "alpha-agent", "skill", 100, "Alpha planning skill"),
+            compatibilityReceipts: [cliCompatibilityReceipt(`pkg:${owner}/alpha-agent`, owner, "a".repeat(64))],
+            dependencies: {
+              "beta-tool": "^0.2.0"
+            }
+          }
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const text = await execaNode(["src/cli.ts", "view", "alpha-agent", "--registry", pathToFileURL(registryPath).href]);
+    expect(text.stdout).toContain("nipmod view alpha-agent@0.1.0");
+    expect(text.stdout).toContain(`id: pkg:${owner}/alpha-agent`);
+    expect(text.stdout).toContain("kind: skill");
+    expect(text.stdout).toContain("trust: verified/100");
+    expect(text.stdout).toContain("permissions: no permissions");
+    expect(text.stdout).toContain("description: Alpha planning skill");
+    expect(text.stdout).toContain("dependencies:");
+    expect(text.stdout).toContain("beta-tool: ^0.2.0");
+    expect(text.stdout).toContain("compatibility: MCP import");
+    expect(text.stdout).toContain(`add: nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
+
+    const json = await execaNode([
+      "src/cli.ts",
+      "view",
+      `pkg:${owner}/alpha-agent@0.1.0`,
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--json"
+    ]);
+    const parsed = JSON.parse(json.stdout) as {
+      ok: true;
+      data: {
+        package: {
+          canonical: string;
+          canonicalInstall: string;
+          dependencies: Record<string, string>;
+          install: string;
+          name: string;
+          version: string;
+        };
+      };
+    };
+    expect(parsed.data.package).toMatchObject({
+      canonical: `pkg:${owner}/alpha-agent`,
+      canonicalInstall: `nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`,
+      dependencies: { "beta-tool": "^0.2.0" },
+      install: "nipmod add alpha-agent --online",
+      name: "alpha-agent",
+      version: "0.1.0"
+    });
+  });
+
+  test("view refuses ambiguous package names", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-view-ambiguous-"));
+    const firstOwner = generateIdentity().did;
+    const secondOwner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          searchPackageFixture(firstOwner, "shared-agent", "skill", 100),
+          searchPackageFixture(secondOwner, "shared-agent", "skill", 100)
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    await expect(
+      execaNode(["src/cli.ts", "view", "shared-agent", "--registry", pathToFileURL(registryPath).href])
+    ).rejects.toThrow(/ambiguous package name/i);
+  });
+
+  test("view refuses ambiguous names beyond the search result limit", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-view-ambiguous-large-"));
+    const firstOwner = generateIdentity().did;
+    const secondOwner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    const crowdedCanonical = Array.from({ length: 100 }, (_, index) => ({
+      ...searchPackageFixture(firstOwner, "shared-agent", "skill", 100),
+      digest: index.toString(16).padStart(64, "0"),
+      version: `0.0.${index}`
+    }));
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          ...crowdedCanonical,
+          {
+            ...searchPackageFixture(secondOwner, "shared-agent", "skill", 0),
+            digest: "f".repeat(64),
+            version: "9.9.9"
+          }
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    await expect(
+      execaNode(["src/cli.ts", "view", "shared-agent", "--registry", pathToFileURL(registryPath).href])
+    ).rejects.toThrow(/ambiguous package name/i);
+  });
+
   test("searches multiple registry sources and fails on digest conflicts", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-multi-"));
     const owner = generateIdentity().did;

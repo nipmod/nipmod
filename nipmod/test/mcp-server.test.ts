@@ -38,6 +38,7 @@ describe("nipmod MCP server", () => {
     });
     expect(list.result.tools.map((tool: { name: string }) => tool.name)).toEqual([
       "nipmod.search",
+      "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
       "nipmod.publish_plan",
@@ -54,6 +55,7 @@ describe("nipmod MCP server", () => {
       Object.fromEntries(tools.map((tool) => [tool.name, tool.annotations.readOnlyHint]))
     ).toEqual({
       "nipmod.search": true,
+      "nipmod.view": true,
       "nipmod.inspect": true,
       "nipmod.install_plan": true,
       "nipmod.publish_plan": false,
@@ -197,6 +199,37 @@ describe("nipmod MCP server", () => {
       type: "text"
     });
     expect(result.result.content[0].text).toContain("alpha-agent");
+  });
+
+  test("views exact registry package metadata through tools/call", async () => {
+    const fixture = await writeRegistryFixture("view-agent");
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 31,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          allowCustomRoots: true,
+          registryUrl: pathToFileURL(fixture.registryPath).href,
+          specifier: "view-agent"
+        },
+        name: "nipmod.view"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      canonical: fixture.canonical,
+      canonicalInstall: `nipmod add ${fixture.canonical}@0.1.0 --online`,
+      install: "nipmod add view-agent --online",
+      name: "view-agent",
+      trust: "verified/100",
+      version: "0.1.0"
+    });
+    expect(result.result.content[0].text).toContain("view-agent");
   });
 
   test("creates an install plan without mutating the project lockfile", async () => {
@@ -424,6 +457,7 @@ describe("nipmod MCP server", () => {
     });
     expect(result.messages[1].result.tools.map((tool: { name: string }) => tool.name)).toEqual([
       "nipmod.search",
+      "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
       "nipmod.publish_plan",

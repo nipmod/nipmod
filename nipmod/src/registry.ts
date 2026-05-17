@@ -153,6 +153,40 @@ export async function searchRegistries(options: {
   });
 }
 
+export async function viewRegistryPackages(options: {
+  fetchImpl?: typeof fetch;
+  includeQuarantined?: boolean;
+  query: string;
+  registryUrl: string;
+}): Promise<RegistrySearchResult> {
+  const registry = RegistrySearchIndexSchema.parse(await readJsonSource(options.registryUrl, options.fetchImpl ?? fetch));
+  return viewParsedRegistries({
+    ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    query: options.query,
+    registries: [{ registry, sourceRegistry: options.registryUrl }]
+  });
+}
+
+export async function viewRegistriesPackages(options: {
+  fetchImpl?: typeof fetch;
+  includeQuarantined?: boolean;
+  query: string;
+  registryUrls: readonly string[];
+}): Promise<RegistrySearchResult> {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const registries = await Promise.all(
+    uniqueRegistryUrls(options.registryUrls).map(async (registryUrl) => ({
+      registry: RegistrySearchIndexSchema.parse(await readJsonSource(registryUrl, fetchImpl)),
+      sourceRegistry: registryUrl
+    }))
+  );
+  return viewParsedRegistries({
+    ...(options.includeQuarantined === undefined ? {} : { includeQuarantined: options.includeQuarantined }),
+    query: options.query,
+    registries
+  });
+}
+
 function searchParsedRegistries(options: {
   includeQuarantined?: boolean;
   limit: number;
@@ -170,6 +204,32 @@ function searchParsedRegistries(options: {
   const packages = matched
     .sort((left, right) => compareRegistryPackages(left, right, query))
     .slice(0, options.limit)
+    .map((pkg) => toSearchPackage(pkg, ambiguousNames.has(pkg.name)));
+
+  return {
+    packages,
+    query: options.query,
+    sources: options.registries.map((entry) => entry.sourceRegistry),
+    total: packages.length
+  };
+}
+
+function viewParsedRegistries(options: {
+  includeQuarantined?: boolean;
+  query: string;
+  registries: Array<{
+    registry: z.infer<typeof RegistrySearchIndexSchema>;
+    sourceRegistry: string;
+  }>;
+}): RegistrySearchResult {
+  const rawQuery = options.query.trim();
+  const nameQuery = rawQuery.toLowerCase();
+  const matched = dedupeRegistryPackages(options.registries)
+    .filter((pkg) => options.includeQuarantined === true || !isActivelyQuarantined(pkg))
+    .filter((pkg) => pkg.name === nameQuery || pkg.canonical === rawQuery);
+  const ambiguousNames = ambiguousPackageNames(matched);
+  const packages = matched
+    .sort(compareRegistryViewPackages)
     .map((pkg) => toSearchPackage(pkg, ambiguousNames.has(pkg.name)));
 
   return {
@@ -245,6 +305,22 @@ function compareRegistryPackages(
     left.name.localeCompare(right.name) ||
     left.version.localeCompare(right.version)
   );
+}
+
+function compareRegistryViewPackages(left: RegistryPackageWithSource, right: RegistryPackageWithSource): number {
+  return left.canonical.localeCompare(right.canonical) || compareSemverDesc(left.version, right.version);
+}
+
+function compareSemverDesc(left: string, right: string): number {
+  const leftParts = left.split(".").map(Number);
+  const rightParts = right.split(".").map(Number);
+  for (let index = 0; index < 3; index += 1) {
+    const diff = (rightParts[index] ?? 0) - (leftParts[index] ?? 0);
+    if (diff !== 0) {
+      return diff;
+    }
+  }
+  return 0;
 }
 
 function registrySearchScore(pkg: z.infer<typeof RegistrySearchPackageSchema>, query: string): number {

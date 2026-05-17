@@ -34,7 +34,15 @@ import {
 } from "./install-plan.js";
 import { installBundlePackage, installFilePackage, listInstalledPackages, uninstallPackage } from "./install.js";
 import { validateManifest, type Manifest } from "./protocol.js";
-import { DEFAULT_REGISTRY_URL, searchRegistries, searchRegistry, type RegistrySearchResult } from "./registry.js";
+import {
+  DEFAULT_REGISTRY_URL,
+  searchRegistries,
+  searchRegistry,
+  viewRegistriesPackages,
+  viewRegistryPackages,
+  type RegistrySearchPackage,
+  type RegistrySearchResult
+} from "./registry.js";
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
 import {
@@ -66,6 +74,7 @@ const CLI_COMMANDS = [
   "ci",
   "inspect",
   "search",
+  "view",
   "policy",
   "mcp",
   "setup-cloudflare"
@@ -145,6 +154,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return inspectCommand(args);
     case "search":
       return searchCommand(args);
+    case "view":
+      return viewCommand(args);
     case "policy":
       return policyCommand(args);
     case "mcp":
@@ -813,6 +824,36 @@ async function searchCommand(args: string[]): Promise<CliResult> {
   };
 }
 
+async function viewCommand(args: string[]): Promise<CliResult> {
+  const rawTarget = firstPositional(args);
+  const registryUrls = registrySearchUrls(args);
+  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
+    throw new Error("view network access requires --online, --registry or --registries");
+  }
+  const target = parseViewTarget(rawTarget);
+  const result =
+    registryUrls.length > 1
+      ? await viewRegistriesPackages({
+          includeQuarantined: hasFlag(args, "--include-quarantined"),
+          query: target.query,
+          registryUrls
+        })
+      : await viewRegistryPackages({
+          includeQuarantined: hasFlag(args, "--include-quarantined"),
+          query: target.query,
+          registryUrl: registryUrls[0] ?? DEFAULT_REGISTRY_URL
+        });
+  const pkg = selectViewPackage(rawTarget, target, result.packages);
+
+  return {
+    ok: true,
+    data: {
+      message: formatView(pkg),
+      package: pkg
+    }
+  };
+}
+
 function registrySearchUrls(args: readonly string[]): string[] {
   const explicit = [
     ...optionalFlagValues(args, "--registry"),
@@ -939,6 +980,88 @@ function formatSearch(result: RegistrySearchResult, options: { details: boolean 
   }
   lines.push("", "Agents: use --json or nipmod mcp for structured output.");
   return lines.join("\n");
+}
+
+function parseViewTarget(rawTarget: string): { query: string; version?: string } {
+  const match = /^(.*)@((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/.exec(rawTarget);
+  if (!match || !match[1]) {
+    return { query: rawTarget };
+  }
+  return { query: requireMatch(match[1], "view target"), version: requireMatch(match[2], "view version") };
+}
+
+function selectViewPackage(
+  rawTarget: string,
+  target: { query: string; version?: string },
+  packages: readonly RegistrySearchPackage[]
+): RegistrySearchPackage {
+  const matches = packages.filter((pkg) => {
+    const targetMatches = pkg.name === target.query || pkg.canonical === target.query;
+    return targetMatches && (!target.version || pkg.version === target.version);
+  });
+  if (matches.length === 0) {
+    throw new Error(`no exact package found for ${rawTarget}; run nipmod search ${quotedSearchQuery(target.query)}`);
+  }
+
+  const canonicals = new Set(matches.map((pkg) => pkg.canonical));
+  if (canonicals.size > 1) {
+    throw new Error(`ambiguous package name ${target.query}; run nipmod view pkg:<publisher>/<name>@<version>`);
+  }
+  return [...matches].sort(comparePackageVersionsDesc)[0]!;
+}
+
+function comparePackageVersionsDesc(left: RegistrySearchPackage, right: RegistrySearchPackage): number {
+  return compareSemverDesc(left.version, right.version);
+}
+
+function compareSemverDesc(left: string, right: string): number {
+  const leftParts = left.split(".").map(Number);
+  const rightParts = right.split(".").map(Number);
+  for (let index = 0; index < 3; index += 1) {
+    const diff = (rightParts[index] ?? 0) - (leftParts[index] ?? 0);
+    if (diff !== 0) {
+      return diff;
+    }
+  }
+  return 0;
+}
+
+function formatView(pkg: RegistrySearchPackage): string {
+  const lines = [`nipmod view ${pkg.name}@${pkg.version}`, ""];
+  lines.push(`id: ${pkg.canonical}`);
+  lines.push(`kind: ${pkg.type}`);
+  lines.push(`trust: ${pkg.trust}`);
+  lines.push(`permissions: ${pkg.permissionSummary}`);
+  lines.push(`source: ${pkg.sourceRegistry}`);
+  if (pkg.description) {
+    lines.push(`description: ${pkg.description}`);
+  }
+  if (pkg.compatibilityReceipts.length > 0) {
+    lines.push(`compatibility: ${pkg.compatibilityReceipts.join(", ")}`);
+  }
+  const installCommand = pkg.canonicalInstall ?? pkg.install;
+  if (installCommand) {
+    lines.push("", `add: ${installCommand}`);
+  } else if (pkg.installBlockedReason) {
+    lines.push("", `blocked: ${pkg.installBlockedReason}`);
+  }
+  appendDependencyBlock(lines, "dependencies", pkg.dependencies);
+  appendDependencyBlock(lines, "peer dependencies", pkg.peerDependencies);
+  appendDependencyBlock(lines, "optional dependencies", pkg.optionalDependencies);
+  appendDependencyBlock(lines, "dev dependencies", pkg.devDependencies);
+  lines.push("", "Agents: use --json for structured metadata.");
+  return lines.join("\n");
+}
+
+function appendDependencyBlock(lines: string[], label: string, dependencies: Record<string, string> | undefined): void {
+  const entries = Object.entries(dependencies ?? {}).sort(([left], [right]) => left.localeCompare(right));
+  if (entries.length === 0) {
+    return;
+  }
+  lines.push("", `${label}:`);
+  for (const [name, range] of entries) {
+    lines.push(`  ${name}: ${range}`);
+  }
 }
 
 function quotedSearchQuery(query: string): string {

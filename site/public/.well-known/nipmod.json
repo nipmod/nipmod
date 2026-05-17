@@ -32,16 +32,16 @@
   "install": {
     "script": "https://nipmod.com/install.sh",
     "release": {
-      "version": "0.1.27",
-      "artifact": "https://nipmod.com/releases/nipmod-0.1.27.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-0.1.27.tgz.sig",
+      "version": "0.1.28",
+      "artifact": "https://nipmod.com/releases/nipmod-0.1.28.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-0.1.28.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
         "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
       },
-      "artifactSha256": "25b1c020cabd0e3533e65be9279d856da9692f80d54f3c82101da43ab36497e3"
+      "artifactSha256": "ffa9d9f492153b7861e84280ffc44aac149d2fd013fa1c416090dd1c35240178"
     },
-    "scriptSha256": "f27235f9d7fe218cbb84c3ccbc7363a2155d9832df4c6894662f69a3215d9894"
+    "scriptSha256": "0521ce2269f5a9ec5b0ce34bc338a854922ce548438cff86a426897e486b680b"
   }
 }

@@ -13,6 +13,7 @@ P0 commands:
 - `nipmod verify`
 - `nipmod publish --dry-run`
 - `nipmod inspect`
+- `nipmod view`
 - `nipmod install --plan`
 - `nipmod add`
 - `nipmod audit`
@@ -62,7 +63,8 @@ Command specific data lives under `data`. Scripts should check `ok` and `exitCod
 
 Human terminal output is optimized for scanning and may change between releases. Agents and scripts should use
 `--json` or `nipmod mcp serve`. `nipmod search --details` prints canonical package ids and source registry URLs
-for humans who want the security detail that is hidden from the default search view.
+for humans who want the security detail that is hidden from the default search view. `nipmod view` returns exact
+package metadata and refuses ambiguous names unless the canonical package id is used.
 
 ## Exit codes
 
