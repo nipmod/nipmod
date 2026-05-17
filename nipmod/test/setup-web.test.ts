@@ -29,6 +29,25 @@ describe("setup web server", () => {
     expect(html).toContain("nipmod.com");
   });
 
+  test("rejects local API writes without the setup token", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "nipmod-setup-token-"));
+    server = await startSetupServer({
+      envPath: join(dir, ".env.local"),
+      port: 0
+    });
+
+    const response = await fetch(`${new URL(server.url).origin}/api/cloudflare`, {
+      body: JSON.stringify({
+        apiToken: "cf-secret-token",
+        zoneName: "nipmod.com"
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST"
+    });
+
+    expect(response.status).toBe(403);
+  });
+
   test("validates and saves credentials through the local API", async () => {
     const dir = await mkdtemp(join(tmpdir(), "nipmod-setup-save-"));
     const validation: CloudflareValidation = async () => ({
@@ -43,13 +62,12 @@ describe("setup web server", () => {
       validateCloudflare: validation
     });
 
-    const response = await fetch(`${server.url}/api/cloudflare`, {
+    const response = await fetch(setupApiUrl(server.url), {
       body: JSON.stringify({
         apiToken: "cf-secret-token",
-        zoneName: "nipmod.com",
-        validate: true
+        zoneName: "nipmod.com"
       }),
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-nipmod-setup-token": setupToken(server.url) },
       method: "POST"
     });
     const body = (await response.json()) as { ok: true; token: string; zoneId: string };
@@ -62,4 +80,36 @@ describe("setup web server", () => {
     expect(env).toContain("CLOUDFLARE_API_TOKEN=cf-secret-token");
     expect(env).toContain("CLOUDFLARE_ZONE_ID=zone-id");
   });
+
+  test("does not let the local API skip Cloudflare validation", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "nipmod-setup-validate-"));
+    server = await startSetupServer({
+      envPath: join(dir, ".env.local"),
+      port: 0,
+      validateCloudflare: async () => {
+        throw new Error("validation required");
+      }
+    });
+
+    const response = await fetch(setupApiUrl(server.url), {
+      body: JSON.stringify({
+        apiToken: "cf-secret-token",
+        validate: false,
+        zoneName: "nipmod.com"
+      }),
+      headers: { "content-type": "application/json", "x-nipmod-setup-token": setupToken(server.url) },
+      method: "POST"
+    });
+
+    expect(response.status).toBe(500);
+    await expect(readFile(join(dir, ".env.local"), "utf8")).rejects.toThrow(/ENOENT/);
+  });
 });
+
+function setupToken(url: string): string {
+  return new URL(url).searchParams.get("token") ?? "";
+}
+
+function setupApiUrl(url: string): string {
+  return `${new URL(url).origin}/api/cloudflare`;
+}

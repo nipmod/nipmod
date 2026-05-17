@@ -1,7 +1,7 @@
 # nipmod
 
 Gitlawb is decentralized GitHub for agents.
-nipmod is decentralized npm for agents.
+nipmod is a verifiable package layer for Gitlawb agents.
 
 Public links:
 

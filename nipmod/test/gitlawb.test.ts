@@ -103,6 +103,16 @@ describe("Gitlawb integration", () => {
     );
   });
 
+  test("rejects non-loopback cleartext Gitlawb node URLs", () => {
+    const identity = generateIdentity();
+    const spec = parseRemoteSpecifier(`pkg:${identity.did}/signed-skill@0.1.0`);
+
+    expect(() => gitlawbBlobUrl("http://node.example", spec)).toThrow(/https/i);
+    expect(gitlawbBlobUrl("http://127.0.0.1:8787", spec)).toBe(
+      `http://127.0.0.1:8787/api/v1/repos/${identity.did.split(":").at(-1)}/signed-skill/blob/releases/0.1.0/bundle.nipmod`
+    );
+  });
+
   test("rejects oversized Gitlawb bundles before buffering remote bodies", async () => {
     const identity = generateIdentity();
     const spec = parseRemoteSpecifier(`pkg:${identity.did}/signed-skill@0.1.0`);
@@ -297,6 +307,35 @@ describe("Gitlawb integration", () => {
     expect(plan.versionCheck.existingDigest).not.toBe(plan.digest);
   });
 
+  test("publish dry-run blocks an existing version with identical bytes", async () => {
+    const signedProject = await createSignedSkillProject();
+    const packed = await packProject(signedProject.dir, {
+      signingPrivateKeyPem: signedProject.identity.privateKeyPem
+    });
+    const helperDir = await mkdtemp(join(tmpdir(), "nipmod-dry-run-same-"));
+    const helperPath = join(helperDir, "git-remote-gitlawb");
+    const gitPath = join(helperDir, "git");
+
+    await writeFile(helperPath, "#!/bin/sh\nexit 0\n");
+    await writeFile(gitPath, "#!/bin/sh\nexit 0\n");
+    await chmod(helperPath, 0o755);
+    await chmod(gitPath, 0o755);
+
+    const plan = await createPublishDryRunPlan({
+      projectDir: signedProject.dir,
+      nodeUrl: "https://node.example",
+      env: { PATH: helperDir },
+      fetchImpl: async () => new Response(packed.bytes, { status: 200 })
+    });
+
+    expect(plan.ready).toBe(false);
+    expect(plan.versionCheck).toMatchObject({
+      status: "same-artifact",
+      existingDigest: plan.digest
+    });
+    expect(plan.versionCheck.message).toMatch(/would not create a new release/i);
+  });
+
   test("finds git-remote-gitlawb from PATH when publish gets no --helper", async () => {
     const signedProject = await createSignedSkillProject();
     const helperDir = await mkdtemp(join(tmpdir(), "nipmod-path-helper-"));
@@ -415,6 +454,38 @@ describe("Gitlawb integration", () => {
         }
       })
     ).rejects.toThrow(/version 0\.1\.0 already exists/i);
+  });
+
+  test("rejects publishing identical bytes over an existing version", async () => {
+    const signedProject = await createSignedSkillProject();
+    const packed = await packProject(signedProject.dir, {
+      signingPrivateKeyPem: signedProject.identity.privateKeyPem
+    });
+    const helperDir = await mkdtemp(join(tmpdir(), "nipmod-version-same-helper-"));
+    const helperPath = join(helperDir, "git-remote-gitlawb");
+    const gitPath = join(helperDir, "git");
+
+    await writeFile(helperPath, "#!/bin/sh\nexit 0\n");
+    await writeFile(gitPath, "#!/bin/sh\nexit 0\n");
+    await chmod(helperPath, 0o755);
+    await chmod(gitPath, 0o755);
+
+    await expect(
+      publishGitlawbPackage({
+        projectDir: signedProject.dir,
+        nodeUrl: "https://node.example",
+        env: { PATH: helperDir },
+        fetchImpl: async () =>
+          new Response('{"error":"repo_exists"}', { status: 409, headers: { "content-type": "application/json" } }),
+        runCommand: async (_command, args) => {
+          if (args[0] === "clone") {
+            const bundleDir = join(String(args[2]), "releases", "0.1.0");
+            await mkdir(bundleDir, { recursive: true });
+            await writeFile(join(bundleDir, "bundle.nipmod"), packed.bytes);
+          }
+        }
+      })
+    ).rejects.toThrow(/same artifact/i);
   });
 
   test("reports helper status for doctor output", async () => {

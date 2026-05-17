@@ -17,6 +17,7 @@ GITLAWB_INSTALL_URL="${GITLAWB_INSTALL_URL:-https://gitlawb.com/install.sh}"
 GITLAWB_INSTALL_SHA256="${GITLAWB_INSTALL_SHA256:-}"
 NIPMOD_RELEASE_PUBLIC_KEY_SPKI_BASE64="MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo="
 NIPMOD_RELEASE_PUBLIC_KEY_SPKI_SHA256="49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
+INITIAL_PATH="$PATH"
 
 need() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -237,8 +238,6 @@ fi
 run npm install --ignore-scripts --omit=dev --prefix "$NIPMOD_HOME" "$archive"
 run ln -sf "$NIPMOD_HOME/node_modules/.bin/nipmod" "$NIPMOD_BIN_DIR/nipmod"
 
-export PATH="$NIPMOD_BIN_DIR:$HOME/.local/bin:$PATH"
-
 if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && ! command -v git-remote-gitlawb >/dev/null 2>&1; then
   helper_script="${tmp_dir}/gitlawb-install.sh"
   if [ "$NIPMOD_DRY_RUN" = "1" ]; then
@@ -275,7 +274,7 @@ echo "Next:"
 echo "  nipmod doctor --online"
 echo "  nipmod search gitlawb"
 
-case ":$PATH:" in
+case ":$INITIAL_PATH:" in
   *":$NIPMOD_BIN_DIR:"*) ;;
   *)
     echo ""

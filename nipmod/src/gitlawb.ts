@@ -555,7 +555,7 @@ export async function createPublishDryRunPlan(options: PublishDryRunOptions): Pr
   });
 
   return {
-    ready: helper.ok && git.ok && (versionCheck.status === "available" || versionCheck.status === "same-artifact"),
+    ready: helper.ok && git.ok && versionCheck.status === "available",
     package: packed.manifest.canonical,
     version: packed.manifest.version,
     digest: packed.digest,
@@ -630,7 +630,7 @@ async function checkPublishedVersion(options: {
         status: "same-artifact",
         checkedUrl: options.url,
         existingDigest,
-        message: "same artifact already exists"
+        message: "same artifact already exists; publish would not create a new release"
       };
     }
 
@@ -991,7 +991,9 @@ async function assertVersionIsPublishable(
   }
 
   if (existingBundle && createHash("sha256").update(existingBundle).digest("hex") === packed.digest) {
-    return;
+    throw new Error(
+      `version ${packed.manifest.version} already exists for ${packed.manifest.canonical} with the same artifact; publish would be a no-op`
+    );
   }
 
   throw new Error(
@@ -1019,11 +1021,28 @@ function ownerSegmentFromDid(ownerDid: string): string {
 
 function normalizeNodeUrl(nodeUrl: string): string {
   const trimmed = nodeUrl.trim().replace(/\/+$/, "");
-  if (!/^https?:\/\//.test(trimmed)) {
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("Gitlawb node URL must be a valid URL");
+  }
+  if (url.username || url.password || url.search || url.hash) {
+    throw new Error("Gitlawb node URL must not include credentials, query, or fragment");
+  }
+  if (url.protocol === "http:" && !isLoopbackHost(url.hostname)) {
+    throw new Error("Gitlawb node URL must use https:// unless it is loopback");
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new Error("Gitlawb node URL must start with http:// or https://");
   }
 
-  return trimmed;
+  const pathname = url.pathname === "/" ? "" : url.pathname.replace(/\/+$/, "");
+  return `${url.origin}${pathname}`;
+}
+
+function isLoopbackHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
 
 function requireMatch(value: string | undefined, label: string): string {

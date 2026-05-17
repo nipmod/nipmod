@@ -79,7 +79,7 @@ https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 Short public post:
 
 ```text
-nipmod is decentralized npm for Gitlawb agents.
+nipmod is a verifiable package layer for Gitlawb agents.
 
 Gitlawb stores repos. nipmod turns them into signed, verifiable agent packages with digest, DID signature, transparency and witness proof.
 

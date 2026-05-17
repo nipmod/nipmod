@@ -51,7 +51,8 @@ export async function startMonitorServer({
 
     const url = new URL(request.url ?? "/", "http://localhost");
     if (url.pathname === "/health") {
-      sendJson(response, healthPayload(state, running));
+      const health = healthPayload(state, running);
+      sendJson(response, health.ok ? 200 : 503, health);
       return;
     }
 
@@ -100,17 +101,30 @@ function redactedCycle(cycle) {
 
 function healthPayload(state, running) {
   const lastStatus = state.lastCycle?.status ?? (state.lastError ? "error" : null);
+  const stale = isMonitorStale(state);
+  const ok = state.lastError === null && stale === false && (state.lastCycle?.ok ?? true) === true;
   return {
     intervalMs: state.intervalMs,
     lastError: state.lastError,
     lastRunAt: state.lastRunAt,
     lastStatus,
-    ok: state.lastError === null && (state.lastCycle?.ok ?? true) === true,
+    ok,
     running,
     runs: state.runs,
+    stale,
     startedAt: state.startedAt,
     type: "dev.nipmod.monitor-health.v1"
   };
+}
+
+function isMonitorStale(state) {
+  const maxAgeMs = state.intervalMs * 2;
+  const reference = state.lastRunAt ?? state.startedAt;
+  const timestamp = Date.parse(reference);
+  if (!Number.isFinite(timestamp)) {
+    return true;
+  }
+  return Date.now() - timestamp > maxAgeMs;
 }
 
 function numberFromEnv(value, fallback) {

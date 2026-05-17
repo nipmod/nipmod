@@ -643,7 +643,7 @@ function lockfileRootDependency(
 ): DependencyRequest {
   return {
     kind: rootRequest.kind,
-    name: rootPackage.name,
+    name: rootRequest.name.startsWith("pkg:") ? rootPackage.canonical : rootPackage.name,
     spec: rootRequest.name.startsWith("pkg:") ? rootPackage.version : rootRequest.spec
   };
 }

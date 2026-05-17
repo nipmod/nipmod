@@ -22,6 +22,7 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
         <input
           autoComplete="off"
           aria-describedby="repo-input-help"
+          aria-errormessage={invalid ? "repo-input-help" : undefined}
           aria-invalid={invalid}
           id="repo-input"
           name="repo"
@@ -30,7 +31,9 @@ export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftF
           type="text"
           value={repo}
         />
-        <p id="repo-input-help">{draft.helper}</p>
+        <p id="repo-input-help" aria-live="polite" role={invalid ? "alert" : undefined}>
+          {draft.helper}
+        </p>
       </div>
       <div className="proof-panel">
         <h2 id="draft-title">Draft output</h2>

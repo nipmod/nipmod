@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { type NipmodBundle, verifyBundle } from "./bundle.js";
@@ -251,23 +251,35 @@ export async function uninstallPackage(query: string, projectDir: string): Promi
     throw new Error("uninstall failed to resolve package");
   }
 
+  const removedPackages: InstalledPackageSummary[] = [installedPackageSummary(packageKey, pkg)];
   delete lockfile.packages[packageKey];
   delete lockfile.snapshots[packageKey];
   removeRootDependency(lockfile, pkg.name);
+  removeRootDependency(lockfile, pkg.canonical);
+  const packagesBeforePrune = new Map(Object.entries(lockfile.packages));
+  const prunedPackageKeys = pruneUnreachableLockfile(lockfile);
+  for (const prunedPackageKey of prunedPackageKeys) {
+    const prunedPackage = packagesBeforePrune.get(prunedPackageKey);
+    if (prunedPackage) {
+      removedPackages.push(installedPackageSummary(prunedPackageKey, prunedPackage));
+    }
+  }
   await writeTextFileAtomic(lockfilePath, `${canonicalJson(lockfile)}\n`);
   return {
     lockfileChanged: true,
     removed: true,
-    removedPackages: [
-      {
-        canonical: pkg.canonical,
-        integrity: pkg.integrity,
-        name: pkg.name,
-        packageKey,
-        publisher: pkg.publisher,
-        version: pkg.version
-      }
-    ]
+    removedPackages
+  };
+}
+
+function installedPackageSummary(packageKey: string, pkg: LockfilePackage): InstalledPackageSummary {
+  return {
+    canonical: pkg.canonical,
+    integrity: pkg.integrity,
+    name: pkg.name,
+    packageKey,
+    publisher: pkg.publisher,
+    version: pkg.version
   };
 }
 
@@ -374,10 +386,49 @@ async function readLockedPackageBundle(
 
 async function writeStoreBundle(projectDir: string, digest: string, bundleBytes: Uint8Array): Promise<string> {
   const relativePath = `.nipmod/store/sha256/${digest}/bundle.nipmod`;
-  const absolutePath = join(projectDir, relativePath);
-  await mkdir(join(projectDir, ".nipmod", "store", "sha256", digest), { recursive: true });
-  await writeFile(absolutePath, bundleBytes);
+  const directory = join(projectDir, ".nipmod", "store", "sha256", digest);
+  await mkdirNoSymlinkPath(projectDir, [".nipmod", "store", "sha256", digest]);
+  await writeBytesFileAtomic(join(directory, "bundle.nipmod"), bundleBytes);
   return relativePath;
+}
+
+async function mkdirNoSymlinkPath(root: string, parts: readonly string[]): Promise<void> {
+  await mkdir(root, { recursive: true });
+  await assertDirectoryNotSymlink(root);
+  let current = root;
+  for (const part of parts) {
+    current = join(current, part);
+    await assertNotSymlink(current);
+    await mkdir(current).catch((error: unknown) => {
+      if (!isEexist(error)) {
+        throw error;
+      }
+    });
+    await assertDirectoryNotSymlink(current);
+  }
+}
+
+async function assertDirectoryNotSymlink(path: string): Promise<void> {
+  const stats = await lstat(path);
+  if (stats.isSymbolicLink()) {
+    throw new Error(`refusing to write through symlinked store path: ${path}`);
+  }
+  if (!stats.isDirectory()) {
+    throw new Error(`store path is not a directory: ${path}`);
+  }
+}
+
+async function assertNotSymlink(path: string): Promise<void> {
+  try {
+    const stats = await lstat(path);
+    if (stats.isSymbolicLink()) {
+      throw new Error(`refusing to write through symlinked store path: ${path}`);
+    }
+  } catch (error) {
+    if (!isEnoent(error)) {
+      throw error;
+    }
+  }
 }
 
 function sha256Hex(bytes: Uint8Array): string {
@@ -385,6 +436,10 @@ function sha256Hex(bytes: Uint8Array): string {
 }
 
 async function writeTextFileAtomic(path: string, contents: string): Promise<void> {
+  await writeBytesFileAtomic(path, Buffer.from(contents, "utf8"));
+}
+
+async function writeBytesFileAtomic(path: string, contents: Uint8Array): Promise<void> {
   const dir = dirname(path);
   await mkdir(dir, { recursive: true });
   const tempPath = join(dir, `.tmp-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -404,6 +459,10 @@ async function writeTextFileAtomic(path: string, contents: string): Promise<void
     await rm(tempPath, { force: true }).catch(() => undefined);
     throw error;
   }
+}
+
+function isEexist(error: unknown): boolean {
+  return error instanceof Error && "code" in error && error.code === "EEXIST";
 }
 
 async function syncDirectory(path: string): Promise<void> {

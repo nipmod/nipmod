@@ -21,6 +21,7 @@ describe("production monitor server", () => {
       });
       expect(health.runs).toBeGreaterThanOrEqual(2);
       expect(health.lastRunAt).toEqual(expect.any(String));
+      expect((await fetch(`${server.url}/health`)).status).toBe(200);
       expect(last).toMatchObject({
         ok: true,
         status: "healthy",
@@ -47,12 +48,35 @@ describe("production monitor server", () => {
     try {
       await waitFor(async () => (await fetchJson(`${server.url}/health`)).runs === 1);
       const health = await fetchJson(`${server.url}/health`);
+      const healthResponse = await fetch(`${server.url}/health`);
 
       expect(health).toMatchObject({
         lastStatus: "firing",
         ok: false,
         runs: 1
       });
+      expect(healthResponse.status).toBe(503);
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("reports unhealthy when the latest cycle is stale", async () => {
+    const server = await startMonitorServer({
+      intervalMs: 1_000,
+      port: 0,
+      runAlertCycleFn: async () => healthyCycle(1)
+    });
+
+    try {
+      await waitFor(async () => (await fetchJson(`${server.url}/health`)).runs === 1);
+      server.state.lastRunAt = new Date(Date.now() - 3_000).toISOString();
+      const response = await fetch(`${server.url}/health`);
+      const health = await response.json();
+
+      expect(response.status).toBe(503);
+      expect(health.ok).toBe(false);
+      expect(health.stale).toBe(true);
     } finally {
       await server.close();
     }

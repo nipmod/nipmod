@@ -7,7 +7,7 @@ import {
   shortDid,
   type RegistryPackage
 } from "../../lib/registry";
-import { packageBrowseData, packagePageHref } from "./content";
+import { packageBrowseData, packageEvidenceHref, packagePageHref } from "./content";
 
 type PackagesPageProps = {
   searchParams?: Promise<{
@@ -80,13 +80,17 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
         </div>
 
         <nav className="filter-row" aria-label="Package type filters">
-          <a className={!type ? "filter-pill filter-active" : "filter-pill"} href={query ? `/packages?q=${encodeURIComponent(query)}` : "/packages"}>
+          <a
+            aria-current={!type ? "page" : undefined}
+            className={!type ? "filter-pill filter-active" : "filter-pill"}
+            href={query ? `/packages?q=${encodeURIComponent(query)}` : "/packages"}
+          >
             All
           </a>
           {types.map((item) => {
             const href = `/packages?${new URLSearchParams({ ...(query ? { q: query } : {}), type: item }).toString()}`;
             return (
-              <a className={type === item ? "filter-pill filter-active" : "filter-pill"} href={href} key={item}>
+              <a aria-current={type === item ? "page" : undefined} className={type === item ? "filter-pill filter-active" : "filter-pill"} href={href} key={item}>
                 {item}
               </a>
             );
@@ -153,9 +157,9 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
 
       <div className="package-links">
         <a href={packagePageHref(pkg)}>Package</a>
-        <a href={`/evidence/package/${encodeURIComponent(pkg.name)}#package-proof`}>Evidence</a>
+        <a href={packageEvidenceHref(pkg)}>Evidence</a>
         {sourceRepoHref ? (
-          <a href={sourceRepoHref} rel="noreferrer" target="_blank">
+          <a href={sourceRepoHref} aria-label={`Open ${pkg.name} Git source in a new tab`} rel="noreferrer" target="_blank">
             Git source
           </a>
         ) : null}

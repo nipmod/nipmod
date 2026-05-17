@@ -30,7 +30,8 @@ progress.md
 task_plan.md
 *.png
 
-# Keep only current public release artifact in git
+# Keep only current public release artifact in git.
+# The release builder fails if a new release artifact is still ignored.
 site/public/releases/*
 !site/public/releases/nipmod-0.1.23.tgz
 !site/public/releases/nipmod-0.1.23.tgz.sha256
@@ -65,6 +66,7 @@ site/public/releases/*
 !site/public/releases/nipmod-0.1.35.tgz
 !site/public/releases/nipmod-0.1.35.tgz.sha256
 !site/public/releases/nipmod-0.1.35.tgz.sig
+site/public/releases/nipmod-* [0-9].tgz*
 
 # Secrets
 .env

@@ -78,13 +78,15 @@ test("human pages do not promote raw artifact links", async ({ page }) => {
     "/",
     "/quickstart",
     "/package",
+    "/packages",
+    "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
     "/trust",
     "/security",
     "/launch",
     "/proof",
     "/mcp",
     "/evidence",
-    "/evidence/package/gitlawb-release-review"
+    "/evidence/package/z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N-gitlawb-release-review"
   ];
   const rawPath = /^(\/install\.sh|\/\.well-known\/(?:nipmod\.json|security\.txt)|\/registry\/|\/transparency\/|\/releases\/.*(?:\.tgz|\.tgz\.sig)|\/advisories\.json|\/proof\/transcript\.json|\/review\/.*\.json|\/compatibility\/.*\.json)/;
 
@@ -131,7 +133,7 @@ test("launch page exposes adoption, review and multi source paths", async ({ pag
 
   await expect(page.getByRole("heading", { name: "Use it. Publish into it. Review it." })).toBeVisible();
   await expect(page.getByText("Catalog type coverage", { exact: true })).toBeVisible();
-  await expect(page.getByText("Adoption path readiness", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adoption workflow ready", { exact: true })).toBeVisible();
   await expect(page.getByText("Gitlawb review signal", { exact: true })).toBeVisible();
   await expect(page.getByText("External human audit", { exact: true })).toBeVisible();
   await expect(page.getByText("Current ledger count is zero.")).toBeVisible();

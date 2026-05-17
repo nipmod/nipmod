@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -12,6 +12,7 @@ import {
   uninstallPackage
 } from "../src/install.js";
 import { type Manifest } from "../src/protocol.js";
+import { NIPMOD_VERSION } from "../src/version.js";
 import { createSignedSkillProject } from "./helpers/package.js";
 
 const fixture = (...parts: string[]) => join(import.meta.dirname, "fixtures", ...parts);
@@ -33,6 +34,7 @@ describe("local install", () => {
 
     expect(result.lockfileChanged).toBe(true);
     expect(lockfile.formatVersion).toBe(2);
+    expect(lockfile.generatedBy).toBe(`nipmod/${NIPMOD_VERSION}`);
     expect(lockfile.packages[`${signedProject.manifest.canonical}@0.1.0`].integrity).toBe(
       `sha256-${packed.digest}`
     );
@@ -115,9 +117,49 @@ describe("local install", () => {
     const nextLockfile = JSON.parse(await readFile(join(temp, "nipmod.lock.json"), "utf8"));
 
     expect(removed.removed).toBe(true);
+    expect(removed.removedPackages.map((pkg) => pkg.packageKey).sort()).toEqual([appKey, depKey].sort());
     expect(nextLockfile.root.dependencies).toEqual({});
     expect(nextLockfile.packages[appKey]).toBeUndefined();
-    expect(nextLockfile.packages[depKey]).toBeDefined();
+    expect(nextLockfile.packages[depKey]).toBeUndefined();
+  });
+
+  test("keeps canonical root dependencies distinct for packages with the same display name", async () => {
+    const first = await createSignedPackage({ name: "shared-agent", slug: "shared-agent", version: "0.1.0" });
+    const second = await createSignedPackage({ name: "shared-agent", slug: "shared-agent", version: "0.1.0" });
+    const firstBundle = await packProject(first.dir, {
+      signingPrivateKeyPem: first.identity.privateKeyPem
+    });
+    const secondBundle = await packProject(second.dir, {
+      signingPrivateKeyPem: second.identity.privateKeyPem
+    });
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-canonical-roots-"));
+
+    await installPackageGraph(
+      [
+        graphNode(first, firstBundle, {
+          rootDependency: {
+            kind: "dependencies",
+            name: first.manifest.canonical,
+            spec: first.manifest.version
+          }
+        }),
+        graphNode(second, secondBundle, {
+          rootDependency: {
+            kind: "dependencies",
+            name: second.manifest.canonical,
+            spec: second.manifest.version
+          }
+        })
+      ],
+      temp
+    );
+
+    const lockfile = JSON.parse(await readFile(join(temp, "nipmod.lock.json"), "utf8"));
+
+    expect(lockfile.root.dependencies).toEqual({
+      [first.manifest.canonical]: "0.1.0",
+      [second.manifest.canonical]: "0.1.0"
+    });
   });
 
   test("rejects graph installs with missing required dependencies before writing the lockfile", async () => {
@@ -153,6 +195,22 @@ describe("local install", () => {
 
     expect(await readFile(storePath, "utf8")).toBe(packed.bytes.toString("utf8"));
     expect(entry.storePath).toBe(`.nipmod/store/sha256/${packed.digest}/bundle.nipmod`);
+  });
+
+  test("refuses to write the local store through symlinked store directories", async () => {
+    const signedProject = await createSignedSkillProject();
+    const packed = await packProject(signedProject.dir, {
+      signingPrivateKeyPem: signedProject.identity.privateKeyPem
+    });
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-store-symlink-"));
+    const outside = await mkdtemp(join(tmpdir(), "nipmod-store-outside-"));
+    await symlink(outside, join(temp, ".nipmod"));
+
+    await expect(
+      installBundlePackage(packed.bytes, "https://node.nipmod.com/api/v1/repos/z6MkProbe/signed-skill/blob/releases/0.1.0/bundle.nipmod", temp, {
+        integrity: `sha256-${packed.digest}`
+      })
+    ).rejects.toThrow(/symlink/i);
   });
 
   test("rejects installs without an external integrity pin", async () => {

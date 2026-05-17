@@ -1,6 +1,7 @@
 import discoveryData from "../../public/.well-known/nipmod.json";
 import registryData from "../registry-data.json";
 import { registryTrustSummary, shortDid, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
+import { packagePageSlug } from "../packages/content";
 
 type DiscoveryManifest = typeof discoveryData;
 
@@ -86,7 +87,7 @@ export function EvidenceView({ selectedPackage }: { selectedPackage: RegistryPac
 }
 
 export function evidencePackageParams(): Array<{ packageName: string }> {
-  return registry.packages.map((pkg) => ({ packageName: pkg.name }));
+  return registry.packages.map((pkg) => ({ packageName: packagePageSlug(pkg) }));
 }
 
 export function findEvidencePackage(value: string): RegistryPackage | null {
@@ -95,9 +96,18 @@ export function findEvidencePackage(value: string): RegistryPackage | null {
     return null;
   }
 
-  return (
-    registry.packages.find((pkg) => pkg.name.toLowerCase() === normalized || pkg.canonical.toLowerCase() === normalized) ?? null
+  const canonicalMatch = registry.packages.find(
+    (pkg) =>
+      packagePageSlug(pkg).toLowerCase() === normalized ||
+      pkg.canonical.toLowerCase() === normalized ||
+      `${pkg.canonical.toLowerCase()}@${pkg.version}` === normalized
   );
+  if (canonicalMatch) {
+    return canonicalMatch;
+  }
+
+  const nameMatches = registry.packages.filter((pkg) => pkg.name.toLowerCase() === normalized);
+  return nameMatches.length === 1 ? nameMatches[0] ?? null : null;
 }
 
 function PackageEvidence({ pkg }: { pkg: RegistryPackage }) {

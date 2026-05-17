@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import * as z from "zod";
 import { PermissionSchema } from "./protocol.js";
 import { type DependencyKind } from "./resolver.js";
+import { NIPMOD_VERSION } from "./version.js";
 
 const PackageKeySchema = z.string().regex(/^pkg:did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*@(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
 const DependencyMapSchema = z.record(z.string().min(1), z.string().min(1));
@@ -110,7 +111,7 @@ export function emptySnapshot(): LockfileSnapshot {
 function emptyLockfile(): Lockfile {
   return {
     formatVersion: 2,
-    generatedBy: "nipmod/0.0.0",
+    generatedBy: `nipmod/${NIPMOD_VERSION}`,
     root: emptyRoot(),
     packages: {},
     snapshots: {}

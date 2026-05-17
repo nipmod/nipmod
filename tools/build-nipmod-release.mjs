@@ -73,6 +73,7 @@ try {
   });
   await writeFile(`${artifactPath}.sha256`, `${digest}  ${packageName}\n`);
   await writeFile(`${artifactPath}.sig`, `${JSON.stringify(signature, null, 2)}\n`);
+  await assertReleaseArtifactsAreTrackable([artifactPath, `${artifactPath}.sha256`, `${artifactPath}.sig`]);
   console.log(`${artifactPath}`);
   console.log(`${digest}`);
   console.log(`${artifactPath}.sig`);
@@ -121,4 +122,30 @@ async function assertReleaseDoesNotExist(artifactPath) {
       }
     }
   }
+}
+
+async function assertReleaseArtifactsAreTrackable(paths) {
+  for (const path of paths) {
+    if (await isGitIgnored(path)) {
+      throw new Error(`release artifact is ignored by git; update .gitignore before publishing: ${path}`);
+    }
+  }
+}
+
+async function isGitIgnored(path) {
+  const child = spawn("git", ["check-ignore", "--quiet", "--no-index", path], {
+    cwd: root,
+    stdio: "ignore"
+  });
+  const code = await new Promise((resolveCode, reject) => {
+    child.on("error", reject);
+    child.on("close", resolveCode);
+  });
+  if (code === 0) {
+    return true;
+  }
+  if (code === 1) {
+    return false;
+  }
+  throw new Error(`git check-ignore failed for release artifact: ${path}`);
 }

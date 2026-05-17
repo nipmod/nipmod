@@ -17,7 +17,9 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain("usage: nipmod <command>");
     expect(text.stdout).toContain("exit codes:");
     expect(text.stdout).toContain("0 ok");
+    expect(text.stdout).toContain("6 audit failed");
     expect(text.stdout).toContain("7 trust or advisory block");
+    expect(text.stdout).toContain("8 ci policy failed");
 
     const json = await execaNode(["src/cli.ts", "help", "--json"]);
     const parsed = JSON.parse(json.stdout) as {
@@ -35,7 +37,9 @@ describe("nipmod CLI", () => {
     expect(parsed.data.exitCodes).toEqual(
       expect.arrayContaining([
         { code: 0, meaning: "ok" },
+        { code: 6, meaning: "audit failed" },
         { code: 7, meaning: "trust or advisory block" },
+        { code: 8, meaning: "ci policy failed" },
         { code: 12, meaning: "preflight not ready" }
       ])
     );
@@ -73,6 +77,14 @@ describe("nipmod CLI", () => {
     expect(packageKeys).toHaveLength(1);
     expect(packageKeys[0]).toMatch(/^pkg:did:key:z[A-Za-z0-9]+\/cli-skill@0\.1\.0$/);
     expect(lockfile.packages[packageKeys[0]].integrity).toBe(`sha256-${packed.data.digest}`);
+  }, 15_000);
+
+  test("init rejects invalid package names before writing a manifest", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-init-invalid-"));
+    const pkg = join(workspace, "pkg");
+
+    await expect(execaNode(["src/cli.ts", "init", "--name", "Invalid Name", "--dir", pkg])).rejects.toThrow(/manifest/i);
+    await expect(readFile(join(pkg, "nipmod.json"), "utf8")).rejects.toThrow(/ENOENT/);
   }, 15_000);
 
   test("restores installed packages from the lockfile with nipmod install", async () => {
@@ -539,6 +551,7 @@ describe("nipmod CLI", () => {
       "--plan",
       "--registry",
       pathToFileURL(registryPath).href,
+      "--allow-custom-roots",
       "--dir",
       app,
       "--json"
@@ -703,6 +716,7 @@ describe("nipmod CLI", () => {
         "--plan",
         "--registry",
         `http://127.0.0.1:${address.port}/registry.json`,
+        "--allow-custom-roots",
         "--dir",
         app,
         "--json"
@@ -1126,6 +1140,19 @@ describe("nipmod CLI", () => {
     await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  test("install requires explicit opt-in for a custom registry root", async () => {
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "install",
+      "policy-agent",
+      "--registry",
+      "https://example.test/registry.json",
+      "--json"
+    ]);
+
+    expect(failed.error?.message).toContain("install custom trust roots require --allow-custom-roots");
+  });
+
   test("prints machine-readable doctor status without network access", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-doctor-"));
     const binDir = join(workspace, "bin");
@@ -1319,6 +1346,38 @@ describe("nipmod CLI", () => {
     const parsed = JSON.parse(result.stdout) as { data: { packages: Array<{ name: string }> } };
 
     expect(parsed.data.packages.map((pkg) => pkg.name)).toEqual(["policy", "policy-sidecar", "zzz"]);
+  });
+
+  test("search total reports all matches even when output is limited", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-total-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [
+          searchPackageFixture(owner, "policy-alpha", "skill", 100, "policy helper"),
+          searchPackageFixture(owner, "policy-beta", "skill", 100, "policy helper")
+        ],
+        source: "file-test"
+      })}\n`
+    );
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "search",
+      "policy",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--limit",
+      "1",
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as { data: { packages: unknown[]; total: number } };
+
+    expect(parsed.data.packages).toHaveLength(1);
+    expect(parsed.data.total).toBe(2);
   });
 
   test("search keeps canonical commands as security detail for duplicate names", async () => {
@@ -3029,7 +3088,7 @@ describe("nipmod CLI", () => {
     }
   }, 30_000);
 
-  test("canonical add stores root intent under package name so uninstall cleans it", async () => {
+  test("canonical add stores canonical root intent so uninstall cleans it", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-canonical-root-"));
     const app = join(workspace, "app");
     const pkg = join(workspace, "pkg");
@@ -3072,9 +3131,9 @@ describe("nipmod CLI", () => {
         "--json"
       ]);
       let lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
-      expect(lockfile.root.dependencies).toEqual({ "root-agent": "0.1.0" });
+      expect(lockfile.root.dependencies).toEqual({ [manifest.canonical]: "0.1.0" });
 
-      await execaNode(["src/cli.ts", "uninstall", "root-agent", "--dir", app, "--json"]);
+      await execaNode(["src/cli.ts", "uninstall", manifest.canonical, "--dir", app, "--json"]);
       lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
       expect(lockfile.root.dependencies).toEqual({});
     } finally {
@@ -3329,6 +3388,7 @@ describe("nipmod CLI", () => {
         "Browser",
         "--registry",
         pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
         "--dir",
         app,
         "--json"

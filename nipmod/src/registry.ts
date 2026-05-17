@@ -247,7 +247,7 @@ function searchParsedRegistries(options: {
     packages,
     query: options.query,
     sources: options.registries.map((entry) => entry.sourceRegistry),
-    total: packages.length
+    total: matched.length
   };
 }
 

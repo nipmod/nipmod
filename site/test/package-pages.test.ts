@@ -1,9 +1,11 @@
 import { describe, expect, test } from "vitest";
+import { findEvidencePackage } from "../app/evidence/evidence-view";
 import {
   findPackage,
   packageBrowseData,
   packageDependencyEntries,
   packageDependencyText,
+  packageEvidenceHref,
   packageInstallVariants,
   packagePageHref,
   packagePageParams,
@@ -18,6 +20,18 @@ describe("package pages", () => {
     expect(params.length).toBeGreaterThan(0);
     expect(pkg).not.toBeNull();
     expect(pkg ? packagePageHref(pkg) : "").toMatch(/^\/packages\/z[A-Za-z0-9]+-[a-z0-9._-]+$/);
+    expect(pkg ? packageEvidenceHref(pkg) : "").toMatch(/^\/evidence\/package\/z[A-Za-z0-9]+-[a-z0-9._-]+#package-proof$/);
+  });
+
+  test("keeps legacy unique name evidence URLs working", () => {
+    const packages = packageBrowseData({ query: "", type: "" }).packages;
+    const unique = packages.find((pkg) => packages.filter((candidate) => candidate.name === pkg.name).length === 1);
+
+    expect(unique).toBeDefined();
+    if (!unique) {
+      return;
+    }
+    expect(findEvidencePackage(unique.name)?.canonical).toBe(unique.canonical);
   });
 
   test("filters browse data by query and package type", () => {

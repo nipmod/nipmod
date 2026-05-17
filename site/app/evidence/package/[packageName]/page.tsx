@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EvidenceView, evidencePackageParams, findEvidencePackage } from "../../evidence-view";
+import { packageEvidenceHref } from "../../../packages/content";
 
 type PackageEvidencePageProps = {
   params: Promise<{
@@ -19,13 +20,13 @@ export async function generateMetadata({ params }: PackageEvidencePageProps): Pr
 
   return {
     alternates: {
-      canonical: pkg ? `https://nipmod.com/evidence/package/${encodeURIComponent(pkg.name)}` : "https://nipmod.com/evidence"
+      canonical: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
     },
     description: pkg ? `Human readable nipmod proof for ${pkg.name}.` : "Human readable nipmod package proof.",
     openGraph: {
       description: pkg ? `Digest, signer, source, witness and raw proof links for ${pkg.name}.` : "Human readable nipmod package proof.",
       title,
-      url: pkg ? `https://nipmod.com/evidence/package/${encodeURIComponent(pkg.name)}` : "https://nipmod.com/evidence"
+      url: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
     },
     title
   };

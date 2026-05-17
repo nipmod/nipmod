@@ -8,6 +8,7 @@ import {
 } from "../../../lib/registry";
 import {
   findPackage,
+  packageEvidenceHref,
   packageDependencyEntries,
   packageDependencyText,
   packageInstallVariants,
@@ -67,11 +68,17 @@ export default async function PackagePage({ params }: PackagePageProps) {
             <a className="button button-primary" href="#install">
               Install
             </a>
-            <a className="button button-ghost" href={`/evidence/package/${encodeURIComponent(pkg.name)}#package-proof`}>
+            <a className="button button-ghost" href={packageEvidenceHref(pkg)}>
               Evidence
             </a>
             {sourceRepoHref ? (
-              <a className="button button-ghost" href={sourceRepoHref} rel="noreferrer" target="_blank">
+              <a
+                className="button button-ghost"
+                href={sourceRepoHref}
+                aria-label={`Open ${pkg.name} Git source in a new tab`}
+                rel="noreferrer"
+                target="_blank"
+              >
                 Source
               </a>
             ) : null}

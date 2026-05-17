@@ -27,6 +27,10 @@ export function packagePageHref(pkg: Pick<RegistryPackage, "canonical">): string
   return `/packages/${packagePageSlug(pkg)}`;
 }
 
+export function packageEvidenceHref(pkg: Pick<RegistryPackage, "canonical">, anchor = "package-proof"): string {
+  return `/evidence/package/${packagePageSlug(pkg)}#${anchor}`;
+}
+
 export function packagePageHrefByName(name: string): string {
   const pkg = findPackage(name);
   return pkg ? packagePageHref(pkg) : `/packages?q=${encodeURIComponent(name)}`;
@@ -105,7 +109,7 @@ function dependencyEntries(kind: string, dependencies: Record<string, string> | 
     .map(([name, spec]) => ({ kind, name, spec }));
 }
 
-function packagePageSlug(pkg: Pick<RegistryPackage, "canonical">): string {
+export function packagePageSlug(pkg: Pick<RegistryPackage, "canonical">): string {
   const match = /^pkg:did:key:([^/]+)\/([a-z0-9][a-z0-9._-]*)$/.exec(pkg.canonical);
   if (!match) {
     throw new Error(`invalid package canonical: ${pkg.canonical}`);

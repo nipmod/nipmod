@@ -108,7 +108,9 @@ const CLI_COMMANDS = [
 const CLI_EXIT_CODES = [
   { code: 0, meaning: "ok" },
   { code: 1, meaning: "usage or unexpected error" },
+  { code: 6, meaning: "audit failed" },
   { code: 7, meaning: "trust or advisory block" },
+  { code: 8, meaning: "ci policy failed" },
   { code: 11, meaning: "install policy block" },
   { code: 12, meaning: "preflight not ready" }
 ] as const;
@@ -247,7 +249,7 @@ async function initCommand(args: string[]): Promise<CliResult> {
   const packageSlug = unscopedName(name);
   const identity = generateIdentity();
   const did = identity.did;
-  const manifest: Manifest = {
+  const manifest = validateManifest({
     formatVersion: 1,
     name,
     canonical: `pkg:${did}/${packageSlug}`,
@@ -278,7 +280,7 @@ async function initCommand(args: string[]): Promise<CliResult> {
       signingKey: did,
       provenance: "local"
     }
-  };
+  });
 
   await mkdir(dir, { recursive: true });
   await mkdir(join(dir, ".nipmod"), { recursive: true });
@@ -1048,7 +1050,17 @@ async function ciCommand(args: string[]): Promise<CliResult> {
 function assertCustomTrustRoots(
   args: readonly string[],
   commandName: string,
-  flags: readonly string[] = ["--advisory-key", "--advisory-key-sha256", "--log-id", "--witness"]
+  flags: readonly string[] = [
+    "--advisories",
+    "--advisories-signature",
+    "--advisory-key",
+    "--advisory-key-sha256",
+    "--discovery",
+    "--log-id",
+    "--registry",
+    "--registries",
+    "--witness"
+  ]
 ): void {
   const hasCustomRootFlag = flags.some((flag) => hasFlag(args, flag));
   if (hasCustomRootFlag && !hasFlag(args, "--allow-custom-roots")) {
@@ -1878,6 +1890,7 @@ function registryTrustFlags(args: readonly string[], commandName: string): Regis
   const allowedLogIds = optionalFlagValues(args, "--log-id");
   const allowedWitnesses = optionalFlagValues(args, "--witness");
   assertCustomTrustRoots(args, commandName, ["--log-id", "--witness"]);
+  assertCustomRegistryEnvRoot(args, commandName, registryUrl);
   if ((allowedLogIds.length > 0 && allowedWitnesses.length === 0) || (allowedWitnesses.length > 0 && allowedLogIds.length === 0)) {
     throw new Error(`${commandName} transparency pins require both --log-id and --witness`);
   }
@@ -1892,6 +1905,12 @@ function registryTrustFlags(args: readonly string[], commandName: string): Regis
     options.allowedWitnesses = allowedWitnesses;
   }
   return options;
+}
+
+function assertCustomRegistryEnvRoot(args: readonly string[], commandName: string, registryUrl: string | undefined): void {
+  if (registryUrl && registryUrl !== DEFAULT_REGISTRY_URL && !hasFlag(args, "--allow-custom-roots")) {
+    throw new Error(`${commandName} custom trust roots require --allow-custom-roots`);
+  }
 }
 
 function registryUrlFromFlagsOrEnv(args: readonly string[]): string | undefined {

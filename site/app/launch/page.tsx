@@ -63,7 +63,7 @@ const readiness = [
     text: "Trust model, catalog matrix, production gates, restore drill, proof transcript, review packet generator and known risks are reproducible."
   },
   {
-    label: "Adoption path readiness",
+    label: "Adoption workflow ready",
     value: "100",
     text: "First user, package author, repo owner, reviewer and agent host paths are ready. Real adoption evidence is tracked separately."
   }
@@ -136,7 +136,14 @@ export default function LaunchPage() {
             <article className="block-card" key={item.label}>
               <span>{item.label}</span>
               <h3>{item.value}%</h3>
-              <div className="progress-track" aria-label={`${item.label} ${item.value} percent`}>
+              <div
+                className="progress-track"
+                aria-label={`${item.label} ${item.value} percent`}
+                aria-valuemax={100}
+                aria-valuemin={0}
+                aria-valuenow={Number(item.value)}
+                role="progressbar"
+              >
                 <div className="progress-fill" style={{ width: `${item.value}%` }} />
               </div>
               <p>{item.text}</p>
@@ -155,7 +162,14 @@ export default function LaunchPage() {
             <article className="block-card" key={item.label}>
               <span>{item.label}</span>
               <h3>{item.value}%</h3>
-              <div className="progress-track" aria-label={`${item.label} ${item.value} percent`}>
+              <div
+                className="progress-track"
+                aria-label={`${item.label} ${item.value} percent`}
+                aria-valuemax={100}
+                aria-valuemin={0}
+                aria-valuenow={Number(item.value)}
+                role="progressbar"
+              >
                 <div className="progress-fill" style={{ width: `${item.value}%` }} />
               </div>
               <p>{item.ready}</p>

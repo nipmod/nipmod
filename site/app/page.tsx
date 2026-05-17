@@ -1,5 +1,5 @@
 import { homeContent } from "./content";
-import { packagePageHref, packagePageHrefByName } from "./packages/content";
+import { packageEvidenceHref, packagePageHref, packagePageHrefByName } from "./packages/content";
 import registryData from "./registry-data.json";
 import {
   installCommand,
@@ -288,10 +288,6 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
       </div>
     </article>
   );
-}
-
-function packageEvidenceHref(pkg: RegistryPackage, anchor: string): string {
-  return `/evidence/package/${encodeURIComponent(pkg.name)}#${anchor}`;
 }
 
 function firstParam(value: string | string[] | undefined): string {

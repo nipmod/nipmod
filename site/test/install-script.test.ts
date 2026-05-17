@@ -131,6 +131,22 @@ describe("install script", () => {
     expect(result.stdout).toContain("nipmod doctor");
   });
 
+  test("prints a persistent PATH hint when the install bin directory is not already on PATH", async () => {
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-install-script-path-"));
+    const binDir = join(temp, "bin");
+    const result = await runScript({
+      NIPMOD_DRY_RUN: "1",
+      NIPMOD_HOME: join(temp, "home"),
+      NIPMOD_BIN_DIR: binDir,
+      NIPMOD_SKIP_GITLAWB: "1",
+      PATH: process.env.PATH ?? ""
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("Add nipmod to PATH:");
+    expect(result.stdout).toContain(`export PATH="${binDir}:$PATH"`);
+  });
+
   test("keeps installer configurable for local verification", async () => {
     const result = await runScript({
       NIPMOD_DRY_RUN: "1",

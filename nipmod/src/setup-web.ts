@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { join } from "node:path";
 import { cwd } from "node:process";
@@ -34,6 +35,7 @@ export async function startSetupServer(options: SetupServerOptions = {}): Promis
   const host = options.host ?? "127.0.0.1";
   const port = options.port ?? 8788;
   const envPath = options.envPath ?? join(cwd(), ".env.local");
+  const setupToken = randomBytes(24).toString("base64url");
   const validateCloudflare =
     options.validateCloudflare ??
     ((input) => {
@@ -46,7 +48,7 @@ export async function startSetupServer(options: SetupServerOptions = {}): Promis
 
   const server = createServer(async (request, response) => {
     try {
-      await routeRequest(request, response, envPath, validateCloudflare);
+      await routeRequest(request, response, envPath, validateCloudflare, setupToken);
     } catch (error) {
       sendJson(response, 500, {
         error: error instanceof Error ? error.message : "unknown server error",
@@ -65,7 +67,7 @@ export async function startSetupServer(options: SetupServerOptions = {}): Promis
     close: () => closeServer(server),
     envPath,
     server,
-    url: `http://${host}:${address.port}`
+    url: `http://${host}:${address.port}/?token=${encodeURIComponent(setupToken)}`
   };
 }
 
@@ -73,12 +75,17 @@ async function routeRequest(
   request: IncomingMessage,
   response: ServerResponse,
   envPath: string,
-  validateCloudflare: CloudflareValidation
+  validateCloudflare: CloudflareValidation,
+  setupToken: string
 ): Promise<void> {
   const url = new URL(request.url ?? "/", "http://127.0.0.1");
 
   if (request.method === "GET" && url.pathname === "/") {
-    sendHtml(response, renderSetupPage(envPath));
+    if (url.searchParams.get("token") !== setupToken) {
+      sendJson(response, 403, { error: "setup token required", ok: false });
+      return;
+    }
+    sendHtml(response, renderSetupPage(envPath, setupToken));
     return;
   }
 
@@ -88,6 +95,10 @@ async function routeRequest(
   }
 
   if (request.method === "POST" && url.pathname === "/api/cloudflare") {
+    if (!isAllowedBrowserPost(request, setupToken)) {
+      sendJson(response, 403, { error: "setup token required", ok: false });
+      return;
+    }
     const body = await readJsonBody<CloudflareSetupRequest>(request);
     const apiToken = body.apiToken?.trim();
     const zoneName = body.zoneName?.trim().toLowerCase() || "nipmod.com";
@@ -99,7 +110,7 @@ async function routeRequest(
     }
 
     const validationInput = accountId ? { accountId, apiToken, zoneName } : { apiToken, zoneName };
-    const validation = body.validate === false ? null : await validateCloudflare(validationInput);
+    const validation = await validateCloudflare(validationInput);
     const saveInput = {
       apiToken,
       zoneName
@@ -127,7 +138,7 @@ async function routeRequest(
   sendJson(response, 404, { error: "not found", ok: false });
 }
 
-function renderSetupPage(envPath: string): string {
+function renderSetupPage(envPath: string, setupToken: string): string {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -265,10 +276,6 @@ function renderSetupPage(envPath: string): string {
           Account ID
           <input name="accountId" placeholder="optional" />
         </label>
-        <label class="row">
-          <input name="validate" type="checkbox" checked />
-          Validate token and zone before saving
-        </label>
         <button type="submit">Save Cloudflare token</button>
         <div id="status" class="status" role="status"></div>
       </form>
@@ -276,6 +283,7 @@ function renderSetupPage(envPath: string): string {
     <script>
       const form = document.querySelector("#cloudflare-form");
       const statusBox = document.querySelector("#status");
+      const setupToken = "${setupToken}";
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = form.querySelector("button");
@@ -284,12 +292,11 @@ function renderSetupPage(envPath: string): string {
         statusBox.textContent = "";
 
         const data = Object.fromEntries(new FormData(form).entries());
-        data.validate = Boolean(data.validate);
 
         try {
           const response = await fetch("/api/cloudflare", {
             method: "POST",
-            headers: { "content-type": "application/json" },
+            headers: { "content-type": "application/json", "x-nipmod-setup-token": setupToken },
             body: JSON.stringify(data)
           });
           const body = await response.json();
@@ -311,11 +318,32 @@ function renderSetupPage(envPath: string): string {
 
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
   const chunks: Buffer[] = [];
+  let total = 0;
   for await (const chunk of request) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += bytes.byteLength;
+    if (total > 8 * 1024) {
+      throw new Error("request body is too large");
+    }
+    chunks.push(bytes);
   }
 
   return JSON.parse(Buffer.concat(chunks).toString("utf8")) as T;
+}
+
+function isAllowedBrowserPost(request: IncomingMessage, setupToken: string): boolean {
+  if (request.headers["x-nipmod-setup-token"] !== setupToken) {
+    return false;
+  }
+  if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
+    return false;
+  }
+  const origin = request.headers.origin;
+  if (!origin) {
+    return true;
+  }
+  const host = request.headers.host;
+  return Boolean(host) && origin === `http://${host}`;
 }
 
 function sendHtml(response: ServerResponse, html: string): void {
