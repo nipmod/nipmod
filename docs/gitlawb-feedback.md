@@ -81,14 +81,14 @@ Observed behavior:
 - The profile still shows `0 pushes` and `newcomer` even when commit activity is present and the canonical repo resolves to a pushed main branch.
 - The direct repo page can show an older latest commit and README while its drift panel already sees the newer `node.gitlawb.com` commit hash.
 
-Latest Nipmod-side read-only check:
+Nipmod-side read-only checks:
 
 ```text
 GITLAWB_NODE=https://node.nipmod.com git ls-remote gitlawb refs/heads/main
-336df2a4b571484a95ca662164d33539efe50be5 refs/heads/main
+GITLAWB_NODE=https://node.gitlawb.com git ls-remote gitlawb refs/heads/main
 ```
 
-`https://node.nipmod.com/api/v1/repos` currently returns one Nipmod repo record for the canonical owner DID. The duplicate is therefore not caused by an extra Nipmod repo on `node.nipmod.com`.
+`https://node.nipmod.com/api/v1/repos` currently returns one Nipmod repo record for the canonical owner DID. The duplicate is therefore not caused by an extra Nipmod repo on `node.nipmod.com`. Direct pushes to `node.gitlawb.com` update the canonical Gitlawb repo, but the public profile still renders the mirror row and reports stale trust counters.
 
 Relevant Gitlawb source findings:
 
