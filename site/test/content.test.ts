@@ -30,6 +30,10 @@ describe("home content", () => {
     expect(homeContent.links.x).toBe("https://x.com/Nipmod");
   });
 
+  test("links to the Bankr coin launch", () => {
+    expect(homeContent.links.bankrCoin).toBe("https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
+  });
+
   test("links source review to the canonical Gitlawb repo page", () => {
     expect(homeContent.links.gitlawbProfile).toBe("https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R");
     expect(homeContent.links.gitlawbSource).toBe("https://gitlawb.com/node/repos/z6Mkwbud/nipmod");

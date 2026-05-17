@@ -11,6 +11,10 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://x.com/Nipmod"
   );
+  await expect(page.getByRole("link", { name: "Open Nipmod coin on Bankr in a new tab" })).toHaveAttribute(
+    "href",
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);

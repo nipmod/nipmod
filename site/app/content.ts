@@ -4,6 +4,7 @@ export const homeContent = {
   lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
   links: {
     docs: "/quickstart#docs",
+    bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     install: "/quickstart#install",
