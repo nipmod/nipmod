@@ -42,7 +42,7 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide nav-primary" href="/packages">
           Packages
         </a>
-        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href="/quickstart">
+        <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href={homeContent.links.docs}>
           Docs
         </a>
         <a className="nav-link nav-link-wide nav-install" href="/quickstart#install">
@@ -51,6 +51,7 @@ export function SiteHeader() {
         <details className="more-menu">
           <summary className="nav-more-button">More</summary>
           <div className="more-menu-panel">
+            <a href={homeContent.links.docs}>Docs</a>
             <a href="/package">Create</a>
             <a href="/trust">Trust</a>
             <a href="/security">Security</a>

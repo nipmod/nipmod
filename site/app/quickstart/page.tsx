@@ -6,35 +6,121 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/quickstart"
   },
-  description: "Install Nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
+  description: "Nipmod docs for install, package search, workspace install, publishing, MCP, trust and security.",
   openGraph: {
-    description: "Install Nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
-    title: "Nipmod quickstart",
+    description: "Nipmod docs for install, package search, workspace install, publishing, MCP, trust and security.",
+    title: "Nipmod docs",
     url: "https://nipmod.com/quickstart"
   },
-  title: "Nipmod quickstart"
+  title: "Nipmod docs"
+};
+
+const docSections = [
+  {
+    href: "#install",
+    label: "Install",
+    text: "Set up the CLI and verify the installer."
+  },
+  {
+    href: "#find",
+    label: "Find",
+    text: "Search the package registry without an account."
+  },
+  {
+    href: "#inspect",
+    label: "Inspect",
+    text: "Check signer, source, digest and permissions before install."
+  },
+  {
+    href: "#publish",
+    label: "Publish",
+    text: "Run the safe author preflight before any public write."
+  },
+  {
+    href: "/mcp",
+    label: "MCP",
+    text: "Connect Nipmod to agent hosts."
+  },
+  {
+    href: "/trust",
+    label: "Trust",
+    text: "Read the public registry roots and witness path."
+  }
+] as const;
+
+const stepIds: Record<string, string> = {
+  Audit: "audit",
+  Check: "doctor",
+  Explain: "explain",
+  Find: "find",
+  Inspect: "inspect",
+  "Install CLI": "install",
+  "Install package": "install-package",
+  Publish: "publish",
+  Restore: "restore",
+  SBOM: "sbom",
+  Update: "update",
+  Verify: "verify"
 };
 
 export default function QuickstartPage() {
   return (
     <main className="page-shell" id="main">
-      <section className="quickstart-hero" aria-labelledby="quickstart-title">
-        <p className="eyebrow">Start</p>
-        <h1 id="quickstart-title">Start with one command.</h1>
-        <p className="lead">Install the CLI, inspect a package, then lock exact bytes into your workspace.</p>
+      <section className="quickstart-hero" id="docs" aria-labelledby="docs-title">
+        <p className="eyebrow">Docs</p>
+        <h1 id="docs-title">Docs</h1>
+        <p className="lead">Install, search, inspect, publish and connect agent hosts from one clean path.</p>
         <div className="actions" aria-label="Quickstart actions">
           <a className="button button-primary" href="#install">
-            Install
+            Install CLI
           </a>
-          <a className="button button-ghost" href="/proof">
-            Proof
+          <a className="button button-ghost" href="/packages">
+            Packages
           </a>
+          <a className="button button-ghost" href="/package">
+            Create package
+          </a>
+        </div>
+      </section>
+
+      <section className="ecosystem-section" aria-labelledby="docs-overview-title">
+        <div className="section-head">
+          <p className="eyebrow">Guide</p>
+          <h2 id="docs-overview-title">Choose the right path.</h2>
+        </div>
+        <nav className="filter-row" aria-label="Docs sections">
+          {docSections.map((section) => (
+            <a className="filter-pill" href={section.href} key={section.label}>
+              {section.label}
+            </a>
+          ))}
+        </nav>
+        <div className="usage-strip">
+          {docSections.slice(0, 3).map((section) => (
+            <article className="usage-item" key={section.label}>
+              <h2>{section.label === "Install" ? "Install the CLI" : section.label}</h2>
+              <p>{section.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="proof-section" aria-labelledby="flow-title">
+        <div>
+          <p className="eyebrow">Flow</p>
+          <h2 id="flow-title">Short command first. Verification when needed.</h2>
+        </div>
+        <div className="proof-panel">
+          <p className="panel-copy">Use the short installer for normal setup. Use the checksum path when reviewing security.</p>
+          <pre className="install-command">
+            <code>{"curl -fsSLO https://nipmod.com/install.sh && bash install.sh"}</code>
+          </pre>
         </div>
       </section>
 
       <section className="quickstart-grid" aria-label="Quickstart steps">
         {homeContent.quickstartSteps.map((step, index) => (
-          <article className="quickstart-card" id={step.label === "Install CLI" ? "install" : undefined} key={step.label}>
+          <article className="quickstart-card" id={stepIds[step.label]} key={step.label}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{step.label}</h2>
             <p>{step.text}</p>

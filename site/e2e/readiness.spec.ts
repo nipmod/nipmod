@@ -13,6 +13,7 @@ test("home registry search stays usable", async ({ page }) => {
   );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
+  await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
   await expect(siteNav.getByRole("link", { name: "Install" })).toBeVisible();
   const viewport = page.viewportSize();
   await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 2 : 3);
@@ -37,6 +38,77 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
   );
+});
+
+test("docs and install navigation have distinct, correct destinations", async ({ page }) => {
+  await page.goto("/");
+  const siteNav = page.getByRole("navigation", { name: "Site" });
+  if ((await siteNav.locator('a[href="/quickstart#docs"]:visible').count()) === 0) {
+    await siteNav.locator(".more-menu summary").click();
+  }
+
+  await expect(siteNav.locator('a[href="/quickstart#docs"]:visible').first()).toBeVisible();
+  await expect(siteNav.getByRole("link", { name: "Install" })).toHaveAttribute("href", "/quickstart#install");
+
+  await siteNav.locator('a[href="/quickstart#docs"]:visible').first().click();
+  await expect(page).toHaveURL(/\/quickstart#docs$/);
+  await expect(page.locator("#docs")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Docs" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install the CLI" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "MCP" })).toHaveAttribute("href", "/mcp");
+
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Install" }).click();
+  await expect(page).toHaveURL(/\/quickstart#install$/);
+  await expect(page.locator("#install")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install CLI" })).toBeVisible();
+});
+
+test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "link target audit is viewport independent");
+  test.setTimeout(60_000);
+
+  const routes = [
+    "/",
+    "/quickstart",
+    "/package",
+    "/packages",
+    "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/trust",
+    "/security",
+    "/launch",
+    "/proof",
+    "/mcp",
+    "/evidence"
+  ];
+
+  for (const route of routes) {
+    await page.goto(route);
+    if ((await page.locator(".more-menu summary").isVisible()) && (await page.locator(".more-menu-panel a:visible").count()) === 0) {
+      await page.locator(".more-menu summary").click();
+    }
+
+    const hrefs = await page
+      .locator('a.button, nav[aria-label="Site"] a, .package-tabs a')
+      .evaluateAll((links) =>
+        [...new Set(links.map((link) => link.getAttribute("href")).filter((href): href is string => Boolean(href)))]
+      );
+
+    for (const href of hrefs) {
+      if (/^(https?:|mailto:)/.test(href)) {
+        continue;
+      }
+
+      const target = new URL(href, `https://nipmod.com${route}`);
+      const response = await request.get(`${target.pathname}${target.search}`);
+      expect(response.ok(), `${route} links to ${href}`).toBe(true);
+
+      if (target.hash) {
+        await page.goto(`${target.pathname}${target.search}${target.hash}`);
+        await expect(page.locator(target.hash)).toBeVisible();
+      }
+    }
+  }
 });
 
 test("mobile more menu exposes secondary navigation", async ({ page }) => {

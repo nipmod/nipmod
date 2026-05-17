@@ -26,8 +26,8 @@ export default function PackagePage() {
           <a className="button button-primary" href="/quickstart#install">
             Install
           </a>
-          <a className="button button-ghost" href="/quickstart">
-            Start
+          <a className="button button-ghost" href="/quickstart#docs">
+            Docs
           </a>
         </div>
       </section>

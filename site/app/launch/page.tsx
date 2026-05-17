@@ -120,7 +120,7 @@ export default function LaunchPage() {
           <a className="button button-ghost" href="/package">
             Publish
           </a>
-          <a className="button button-ghost" href="/security">
+          <a className="button button-ghost" href="#external-proof">
             Review
           </a>
         </div>
@@ -152,7 +152,7 @@ export default function LaunchPage() {
         </div>
       </section>
 
-      <section className="ecosystem-section" aria-labelledby="external-proof-title">
+      <section className="ecosystem-section" id="external-proof" aria-labelledby="external-proof-title">
         <div className="section-head">
           <p className="eyebrow">External Proof</p>
           <h2 id="external-proof-title">Prepared here. Completed by others.</h2>

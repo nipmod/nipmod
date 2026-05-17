@@ -3,6 +3,7 @@ export const homeContent = {
   headline: "Packages agents can trust",
   lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
   links: {
+    docs: "/quickstart#docs",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     install: "/quickstart#install",
     x: "https://x.com/Nipmod"
