@@ -6,6 +6,7 @@ Nipmod is technically live and ready for an external review. It is not officiall
 
 - Website: https://nipmod.com
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
+- Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Launch: https://nipmod.com/launch
 - Security: https://nipmod.com/security
 - Discovery: https://nipmod.com/.well-known/nipmod.json

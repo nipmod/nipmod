@@ -80,6 +80,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 - Website: https://nipmod.com
 - Launch path: https://nipmod.com/launch
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
+- Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Registry: https://nipmod.com/registry/packages.json
 - Transparency checkpoint: https://nipmod.com/transparency/checkpoint.json
 - Security policy: https://nipmod.com/security

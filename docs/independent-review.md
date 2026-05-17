@@ -6,6 +6,7 @@ Nipmod must not claim third party audit status until an independent reviewer has
 
 - Website: `https://nipmod.com`
 - Source: `https://gitlawb.com/node/repos/z6Mkwbud/nipmod`
+- Bankr token: `https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3`
 - Discovery: `https://nipmod.com/.well-known/nipmod.json`
 - Security policy: `https://nipmod.com/security`
 - Security metadata: `https://nipmod.com/.well-known/security.txt`

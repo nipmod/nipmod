@@ -22,6 +22,7 @@ describe("public review packet", () => {
       type: "dev.nipmod.review-packet.v1"
     });
     expect(packet.targets).toMatchObject({
+      bankrToken: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
       evidenceLedger: "https://nipmod.com/review/evidence-ledger.json",
       proofTranscript: "https://nipmod.com/proof/transcript.json",
       registry: "https://nipmod.com/registry/packages.json",

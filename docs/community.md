@@ -38,6 +38,8 @@ Website: https://nipmod.com
 
 X: https://x.com/Nipmod
 
+Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
+
 Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 
 First user evidence:
@@ -85,6 +87,7 @@ Gitlawb stores repos. Nipmod turns them into signed, verifiable agent packages w
 
 Code: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 Site: https://nipmod.com
+Token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 ```
 
 Direct message:

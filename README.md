@@ -7,6 +7,7 @@ Public links:
 
 - Website: https://nipmod.com
 - X: https://x.com/Nipmod
+- Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Registry: https://nipmod.com/registry/packages.json
