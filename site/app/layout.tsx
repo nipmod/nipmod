@@ -6,14 +6,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com"
   },
-  description: "Verifiable packages for agents.",
+  description: "Packages agents can trust.",
   icons: {
     apple: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }],
     icon: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
-    description: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+    description: "Install Gitlawb packages with source, signature, digest and proof visible first.",
     images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
     siteName: "nipmod",
     title: "nipmod",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     creator: "@Nipmod",
-    description: "Built on Gitlawb. Used from terminal, Codex, or any agent runtime.",
+    description: "Install Gitlawb packages with source, signature, digest and proof visible first.",
     images: ["/nipmod-logo.jpg"],
     site: "@Nipmod",
     title: "nipmod"
