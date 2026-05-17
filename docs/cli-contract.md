@@ -7,6 +7,8 @@ This document defines the public command behavior for agents and scripts.
 P0 commands:
 
 - `nipmod help`
+- `nipmod version`
+- `nipmod --version`
 - `nipmod init`
 - `nipmod manifest validate`
 - `nipmod pack`
@@ -31,7 +33,7 @@ P0 commands:
 
 Next npm parity commands:
 
-- `nipmod version`
+- signed `nipmod version <semver>` release bump
 - `nipmod dist-tag`
 - `nipmod deprecate`
 
@@ -69,7 +71,8 @@ package metadata and refuses ambiguous names unless the canonical package id is 
 `nipmod install` without a package specifier restores `.nipmod/store` from the existing lockfile and reports
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
 `nipmod install <package>` resolves a verified registry package, installs its verified dependency graph and
-writes the root dependency to the lockfile. `nipmod add <package>` is kept as a compatibility alias.
+writes the root dependency to the lockfile. `--plan` and `--dry-run` return the same verified graph plan without
+mutating the lockfile. `nipmod add <package>` is kept as a compatibility alias.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
 `nipmod update [package] --plan` returns a verified update plan for root dependencies without mutating the lockfile.

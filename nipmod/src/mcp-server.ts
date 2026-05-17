@@ -7,7 +7,7 @@ import { auditProject, type AuditProjectOptions } from "./audit.js";
 import { verifyBundle } from "./bundle.js";
 import { explainPackage } from "./explain.js";
 import { createPublishDryRunPlan } from "./gitlawb.js";
-import { createRegistryInstallPlan } from "./install-plan.js";
+import { resolveAddInstallPlan } from "./install-plan.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
 import { DEFAULT_REGISTRY_URL, searchRegistry, viewRegistryPackages, type RegistrySearchPackage } from "./registry.js";
@@ -300,13 +300,13 @@ async function installPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<J
   assertCustomRootOptIn(args);
   const policy = args.policyProfile ? defaultPolicy(parsePolicyProfile(args.policyProfile)) : undefined;
   return toJsonValue(
-    await createRegistryInstallPlan({
+    await resolveAddInstallPlan({
       ...registryTrustOptions(args),
       action: "install",
       fetchImpl,
       ...(policy ? { policy } : {}),
       projectDir: args.projectDir ?? process.cwd(),
-      specifier: args.specifier
+      query: args.specifier
     })
   );
 }

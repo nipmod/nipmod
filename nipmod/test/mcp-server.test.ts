@@ -333,6 +333,44 @@ describe("nipmod MCP server", () => {
     await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  test("creates an install plan by short package name", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-plan-short-"));
+    const app = join(workspace, "app");
+    const fixture = await writeRegistryFixture("short-plan-agent", workspace);
+    const server = createNipmodMcpServer();
+    await mkdir(app, { recursive: true });
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 41,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          allowCustomRoots: true,
+          allowedLogIds: [fixture.transparency.log.treeHead.logId],
+          allowedWitnesses: [fixture.transparency.witness.witness],
+          projectDir: app,
+          registryUrl: pathToFileURL(fixture.registryPath).href,
+          specifier: "short-plan-agent"
+        },
+        name: "nipmod.install_plan"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      action: "install",
+      graph: { packageCount: 1 },
+      readyToInstall: true,
+      package: {
+        canonical: fixture.canonical,
+        version: "0.1.0"
+      }
+    });
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   test("creates an update plan without applying a default policy profile", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-update-plan-"));
     const app = join(workspace, "app");

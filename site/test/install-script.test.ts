@@ -270,11 +270,36 @@ describe("install script", () => {
       NIPMOD_BIN_DIR: join(temp, "bin"),
       NIPMOD_HOME: join(temp, "home"),
       NIPMOD_INSTALL_GITLAWB: "1",
+      HOME: join(temp, "user-home"),
       PATH: `${fakeBin}:/bin:/usr/bin`
     });
 
     expect(result.code).toBe(1);
     expect(result.stderr).toContain("GITLAWB_INSTALL_SHA256 is required");
+  });
+
+  test("does not require a helper installer checksum when Gitlawb helper already exists", async () => {
+    const fakeBin = await makeFakeBin({
+      checksumFails: true,
+      signatureFails: true
+    });
+    await writeExecutable(join(fakeBin, "git-remote-gitlawb"), "#!/usr/bin/env bash\nexit 0\n");
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-install-script-"));
+    const result = await runScript({
+      NIPMOD_ALLOW_UNVERIFIED: "1",
+      NIPMOD_PACKAGE_URL: "file:///tmp/nipmod.tgz",
+      NIPMOD_CHECKSUM_URL: "file:///tmp/nipmod.tgz.sha256",
+      NIPMOD_SIGNATURE_URL: "file:///tmp/nipmod.tgz.sig",
+      NIPMOD_BIN_DIR: join(temp, "bin"),
+      NIPMOD_HOME: join(temp, "home"),
+      NIPMOD_INSTALL_GITLAWB: "1",
+      HOME: join(temp, "user-home"),
+      PATH: `${fakeBin}:/bin:/usr/bin`
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).not.toContain("GITLAWB_INSTALL_SHA256 is required");
+    expect(result.stdout).toContain("Installed nipmod");
   });
 });
 

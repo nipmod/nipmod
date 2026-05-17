@@ -59,6 +59,9 @@ site/public/releases/*
 !site/public/releases/nipmod-0.1.33.tgz
 !site/public/releases/nipmod-0.1.33.tgz.sha256
 !site/public/releases/nipmod-0.1.33.tgz.sig
+!site/public/releases/nipmod-0.1.34.tgz
+!site/public/releases/nipmod-0.1.34.tgz.sha256
+!site/public/releases/nipmod-0.1.34.tgz.sig
 
 # Secrets
 .env

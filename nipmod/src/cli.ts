@@ -29,7 +29,6 @@ import {
   type PolicyCheckResult
 } from "./policy.js";
 import {
-  createRegistryInstallPlan,
   executeInstallPlan,
   formatInstallPlan,
   InstallPolicyBlockedError,
@@ -59,6 +58,7 @@ import {
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
 import { createUpdatePlan, executeUpdatePlan, type UpdatePlan } from "./update.js";
+import { NIPMOD_VERSION } from "./version.js";
 import {
   inspectBundleFile,
   inspectRegistryPackage,
@@ -95,6 +95,7 @@ const CLI_COMMANDS = [
   "view",
   "policy",
   "mcp",
+  "version",
   "setup-cloudflare"
 ] as const;
 
@@ -143,6 +144,10 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
     case "--help":
     case "-h":
       return helpCommand();
+    case "--version":
+    case "-v":
+    case "version":
+      return versionCommand();
     case "init":
       return initCommand(args);
     case "pack":
@@ -192,6 +197,16 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
     default:
       throw new Error(`usage: nipmod <${CLI_COMMANDS.join("|")}>`);
   }
+}
+
+async function versionCommand(): Promise<CliResult> {
+  return {
+    ok: true,
+    data: {
+      message: NIPMOD_VERSION,
+      version: NIPMOD_VERSION
+    }
+  };
 }
 
 async function helpCommand(): Promise<CliResult> {
@@ -454,18 +469,25 @@ async function manifestValidateCommand(args: string[]): Promise<CliResult> {
 }
 
 async function installCommand(args: string[]): Promise<CliResult> {
+  assertKnownInstallFlags(args);
   const spec = optionalFirstPositional(args);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
-  if (hasFlag(args, "--plan")) {
+  if (spec && hasFlag(args, "--offline")) {
+    throw new Error("install with a package specifier does not accept --offline");
+  }
+  if (hasFlag(args, "--plan") || hasFlag(args, "--dry-run")) {
     if (!spec) {
       throw new Error("install --plan requires a package specifier");
     }
-    const plan = await createRegistryInstallPlan({
+    if (hasFlag(args, "--dry-run") && (optionalFlagValue(args, "--integrity") || isLocalInstallSpecifier(spec))) {
+      throw new Error("install --dry-run only supports registry packages");
+    }
+    const plan = await resolveAddInstallPlan({
       ...registryTrustFlags(args, "install --plan"),
       action: "install",
       policy: await optionalPolicyFromFlags(args),
       projectDir: dir,
-      specifier: spec
+      query: spec
     });
     return {
       ok: plan.readyToInstall,
@@ -586,6 +608,7 @@ class PolicyBlockError extends Error {
 }
 
 async function addCommand(args: string[]): Promise<CliResult> {
+  assertRegistryMutationFlags(args, "add");
   const query = firstPositional(args);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
   return registryInstallCommand({
@@ -612,6 +635,16 @@ async function registryInstallCommand(options: {
     projectDir: options.dir,
     query: options.query
   });
+  if (hasFlag(options.args, "--plan") || hasFlag(options.args, "--dry-run")) {
+    return {
+      ok: plan.readyToInstall,
+      data: {
+        message: formatInstallPlan(plan),
+        plan
+      },
+      exitCode: installPlanExitCode(plan)
+    };
+  }
   if (!plan.readyToInstall) {
     return {
       ok: false,
@@ -800,18 +833,20 @@ async function sbomCommand(args: string[]): Promise<CliResult> {
 async function doctorCommand(args: string[]): Promise<CliResult> {
   const doctor = await doctorGitlawb({
     nodeUrl: configuredNodeUrl(args),
+    registryUrl: registryUrlFromFlagsOrEnv(args) ?? DEFAULT_REGISTRY_URL,
     offline: hasFlag(args, "--offline")
   });
 
   return {
-    ok: true,
+    ok: doctor.ready,
     data: {
       message: formatDoctor(doctor),
       ready: doctor.ready,
       nodeUrl: doctor.nodeUrl,
       checks: doctor.checks,
       installCommand: doctor.installCommand
-    }
+    },
+    exitCode: doctor.ready ? 0 : 12
   };
 }
 
@@ -1543,6 +1578,40 @@ function assertLockfileInstallFlags(args: readonly string[]): void {
   }
 }
 
+function assertKnownInstallFlags(args: readonly string[]): void {
+  assertKnownFlags(args, "install", INSTALL_BOOLEAN_FLAGS, INSTALL_VALUE_FLAGS);
+}
+
+function assertRegistryMutationFlags(args: readonly string[], commandName: string): void {
+  assertKnownFlags(args, commandName, REGISTRY_MUTATION_BOOLEAN_FLAGS, REGISTRY_MUTATION_VALUE_FLAGS);
+}
+
+function assertKnownFlags(
+  args: readonly string[],
+  commandName: string,
+  booleanFlags: ReadonlySet<string>,
+  valueFlags: ReadonlySet<string>
+): void {
+  for (let index = 0; index < args.length; index += 1) {
+    const value = args[index];
+    if (!value?.startsWith("--")) {
+      continue;
+    }
+    if (booleanFlags.has(value)) {
+      continue;
+    }
+    if (valueFlags.has(value)) {
+      const flagValue = args[index + 1];
+      if (!flagValue || flagValue.startsWith("--")) {
+        throw new Error(`missing value for ${value}`);
+      }
+      index += 1;
+      continue;
+    }
+    throw new Error(`${commandName} does not accept ${value}`);
+  }
+}
+
 function searchLimit(args: readonly string[]): number {
   const rawLimit = optionalFlagValue(args, "--limit") ?? "20";
   const limit = Number(rawLimit);
@@ -1752,6 +1821,10 @@ const VALUE_FLAGS = new Set([
 
 const LOCKFILE_INSTALL_BOOLEAN_FLAGS = new Set(["--json", "--offline", "--online"]);
 const LOCKFILE_INSTALL_VALUE_FLAGS = new Set(["--dir", "--policy", "--profile"]);
+const INSTALL_BOOLEAN_FLAGS = new Set(["--allow-custom-roots", "--dry-run", "--json", "--offline", "--online", "--plan"]);
+const INSTALL_VALUE_FLAGS = new Set(["--dir", "--integrity", "--log-id", "--node", "--policy", "--profile", "--registry", "--witness"]);
+const REGISTRY_MUTATION_BOOLEAN_FLAGS = new Set(["--allow-custom-roots", "--dry-run", "--json", "--plan"]);
+const REGISTRY_MUTATION_VALUE_FLAGS = new Set(["--dir", "--log-id", "--node", "--policy", "--profile", "--registry", "--witness"]);
 
 const PACKAGE_DRAFT_TYPES = new Set<Manifest["type"]>([
   "skill",

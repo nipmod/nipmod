@@ -10,6 +10,7 @@ import { readResponseBytes, readResponseText } from "./http.js";
 import { type Identity, signBytes } from "./identity.js";
 import { type ReleaseEvent } from "./protocol.js";
 import { signReleaseEvent } from "./release.js";
+import { DEFAULT_REGISTRY_URL } from "./registry.js";
 import { canonicalJson } from "./verifier.js";
 
 export const DEFAULT_GITLAWB_NODE = "https://node.nipmod.com";
@@ -151,7 +152,7 @@ export interface GitlawbHelperStatus {
 export type DoctorCheckStatus = "ok" | "warn" | "fail";
 
 export interface DoctorCheck {
-  id: "node" | "git" | "gitlawb-helper" | "gitlawb-node";
+  id: "node" | "git" | "gitlawb-helper" | "gitlawb-node" | "registry";
   label: string;
   status: DoctorCheckStatus;
   message: string;
@@ -160,6 +161,7 @@ export interface DoctorCheck {
 
 export interface DoctorGitlawbOptions {
   nodeUrl?: string;
+  registryUrl?: string;
   offline?: boolean;
   env?: Record<string, string | undefined>;
   cwd?: string;
@@ -578,6 +580,7 @@ export async function resolveGitlawbHelper(
 export async function doctorGitlawb(options: DoctorGitlawbOptions = {}): Promise<DoctorGitlawbResult> {
   const env = options.env ?? process.env;
   const nodeUrl = normalizeNodeUrl(options.nodeUrl ?? DEFAULT_GITLAWB_NODE);
+  const registryUrl = options.registryUrl ?? DEFAULT_REGISTRY_URL;
   const installCommand = GITLAWB_INSTALL_COMMAND;
   const nodeVersion = options.nodeVersion ?? process.version;
   const checks: DoctorCheck[] = [
@@ -634,6 +637,13 @@ export async function doctorGitlawb(options: DoctorGitlawbOptions = {}): Promise
     nodeCheckOptions.fetchImpl = options.fetchImpl;
   }
   checks.push(await gitlawbNodeCheck(nodeCheckOptions));
+  checks.push(
+    await registryCheck({
+      ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {}),
+      offline: options.offline === true,
+      registryUrl
+    })
+  );
 
   return {
     ready: checks.every((check) => check.status !== "fail"),
@@ -641,6 +651,50 @@ export async function doctorGitlawb(options: DoctorGitlawbOptions = {}): Promise
     checks,
     installCommand
   };
+}
+
+async function registryCheck(options: {
+  registryUrl: string;
+  offline: boolean;
+  fetchImpl?: typeof fetch;
+}): Promise<DoctorCheck> {
+  if (options.offline) {
+    return {
+      id: "registry",
+      label: "Registry",
+      status: "warn",
+      message: `skipped registry check for ${options.registryUrl}`,
+      detail: "run without --offline before search or install"
+    };
+  }
+
+  try {
+    const response = await (options.fetchImpl ?? fetch)(options.registryUrl);
+    if (!response.ok) {
+      return {
+        id: "registry",
+        label: "Registry",
+        status: "fail",
+        message: `registry failed with ${response.status}`,
+        detail: options.registryUrl
+      };
+    }
+
+    return {
+      id: "registry",
+      label: "Registry",
+      status: "ok",
+      message: `registry is reachable at ${options.registryUrl}`
+    };
+  } catch (error) {
+    return {
+      id: "registry",
+      label: "Registry",
+      status: "fail",
+      message: error instanceof Error ? error.message : "registry check failed",
+      detail: options.registryUrl
+    };
+  }
 }
 
 function releaseEventForPackedBundle(packed: Awaited<ReturnType<typeof packProject>>, sourceCommit?: string | null): ReleaseEvent {

@@ -9,6 +9,7 @@ import { describe, expect, test } from "vitest";
 import { generateIdentity } from "../src/identity.js";
 import { inspectRegistryPackage } from "../src/trust-report.js";
 import { createTransparencyLogFromLeaves, signWitnessStatement } from "../src/transparency.js";
+import { NIPMOD_VERSION } from "../src/version.js";
 
 describe("nipmod CLI", () => {
   test("prints stable help with exit codes for humans and agents", async () => {
@@ -38,6 +39,14 @@ describe("nipmod CLI", () => {
         { code: 12, meaning: "preflight not ready" }
       ])
     );
+  }, 15_000);
+
+  test("prints the installed version with standard version flags", async () => {
+    const long = await execaNode(["src/cli.ts", "--version"]);
+    const short = await execaNode(["src/cli.ts", "-v"]);
+
+    expect(long.stdout).toBe(`${NIPMOD_VERSION}\n`);
+    expect(short.stdout).toBe(`${NIPMOD_VERSION}\n`);
   }, 15_000);
 
   test("initializes, packs, verifies, and installs a local package", async () => {
@@ -1000,6 +1009,46 @@ describe("nipmod CLI", () => {
     ).rejects.toThrow(/file URL host/i);
   });
 
+  test("does not mutate local installs when dry-run is requested", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-local-dry-run-"));
+    const app = join(workspace, "app");
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "install",
+      `file:${join(workspace, "missing.nipmod")}`,
+      "--dir",
+      app,
+      "--integrity",
+      `sha256-${"a".repeat(64)}`,
+      "--dry-run",
+      "--json"
+    ]);
+
+    expect(failed.error?.message).toContain("install --dry-run only supports registry packages");
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("rejects unknown install flags instead of mutating", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-unknown-flag-"));
+    const app = join(workspace, "app");
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "install",
+      `file:${join(workspace, "missing.nipmod")}`,
+      "--dir",
+      app,
+      "--integrity",
+      `sha256-${"a".repeat(64)}`,
+      "--definitely-unknown",
+      "--json"
+    ]);
+
+    expect(failed.error?.message).toContain("install does not accept --definitely-unknown");
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   test("prints machine-readable doctor status without network access", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-doctor-"));
     const binDir = join(workspace, "bin");
@@ -1046,6 +1095,21 @@ describe("nipmod CLI", () => {
     expect(result.stdout).not.toContain("Then run: nipmod doctor");
     expect(result.stdout).not.toContain("curl -fsSL");
     expect(result.stdout).not.toContain("| sh");
+  });
+
+  test("doctor exits non-zero when required online checks fail", async () => {
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "doctor",
+      "--node",
+      "http://127.0.0.1:9",
+      "--registry",
+      "http://127.0.0.1:9/packages.json",
+      "--json"
+    ]);
+
+    expect(failed.exitCode).toBe(12);
+    expect(failed.data?.ready).toBe(false);
   });
 
   test("searches a file-backed registry and prints install-ready results", async () => {
@@ -1974,6 +2038,54 @@ describe("nipmod CLI", () => {
         changed: true,
         path: join(app, "nipmod.lock.json")
       },
+      package: {
+        canonical,
+        version: "0.1.0"
+      },
+      readyToInstall: true
+    });
+    await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("plans a verified registry install by short package name", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-plan-short-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/plan-agent`;
+    const digest = "f".repeat(64);
+    const registryPath = join(workspace, "registry.json");
+    const transparency = cliTransparency(canonical, owner, digest);
+    await writeFile(registryPath, `${JSON.stringify(cliRegistry(canonical, owner, digest, transparency))}\n`);
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "install",
+      "plan-agent",
+      "--plan",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--allow-custom-roots",
+      "--log-id",
+      transparency.log.treeHead.logId,
+      "--witness",
+      transparency.witness.witness,
+      "--dir",
+      app,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        plan: {
+          action: string;
+          package: { canonical: string; version: string };
+          readyToInstall: boolean;
+        };
+      };
+    };
+
+    expect(parsed.data.plan).toMatchObject({
+      action: "install",
       package: {
         canonical,
         version: "0.1.0"

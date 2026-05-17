@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${NIPMOD_VERSION:-0.1.33}"
+VERSION="${NIPMOD_VERSION:-0.1.34}"
 BASE_URL="${NIPMOD_BASE_URL:-https://nipmod.com}"
 PACKAGE_NAME="${NIPMOD_PACKAGE_NAME:-nipmod-${VERSION}.tgz}"
 PACKAGE_URL="${NIPMOD_PACKAGE_URL:-${BASE_URL}/releases/${PACKAGE_NAME}}"
@@ -245,10 +245,11 @@ if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && !
     echo "dry run: curl -fsSL ${GITLAWB_INSTALL_URL} -o ${helper_script}"
     echo "dry run: verify GITLAWB_INSTALL_SHA256"
     echo "dry run: sh ${helper_script}"
-  elif [ -z "$GITLAWB_INSTALL_SHA256" ]; then
-    echo "error: GITLAWB_INSTALL_SHA256 is required when NIPMOD_INSTALL_GITLAWB=1" >&2
-    exit 1
   else
+    if [ -z "$GITLAWB_INSTALL_SHA256" ]; then
+      echo "error: GITLAWB_INSTALL_SHA256 is required when NIPMOD_INSTALL_GITLAWB=1" >&2
+      exit 1
+    fi
     curl -fsSL "$GITLAWB_INSTALL_URL" -o "$helper_script"
     actual_helper_sha256="$(sha256_file "$helper_script")"
     if [ "$GITLAWB_INSTALL_SHA256" != "$actual_helper_sha256" ]; then

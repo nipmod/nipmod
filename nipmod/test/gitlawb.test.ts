@@ -443,7 +443,8 @@ describe("Gitlawb integration", () => {
       "node:ok",
       "git:ok",
       "gitlawb-helper:ok",
-      "gitlawb-node:warn"
+      "gitlawb-node:warn",
+      "registry:warn"
     ]);
   });
 
@@ -464,7 +465,8 @@ describe("Gitlawb integration", () => {
       "node:ok",
       "git:ok",
       "gitlawb-helper:warn",
-      "gitlawb-node:warn"
+      "gitlawb-node:warn",
+      "registry:warn"
     ]);
     expect(doctor.checks.find((check) => check.id === "gitlawb-helper")).toMatchObject({
       detail: expect.stringContaining("verified checksum"),
