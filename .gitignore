@@ -17,6 +17,9 @@ probe-work/
 site/.vercel/
 site/tsconfig.tsbuildinfo
 
+# Local filesystem conflict copies of generated registry package docs
+site/public/registry/packages/* [0-9].json
+
 # Local planning artifacts
 findings.md
 mass-readiness-plan.md

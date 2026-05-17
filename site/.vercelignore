@@ -1,0 +1,2 @@
+# Local filesystem conflict copies of generated registry package docs
+public/registry/packages/* [0-9].json
