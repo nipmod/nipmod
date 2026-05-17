@@ -27,7 +27,7 @@ Current implementation status:
 - Public Gitlawb publish/install against `https://node.nipmod.com`
 - `nipmod doctor` setup checks for Git, Gitlawb helper and node health
 - Public installer at `https://nipmod.com/install.sh`
-- Standalone CLI release artifact at `/releases/nipmod-0.1.36.tgz`
+- Standalone CLI release artifact at `/releases/nipmod-1.0.0.tgz`
 - Detached Ed25519 release signatures for CLI artifacts
 - Signed public transparency log under `/transparency/*`
 - Live independent witness at `https://nipmod-witness.fly.dev`
