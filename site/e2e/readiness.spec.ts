@@ -15,6 +15,10 @@ test("home registry search stays usable", async ({ page }) => {
   await expect(siteNav.locator('a[href="/trust"]:visible').first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Install" }).first()).toHaveAttribute("href", "/quickstart#install");
   await expect(page.getByText("nipmod install gitlawb-repo-reader").first()).toBeVisible();
+  await expect(page.getByText("Signed", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Digest pinned", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Witnessed", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Advisory checked", { exact: true })).toHaveCount(0);
 
   await page.getByLabel("Search packages").fill("repo");
   await page.getByRole("button", { name: "Search" }).click();

@@ -35,11 +35,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <p className="product-line">Built on Gitlawb</p>
           <h1 id="hero-title">{homeContent.headline}</h1>
           <p className="lead">{homeContent.lead}</p>
-          <div className="proof-chips" aria-label="Proof included">
-            {["Signed", "Digest pinned", "Witnessed", "Advisory checked"].map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
           <div className="actions" aria-label="Actions">
             <a className="button button-primary" href={homeContent.links.install}>
               {homeContent.primaryAction}
@@ -47,16 +42,17 @@ export default async function Home({ searchParams }: HomeProps) {
             <a className="button button-ghost" href="/packages">
               Browse packages
             </a>
-            <a className="button button-ghost" href="/trust">
-              View proof
-            </a>
           </div>
         </div>
 
         <div className="terminal-panel" id="flow" aria-label="Terminal flow">
           <div className="terminal-top">
+            <span className="terminal-dots" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
             <span>nipmod</span>
-            <span>verified</span>
           </div>
           <pre>
             {homeContent.commands.map((command) => (
@@ -82,7 +78,7 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="registry-head">
           <div>
             <p className="eyebrow">Registry</p>
-            <h2 id="registry-title">Find the package. Check the proof. Install.</h2>
+            <h2 id="registry-title">Search. Inspect. Install.</h2>
           </div>
           <form className="search-form" action="/#registry">
             <label className="sr-only" htmlFor="package-search">
@@ -110,7 +106,7 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           ))}
         </div>
-        <p className="ranking-note">Ranked by trust, exact match, permissions, proof and freshness.</p>
+        <p className="ranking-note">Ordered by relevance and trust.</p>
 
         <div className="package-grid" aria-live="polite">
           {packages.length > 0 ? (
@@ -130,36 +126,13 @@ export default async function Home({ searchParams }: HomeProps) {
         ) : null}
       </section>
 
-      <section className="proof-section" aria-labelledby="trust-home-title">
-        <div>
-          <p className="eyebrow">Proof</p>
-          <h2 id="trust-home-title">Trust stays visible.</h2>
-        </div>
-        <div className="proof-panel proof-stack">
-          {[
-            ["Source", "Gitlawb repo and commit"],
-            ["Bytes", "Digest pinned bundle"],
-            ["Identity", "DID publisher signature"],
-            ["Safety", "Advisory aware audit"]
-          ].map(([label, text]) => (
-            <div className="proof-mini" key={label}>
-              <span>{label}</span>
-              <p>{text}</p>
-            </div>
-          ))}
-          <a className="button button-primary" href="/trust">
-            View proof
-          </a>
-        </div>
-      </section>
-
       <section className="proof-section" aria-labelledby="package-title">
         <div>
           <p className="eyebrow">Create</p>
-          <h2 id="package-title">Turn a Gitlawb repo into a package.</h2>
+          <h2 id="package-title">Package a Gitlawb repo.</h2>
         </div>
         <div className="proof-panel">
-          <p className="panel-copy">Paste a repo. Get a manifest, trust checklist and publish dry run.</p>
+          <p className="panel-copy">Paste a repo and dry run the publish path.</p>
           <pre className="install-command">
             <code>{"nipmod package gitlawb://did:key:z6Mk.../repo --dir repo\nnipmod publish repo --dry-run --json"}</code>
           </pre>

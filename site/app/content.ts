@@ -1,7 +1,7 @@
 export const homeContent = {
   brand: "nipmod",
   headline: "Packages agents can trust",
-  lead: "Install Gitlawb packages from the terminal. See source, signature, digest and proof before anything runs.",
+  lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
   links: {
     install: "/quickstart#install",
     x: "https://x.com/Nipmod"
@@ -21,7 +21,7 @@ export const homeContent = {
     },
     {
       label: "Inspect",
-      text: "Check source, digest, witness and permissions."
+      text: "Read source and permissions first."
     },
     {
       label: "Install",
@@ -117,7 +117,7 @@ export const homeContent = {
     },
     {
       label: "Respond",
-      text: "Signed advisories and quarantine metadata can block install surfaces without owning publishing rights."
+      text: "Advisories and quarantine metadata can block install surfaces without owning publishing rights."
     }
   ],
   launchReadiness: [
