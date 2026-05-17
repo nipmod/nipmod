@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:31.961914107+00:00",
+  "name": "agent-runtime-compat-check",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

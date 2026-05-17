@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:03.074473790+00:00",
+  "name": "strict-ci-policy",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

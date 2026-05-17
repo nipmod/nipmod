@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:05.405678272+00:00",
+  "name": "malicious-skill-fixtures",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

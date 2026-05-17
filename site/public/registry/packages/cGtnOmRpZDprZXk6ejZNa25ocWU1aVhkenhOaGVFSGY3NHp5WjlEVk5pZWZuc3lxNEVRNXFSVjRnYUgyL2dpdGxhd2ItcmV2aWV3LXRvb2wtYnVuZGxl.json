@@ -1,0 +1,102 @@
+{
+  "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "gitlawb-review-tool-bundle",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+      "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "cloneUrl": "https://node.nipmod.com/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle.git",
+      "description": "Bundle Gitlawb repo review, diff summary and release review guidance.",
+      "digest": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "gitlawb-review-tool-bundle",
+      "owner": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "53b8d2626b140869f4214f8a6e3157d36f60af5e2f35b2c602d05907a8571888",
+        "leafHash": "544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1",
+        "leafIndex": 25,
+        "leafUrl": "/transparency/leaves/544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1.json",
+        "proofUrl": "/transparency/proofs/544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "gitlawb-review-tool-bundle",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "4b89193645af4a222bb6e8b7fb1f0a4419b6d715",
+      "sourceRepo": "https://node.nipmod.com/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "tool-bundle",
+      "updatedAt": "2026-05-16T21:43:40.776642023+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxl/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxl.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxl/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxl/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:29.255964616+00:00",
+  "name": "registry-mirror-compare",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

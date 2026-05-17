@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:39.586938356+00:00",
+  "name": "package-safety-eval-pack",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

@@ -40,6 +40,41 @@ describe("package document builder", () => {
     ]);
   });
 
+  test("uses source dist tags instead of highest semver", () => {
+    const documents = buildPackageDocuments([
+      {
+        ...registryPackage("pkg:did:key:z6Mka/example", "example", "2.0.0")
+      },
+      {
+        ...registryPackage("pkg:did:key:z6Mka/example", "example", "1.0.0"),
+        distTags: {
+          latest: "1.0.0"
+        }
+      }
+    ]);
+
+    expect(documents[0]?.distTags.latest).toBe("1.0.0");
+  });
+
+  test("fails closed on conflicting source dist tags", () => {
+    expect(() =>
+      buildPackageDocuments([
+        {
+          ...registryPackage("pkg:did:key:z6Mka/example", "example", "1.0.0"),
+          distTags: {
+            latest: "1.0.0"
+          }
+        },
+        {
+          ...registryPackage("pkg:did:key:z6Mka/example", "example", "2.0.0"),
+          distTags: {
+            latest: "2.0.0"
+          }
+        }
+      ])
+    ).toThrow(/conflicting latest/i);
+  });
+
   test("fails closed when the same canonical version has conflicting digests", () => {
     expect(() =>
       buildPackageDocuments([

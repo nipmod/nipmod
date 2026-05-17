@@ -1,0 +1,102 @@
+{
+  "canonical": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "agent-permission-review",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+      "canonical": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "cloneUrl": "https://node.nipmod.com/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review.git",
+      "description": "Review agent package permissions for least privilege before install or publish.",
+      "digest": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "agent-permission-review",
+      "owner": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "d2701a2fc57389aed3478d536ccd66d318c62f7434f47210f6807b08192e39ff",
+        "leafHash": "418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81",
+        "leafIndex": 18,
+        "leafUrl": "/transparency/leaves/418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81.json",
+        "proofUrl": "/transparency/proofs/418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "agent-permission-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "38d0928c7cb747d85a390c964c9e552b3f2f215d",
+      "sourceRepo": "https://node.nipmod.com/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:04.919747527+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

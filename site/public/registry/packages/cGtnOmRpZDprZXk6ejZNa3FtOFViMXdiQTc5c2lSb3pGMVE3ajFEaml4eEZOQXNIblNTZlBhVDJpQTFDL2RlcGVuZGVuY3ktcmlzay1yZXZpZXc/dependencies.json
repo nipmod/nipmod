@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T10:08:53.491621872+00:00",
+  "name": "dependency-risk-review",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

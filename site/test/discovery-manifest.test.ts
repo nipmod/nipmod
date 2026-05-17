@@ -42,7 +42,14 @@ describe("nipmod discovery manifest", () => {
   });
 
   test("keeps nested objects exact and discovery only", () => {
-	    expect(Object.keys(manifest.registry).sort()).toEqual(["source", "url"]);
+	    expect(Object.keys(manifest.registry).sort()).toEqual([
+	      "dependenciesTemplate",
+	      "packageDocumentTemplate",
+	      "packageVersionTemplate",
+	      "provenanceTemplate",
+	      "source",
+	      "url"
+	    ]);
 	    expect(manifest.advisories).toBe("https://nipmod.com/advisories.json");
 	    expect(manifest.advisoriesSignature).toBe("https://nipmod.com/advisories.json.sig");
 	    expect(Object.keys(manifest.advisoriesPublicKey).sort()).toEqual([
@@ -157,6 +164,10 @@ describe("nipmod discovery manifest", () => {
 
   test("matches the verified registry and transparency roots", () => {
     expect(manifest.registry).toEqual({
+      dependenciesTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
+      packageDocumentTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}.json",
+      packageVersionTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
+      provenanceTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/provenance.json",
       source: registry.source,
       url: "https://nipmod.com/registry/packages.json"
     });

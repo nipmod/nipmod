@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:06.660636790+00:00",
+  "name": "mcp-server-import-example",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

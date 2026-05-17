@@ -1,0 +1,89 @@
+{
+  "artifactPath": "releases/0.1.0/bundle.nipmod",
+  "artifactSha256": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+  "canonical": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+  "cloneUrl": "https://node.nipmod.com/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack.git",
+  "description": "Evaluate package safety scanners against known unsafe agent package fixtures.",
+  "digest": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+  "documentType": "dev.nipmod.package-version.v1",
+  "formatVersion": 1,
+  "name": "package-safety-eval-pack",
+  "owner": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+  "permissionDetails": {
+    "env": [],
+    "filesystem": [],
+    "mcpTools": [],
+    "network": [],
+    "secrets": []
+  },
+  "permissions": {
+    "env": 0,
+    "exec": false,
+    "filesystem": 0,
+    "mcpTools": 0,
+    "network": 0,
+    "postinstall": false,
+    "secrets": 0
+  },
+  "proof": {
+    "checkpointUrl": "/transparency/checkpoint.json",
+    "eventHash": "86111d58daa5769f9e34287265130e50d408a0e5119f6de823ac0a8044f1fc07",
+    "leafHash": "e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76",
+    "leafIndex": 26,
+    "leafUrl": "/transparency/leaves/e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76.json",
+    "proofUrl": "/transparency/proofs/e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76.json",
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "subject": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack@0.1.0",
+    "treeSize": 32,
+    "type": "dev.nipmod.registry.proof.v1",
+    "witnesses": [
+      "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+    ],
+    "witnessUrls": [
+      "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+    ]
+  },
+  "publisher": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+  "releasePath": "releases/0.1.0/release.json",
+  "repo": "package-safety-eval-pack",
+  "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack/blob/releases/0.1.0/bundle.nipmod",
+  "sourceCommit": "6c04f95135756f796a74db277c80f1fd31767d2e",
+  "sourceRepo": "https://node.nipmod.com/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack.git",
+  "sourceTag": "v0.1.0",
+  "stars": 0,
+  "trust": {
+    "evidence": {
+      "artifactDigestVerified": true,
+      "bundleSignatureVerified": true,
+      "immutableSnapshotMatched": true,
+      "publisherMatchesCanonical": true,
+      "releaseEventSigned": true,
+      "sourceProvenanceVerified": true,
+      "transparencyLogIncluded": true,
+      "transparencyLogVerified": true
+    },
+    "level": "verified",
+    "score": 100,
+    "signals": [
+      "Artifact digest verified",
+      "Bundle signature verified",
+      "Publisher matches canonical owner",
+      "Version digest unchanged",
+      "Release event signed",
+      "Source tag verified",
+      "Transparency proof published",
+      "Witnessed checkpoint verified",
+      "No manifest permissions"
+    ],
+    "warnings": []
+  },
+  "type": "eval-pack",
+  "updatedAt": "2026-05-16T21:43:39.586938356+00:00",
+  "urls": {
+    "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFjaw/dependencies.json",
+    "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFjaw.json",
+    "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFjaw/provenance.json",
+    "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFjaw/0.1.0.json"
+  },
+  "version": "0.1.0"
+}

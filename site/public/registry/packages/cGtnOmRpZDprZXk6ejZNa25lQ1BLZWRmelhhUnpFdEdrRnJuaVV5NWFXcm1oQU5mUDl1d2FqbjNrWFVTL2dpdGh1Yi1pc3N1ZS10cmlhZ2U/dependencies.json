@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:42:59.376735717+00:00",
+  "name": "github-issue-triage",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

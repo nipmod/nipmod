@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:01.919816609+00:00",
+  "name": "nipmod-audit-ci",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

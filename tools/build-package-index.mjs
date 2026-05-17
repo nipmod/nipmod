@@ -9,6 +9,7 @@ import { spawnSync } from "node:child_process";
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SITE_REGISTRY_PATH = join(ROOT, "site", "app", "registry-data.json");
 const PUBLIC_REGISTRY_PATH = join(ROOT, "site", "public", "registry", "packages.json");
+const PUBLIC_REGISTRY_PACKAGES_DIR = join(ROOT, "site", "public", "registry", "packages");
 const PUBLIC_TRANSPARENCY_DIR = join(ROOT, "site", "public", "transparency");
 const PUBLIC_TRANSPARENCY_LOG_PATH = join(PUBLIC_TRANSPARENCY_DIR, "log.json");
 const PUBLIC_TRANSPARENCY_CHECKPOINT_PATH = join(PUBLIC_TRANSPARENCY_DIR, "checkpoint.json");
@@ -25,6 +26,7 @@ const BUNDLE_MEDIA_TYPE = "application/vnd.nipmod.bundle.v1+json";
 const COMPATIBILITY_RECEIPT_TYPE = "dev.nipmod.compatibility-receipt.v1";
 const COMPATIBILITY_RECEIPT_INDEX_TYPE = "dev.nipmod.compatibility-receipts.v1";
 const COMPATIBILITY_FORMATS = new Set(["apm-package", "git-source-provenance", "mcp-server-json"]);
+const MAX_STATIC_CANONICAL_BYTES = 187;
 const JSON_LIMIT = 512 * 1024;
 const BUNDLE_LIMIT = 5 * 1024 * 1024;
 const STRING_LIMITS = {
@@ -72,133 +74,150 @@ export async function buildRegistryIndex(options = {}) {
           maxBytes: JSON_LIMIT
         })
       );
-      const release = packageIndex.releases[packageIndex.latest];
-      if (!release) {
+      for (const skippedRelease of packageIndex.skippedReleases) {
+        skipped.push({
+          reason: `release ${skippedRelease.version}: ${skippedRelease.reason}`,
+          repo: repo.name
+        });
+      }
+      if (!packageIndex.releases[packageIndex.latest]) {
         throw new Error(`latest release ${packageIndex.latest} is missing`);
       }
 
-      const artifactPath = safeBlobPath(release.artifact.path);
-      if (release.artifact.mediaType !== BUNDLE_MEDIA_TYPE) {
-        throw new Error(`unsupported artifact media type ${release.artifact.mediaType}`);
-      }
-
-      const releasePath = safeBlobPath(`releases/${packageIndex.latest}/release.json`);
-      const releaseEvent = await fetchOptionalJson(buildBlobUrl(baseUrl, ownerSegment, repo.name, releasePath), {
-        fetchFn,
-        maxBytes: JSON_LIMIT
-      });
-      const artifactUrl = buildBlobUrl(baseUrl, ownerSegment, repo.name, artifactPath);
-      const artifactBytes = await fetchBytes(artifactUrl, { fetchFn, maxBytes: BUNDLE_LIMIT });
-      const artifactDigest = sha256Hex(artifactBytes);
-      const artifactDigestVerified = artifactDigest === release.artifact.sha256;
-      if (!artifactDigestVerified) {
-        throw new Error(`artifact digest mismatch: ${artifactDigest} !== ${release.artifact.sha256}`);
-      }
-
-      const bundle = verifyBundle(artifactBytes, release.artifact.sha256, { requireSignature: true });
-      const manifest = bundle.manifest;
-      if (packageIndex.package !== manifest.canonical) {
-        throw new Error("package index canonical does not match bundle canonical");
-      }
-      if (packageIndex.latest !== manifest.version) {
-        throw new Error("package index latest does not match bundle version");
-      }
-      if (manifest.publish.signingKey !== repo.owner_did) {
-        throw new Error("repo owner does not match package publisher");
-      }
-      if (release.publisher !== manifest.publish.signingKey) {
-        throw new Error("release publisher does not match package publisher");
-      }
-      if (!manifest.canonical.startsWith(`pkg:${manifest.publish.signingKey}/`)) {
-        throw new Error("package canonical owner does not match publisher");
-      }
-      if (release.artifact.manifestDigest !== bundle.manifestDigest) {
-        throw new Error("package index manifest digest does not match bundle manifest");
-      }
-      const permissions = summarizePermissions(manifest.permissions);
-      const gitlawbSourceRepo = `gitlawb://${repo.owner_did}/${repo.name}`;
-      const releaseEventSigned = hasVerifiedReleaseEvent(
-        releaseEvent,
-        {
-          artifactPath,
-          artifactSha256: release.artifact.sha256,
-          manifestDigest: release.artifact.manifestDigest,
-          mediaType: BUNDLE_MEDIA_TYPE,
-          package: manifest.canonical,
-          publisher: manifest.publish.signingKey,
-          sourceRepo: gitlawbSourceRepo,
-          sourceTag: `v${manifest.version}`,
-          version: manifest.version
-        },
-        verifySignedReleaseEvent
-      );
-      const sourceProvenance = releaseEventSigned
-        ? await verifySourceTag(baseUrl, ownerSegment, repo.name, repo.default_branch, `v${manifest.version}`, fetchFn)
-        : null;
-      const evidence = {
-        artifactDigestVerified,
-        bundleSignatureVerified: Boolean(bundle.signature),
-        immutableSnapshotMatched:
-          previousDigests.get(`${manifest.canonical}@${manifest.version}`) === undefined ||
-          previousDigests.get(`${manifest.canonical}@${manifest.version}`) === artifactDigest,
-        publisherMatchesCanonical:
-          manifest.publish.signingKey === repo.owner_did &&
-          release.publisher === manifest.publish.signingKey &&
-          manifest.canonical.startsWith(`pkg:${manifest.publish.signingKey}/`),
-        releaseEventSigned,
-        sourceProvenanceVerified: sourceProvenance?.verified === true,
-        transparencyLogIncluded: false,
-        transparencyLogVerified: false
-      };
-      const trust = deriveTrust(evidence, permissions.summary);
-
-      const packageRecord = {
-        artifactPath,
-        artifactSha256: release.artifact.sha256,
-        canonical: manifest.canonical,
-        cloneUrl: buildCloneUrl(baseUrl, ownerSegment, repo.name),
-        description: sanitizeText(manifest.description ?? repo.description ?? "", STRING_LIMITS.description),
-        ...dependencyMetadata(manifest),
-        digest: artifactDigest,
-        name: sanitizeText(manifest.name, STRING_LIMITS.name),
-        owner: repo.owner_did,
-        permissionDetails: permissions.details,
-        permissions: permissions.summary,
-        publisher: manifest.publish.signingKey,
-        releasePath,
-        repo: repo.name,
-        resolved: artifactUrl.href,
-        sourceCommit: sourceProvenance?.commit ?? null,
-        sourceTag: sourceProvenance?.tag ?? null,
-        sourceRepo: buildCloneUrl(baseUrl, ownerSegment, repo.name),
-        stars: repo.star_count,
-        trust,
-        type: sanitizeText(manifest.type, STRING_LIMITS.type),
-        updatedAt: repo.updated_at,
-        version: manifest.version
-      };
-      const excludedPackageKeys = registryExcludedPackageKeys(options.excludedPackageKeys);
-      if (isRegistryExcludedPackage(packageRecord, excludedPackageKeys)) {
-        skipped.push({
-          reason: "package excluded by registry policy",
-          repo: repo.name
-        });
-        continue;
-      }
-
-      const packageIndexInResult = packages.length;
-      packages.push(packageRecord);
-      if (releaseEventSigned && releaseEvent) {
-        transparencyCandidates.push({
-          packageIndex: packageIndexInResult,
-          leaf: {
-            artifactSha256: release.artifact.sha256,
-            package: manifest.canonical,
-            publisher: manifest.publish.signingKey,
-            releaseEvent,
-            version: manifest.version
+      for (const [releaseVersion, release] of sortedReleaseEntries(packageIndex.releases, skipped, repo.name)) {
+        try {
+          const artifactPath = safeBlobPath(release.artifact.path);
+          if (release.artifact.mediaType !== BUNDLE_MEDIA_TYPE) {
+            throw new Error(`unsupported artifact media type ${release.artifact.mediaType}`);
           }
-        });
+
+          const releasePath = safeBlobPath(`releases/${releaseVersion}/release.json`);
+          const releaseEvent = await fetchOptionalJson(buildBlobUrl(baseUrl, ownerSegment, repo.name, releasePath), {
+            fetchFn,
+            maxBytes: JSON_LIMIT
+          });
+          const artifactUrl = buildBlobUrl(baseUrl, ownerSegment, repo.name, artifactPath);
+          const artifactBytes = await fetchBytes(artifactUrl, { fetchFn, maxBytes: BUNDLE_LIMIT });
+          const artifactDigest = sha256Hex(artifactBytes);
+          const artifactDigestVerified = artifactDigest === release.artifact.sha256;
+          if (!artifactDigestVerified) {
+            throw new Error(`artifact digest mismatch: ${artifactDigest} !== ${release.artifact.sha256}`);
+          }
+
+          const bundle = verifyBundle(artifactBytes, release.artifact.sha256, { requireSignature: true });
+          const manifest = bundle.manifest;
+          if (packageIndex.package !== manifest.canonical) {
+            throw new Error("package index canonical does not match bundle canonical");
+          }
+          if (releaseVersion !== manifest.version) {
+            throw new Error("package index release version does not match bundle version");
+          }
+          if (manifest.publish.signingKey !== repo.owner_did) {
+            throw new Error("repo owner does not match package publisher");
+          }
+          if (release.publisher !== manifest.publish.signingKey) {
+            throw new Error("release publisher does not match package publisher");
+          }
+          if (!manifest.canonical.startsWith(`pkg:${manifest.publish.signingKey}/`)) {
+            throw new Error("package canonical owner does not match publisher");
+          }
+          if (release.artifact.manifestDigest !== bundle.manifestDigest) {
+            throw new Error("package index manifest digest does not match bundle manifest");
+          }
+          const permissions = summarizePermissions(manifest.permissions);
+          const gitlawbSourceRepo = `gitlawb://${repo.owner_did}/${repo.name}`;
+          const releaseEventSigned = hasVerifiedReleaseEvent(
+            releaseEvent,
+            {
+              artifactPath,
+              artifactSha256: release.artifact.sha256,
+              manifestDigest: release.artifact.manifestDigest,
+              mediaType: BUNDLE_MEDIA_TYPE,
+              package: manifest.canonical,
+              publisher: manifest.publish.signingKey,
+              sourceRepo: gitlawbSourceRepo,
+              sourceTag: `v${manifest.version}`,
+              version: manifest.version
+            },
+            verifySignedReleaseEvent
+          );
+          const sourceProvenance = releaseEventSigned
+            ? await verifySourceTag(baseUrl, ownerSegment, repo.name, repo.default_branch, `v${manifest.version}`, fetchFn)
+            : null;
+          const evidence = {
+            artifactDigestVerified,
+            bundleSignatureVerified: Boolean(bundle.signature),
+            immutableSnapshotMatched:
+              previousDigests.get(`${manifest.canonical}@${manifest.version}`) === undefined ||
+              previousDigests.get(`${manifest.canonical}@${manifest.version}`) === artifactDigest,
+            publisherMatchesCanonical:
+              manifest.publish.signingKey === repo.owner_did &&
+              release.publisher === manifest.publish.signingKey &&
+              manifest.canonical.startsWith(`pkg:${manifest.publish.signingKey}/`),
+            releaseEventSigned,
+            sourceProvenanceVerified: sourceProvenance?.verified === true,
+            transparencyLogIncluded: false,
+            transparencyLogVerified: false
+          };
+          const trust = deriveTrust(evidence, permissions.summary);
+
+          const packageRecord = {
+            artifactPath,
+            artifactSha256: release.artifact.sha256,
+            canonical: manifest.canonical,
+            cloneUrl: buildCloneUrl(baseUrl, ownerSegment, repo.name),
+            description: sanitizeText(manifest.description ?? repo.description ?? "", STRING_LIMITS.description),
+            ...dependencyMetadata(manifest),
+            digest: artifactDigest,
+            distTags: {
+              latest: packageIndex.latest
+            },
+            name: sanitizeText(manifest.name, STRING_LIMITS.name),
+            owner: repo.owner_did,
+            permissionDetails: permissions.details,
+            permissions: permissions.summary,
+            publisher: manifest.publish.signingKey,
+            releasePath,
+            repo: repo.name,
+            resolved: artifactUrl.href,
+            sourceCommit: sourceProvenance?.commit ?? null,
+            sourceTag: sourceProvenance?.tag ?? null,
+            sourceRepo: buildCloneUrl(baseUrl, ownerSegment, repo.name),
+            stars: repo.star_count,
+            trust,
+            type: sanitizeText(manifest.type, STRING_LIMITS.type),
+            updatedAt: repo.updated_at,
+            version: manifest.version
+          };
+          const excludedPackageKeys = registryExcludedPackageKeys(options.excludedPackageKeys);
+          if (isRegistryExcludedPackage(packageRecord, excludedPackageKeys)) {
+            skipped.push({
+              reason: "package excluded by registry policy",
+              repo: repo.name
+            });
+            continue;
+          }
+
+          const packageIndexInResult = packages.length;
+          packages.push(packageRecord);
+          if (releaseEventSigned && releaseEvent) {
+            transparencyCandidates.push({
+              packageIndex: packageIndexInResult,
+              leaf: {
+                artifactSha256: release.artifact.sha256,
+                package: manifest.canonical,
+                publisher: manifest.publish.signingKey,
+                releaseEvent,
+                version: manifest.version
+              }
+            });
+          }
+        } catch (error) {
+          skipped.push({
+            reason: `release ${releaseVersion}: ${error instanceof Error ? error.message : "unknown crawler error"}`,
+            repo: repo.name
+          });
+        }
       }
     } catch (error) {
       skipped.push({
@@ -591,7 +610,17 @@ function parsePackageIndex(value) {
     throw new Error("package index releases are invalid");
   }
   const releases = {};
+  const skippedReleases = [];
   for (const [version, releaseValue] of Object.entries(value.releases)) {
+    try {
+      parseSemver(version);
+    } catch (error) {
+      skippedReleases.push({
+        reason: error instanceof Error ? error.message : "invalid semver",
+        version
+      });
+      continue;
+    }
     if (!releaseValue || typeof releaseValue !== "object") {
       continue;
     }
@@ -614,7 +643,8 @@ function parsePackageIndex(value) {
     formatVersion: 1,
     latest,
     package: packageId,
-    releases
+    releases,
+    skippedReleases
   };
 }
 
@@ -1143,6 +1173,22 @@ function comparePackages(left, right) {
   return right.updatedAt.localeCompare(left.updatedAt);
 }
 
+function sortedReleaseEntries(releases, skipped, repoName) {
+  const valid = [];
+  for (const entry of Object.entries(releases)) {
+    try {
+      parseSemver(entry[0]);
+      valid.push(entry);
+    } catch (error) {
+      skipped.push({
+        reason: `release ${entry[0]}: ${error instanceof Error ? error.message : "invalid semver"}`,
+        repo: repoName
+      });
+    }
+  }
+  return valid.sort(([left], [right]) => compareSemver(left, right));
+}
+
 function hasNoRequestedPermissions(permissions) {
   return (
     permissions.filesystem === 0 &&
@@ -1245,7 +1291,225 @@ async function writeRegistry(index) {
   await writeFile(SITE_REGISTRY_PATH, payload);
   await mkdir(dirname(PUBLIC_REGISTRY_PATH), { recursive: true });
   await writeFile(PUBLIC_REGISTRY_PATH, payload);
+  await writePackageDocuments(index);
   await writeTransparencyFiles(index.transparencyLog ?? null);
+}
+
+export function encodeCanonicalForRegistryPath(canonical) {
+  if (typeof canonical !== "string" || canonical.length === 0 || canonical.length > 240) {
+    throw new Error("canonical package id is invalid");
+  }
+  if (Buffer.byteLength(canonical, "utf8") > MAX_STATIC_CANONICAL_BYTES) {
+    throw new Error("canonical package id is too long for a static registry path");
+  }
+  return Buffer.from(canonical, "utf8").toString("base64url");
+}
+
+export function buildPublicPackageDocuments(index) {
+  const groups = new Map();
+  for (const pkg of index.packages ?? []) {
+    const group = groups.get(pkg.canonical) ?? [];
+    group.push(pkg);
+    groups.set(pkg.canonical, group);
+  }
+
+  return [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([canonical, packages]) => {
+      const encoded = encodeCanonicalForRegistryPath(canonical);
+      const sortedPackages = [...packages].sort(comparePackageVersionAsc);
+      const versions = {};
+      const versionDocuments = [];
+      for (const pkg of sortedPackages) {
+        parseSemver(pkg.version);
+        const existing = versions[pkg.version];
+        if (existing && existing.digest !== pkg.digest) {
+          throw new Error(`conflicting package document version for ${pkg.canonical}@${pkg.version}`);
+        }
+        const versionDocument = buildPackageVersionDocument(pkg, encoded);
+        versions[pkg.version] = versionDocument;
+        versionDocuments.push(versionDocument);
+      }
+      const latest = sourceLatestVersion(sortedPackages) ?? latestVersion(sortedPackages.map((pkg) => pkg.version));
+      const latestPackage = sortedPackages.find((pkg) => pkg.version === latest);
+      if (!latestPackage) {
+        throw new Error(`package document has no latest version: ${canonical}`);
+      }
+      const distTags = { latest };
+      const packageDocument = {
+        canonical,
+        distTags,
+        formatVersion: 1,
+        generatedAt: index.generatedAt,
+        name: latestPackage.name,
+        source: index.source,
+        type: "dev.nipmod.package-document.v1",
+        versions
+      };
+
+      return {
+        dependenciesDocument: buildDependenciesDocument(latestPackage, distTags),
+        dependenciesPath: `registry/packages/${encoded}/dependencies.json`,
+        documentPath: `registry/packages/${encoded}.json`,
+        encoded,
+        packageDocument,
+        provenanceDocument: buildProvenanceDocument(latestPackage),
+        provenancePath: `registry/packages/${encoded}/provenance.json`,
+        versionDocuments,
+        versionPaths: versionDocuments.map((doc) => `registry/packages/${encoded}/${doc.version}.json`)
+      };
+    });
+}
+
+export async function writePackageDocuments(index, options = {}) {
+  const documents = buildPublicPackageDocuments(index);
+  const publicSiteDir = options.publicSiteDir ?? PUBLIC_SITE_DIR;
+  const packagesDir = join(publicSiteDir, "registry", "packages");
+  await rm(packagesDir, { force: true, recursive: true });
+  await mkdir(packagesDir, { recursive: true });
+  for (const document of documents) {
+    await writeJsonFile(join(publicSiteDir, document.documentPath), document.packageDocument);
+    const packageDir = join(packagesDir, document.encoded);
+    await mkdir(packageDir, { recursive: true });
+    for (const versionDocument of document.versionDocuments) {
+      await writeJsonFile(join(packageDir, `${versionDocument.version}.json`), versionDocument);
+    }
+    await writeJsonFile(join(publicSiteDir, document.dependenciesPath), document.dependenciesDocument);
+    await writeJsonFile(join(publicSiteDir, document.provenancePath), document.provenanceDocument);
+  }
+}
+
+function buildPackageVersionDocument(pkg, encoded) {
+  return {
+    artifactPath: pkg.artifactPath,
+    artifactSha256: pkg.artifactSha256,
+    canonical: pkg.canonical,
+    cloneUrl: pkg.cloneUrl,
+    compatibilityReceipts: pkg.compatibilityReceipts,
+    ...dependencyMetadata(pkg),
+    description: pkg.description ?? "",
+    digest: pkg.digest,
+    documentType: "dev.nipmod.package-version.v1",
+    formatVersion: 1,
+    name: pkg.name,
+    owner: pkg.owner,
+    permissionDetails: pkg.permissionDetails,
+    permissions: pkg.permissions,
+    proof: pkg.proof,
+    publisher: pkg.publisher,
+    quarantine: pkg.quarantine,
+    releasePath: pkg.releasePath,
+    repo: pkg.repo,
+    resolved: pkg.resolved,
+    sourceCommit: pkg.sourceCommit ?? null,
+    sourceRepo: pkg.sourceRepo,
+    sourceTag: pkg.sourceTag ?? null,
+    stars: pkg.stars,
+    trust: pkg.trust,
+    type: pkg.type ?? "unknown",
+    updatedAt: pkg.updatedAt,
+    urls: {
+      dependencies: `/registry/packages/${encoded}/dependencies.json`,
+      package: `/registry/packages/${encoded}.json`,
+      provenance: `/registry/packages/${encoded}/provenance.json`,
+      version: `/registry/packages/${encoded}/${pkg.version}.json`
+    },
+    version: pkg.version
+  };
+}
+
+function buildDependenciesDocument(pkg, distTags) {
+  return {
+    canonical: pkg.canonical,
+    direct: dependencyMetadata(pkg),
+    distTags,
+    formatVersion: 1,
+    generatedAt: pkg.updatedAt,
+    name: pkg.name,
+    type: "dev.nipmod.package-dependencies.v1",
+    version: pkg.version
+  };
+}
+
+function buildProvenanceDocument(pkg) {
+  return {
+    artifactPath: pkg.artifactPath,
+    artifactSha256: pkg.artifactSha256,
+    canonical: pkg.canonical,
+    digest: pkg.digest,
+    formatVersion: 1,
+    name: pkg.name,
+    proof: pkg.proof ?? null,
+    publisher: pkg.publisher,
+    releasePath: pkg.releasePath,
+    resolved: pkg.resolved,
+    sourceCommit: pkg.sourceCommit ?? null,
+    sourceRepo: pkg.sourceRepo,
+    sourceTag: pkg.sourceTag ?? null,
+    trust: pkg.trust,
+    type: "dev.nipmod.package-provenance.v1",
+    version: pkg.version
+  };
+}
+
+function latestVersion(versions) {
+  const latest = [...versions].sort(compareSemverDesc)[0];
+  if (!latest) {
+    throw new Error("package document requires at least one version");
+  }
+  return latest;
+}
+
+function sourceLatestVersion(packages) {
+  const latestValues = new Set();
+  for (const pkg of packages) {
+    const latest = pkg?.distTags?.latest;
+    if (typeof latest === "string" && latest.length > 0) {
+      latestValues.add(latest);
+    }
+  }
+  if (latestValues.size === 0) {
+    return null;
+  }
+  if (latestValues.size > 1) {
+    throw new Error(`conflicting latest dist tags for ${packages[0]?.canonical ?? "package"}`);
+  }
+  const latest = [...latestValues][0];
+  if (!packages.some((pkg) => pkg.version === latest)) {
+    throw new Error(`latest dist tag ${latest} is missing from ${packages[0]?.canonical ?? "package"} versions`);
+  }
+  return latest;
+}
+
+function comparePackageVersionAsc(left, right) {
+  return compareSemver(left.version, right.version);
+}
+
+function compareSemverDesc(left, right) {
+  return compareSemver(right, left);
+}
+
+function compareSemver(left, right) {
+  const leftParts = parseSemver(left);
+  const rightParts = parseSemver(right);
+  for (let index = 0; index < 3; index += 1) {
+    const diff = leftParts[index] - rightParts[index];
+    if (diff !== 0) {
+      return diff;
+    }
+  }
+  return 0;
+}
+
+function parseSemver(value) {
+  if (typeof value !== "string" || value.length > 40) {
+    throw new Error(`invalid semver: ${value}`);
+  }
+  const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(value);
+  if (!match) {
+    throw new Error(`invalid semver: ${value}`);
+  }
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
 async function writeTransparencyFiles(log) {
@@ -1285,6 +1549,13 @@ async function writeJsonFile(path, value) {
 }
 
 async function main() {
+  if (process.argv.includes("--package-docs-only")) {
+    const index = await readPreviousIndex();
+    await writePackageDocuments(index);
+    console.log(`wrote package documents for ${new Set(index.packages.map((pkg) => pkg.canonical)).size} packages`);
+    return;
+  }
+
   const previousIndex = await readPreviousIndex();
   const index = await buildRegistryIndex({ previousIndex });
   await writeRegistry(index);

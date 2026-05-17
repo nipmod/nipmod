@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:00:02.802189127+00:00",
+  "name": "security-advisory-triage",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

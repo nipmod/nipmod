@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:30.655330504+00:00",
+  "name": "package-evidence-brief",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

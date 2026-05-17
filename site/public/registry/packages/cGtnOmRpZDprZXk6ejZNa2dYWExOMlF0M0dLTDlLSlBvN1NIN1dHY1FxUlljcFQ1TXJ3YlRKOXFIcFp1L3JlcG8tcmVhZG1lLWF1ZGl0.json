@@ -1,0 +1,128 @@
+{
+  "canonical": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "repo-readme-audit",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "canonical": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "cloneUrl": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "compatibilityReceipts": [
+        {
+          "exampleUrl": "https://nipmod.com/compatibility/examples/apm-package.json",
+          "externalFormat": "apm-package",
+          "externalInputSha256": "8ca75cd43e96ca15a622e36f463e8f7449e1ebd21a6bf453238286df8ad8bdbc",
+          "id": "receipt.apm.repo-readme-audit",
+          "label": "APM package",
+          "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+          "packageDigest": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+          "preservedFields": [
+            "name",
+            "version",
+            "description",
+            "entrypoint",
+            "permissions"
+          ],
+          "provenanceLoss": [],
+          "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.apm.repo-readme-audit",
+          "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+          "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+          "sourceTag": "v0.1.0",
+          "type": "dev.nipmod.compatibility-receipt.v1",
+          "unsupportedFields": [],
+          "version": "0.1.0"
+        }
+      ],
+      "description": "Audit repository README files for installation clarity, trust evidence and agent-safe instructions.",
+      "digest": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "repo-readme-audit",
+      "owner": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "1e0c54476e578ddad2dbb2d5108a6fed74217e36272747f190abdd111371a561",
+        "leafHash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+        "leafIndex": 4,
+        "leafUrl": "/transparency/leaves/da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6.json",
+        "proofUrl": "/transparency/proofs/da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "repo-readme-audit",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+      "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T10:08:53.576138093+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

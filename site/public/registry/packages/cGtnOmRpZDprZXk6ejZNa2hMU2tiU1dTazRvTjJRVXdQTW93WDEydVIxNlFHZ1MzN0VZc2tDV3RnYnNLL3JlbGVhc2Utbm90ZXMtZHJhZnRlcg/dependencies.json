@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:00:00.845327274+00:00",
+  "name": "release-notes-drafter",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

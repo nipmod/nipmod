@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:08.993754021+00:00",
+  "name": "gitlawb-release-review",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

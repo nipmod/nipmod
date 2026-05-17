@@ -13,7 +13,11 @@
   },
   "registry": {
     "url": "https://nipmod.com/registry/packages.json",
-    "source": "https://node.nipmod.com"
+    "source": "https://node.nipmod.com",
+    "packageDocumentTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}.json",
+    "packageVersionTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
+    "dependenciesTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
+    "provenanceTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/provenance.json"
   },
   "node": {
     "url": "https://node.nipmod.com",

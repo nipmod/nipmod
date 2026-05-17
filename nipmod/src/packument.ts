@@ -4,6 +4,7 @@ export interface RegistryPackageRecord {
   description?: string;
   devDependencies?: Record<string, string>;
   digest: string;
+  distTags?: Record<string, string>;
   name: string;
   optionalDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
@@ -44,8 +45,10 @@ export interface PackageDocument {
 
 export function buildPackageDocuments(packages: readonly RegistryPackageRecord[]): PackageDocument[] {
   const byCanonical = new Map<string, PackageDocument>();
+  const sourceLatestByCanonical = new Map<string, string>();
 
   for (const pkg of packages) {
+    parseSemver(pkg.version);
     const document =
       byCanonical.get(pkg.canonical) ??
       {
@@ -69,11 +72,14 @@ export function buildPackageDocuments(packages: readonly RegistryPackageRecord[]
       type: pkg.type ?? "unknown",
       version: pkg.version
     };
-    document.distTags.latest = latestVersion(Object.keys(document.versions));
+    recordSourceLatest(pkg, sourceLatestByCanonical);
     byCanonical.set(pkg.canonical, document);
   }
 
-  return [...byCanonical.values()].sort((left, right) => left.name.localeCompare(right.name) || left.canonical.localeCompare(right.canonical));
+  return [...byCanonical.values()]
+    .map((document) => applyLatestDistTag(document, sourceLatestByCanonical.get(document.canonical)))
+    .map(assertPackageDocumentDistTags)
+    .sort((left, right) => left.name.localeCompare(right.name) || left.canonical.localeCompare(right.canonical));
 }
 
 function dependencyMetadata(pkg: RegistryPackageRecord): Partial<PackageVersionDocument> {
@@ -96,6 +102,31 @@ function latestVersion(versions: readonly string[]): string {
     throw new Error("package document requires at least one version");
   }
   return latest;
+}
+
+function recordSourceLatest(pkg: RegistryPackageRecord, sourceLatestByCanonical: Map<string, string>): void {
+  const latest = pkg.distTags?.latest;
+  if (latest === undefined || latest === "") {
+    return;
+  }
+  const existing = sourceLatestByCanonical.get(pkg.canonical);
+  if (existing !== undefined && existing !== latest) {
+    throw new Error(`conflicting latest dist tags for ${pkg.canonical}`);
+  }
+  sourceLatestByCanonical.set(pkg.canonical, latest);
+}
+
+function applyLatestDistTag(document: PackageDocument, sourceLatest: string | undefined): PackageDocument {
+  document.distTags.latest = sourceLatest ?? latestVersion(Object.keys(document.versions));
+  return document;
+}
+
+function assertPackageDocumentDistTags(document: PackageDocument): PackageDocument {
+  const latest = document.distTags.latest;
+  if (!latest || !document.versions[latest]) {
+    throw new Error(`latest dist tag is missing from ${document.canonical} versions`);
+  }
+  return document;
 }
 
 function compareSemverDesc(left: string, right: string): number {
@@ -121,6 +152,9 @@ function compareSemver(left: string, right: string): number {
 }
 
 function parseSemver(value: string): [number, number, number] {
+  if (value.length > 40) {
+    throw new Error(`invalid semver: ${value}`);
+  }
   const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(value);
   if (!match) {
     throw new Error(`invalid semver: ${value}`);

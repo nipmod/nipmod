@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T20:59:58.808613893+00:00",
+  "name": "gitlawb-diff-summarizer",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

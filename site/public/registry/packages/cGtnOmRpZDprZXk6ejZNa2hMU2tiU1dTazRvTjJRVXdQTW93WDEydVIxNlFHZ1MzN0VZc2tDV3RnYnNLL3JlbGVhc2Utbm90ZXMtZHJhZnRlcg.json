@@ -1,0 +1,102 @@
+{
+  "canonical": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "release-notes-drafter",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+      "canonical": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "cloneUrl": "https://node.nipmod.com/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter.git",
+      "description": "Draft release notes from verified package, Gitlawb tag and changelog evidence.",
+      "digest": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "release-notes-drafter",
+      "owner": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "4a78415b4aea393f01ba23521e9ffc1719fc539e2c8746235bad484acfd5d3df",
+        "leafHash": "7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4",
+        "leafIndex": 16,
+        "leafUrl": "/transparency/leaves/7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4.json",
+        "proofUrl": "/transparency/proofs/7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "release-notes-drafter",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "47fb8fee60b381b2d5fdf23409a36213c0627be3",
+      "sourceRepo": "https://node.nipmod.com/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:00.845327274+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlcg/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlcg.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlcg/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlcg/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

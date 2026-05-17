@@ -1,0 +1,89 @@
+{
+  "artifactPath": "releases/0.1.0/bundle.nipmod",
+  "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+  "canonical": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+  "cloneUrl": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
+  "description": "Expose read only nipmod registry search and inspect tools through MCP.",
+  "digest": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+  "documentType": "dev.nipmod.package-version.v1",
+  "formatVersion": 1,
+  "name": "readonly-registry-mcp-server",
+  "owner": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+  "permissionDetails": {
+    "env": [],
+    "filesystem": [],
+    "mcpTools": [],
+    "network": [],
+    "secrets": []
+  },
+  "permissions": {
+    "env": 0,
+    "exec": false,
+    "filesystem": 0,
+    "mcpTools": 0,
+    "network": 0,
+    "postinstall": false,
+    "secrets": 0
+  },
+  "proof": {
+    "checkpointUrl": "/transparency/checkpoint.json",
+    "eventHash": "dc5c6c3d6eed0a49eb968e8df1deec63a8bff42f397a2c3131b175f69d0f516b",
+    "leafHash": "3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42",
+    "leafIndex": 28,
+    "leafUrl": "/transparency/leaves/3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42.json",
+    "proofUrl": "/transparency/proofs/3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42.json",
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "subject": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server@0.1.0",
+    "treeSize": 32,
+    "type": "dev.nipmod.registry.proof.v1",
+    "witnesses": [
+      "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+    ],
+    "witnessUrls": [
+      "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+    ]
+  },
+  "publisher": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+  "releasePath": "releases/0.1.0/release.json",
+  "repo": "readonly-registry-mcp-server",
+  "resolved": "https://node.nipmod.com/api/v1/repos/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server/blob/releases/0.1.0/bundle.nipmod",
+  "sourceCommit": "1ab073a75f7f0390a3e40ace949bde404b6645c3",
+  "sourceRepo": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
+  "sourceTag": "v0.1.0",
+  "stars": 0,
+  "trust": {
+    "evidence": {
+      "artifactDigestVerified": true,
+      "bundleSignatureVerified": true,
+      "immutableSnapshotMatched": true,
+      "publisherMatchesCanonical": true,
+      "releaseEventSigned": true,
+      "sourceProvenanceVerified": true,
+      "transparencyLogIncluded": true,
+      "transparencyLogVerified": true
+    },
+    "level": "verified",
+    "score": 100,
+    "signals": [
+      "Artifact digest verified",
+      "Bundle signature verified",
+      "Publisher matches canonical owner",
+      "Version digest unchanged",
+      "Release event signed",
+      "Source tag verified",
+      "Transparency proof published",
+      "Witnessed checkpoint verified",
+      "No manifest permissions"
+    ],
+    "warnings": []
+  },
+  "type": "mcp-server",
+  "updatedAt": "2026-05-16T21:43:37.092574323+00:00",
+  "urls": {
+    "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXI/dependencies.json",
+    "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXI.json",
+    "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXI/provenance.json",
+    "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXI/0.1.0.json"
+  },
+  "version": "0.1.0"
+}

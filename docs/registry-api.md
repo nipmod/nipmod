@@ -1,6 +1,6 @@
 # Registry API
 
-Status: proposed P0 contract
+Status: implemented static package documents, v1 sidecars in progress
 Date: 2026-05-17
 
 ## Why this exists
@@ -44,9 +44,13 @@ Each canonical Gitlawb package should resolve to a document:
 | `/registry/packages.json` | Search index, optimized for discovery. |
 | `/registry/packages/<encoded-canonical>.json` | Package document with versions and dist tags. |
 | `/registry/packages/<encoded-canonical>/<version>.json` | Exact version metadata. |
-| `/registry/packages/<encoded-canonical>/readme` | README from the signed bundle. |
-| `/registry/packages/<encoded-canonical>/dependencies` | Direct dependency maps and resolved graph preview. |
-| `/registry/packages/<encoded-canonical>/provenance` | Source, release event, transparency and witness proof. |
+| `/registry/packages/<encoded-canonical>/dependencies.json` | Direct dependency maps for the current `latest` dist tag. |
+| `/registry/packages/<encoded-canonical>/provenance.json` | Source, artifact, release, transparency and witness proof for the current `latest` dist tag. |
+| `/registry/packages/<encoded-canonical>/readme` | README from the signed bundle. Pending signed README extraction. |
+
+`<encoded-canonical>` is base64url over the UTF-8 canonical package id. This keeps `pkg:did:key:.../name` usable in static file paths without decoded slashes breaking routing.
+
+Agents can discover the templates from `https://nipmod.com/.well-known/nipmod.json` under `registry`.
 
 ## Dist tags
 
@@ -61,7 +65,7 @@ Dist tags are signed lifecycle events. `latest` can be derived only when no sign
 
 ## Next implementation steps
 
-1. Generate public package documents from the verified flat registry.
-2. Add signed registry root metadata for package documents.
-3. Teach resolver and inspect to consume package documents for registry driven graph install.
+1. Add signed registry root metadata for package documents.
+2. Teach resolver and inspect to consume package documents for registry driven graph install.
+3. Add signed README extraction from bundles.
 4. Add lifecycle schemas for dist tag, deprecation, yank, owner and trusted publishing events.

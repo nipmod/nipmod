@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -7,12 +7,15 @@ import {
   assertImmutableDigests,
   buildRegistryIndex,
   buildBlobUrl,
+  buildPublicPackageDocuments,
   deriveTrust,
+  encodeCanonicalForRegistryPath,
   hasVerifiedReleaseEvent,
   assertNoMissingPackages,
   normalizeBaseUrl,
   readPreviousIndex,
-  safeBlobPath
+  safeBlobPath,
+  writePackageDocuments
 } from "./build-package-index.mjs";
 
 const emptyPermissions = {
@@ -252,6 +255,184 @@ describe("package indexer rules", () => {
           optional: true
         }
       }
+    });
+  });
+
+  test("builds npm-style public package documents with URL-safe canonical paths", () => {
+    const canonical = "pkg:did:key:z6Mkowner/alpha";
+    const encoded = encodeCanonicalForRegistryPath(canonical);
+    const documents = buildPublicPackageDocuments({
+      formatVersion: 1,
+      generatedAt: "2026-05-17T00:00:00.000Z",
+      packages: [
+        registryPackageFixture({
+          canonical,
+          dependencies: { "agent-logger": "^1.0.0" },
+          digest: "a".repeat(64),
+          version: "0.1.0"
+        }),
+        registryPackageFixture({
+          canonical,
+          digest: "b".repeat(64),
+          proof: {
+            checkpointUrl: "/transparency/checkpoint.json",
+            eventHash: "c".repeat(64),
+            leafHash: "d".repeat(64),
+            leafIndex: 1,
+            leafUrl: "/transparency/leaves/d.json",
+            proofUrl: "/transparency/proofs/d.json",
+            rootHash: "e".repeat(64),
+            subject: `${canonical}@0.2.0`,
+            treeSize: 2,
+            type: "dev.nipmod.registry.proof.v1"
+          },
+          sourceCommit: "1".repeat(40),
+          sourceTag: "v0.2.0",
+          version: "0.2.0"
+        })
+      ],
+      skipped: [],
+      source: "https://node.nipmod.com"
+    });
+
+    expect(encoded).not.toMatch(/[/:+]/);
+    expect(documents).toHaveLength(1);
+    expect(documents[0]).toMatchObject({
+      dependenciesPath: `registry/packages/${encoded}/dependencies.json`,
+      documentPath: `registry/packages/${encoded}.json`,
+      provenancePath: `registry/packages/${encoded}/provenance.json`,
+      packageDocument: {
+        canonical,
+        distTags: {
+          latest: "0.2.0"
+        },
+        formatVersion: 1,
+        name: "alpha",
+        type: "dev.nipmod.package-document.v1"
+      }
+    });
+    expect(Object.keys(documents[0].packageDocument.versions)).toEqual(["0.1.0", "0.2.0"]);
+    expect(documents[0].packageDocument.versions["0.1.0"].dependencies).toEqual({ "agent-logger": "^1.0.0" });
+    expect(documents[0].versionDocuments.map((doc) => doc.version)).toEqual(["0.1.0", "0.2.0"]);
+    expect(documents[0].dependenciesDocument).toMatchObject({
+      canonical,
+      direct: {},
+      version: "0.2.0"
+    });
+    expect(documents[0].provenanceDocument).toMatchObject({
+      canonical,
+      digest: "b".repeat(64),
+      proof: {
+        subject: `${canonical}@0.2.0`
+      },
+      sourceCommit: "1".repeat(40),
+      version: "0.2.0"
+    });
+  });
+
+  test("rejects canonical package ids that cannot fit in one static path segment", () => {
+    const canonical = `pkg:did:key:z${"a".repeat(120)}/${"b".repeat(53)}`;
+    const encoded = encodeCanonicalForRegistryPath(canonical);
+    expect(Buffer.byteLength(`${encoded}.json`)).toBeLessThanOrEqual(255);
+    expect(() => encodeCanonicalForRegistryPath(`${canonical}c`)).toThrow(/too long/i);
+  });
+
+  test("validates package documents before removing existing static registry files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "nipmod-static-registry-test-"));
+    const packagesDir = join(dir, "registry", "packages");
+    await mkdir(packagesDir, { recursive: true });
+    await writeFile(join(packagesDir, "existing.json"), "{}\n");
+
+    await expect(
+      writePackageDocuments(
+        {
+          formatVersion: 1,
+          generatedAt: "2026-05-17T00:00:00.000Z",
+          packages: [
+            registryPackageFixture({
+              canonical: `pkg:did:key:z${"a".repeat(120)}/${"b".repeat(54)}`
+            })
+          ],
+          skipped: [],
+          source: "https://node.nipmod.com"
+        },
+        { publicSiteDir: dir }
+      )
+    ).rejects.toThrow(/too long/i);
+    expect(await readdir(packagesDir)).toEqual(["existing.json"]);
+  });
+
+  test("validates version path segments before removing existing static registry files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "nipmod-static-registry-version-test-"));
+    const packagesDir = join(dir, "registry", "packages");
+    await mkdir(packagesDir, { recursive: true });
+    await writeFile(join(packagesDir, "existing.json"), "{}\n");
+
+    await expect(
+      writePackageDocuments(
+        {
+          formatVersion: 1,
+          generatedAt: "2026-05-17T00:00:00.000Z",
+          packages: [
+            registryPackageFixture({
+              version: `${"1".repeat(41)}.0.0`
+            })
+          ],
+          skipped: [],
+          source: "https://node.nipmod.com"
+        },
+        { publicSiteDir: dir }
+      )
+    ).rejects.toThrow(/invalid semver/i);
+    expect(await readdir(packagesDir)).toEqual(["existing.json"]);
+  });
+
+  test("indexes every package release instead of only the latest release", async () => {
+    const owner = "did:key:z6Mkowner";
+    const result = await buildRegistryFixture({
+      latestVersion: "0.2.0",
+      manifestOwner: owner,
+      releaseVersions: ["0.1.0", "0.2.0"],
+      repoOwner: owner
+    });
+    const documents = buildPublicPackageDocuments(result);
+
+    expect(result.packages.map((pkg) => pkg.version).sort()).toEqual(["0.1.0", "0.2.0"]);
+    expect(documents[0].packageDocument.distTags.latest).toBe("0.2.0");
+    expect(Object.keys(documents[0].packageDocument.versions)).toEqual(["0.1.0", "0.2.0"]);
+    expect(documents[0].versionDocuments.map((doc) => doc.version)).toEqual(["0.1.0", "0.2.0"]);
+  });
+
+  test("uses the verified package index latest value instead of highest semver", async () => {
+    const owner = "did:key:z6Mkowner";
+    const result = await buildRegistryFixture({
+      latestVersion: "0.1.0",
+      manifestOwner: owner,
+      releaseVersions: ["0.1.0", "0.2.0"],
+      repoOwner: owner
+    });
+    const documents = buildPublicPackageDocuments(result);
+
+    expect(result.packages.every((pkg) => pkg.distTags.latest === "0.1.0")).toBe(true);
+    expect(documents[0].packageDocument.distTags.latest).toBe("0.1.0");
+    expect(documents[0].dependenciesDocument.version).toBe("0.1.0");
+    expect(documents[0].provenanceDocument.version).toBe("0.1.0");
+  });
+
+  test("skips malformed package release keys before reading bad payloads", async () => {
+    const owner = "did:key:z6Mkowner";
+    const result = await buildRegistryFixture({
+      extraMalformedReleases: ["canary"],
+      latestVersion: "0.2.0",
+      manifestOwner: owner,
+      releaseVersions: ["0.1.0", "0.2.0"],
+      repoOwner: owner
+    });
+
+    expect(result.packages.map((pkg) => pkg.version).sort()).toEqual(["0.1.0", "0.2.0"]);
+    expect(result.skipped).toContainEqual({
+      reason: expect.stringContaining("release canary: invalid semver"),
+      repo: "alpha"
     });
   });
 
@@ -598,6 +779,51 @@ function indexFixture(digest) {
   };
 }
 
+function registryPackageFixture(overrides = {}) {
+  const canonical = overrides.canonical ?? "pkg:did:key:z6Mkowner/alpha";
+  const version = overrides.version ?? "0.1.0";
+  return {
+    artifactPath: `releases/${version}/bundle.nipmod`,
+    artifactSha256: overrides.digest ?? "a".repeat(64),
+    canonical,
+    cloneUrl: "https://node.nipmod.com/z6Mkowner/alpha.git",
+    description: "alpha package",
+    digest: overrides.digest ?? "a".repeat(64),
+    name: "alpha",
+    owner: "did:key:z6Mkowner",
+    permissionDetails: { env: [], filesystem: [], mcpTools: [], network: [], secrets: [] },
+    permissions: emptyPermissions,
+    publisher: "did:key:z6Mkowner",
+    releasePath: `releases/${version}/release.json`,
+    repo: "alpha",
+    resolved: `https://node.nipmod.com/api/v1/repos/z6Mkowner/alpha/blob/releases/${version}/bundle.nipmod`,
+    sourceCommit: null,
+    sourceRepo: "https://node.nipmod.com/z6Mkowner/alpha.git",
+    sourceTag: null,
+    stars: 0,
+    trust: {
+      evidence: {
+        artifactDigestVerified: true,
+        bundleSignatureVerified: true,
+        immutableSnapshotMatched: true,
+        publisherMatchesCanonical: true,
+        releaseEventSigned: true,
+        sourceProvenanceVerified: false,
+        transparencyLogIncluded: false,
+        transparencyLogVerified: false
+      },
+      level: "signed",
+      score: 90,
+      signals: [],
+      warnings: []
+    },
+    type: "skill",
+    updatedAt: "2026-05-17T00:00:00.000Z",
+    version,
+    ...overrides
+  };
+}
+
 function sha256Hex(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -607,12 +833,15 @@ async function buildRegistryFixture({
   allowedWitnesses,
   bundleManifestDigest = "a".repeat(64),
   compatibilityReceipts = [],
+  extraMalformedReleases = [],
   indexManifestDigest = bundleManifestDigest,
+  latestVersion = "0.1.0",
   manifestName = "alpha",
   manifestDependencies = {},
   manifestOwner,
   previousIndex,
   releaseEventVerifies = false,
+  releaseVersions = ["0.1.0"],
   repoName = "alpha",
   repoOwner,
   sourceHeadCommit = "1".repeat(40),
@@ -621,9 +850,25 @@ async function buildRegistryFixture({
   witnessIdentity,
   witnessStatements
 }) {
-  const artifactBytes = Buffer.from("bundle");
-  const artifactSha256 = sha256Hex(artifactBytes);
   const canonical = `pkg:${manifestOwner}/${manifestName}`;
+  const releaseFixtures = new Map(
+    releaseVersions.map((version) => {
+      const artifactBytes = version === "0.1.0" ? Buffer.from("bundle") : Buffer.from(`bundle-${version}`);
+      const manifestDigest =
+        version === "0.1.0" ? bundleManifestDigest : sha256Hex(Buffer.from(`manifest-${version}`));
+      const indexedManifestDigest = version === "0.1.0" ? indexManifestDigest : manifestDigest;
+      return [
+        version,
+        {
+          artifactBytes,
+          artifactSha256: sha256Hex(artifactBytes),
+          indexedManifestDigest,
+          manifestDigest,
+          version
+        }
+      ];
+    })
+  );
   const fetchFn = async (input) => {
     const path = new URL(String(input)).pathname;
     if (path === "/api/v1/repos") {
@@ -646,59 +891,90 @@ async function buildRegistryFixture({
       return gitInfoRefsResponse({
         head: sourceHeadCommit,
         main: sourceHeadCommit,
-        tag: sourceTagCommit
+        tags: Object.fromEntries(releaseVersions.map((version) => [`v${version}`, sourceTagCommit]))
       });
     }
     if (path.endsWith("/blob/index.json")) {
       return jsonResponse({
         formatVersion: 1,
-        latest: "0.1.0",
-          package: canonical,
+        latest: latestVersion,
+        package: canonical,
         releases: {
-          "0.1.0": {
-            artifact: {
-              manifestDigest: indexManifestDigest,
-              mediaType: "application/vnd.nipmod.bundle.v1+json",
-              path: "releases/0.1.0/bundle.nipmod",
-              sha256: artifactSha256
-            },
-            publisher: manifestOwner
-          }
+	          ...Object.fromEntries(
+	            [...releaseFixtures.values()].map((release) => [
+	              release.version,
+	              {
+	                artifact: {
+	                  manifestDigest: release.indexedManifestDigest,
+	                  mediaType: "application/vnd.nipmod.bundle.v1+json",
+	                  path: `releases/${release.version}/bundle.nipmod`,
+	                  sha256: release.artifactSha256
+	                },
+	                publisher: manifestOwner
+	              }
+	            ])
+	          ),
+	          ...Object.fromEntries(
+	            extraMalformedReleases.map((version) => [
+	              version,
+	              {
+	                artifact: {
+	                  manifestDigest: "not-a-sha",
+	                  mediaType: "application/vnd.nipmod.bundle.v1+json",
+	                  path: `releases/${version}/bundle.nipmod`,
+	                  sha256: "not-a-sha"
+	                },
+	                publisher: manifestOwner
+	              }
+            ])
+          )
         }
       });
     }
-    if (path.endsWith("/blob/releases/0.1.0/release.json")) {
-      return jsonResponse({ ok: true });
-    }
-    if (path.endsWith("/blob/releases/0.1.0/bundle.nipmod")) {
-      return new Response(artifactBytes);
+    const releaseMatch = /\/blob\/releases\/([^/]+)\/(release\.json|bundle\.nipmod)$/.exec(path);
+    if (releaseMatch) {
+      const release = releaseFixtures.get(releaseMatch[1]);
+      if (!release) {
+        return new Response("not found", { status: 404 });
+      }
+      if (releaseMatch[2] === "release.json") {
+        return jsonResponse({ ok: true });
+      }
+      return new Response(release.artifactBytes);
     }
     return new Response("not found", { status: 404 });
   };
 
   return buildRegistryIndex({
     fetchFn,
-    verifyBundle: () => ({
-      manifest: {
-        canonical,
-        description: "alpha package",
-        ...manifestDependencies,
-        name: manifestName,
-        permissions: manifestPermissions(),
-        publish: {
-          provenance: "test",
-          signingKey: manifestOwner
-        },
-        type: "skill",
-        version: "0.1.0"
-      },
-      manifestDigest: bundleManifestDigest,
-      signature: {
-        algorithm: "Ed25519",
-        keyId: manifestOwner,
-        signatureBase64: "signed"
+    verifyBundle: (bytes) => {
+      const artifactDigest = sha256Hex(bytes);
+      const release = [...releaseFixtures.values()].find((candidate) => candidate.artifactSha256 === artifactDigest);
+      if (!release) {
+        throw new Error("unknown bundle");
       }
-    }),
+      return {
+        manifest: {
+          canonical,
+          description: "alpha package",
+          ...manifestDependencies,
+          name: manifestName,
+          permissions: manifestPermissions(),
+          publish: {
+            provenance: "test",
+            signingKey: manifestOwner
+          },
+          type: "skill",
+          version: release.version
+        },
+        manifestDigest: release.manifestDigest,
+        signature: {
+          algorithm: "Ed25519",
+          keyId: manifestOwner,
+          signatureBase64: "signed"
+        }
+      };
+    },
     verifySignedReleaseEvent: releaseEventVerifies ? () => ({ ok: true }) : () => {
       throw new Error("not signed");
     },
@@ -739,11 +1015,12 @@ function compatibilityReceiptFixture(overrides = {}) {
   };
 }
 
-function gitInfoRefsResponse({ head, main, tag }) {
+function gitInfoRefsResponse({ head, main, tag, tags }) {
+  const tagEntries = tags ?? { "v0.1.0": tag };
   const lines = [
     `${head} HEAD\0multi_ack`,
     `${main} refs/heads/main`,
-    `${tag} refs/tags/v0.1.0`
+    ...Object.entries(tagEntries).map(([name, sha]) => `${sha} refs/tags/${name}`)
   ];
   const service = pktLine("# service=git-upload-pack\n");
   const refs = lines.map((line) => pktLine(`${line}\n`)).join("");

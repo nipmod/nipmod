@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T15:43:04.185206840+00:00",
+  "name": "developer-default-policy",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

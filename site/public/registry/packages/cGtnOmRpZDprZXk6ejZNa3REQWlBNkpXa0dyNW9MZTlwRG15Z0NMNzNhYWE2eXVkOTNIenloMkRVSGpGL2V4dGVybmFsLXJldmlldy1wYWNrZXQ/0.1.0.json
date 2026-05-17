@@ -1,0 +1,89 @@
+{
+  "artifactPath": "releases/0.1.0/bundle.nipmod",
+  "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+  "canonical": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+  "cloneUrl": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
+  "description": "Prepare a complete external review packet from nipmod proof and gate output.",
+  "digest": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+  "documentType": "dev.nipmod.package-version.v1",
+  "formatVersion": 1,
+  "name": "external-review-packet",
+  "owner": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+  "permissionDetails": {
+    "env": [],
+    "filesystem": [],
+    "mcpTools": [],
+    "network": [],
+    "secrets": []
+  },
+  "permissions": {
+    "env": 0,
+    "exec": false,
+    "filesystem": 0,
+    "mcpTools": 0,
+    "network": 0,
+    "postinstall": false,
+    "secrets": 0
+  },
+  "proof": {
+    "checkpointUrl": "/transparency/checkpoint.json",
+    "eventHash": "605b0129005e64e789ec5e84a2849c844bd9848daa5317b81b00a5cbe09161f2",
+    "leafHash": "3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484",
+    "leafIndex": 30,
+    "leafUrl": "/transparency/leaves/3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484.json",
+    "proofUrl": "/transparency/proofs/3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484.json",
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "subject": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet@0.1.0",
+    "treeSize": 32,
+    "type": "dev.nipmod.registry.proof.v1",
+    "witnesses": [
+      "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+    ],
+    "witnessUrls": [
+      "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+    ]
+  },
+  "publisher": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+  "releasePath": "releases/0.1.0/release.json",
+  "repo": "external-review-packet",
+  "resolved": "https://node.nipmod.com/api/v1/repos/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet/blob/releases/0.1.0/bundle.nipmod",
+  "sourceCommit": "964c6bbf808e337ffbdc192d94de6693e355bc36",
+  "sourceRepo": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
+  "sourceTag": "v0.1.0",
+  "stars": 0,
+  "trust": {
+    "evidence": {
+      "artifactDigestVerified": true,
+      "bundleSignatureVerified": true,
+      "immutableSnapshotMatched": true,
+      "publisherMatchesCanonical": true,
+      "releaseEventSigned": true,
+      "sourceProvenanceVerified": true,
+      "transparencyLogIncluded": true,
+      "transparencyLogVerified": true
+    },
+    "level": "verified",
+    "score": 100,
+    "signals": [
+      "Artifact digest verified",
+      "Bundle signature verified",
+      "Publisher matches canonical owner",
+      "Version digest unchanged",
+      "Release event signed",
+      "Source tag verified",
+      "Transparency proof published",
+      "Witnessed checkpoint verified",
+      "No manifest permissions"
+    ],
+    "warnings": []
+  },
+  "type": "workflow-pack",
+  "updatedAt": "2026-05-16T21:43:33.217909796+00:00",
+  "urls": {
+    "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXQ/dependencies.json",
+    "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXQ.json",
+    "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXQ/provenance.json",
+    "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXQ/0.1.0.json"
+  },
+  "version": "0.1.0"
+}

@@ -1,0 +1,60 @@
+{
+  "artifactPath": "releases/0.1.0/bundle.nipmod",
+  "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+  "canonical": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+  "digest": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+  "formatVersion": 1,
+  "name": "github-issue-triage",
+  "proof": {
+    "checkpointUrl": "/transparency/checkpoint.json",
+    "eventHash": "9f3a443a2ad09d657f5ec26fb7918eae7131f0367a6d072c18c3f8d0b0ce99a4",
+    "leafHash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+    "leafIndex": 11,
+    "leafUrl": "/transparency/leaves/c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849.json",
+    "proofUrl": "/transparency/proofs/c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849.json",
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "subject": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage@0.1.0",
+    "treeSize": 32,
+    "type": "dev.nipmod.registry.proof.v1",
+    "witnesses": [
+      "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+    ],
+    "witnessUrls": [
+      "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+    ]
+  },
+  "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+  "releasePath": "releases/0.1.0/release.json",
+  "resolved": "https://node.nipmod.com/api/v1/repos/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage/blob/releases/0.1.0/bundle.nipmod",
+  "sourceCommit": "c454a839ce89a0446dcc0010afd991dc3e4f25b8",
+  "sourceRepo": "https://node.nipmod.com/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage.git",
+  "sourceTag": "v0.1.0",
+  "trust": {
+    "evidence": {
+      "artifactDigestVerified": true,
+      "bundleSignatureVerified": true,
+      "immutableSnapshotMatched": true,
+      "publisherMatchesCanonical": true,
+      "releaseEventSigned": true,
+      "sourceProvenanceVerified": true,
+      "transparencyLogIncluded": true,
+      "transparencyLogVerified": true
+    },
+    "level": "verified",
+    "score": 100,
+    "signals": [
+      "Artifact digest verified",
+      "Bundle signature verified",
+      "Publisher matches canonical owner",
+      "Version digest unchanged",
+      "Release event signed",
+      "Source tag verified",
+      "Transparency proof published",
+      "Witnessed checkpoint verified",
+      "No manifest permissions"
+    ],
+    "warnings": []
+  },
+  "type": "dev.nipmod.package-provenance.v1",
+  "version": "0.1.0"
+}

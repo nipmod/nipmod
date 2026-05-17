@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T10:08:53.498837716+00:00",
+  "name": "gitlawb-repo-reader",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

@@ -1,0 +1,60 @@
+{
+  "artifactPath": "releases/0.1.0/bundle.nipmod",
+  "artifactSha256": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+  "canonical": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+  "digest": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+  "formatVersion": 1,
+  "name": "registry-mirror-compare",
+  "proof": {
+    "checkpointUrl": "/transparency/checkpoint.json",
+    "eventHash": "f98502c8595d96ae8957eecc50d14706f729b74fd132afbae2341d0f00a5f3f6",
+    "leafHash": "eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269",
+    "leafIndex": 23,
+    "leafUrl": "/transparency/leaves/eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269.json",
+    "proofUrl": "/transparency/proofs/eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269.json",
+    "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+    "subject": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare@0.1.0",
+    "treeSize": 32,
+    "type": "dev.nipmod.registry.proof.v1",
+    "witnesses": [
+      "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+    ],
+    "witnessUrls": [
+      "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+    ]
+  },
+  "publisher": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+  "releasePath": "releases/0.1.0/release.json",
+  "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare/blob/releases/0.1.0/bundle.nipmod",
+  "sourceCommit": "a4150243a0ed9b4a7d2bbeba9184468f91a05ec4",
+  "sourceRepo": "https://node.nipmod.com/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare.git",
+  "sourceTag": "v0.1.0",
+  "trust": {
+    "evidence": {
+      "artifactDigestVerified": true,
+      "bundleSignatureVerified": true,
+      "immutableSnapshotMatched": true,
+      "publisherMatchesCanonical": true,
+      "releaseEventSigned": true,
+      "sourceProvenanceVerified": true,
+      "transparencyLogIncluded": true,
+      "transparencyLogVerified": true
+    },
+    "level": "verified",
+    "score": 100,
+    "signals": [
+      "Artifact digest verified",
+      "Bundle signature verified",
+      "Publisher matches canonical owner",
+      "Version digest unchanged",
+      "Release event signed",
+      "Source tag verified",
+      "Transparency proof published",
+      "Witnessed checkpoint verified",
+      "No manifest permissions"
+    ],
+    "warnings": []
+  },
+  "type": "dev.nipmod.package-provenance.v1",
+  "version": "0.1.0"
+}

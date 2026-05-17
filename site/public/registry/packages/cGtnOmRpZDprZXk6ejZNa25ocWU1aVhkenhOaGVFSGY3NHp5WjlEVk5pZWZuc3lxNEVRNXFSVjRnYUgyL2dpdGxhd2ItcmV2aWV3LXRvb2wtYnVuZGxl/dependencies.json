@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:40.776642023+00:00",
+  "name": "gitlawb-review-tool-bundle",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

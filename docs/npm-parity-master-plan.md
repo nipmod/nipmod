@@ -139,3 +139,5 @@ The third slice adds `nipmod sbom` for verified agent capability inventories fro
 The fourth slice adds `nipmod explain` for lockfile root intent, dependent records and dependency paths. It gives agents the missing npm style answer to why a package is installed without network access or package execution.
 
 The fifth slice adds `nipmod update` and MCP `nipmod.update_plan` for verified root package updates. Plans are read only, execution reuses the signed graph install path and stale package records are pruned only when they are unreachable from all root dependencies.
+
+The sixth slice adds the public static Registry API: base64url canonical package documents, exact version documents, latest dependency sidecars, latest provenance sidecars and discovery-manifest templates. This moves nipmod closer to npm packuments while preserving Gitlawb canonical IDs and static auditability.

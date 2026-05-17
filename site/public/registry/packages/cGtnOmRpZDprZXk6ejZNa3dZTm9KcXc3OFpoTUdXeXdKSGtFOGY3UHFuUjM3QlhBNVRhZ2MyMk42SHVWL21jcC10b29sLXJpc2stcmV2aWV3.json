@@ -1,0 +1,102 @@
+{
+  "canonical": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "mcp-tool-risk-review",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+      "canonical": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "cloneUrl": "https://node.nipmod.com/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review.git",
+      "description": "Review MCP server tools and manifests before agents expose them to package workflows.",
+      "digest": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "mcp-tool-risk-review",
+      "owner": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "74b1dbb47265194ae1295239574c1498fa36db50acbc14041014edc38e97c963",
+        "leafHash": "e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d",
+        "leafIndex": 21,
+        "leafUrl": "/transparency/leaves/e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d.json",
+        "proofUrl": "/transparency/proofs/e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "mcp-tool-risk-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "49b058505bf74c24975805d29cfb071359d76d29",
+      "sourceRepo": "https://node.nipmod.com/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:06.968021013+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

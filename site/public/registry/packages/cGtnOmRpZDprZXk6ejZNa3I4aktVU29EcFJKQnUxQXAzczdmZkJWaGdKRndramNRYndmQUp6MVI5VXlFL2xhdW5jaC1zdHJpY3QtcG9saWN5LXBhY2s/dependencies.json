@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:43:38.313761319+00:00",
+  "name": "launch-strict-policy-pack",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}

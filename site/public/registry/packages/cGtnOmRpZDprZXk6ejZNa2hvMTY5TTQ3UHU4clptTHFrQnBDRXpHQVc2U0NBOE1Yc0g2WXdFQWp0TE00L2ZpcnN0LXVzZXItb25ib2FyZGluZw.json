@@ -1,0 +1,102 @@
+{
+  "canonical": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "name": "first-user-onboarding",
+  "source": "https://node.nipmod.com",
+  "type": "dev.nipmod.package-document.v1",
+  "versions": {
+    "0.1.0": {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+      "canonical": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "cloneUrl": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
+      "description": "Guide a new user through install, inspect, add, audit and publish dry run.",
+      "digest": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+      "documentType": "dev.nipmod.package-version.v1",
+      "formatVersion": 1,
+      "name": "first-user-onboarding",
+      "owner": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "72a3d6e147cfbd0c7e2066e37d1658b7f535a4facfd4ec17402c18d6fb6f3a23",
+        "leafHash": "db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11",
+        "leafIndex": 24,
+        "leafUrl": "/transparency/leaves/db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11.json",
+        "proofUrl": "/transparency/proofs/db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "publisher": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "first-user-onboarding",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "1b6212908a6b1baf03dbc47251c39d01c8b1348a",
+      "sourceRepo": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
+      "sourceTag": "v0.1.0",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "workflow-pack",
+      "updatedAt": "2026-05-16T21:43:34.549380780+00:00",
+      "urls": {
+        "dependencies": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZw/dependencies.json",
+        "package": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZw.json",
+        "provenance": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZw/provenance.json",
+        "version": "/registry/packages/cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZw/0.1.0.json"
+      },
+      "version": "0.1.0"
+    }
+  }
+}

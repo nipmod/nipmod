@@ -1,0 +1,12 @@
+{
+  "canonical": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+  "direct": {},
+  "distTags": {
+    "latest": "0.1.0"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:00:09.023795601+00:00",
+  "name": "package-onboarding-checklist",
+  "type": "dev.nipmod.package-dependencies.v1",
+  "version": "0.1.0"
+}
