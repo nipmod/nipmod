@@ -197,6 +197,45 @@ describe("nipmod scout agent", () => {
     });
   });
 
+  test("does not create drafts for packages that are already published", async () => {
+    const result = await runScoutCycle({
+      fetchFn: async (url) => {
+        if (String(url) === "https://node.example/api/v1/repos") {
+          return jsonResponse([
+            repoFixture({ description: "Already published package", name: "repo-reader" }),
+            repoFixture({ description: "Agent runtime compatibility check", name: "agent-runtime-compat-check" })
+          ]);
+        }
+        if (String(url) === "https://claims.example/index.json") {
+          return jsonResponse({ verifiedClaims: [] });
+        }
+        if (String(url) === "https://registry.example/packages.json") {
+          return jsonResponse({
+            packages: [
+              {
+                canonical: `pkg:${owner}/repo-reader`
+              }
+            ]
+          });
+        }
+        return new Response("not found", { status: 404 });
+      },
+      claimIndexUrl: "https://claims.example/index.json",
+      nodeUrl: "https://node.example",
+      registryUrl: "https://registry.example/packages.json"
+    });
+
+    expect(result.summary).toMatchObject({
+      drafts: 1,
+      published: 1,
+      scanned: 2
+    });
+    expect(result.candidates.find((candidate) => candidate.repoName === "repo-reader")).toMatchObject({
+      status: "published"
+    });
+    expect(result.drafts.map((draft) => draft.package)).toEqual([`pkg:${owner}/agent-runtime-compat-check`]);
+  });
+
   test("surfaces claim index failure without failing candidate generation", async () => {
     const result = await runScoutCycle({
       fetchFn: async (url) => {

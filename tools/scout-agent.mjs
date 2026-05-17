@@ -2,6 +2,7 @@
 
 const DEFAULT_NODE_URL = "https://node.nipmod.com";
 const DEFAULT_CLAIM_INDEX_URL = "https://nipmod.com/claims/index.json";
+const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_SCOUT_URL = "https://nipmod.com/scout";
 
 export async function runScoutCycle({
@@ -10,20 +11,24 @@ export async function runScoutCycle({
   generatedAt = new Date().toISOString(),
   limit = numberFromEnv(process.env.NIPMOD_SCOUT_LIMIT, 500),
   nodeUrl = process.env.NIPMOD_SCOUT_NODE_URL ?? process.env.GITLAWB_NODE ?? DEFAULT_NODE_URL,
+  registryUrl = process.env.NIPMOD_SCOUT_REGISTRY_URL ?? DEFAULT_REGISTRY_URL,
   scoutUrl = process.env.NIPMOD_SCOUT_PUBLIC_URL ?? DEFAULT_SCOUT_URL
 } = {}) {
   const repos = await fetchPublicRepos({ fetchFn, limit, nodeUrl });
   const claimIndex = await fetchClaimIndex({ claimIndexUrl, fetchFn });
+  const registry = await fetchRegistry({ fetchFn, registryUrl });
   const candidates = repos
-    .map((repo) => candidateFromRepo(repo, claimIndex.verifiedPackageSet, { scoutUrl }))
+    .map((repo) => candidateFromRepo(repo, claimIndex.verifiedPackageSet, registry.publishedPackageSet, { scoutUrl }))
     .sort(compareCandidates);
-  const drafts = candidates.map((candidate) =>
-    createPackageDraft(candidate, {
-      generatedAt,
-      scoutUrl,
-      status: candidate.claimStatus === "claimed" ? "claimed" : candidate.status === "needs-work" ? "needs-work" : "unclaimed"
-    })
-  );
+  const drafts = candidates
+    .filter((candidate) => candidate.status !== "published")
+    .map((candidate) =>
+      createPackageDraft(candidate, {
+        generatedAt,
+        scoutUrl,
+        status: candidate.claimStatus === "claimed" ? "claimed" : candidate.status === "needs-work" ? "needs-work" : "unclaimed"
+      })
+    );
 
   return {
     candidates,
@@ -42,10 +47,17 @@ export async function runScoutCycle({
       url: trimTrailingSlash(nodeUrl)
     },
     ok: true,
+    registry: {
+      error: registry.error,
+      ok: registry.ok,
+      publishedPackages: registry.publishedPackages,
+      url: registryUrl
+    },
     summary: {
       claimed: candidates.filter((candidate) => candidate.claimStatus === "claimed").length,
       drafts: drafts.length,
       patchable: candidates.filter((candidate) => candidate.patch?.remoteWrites === false).length,
+      published: candidates.filter((candidate) => candidate.status === "published").length,
       scanned: candidates.length,
       unclaimedDrafts: drafts.filter((draft) => draft.status === "unclaimed").length
     },
@@ -237,13 +249,48 @@ function verifiedClaimPackages(payload) {
   );
 }
 
-function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
+async function fetchRegistry({ fetchFn, registryUrl }) {
+  try {
+    const response = await fetchFn(registryUrl, {
+      headers: { accept: "application/json" }
+    });
+    if (!response.ok) {
+      throw new Error(`registry returned HTTP ${response.status}`);
+    }
+    const publishedPackageSet = publishedPackages(await response.json());
+    return {
+      ok: true,
+      publishedPackages: publishedPackageSet.size,
+      publishedPackageSet
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : String(error),
+      ok: false,
+      publishedPackages: 0,
+      publishedPackageSet: new Set()
+    };
+  }
+}
+
+function publishedPackages(payload) {
+  const packages = Array.isArray(payload?.packages) ? payload.packages : [];
+  return new Set(
+    packages
+      .map((pkg) => (typeof pkg?.canonical === "string" ? pkg.canonical : null))
+      .filter(Boolean)
+      .map((canonical) => canonical.replace(/@(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/, ""))
+  );
+}
+
+function candidateFromRepo(repo, verifiedPackageSet, publishedPackageSet, { scoutUrl }) {
   const packageId = packageForRepo(repo);
   const source = sourceForRepo(repo);
   const claimed = verifiedPackageSet.has(packageId);
+  const published = publishedPackageSet.has(packageId);
   const readinessScore = claimed ? 100 : scoreRepo(repo);
   const sourceParam = encodeURIComponent(source);
-  const draftStatus = claimed ? "claimed" : readinessScore >= 50 ? "unclaimed" : "needs-work";
+  const draftStatus = published ? "published" : claimed ? "claimed" : readinessScore >= 50 ? "unclaimed" : "needs-work";
   const patchEndpoint = `${trimTrailingSlash(scoutUrl)}/patch?repo=${sourceParam}`;
 
   return {
@@ -257,7 +304,7 @@ function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
     defaultBranch: repo.default_branch,
     description: repo.description || "Public Gitlawb repo",
     draft: {
-      claimRequired: draftStatus !== "claimed",
+      claimRequired: draftStatus !== "claimed" && draftStatus !== "published",
       endpoint: `${trimTrailingSlash(scoutUrl)}/draft?repo=${sourceParam}`,
       remoteWrites: false,
       status: draftStatus
@@ -272,7 +319,7 @@ function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
     repoName: repo.name,
     shortOwner: ownerSegment(repo.owner_did).slice(0, 8),
     source,
-    status: claimed ? "claimed" : readinessScore >= 50 ? "unclaimed-draft" : "needs-work",
+    status: published ? "published" : claimed ? "claimed" : readinessScore >= 50 ? "unclaimed-draft" : "needs-work",
     suggestedType: suggestedType(repo),
     updatedAt: repo.updated_at
   };

@@ -10,6 +10,7 @@ primary_region = "fra"
   NIPMOD_SCOUT_INTERVAL_MS = "300000"
   NIPMOD_SCOUT_NODE_URL = "https://node.nipmod.com"
   NIPMOD_SCOUT_PUBLIC_URL = "https://nipmod-scout.fly.dev"
+  NIPMOD_SCOUT_REGISTRY_URL = "https://nipmod.com/registry/packages.json"
 
 [http_service]
   internal_port = 8080
