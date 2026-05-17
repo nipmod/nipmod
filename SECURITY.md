@@ -10,7 +10,7 @@ In scope:
 - `https://node.nipmod.com`
 - `https://nipmod-witness.fly.dev`
 - `https://nipmod-monitor.fly.dev`
-- the `nipmod` CLI, installer, registry, advisory feed, transparency log, witness flow and first party packages in this repository
+- the Nipmod CLI, installer, registry, advisory feed, transparency log, witness flow and first party packages in this repository
 
 Out of scope:
 

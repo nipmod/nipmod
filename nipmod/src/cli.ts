@@ -372,7 +372,7 @@ async function packageCommand(args: string[]): Promise<CliResult> {
       "",
       `Gitlawb source: ${repo.source}`,
       "",
-      "This is an unsigned nipmod package draft. The repo owner must claim it with the matching DID identity before publish.",
+      "This is an unsigned Nipmod package draft. The repo owner must claim it with the matching DID identity before publish.",
       ""
     ].join("\n")
   );

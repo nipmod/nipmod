@@ -4,7 +4,7 @@ Review Gitlawb package releases for immutable tags, signed release events and re
 
 ## What it does
 
-- Checks whether a Gitlawb-backed package release has the evidence nipmod expects.
+- Checks whether a Gitlawb-backed package release has the evidence Nipmod expects.
 - Compares repo source, release event, bundle digest and public registry entry.
 - Produces a publish-readiness verdict for agents and maintainers.
 

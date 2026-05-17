@@ -3,7 +3,7 @@
   "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
   "canonical": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
   "cloneUrl": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
-  "description": "Expose read only nipmod registry search and inspect tools through MCP.",
+  "description": "Expose read only Nipmod registry search and inspect tools through MCP.",
   "digest": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
   "documentType": "dev.nipmod.package-version.v1",
   "formatVersion": 1,

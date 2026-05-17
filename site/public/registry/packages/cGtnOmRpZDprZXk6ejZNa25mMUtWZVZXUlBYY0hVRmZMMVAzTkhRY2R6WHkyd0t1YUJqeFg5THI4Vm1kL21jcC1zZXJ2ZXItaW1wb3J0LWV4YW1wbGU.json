@@ -14,7 +14,7 @@
       "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
       "canonical": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
       "cloneUrl": "https://node.nipmod.com/z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example.git",
-      "description": "Show agents how to model an MCP server as a safe nipmod package with explicit trust evidence.",
+      "description": "Show agents how to model an MCP server as a safe Nipmod package with explicit trust evidence.",
       "digest": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
       "documentType": "dev.nipmod.package-version.v1",
       "formatVersion": 1,

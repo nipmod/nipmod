@@ -3,7 +3,7 @@
   "artifactSha256": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
   "canonical": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
   "cloneUrl": "https://node.nipmod.com/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief.git",
-  "description": "Turn nipmod inspect output into a short human review brief.",
+  "description": "Turn Nipmod inspect output into a short human review brief.",
   "digest": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
   "documentType": "dev.nipmod.package-version.v1",
   "formatVersion": 1,

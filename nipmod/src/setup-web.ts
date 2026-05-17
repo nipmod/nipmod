@@ -144,7 +144,7 @@ function renderSetupPage(envPath: string, setupToken: string): string {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>nipmod setup</title>
+    <title>Nipmod setup</title>
     <style>
       :root {
         color: #111827;
@@ -261,7 +261,7 @@ function renderSetupPage(envPath: string, setupToken: string): string {
   </head>
   <body>
     <main>
-      <h1>nipmod Cloudflare setup</h1>
+      <h1>Nipmod Cloudflare setup</h1>
       <p>Stores DNS credentials locally in <code>${escapeHtml(envPath)}</code>. Nothing is sent to chat.</p>
       <form id="cloudflare-form">
         <label>

@@ -1,6 +1,6 @@
 # nipmod-audit-ci
 
-Turn nipmod audit and policy output into CI decisions agents can explain and enforce.
+Turn `nipmod audit` and policy output into CI decisions agents can explain and enforce.
 
 ## What it does
 

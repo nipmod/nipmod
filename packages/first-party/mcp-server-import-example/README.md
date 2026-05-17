@@ -1,6 +1,6 @@
 # mcp-server-import-example
 
-Show agents how to model an MCP server as a safe nipmod package with explicit trust evidence.
+Show agents how to model an MCP server as a safe Nipmod package with explicit trust evidence.
 
 ## What it does
 

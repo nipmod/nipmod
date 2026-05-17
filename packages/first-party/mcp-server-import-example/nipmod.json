@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
   "version": "0.1.0",
   "type": "skill",
-  "description": "Show agents how to model an MCP server as a safe nipmod package with explicit trust evidence.",
+  "description": "Show agents how to model an MCP server as a safe Nipmod package with explicit trust evidence.",
   "license": "MIT",
   "exports": {
     ".": {

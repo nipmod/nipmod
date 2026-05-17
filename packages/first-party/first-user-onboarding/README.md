@@ -4,7 +4,7 @@ Guide a new user through install, inspect, add, audit and publish dry run.
 
 ## What it does
 
-- Gives first users a short terminal path that proves nipmod works before any account setup.
+- Gives first users a short terminal path that proves Nipmod works before any account setup.
 - Captures evidence needed for feedback without collecting secrets.
 - Separates package consumer onboarding from package author onboarding.
 

@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
   "version": "0.1.0",
   "type": "workflow-pack",
-  "description": "Turn nipmod inspect output into a short human review brief.",
+  "description": "Turn Nipmod inspect output into a short human review brief.",
   "license": "MIT",
   "exports": {
     ".": {

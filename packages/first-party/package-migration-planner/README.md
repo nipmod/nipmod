@@ -1,10 +1,10 @@
 # package-migration-planner
 
-Plan a Gitlawb, MCP or APM source migration into a nipmod package.
+Plan a Gitlawb, MCP or APM source migration into a Nipmod package.
 
 ## What it does
 
-- Maps an existing repo, MCP server or APM package into a nipmod package candidate.
+- Maps an existing repo, MCP server or APM package into a Nipmod package candidate.
 - Identifies manifest fields, permission claims, compatibility receipts and missing proof.
 - Produces a staged migration plan that avoids false ownership claims.
 

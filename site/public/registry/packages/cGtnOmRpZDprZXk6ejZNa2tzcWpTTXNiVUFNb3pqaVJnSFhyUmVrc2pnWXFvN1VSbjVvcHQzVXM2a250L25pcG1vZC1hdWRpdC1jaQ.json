@@ -14,7 +14,7 @@
       "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
       "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
       "cloneUrl": "https://node.nipmod.com/z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci.git",
-      "description": "Turn nipmod audit and policy output into CI decisions agents can explain and enforce.",
+      "description": "Turn Nipmod audit and policy output into CI decisions agents can explain and enforce.",
       "digest": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
       "documentType": "dev.nipmod.package-version.v1",
       "formatVersion": 1,

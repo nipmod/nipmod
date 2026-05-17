@@ -3,7 +3,7 @@
   "artifactSha256": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
   "canonical": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
   "cloneUrl": "https://node.nipmod.com/z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist.git",
-  "description": "Guide new package authors through a clean nipmod publish candidate.",
+  "description": "Guide new package authors through a clean Nipmod publish candidate.",
   "digest": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
   "documentType": "dev.nipmod.package-version.v1",
   "formatVersion": 1,

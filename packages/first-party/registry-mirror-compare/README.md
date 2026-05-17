@@ -4,7 +4,7 @@ Compare registry mirrors and flag digest, trust root, witness or advisory drift.
 
 ## What it does
 
-- Compares two or more nipmod registry indexes before an agent trusts a mirror.
+- Compares two or more Nipmod registry indexes before an agent trusts a mirror.
 - Flags package digest mismatch, root mismatch, witness mismatch and advisory drift.
 - Produces a fail closed decision for install and search plans.
 

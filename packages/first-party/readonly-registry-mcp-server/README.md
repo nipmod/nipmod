@@ -1,6 +1,6 @@
 # readonly-registry-mcp-server
 
-Expose read only nipmod registry search and inspect tools through MCP.
+Expose read only Nipmod registry search and inspect tools through MCP.
 
 ## What it does
 

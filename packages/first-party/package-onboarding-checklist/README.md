@@ -1,6 +1,6 @@
 # package-onboarding-checklist
 
-Guide new package authors through a clean nipmod publish candidate.
+Guide new package authors through a clean Nipmod publish candidate.
 
 ## What it does
 

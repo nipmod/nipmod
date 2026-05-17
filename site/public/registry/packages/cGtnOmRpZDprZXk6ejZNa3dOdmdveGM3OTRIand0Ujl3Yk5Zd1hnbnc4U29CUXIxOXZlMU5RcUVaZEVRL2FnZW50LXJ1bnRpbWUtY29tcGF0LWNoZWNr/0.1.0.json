@@ -3,7 +3,7 @@
   "artifactSha256": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
   "canonical": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
   "cloneUrl": "https://node.nipmod.com/z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check.git",
-  "description": "Check whether an agent host can safely run nipmod install, audit and MCP flows.",
+  "description": "Check whether an agent host can safely run Nipmod install, audit and MCP flows.",
   "digest": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
   "documentType": "dev.nipmod.package-version.v1",
   "formatVersion": 1,

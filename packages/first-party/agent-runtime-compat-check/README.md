@@ -1,6 +1,6 @@
 # agent-runtime-compat-check
 
-Check whether an agent host can safely run nipmod install, audit and MCP flows.
+Check whether an agent host can safely run Nipmod install, audit and MCP flows.
 
 ## What it does
 

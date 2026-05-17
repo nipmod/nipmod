@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
   "version": "0.1.0",
   "type": "adapter",
-  "description": "Plan a Gitlawb, MCP or APM source migration into a nipmod package.",
+  "description": "Plan a Gitlawb, MCP or APM source migration into a Nipmod package.",
   "license": "MIT",
   "exports": {
     ".": {

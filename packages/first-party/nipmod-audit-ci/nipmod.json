@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
   "version": "0.1.0",
   "type": "skill",
-  "description": "Turn nipmod audit and policy output into CI decisions agents can explain and enforce.",
+  "description": "Turn Nipmod audit and policy output into CI decisions agents can explain and enforce.",
   "license": "MIT",
   "exports": {
     ".": {

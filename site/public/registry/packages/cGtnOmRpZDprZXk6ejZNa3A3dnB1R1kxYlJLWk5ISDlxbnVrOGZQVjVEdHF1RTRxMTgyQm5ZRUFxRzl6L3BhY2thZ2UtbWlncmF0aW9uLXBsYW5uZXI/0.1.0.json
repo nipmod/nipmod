@@ -3,7 +3,7 @@
   "artifactSha256": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
   "canonical": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
   "cloneUrl": "https://node.nipmod.com/z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner.git",
-  "description": "Plan a Gitlawb, MCP or APM source migration into a nipmod package.",
+  "description": "Plan a Gitlawb, MCP or APM source migration into a Nipmod package.",
   "digest": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
   "documentType": "dev.nipmod.package-version.v1",
   "formatVersion": 1,

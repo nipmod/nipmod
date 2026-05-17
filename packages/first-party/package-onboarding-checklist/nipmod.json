@@ -4,7 +4,7 @@
   "canonical": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
   "version": "0.1.0",
   "type": "skill",
-  "description": "Guide new package authors through a clean nipmod publish candidate.",
+  "description": "Guide new package authors through a clean Nipmod publish candidate.",
   "license": "MIT",
   "exports": {
     ".": {

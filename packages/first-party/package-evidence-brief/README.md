@@ -1,6 +1,6 @@
 # package-evidence-brief
 
-Turn nipmod inspect output into a short human review brief.
+Turn `nipmod inspect` output into a short human review brief.
 
 ## What it does
 
