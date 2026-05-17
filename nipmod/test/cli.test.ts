@@ -1121,8 +1121,8 @@ describe("nipmod CLI", () => {
     expect(parsed.data.query).toBe("alpha");
     expect(parsed.data.total).toBe(1);
     expect(parsed.data.packages[0]).toMatchObject({
-      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`,
-      install: "nipmod install alpha-agent --online",
+      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0`,
+      install: "nipmod install alpha-agent",
       name: "alpha-agent",
       trust: "verified/100"
     });
@@ -1135,9 +1135,9 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain("0.1.0");
     expect(text.stdout).toContain("verified/100");
     expect(text.stdout).toContain("no permissions");
-    expect(text.stdout).toContain("install: nipmod install alpha-agent --online");
+    expect(text.stdout).toContain("install: nipmod install alpha-agent");
     expect(text.stdout).not.toContain(`id: pkg:${owner}/alpha-agent`);
-    expect(text.stdout).not.toContain(`security: nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`);
+    expect(text.stdout).not.toContain(`security: nipmod install pkg:${owner}/alpha-agent@0.1.0`);
 
     const detailed = await execaNode([
       "src/cli.ts",
@@ -1207,8 +1207,8 @@ describe("nipmod CLI", () => {
       pathToFileURL(registryPath).href
     ]);
 
-    expect(text.stdout.match(/install: nipmod install duplicate-agent --online/g)?.length).toBe(1);
-    expect(text.stdout).toContain(`security: nipmod install pkg:${firstOwner}/duplicate-agent@0.1.0 --online`);
+    expect(text.stdout.match(/install: nipmod install duplicate-agent/g)?.length).toBe(1);
+    expect(text.stdout).toContain(`security: nipmod install pkg:${firstOwner}/duplicate-agent@0.1.0`);
   });
 
   test("views exact registry package metadata for humans and agents", async () => {
@@ -1242,7 +1242,7 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain("dependencies:");
     expect(text.stdout).toContain("beta-tool: ^0.2.0");
     expect(text.stdout).toContain("compatibility: MCP import");
-    expect(text.stdout).toContain(`install: nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`);
+    expect(text.stdout).toContain(`install: nipmod install pkg:${owner}/alpha-agent@0.1.0`);
 
     const json = await execaNode([
       "src/cli.ts",
@@ -1267,9 +1267,9 @@ describe("nipmod CLI", () => {
     };
     expect(parsed.data.package).toMatchObject({
       canonical: `pkg:${owner}/alpha-agent`,
-      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`,
+      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0`,
       dependencies: { "beta-tool": "^0.2.0" },
-      install: "nipmod install alpha-agent --online",
+      install: "nipmod install alpha-agent",
       name: "alpha-agent",
       version: "0.1.0"
     });
@@ -1478,8 +1478,26 @@ describe("nipmod CLI", () => {
     expect(text.stdout).not.toContain("add: nipmod add");
   });
 
-  test("search refuses implicit network access without online mode", async () => {
-    await expect(execaNode(["src/cli.ts", "search", "agent"])).rejects.toThrow(/--online/);
+  test("search uses the configured registry without an online flag", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-search-default-registry-"));
+    const owner = generateIdentity().did;
+    const registryPath = join(workspace, "registry.json");
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [searchPackageFixture(owner, "default-agent", "skill", 100, "Default registry agent")],
+        source: "file-test"
+      })}\n`
+    );
+
+    const result = await execaNode(["src/cli.ts", "search", "default-agent", "--json"], {
+      env: { NIPMOD_REGISTRY_URLS: pathToFileURL(registryPath).href }
+    });
+    const parsed = JSON.parse(result.stdout) as { data: { packages: Array<{ name: string }>; total: number } };
+
+    expect(parsed.data.total).toBe(1);
+    expect(parsed.data.packages[0]?.name).toBe("default-agent");
   });
 
   test("search rejects file registries with remote hosts", async () => {
@@ -1531,7 +1549,7 @@ describe("nipmod CLI", () => {
     expect(parsed.data.report).toMatchObject({
       canonical,
       digest,
-      installCommand: `nipmod install ${canonical}@0.1.0 --online`,
+      installCommand: `nipmod install ${canonical}@0.1.0`,
       publisher: owner,
       readyToInstall: true,
       trust: { level: "verified", score: 100 },
@@ -1547,6 +1565,39 @@ describe("nipmod CLI", () => {
         expect.objectContaining({ id: "witness", status: "pass" })
       ])
     );
+  });
+
+  test("inspects a verified registry package from the configured default registry", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-inspect-default-registry-"));
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/default-inspect-agent`;
+    const digest = "a".repeat(64);
+    const registryPath = join(workspace, "registry.json");
+    const transparency = cliTransparency(canonical, owner, digest);
+    await writeFile(registryPath, `${JSON.stringify(cliRegistry(canonical, owner, digest, transparency))}\n`);
+
+    const result = await execaNode(
+      [
+        "src/cli.ts",
+        "inspect",
+        `${canonical}@0.1.0`,
+        "--allow-custom-roots",
+        "--log-id",
+        transparency.log.treeHead.logId,
+        "--witness",
+        transparency.witness.witness,
+        "--json"
+      ],
+      {
+        env: { NIPMOD_REGISTRY_URL: pathToFileURL(registryPath).href }
+      }
+    );
+    const parsed = JSON.parse(result.stdout) as { ok: true; data: { report: { canonical: string; verdict: string } } };
+
+    expect(parsed.data.report).toMatchObject({
+      canonical,
+      verdict: "verified"
+    });
   });
 
   test("inspects valid package ids whose slug contains dots", async () => {
@@ -2082,6 +2133,58 @@ describe("nipmod CLI", () => {
       expect(lockfile.root.dependencies).toEqual({ "install-agent": "latest" });
       expect(lockfile.packages[key].integrity).toBe(`sha256-${packed.data.digest}`);
       expect(lockfile.packages[key].resolved).toBe(server.resolved);
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("installs a unique verified registry package from the configured default registry", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-default-registry-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "@probe/default-install-agent", "--dir", pkg]);
+    const pack = await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"]);
+    const packed = JSON.parse(pack.stdout) as { ok: true; data: { digest: string; path: string } };
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const transparency = cliTransparency(manifest.canonical, manifest.publish.signingKey, packed.data.digest);
+    const registry = cliRegistry(manifest.canonical, manifest.publish.signingKey, packed.data.digest, transparency);
+    const server = await serveBundle(await readFile(packed.data.path), manifest.canonical, manifest.version);
+    try {
+      registry.packages[0]!.resolved = server.resolved;
+      registry.packages[0]!.sourceRepo = server.sourceRepo;
+      await writeFile(registryPath, `${JSON.stringify(registry)}\n`);
+
+      const result = await execaNode(
+        [
+          "src/cli.ts",
+          "install",
+          "default-install-agent",
+          "--allow-custom-roots",
+          "--log-id",
+          transparency.log.treeHead.logId,
+          "--witness",
+          transparency.witness.witness,
+          "--dir",
+          app,
+          "--json"
+        ],
+        { env: { NIPMOD_REGISTRY_URL: pathToFileURL(registryPath).href } }
+      );
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { lockfileChanged: boolean; package: string; version: string };
+      };
+
+      expect(parsed.data).toMatchObject({
+        lockfileChanged: true,
+        package: manifest.canonical,
+        version: manifest.version
+      });
     } finally {
       await server.close();
     }

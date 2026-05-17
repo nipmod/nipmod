@@ -101,8 +101,8 @@ export async function runPublicProofLoop(options = {}) {
     await mkdir(appDir, { recursive: true });
     const cli = options.cli ?? localCli();
     const safe = [
-      await runCli(cli, ["inspect", subject, "--online", "--json"], { label: "inspect" }),
-      await runCli(cli, ["install", packageName, "--dir", appDir, "--online", "--json"], { label: "install" }),
+      await runCli(cli, ["inspect", subject, "--json"], { label: "inspect" }),
+      await runCli(cli, ["install", packageName, "--dir", appDir, "--json"], { label: "install" }),
       await runCli(cli, ["audit", "--dir", appDir, "--online", "--json"], { label: "audit" }),
       await runCli(cli, ["ci", "--dir", appDir, "--online", "--json"], { label: "ci" })
     ];

@@ -59,10 +59,10 @@ describe("home content", () => {
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
       "nipmod doctor --online",
       "mkdir -p nipmod-demo && cd nipmod-demo",
-      "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
-      "nipmod install gitlawb-repo-reader --online",
+      "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+      "nipmod install gitlawb-repo-reader",
       "nipmod install",
-      "nipmod update --plan --online",
+      "nipmod update --plan",
       "nipmod sbom --json",
       "nipmod explain gitlawb-repo-reader --json",
       "nipmod audit --online"
@@ -96,14 +96,14 @@ describe("home content", () => {
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Update")?.command).toBe(
-      "nipmod update --plan --online\nnipmod update --online"
+      "nipmod update --plan\nnipmod update"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "SBOM")?.command).toBe("nipmod sbom --json");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Explain")?.command).toBe(
       "nipmod explain gitlawb-repo-reader --json"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Inspect")?.command).toMatch(
-      /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --online$/
+      /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0$/
     );
   });
 

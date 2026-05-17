@@ -10,7 +10,7 @@ or:
 
 ```bash
 export NIPMOD_REGISTRY_URLS="https://nipmod.com/registry/packages.json,https://mirror.example/packages.json"
-nipmod search policy --online
+nipmod search policy
 ```
 
 ## Safety Rules

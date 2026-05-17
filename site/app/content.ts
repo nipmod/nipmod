@@ -12,10 +12,10 @@ export const homeContent = {
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "nipmod doctor --online",
     "mkdir -p nipmod-demo && cd nipmod-demo",
-    "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
-    "nipmod install gitlawb-repo-reader --online",
+    "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+    "nipmod install gitlawb-repo-reader",
     "nipmod install",
-    "nipmod update --plan --online",
+    "nipmod update --plan",
     "nipmod sbom --json",
     "nipmod explain gitlawb-repo-reader --json",
     "nipmod audit --online"
@@ -54,17 +54,17 @@ export const homeContent = {
     {
       label: "Find",
       text: "Search the public registry for a useful agent package.",
-      command: "nipmod search gitlawb --online"
+      command: "nipmod search gitlawb"
     },
     {
       label: "Inspect",
       text: "Read the digest, signer, source, witness and permissions.",
-      command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online"
+      command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0"
     },
     {
       label: "Install package",
       text: "Create a demo workspace first so the first lockfile mutation is isolated.",
-      command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod install gitlawb-repo-reader --online"
+      command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod install gitlawb-repo-reader"
     },
     {
       label: "Restore",
@@ -74,7 +74,7 @@ export const homeContent = {
     {
       label: "Update",
       text: "Check for verified root package updates and apply them when available.",
-      command: "nipmod update --plan --online\nnipmod update --online"
+      command: "nipmod update --plan\nnipmod update"
     },
     {
       label: "SBOM",
@@ -154,17 +154,17 @@ export const homeContent = {
     {
       label: "Find",
       text: "Search the public registry without a nipmod account.",
-      command: "nipmod search gitlawb --online"
+      command: "nipmod search gitlawb"
     },
     {
       label: "Inspect",
       text: "Read digest, signer, source, witness and transparency evidence.",
-      command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online"
+      command: "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0"
     },
     {
       label: "Install",
       text: "Pin the verified package in the workspace lockfile.",
-      command: "nipmod install gitlawb-repo-reader --online"
+      command: "nipmod install gitlawb-repo-reader"
     },
     {
       label: "Restore",
@@ -182,142 +182,142 @@ export const homeContent = {
     {
       name: "gitlawb-repo-reader",
       text: "Read a public Gitlawb repo and return a provenance focused summary.",
-      command: "nipmod install gitlawb-repo-reader --online"
+      command: "nipmod install gitlawb-repo-reader"
     },
     {
       name: "gitlawb-release-review",
       text: "Review immutable tags, signed release events and registry readiness.",
-      command: "nipmod install gitlawb-release-review --online"
+      command: "nipmod install gitlawb-release-review"
     },
     {
       name: "repo-readme-audit",
       text: "Audit repository README content for package clarity and untrusted instruction risk.",
-      command: "nipmod install repo-readme-audit --online"
+      command: "nipmod install repo-readme-audit"
     },
     {
       name: "dependency-risk-review",
       text: "Review dependency manifests, permissions and lockfiles before install.",
-      command: "nipmod install dependency-risk-review --online"
+      command: "nipmod install dependency-risk-review"
     },
     {
       name: "prompt-injection-scan",
       text: "Scan package text and prompts for instruction injection risk.",
-      command: "nipmod install prompt-injection-scan --online"
+      command: "nipmod install prompt-injection-scan"
     },
     {
       name: "strict-ci-policy",
       text: "Run strict install policy gates for automated agent workspaces.",
-      command: "nipmod install strict-ci-policy --online"
+      command: "nipmod install strict-ci-policy"
     },
     {
       name: "developer-default-policy",
       text: "Apply a practical default policy for trying packages safely before production use.",
-      command: "nipmod install developer-default-policy --online"
+      command: "nipmod install developer-default-policy"
     },
     {
       name: "nipmod-audit-ci",
       text: "Turn audit and policy output into CI decisions agents can explain and enforce.",
-      command: "nipmod install nipmod-audit-ci --online"
+      command: "nipmod install nipmod-audit-ci"
     },
     {
       name: "github-issue-triage",
       text: "Triage GitHub issues from untrusted issue text without package permissions.",
-      command: "nipmod install github-issue-triage --online"
+      command: "nipmod install github-issue-triage"
     },
     {
       name: "mcp-server-import-example",
       text: "Map MCP server metadata into nipmod compatibility receipts.",
-      command: "nipmod install mcp-server-import-example --online"
+      command: "nipmod install mcp-server-import-example"
     },
     {
       name: "apm-import-example",
       text: "Map an APM package listing into nipmod trust metadata.",
-      command: "nipmod install apm-import-example --online"
+      command: "nipmod install apm-import-example"
     },
     {
       name: "malicious-skill-fixtures",
       text: "Provide safe negative test fixtures for scanners and policy reviewers.",
-      command: "nipmod install malicious-skill-fixtures --online"
+      command: "nipmod install malicious-skill-fixtures"
     },
     {
       name: "gitlawb-diff-summarizer",
       text: "Summarize Gitlawb repository diffs with provenance, risk and next action clarity.",
-      command: "nipmod install gitlawb-diff-summarizer --online"
+      command: "nipmod install gitlawb-diff-summarizer"
     },
     {
       name: "release-notes-drafter",
       text: "Draft release notes from verified package, Gitlawb tag and changelog evidence.",
-      command: "nipmod install release-notes-drafter --online"
+      command: "nipmod install release-notes-drafter"
     },
     {
       name: "security-advisory-triage",
       text: "Triage package security reports into advisory, quarantine and user action decisions.",
-      command: "nipmod install security-advisory-triage --online"
+      command: "nipmod install security-advisory-triage"
     },
     {
       name: "agent-permission-review",
       text: "Review agent package permissions for least privilege before install or publish.",
-      command: "nipmod install agent-permission-review --online"
+      command: "nipmod install agent-permission-review"
     },
     {
       name: "mcp-tool-risk-review",
       text: "Review MCP server tools and manifests before agents expose them to package workflows.",
-      command: "nipmod install mcp-tool-risk-review --online"
+      command: "nipmod install mcp-tool-risk-review"
     },
     {
       name: "package-onboarding-checklist",
       text: "Guide new package authors through a clean nipmod publish candidate.",
-      command: "nipmod install package-onboarding-checklist --online"
+      command: "nipmod install package-onboarding-checklist"
     },
     {
       name: "registry-mirror-compare",
       text: "Compare registry mirrors and fail closed on digest, root, witness or advisory drift.",
-      command: "nipmod install registry-mirror-compare --online"
+      command: "nipmod install registry-mirror-compare"
     },
     {
       name: "package-evidence-brief",
       text: "Turn package proof into a short human review brief.",
-      command: "nipmod install package-evidence-brief --online"
+      command: "nipmod install package-evidence-brief"
     },
     {
       name: "agent-runtime-compat-check",
       text: "Check whether an agent host is ready for install, audit and MCP flows.",
-      command: "nipmod install agent-runtime-compat-check --online"
+      command: "nipmod install agent-runtime-compat-check"
     },
     {
       name: "external-review-packet",
       text: "Prepare an external reviewer handoff from proof and gate output.",
-      command: "nipmod install external-review-packet --online"
+      command: "nipmod install external-review-packet"
     },
     {
       name: "first-user-onboarding",
       text: "Guide a new user through setup, inspect, package install, audit and publish dry run.",
-      command: "nipmod install first-user-onboarding --online"
+      command: "nipmod install first-user-onboarding"
     },
     {
       name: "package-migration-planner",
       text: "Plan a Gitlawb, MCP or APM source migration into a package candidate.",
-      command: "nipmod install package-migration-planner --online"
+      command: "nipmod install package-migration-planner"
     },
     {
       name: "readonly-registry-mcp-server",
       text: "Expose read only registry search and inspect tools through MCP.",
-      command: "nipmod install readonly-registry-mcp-server --online"
+      command: "nipmod install readonly-registry-mcp-server"
     },
     {
       name: "launch-strict-policy-pack",
       text: "Apply launch strict install policy for verified agent packages.",
-      command: "nipmod install launch-strict-policy-pack --online"
+      command: "nipmod install launch-strict-policy-pack"
     },
     {
       name: "package-safety-eval-pack",
       text: "Evaluate scanners against unsafe agent package fixtures.",
-      command: "nipmod install package-safety-eval-pack --online"
+      command: "nipmod install package-safety-eval-pack"
     },
     {
       name: "gitlawb-review-tool-bundle",
       text: "Bundle Gitlawb repo review, diff summary and release review guidance.",
-      command: "nipmod install gitlawb-review-tool-bundle --online"
+      command: "nipmod install gitlawb-review-tool-bundle"
     }
   ],
   repoToPackage: {

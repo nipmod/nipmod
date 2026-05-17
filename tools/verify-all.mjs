@@ -231,9 +231,9 @@ async function smokeLiveInstalledAudit() {
     const subject = await writeAuditSmokeLockfile({ appDir });
     await run(join(dir, "bin", "nipmod"), ["audit", "--dir", appDir, "--online", "--json"]);
     await run(join(dir, "bin", "nipmod"), ["ci", "--dir", appDir, "--online", "--json"]);
-    await run(join(dir, "bin", "nipmod"), ["inspect", subject, "--online", "--json"]);
-    await run(join(dir, "bin", "nipmod"), ["install", "--plan", subject, "--dir", join(dir, "plan-app"), "--online", "--json"]);
-    await run(join(dir, "bin", "nipmod"), ["add", subject, "--dir", join(dir, "add-app"), "--online", "--json"]);
+    await run(join(dir, "bin", "nipmod"), ["inspect", subject, "--json"]);
+    await run(join(dir, "bin", "nipmod"), ["install", "--plan", subject, "--dir", join(dir, "plan-app"), "--json"]);
+    await run(join(dir, "bin", "nipmod"), ["add", subject, "--dir", join(dir, "add-app"), "--json"]);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

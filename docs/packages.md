@@ -55,11 +55,11 @@ Every public package should have:
 Agents should search first, inspect second and install only after the report is acceptable.
 
 ```sh
-nipmod search repo --online
-nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
+nipmod search repo
+nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0
 mkdir -p nipmod-demo
 cd nipmod-demo
-nipmod install gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader
 nipmod install
 ```
 

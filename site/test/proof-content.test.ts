@@ -23,10 +23,10 @@ describe("public proof content", () => {
 
   test("uses live package manager commands and exact block cases", () => {
     expect(proofContent.safeCommands[0]).toMatch(
-      /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-release-review@0\.1\.0 --online$/
+      /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-release-review@0\.1\.0$/
     );
     expect(proofContent.safeCommands.slice(1)).toEqual([
-      "nipmod install gitlawb-release-review --online",
+      "nipmod install gitlawb-release-review",
       "nipmod audit --online",
       "nipmod ci --online"
     ]);

@@ -19,8 +19,8 @@ export const proofContent = {
     trust: verified.length === registry.packages.length ? "verified/100" : "review required"
   },
   safeCommands: [
-    `nipmod inspect ${proofSubject} --online`,
-    `nipmod install ${proofPackageName} --online`,
+    `nipmod inspect ${proofSubject}`,
+    `nipmod install ${proofPackageName}`,
     "nipmod audit --online",
     "nipmod ci --online"
   ],

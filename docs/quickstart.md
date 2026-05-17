@@ -37,7 +37,7 @@ Expected result:
 ## Find a package
 
 ```sh
-nipmod search gitlawb --online
+nipmod search gitlawb
 ```
 
 Expected result:
@@ -49,7 +49,7 @@ Expected result:
 ## Inspect before install
 
 ```sh
-nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
+nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0
 ```
 
 Check these fields before mutation:
@@ -70,7 +70,7 @@ Create a demo workspace first. The first lockfile mutation should not happen in 
 ```sh
 mkdir -p nipmod-demo
 cd nipmod-demo
-nipmod install gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader
 ```
 
 Expected result:
@@ -83,7 +83,7 @@ Expected result:
 
 ```sh
 nipmod install
-nipmod update --plan --online
+nipmod update --plan
 ```
 
 Expected result:
@@ -96,7 +96,7 @@ Expected result:
 ## Update packages
 
 ```sh
-nipmod update --online
+nipmod update
 ```
 
 Expected result:
@@ -147,7 +147,7 @@ Expected result:
 
 If install fails, rerun the checksum step and do not pipe the installer into a shell.
 
-If search or inspect fails with a network message, rerun with `--online`. `nipmod install` may fetch digest-pinned remote bundles when the local store is missing or corrupt; pass `--offline` to force local store and file URL use only.
+Registry commands use the public registry by default. `nipmod install` may fetch digest-pinned remote bundles when the local store is missing or corrupt; pass `--offline` to force local store and file URL use only.
 
 If inspect fails with a custom root message, use public roots or pass `--allow-custom-roots` only for a local test registry.
 

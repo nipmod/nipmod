@@ -272,7 +272,7 @@ echo ""
 echo "Installed nipmod"
 echo "Next:"
 echo "  nipmod doctor --online"
-echo "  nipmod search gitlawb --online"
+echo "  nipmod search gitlawb"
 
 case ":$PATH:" in
   *":$NIPMOD_BIN_DIR:"*) ;;

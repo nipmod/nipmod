@@ -264,7 +264,7 @@ export function installCommand(pkg: RegistryPackage): string {
   if (quarantine) {
     return `Install blocked: ${quarantine.advisoryId}: ${quarantine.reason}`;
   }
-  return `nipmod install ${pkg.name} --online`;
+  return `nipmod install ${pkg.name}`;
 }
 
 const allowedSourceRepoHosts = new Set([

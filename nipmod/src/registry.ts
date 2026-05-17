@@ -370,8 +370,8 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     ...(installBlockedReason
       ? { installBlockedReason }
       : {
-          canonicalInstall: `nipmod install ${pkg.canonical}@${pkg.version} --online`,
-          install: `nipmod install ${pkg.name} --online`
+          canonicalInstall: `nipmod install ${pkg.canonical}@${pkg.version}`,
+          install: `nipmod install ${pkg.name}`
         }),
     name: pkg.name,
     nameAmbiguous,

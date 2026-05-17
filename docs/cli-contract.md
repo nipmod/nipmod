@@ -68,8 +68,8 @@ for humans who want the security detail that is hidden from the default search v
 package metadata and refuses ambiguous names unless the canonical package id is used.
 `nipmod install` without a package specifier restores `.nipmod/store` from the existing lockfile and reports
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
-`nipmod install <package> --online` resolves a verified registry package, installs its verified dependency graph and
-writes the root dependency to the lockfile. `nipmod add <package> --online` is kept as a compatibility alias.
+`nipmod install <package>` resolves a verified registry package, installs its verified dependency graph and
+writes the root dependency to the lockfile. `nipmod add <package>` is kept as a compatibility alias.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
 `nipmod update [package] --plan` returns a verified update plan for root dependencies without mutating the lockfile.
@@ -95,9 +95,11 @@ type. It does not fetch network data.
 
 ## Network mode
 
-Commands that need registry or advisory data require `--online`. Lockfile restore is an install command: it may fetch
-digest-pinned remote bundles when the local store is missing or corrupt. Pass `--offline` to force local store and
-file URL use only.
+Registry package commands use the public registry by default. `NIPMOD_REGISTRY_URL` sets one default registry;
+`NIPMOD_REGISTRY_URLS` sets a comma-separated search list for search, view and outdated checks. Audit and CI still
+require `--online` unless explicit registry and advisory sources are supplied. Lockfile restore is an install command:
+it may fetch digest-pinned remote bundles when the local store is missing or corrupt. Pass `--offline` to force local
+store and file URL use only.
 
 Use `--offline` for checks that should never touch public services.
 

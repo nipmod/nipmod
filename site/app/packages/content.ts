@@ -70,15 +70,15 @@ export function packageInstallVariants(pkg: RegistryPackage): PackageInstallVari
   return [
     {
       label: "Install",
-      command: `nipmod install ${spec} --online`
+      command: `nipmod install ${spec}`
     },
     {
       label: "Inspect first",
-      command: `nipmod inspect ${spec} --online`
+      command: `nipmod inspect ${spec}`
     },
     {
       label: "Plan only",
-      command: `nipmod install --plan ${spec} --online`
+      command: `nipmod install --plan ${spec}`
     }
   ];
 }

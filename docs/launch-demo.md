@@ -13,10 +13,10 @@ This path is for someone with no nipmod account and no private credentials. It p
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 nipmod doctor --online
-nipmod search gitlawb --online
+nipmod search gitlawb
 mkdir -p nipmod-demo && cd nipmod-demo
-nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
-nipmod install gitlawb-repo-reader --online
+nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0
+nipmod install gitlawb-repo-reader
 nipmod install
 nipmod audit --online
 ```

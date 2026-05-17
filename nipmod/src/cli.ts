@@ -697,9 +697,6 @@ async function uninstallCommand(args: string[]): Promise<CliResult> {
 async function outdatedCommand(args: string[]): Promise<CliResult> {
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
   const registryUrls = registrySearchUrls(args);
-  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
-    throw new Error("outdated network access requires --online, --registry or --registries");
-  }
   const report = await checkOutdatedPackages({
     includeQuarantined: hasFlag(args, "--include-quarantined"),
     projectDir: dir,
@@ -989,13 +986,10 @@ function inspectBundleFileOptions(specifier: string, args: readonly string[]): {
 }
 
 async function inspectRegistryCommand(specifier: string, args: string[]): Promise<TrustReport> {
-  const registryUrl = optionalFlagValue(args, "--registry");
+  const registryUrl = registryUrlFromFlagsOrEnv(args);
   const allowedLogIds = optionalFlagValues(args, "--log-id");
   const allowedWitnesses = optionalFlagValues(args, "--witness");
   assertCustomTrustRoots(args, "inspect", ["--log-id", "--witness"]);
-  if (!registryUrl && !hasFlag(args, "--online")) {
-    throw new Error("inspect network access requires --online or --registry");
-  }
   if ((allowedLogIds.length > 0 && allowedWitnesses.length === 0) || (allowedWitnesses.length > 0 && allowedLogIds.length === 0)) {
     throw new Error("inspect transparency pins require both --log-id and --witness");
   }
@@ -1053,9 +1047,6 @@ function formatVerdict(verdict: TrustReportVerdict): string {
 async function searchCommand(args: string[]): Promise<CliResult> {
   const query = firstPositional(args);
   const registryUrls = registrySearchUrls(args);
-  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
-    throw new Error("search network access requires --online, --registry or --registries");
-  }
   const result =
     registryUrls.length > 1
       ? await searchRegistries({
@@ -1083,9 +1074,6 @@ async function searchCommand(args: string[]): Promise<CliResult> {
 async function viewCommand(args: string[]): Promise<CliResult> {
   const rawTarget = firstPositional(args);
   const registryUrls = registrySearchUrls(args);
-  if (registryUrls.length === 0 && !hasFlag(args, "--online")) {
-    throw new Error("view network access requires --online, --registry or --registries");
-  }
   const target = parseViewTarget(rawTarget);
   const result =
     registryUrls.length > 1
@@ -1118,7 +1106,12 @@ function registrySearchUrls(args: readonly string[]): string[] {
   if (explicit.length > 0) {
     return [...new Set(explicit)];
   }
-  return splitRegistryList(process.env.NIPMOD_REGISTRY_URLS ?? "");
+  return [
+    ...new Set([
+      ...splitRegistryList(process.env.NIPMOD_REGISTRY_URL ?? ""),
+      ...splitRegistryList(process.env.NIPMOD_REGISTRY_URLS ?? "")
+    ])
+  ];
 }
 
 function splitRegistryList(value: string): string[] {
@@ -1637,13 +1630,10 @@ function positionalArg(args: readonly string[], commandName: string): string {
 }
 
 function registryTrustFlags(args: readonly string[], commandName: string): RegistryTrustOptions {
-  const registryUrl = optionalFlagValue(args, "--registry");
+  const registryUrl = registryUrlFromFlagsOrEnv(args);
   const allowedLogIds = optionalFlagValues(args, "--log-id");
   const allowedWitnesses = optionalFlagValues(args, "--witness");
   assertCustomTrustRoots(args, commandName, ["--log-id", "--witness"]);
-  if (!registryUrl && !hasFlag(args, "--online")) {
-    throw new Error(`${commandName} network access requires --online or --registry`);
-  }
   if ((allowedLogIds.length > 0 && allowedWitnesses.length === 0) || (allowedWitnesses.length > 0 && allowedLogIds.length === 0)) {
     throw new Error(`${commandName} transparency pins require both --log-id and --witness`);
   }
@@ -1658,6 +1648,10 @@ function registryTrustFlags(args: readonly string[], commandName: string): Regis
     options.allowedWitnesses = allowedWitnesses;
   }
   return options;
+}
+
+function registryUrlFromFlagsOrEnv(args: readonly string[]): string | undefined {
+  return optionalFlagValue(args, "--registry") ?? splitRegistryList(process.env.NIPMOD_REGISTRY_URL ?? "")[0];
 }
 
 function configuredNodeUrl(args: readonly string[]): string {
