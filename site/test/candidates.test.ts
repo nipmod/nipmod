@@ -21,6 +21,8 @@ describe("candidate content", () => {
     expect(candidate).toMatchObject({
       claimCommand:
         "nipmod claim gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
+      draftCommand:
+        "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader --dir repo-reader-pr --json",
       packageId: "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
       repoName: "repo-reader",
       source: "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
@@ -75,10 +77,11 @@ describe("candidate content", () => {
     });
 
     expect(candidateStats([unclaimed, published, claimed])).toEqual([
-      { label: "Candidates", value: "3" },
+      { label: "Repos", value: "3" },
+      { label: "Drafts", value: "2" },
       { label: "Claimed", value: "1" },
       { label: "Published", value: "1" },
-      { label: "Unclaimed", value: "1" }
+      { label: "Unclaimed drafts", value: "1" }
     ]);
   });
 });

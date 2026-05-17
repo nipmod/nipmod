@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/candidates"
   },
-  description: "Claim a public Gitlawb repo as an installable Nipmod package for agents.",
+  description: "Claim a Scout prepared Nipmod package draft for a public Gitlawb repo.",
   openGraph: {
-    description: "Claim a public Gitlawb repo as an installable Nipmod package for agents.",
+    description: "Claim a Scout prepared Nipmod package draft for a public Gitlawb repo.",
     title: "Nipmod Package Claim",
     url: "https://nipmod.com/candidates"
   },
@@ -46,15 +46,15 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="candidates-title">
         <p className="eyebrow">Package Claim</p>
-        <h1 id="candidates-title">Turn Gitlawb repos into agent packages.</h1>
-        <p className="lead">Nipmod finds public Gitlawb repos, scores package readiness and lets owners claim them with Gitlawb proof.</p>
+        <h1 id="candidates-title">Scout prepares package drafts.</h1>
+        <p className="lead">Nipmod scans public Gitlawb repos, prepares unclaimed package drafts and lets owners verify them with Gitlawb proof.</p>
       </section>
 
       <section className="registry-section" aria-labelledby="candidate-browse-title">
         <div className="registry-head">
           <div>
             <p className="eyebrow">Candidates</p>
-            <h2 id="candidate-browse-title">Claim what is yours.</h2>
+            <h2 id="candidate-browse-title">Claim a prepared draft.</h2>
           </div>
           <form className="search-form" action="/candidates">
             <label className="sr-only" htmlFor="candidate-search">
@@ -85,7 +85,7 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
 
         <div className="candidate-flow" aria-label="Package Claim flow">
           <span>Gitlawb repo</span>
-          <span>Candidate</span>
+          <span>Scout draft</span>
           <span>Owner claim</span>
           <span>Verified package</span>
         </div>
@@ -173,19 +173,26 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
         </div>
         <div>
           <dt>Source</dt>
-          <dd>Gitlawb</dd>
+          <dd>{candidate.status === "published" ? "published" : candidate.draftStatus === "claimed" ? "claimed draft" : "draft ready"}</dd>
         </div>
       </dl>
 
       <pre className="install-command">
-        <code>{candidate.status === "claimed" || candidate.status === "published" ? `nipmod add ${candidate.packageId}` : candidate.claimCommand}</code>
+        <code>{candidate.status === "claimed" || candidate.status === "published" ? `nipmod add ${candidate.packageId}` : candidate.draftCommand}</code>
       </pre>
 
       <div className="package-links">
         <a href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
           Gitlawb
         </a>
-        <a href={`/packages?q=${encodeURIComponent(candidate.repoName)}`}>Package</a>
+        {candidate.draftEndpoint && candidate.status !== "published" ? (
+          <a href={candidate.draftEndpoint} rel="noreferrer" target="_blank">
+            Draft JSON
+          </a>
+        ) : null}
+        <a href={candidate.status === "published" || candidate.status === "claimed" ? `/packages?q=${encodeURIComponent(candidate.repoName)}` : "/package"}>
+          {candidate.status === "published" || candidate.status === "claimed" ? "Package" : "Prepare"}
+        </a>
       </div>
     </article>
   );

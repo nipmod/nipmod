@@ -23,6 +23,9 @@
     "health": "https://nipmod.com/scout/health",
     "last": "https://nipmod.com/scout/last",
     "candidates": "https://nipmod.com/scout/candidates",
+    "drafts": "https://nipmod.com/scout/drafts",
+    "draft": "https://nipmod.com/scout/draft",
+    "draftParam": "repo",
     "patch": "https://nipmod.com/scout/patch",
     "patchParam": "repo",
     "intervalMs": 300000

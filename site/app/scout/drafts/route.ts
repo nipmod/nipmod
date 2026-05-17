@@ -6,12 +6,11 @@ export const runtime = "nodejs";
 export async function GET() {
   const cycle = await readScoutCycle();
   return Response.json({
+    drafts: cycle.drafts,
     formatVersion: 1,
     generatedAt: cycle.generatedAt,
-    node: cycle.node,
-    ok: cycle.ok,
-    draftCount: cycle.drafts.length,
+    ok: true,
     summary: cycle.summary,
-    type: "dev.nipmod.scout-last-public.v1"
+    type: "dev.nipmod.scout-drafts.v1"
   });
 }

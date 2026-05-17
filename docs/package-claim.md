@@ -9,7 +9,7 @@ Gitlawb is the source layer for agent-built code. Nipmod is the package layer on
 Package Claim makes that concrete:
 
 ```text
-Gitlawb repo -> package candidate -> owner claim -> package doctor -> verified package
+Gitlawb repo -> Scout draft -> owner claim -> package doctor -> verified package
 ```
 
 The hard boundary is simple: published is not claimed. A registry package can be installable, but the `/candidates`
@@ -22,6 +22,20 @@ surface only marks it `claimed` after a Gitlawb-pushed `.nipmod/package-claim.js
 A Package Candidate is a public Gitlawb repo that Nipmod can describe as a possible agent package before the owner has claimed it.
 
 Candidates are not official packages. The UI must clearly label them as unclaimed until a Gitlawb owner proof exists.
+
+### Package Draft
+
+A Package Draft is the concrete package proposal Scout can generate from a candidate without writing to Gitlawb.
+
+It contains:
+
+- `nipmod.json`
+- `README.nipmod.md`
+- claim command
+- claim verify command
+- exact local commit and push commands
+
+Drafts are useful because a repo owner or agent can inspect real files instead of interpreting generic advice. They are still unclaimed until the owner DID signs `.nipmod/package-claim.json`.
 
 ### Readiness Score
 
@@ -99,6 +113,8 @@ Nipmod Scout Agent continuously reads public Gitlawb repos from configured nodes
 
 ```text
 https://nipmod.com/scout/candidates
+https://nipmod.com/scout/drafts
+https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo
 ```
 
 Output:

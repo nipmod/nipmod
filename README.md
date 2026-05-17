@@ -12,6 +12,7 @@ Public links:
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Registry: https://nipmod.com/registry/packages.json
 - Scout: https://nipmod.com/scout/candidates
+- Scout drafts: https://nipmod.com/scout/drafts
 
 ## Founder-facing pitch
 
@@ -34,7 +35,7 @@ Nipmod is not a Gitlawb authority and not a central upload gate. Gitlawb remains
 - Gitlawb publish and install against `https://node.nipmod.com`.
 - Package Claim for proving that a Gitlawb repo owner accepts a Nipmod package identity.
 - Package PR generator for turning an existing Gitlawb repo into a local package patch without remote writes.
-- Scout Agent that continuously scans public Gitlawb repos and exposes package-ready candidates.
+- Scout Agent that continuously scans public Gitlawb repos and exposes package-ready candidates plus claim-safe package drafts.
 - Read-only MCP server for agents.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
 
@@ -87,11 +88,13 @@ nipmod publish . --dry-run --json
 ## Turn a Gitlawb repo into a package patch
 
 ```bash
+curl -fsS "https://nipmod.com/scout/draft?repo=gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
 nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
+nipmod claim gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir . --identity .nipmod/identity.json
 nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 ```
 
-`package pr` writes local files only. The Gitlawb repo owner can review the patch, sign the claim with the matching DID identity and push it through Gitlawb.
+Scout drafts and `package pr` write local files only. The Gitlawb repo owner can review the patch, sign the claim with the matching DID identity and push it through Gitlawb.
 
 ## Agent surfaces
 
@@ -100,6 +103,7 @@ nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5b
 - MCP docs: `https://nipmod.com/mcp`
 - Package candidates: `https://nipmod.com/candidates`
 - Scout API: `https://nipmod.com/scout/candidates`
+- Scout drafts: `https://nipmod.com/scout/drafts`
 
 ## Operator flow
 

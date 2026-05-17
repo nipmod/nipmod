@@ -17,9 +17,17 @@ export async function runScoutCycle({
   const candidates = repos
     .map((repo) => candidateFromRepo(repo, claimIndex.verifiedPackageSet, { scoutUrl }))
     .sort(compareCandidates);
+  const drafts = candidates.map((candidate) =>
+    createPackageDraft(candidate, {
+      generatedAt,
+      scoutUrl,
+      status: candidate.claimStatus === "claimed" ? "claimed" : candidate.status === "needs-work" ? "needs-work" : "unclaimed"
+    })
+  );
 
   return {
     candidates,
+    drafts,
     claimIndex: {
       error: claimIndex.error,
       generatedAt: claimIndex.generatedAt,
@@ -36,33 +44,76 @@ export async function runScoutCycle({
     ok: true,
     summary: {
       claimed: candidates.filter((candidate) => candidate.claimStatus === "claimed").length,
+      drafts: drafts.length,
       patchable: candidates.filter((candidate) => candidate.patch?.remoteWrites === false).length,
-      scanned: candidates.length
+      scanned: candidates.length,
+      unclaimedDrafts: drafts.filter((draft) => draft.status === "unclaimed").length
     },
     type: "dev.nipmod.scout-cycle.v1"
   };
 }
 
 export function createPackagePatch(input, { generatedAt = new Date().toISOString(), nodeUrl = DEFAULT_NODE_URL } = {}) {
-  const repo = normalizeRepo(input);
+  const draft = createPackageDraft(input, { generatedAt, nodeUrl });
+
+  return {
+    files: draft.files,
+    formatVersion: 1,
+    generatedAt,
+    nextCommands: [
+      "git add nipmod.json README.nipmod.md",
+      "git commit -m \"feat: add nipmod package manifest\"",
+      "GITLAWB_NODE=https://node.nipmod.com git push"
+    ],
+    package: draft.package,
+    remoteWrites: false,
+    source: draft.source,
+    type: "dev.nipmod.package-patch.v1"
+  };
+}
+
+export function createPackageDraft(
+  input,
+  { generatedAt = new Date().toISOString(), nodeUrl = DEFAULT_NODE_URL, scoutUrl = DEFAULT_SCOUT_URL, status = "unclaimed" } = {}
+) {
+  const repo = normalizeRepo(input, { assumePublicFromSource: true });
   if (!repo) {
     throw new Error("invalid Gitlawb repo");
   }
 
   const source = sourceForRepo(repo);
   const packageId = packageForRepo(repo);
+  const gitlawbUrl = `https://gitlawb.com/node/repos/${ownerSegment(repo.owner_did)}/${repo.name}`;
   const manifest = {
-    agent: {
-      permissions: [],
-      runtime: "source"
-    },
     canonical: packageId,
-    defaultBranch: repo.default_branch,
     description: repo.description || "Public Gitlawb repo",
+    exports: {
+      ".": {
+        source: "./README.nipmod.md"
+      }
+    },
+    files: ["README.nipmod.md", "nipmod.json"],
     formatVersion: 1,
+    license: "NOASSERTION",
     name: repo.name,
-    source,
-    type: "dev.nipmod.package-manifest.v1",
+    permissions: {
+      env: [],
+      exec: {
+        allowed: false
+      },
+      filesystem: [],
+      mcpTools: [],
+      network: [],
+      postinstall: {
+        allowed: false
+      },
+      secrets: []
+    },
+    publish: {
+      provenance: source,
+      signingKey: repo.owner_did
+    },
+    type: manifestTypeFromSuggested(suggestedType(repo)),
     version: "0.1.0"
   };
   const files = [
@@ -75,20 +126,40 @@ export function createPackagePatch(input, { generatedAt = new Date().toISOString
       path: "README.nipmod.md"
     }
   ];
+  const claimRequired = status !== "claimed" && status !== "published";
 
   return {
+    claim: {
+      command: `nipmod claim ${source} --dir . --identity .nipmod/identity.json`,
+      proofPath: ".nipmod/package-claim.json",
+      required: claimRequired,
+      verifyCommand: `nipmod claim verify ${source} --json`
+    },
     files,
     formatVersion: 1,
     generatedAt,
+    manifest,
     nextCommands: [
-      "git add nipmod.json README.nipmod.md",
+      `nipmod package pr ${source} --dir . --identity .nipmod/identity.json --json`,
+      "git add nipmod.json README.nipmod.md .nipmod/package-claim.json",
       "git commit -m \"feat: add nipmod package manifest\"",
-      "GITLAWB_NODE=https://node.nipmod.com git push"
+      "GITLAWB_NODE=https://node.nipmod.com git push",
+      `nipmod claim verify ${source} --json`
     ],
     package: packageId,
     remoteWrites: false,
+    repo: {
+      gitlawbUrl,
+      name: repo.name,
+      ownerDid: repo.owner_did
+    },
     source,
-    type: "dev.nipmod.package-patch.v1"
+    status,
+    type: "dev.nipmod.package-draft.v1",
+    warnings: [
+      "This is an unclaimed draft until the Gitlawb repo owner signs and pushes .nipmod/package-claim.json.",
+      "Nipmod does not claim ownership of this repo and does not open remote writes automatically."
+    ]
   };
 }
 
@@ -123,7 +194,7 @@ async function fetchPublicRepos({ fetchFn, limit, nodeUrl }) {
       : Array.isArray(payload?.repositories)
         ? payload.repositories
         : [];
-  return rawRepos.map(normalizeRepo).filter(isScoutableRepo).slice(0, limit);
+  return rawRepos.map((repo) => normalizeRepo(repo)).filter(isScoutableRepo).slice(0, limit);
 }
 
 async function fetchClaimIndex({ claimIndexUrl, fetchFn }) {
@@ -171,7 +242,9 @@ function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
   const source = sourceForRepo(repo);
   const claimed = verifiedPackageSet.has(packageId);
   const readinessScore = claimed ? 100 : scoreRepo(repo);
-  const patchEndpoint = `${trimTrailingSlash(scoutUrl)}/patch?repo=${encodeURIComponent(source)}`;
+  const sourceParam = encodeURIComponent(source);
+  const draftStatus = claimed ? "claimed" : readinessScore >= 50 ? "unclaimed" : "needs-work";
+  const patchEndpoint = `${trimTrailingSlash(scoutUrl)}/patch?repo=${sourceParam}`;
 
   return {
     claimStatus: claimed ? "claimed" : "unclaimed",
@@ -183,6 +256,12 @@ function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
     },
     defaultBranch: repo.default_branch,
     description: repo.description || "Public Gitlawb repo",
+    draft: {
+      claimRequired: draftStatus !== "claimed",
+      endpoint: `${trimTrailingSlash(scoutUrl)}/draft?repo=${sourceParam}`,
+      remoteWrites: false,
+      status: draftStatus
+    },
     gitlawbUrl: `https://gitlawb.com/node/repos/${ownerSegment(repo.owner_did)}/${repo.name}`,
     package: packageId,
     patch: {
@@ -193,13 +272,13 @@ function candidateFromRepo(repo, verifiedPackageSet, { scoutUrl }) {
     repoName: repo.name,
     shortOwner: ownerSegment(repo.owner_did).slice(0, 8),
     source,
-    status: claimed ? "claimed" : readinessScore >= 50 ? "package-ready" : "needs-work",
+    status: claimed ? "claimed" : readinessScore >= 50 ? "unclaimed-draft" : "needs-work",
     suggestedType: suggestedType(repo),
     updatedAt: repo.updated_at
   };
 }
 
-function normalizeRepo(input) {
+function normalizeRepo(input, { assumePublicFromSource = false } = {}) {
   if (!input || typeof input !== "object") {
     return null;
   }
@@ -210,14 +289,21 @@ function normalizeRepo(input) {
         ? input.ownerDid
         : typeof input.owner?.did === "string"
           ? input.owner.did
-          : "";
-  const name = typeof input.name === "string" ? input.name : typeof input.repo === "string" ? input.repo : "";
+          : ownerDidFromSource(input.source);
+  const name =
+    typeof input.name === "string"
+      ? input.name
+      : typeof input.repoName === "string"
+        ? input.repoName
+        : typeof input.repo === "string"
+          ? input.repo
+          : repoNameFromSource(input.source);
   const isPublic =
     typeof input.is_public === "boolean"
       ? input.is_public
       : typeof input.public === "boolean"
         ? input.public
-        : input.visibility === "public";
+        : input.visibility === "public" || (assumePublicFromSource && isGitlawbSource(input.source));
 
   return {
     clone_url: stringOr(input.clone_url, input.cloneUrl, ""),
@@ -259,6 +345,14 @@ function suggestedType(repo) {
   return "source-package";
 }
 
+function manifestTypeFromSuggested(value) {
+  if (value === "mcp-server") return "mcp-server";
+  if (value === "agent-skill") return "skill";
+  if (value === "workflow-pack") return "workflow-pack";
+  if (value === "agent-tool") return "tool-bundle";
+  return "adapter";
+}
+
 function compareCandidates(left, right) {
   return (
     statusWeight(right.status) - statusWeight(left.status) ||
@@ -268,7 +362,7 @@ function compareCandidates(left, right) {
 }
 
 function statusWeight(status) {
-  if (status === "package-ready") return 3;
+  if (status === "unclaimed-draft") return 3;
   if (status === "claimed") return 2;
   return 1;
 }
@@ -287,7 +381,8 @@ ${packageId}
 Prepare this repo:
 
 \`\`\`sh
-git add nipmod.json README.nipmod.md
+nipmod claim ${source} --dir . --identity .nipmod/identity.json
+git add nipmod.json README.nipmod.md .nipmod/package-claim.json
 git commit -m "feat: add nipmod package manifest"
 GITLAWB_NODE=${trimTrailingSlash(nodeUrl)} git push
 \`\`\`
@@ -318,6 +413,20 @@ function isDidKey(value) {
 
 function isRepoName(value) {
   return /^[a-z0-9][a-z0-9._-]*$/.test(value);
+}
+
+function isGitlawbSource(value) {
+  return /^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(String(value ?? ""));
+}
+
+function ownerDidFromSource(value) {
+  const match = /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+)\//.exec(String(value ?? ""));
+  return match?.[1] ?? "";
+}
+
+function repoNameFromSource(value) {
+  const match = /^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/([a-z0-9][a-z0-9._-]*)$/.exec(String(value ?? ""));
+  return match?.[1] ?? "";
 }
 
 function isProbeRepo(repo) {

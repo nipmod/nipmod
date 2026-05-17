@@ -16,6 +16,7 @@ const DEFAULT_ENDPOINTS = {
   nodeUrl: "https://node.nipmod.com",
   registry: "https://nipmod.com/registry/packages.json",
   scoutCandidates: "https://nipmod.com/scout/candidates",
+  scoutDrafts: "https://nipmod.com/scout/drafts",
   scoutHealth: "https://nipmod.com/scout/health",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
@@ -76,6 +77,7 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.witness?.health, endpoints.witnessHealth, "discovery witness health URL mismatch");
     assertEqual(state.discovery.scout?.health, endpoints.scoutHealth, "discovery scout health URL mismatch");
     assertEqual(state.discovery.scout?.candidates, endpoints.scoutCandidates, "discovery scout candidates URL mismatch");
+    assertEqual(state.discovery.scout?.drafts, endpoints.scoutDrafts, "discovery scout drafts URL mismatch");
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
@@ -239,6 +241,20 @@ export async function runSyntheticMonitor({
     }
     return {
       candidates: payload.candidates.length
+    };
+  });
+
+  await runCheck(checks, "scout_drafts", async () => {
+    const payload = await fetchJson(endpoints.scoutDrafts, timedFetch);
+    if (payload.type !== "dev.nipmod.scout-drafts.v1") {
+      throw new Error("scout drafts type mismatch");
+    }
+    if (!Array.isArray(payload.drafts)) {
+      throw new Error("scout drafts payload is invalid");
+    }
+    return {
+      drafts: payload.drafts.length,
+      unclaimedDrafts: payload.summary?.unclaimedDrafts ?? 0
     };
   });
 

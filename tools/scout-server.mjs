@@ -9,6 +9,7 @@ const DEFAULT_PORT = 8080;
 export async function startScoutServer({
   intervalMs = numberFromEnv(process.env.NIPMOD_SCOUT_INTERVAL_MS, DEFAULT_INTERVAL_MS),
   port = numberFromEnv(process.env.PORT, DEFAULT_PORT),
+  publicOrigin = process.env.NIPMOD_SCOUT_PUBLIC_URL,
   runToken = process.env.NIPMOD_SCOUT_RUN_TOKEN,
   runScoutCycleFn = runScoutCycle
 } = {}) {
@@ -72,13 +73,44 @@ export async function startScoutServer({
         return;
       }
       sendJson(response, {
-        candidates: state.lastCycle.candidates ?? [],
+        candidates: absolutizeCandidates(state.lastCycle.candidates ?? [], configuredOrigin(publicOrigin, request)),
         formatVersion: 1,
         generatedAt: state.lastCycle.generatedAt,
         ok: true,
         summary: state.lastCycle.summary,
         type: "dev.nipmod.scout-candidates.v1"
       });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/drafts") {
+      if (!state.lastCycle) {
+        sendJson(response, 404, { error: "no completed scout cycle yet", ok: false });
+        return;
+      }
+      sendJson(response, {
+        drafts: state.lastCycle.drafts ?? [],
+        formatVersion: 1,
+        generatedAt: state.lastCycle.generatedAt,
+        ok: true,
+        summary: state.lastCycle.summary,
+        type: "dev.nipmod.scout-drafts.v1"
+      });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/draft") {
+      try {
+        const source = repoFromGitlawbSource(url.searchParams.get("repo"));
+        const draft = draftFromCycle(state.lastCycle, `gitlawb://${source.owner_did}/${source.name}`);
+        if (!draft) {
+          sendJson(response, 404, { error: "repo is not a current Scout draft", ok: false });
+          return;
+        }
+        sendJson(response, draft);
+      } catch (error) {
+        sendJson(response, 400, { error: error instanceof Error ? error.message : String(error), ok: false });
+      }
       return;
     }
 
@@ -126,6 +158,7 @@ export async function startScoutServer({
 function publicLastCycle(cycle) {
   return {
     claimIndex: cycle.claimIndex,
+    draftCount: cycle.drafts?.length ?? 0,
     formatVersion: 1,
     generatedAt: cycle.generatedAt,
     node: cycle.node,
@@ -133,6 +166,51 @@ function publicLastCycle(cycle) {
     summary: cycle.summary,
     type: "dev.nipmod.scout-last-public.v1"
   };
+}
+
+function absolutizeCandidates(candidates, origin) {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    draft: candidate.draft
+      ? {
+          ...candidate.draft,
+          endpoint: absolutizeUrl(candidate.draft.endpoint, origin)
+        }
+      : candidate.draft,
+    patch: candidate.patch
+      ? {
+          ...candidate.patch,
+          endpoint: absolutizeUrl(candidate.patch.endpoint, origin)
+        }
+      : candidate.patch
+  }));
+}
+
+function absolutizeUrl(value, origin) {
+  if (typeof value !== "string" || value.length === 0 || /^https?:\/\//.test(value)) {
+    return value;
+  }
+  return `${origin}${value.startsWith("/") ? "" : "/"}${value}`;
+}
+
+function draftFromCycle(cycle, source) {
+  return cycle?.drafts?.find((draft) => draft.source === source) ?? null;
+}
+
+function configuredOrigin(publicOrigin, request) {
+  if (typeof publicOrigin === "string" && publicOrigin.trim()) {
+    return trimTrailingSlash(publicOrigin.trim());
+  }
+  return requestOrigin(request);
+}
+
+function trimTrailingSlash(value) {
+  return value.replace(/\/+$/, "");
+}
+
+function requestOrigin(request) {
+  const host = request.headers.host ?? `127.0.0.1:${DEFAULT_PORT}`;
+  return `http://${host}`;
 }
 
 function healthPayload(state, running) {

@@ -12,8 +12,12 @@ export interface GitlawbRepoSummary {
 
 export interface PackageCandidate {
   claimCommand: string;
+  claimVerifyCommand: string;
   description: string;
   doctorCommand: string;
+  draftCommand: string;
+  draftEndpoint?: string;
+  draftStatus?: string;
   gitlawbHref: string;
   packageCommand: string;
   packageId: string;
@@ -29,11 +33,16 @@ export interface ScoutCandidateSummary {
   claimStatus: "claimed" | "unclaimed";
   commands?: {
     claim?: string;
+    claimVerify?: string;
     packagePr?: string;
   };
   description?: string;
   gitlawbUrl?: string;
   package: string;
+  draft?: {
+    endpoint?: string;
+    status?: string;
+  };
   readinessScore?: number;
   repoName: string;
   shortOwner?: string;
@@ -81,10 +90,14 @@ export function candidateFromRepo(repo: GitlawbRepoSummary, state: CandidateClai
 
   return {
     claimCommand: `nipmod claim ${source}`,
+    claimVerifyCommand: `nipmod claim verify ${source} --json`,
     description: repo.description || "Public Gitlawb repo",
     doctorCommand: `nipmod package doctor ${source}`,
+    draftCommand: `nipmod package pr ${source} --dir ${repo.name}-pr --json`,
+    draftEndpoint: draftEndpointForSource(source),
+    draftStatus: status,
     gitlawbHref: `https://gitlawb.com/node/repos/${ownerSegment(repo.owner_did)}/${repo.name}`,
-    packageCommand: `nipmod package ${source} --dir ${repo.name}`,
+    packageCommand: `nipmod package pr ${source} --dir ${repo.name}-pr --json`,
     packageId,
     readinessScore,
     repoName: repo.name,
@@ -97,11 +110,21 @@ export function candidateFromRepo(repo: GitlawbRepoSummary, state: CandidateClai
 
 export function candidateFromScout(candidate: ScoutCandidateSummary): PackageCandidate {
   const repoName = candidate.repoName;
-  const status: CandidateStatus = candidate.claimStatus === "claimed" ? "claimed" : "unclaimed";
-  return {
+  const status: CandidateStatus =
+    candidate.status === "published"
+      ? "published"
+      : candidate.claimStatus === "claimed"
+        ? "claimed"
+        : candidate.status === "needs-work"
+          ? "needs-work"
+          : "unclaimed";
+  const packageCandidate: PackageCandidate = {
     claimCommand: candidate.commands?.claim ?? `nipmod claim ${candidate.source}`,
+    claimVerifyCommand: candidate.commands?.claimVerify ?? `nipmod claim verify ${candidate.source} --json`,
     description: candidate.description || "Public Gitlawb repo",
     doctorCommand: `nipmod package doctor ${candidate.source}`,
+    draftCommand: candidate.commands?.packagePr ?? `nipmod package pr ${candidate.source} --dir ${repoName}-pr --json`,
+    draftStatus: candidate.draft?.status ?? status,
     gitlawbHref: candidate.gitlawbUrl ?? "https://gitlawb.com",
     packageCommand: candidate.commands?.packagePr ?? `nipmod package pr ${candidate.source} --dir ${repoName}-pr`,
     packageId: candidate.package,
@@ -112,6 +135,12 @@ export function candidateFromScout(candidate: ScoutCandidateSummary): PackageCan
     status,
     updatedAt: candidate.updatedAt ?? new Date(0).toISOString()
   };
+  if (candidate.draft?.endpoint) {
+    packageCandidate.draftEndpoint = candidate.draft.endpoint;
+  } else if (candidate.status !== "published") {
+    packageCandidate.draftEndpoint = draftEndpointForSource(candidate.source);
+  }
+  return packageCandidate;
 }
 
 export function searchCandidates(candidates: readonly PackageCandidate[], query: string): PackageCandidate[] {
@@ -133,10 +162,11 @@ export function candidateStats(candidates: readonly PackageCandidate[]): Array<{
   const published = candidates.filter((candidate) => candidate.status === "published").length;
   const unclaimed = candidates.filter((candidate) => candidate.status === "unclaimed").length;
   return [
-    { label: "Candidates", value: String(candidates.length) },
+    { label: "Repos", value: String(candidates.length) },
+    { label: "Drafts", value: String(candidates.length - published) },
     { label: "Claimed", value: String(claimed) },
     { label: "Published", value: String(published) },
-    { label: "Unclaimed", value: String(unclaimed) }
+    { label: "Unclaimed drafts", value: String(unclaimed) }
   ];
 }
 
@@ -195,6 +225,10 @@ function statusWeight(status: CandidateStatus): number {
 
 function ownerSegment(ownerDid: string): string {
   return ownerDid.replace(/^did:key:/, "");
+}
+
+function draftEndpointForSource(source: string): string {
+  return `/scout/draft?repo=${encodeURIComponent(source)}`;
 }
 
 function isDidKey(value: string): boolean {

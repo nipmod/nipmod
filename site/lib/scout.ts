@@ -22,6 +22,12 @@ export interface ScoutCandidate {
   };
   defaultBranch: string;
   description: string;
+  draft: {
+    claimRequired: boolean;
+    endpoint: string;
+    remoteWrites: false;
+    status: PackageDraftStatus;
+  };
   gitlawbUrl: string;
   package: string;
   patch: {
@@ -37,8 +43,36 @@ export interface ScoutCandidate {
   updatedAt: string;
 }
 
+export type PackageDraftStatus = "claimed" | "published" | "unclaimed" | "needs-work";
+
+export interface PackageDraft {
+  claim: {
+    command: string;
+    proofPath: ".nipmod/package-claim.json";
+    required: boolean;
+    verifyCommand: string;
+  };
+  files: Array<{ content: string; path: string }>;
+  formatVersion: 1;
+  generatedAt: string;
+  manifest: Record<string, unknown>;
+  nextCommands: string[];
+  package: string;
+  remoteWrites: false;
+  repo: {
+    gitlawbUrl: string;
+    name: string;
+    ownerDid: string;
+  };
+  source: string;
+  status: PackageDraftStatus;
+  type: "dev.nipmod.package-draft.v1";
+  warnings: string[];
+}
+
 export interface ScoutCycle {
   candidates: ScoutCandidate[];
+  drafts: PackageDraft[];
   formatVersion: 1;
   generatedAt: string;
   node: {
@@ -48,8 +82,11 @@ export interface ScoutCycle {
   ok: true;
   summary: {
     claimed: number;
+    drafts: number;
     patchable: number;
+    published: number;
     scanned: number;
+    unclaimedDrafts: number;
   };
   type: "dev.nipmod.scout-cycle.v1";
 }
@@ -86,9 +123,18 @@ export async function buildScoutCycle({
   });
   const repos = await readRepos({ fetchReposFn, nodeUrl, registry });
   const candidates = repos.map((repo) => scoutCandidateFromPackageCandidate(candidateFromRepo(repo, state), state, scoutBaseUrl));
+  const drafts = candidates
+    .filter((candidate) => draftStatusFromCandidate(candidate) !== "published")
+    .map((candidate) =>
+      createPackageDraftFromCandidate(candidate, {
+        generatedAt,
+        status: draftStatusFromCandidate(candidate)
+      })
+    );
 
   return {
     candidates,
+    drafts,
     formatVersion: 1,
     generatedAt,
     node: {
@@ -98,43 +144,53 @@ export async function buildScoutCycle({
     ok: true,
     summary: {
       claimed: candidates.filter((candidate) => candidate.claimStatus === "claimed").length,
+      drafts: drafts.length,
       patchable: candidates.length,
-      scanned: candidates.length
+      published: candidates.filter((candidate) => candidate.status === "published").length,
+      scanned: candidates.length,
+      unclaimedDrafts: drafts.filter((draft) => draft.status === "unclaimed").length
     },
     type: "dev.nipmod.scout-cycle.v1"
   };
 }
 
-export function createPackagePatchFromSource(source: string, { generatedAt = new Date().toISOString() } = {}): PackagePatch {
+export function createPackageDraftFromSource(
+  source: string,
+  {
+    generatedAt = new Date().toISOString(),
+    scoutBaseUrl = SCOUT_BASE_URL,
+    status = "unclaimed"
+  }: {
+    generatedAt?: string;
+    scoutBaseUrl?: string;
+    status?: PackageDraftStatus;
+  } = {}
+): PackageDraft {
   const repo = repoFromSource(source);
-  const packageId = `pkg:${repo.owner_did}/${repo.name}`;
-  const normalizedSource = `gitlawb://${repo.owner_did}/${repo.name}`;
-  const manifest = {
-    agent: {
-      permissions: [],
-      runtime: "source"
+  const candidate = scoutCandidateFromPackageCandidate(
+    candidateFromRepo(repo, {
+      claimedPackages: status === "claimed" ? new Set([`pkg:${repo.owner_did}/${repo.name}`]) : new Set(),
+      publishedPackages: status === "published" ? new Set([`pkg:${repo.owner_did}/${repo.name}`]) : new Set()
+    }),
+    {
+      claimedPackages: status === "claimed" ? new Set([`pkg:${repo.owner_did}/${repo.name}`]) : new Set(),
+      publishedPackages: status === "published" ? new Set([`pkg:${repo.owner_did}/${repo.name}`]) : new Set()
     },
-    canonical: packageId,
-    defaultBranch: repo.default_branch,
-    description: repo.description,
-    formatVersion: 1,
-    name: repo.name,
-    source: normalizedSource,
-    type: "dev.nipmod.package-manifest.v1",
-    version: "0.1.0"
-  };
+    scoutBaseUrl
+  );
+  return createPackageDraftFromCandidate(candidate, { generatedAt, status });
+}
+
+export function packageDraftFromScoutCycle(cycle: Pick<ScoutCycle, "drafts">, source: string): PackageDraft | null {
+  const normalizedSource = sourceFromRepo(repoFromSource(source));
+  return cycle.drafts.find((draft) => draft.source === normalizedSource) ?? null;
+}
+
+export function createPackagePatchFromSource(source: string, { generatedAt = new Date().toISOString() } = {}): PackagePatch {
+  const draft = createPackageDraftFromSource(source, { generatedAt });
 
   return {
-    files: [
-      {
-        content: `${JSON.stringify(manifest, null, 2)}\n`,
-        path: "nipmod.json"
-      },
-      {
-        content: readmeForPatch(repo, packageId, normalizedSource),
-        path: "README.nipmod.md"
-      }
-    ],
+    files: draft.files,
     formatVersion: 1,
     generatedAt,
     nextCommands: [
@@ -142,9 +198,9 @@ export function createPackagePatchFromSource(source: string, { generatedAt = new
       "git commit -m \"feat: add nipmod package manifest\"",
       "GITLAWB_NODE=https://node.nipmod.com git push"
     ],
-    package: packageId,
+    package: draft.package,
     remoteWrites: false,
-    source: normalizedSource,
+    source: draft.source,
     type: "dev.nipmod.package-patch.v1"
   };
 }
@@ -171,6 +227,9 @@ async function readRepos({
 
 function scoutCandidateFromPackageCandidate(candidate: PackageCandidate, state: ReturnType<typeof candidateClaimState>, scoutBaseUrl: string): ScoutCandidate {
   const claimed = state.claimedPackages.has(candidate.packageId);
+  const published = state.publishedPackages.has(candidate.packageId);
+  const draftStatus = published ? "published" : claimed ? "claimed" : candidate.status === "needs-work" ? "needs-work" : "unclaimed";
+  const sourceParam = encodeURIComponent(candidate.source);
   return {
     claimStatus: claimed ? "claimed" : "unclaimed",
     cloneUrl: "",
@@ -181,19 +240,113 @@ function scoutCandidateFromPackageCandidate(candidate: PackageCandidate, state: 
     },
     defaultBranch: "main",
     description: candidate.description,
+    draft: {
+      claimRequired: draftStatus !== "claimed" && draftStatus !== "published",
+      endpoint: `${trimTrailingSlash(scoutBaseUrl)}/draft?repo=${sourceParam}`,
+      remoteWrites: false,
+      status: draftStatus
+    },
     gitlawbUrl: candidate.gitlawbHref,
     package: candidate.packageId,
     patch: {
-      endpoint: `${trimTrailingSlash(scoutBaseUrl)}/patch?repo=${encodeURIComponent(candidate.source)}`,
+      endpoint: `${trimTrailingSlash(scoutBaseUrl)}/patch?repo=${sourceParam}`,
       remoteWrites: false
     },
     readinessScore: candidate.readinessScore,
     repoName: candidate.repoName,
     shortOwner: candidate.shortOwner,
     source: candidate.source,
-    status: candidate.status === "needs-work" ? "needs-work" : claimed ? "claimed" : "package-ready",
+    status: candidate.status === "published" ? "published" : candidate.status === "needs-work" ? "needs-work" : claimed ? "claimed" : "unclaimed-draft",
     suggestedType: suggestedType(candidate),
     updatedAt: candidate.updatedAt
+  };
+}
+
+function createPackageDraftFromCandidate(
+  candidate: ScoutCandidate,
+  { generatedAt, status }: { generatedAt: string; status: PackageDraftStatus }
+): PackageDraft {
+  const ownerDid = ownerDidFromSource(candidate.source);
+  const claimRequired = status !== "claimed" && status !== "published";
+  const manifest = packageManifestForCandidate(candidate, ownerDid);
+  const files = [
+    {
+      content: `${JSON.stringify(manifest, null, 2)}\n`,
+      path: "nipmod.json"
+    },
+    {
+      content: readmeForDraft(candidate),
+      path: "README.nipmod.md"
+    }
+  ];
+
+  return {
+    claim: {
+      command: `nipmod claim ${candidate.source} --dir . --identity .nipmod/identity.json`,
+      proofPath: ".nipmod/package-claim.json",
+      required: claimRequired,
+      verifyCommand: `nipmod claim verify ${candidate.source} --json`
+    },
+    files,
+    formatVersion: 1,
+    generatedAt,
+    manifest,
+    nextCommands: [
+      `nipmod package pr ${candidate.source} --dir . --identity .nipmod/identity.json --json`,
+      "git add nipmod.json README.nipmod.md .nipmod/package-claim.json",
+      "git commit -m \"feat: add nipmod package manifest\"",
+      "GITLAWB_NODE=https://node.nipmod.com git push",
+      `nipmod claim verify ${candidate.source} --json`
+    ],
+    package: candidate.package,
+    remoteWrites: false,
+    repo: {
+      gitlawbUrl: candidate.gitlawbUrl,
+      name: candidate.repoName,
+      ownerDid
+    },
+    source: candidate.source,
+    status,
+    type: "dev.nipmod.package-draft.v1",
+    warnings: [
+      "This is an unclaimed draft until the Gitlawb repo owner signs and pushes .nipmod/package-claim.json.",
+      "Nipmod does not claim ownership of this repo and does not open remote writes automatically."
+    ]
+  };
+}
+
+function packageManifestForCandidate(candidate: ScoutCandidate, ownerDid: string): Record<string, unknown> {
+  return {
+    canonical: candidate.package,
+    description: candidate.description || `${candidate.repoName} package from Gitlawb source`,
+    exports: {
+      ".": {
+        source: "./README.nipmod.md"
+      }
+    },
+    files: ["README.nipmod.md", "nipmod.json"],
+    formatVersion: 1,
+    license: "NOASSERTION",
+    name: candidate.repoName,
+    permissions: {
+      env: [],
+      exec: {
+        allowed: false
+      },
+      filesystem: [],
+      mcpTools: [],
+      network: [],
+      postinstall: {
+        allowed: false
+      },
+      secrets: []
+    },
+    publish: {
+      provenance: candidate.source,
+      signingKey: ownerDid
+    },
+    type: manifestTypeFromSuggested(candidate.suggestedType),
+    version: "0.1.0"
   };
 }
 
@@ -218,6 +371,10 @@ function repoFromSource(source: string): GitlawbRepoSummary {
   };
 }
 
+function sourceFromRepo(repo: GitlawbRepoSummary): string {
+  return `gitlawb://${repo.owner_did}/${repo.name}`;
+}
+
 function repoFromRegistryPackage(pkg: RegistryPackage): GitlawbRepoSummary {
   return {
     clone_url: pkg.cloneUrl,
@@ -239,21 +396,22 @@ function suggestedType(candidate: PackageCandidate): string {
   return "source-package";
 }
 
-function readmeForPatch(repo: GitlawbRepoSummary, packageId: string, source: string): string {
-  return `# ${repo.name}
+function readmeForDraft(candidate: ScoutCandidate): string {
+  return `# ${candidate.repoName}
 
-Nipmod package draft for ${source}.
+Nipmod package draft for ${candidate.source}.
 
 Package:
 
 \`\`\`text
-${packageId}
+${candidate.package}
 \`\`\`
 
 Prepare this repo:
 
 \`\`\`sh
-git add nipmod.json README.nipmod.md
+nipmod claim ${candidate.source} --dir . --identity .nipmod/identity.json
+git add nipmod.json README.nipmod.md .nipmod/package-claim.json
 git commit -m "feat: add nipmod package manifest"
 GITLAWB_NODE=https://node.nipmod.com git push
 \`\`\`
@@ -261,9 +419,32 @@ GITLAWB_NODE=https://node.nipmod.com git push
 Verify ownership:
 
 \`\`\`sh
-nipmod claim verify ${source} --json
+nipmod claim verify ${candidate.source} --json
 \`\`\`
 `;
+}
+
+function draftStatusFromCandidate(candidate: ScoutCandidate): PackageDraftStatus {
+  if (candidate.status === "published") return "published";
+  if (candidate.status === "claimed") return "claimed";
+  if (candidate.status === "needs-work") return "needs-work";
+  return "unclaimed";
+}
+
+function manifestTypeFromSuggested(value: string): string {
+  if (value === "mcp-server") return "mcp-server";
+  if (value === "agent-skill") return "skill";
+  if (value === "workflow-pack") return "workflow-pack";
+  if (value === "agent-tool") return "tool-bundle";
+  return "adapter";
+}
+
+function ownerDidFromSource(source: string): string {
+  const match = /^gitlawb:\/\/(did:key:z[A-Za-z0-9]+)\//.exec(source);
+  if (!match?.[1]) {
+    throw new Error("repo must be gitlawb://did:key:.../repo");
+  }
+  return match[1];
 }
 
 function trimTrailingSlash(value: string): string {
