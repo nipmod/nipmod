@@ -13,6 +13,7 @@ import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.j
 import { DEFAULT_REGISTRY_URL, searchRegistry, viewRegistryPackages, type RegistrySearchPackage } from "./registry.js";
 import { generateSbom } from "./sbom.js";
 import { inspectBundleFile, inspectRegistryPackage } from "./trust-report.js";
+import { createUpdatePlan } from "./update.js";
 import { sha256Hex } from "./verifier.js";
 import { NIPMOD_VERSION } from "./version.js";
 
@@ -106,6 +107,13 @@ const InstallPlanArgumentsSchema = TrustPinsSchema.extend({
   projectDir: z.string().optional(),
   registryUrl: z.string().optional(),
   specifier: z.string().min(1)
+});
+
+const UpdatePlanArgumentsSchema = TrustPinsSchema.extend({
+  policyProfile: z.enum(["developer-default", "strict-ci"]).optional(),
+  projectDir: z.string().optional(),
+  query: z.string().min(1).optional(),
+  registryUrl: z.string().optional()
 });
 
 const PublishPlanArgumentsSchema = z.strictObject({
@@ -219,6 +227,8 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await inspectTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.install_plan":
       return toolResult(await installPlanTool(parsed.arguments ?? {}, fetchImpl));
+    case "nipmod.update_plan":
+      return toolResult(await updatePlanTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.publish_plan":
       return toolResult(await publishPlanTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.verify":
@@ -299,6 +309,21 @@ async function installPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<J
       specifier: args.specifier
     })
   );
+}
+
+async function updatePlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
+  const args = UpdatePlanArgumentsSchema.parse(raw);
+  assertCustomRootOptIn(args);
+  const policy = args.policyProfile ? defaultPolicy(parsePolicyProfile(args.policyProfile)) : undefined;
+  const options = {
+    ...registryTrustOptions(args),
+    fetchImpl,
+    ...(policy ? { policy } : {}),
+    projectDir: args.projectDir ?? process.cwd(),
+    registryUrl: args.registryUrl ?? DEFAULT_REGISTRY_URL,
+    ...(args.query ? { query: args.query } : {})
+  };
+  return toJsonValue(await createUpdatePlan(options));
 }
 
 async function publishPlanTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonValue> {
@@ -678,6 +703,28 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.install_plan",
     title: "Plan nipmod install"
+  },
+  {
+    annotations: {
+      ...COMMON_READONLY_ANNOTATIONS,
+      openWorldHint: true
+    },
+    description: "Create a verified update plan for installed root dependencies without mutating the project lockfile.",
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        allowCustomRoots: { type: "boolean" },
+        allowedLogIds: { items: { type: "string" }, type: "array" },
+        allowedWitnesses: { items: { type: "string" }, type: "array" },
+        policyProfile: { enum: ["developer-default", "strict-ci"], type: "string" },
+        projectDir: { type: "string" },
+        query: { type: "string" },
+        registryUrl: { type: "string" }
+      },
+      type: "object"
+    },
+    name: "nipmod.update_plan",
+    title: "Plan nipmod update"
   },
   {
     annotations: {

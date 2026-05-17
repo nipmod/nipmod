@@ -41,6 +41,7 @@ describe("nipmod MCP server", () => {
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.update_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
       "nipmod.audit",
@@ -60,6 +61,7 @@ describe("nipmod MCP server", () => {
       "nipmod.view": true,
       "nipmod.inspect": true,
       "nipmod.install_plan": true,
+      "nipmod.update_plan": true,
       "nipmod.publish_plan": false,
       "nipmod.verify": true,
       "nipmod.audit": true,
@@ -331,6 +333,97 @@ describe("nipmod MCP server", () => {
     await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  test("creates an update plan without applying a default policy profile", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-update-plan-"));
+    const app = join(workspace, "app");
+    const fixture = await writeRegistryFixture("mcp-update-agent", workspace, {
+      permissions: {
+        mcpTools: 1
+      },
+      version: "0.2.0"
+    });
+    const owner = fixture.canonical.slice("pkg:".length).split("/")[0];
+    const oldKey = `${fixture.canonical}@0.1.0`;
+    const server = createNipmodMcpServer();
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {
+          [oldKey]: {
+            canonical: fixture.canonical,
+            files: ["nipmod.json"],
+            integrity: `sha256-${"a".repeat(64)}`,
+            manifestDigest: "a".repeat(64),
+            name: "mcp-update-agent",
+            permissions: {
+              env: [],
+              exec: { allowed: false },
+              filesystem: [],
+              mcpTools: [],
+              network: [],
+              postinstall: { allowed: false },
+              secrets: []
+            },
+            publisher: owner,
+            resolved: `https://node.nipmod.com/api/v1/repos/${owner.slice("did:key:".length)}/mcp-update-agent/blob/releases/0.1.0/bundle.nipmod`,
+            version: "0.1.0"
+          }
+        },
+        root: {
+          dependencies: {
+            "mcp-update-agent": "latest"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {
+          [oldKey]: {
+            dependencies: {},
+            devDependencies: {},
+            optionalDependencies: {},
+            peerDependencies: {}
+          }
+        }
+      })}\n`
+    );
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 41,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          allowCustomRoots: true,
+          allowedLogIds: [fixture.transparency.log.treeHead.logId],
+          allowedWitnesses: [fixture.transparency.witness.witness],
+          projectDir: app,
+          registryUrl: pathToFileURL(fixture.registryPath).href
+        },
+        name: "nipmod.update_plan"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      readyToUpdate: true,
+      summary: {
+        updates: 1
+      },
+      updates: [
+        {
+          current: "0.1.0",
+          wanted: "0.2.0"
+        }
+      ]
+    });
+    expect(JSON.stringify(result.result.structuredContent)).not.toContain("policyDecision");
+  });
+
   test("requires explicit custom-root opt-in for MCP trust pins", async () => {
     const fixture = await writeRegistryFixture("roots-agent");
     const server = createNipmodMcpServer();
@@ -522,6 +615,7 @@ describe("nipmod MCP server", () => {
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.update_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
       "nipmod.audit",
@@ -560,18 +654,34 @@ async function initialize(server: ReturnType<typeof createNipmodMcpServer>): Pro
   });
 }
 
-async function writeRegistryFixture(packageName: string, workspace?: string) {
+async function writeRegistryFixture(
+  packageName: string,
+  workspace?: string,
+  options: {
+    permissions?: Partial<{
+      env: number;
+      exec: boolean;
+      filesystem: number;
+      mcpTools: number;
+      network: number;
+      postinstall: boolean;
+      secrets: number;
+    }>;
+    version?: string;
+  } = {}
+) {
   const dir = workspace ?? (await mkdtemp(join(tmpdir(), "nipmod-mcp-registry-")));
   const owner = generateIdentity().did;
   const canonical = `pkg:${owner}/${packageName}`;
   const digest = "f".repeat(64);
-  const transparency = cliTransparency(canonical, owner, digest);
+  const version = options.version ?? "0.1.0";
+  const transparency = cliTransparency(canonical, owner, digest, version);
   const registryPath = join(dir, "registry.json");
-  await writeFile(registryPath, `${JSON.stringify(cliRegistry(canonical, owner, digest, transparency))}\n`);
+  await writeFile(registryPath, `${JSON.stringify(cliRegistry(canonical, owner, digest, transparency, { ...options, version }))}\n`);
   return { canonical, registryPath, transparency };
 }
 
-function cliTransparency(canonical: string, owner: string, digest: string) {
+function cliTransparency(canonical: string, owner: string, digest: string, version = "0.1.0") {
   const logIdentity = generateIdentity();
   const witnessIdentity = generateIdentity();
   const leaf = {
@@ -579,7 +689,7 @@ function cliTransparency(canonical: string, owner: string, digest: string) {
     eventHash: "e".repeat(64),
     package: canonical,
     publisher: owner,
-    version: "0.1.0"
+    version
   };
   const log = createTransparencyLogFromLeaves([leaf], logIdentity, "2026-05-16T14:00:00.000Z");
   const witness = signWitnessStatement(log.treeHead, witnessIdentity);
@@ -594,9 +704,32 @@ function cliRegistry(
   canonical: string,
   owner: string,
   digest: string,
-  transparency: ReturnType<typeof cliTransparency>
+  transparency: ReturnType<typeof cliTransparency>,
+  options: {
+    permissions?: Partial<{
+      env: number;
+      exec: boolean;
+      filesystem: number;
+      mcpTools: number;
+      network: number;
+      postinstall: boolean;
+      secrets: number;
+    }>;
+    version?: string;
+  } = {}
 ): { packages: Array<Record<string, unknown>>; [key: string]: unknown } {
   const name = canonical.split("/").at(-1);
+  const version = options.version ?? "0.1.0";
+  const permissions = {
+    env: 0,
+    exec: false,
+    filesystem: 0,
+    mcpTools: 0,
+    network: 0,
+    postinstall: false,
+    secrets: 0,
+    ...options.permissions
+  };
   return {
     formatVersion: 1,
     generatedAt: "2026-05-16T14:00:00.000Z",
@@ -607,15 +740,7 @@ function cliRegistry(
         digest,
         name,
         owner,
-        permissions: {
-          env: 0,
-          exec: false,
-          filesystem: 0,
-          mcpTools: 0,
-          network: 0,
-          postinstall: false,
-          secrets: 0
-        },
+        permissions,
         proof: {
           checkpointUrl: "/transparency/checkpoint.json",
           eventHash: transparency.entry.leaf.eventHash,
@@ -624,17 +749,17 @@ function cliRegistry(
           leafUrl: `/transparency/leaves/${transparency.entry.leafHash}.json`,
           proofUrl: `/transparency/proofs/${transparency.entry.leafHash}.json`,
           rootHash: transparency.log.treeHead.rootHash,
-          subject: `${canonical}@0.1.0`,
+          subject: `${canonical}@${version}`,
           treeSize: transparency.log.treeHead.treeSize,
           type: "dev.nipmod.registry.proof.v1",
           witnesses: [transparency.witness.witness],
           witnessUrls: [`/transparency/witnesses/${transparency.witness.witness}.json`]
         },
         publisher: owner,
-        resolved: `https://node.nipmod.com/api/v1/repos/${owner.slice("did:key:".length)}/${name}/blob/releases/0.1.0/bundle.nipmod`,
+        resolved: `https://node.nipmod.com/api/v1/repos/${owner.slice("did:key:".length)}/${name}/blob/releases/${version}/bundle.nipmod`,
         sourceCommit: "a".repeat(40),
         sourceRepo: `https://node.nipmod.com/${owner.slice("did:key:".length)}/${name}.git`,
-        sourceTag: "v0.1.0",
+        sourceTag: `v${version}`,
         trust: {
           evidence: {
             artifactDigestVerified: true,
@@ -650,7 +775,7 @@ function cliRegistry(
           score: 100
         },
         type: "skill",
-        version: "0.1.0"
+        version
       }
     ],
     skipped: [],

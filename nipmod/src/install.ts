@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { type NipmodBundle, verifyBundle } from "./bundle.js";
 import { readResponseBytes } from "./http.js";
@@ -48,8 +48,14 @@ export interface InstallLockfileResult extends InstallResult {
   restored: number;
 }
 
+export interface PruneUnreachableResult extends InstallResult {
+  removedPackageKeys: string[];
+}
+
 type LockedBundleSource = "file" | "remote" | "store";
 type LockfileValidator = (lockfile: Lockfile) => Promise<void> | void;
+type LockfileFinalizer = (lockfile: Lockfile) => Promise<void> | void;
+const DEPENDENCY_KINDS = ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"] as const;
 
 const BUNDLE_LIMIT = 50 * 1024 * 1024;
 const LOCKFILE_PACKAGE_LIMIT = 128;
@@ -94,14 +100,19 @@ export async function installPackageGraph(
   packages: readonly InstallGraphPackage[],
   projectDir: string,
   options: {
+    finalizeLockfile?: LockfileFinalizer;
     validateLockfile?: (lockfile: Lockfile) => Promise<void> | void;
   } = {}
 ): Promise<InstallResult> {
   const verified = packages.map(verifyGraphPackage);
   const installOptions: {
     enforceRequiredDependencies: boolean;
+    finalizeLockfile?: LockfileFinalizer;
     validateLockfile?: LockfileValidator;
   } = { enforceRequiredDependencies: true };
+  if (options.finalizeLockfile) {
+    installOptions.finalizeLockfile = options.finalizeLockfile;
+  }
   if (options.validateLockfile) {
     installOptions.validateLockfile = options.validateLockfile;
   }
@@ -113,12 +124,14 @@ async function installVerifiedPackages(
   projectDir: string,
   options: {
     enforceRequiredDependencies: boolean;
+    finalizeLockfile?: LockfileFinalizer;
     validateLockfile?: LockfileValidator;
   }
 ): Promise<InstallResult> {
   const lockfilePath = join(projectDir, "nipmod.lock.json");
   const lockfile = await readLockfile(lockfilePath);
   applyVerifiedPackages(lockfile, packages, { enforceRequiredDependencies: options.enforceRequiredDependencies });
+  await options.finalizeLockfile?.(lockfile);
   await options.validateLockfile?.(lockfile);
   await writeVerifiedStores(projectDir, packages);
 
@@ -128,8 +141,7 @@ async function installVerifiedPackages(
     return { lockfileChanged: false };
   }
 
-  await mkdir(projectDir, { recursive: true });
-  await writeFile(lockfilePath, nextLockfile);
+  await writeTextFileAtomic(lockfilePath, nextLockfile);
   return { lockfileChanged: true };
 }
 
@@ -242,7 +254,7 @@ export async function uninstallPackage(query: string, projectDir: string): Promi
   delete lockfile.packages[packageKey];
   delete lockfile.snapshots[packageKey];
   removeRootDependency(lockfile, pkg.name);
-  await writeFile(lockfilePath, `${canonicalJson(lockfile)}\n`);
+  await writeTextFileAtomic(lockfilePath, `${canonicalJson(lockfile)}\n`);
   return {
     lockfileChanged: true,
     removed: true,
@@ -257,6 +269,57 @@ export async function uninstallPackage(query: string, projectDir: string): Promi
       }
     ]
   };
+}
+
+export async function pruneUnreachablePackages(projectDir: string): Promise<PruneUnreachableResult> {
+  const lockfilePath = join(projectDir, "nipmod.lock.json");
+  const lockfile = await readLockfile(lockfilePath);
+  const rootRequests = rootDependencyRequests(lockfile);
+  if (rootRequests.length === 0) {
+    return {
+      lockfileChanged: false,
+      removedPackageKeys: []
+    };
+  }
+
+  const removedPackageKeys = pruneUnreachableLockfile(lockfile);
+  if (removedPackageKeys.length === 0) {
+    return {
+      lockfileChanged: false,
+      removedPackageKeys
+    };
+  }
+
+  await writeTextFileAtomic(lockfilePath, `${canonicalJson(lockfile)}\n`);
+  return {
+    lockfileChanged: true,
+    removedPackageKeys
+  };
+}
+
+export function pruneUnreachableLockfile(
+  lockfile: Lockfile,
+  options: { rootPackageKeys?: readonly string[] } = {}
+): string[] {
+  const rootPackageKeys = options.rootPackageKeys ?? rootDependencyRequests(lockfile).map((request) => resolveInstalledRoot(lockfile, request));
+  const reachable = reachablePackageKeys(lockfile, rootPackageKeys);
+  const removedPackageKeys = Object.keys(lockfile.packages)
+    .filter((packageKey) => !reachable.has(packageKey))
+    .sort();
+  for (const packageKey of removedPackageKeys) {
+    delete lockfile.packages[packageKey];
+    delete lockfile.snapshots[packageKey];
+  }
+  for (const snapshot of Object.values(lockfile.snapshots)) {
+    for (const kind of DEPENDENCY_KINDS) {
+      for (const [dependencyName, packageKey] of Object.entries(snapshot[kind])) {
+        if (removedPackageKeys.includes(packageKey)) {
+          delete snapshot[kind][dependencyName];
+        }
+      }
+    }
+  }
+  return removedPackageKeys;
 }
 
 async function readLockedPackageBundle(
@@ -321,6 +384,40 @@ function sha256Hex(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
+async function writeTextFileAtomic(path: string, contents: string): Promise<void> {
+  const dir = dirname(path);
+  await mkdir(dir, { recursive: true });
+  const tempPath = join(dir, `.tmp-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  let handle: Awaited<ReturnType<typeof open>> | null = null;
+  try {
+    handle = await open(tempPath, "wx");
+    await handle.writeFile(contents);
+    await handle.sync();
+    await handle.close();
+    handle = null;
+    await rename(tempPath, path);
+    await syncDirectory(dir);
+  } catch (error) {
+    if (handle) {
+      await handle.close().catch(() => undefined);
+    }
+    await rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+}
+
+async function syncDirectory(path: string): Promise<void> {
+  let handle: Awaited<ReturnType<typeof open>> | null = null;
+  try {
+    handle = await open(path, "r");
+    await handle.sync();
+  } catch {
+    return;
+  } finally {
+    await handle?.close().catch(() => undefined);
+  }
+}
+
 function isEnoent(error: unknown): boolean {
   return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
@@ -370,7 +467,7 @@ function applyVerifiedPackages(
   packages: readonly VerifiedGraphPackage[],
   options: { enforceRequiredDependencies: boolean }
 ): void {
-  const candidates = resolverPackagesFromLockfile(lockfile, packages);
+  const candidates = resolverPackagesFromVerifiedPackages(packages);
   for (const entry of packages) {
     lockfile.packages[entry.packageKey] = entry.record;
     lockfile.snapshots[entry.packageKey] = snapshotFromBundle(entry.bundle, candidates, options);
@@ -407,32 +504,72 @@ function snapshotFromBundle(
   return snapshot;
 }
 
-function resolverPackagesFromLockfile(
-  lockfile: Lockfile,
-  verifiedPackages: readonly VerifiedGraphPackage[]
-): RegistryResolverPackage[] {
-  return [
-    ...Object.values(lockfile.packages).map((pkg) => ({
-      canonical: pkg.canonical,
-      digest: digestFromIntegrity(pkg.integrity),
-      name: pkg.name,
-      trustScore: 100,
-      version: pkg.version
-    })),
-    ...verifiedPackages.map((entry) => ({
-      canonical: entry.record.canonical,
-      digest: entry.digest,
-      name: entry.record.name,
-      trustScore: 100,
-      version: entry.record.version
-    }))
-  ];
+function resolverPackagesFromVerifiedPackages(verifiedPackages: readonly VerifiedGraphPackage[]): RegistryResolverPackage[] {
+  return verifiedPackages.map((entry) => ({
+    canonical: entry.record.canonical,
+    digest: entry.digest,
+    name: entry.record.name,
+    trustScore: 100,
+    version: entry.record.version
+  }));
 }
 
 function removeRootDependency(lockfile: Lockfile, name: string): void {
-  for (const kind of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"] as const) {
+  for (const kind of DEPENDENCY_KINDS) {
     if (lockfile.root[kind][name] !== undefined) {
       delete lockfile.root[kind][name];
     }
   }
+}
+
+function rootDependencyRequests(lockfile: Lockfile): DependencyRequest[] {
+  return DEPENDENCY_KINDS.flatMap((kind) =>
+    Object.entries(lockfile.root[kind]).map(([name, spec]) => ({
+      kind,
+      name,
+      spec
+    }))
+  );
+}
+
+function resolveInstalledRoot(lockfile: Lockfile, request: DependencyRequest): string {
+  const candidates = Object.values(lockfile.packages).map((pkg): RegistryResolverPackage => ({
+    canonical: pkg.canonical,
+    digest: digestFromIntegrity(pkg.integrity),
+    name: pkg.name,
+    trustScore: 100,
+    version: pkg.version
+  }));
+  const resolved = resolveDependencyGraph({
+    packages: candidates,
+    requests: [request]
+  }).resolved[0];
+  if (!resolved) {
+    throw new Error(`lockfile root cannot resolve installed package ${request.name}@${request.spec}`);
+  }
+  return `${resolved.canonical}@${resolved.version}`;
+}
+
+function reachablePackageKeys(lockfile: Lockfile, rootPackageKeys: readonly string[]): Set<string> {
+  const reachable = new Set<string>();
+  const queue = [...rootPackageKeys];
+  while (queue.length > 0) {
+    const packageKey = queue.shift();
+    if (!packageKey || reachable.has(packageKey)) {
+      continue;
+    }
+    if (!lockfile.packages[packageKey]) {
+      throw new Error(`lockfile snapshot references missing package ${packageKey}`);
+    }
+    reachable.add(packageKey);
+    const snapshot = lockfile.snapshots[packageKey] ?? emptySnapshot();
+    for (const kind of DEPENDENCY_KINDS) {
+      for (const dependencyPackageKey of Object.values(snapshot[kind])) {
+        if (!reachable.has(dependencyPackageKey)) {
+          queue.push(dependencyPackageKey);
+        }
+      }
+    }
+  }
+  return reachable;
 }

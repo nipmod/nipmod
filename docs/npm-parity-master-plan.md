@@ -28,6 +28,7 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | View | `npm view`, npm package pages | exact package metadata CLI/API and `/packages/[name]` pages | started |
 | Publish | `npm publish` | signed bundle and release event published through Gitlawb | partial |
 | Outdated | `npm outdated` | lockfile versus registry report with current, wanted, latest and policy-safe status | done |
+| Update | `npm update` | verified root dependency update plans, signed bundle fetch and stale lockfile prune | done |
 | Pack | `npm pack` | signed `.nipmod` bundle | done |
 | Dist tags | `npm dist-tag` | signed lifecycle event mapping tags to versions | missing |
 | Version bump | `npm version` | signed version update and immutable Gitlawb release tag | missing |
@@ -79,7 +80,6 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 
 2. Package operations
    - `nipmod outdated`
-   - `nipmod update`
    - `nipmod uninstall`
    - `nipmod explain`
    - `nipmod ls`
@@ -137,3 +137,5 @@ The second slice adds additive Registry dependency metadata, v1 readable / v2 wr
 The third slice adds `nipmod sbom` for verified agent capability inventories from lockfiles and local store bundles. It gives agents one JSON surface for package identity, manifest exports, permission counts and dependency edges without fetching network data.
 
 The fourth slice adds `nipmod explain` for lockfile root intent, dependent records and dependency paths. It gives agents the missing npm style answer to why a package is installed without network access or package execution.
+
+The fifth slice adds `nipmod update` and MCP `nipmod.update_plan` for verified root package updates. Plans are read only, execution reuses the signed graph install path and stale package records are pruned only when they are unreachable from all root dependencies.

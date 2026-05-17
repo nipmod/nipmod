@@ -20,6 +20,7 @@ describe("MCP host content", () => {
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.update_plan",
       "nipmod.publish_plan",
       "nipmod.verify",
       "nipmod.audit",

@@ -66,7 +66,7 @@ if (runProdChecks) {
 console.log(runProdChecks ? "verify-all passed with production checks" : "verify-all passed");
 
 async function cleanBuildArtifacts() {
-  await rm(join(root, "site", ".next"), { recursive: true, force: true });
+  await rm(join(root, "site", ".next"), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
 
 async function verifyLocalArtifacts() {

@@ -62,6 +62,7 @@ describe("home content", () => {
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "nipmod add gitlawb-repo-reader --online",
       "nipmod install",
+      "nipmod update --plan --online",
       "nipmod sbom --json",
       "nipmod explain gitlawb-repo-reader --json",
       "nipmod audit --online"
@@ -82,6 +83,7 @@ describe("home content", () => {
       "Inspect",
       "Add",
       "Restore",
+      "Update",
       "SBOM",
       "Explain",
       "Audit",
@@ -93,6 +95,9 @@ describe("home content", () => {
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Update")?.command).toBe(
+      "nipmod update --plan --online\nnipmod update --online"
+    );
     expect(homeContent.quickstartSteps.find((step) => step.label === "SBOM")?.command).toBe("nipmod sbom --json");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Explain")?.command).toBe(
       "nipmod explain gitlawb-repo-reader --json"

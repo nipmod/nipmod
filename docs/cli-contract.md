@@ -23,6 +23,7 @@ P0 commands:
 - `nipmod ls`
 - `nipmod uninstall`
 - `nipmod outdated`
+- `nipmod update`
 - `nipmod explain`
 - `nipmod sbom`
 - `nipmod policy`
@@ -30,7 +31,6 @@ P0 commands:
 
 Next npm parity commands:
 
-- `nipmod update`
 - `nipmod version`
 - `nipmod dist-tag`
 - `nipmod deprecate`
@@ -70,6 +70,9 @@ package metadata and refuses ambiguous names unless the canonical package id is 
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
+`nipmod update [package] --plan` returns a verified update plan for root dependencies without mutating the lockfile.
+`nipmod update [package]` applies ready update plans, verifies fetched signed bundles, writes the lockfile atomically and
+prunes stale package records that are no longer reachable from any root dependency.
 `nipmod explain <package>` reads the lockfile without network access and returns root reasons, dependents and
 dependency paths for matching installed package records. `<package>` accepts `name`, `name@version`, canonical package
 id, canonical package id with version, or the exact lockfile package key. Path enumeration is capped and reports

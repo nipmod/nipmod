@@ -1,6 +1,6 @@
 export const mcpContent = {
   headline: "Connect nipmod to agents",
-  lead: "Run the live CLI as a local MCP server for search, metadata, trust reports, install plans, explain, SBOM, verify and audit.",
+  lead: "Run the CLI as MCP for search, view, trust reports, install and update plans, verify, audit, SBOM and explain.",
   primaryAction: "Install",
   secondaryAction: "Trust",
   safety: [
@@ -26,6 +26,7 @@ export const mcpContent = {
     { name: "nipmod.view", safety: "read only" },
     { name: "nipmod.inspect", safety: "read only" },
     { name: "nipmod.install_plan", safety: "read only" },
+    { name: "nipmod.update_plan", safety: "read only" },
     { name: "nipmod.publish_plan", safety: "gated dry run" },
     { name: "nipmod.verify", safety: "read only" },
     { name: "nipmod.audit", safety: "read only" },

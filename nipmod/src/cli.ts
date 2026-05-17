@@ -58,6 +58,7 @@ import {
 } from "./registry.js";
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
+import { createUpdatePlan, executeUpdatePlan, type UpdatePlan } from "./update.js";
 import {
   inspectBundleFile,
   inspectRegistryPackage,
@@ -83,6 +84,7 @@ const CLI_COMMANDS = [
   "ls",
   "uninstall",
   "outdated",
+  "update",
   "explain",
   "sbom",
   "doctor",
@@ -163,6 +165,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return uninstallCommand(args);
     case "outdated":
       return outdatedCommand(args);
+    case "update":
+      return updateCommand(args);
     case "explain":
       return explainCommand(args);
     case "sbom":
@@ -666,6 +670,67 @@ async function outdatedCommand(args: string[]): Promise<CliResult> {
     data: {
       message: formatOutdated(report),
       ...report
+    }
+  };
+}
+
+async function updateCommand(args: string[]): Promise<CliResult> {
+  const query = optionalFirstPositional(args) ?? undefined;
+  const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
+  const policy = await optionalPolicyFromFlags(args);
+  const plan = await createUpdatePlan({
+    ...registryTrustFlags(args, "update"),
+    policy,
+    projectDir: dir,
+    ...(query ? { query } : {})
+  });
+  if (hasFlag(args, "--plan")) {
+    return {
+      ok: plan.readyToUpdate,
+      data: {
+        message: formatUpdatePlan(plan),
+        plan
+      },
+      exitCode: plan.readyToUpdate ? 0 : updatePlanExitCode(plan)
+    };
+  }
+  if (!plan.readyToUpdate) {
+    return {
+      ok: false,
+      data: {
+        message: formatUpdatePlan(plan),
+        plan
+      },
+      exitCode: updatePlanExitCode(plan)
+    };
+  }
+
+  let result: Awaited<ReturnType<typeof executeUpdatePlan>>;
+  try {
+    result = await executeUpdatePlan(plan, {
+      nodeUrl: configuredNodeUrl(args),
+      policy,
+      projectDir: dir
+    });
+  } catch (error) {
+    if (error instanceof InstallPolicyBlockedError) {
+      return {
+        ok: false,
+        data: {
+          message: formatPolicyDecision(error.policyDecision),
+          policyDecision: error.policyDecision
+        },
+        exitCode: 11
+      };
+    }
+    throw error;
+  }
+
+  return {
+    ok: true,
+    data: {
+      message: formatUpdateResult(result),
+      ...result
     }
   };
 }
@@ -1249,6 +1314,40 @@ function formatOutdatedPackage(pkg: OutdatedPackage): string {
   ].join(" ");
 }
 
+function formatUpdatePlan(plan: UpdatePlan): string {
+  const lines = [`nipmod update plan ${plan.readyToUpdate ? "ready" : "blocked"}`];
+  lines.push(`updates: ${plan.summary.updates}`);
+  lines.push(`unchanged: ${plan.summary.unchanged}`);
+  lines.push(`skipped: ${plan.summary.skipped}`);
+  for (const update of plan.updates) {
+    lines.push(
+      `${update.status}: ${update.name} ${update.current ?? "missing"} -> ${update.wanted} latest ${update.latest ?? "unknown"} (${update.root.kind}.${update.root.name}@${update.root.spec})`
+    );
+    if (!update.plan.readyToInstall) {
+      for (const finding of update.plan.trustReport.findings) {
+        lines.push(`finding: ${finding}`);
+      }
+      for (const reason of update.plan.policyDecision?.reasons ?? []) {
+        lines.push(`policy finding: ${reason}`);
+      }
+    }
+  }
+  for (const item of plan.unchanged) {
+    lines.push(`current: ${item.name}@${item.current} (${item.root.kind}.${item.root.name}@${item.root.spec})`);
+  }
+  for (const item of plan.skipped) {
+    lines.push(`skipped: ${item.name}: ${item.reason}`);
+  }
+  return lines.join("\n");
+}
+
+function formatUpdateResult(result: Awaited<ReturnType<typeof executeUpdatePlan>>): string {
+  const lines = [`updated ${result.updated} package${result.updated === 1 ? "" : "s"}`];
+  lines.push(`lockfile: ${result.lockfileChanged ? "updated" : "unchanged"}`);
+  lines.push(`pruned: ${result.prunedPackageCount}`);
+  return lines.join("\n");
+}
+
 function formatLockfileInstall(result: InstallLockfileResult): string {
   if (result.packageCount === 0) {
     return "no packages in lockfile";
@@ -1362,6 +1461,13 @@ function installPlanExitCode(plan: { policyDecision?: { allowed: boolean } | und
     return 0;
   }
   return plan.policyDecision && !plan.policyDecision.allowed ? 11 : 7;
+}
+
+function updatePlanExitCode(plan: UpdatePlan): number {
+  if (plan.readyToUpdate) {
+    return 0;
+  }
+  return plan.updates.some((update) => update.plan.policyDecision && !update.plan.policyDecision.allowed) ? 11 : 7;
 }
 
 function formatPolicyDecision(decision: { allowed: boolean; profile: string; reasons: string[]; subject: string }): string {

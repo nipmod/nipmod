@@ -83,6 +83,7 @@ Expected result:
 
 ```sh
 nipmod install
+nipmod update --plan --online
 ```
 
 Expected result:
@@ -90,6 +91,19 @@ Expected result:
 - `.nipmod/store` is restored from the lockfile.
 - Existing verified store entries are reused.
 - `--offline` refuses remote fetches and only uses local store or file URLs.
+- `update --plan` shows whether verified root packages are current or can update before mutation.
+
+## Update packages
+
+```sh
+nipmod update --online
+```
+
+Expected result:
+
+- Root package updates are fetched from the verified registry.
+- Every updated bundle is checked before the lockfile changes.
+- Stale package versions are pruned when no root dependency can reach them.
 
 ## Explain and audit
 

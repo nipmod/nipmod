@@ -492,6 +492,322 @@ describe("nipmod CLI", () => {
     expect(result.stdout).toBe("all installed packages are current\n");
   });
 
+  test("update reports skipped root dependencies as blocked", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-skipped-"));
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {},
+        root: {
+          dependencies: {
+            "missing-agent": "latest"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {}
+      })}\n`
+    );
+    await writeFile(
+      registryPath,
+      `${JSON.stringify({
+        formatVersion: 1,
+        packages: [],
+        source: "file-test"
+      })}\n`
+    );
+
+    const failed = await expectCliJsonFailure([
+      "src/cli.ts",
+      "update",
+      "missing-agent",
+      "--plan",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--dir",
+      app,
+      "--json"
+    ]);
+
+    expect(failed).toMatchObject({
+      data: {
+        plan: {
+          readyToUpdate: false,
+          skipped: [expect.objectContaining({ name: "missing-agent" })]
+        }
+      },
+      exitCode: 7,
+      ok: false
+    });
+  });
+
+  test("update honors registry latest dist tags", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-dist-tags-"));
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/dist-tag-agent`;
+    const oldKey = `${canonical}@0.9.0`;
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {
+          [oldKey]: lockfilePackageFixture(owner, "dist-tag-agent", "0.9.0", "9".repeat(64))
+        },
+        root: {
+          dependencies: {
+            "dist-tag-agent": "latest"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {
+          [oldKey]: emptyLockfileSnapshot()
+        }
+      })}\n`
+    );
+    const registry = cliGraphRegistry([
+      {
+        canonical,
+        digest: "1".repeat(64),
+        distTags: { latest: "1.0.0", next: "2.0.0" },
+        owner,
+        version: "1.0.0"
+      },
+      {
+        canonical,
+        digest: "2".repeat(64),
+        distTags: { latest: "1.0.0", next: "2.0.0" },
+        owner,
+        version: "2.0.0"
+      }
+    ]);
+    await writeFile(registryPath, `${JSON.stringify(registry.registry)}\n`);
+
+    const result = await execaNode([
+      "src/cli.ts",
+      "update",
+      "dist-tag-agent",
+      "--plan",
+      "--registry",
+      pathToFileURL(registryPath).href,
+      "--allow-custom-roots",
+      "--log-id",
+      registry.log.treeHead.logId,
+      "--witness",
+      registry.witness.witness,
+      "--dir",
+      app,
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: { plan: { updates: Array<{ latest: string; wanted: string }> } };
+    };
+
+    expect(parsed.data.plan.updates).toEqual([expect.objectContaining({ latest: "1.0.0", wanted: "1.0.0" })]);
+  });
+
+  test("update pins the exact wanted version across registry reads", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-drift-"));
+    const app = join(workspace, "app");
+    const owner = generateIdentity().did;
+    const canonical = `pkg:${owner}/drift-agent`;
+    const oldKey = `${canonical}@0.1.0`;
+    await mkdir(app, { recursive: true });
+    await writeFile(
+      join(app, "nipmod.lock.json"),
+      `${JSON.stringify({
+        formatVersion: 2,
+        generatedBy: "test",
+        packages: {
+          [oldKey]: lockfilePackageFixture(owner, "drift-agent", "0.1.0", "1".repeat(64))
+        },
+        root: {
+          dependencies: {
+            "drift-agent": "latest"
+          },
+          devDependencies: {},
+          optionalDependencies: {},
+          peerDependencies: {}
+        },
+        snapshots: {
+          [oldKey]: emptyLockfileSnapshot()
+        }
+      })}\n`
+    );
+    const firstRegistry = cliGraphRegistry([
+      {
+        canonical,
+        digest: "2".repeat(64),
+        owner,
+        version: "0.2.0"
+      }
+    ]);
+    const secondRegistry = cliGraphRegistry([
+      {
+        canonical,
+        digest: "2".repeat(64),
+        owner,
+        version: "0.2.0"
+      },
+      {
+        canonical,
+        digest: "3".repeat(64),
+        owner,
+        version: "0.3.0"
+      }
+    ]);
+    let requestCount = 0;
+    const server = createServer((_request, response) => {
+      requestCount += 1;
+      response.writeHead(200, { "content-type": "application/json" });
+      response.end(JSON.stringify(requestCount === 1 ? firstRegistry.registry : secondRegistry.registry));
+    });
+    await new Promise<void>((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", () => {
+        server.off("error", reject);
+        resolve();
+      });
+    });
+    const address = server.address();
+    if (!address || typeof address === "string") {
+      throw new Error("test server did not bind to tcp");
+    }
+
+    try {
+      const failed = (await expectCliJsonFailure([
+        "src/cli.ts",
+        "update",
+        "drift-agent",
+        "--plan",
+        "--registry",
+        `http://127.0.0.1:${address.port}/registry.json`,
+        "--dir",
+        app,
+        "--json"
+      ])) as {
+        data: { plan: { updates: Array<{ plan: { package: { version: string } }; wanted: string }> } };
+      };
+
+      expect(failed.data.plan.updates).toEqual([
+        expect.objectContaining({
+          plan: expect.objectContaining({ package: expect.objectContaining({ version: "0.2.0" }) }),
+          wanted: "0.2.0"
+        })
+      ]);
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+    }
+  });
+
+  test("update executes a dist tag root without lockfile tag metadata", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-tag-exec-"));
+    const app = join(workspace, "app");
+    const pkg = join(workspace, "pkg");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "tag-update-agent", "--dir", pkg]);
+
+    const manifestPath = join(pkg, "nipmod.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    manifest.version = "0.2.0";
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const pack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const server = await serveBundle(await readFile(pack.data.path), manifest.canonical, "0.2.0");
+    try {
+      const oldKey = `${manifest.canonical}@0.1.0`;
+      await mkdir(app, { recursive: true });
+      await writeFile(
+        join(app, "nipmod.lock.json"),
+        `${JSON.stringify({
+          formatVersion: 2,
+          generatedBy: "test",
+          packages: {
+            [oldKey]: lockfilePackageFixture(manifest.publish.signingKey, "tag-update-agent", "0.1.0", "1".repeat(64))
+          },
+          root: {
+            dependencies: {
+              "tag-update-agent": "next"
+            },
+            devDependencies: {},
+            optionalDependencies: {},
+            peerDependencies: {}
+          },
+          snapshots: {
+            [oldKey]: emptyLockfileSnapshot()
+          }
+        })}\n`
+      );
+      const registry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: pack.data.digest,
+          distTags: { next: "0.2.0" },
+          owner: manifest.publish.signingKey,
+          resolved: server.resolved,
+          sourceRepo: server.sourceRepo,
+          version: "0.2.0"
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(registry.registry)}\n`);
+
+      const result = await execaNode([
+        "src/cli.ts",
+        "update",
+        "tag-update-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        registry.log.treeHead.logId,
+        "--witness",
+        registry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { prunedPackageCount: number; updated: number };
+      };
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      const newKey = `${manifest.canonical}@0.2.0`;
+
+      expect(parsed.data).toMatchObject({ prunedPackageCount: 1, updated: 1 });
+      expect(lockfile.root.dependencies).toEqual({ "tag-update-agent": "next" });
+      expect(lockfile.packages[oldKey]).toBeUndefined();
+      expect(lockfile.packages[newKey].integrity).toBe(`sha256-${pack.data.digest}`);
+    } finally {
+      await server.close();
+    }
+  }, 30_000);
+
   test("validates a manifest and reports normalized publish facts", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-manifest-"));
     const pkg = join(workspace, "pkg");
@@ -1807,6 +2123,306 @@ describe("nipmod CLI", () => {
       await depServer.close();
     }
   }, 30_000);
+
+  test("plans and applies a verified root package update without trusting stale local graph candidates", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-"));
+    const app = join(workspace, "app");
+    const pkg = join(workspace, "pkg");
+    const depPkg = join(workspace, "dep");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "update-agent", "--dir", pkg]);
+    await execaNode(["src/cli.ts", "init", "--name", "dep-agent", "--dir", depPkg]);
+
+    const manifestPath = join(pkg, "nipmod.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      canonical: string;
+      dependencies?: Record<string, string>;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const oldPack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    manifest.version = "0.2.0";
+    manifest.dependencies = { "dep-agent": "*" };
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const newPack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const depPack = JSON.parse((await execaNode(["src/cli.ts", "pack", depPkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const depManifest = JSON.parse(await readFile(join(depPkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const oldServer = await serveBundle(await readFile(oldPack.data.path), manifest.canonical, "0.1.0");
+    const newServer = await serveBundle(await readFile(newPack.data.path), manifest.canonical, "0.2.0");
+    const depServer = await serveBundle(await readFile(depPack.data.path), depManifest.canonical, depManifest.version);
+    try {
+      const oldRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: oldPack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: oldServer.resolved,
+          sourceRepo: oldServer.sourceRepo,
+          version: "0.1.0"
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(oldRegistry.registry)}\n`);
+      await execaNode([
+        "src/cli.ts",
+        "add",
+        "update-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        oldRegistry.log.treeHead.logId,
+        "--witness",
+        oldRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const poisonedOwner = generateIdentity().did;
+      const poisonedKey = `pkg:${poisonedOwner}/dep-agent@9.9.9`;
+      const poisonedLockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      poisonedLockfile.packages[poisonedKey] = lockfilePackageFixture(poisonedOwner, "dep-agent", "9.9.9", "9".repeat(64));
+      poisonedLockfile.snapshots[poisonedKey] = emptyLockfileSnapshot();
+      await writeFile(join(app, "nipmod.lock.json"), `${JSON.stringify(poisonedLockfile, null, 2)}\n`);
+
+      const updateRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: oldPack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: oldServer.resolved,
+          sourceRepo: oldServer.sourceRepo,
+          version: "0.1.0"
+        },
+        {
+          canonical: manifest.canonical,
+          dependencies: { "dep-agent": "*" },
+          digest: newPack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: newServer.resolved,
+          sourceRepo: newServer.sourceRepo,
+          version: "0.2.0"
+        },
+        {
+          canonical: depManifest.canonical,
+          digest: depPack.data.digest,
+          owner: depManifest.publish.signingKey,
+          resolved: depServer.resolved,
+          sourceRepo: depServer.sourceRepo,
+          version: depManifest.version
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(updateRegistry.registry)}\n`);
+      const beforePlan = await readFile(join(app, "nipmod.lock.json"), "utf8");
+      const planResult = await execaNode([
+        "src/cli.ts",
+        "update",
+        "update-agent",
+        "--plan",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        updateRegistry.log.treeHead.logId,
+        "--witness",
+        updateRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const plan = JSON.parse(planResult.stdout) as {
+        ok: true;
+        data: { plan: { updates: Array<{ current: string; latest: string; plan: { graph?: { packageCount: number } }; wanted: string }> } };
+      };
+      expect(plan.data.plan.updates).toEqual([
+        expect.objectContaining({
+          current: "0.1.0",
+          latest: "0.2.0",
+          plan: expect.objectContaining({ graph: expect.objectContaining({ packageCount: 2 }) }),
+          wanted: "0.2.0"
+        })
+      ]);
+      await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).resolves.toBe(beforePlan);
+
+      const updateResult = await execaNode([
+        "src/cli.ts",
+        "update",
+        "update-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        updateRegistry.log.treeHead.logId,
+        "--witness",
+        updateRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const parsed = JSON.parse(updateResult.stdout) as {
+        ok: true;
+        data: { lockfileChanged: boolean; prunedPackageCount: number; updated: number };
+      };
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      const oldKey = `${manifest.canonical}@0.1.0`;
+      const newKey = `${manifest.canonical}@0.2.0`;
+      const depKey = `${depManifest.canonical}@${depManifest.version}`;
+
+      expect(parsed.data).toMatchObject({
+        lockfileChanged: true,
+        prunedPackageCount: 2,
+        updated: 1
+      });
+      expect(lockfile.root.dependencies).toEqual({ "update-agent": "latest" });
+      expect(lockfile.packages[oldKey]).toBeUndefined();
+      expect(lockfile.packages[poisonedKey]).toBeUndefined();
+      expect(lockfile.packages[newKey].integrity).toBe(`sha256-${newPack.data.digest}`);
+      expect(lockfile.packages[depKey].integrity).toBe(`sha256-${depPack.data.digest}`);
+      expect(lockfile.snapshots[newKey].dependencies).toEqual({ "dep-agent": depKey });
+      expect(Object.keys(lockfile.packages).sort()).toEqual([depKey, newKey].sort());
+    } finally {
+      await oldServer.close();
+      await newServer.close();
+      await depServer.close();
+    }
+  }, 45_000);
+
+  test("update rolls back the lockfile when a later root update fails", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-update-rollback-"));
+    const app = join(workspace, "app");
+    const pkg = join(workspace, "pkg");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "rollback-a", "--dir", pkg]);
+
+    const manifestPath = join(pkg, "nipmod.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const oldPack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    manifest.version = "0.2.0";
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const newPack = JSON.parse((await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { digest: string; path: string };
+    };
+    const failingOwner = generateIdentity().did;
+    const failingCanonical = `pkg:${failingOwner}/rollback-b`;
+    const failingServer = createServer((_request, response) => {
+      response.writeHead(500);
+      response.end("failed");
+    });
+    await new Promise<void>((resolve, reject) => {
+      failingServer.once("error", reject);
+      failingServer.listen(0, "127.0.0.1", () => {
+        failingServer.off("error", reject);
+        resolve();
+      });
+    });
+    const failingAddress = failingServer.address();
+    if (!failingAddress || typeof failingAddress === "string") {
+      throw new Error("test server did not bind to tcp");
+    }
+    const goodServer = await serveBundle(await readFile(newPack.data.path), manifest.canonical, "0.2.0");
+    try {
+      await mkdir(app, { recursive: true });
+      const oldAKey = `${manifest.canonical}@0.1.0`;
+      const oldBKey = `${failingCanonical}@0.1.0`;
+      await writeFile(
+        join(app, "nipmod.lock.json"),
+        `${JSON.stringify({
+          formatVersion: 2,
+          generatedBy: "test",
+          packages: {
+            [oldAKey]: lockfilePackageFixture(manifest.publish.signingKey, "rollback-a", "0.1.0", oldPack.data.digest),
+            [oldBKey]: lockfilePackageFixture(failingOwner, "rollback-b", "0.1.0", "b".repeat(64))
+          },
+          root: {
+            dependencies: {
+              "rollback-a": "latest",
+              "rollback-b": "latest"
+            },
+            devDependencies: {},
+            optionalDependencies: {},
+            peerDependencies: {}
+          },
+          snapshots: {
+            [oldAKey]: emptyLockfileSnapshot(),
+            [oldBKey]: emptyLockfileSnapshot()
+          }
+        }, null, 2)}\n`
+      );
+      const beforeUpdate = await readFile(join(app, "nipmod.lock.json"), "utf8");
+      const updateRegistry = cliGraphRegistry([
+        {
+          canonical: manifest.canonical,
+          digest: newPack.data.digest,
+          owner: manifest.publish.signingKey,
+          resolved: goodServer.resolved,
+          sourceRepo: goodServer.sourceRepo,
+          version: "0.2.0"
+        },
+        {
+          canonical: failingCanonical,
+          digest: "f".repeat(64),
+          owner: failingOwner,
+          resolved: `http://127.0.0.1:${failingAddress.port}/api/v1/repos/${failingOwner.slice("did:key:".length)}/rollback-b/blob/releases/0.2.0/bundle.nipmod`,
+          sourceRepo: `http://127.0.0.1:${failingAddress.port}/${failingOwner.slice("did:key:".length)}/rollback-b.git`,
+          version: "0.2.0"
+        }
+      ]);
+      await writeFile(registryPath, `${JSON.stringify(updateRegistry.registry)}\n`);
+
+      const failed = await expectCliJsonFailure([
+        "src/cli.ts",
+        "update",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        updateRegistry.log.treeHead.logId,
+        "--witness",
+        updateRegistry.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+
+      expect(failed).toMatchObject({
+        exitCode: 1,
+        ok: false
+      });
+      expect(failed.error?.message).toContain("failed to fetch package: 500");
+      await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).resolves.toBe(beforeUpdate);
+    } finally {
+      await goodServer.close();
+      await new Promise<void>((resolve, reject) => {
+        failingServer.close((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+    }
+  }, 45_000);
 
   test("add blocks the whole graph when a dependency trust report fails", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-add-graph-block-"));
@@ -3356,6 +3972,7 @@ function cliGraphRegistry(
     canonical: string;
     dependencies?: Record<string, string>;
     digest: string;
+    distTags?: Record<string, string>;
     owner: string;
     permissions?: Partial<{
       env: number;
@@ -3366,24 +3983,25 @@ function cliGraphRegistry(
       postinstall: boolean;
       secrets: number;
     }>;
-    resolved?: string;
-    sourceRepo?: string;
-    trustEvidenceOverrides?: Partial<Record<string, boolean>>;
-  }>
-) {
+	    resolved?: string;
+	    sourceRepo?: string;
+	    trustEvidenceOverrides?: Partial<Record<string, boolean>>;
+	    version?: string;
+	  }>
+	) {
   const logIdentity = generateIdentity();
   const witnessIdentity = generateIdentity();
-  const leaves = entries.map((entry) => ({
-    artifactSha256: entry.digest,
-    eventHash: createHash("sha256").update(`${entry.canonical}@0.1.0`).digest("hex"),
-    package: entry.canonical,
-    publisher: entry.owner,
-    version: "0.1.0"
-  }));
+	  const leaves = entries.map((entry) => ({
+	    artifactSha256: entry.digest,
+	    eventHash: createHash("sha256").update(`${entry.canonical}@${entry.version ?? "0.1.0"}`).digest("hex"),
+	    package: entry.canonical,
+	    publisher: entry.owner,
+	    version: entry.version ?? "0.1.0"
+	  }));
   const log = createTransparencyLogFromLeaves(leaves, logIdentity, "2026-05-16T03:53:00.000Z");
   const witness = signWitnessStatement(log.treeHead, witnessIdentity);
-  const packages = entries.map((entry, index) => {
-    const proofEntry = log.entries[index];
+	  const packages = entries.map((entry, index) => {
+	    const proofEntry = log.entries[index];
     if (!proofEntry) {
       throw new Error("missing graph transparency entry");
     }
@@ -3391,8 +4009,9 @@ function cliGraphRegistry(
     if (!name) {
       throw new Error("missing graph package name");
     }
-    const ownerSegment = entry.owner.slice("did:key:".length);
-    const evidence = {
+	    const ownerSegment = entry.owner.slice("did:key:".length);
+	    const version = entry.version ?? "0.1.0";
+	    const evidence = {
       artifactDigestVerified: true,
       bundleSignatureVerified: true,
       immutableSnapshotMatched: true,
@@ -3408,6 +4027,7 @@ function cliGraphRegistry(
       ...(entry.dependencies ? { dependencies: entry.dependencies } : {}),
       description: "Inspectable agent package",
       digest: entry.digest,
+      ...(entry.distTags ? { distTags: entry.distTags } : {}),
       name,
       owner: entry.owner,
       permissions: {
@@ -3421,25 +4041,25 @@ function cliGraphRegistry(
         ...entry.permissions
       },
       proof: {
-        checkpointUrl: "/transparency/checkpoint.json",
-        eventHash: proofEntry.leaf.eventHash,
+	          checkpointUrl: "/transparency/checkpoint.json",
+	          eventHash: proofEntry.leaf.eventHash,
         leafHash: proofEntry.leafHash,
         leafIndex: proofEntry.leafIndex,
         leafUrl: `/transparency/leaves/${proofEntry.leafHash}.json`,
         proofUrl: `/transparency/proofs/${proofEntry.leafHash}.json`,
         rootHash: log.treeHead.rootHash,
-        subject: `${entry.canonical}@0.1.0`,
+	          subject: `${entry.canonical}@${version}`,
         treeSize: log.treeHead.treeSize,
         type: "dev.nipmod.registry.proof.v1",
         witnesses: [witness.witness],
         witnessUrls: [`/transparency/witnesses/${witness.witness}.json`]
       },
       publisher: entry.owner,
-      resolved:
-        entry.resolved ??
-        `https://node.nipmod.com/api/v1/repos/${ownerSegment}/${name}/blob/releases/0.1.0/bundle.nipmod`,
-      sourceCommit: "a".repeat(40),
-      sourceTag: "v0.1.0",
+	        resolved:
+	          entry.resolved ??
+	          `https://node.nipmod.com/api/v1/repos/${ownerSegment}/${name}/blob/releases/${version}/bundle.nipmod`,
+	        sourceCommit: "a".repeat(40),
+	        sourceTag: `v${version}`,
       sourceRepo: entry.sourceRepo ?? `https://node.nipmod.com/${ownerSegment}/${name}.git`,
       trust: {
         evidence,
@@ -3447,8 +4067,8 @@ function cliGraphRegistry(
         score: 100
       },
       type: "skill",
-      version: "0.1.0"
-    };
+	      version
+	    };
   });
 
   return {
@@ -3614,9 +4234,11 @@ async function expectCliJsonFailure(args: string[]): Promise<{
       version?: string;
     }>;
     plan?: {
+      readyToUpdate?: boolean;
       graph?: { packageCount: number };
       policyDecision?: { allowed: boolean; profile: string; reasons: string[] };
-      readyToInstall: boolean;
+      readyToInstall?: boolean;
+      skipped?: Array<{ name: string; reason: string }>;
       trustReport: { findings: string[] };
     };
     policyCheck?: {

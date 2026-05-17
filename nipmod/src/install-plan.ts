@@ -16,7 +16,7 @@ import {
 } from "./resolver.js";
 import { inspectRegistryPackage, trustReportWithManifestPermissions, type TrustReport } from "./trust-report.js";
 
-export type InstallPlanAction = "install" | "add";
+export type InstallPlanAction = "install" | "add" | "update";
 
 export interface RegistryTrustOptions {
   allowedLogIds?: readonly string[];
@@ -36,6 +36,12 @@ export interface ResolveAddPlanOptions extends RegistryTrustOptions {
   policy?: NipmodPolicy | undefined;
   projectDir: string;
   query: string;
+}
+
+export interface CreateRegistryGraphInstallPlanOptions extends RegistryTrustOptions {
+  action: InstallPlanAction;
+  policy?: NipmodPolicy | undefined;
+  projectDir: string;
 }
 
 export interface ExecuteInstallPlanOptions {
@@ -111,11 +117,17 @@ export async function createRegistryInstallPlan(options: CreateInstallPlanOption
 export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Promise<InstallPlan> {
   if (isPackageVersionSpecifier(options.query)) {
     const spec = packageVersionSpecifierParts(options.query);
-    return createRegistryGraphInstallPlan(options, {
-      kind: "dependencies",
-      name: spec.canonical,
-      spec: spec.version
-    });
+    return createRegistryGraphInstallPlan(
+      {
+        ...options,
+        action: "add"
+      },
+      {
+        kind: "dependencies",
+        name: spec.canonical,
+        spec: spec.version
+      }
+    );
   }
 
   const registryUrl = options.registryUrl ?? DEFAULT_REGISTRY_URL;
@@ -140,11 +152,17 @@ export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Pro
   if (!selected) {
     throw new Error(`no package found for "${options.query}"`);
   }
-  return createRegistryGraphInstallPlan(options, {
-    kind: "dependencies",
-    name: options.query.startsWith("pkg:") ? selected.canonical : selected.name,
-    spec: "latest"
-  });
+  return createRegistryGraphInstallPlan(
+    {
+      ...options,
+      action: "add"
+    },
+    {
+      kind: "dependencies",
+      name: options.query.startsWith("pkg:") ? selected.canonical : selected.name,
+      spec: "latest"
+    }
+  );
 }
 
 export async function executeInstallPlan(plan: InstallPlan, options: ExecuteInstallPlanOptions): Promise<InstallResult> {
@@ -156,10 +174,7 @@ export async function executeInstallPlan(plan: InstallPlan, options: ExecuteInst
     if (plan.graph.packages.length > GRAPH_PACKAGE_LIMIT) {
       throw new Error(`dependency graph exceeds ${GRAPH_PACKAGE_LIMIT} packages`);
     }
-    const packages = await fetchGraphPackages(plan.graph, options);
-    assertSignedManifestGraph(plan.graph, packages);
-    enforceSignedManifestPolicy(plan.graph.packages, packages, options.policy);
-    return installPackageGraph(packages.map((pkg) => pkg.graphPackage), options.projectDir);
+    return installPackageGraph(await prepareGraphInstallPlanPackages(plan, options), options.projectDir);
   }
 
   const fetched = await fetchPlanPackage(plan.trustReport, options);
@@ -201,6 +216,25 @@ export async function executeInstallPlan(plan: InstallPlan, options: ExecuteInst
   });
 }
 
+export async function prepareGraphInstallPlanPackages(
+  plan: InstallPlan,
+  options: ExecuteInstallPlanOptions
+): Promise<InstallGraphPackage[]> {
+  if (!plan.readyToInstall) {
+    throw new Error(`package is not installable: ${plan.trustReport.findings.join("; ") || "trust report failed"}`);
+  }
+  if (!plan.graph) {
+    throw new Error("install plan does not contain a dependency graph");
+  }
+  if (plan.graph.packages.length > GRAPH_PACKAGE_LIMIT) {
+    throw new Error(`dependency graph exceeds ${GRAPH_PACKAGE_LIMIT} packages`);
+  }
+  const packages = await fetchGraphPackages(plan.graph, options);
+  assertSignedManifestGraph(plan.graph, packages);
+  enforceSignedManifestPolicy(plan.graph.packages, packages, options.policy);
+  return packages.map((pkg) => pkg.graphPackage);
+}
+
 export function isPackageVersionSpecifier(value: string): boolean {
   return PACKAGE_VERSION_SPECIFIER.test(value);
 }
@@ -232,8 +266,8 @@ export function formatInstallPlan(plan: InstallPlan): string {
   return lines.join("\n");
 }
 
-async function createRegistryGraphInstallPlan(
-  options: ResolveAddPlanOptions,
+export async function createRegistryGraphInstallPlan(
+  options: CreateRegistryGraphInstallPlanOptions,
   rootDependency: DependencyRequest
 ): Promise<InstallPlan> {
   const registryUrl = options.registryUrl ?? DEFAULT_REGISTRY_URL;
@@ -310,7 +344,7 @@ async function createRegistryGraphInstallPlan(
     );
 
   const plan: InstallPlan = {
-    action: "add",
+    action: options.action,
     formatVersion: 1,
     graph: {
       packageCount: graphPackages.length,
@@ -440,6 +474,7 @@ function registryResolverPackage(pkg: RegistrySearchPackage): RegistryResolverPa
     ...(pkg.dependencies ? { dependencies: pkg.dependencies } : {}),
     ...(pkg.devDependencies ? { devDependencies: pkg.devDependencies } : {}),
     digest: pkg.digest,
+    ...(pkg.distTags ? { distTags: pkg.distTags } : {}),
     name: pkg.name,
     ...(pkg.optionalDependencies ? { optionalDependencies: pkg.optionalDependencies } : {}),
     ...(pkg.peerDependencies ? { peerDependencies: pkg.peerDependencies } : {}),
