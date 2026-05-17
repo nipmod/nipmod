@@ -253,7 +253,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
             ))}
           </div>
           <p className="panel-copy">
-            Agents should inspect first, then add only when trust score, permissions, advisories and local policy match
+            Agents should inspect first, then install only when trust score, permissions, advisories and local policy match
             the workspace.
           </p>
         </div>

@@ -246,7 +246,7 @@ describe("registry data", () => {
   test("builds verified add commands", () => {
     const pkg = packageFixture({ name: "alpha" });
 
-    expect(installCommand(pkg)).toBe("nipmod add alpha --online");
+    expect(installCommand(pkg)).toBe("nipmod install alpha --online");
   });
 
   test("does not build normal add commands for quarantined packages", () => {

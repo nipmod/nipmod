@@ -78,7 +78,7 @@
       "ok": true
     },
     {
-      "command": "add",
+      "command": "install",
       "error": null,
       "exitCode": 0,
       "ok": true

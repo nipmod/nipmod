@@ -33,6 +33,7 @@ export interface CreateInstallPlanOptions extends RegistryTrustOptions {
 }
 
 export interface ResolveAddPlanOptions extends RegistryTrustOptions {
+  action?: "add" | "install";
   policy?: NipmodPolicy | undefined;
   projectDir: string;
   query: string;
@@ -115,12 +116,13 @@ export async function createRegistryInstallPlan(options: CreateInstallPlanOption
 }
 
 export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Promise<InstallPlan> {
+  const action = options.action ?? "add";
   if (isPackageVersionSpecifier(options.query)) {
     const spec = packageVersionSpecifierParts(options.query);
     return createRegistryGraphInstallPlan(
       {
         ...options,
-        action: "add"
+        action
       },
       {
         kind: "dependencies",
@@ -140,7 +142,7 @@ export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Pro
   });
   const exactMatches = search.packages.filter((pkg) => pkg.name === options.query || pkg.canonical === options.query);
   if (exactMatches.length === 0) {
-    throw new Error(`add requires an exact package name or pkg: canonical spec; run nipmod search "${options.query}"`);
+    throw new Error(`${action} requires an exact package name or pkg: canonical spec; run nipmod search "${options.query}"`);
   }
   const exactCanonicals = [...new Set(exactMatches.map((pkg) => pkg.canonical))];
   if (exactCanonicals.length > 1) {
@@ -155,7 +157,7 @@ export async function resolveAddInstallPlan(options: ResolveAddPlanOptions): Pro
   return createRegistryGraphInstallPlan(
     {
       ...options,
-      action: "add"
+      action
     },
     {
       kind: "dependencies",
@@ -285,7 +287,11 @@ export async function createRegistryGraphInstallPlan(
   });
   const rootResolved = closure.resolved[0];
   if (!rootResolved) {
-    throw new Error(`add could not resolve ${rootDependency.name}@${rootDependency.spec}: ${closure.unresolved[0]?.reason ?? "not found"}`);
+    throw new Error(
+      `${options.action} could not resolve ${rootDependency.name}@${rootDependency.spec}: ${
+        closure.unresolved[0]?.reason ?? "not found"
+      }`
+    );
   }
 
   const resolvedPackages = uniqueResolvedPackages(closure.resolved);
@@ -297,7 +303,7 @@ export async function createRegistryGraphInstallPlan(
       const report = await inspectRegistryPackage({
         ...inspectOptions({
           ...registryTrustOptions(options),
-          action: "add",
+          action: options.action,
           projectDir: options.projectDir,
           specifier: `${resolvedPackage.canonical}@${resolvedPackage.version}`
         })
@@ -326,7 +332,7 @@ export async function createRegistryGraphInstallPlan(
 
   const rootPackage = graphPackages[0];
   if (!rootPackage) {
-    throw new Error("add graph did not resolve a root package");
+    throw new Error(`${options.action} graph did not resolve a root package`);
   }
 
   const rootReport = aggregateGraphTrustReport(rootPackage.trustReport, graphPackages, closure.unresolved);

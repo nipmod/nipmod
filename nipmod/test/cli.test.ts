@@ -1038,7 +1038,7 @@ describe("nipmod CLI", () => {
 
     expect(result.stdout).toContain("nipmod ready");
     expect(result.stdout).toContain("WARN Publish helper");
-    expect(result.stdout).toContain("Install and add are ready");
+    expect(result.stdout).toContain("Install is ready");
     expect(result.stdout).toContain("verified checksum");
     expect(result.stdout).toContain("Publish needs the Gitlawb helper:");
     expect(result.stdout).not.toContain("nipmod needs setup");
@@ -1121,8 +1121,8 @@ describe("nipmod CLI", () => {
     expect(parsed.data.query).toBe("alpha");
     expect(parsed.data.total).toBe(1);
     expect(parsed.data.packages[0]).toMatchObject({
-      canonicalInstall: `nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`,
-      install: "nipmod add alpha-agent --online",
+      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`,
+      install: "nipmod install alpha-agent --online",
       name: "alpha-agent",
       trust: "verified/100"
     });
@@ -1135,9 +1135,9 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain("0.1.0");
     expect(text.stdout).toContain("verified/100");
     expect(text.stdout).toContain("no permissions");
-    expect(text.stdout).toContain("add: nipmod add alpha-agent --online");
+    expect(text.stdout).toContain("install: nipmod install alpha-agent --online");
     expect(text.stdout).not.toContain(`id: pkg:${owner}/alpha-agent`);
-    expect(text.stdout).not.toContain(`security: nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
+    expect(text.stdout).not.toContain(`security: nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`);
 
     const detailed = await execaNode([
       "src/cli.ts",
@@ -1207,8 +1207,8 @@ describe("nipmod CLI", () => {
       pathToFileURL(registryPath).href
     ]);
 
-    expect(text.stdout.match(/add: nipmod add duplicate-agent --online/g)?.length).toBe(1);
-    expect(text.stdout).toContain(`security: nipmod add pkg:${firstOwner}/duplicate-agent@0.1.0 --online`);
+    expect(text.stdout.match(/install: nipmod install duplicate-agent --online/g)?.length).toBe(1);
+    expect(text.stdout).toContain(`security: nipmod install pkg:${firstOwner}/duplicate-agent@0.1.0 --online`);
   });
 
   test("views exact registry package metadata for humans and agents", async () => {
@@ -1242,7 +1242,7 @@ describe("nipmod CLI", () => {
     expect(text.stdout).toContain("dependencies:");
     expect(text.stdout).toContain("beta-tool: ^0.2.0");
     expect(text.stdout).toContain("compatibility: MCP import");
-    expect(text.stdout).toContain(`add: nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`);
+    expect(text.stdout).toContain(`install: nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`);
 
     const json = await execaNode([
       "src/cli.ts",
@@ -1267,9 +1267,9 @@ describe("nipmod CLI", () => {
     };
     expect(parsed.data.package).toMatchObject({
       canonical: `pkg:${owner}/alpha-agent`,
-      canonicalInstall: `nipmod add pkg:${owner}/alpha-agent@0.1.0 --online`,
+      canonicalInstall: `nipmod install pkg:${owner}/alpha-agent@0.1.0 --online`,
       dependencies: { "beta-tool": "^0.2.0" },
-      install: "nipmod add alpha-agent --online",
+      install: "nipmod install alpha-agent --online",
       name: "alpha-agent",
       version: "0.1.0"
     });
@@ -1531,7 +1531,7 @@ describe("nipmod CLI", () => {
     expect(parsed.data.report).toMatchObject({
       canonical,
       digest,
-      installCommand: `nipmod add ${canonical}@0.1.0 --online`,
+      installCommand: `nipmod install ${canonical}@0.1.0 --online`,
       publisher: owner,
       readyToInstall: true,
       trust: { level: "verified", score: 100 },
@@ -2024,6 +2024,62 @@ describe("nipmod CLI", () => {
         package: manifest.canonical,
         version: manifest.version
       });
+      expect(lockfile.packages[key].integrity).toBe(`sha256-${packed.data.digest}`);
+      expect(lockfile.packages[key].resolved).toBe(server.resolved);
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("installs a unique verified registry package by query without a manual integrity flag", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-install-registry-"));
+    const pkg = join(workspace, "pkg");
+    const app = join(workspace, "app");
+    const registryPath = join(workspace, "registry.json");
+    await execaNode(["src/cli.ts", "init", "--name", "@probe/install-agent", "--dir", pkg]);
+    const pack = await execaNode(["src/cli.ts", "pack", pkg, "--out", workspace, "--json"]);
+    const packed = JSON.parse(pack.stdout) as { ok: true; data: { digest: string; path: string } };
+    const manifest = JSON.parse(await readFile(join(pkg, "nipmod.json"), "utf8")) as {
+      canonical: string;
+      publish: { signingKey: string };
+      version: string;
+    };
+    const transparency = cliTransparency(manifest.canonical, manifest.publish.signingKey, packed.data.digest);
+    const registry = cliRegistry(manifest.canonical, manifest.publish.signingKey, packed.data.digest, transparency);
+    const server = await serveBundle(await readFile(packed.data.path), manifest.canonical, manifest.version);
+    try {
+      registry.packages[0]!.resolved = server.resolved;
+      registry.packages[0]!.sourceRepo = server.sourceRepo;
+      await writeFile(registryPath, `${JSON.stringify(registry)}\n`);
+
+      const result = await execaNode([
+        "src/cli.ts",
+        "install",
+        "install-agent",
+        "--registry",
+        pathToFileURL(registryPath).href,
+        "--allow-custom-roots",
+        "--log-id",
+        transparency.log.treeHead.logId,
+        "--witness",
+        transparency.witness.witness,
+        "--dir",
+        app,
+        "--json"
+      ]);
+      const parsed = JSON.parse(result.stdout) as {
+        ok: true;
+        data: { lockfileChanged: boolean; package: string; version: string };
+      };
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8"));
+      const key = `${manifest.canonical}@${manifest.version}`;
+
+      expect(parsed.data).toMatchObject({
+        lockfileChanged: true,
+        package: manifest.canonical,
+        version: manifest.version
+      });
+      expect(lockfile.root.dependencies).toEqual({ "install-agent": "latest" });
       expect(lockfile.packages[key].integrity).toBe(`sha256-${packed.data.digest}`);
       expect(lockfile.packages[key].resolved).toBe(server.resolved);
     } finally {

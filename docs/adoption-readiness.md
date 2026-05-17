@@ -6,7 +6,7 @@ Adoption readiness is not the same as real adoption. Readiness can be made compl
 
 | Persona | Path | Expected artifact |
 | --- | --- | --- |
-| First user | Install, doctor, inspect, demo add, audit, CI | Redacted first user evidence template. |
+| First user | Install, doctor, inspect, demo install, audit, CI | Redacted first user evidence template. |
 | Package author | Init, validate, publish dry run | Registry candidate JSON. |
 | Gitlawb repo owner | Package draft and manifest validate | Claim preview without ownership claim. |
 | Security reviewer | Review packet and proof loop | Signed review packet or findings. |

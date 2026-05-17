@@ -287,8 +287,8 @@ describe("nipmod MCP server", () => {
     expect(result.error).toBeUndefined();
     expect(result.result.structuredContent).toMatchObject({
       canonical: fixture.canonical,
-      canonicalInstall: `nipmod add ${fixture.canonical}@0.1.0 --online`,
-      install: "nipmod add view-agent --online",
+      canonicalInstall: `nipmod install ${fixture.canonical}@0.1.0 --online`,
+      install: "nipmod install view-agent --online",
       name: "view-agent",
       trust: "verified/100",
       version: "0.1.0"

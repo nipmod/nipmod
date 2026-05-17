@@ -16,7 +16,7 @@ nipmod doctor --online
 nipmod search gitlawb --online
 mkdir -p nipmod-demo && cd nipmod-demo
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 nipmod install
 nipmod audit --online
 ```
@@ -59,7 +59,7 @@ nipmod manifest validate --dir gitlawb-repo-reader-draft
 - `init` creates a local package and DID identity without a nipmod account in the author dry run.
 - `publish --dry-run --json` prints a registry candidate and does not mutate Gitlawb in the author dry run.
 - `inspect` shows digest, publisher DID, source repo, source commit, transparency proof and witness URL.
-- `add` writes the lockfile only after verification.
+- `install <package>` writes the lockfile only after verification.
 - `install` restores the local store from the digest-pinned lockfile.
 - `audit` exits clean when advisories and proof are current.
 

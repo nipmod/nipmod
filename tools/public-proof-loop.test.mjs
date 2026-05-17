@@ -23,7 +23,7 @@ describe("public proof loop contract", () => {
       })),
       safe: [
         { command: "inspect", exitCode: 0, ok: true },
-        { command: "add", exitCode: 0, ok: true },
+        { command: "install", exitCode: 0, ok: true },
         { command: "audit", exitCode: 0, ok: true },
         { command: "ci", exitCode: 0, ok: true }
       ]

@@ -16,7 +16,7 @@ P0 commands:
 - `nipmod view`
 - `nipmod install`
 - `nipmod install --plan`
-- `nipmod add`
+- `nipmod add` (legacy alias for `nipmod install <package>`)
 - `nipmod audit`
 - `nipmod ci`
 - `nipmod search`
@@ -68,6 +68,8 @@ for humans who want the security detail that is hidden from the default search v
 package metadata and refuses ambiguous names unless the canonical package id is used.
 `nipmod install` without a package specifier restores `.nipmod/store` from the existing lockfile and reports
 `packageCount`, `restored`, `fetched` and `lockfileChanged` in JSON mode. `--offline` blocks remote bundle fetches.
+`nipmod install <package> --online` resolves a verified registry package, installs its verified dependency graph and
+writes the root dependency to the lockfile. `nipmod add <package> --online` is kept as a compatibility alias.
 `nipmod outdated` compares installed lockfile packages against the configured registry and reports `current`,
 `wanted`, `latest`, `spec` and `status`; it stays quiet when every installed package is current.
 `nipmod update [package] --plan` returns a verified update plan for root dependencies without mutating the lockfile.

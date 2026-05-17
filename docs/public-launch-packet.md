@@ -6,7 +6,7 @@ This is the public material to send to Gitlawb founders, agent builders or revie
 
 Gitlawb already gives agents decentralized source. nipmod adds the package layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
 
-nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb content. It verifies packages over Gitlawb content so agents can search, inspect, add, lock and audit before trusting code.
+nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb content. It verifies packages over Gitlawb content so agents can search, inspect, install, lock and audit before trusting code.
 
 ## Public demo
 
@@ -16,7 +16,7 @@ nipmod doctor --online
 nipmod search gitlawb --online
 mkdir -p nipmod-demo && cd nipmod-demo
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 nipmod install
 nipmod outdated --online
 nipmod audit --online

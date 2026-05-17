@@ -1,6 +1,6 @@
 # Adoption
 
-nipmod adoption is measured by real install, inspect, add, restore, audit and publish dry run evidence. Do not claim adoption from page views alone.
+nipmod adoption is measured by real setup, inspect, package install, restore, audit and publish dry run evidence. Do not claim adoption from page views alone.
 
 ## First 100 User Loop
 
@@ -13,7 +13,7 @@ nipmod search gitlawb --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 mkdir -p nipmod-demo
 cd nipmod-demo
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 nipmod install
 nipmod audit --online
 nipmod ci --online
@@ -59,7 +59,6 @@ nipmod version:
 Commands run:
 Package:
 Doctor result:
-Add result:
 Install result:
 Audit result:
 Blocker:

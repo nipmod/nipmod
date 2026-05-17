@@ -52,7 +52,7 @@ Search hides quarantined packages by default.
 
 Inspect fails closed when verified registry evidence contradicts proof.
 
-Add and install plan exit before lockfile mutation when trust, policy or advisory checks fail.
+Install commands and install plans exit before lockfile mutation when trust, policy or advisory checks fail.
 
 CI exits nonzero when a lockfile can no longer be verified.
 

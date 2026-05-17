@@ -180,7 +180,7 @@ function evidenceArtifacts(pkg: RegistryPackage | null): Array<{ id: string; hre
       href: "/proof/transcript.json",
       id: "transcript",
       label: "Proof transcript",
-      text: "A machine readable record of the demo path: inspect, add, audit and blocked unsafe manifests."
+      text: "A machine readable record of the demo path: inspect, install, audit and blocked unsafe manifests."
     }
   ];
 

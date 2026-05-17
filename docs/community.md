@@ -51,7 +51,7 @@ nipmod version:
 Commands run:
 Package:
 Doctor result:
-Add result:
+Install result:
 Audit result:
 Blocker:
 May quote anonymously: yes or no

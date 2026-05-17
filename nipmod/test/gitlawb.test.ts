@@ -468,7 +468,7 @@ describe("Gitlawb integration", () => {
     ]);
     expect(doctor.checks.find((check) => check.id === "gitlawb-helper")).toMatchObject({
       detail: expect.stringContaining("verified checksum"),
-      message: "publish needs git-remote-gitlawb; install and add still work"
+      message: "publish needs git-remote-gitlawb; install still works"
     });
   });
 

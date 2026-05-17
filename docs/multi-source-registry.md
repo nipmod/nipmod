@@ -23,4 +23,4 @@ nipmod search policy --online
 
 ## Current Limit
 
-Search is multi source. Install and add still operate against one selected registry URL because trust roots, transparency pins and advisory roots must stay explicit. Multi source install should only ship after each source can publish signed registry root metadata.
+Search is multi source. Install still operates against one selected registry URL because trust roots, transparency pins and advisory roots must stay explicit. Multi source install should only ship after each source can publish signed registry root metadata.

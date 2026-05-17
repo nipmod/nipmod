@@ -60,7 +60,7 @@ describe("home content", () => {
       "nipmod doctor --online",
       "mkdir -p nipmod-demo && cd nipmod-demo",
       "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
-      "nipmod add gitlawb-repo-reader --online",
+      "nipmod install gitlawb-repo-reader --online",
       "nipmod install",
       "nipmod update --plan --online",
       "nipmod sbom --json",
@@ -76,12 +76,12 @@ describe("home content", () => {
 
   test("exposes a complete first run path", () => {
     expect(homeContent.quickstartSteps.map((step) => step.label)).toEqual([
-      "Install",
+      "Install CLI",
       "Verify",
       "Check",
       "Find",
       "Inspect",
-      "Add",
+      "Install package",
       "Restore",
       "Update",
       "SBOM",
@@ -89,11 +89,11 @@ describe("home content", () => {
       "Audit",
       "Publish"
     ]);
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Install")?.command).toBe(
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Install CLI")?.command).toBe(
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Add")?.command).toContain("mkdir -p nipmod-demo");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Restore")?.command).toBe("nipmod install");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Update")?.command).toBe(
       "nipmod update --plan --online\nnipmod update --online"
@@ -121,9 +121,9 @@ describe("home content", () => {
     ]);
     expect(homeContent.founderOutreach.post).toContain("package layer");
     expect(homeContent.founderOutreach.dm).toContain("sanity check");
-    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Add", "Restore", "Publish dry run"]);
+    expect(homeContent.demoFlow.map((item) => item.label)).toEqual(["Find", "Inspect", "Install", "Restore", "Publish dry run"]);
     expect(homeContent.ecosystemPackages.length).toBeGreaterThanOrEqual(28);
-    expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod add "))).toBe(true);
+    expect(homeContent.ecosystemPackages.every((pkg) => pkg.command.startsWith("nipmod install "))).toBe(true);
   });
 
   test("defines the Gitlawb repo to package flow without claiming ownership", () => {

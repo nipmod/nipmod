@@ -20,7 +20,7 @@ export const proofContent = {
   },
   safeCommands: [
     `nipmod inspect ${proofSubject} --online`,
-    `nipmod add ${proofPackageName} --online`,
+    `nipmod install ${proofPackageName} --online`,
     "nipmod audit --online",
     "nipmod ci --online"
   ],

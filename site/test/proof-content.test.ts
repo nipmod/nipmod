@@ -26,7 +26,7 @@ describe("public proof content", () => {
       /^nipmod inspect pkg:did:key:z[A-Za-z0-9]+\/gitlawb-release-review@0\.1\.0 --online$/
     );
     expect(proofContent.safeCommands.slice(1)).toEqual([
-      "nipmod add gitlawb-release-review --online",
+      "nipmod install gitlawb-release-review --online",
       "nipmod audit --online",
       "nipmod ci --online"
     ]);

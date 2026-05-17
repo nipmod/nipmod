@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/quickstart"
   },
-  description: "Install nipmod, inspect a verified package, add it to a workspace and run the author preflight.",
+  description: "Install nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
   openGraph: {
-    description: "Install nipmod, inspect a verified package, add it to a workspace and run the author preflight.",
+    description: "Install nipmod, inspect a verified package, install it to a workspace and run the author preflight.",
     title: "nipmod quickstart",
     url: "https://nipmod.com/quickstart"
   },
@@ -19,7 +19,7 @@ export default function QuickstartPage() {
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="quickstart-title">
         <p className="eyebrow">Start</p>
-        <h1 id="quickstart-title">Install. Inspect. Add. Publish safely.</h1>
+        <h1 id="quickstart-title">Install. Inspect. Lock. Publish safely.</h1>
         <p className="lead">
           A first run path for agents and developers who want useful packages with proof before workspace mutation.
         </p>
@@ -35,7 +35,7 @@ export default function QuickstartPage() {
 
       <section className="quickstart-grid" aria-label="Quickstart steps">
         {homeContent.quickstartSteps.map((step, index) => (
-          <article className="quickstart-card" id={step.label === "Install" ? "install" : undefined} key={step.label}>
+          <article className="quickstart-card" id={step.label === "Install CLI" ? "install" : undefined} key={step.label}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <h2>{step.label}</h2>
             <p>{step.text}</p>

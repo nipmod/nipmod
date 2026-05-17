@@ -261,7 +261,7 @@ if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && !
   fi
 elif [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && ! command -v git-remote-gitlawb >/dev/null 2>&1; then
   echo "Gitlawb publish helper not installed"
-  echo "Install and add work. Publish needs git-remote-gitlawb."
+  echo "Install works. Publish needs git-remote-gitlawb."
 fi
 
 if [ "$NIPMOD_DRY_RUN" != "1" ]; then

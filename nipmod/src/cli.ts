@@ -480,7 +480,19 @@ async function installCommand(args: string[]): Promise<CliResult> {
     return installLockfileCommand(args, dir);
   }
 
-  const integrity = requireFlagValue(args, "--integrity");
+  const integrity = optionalFlagValue(args, "--integrity");
+  if (!integrity && !isLocalInstallSpecifier(spec)) {
+    return registryInstallCommand({
+      args,
+      commandName: "install",
+      dir,
+      query: spec,
+      successMessage: "installed package"
+    });
+  }
+  if (!integrity) {
+    throw new Error("missing --integrity");
+  }
   if (spec.startsWith("pkg:")) {
     const expected = parseRemoteSpecifier(spec);
     const remote = await fetchGitlawbBundle({
@@ -576,12 +588,29 @@ class PolicyBlockError extends Error {
 async function addCommand(args: string[]): Promise<CliResult> {
   const query = firstPositional(args);
   const dir = optionalFlagValue(args, "--dir") ?? process.cwd();
-  const policy = await optionalPolicyFromFlags(args);
+  return registryInstallCommand({
+    args,
+    commandName: "add",
+    dir,
+    query,
+    successMessage: "added package"
+  });
+}
+
+async function registryInstallCommand(options: {
+  args: string[];
+  commandName: string;
+  dir: string;
+  query: string;
+  successMessage: string;
+}): Promise<CliResult> {
+  const policy = await optionalPolicyFromFlags(options.args);
   const plan = await resolveAddInstallPlan({
-    ...registryTrustFlags(args, "add"),
+    action: options.commandName === "install" ? "install" : "add",
+    ...registryTrustFlags(options.args, options.commandName),
     policy,
-    projectDir: dir,
-    query
+    projectDir: options.dir,
+    query: options.query
   });
   if (!plan.readyToInstall) {
     return {
@@ -597,9 +626,9 @@ async function addCommand(args: string[]): Promise<CliResult> {
   let result: Awaited<ReturnType<typeof executeInstallPlan>>;
   try {
     result = await executeInstallPlan(plan, {
-      nodeUrl: configuredNodeUrl(args),
+      nodeUrl: configuredNodeUrl(options.args),
       policy,
-      projectDir: dir
+      projectDir: options.dir
     });
   } catch (error) {
     if (error instanceof InstallPolicyBlockedError) {
@@ -617,7 +646,7 @@ async function addCommand(args: string[]): Promise<CliResult> {
   return {
     ok: true,
     data: {
-      message: result.lockfileChanged ? "added package" : "package already installed",
+      message: result.lockfileChanged ? options.successMessage : "package already installed",
       ...(plan.graph ? { graphPackageCount: plan.graph.packageCount } : {}),
       integrity: plan.integrity,
       lockfileChanged: result.lockfileChanged,
@@ -626,6 +655,17 @@ async function addCommand(args: string[]): Promise<CliResult> {
       version: plan.package.version
     }
   };
+}
+
+function isLocalInstallSpecifier(spec: string): boolean {
+  return (
+    spec.startsWith("file:") ||
+    spec.startsWith(".") ||
+    spec.startsWith("/") ||
+    spec.startsWith("~") ||
+    /^[A-Za-z]:[\\/]/.test(spec) ||
+    spec.endsWith(".nipmod")
+  );
 }
 
 async function listCommand(args: string[]): Promise<CliResult> {
@@ -1182,7 +1222,7 @@ function formatSearch(result: RegistrySearchResult, options: { details: boolean 
       lines.push(`    ${clipCell(pkg.description, 96)}`);
     }
     if (pkg.install) {
-      lines.push(`    add: ${pkg.install}`);
+      lines.push(`    install: ${pkg.install}`);
       if (pkg.nameAmbiguous && pkg.canonicalInstall) {
         lines.push(`    security: ${pkg.canonicalInstall}`);
       }
@@ -1257,7 +1297,7 @@ function formatView(pkg: RegistrySearchPackage): string {
   }
   const installCommand = pkg.canonicalInstall ?? pkg.install;
   if (installCommand) {
-    lines.push("", `add: ${installCommand}`);
+    lines.push("", `install: ${installCommand}`);
   } else if (pkg.installBlockedReason) {
     lines.push("", `blocked: ${pkg.installBlockedReason}`);
   }
@@ -1635,7 +1675,7 @@ function formatDoctor(doctor: DoctorGitlawbResult): string {
 
   const helper = doctor.checks.find((check) => check.id === "gitlawb-helper");
   if (helper?.status === "warn") {
-    lines.push("", "Install and add are ready. Publish needs the Gitlawb helper:", `  ${helper.detail ?? doctor.installCommand}`);
+    lines.push("", "Install is ready. Publish needs the Gitlawb helper:", `  ${helper.detail ?? doctor.installCommand}`);
   }
 
   return lines.join("\n");

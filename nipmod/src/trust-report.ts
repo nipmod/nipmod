@@ -500,7 +500,7 @@ function registryPackageReport(
     report.transparency = transparencyReport;
   }
   if (verified) {
-    report.installCommand = `nipmod add ${pkg.canonical}@${pkg.version} --online`;
+    report.installCommand = `nipmod install ${pkg.canonical}@${pkg.version} --online`;
   }
 
   return report;

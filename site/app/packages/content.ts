@@ -69,8 +69,8 @@ export function packageInstallVariants(pkg: RegistryPackage): PackageInstallVari
   const spec = `${pkg.canonical}@${pkg.version}`;
   return [
     {
-      label: "Add",
-      command: `nipmod add ${spec} --online`
+      label: "Install",
+      command: `nipmod install ${spec} --online`
     },
     {
       label: "Inspect first",

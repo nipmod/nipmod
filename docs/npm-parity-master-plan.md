@@ -22,7 +22,7 @@ Gitlawb owns source, refs and package artifacts. nipmod can index, resolve, veri
 | Dependency graph | dependencies, dev, peer, optional | agent dependencies, dev dependencies, peer agent dependencies, optional capabilities | in progress |
 | Lockfile | `package-lock.json` | `nipmod.lock.json` with verified package records and dependency graph snapshots | in progress |
 | Local store | `node_modules` plus cache | `.nipmod/store/sha256/<digest>` plus host activation adapters | started |
-| Install | `npm install` | `nipmod add`, graph install and lockfile restore with `nipmod install` | in progress |
+| Install | `npm install` | `nipmod install <package>`, graph install and lockfile restore with `nipmod install` | shipped |
 | Clean CI | `npm ci` | `nipmod ci` with trust, advisory and policy gates | partial |
 | Search | `npm search`, website search | trust ranked package search across signed registries | partial |
 | View | `npm view`, npm package pages | exact package metadata CLI/API and `/packages/[name]` pages | started |

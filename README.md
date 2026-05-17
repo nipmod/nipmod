@@ -74,7 +74,7 @@ nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitl
 nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online
 mkdir -p nipmod-demo
 cd nipmod-demo
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 nipmod install
 nipmod update --plan --online
 nipmod sbom --json

@@ -63,14 +63,14 @@ Check these fields before mutation:
 - Permissions.
 - Advisory status.
 
-## Add to a workspace
+## Install into a workspace
 
 Create a demo workspace first. The first lockfile mutation should not happen in an unrelated repo.
 
 ```sh
 mkdir -p nipmod-demo
 cd nipmod-demo
-nipmod add gitlawb-repo-reader --online
+nipmod install gitlawb-repo-reader --online
 ```
 
 Expected result:
@@ -151,4 +151,4 @@ If search or inspect fails with a network message, rerun with `--online`. `nipmo
 
 If inspect fails with a custom root message, use public roots or pass `--allow-custom-roots` only for a local test registry.
 
-If add fails with a trust or advisory block, do not force install. Inspect the report, advisory id and permission reasons first.
+If install fails with a trust or advisory block, do not force it. Inspect the report, advisory id and permission reasons first.
