@@ -36,7 +36,7 @@ test("home registry search stays usable", async ({ page }) => {
   await expect(page.locator("#registry .package-card").first()).toContainText("verified");
   await expect(page.locator("#registry .package-card").first().getByRole("link", { name: "Git source" })).toHaveAttribute(
     "href",
-    /^https:\/\/gitlawb\.com\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
+    /^https:\/\/gitlawb\.com\/node\/repos\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
   );
 });
 

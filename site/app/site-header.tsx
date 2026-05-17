@@ -57,7 +57,7 @@ export function SiteHeader() {
             <a href="/security">Security</a>
             <a href="/mcp">MCP</a>
             <a
-              href="https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod"
+              href={homeContent.links.gitlawbSource}
               aria-label="Open Nipmod source on Gitlawb in a new tab"
               rel="noreferrer"
               target="_blank"

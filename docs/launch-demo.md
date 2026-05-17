@@ -86,5 +86,5 @@ Independent project asking for Gitlawb review, not claiming endorsement.
 
 Run the demo and send the strongest objection.
 Public demo: https://nipmod.com/launch
-Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 ```

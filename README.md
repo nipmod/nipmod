@@ -7,7 +7,7 @@ Public links:
 
 - Website: https://nipmod.com
 - X: https://x.com/Nipmod
-- Gitlawb source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+- Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 
 ## Founder-facing pitch
 
@@ -141,5 +141,5 @@ Canonical public brand:
 
 - Website: `https://nipmod.com`
 - X: `https://x.com/Nipmod`
-- Gitlawb source: `https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod`
+- Gitlawb source: `https://gitlawb.com/node/repos/z6Mkwbud/nipmod`
 - DNS: Cloudflare

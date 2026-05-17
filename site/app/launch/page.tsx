@@ -98,7 +98,7 @@ const externalProofTracks = [
 
 const founderCopy = {
   post:
-    "Gitlawb gives agents decentralized source.\n\nNipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+    "Gitlawb gives agents decentralized source.\n\nNipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit.\n\nIndependent project asking for Gitlawb review, not claiming endorsement.\n\nRun the demo and send the strongest objection.\nPublic demo: https://nipmod.com/launch\nSource: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
   dm:
     "We built Nipmod as an independent package layer for Gitlawb agents. It keeps Gitlawb as decentralized source and adds verification around install: signed bundles, DID publisher identity, digest pinned lockfiles, release evidence, transparency proof, witness proof and advisory aware audit.\n\nCould you sanity check whether this model fits Gitlawb, should stay independent, or should become a smaller primitive Gitlawb exposes directly?"
 } as const;

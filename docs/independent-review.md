@@ -5,7 +5,7 @@ Nipmod must not claim third party audit status until an independent reviewer has
 ## Review Target
 
 - Website: `https://nipmod.com`
-- Source: `https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod`
+- Source: `https://gitlawb.com/node/repos/z6Mkwbud/nipmod`
 - Discovery: `https://nipmod.com/.well-known/nipmod.json`
 - Security policy: `https://nipmod.com/security`
 - Security metadata: `https://nipmod.com/.well-known/security.txt`

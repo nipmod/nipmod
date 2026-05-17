@@ -259,9 +259,9 @@ describe("registry data", () => {
   });
 
   test("renders clone repo URLs as Gitlawb web source links", () => {
-    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
-    expect(safeSourceRepoHref("https://node.gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
-    expect(safeSourceRepoHref("https://gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/zalpha/alpha");
+    expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git")).toBe("https://gitlawb.com/node/repos/zalpha/alpha");
+    expect(safeSourceRepoHref("https://node.gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/node/repos/zalpha/alpha");
+    expect(safeSourceRepoHref("https://gitlawb.com/zalpha/alpha.git")).toBe("https://gitlawb.com/node/repos/zalpha/alpha");
     expect(safeSourceRepoHref("javascript:alert(1)")).toBeNull();
     expect(safeSourceRepoHref("https://example.test/zalpha/alpha.git")).toBeNull();
     expect(safeSourceRepoHref("https://node.nipmod.com/zalpha/alpha.git/info/refs")).toBeNull();
@@ -269,7 +269,7 @@ describe("registry data", () => {
 
   test("current package source links are browser safe Gitlawb URLs", () => {
     expect(currentRegistry.packages.map((pkg) => safeSourceRepoHref(pkg.sourceRepo))).toEqual(
-      currentRegistry.packages.map((pkg) => `https://gitlawb.com/${pkg.owner.split(":").at(-1)}/${pkg.repo}`)
+      currentRegistry.packages.map((pkg) => `https://gitlawb.com/node/repos/${pkg.owner.split(":").at(-1)}/${pkg.repo}`)
     );
   });
 

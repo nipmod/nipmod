@@ -329,7 +329,7 @@ export function safeSourceRepoHref(value: string): string | null {
     if (!sourcePath) {
       return null;
     }
-    return `https://gitlawb.com/${sourcePath.owner}/${sourcePath.repo}`;
+    return `https://gitlawb.com/node/repos/${sourcePath.owner}/${sourcePath.repo}`;
   } catch {
     return null;
   }

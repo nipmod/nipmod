@@ -5,6 +5,7 @@ export const homeContent = {
   links: {
     docs: "/quickstart#docs",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+    gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     install: "/quickstart#install",
     x: "https://x.com/Nipmod"
   },
@@ -147,7 +148,7 @@ export const homeContent = {
   ],
   founderOutreach: {
     post:
-      "Gitlawb gives agents decentralized source. Nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "Gitlawb gives agents decentralized source. Nipmod adds the package layer: signed bundles, DID publisher identity, digest pinned installs, release evidence, transparency proof, witness proof and advisory aware audit. Independent project asking for Gitlawb review, not claiming endorsement. Public demo: https://nipmod.com/launch Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     dm:
       "We built Nipmod as an independent package layer for Gitlawb agents. It does not control Gitlawb publishing; it verifies signed packages over Gitlawb content so agents can inspect, install, lock and audit before trusting code. Could you sanity check whether this model fits Gitlawb's direction?"
   },

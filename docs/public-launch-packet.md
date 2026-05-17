@@ -62,7 +62,7 @@ Independent project asking for Gitlawb review, not claiming endorsement.
 
 Run the demo and send the strongest objection.
 Public demo: https://nipmod.com/launch
-Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 ```
 
 ## Founder DM
@@ -79,7 +79,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 
 - Website: https://nipmod.com
 - Launch path: https://nipmod.com/launch
-- Source: https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+- Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Registry: https://nipmod.com/registry/packages.json
 - Transparency checkpoint: https://nipmod.com/transparency/checkpoint.json
 - Security policy: https://nipmod.com/security
