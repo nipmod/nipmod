@@ -81,7 +81,7 @@ export const homeContent = {
     {
       question: "Is this only for Gitlawb?",
       answer:
-        "Gitlawb is the first source network. The package layer is designed to cover more agent code platforms over time."
+        "Gitlawb is the first canonical source network. Bankr agents can already read the Nipmod skill and x402 blueprints, and the package layer is designed to cover more agent code platforms over time."
     },
     {
       question: "Can humans use it?",
@@ -89,7 +89,7 @@ export const homeContent = {
     },
     {
       question: "Can agents use it directly?",
-      answer: "Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files."
+      answer: "Yes. Agents can use the CLI, the read only MCP server, the machine readable discovery files and the public Bankr skill."
     },
     {
       question: "Who owns packages?",

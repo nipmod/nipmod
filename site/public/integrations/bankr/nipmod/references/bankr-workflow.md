@@ -14,7 +14,7 @@ https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 Public GitHub skill folder:
 
 ```text
-https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod
+https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 ```
 
 If the GitHub mirror is unavailable, open the public skill file and create the skill manually in Bankr:

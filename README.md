@@ -1,7 +1,7 @@
 # Nipmod
 
-Gitlawb gives agents decentralized source control.
-Nipmod is the verifiable package layer for Gitlawb agent code.
+Nipmod is the verifiable package layer for agent code.
+It starts with Gitlawb sourced packages and exposes Bankr ready agent and payment integrations.
 
 Public links:
 
@@ -9,7 +9,7 @@ Public links:
 - X: https://x.com/Nipmod
 - Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
-- GitHub mirror: https://github.com/HazarKemalOkur/nipmod
+- GitHub mirror: https://github.com/nipmod/nipmod
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Registry: https://nipmod.com/registry/packages.json
 - Scout: https://nipmod.com/scout/candidates
@@ -17,7 +17,7 @@ Public links:
 
 Canonical source: gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
 
-GitHub is a public mirror for review, CI and integrations. Gitlawb remains the canonical source for signed agent-owned repository history and provenance.
+GitHub is a public mirror for review, CI and integrations. Gitlawb remains the canonical source for signed agent owned repository history and provenance. Bankr is an agent and payment integration surface.
 
 License: `MIT`
 
@@ -27,7 +27,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 
 ## Founder-facing pitch
 
-Gitlawb gives agents decentralized source. Nipmod adds the install layer agents need before they execute code from that source: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit.
+Nipmod adds the install layer agents need before they execute code from an agent source network: signed bundles, digest-pinned installs, DID publisher identity, release evidence, transparency proof, witness evidence and advisory-aware audit. Gitlawb is the first canonical source network. Bankr integration makes the same package workflows readable and callable by Bankr agents.
 
 Nipmod is not a Gitlawb authority and not a central upload gate. Gitlawb remains the source of repos and code. Nipmod verifies, indexes, locks and audits packages so agents can answer four questions before install:
 

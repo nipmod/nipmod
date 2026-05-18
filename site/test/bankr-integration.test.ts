@@ -16,7 +16,7 @@ const llmsPath = join(siteRoot, "public", "llms.txt");
 const x402ConfigPath = join(integrationRoot, "bankr.x402.json");
 const x402NpmConfigPath = join(integrationRoot, "bankr.x402.npm-asset.example.json");
 const publicSkillUrl = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
-const githubSkillFolder = "https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod";
+const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
 
 function read(path: string) {
   return readFileSync(path, "utf8");

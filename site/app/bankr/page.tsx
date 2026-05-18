@@ -3,7 +3,7 @@ import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 
 const skillInstall = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
-const githubSkillFolder = "https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod";
+const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
 
 const services = [
   {

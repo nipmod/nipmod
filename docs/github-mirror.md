@@ -25,7 +25,7 @@ https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 GitHub mirror:
 
 ```text
-https://github.com/HazarKemalOkur/nipmod
+https://github.com/nipmod/nipmod
 ```
 
 Do not treat GitHub as the authority for package ownership, DID identity, signed Gitlawb pushes or Nipmod registry provenance.
