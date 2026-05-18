@@ -27,6 +27,14 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://github.com/nipmod/nipmod"
   );
+  await expect(page.locator(".brand-socials").getByRole("link", { name: "Open Nipmod Bankr coin in a new tab" })).toHaveAttribute(
+    "href",
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  );
+  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod Bankr coin in a new tab" })).toHaveAttribute(
+    "href",
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
@@ -287,6 +295,10 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
     "href",
     "https://github.com/nipmod/nipmod"
+  );
+  await expect(panel.getByRole("link", { name: "Open Nipmod Bankr coin in a new tab" })).toHaveAttribute(
+    "href",
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
   );
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
 });

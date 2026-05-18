@@ -54,6 +54,16 @@ export default async function Home({ searchParams }: HomeProps) {
               <img alt="" height="18" src="/github-logo.svg" width="18" />
               <span>GitHub</span>
             </a>
+            <a
+              className="button button-ghost button-with-icon"
+              href={homeContent.links.bankrCoin}
+              aria-label="Open Nipmod Bankr coin in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <img alt="" height="18" src="/bankr-logo.svg" width="18" />
+              <span>Bankr coin</span>
+            </a>
           </div>
         </div>
 

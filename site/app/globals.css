@@ -1717,12 +1717,18 @@ h1 {
   }
 
   .brand {
-    padding: 0 7px;
+    padding: 0 4px;
   }
 
   .brand-icon-button {
-    height: 32px;
-    width: 32px;
+    height: 26px;
+    width: 26px;
+  }
+
+  .brand-icon-button img,
+  .brand-icon-button svg {
+    height: 15px;
+    width: 15px;
   }
 
   .nav-actions {
@@ -1732,7 +1738,7 @@ h1 {
   .nav-link,
   .nav-more-button {
     font-size: 12px;
-    padding: 0 10px;
+    padding: 0 7px;
   }
 
   .actions,

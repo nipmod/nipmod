@@ -46,6 +46,16 @@ export function SiteHeader() {
           >
             <img alt="" height="18" src="/github-logo.svg" width="18" />
           </a>
+          <a
+            className="brand-icon-button"
+            href={homeContent.links.bankrCoin}
+            aria-label="Open Nipmod Bankr coin in a new tab"
+            rel="noreferrer"
+            target="_blank"
+            title="Bankr coin"
+          >
+            <img alt="" height="18" src="/bankr-logo.svg" width="18" />
+          </a>
         </div>
       </div>
       <nav className="nav-actions" aria-label="Site">
@@ -88,6 +98,14 @@ export function SiteHeader() {
               target="_blank"
             >
               GitHub
+            </a>
+            <a
+              href={homeContent.links.bankrCoin}
+              aria-label="Open Nipmod Bankr coin in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Bankr coin
             </a>
             <a
               href={homeContent.links.gitlawbSource}
