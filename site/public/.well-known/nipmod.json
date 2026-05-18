@@ -26,6 +26,7 @@
     "drafts": "https://nipmod.com/scout/drafts",
     "draft": "https://nipmod.com/scout/draft",
     "draftParam": "repo",
+    "notifications": "https://nipmod.com/scout/notifications",
     "patch": "https://nipmod.com/scout/patch",
     "patchParam": "repo",
     "intervalMs": 300000

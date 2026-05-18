@@ -36,7 +36,7 @@ const SECRET_PATTERNS = [
   {
     type: "generic-secret-assignment",
     pattern:
-      /\b(?:API_TOKEN|AUTH_TOKEN|BEARER_TOKEN|GITHUB_TOKEN|NPM_TOKEN|PRIVATE_KEY|SECRET|SIGNING_PRIVATE_KEY|TOKEN|VERCEL_TOKEN)\s*=\s*["']?[A-Za-z0-9._~+/=-]{24,}|["'](?:apiToken|authToken|bearerToken|githubToken|npmToken|privateKey|secret|signingPrivateKey|token|vercelToken)["']\s*:\s*["'][A-Za-z0-9._~+/=-]{24,}["']/i
+      /\b(?:API_TOKEN|AUTH_TOKEN|BEARER_TOKEN|GITHUB_TOKEN|IDENTITY_B64|IDENTITY_JSON|NIPMOD_SCOUT_NOTIFY_IDENTITY_B64|NIPMOD_SCOUT_NOTIFY_IDENTITY_JSON|NPM_TOKEN|PRIVATE_KEY|SECRET|SIGNING_PRIVATE_KEY|TOKEN|VERCEL_TOKEN)\s*=\s*["']?[A-Za-z0-9._~+/=-]{24,}|["'](?:apiToken|authToken|bearerToken|githubToken|identityB64|identityJson|npmToken|privateKey|secret|signingPrivateKey|token|vercelToken)["']\s*:\s*["'][A-Za-z0-9._~+/=-]{24,}["']/i
   }
 ];
 

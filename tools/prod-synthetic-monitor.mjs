@@ -18,6 +18,7 @@ const DEFAULT_ENDPOINTS = {
   scoutCandidates: "https://nipmod.com/scout/candidates",
   scoutDrafts: "https://nipmod.com/scout/drafts",
   scoutHealth: "https://nipmod.com/scout/health",
+  scoutNotifications: "https://nipmod.com/scout/notifications",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
   trust: "https://nipmod.com/trust",
@@ -78,6 +79,11 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.scout?.health, endpoints.scoutHealth, "discovery scout health URL mismatch");
     assertEqual(state.discovery.scout?.candidates, endpoints.scoutCandidates, "discovery scout candidates URL mismatch");
     assertEqual(state.discovery.scout?.drafts, endpoints.scoutDrafts, "discovery scout drafts URL mismatch");
+    assertEqual(
+      state.discovery.scout?.notifications,
+      endpoints.scoutNotifications,
+      "discovery scout notifications URL mismatch"
+    );
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
@@ -255,6 +261,24 @@ export async function runSyntheticMonitor({
     return {
       drafts: payload.drafts.length,
       unclaimedDrafts: payload.summary?.unclaimedDrafts ?? 0
+    };
+  });
+
+  await runCheck(checks, "scout_notifications", async () => {
+    const payload = await fetchJson(endpoints.scoutNotifications, timedFetch);
+    if (payload.type !== "dev.nipmod.scout-owner-notifications.v1") {
+      throw new Error("scout notifications type mismatch");
+    }
+    if (payload.remoteWrites !== false || payload.dryRun !== true) {
+      throw new Error("scout notifications must be public dry runs");
+    }
+    if (!Array.isArray(payload.notifications)) {
+      throw new Error("scout notifications payload is invalid");
+    }
+    assertNoSecretLeak(payload, "scout notifications");
+    return {
+      notifications: payload.notifications.length,
+      planned: payload.summary?.planned ?? 0
     };
   });
 
@@ -438,6 +462,13 @@ function assertEqual(actual, expected, message) {
 function assertIncludes(text, marker, message) {
   if (!text.includes(marker)) {
     throw new Error(message);
+  }
+}
+
+function assertNoSecretLeak(value, label) {
+  const text = JSON.stringify(value);
+  if (/Bearer\s+[A-Za-z0-9._~+/=-]{20,}|BEGIN PRIVATE KEY|NIPMOD_SCOUT_NOTIFY_IDENTITY|TOKEN=|SECRET=/i.test(text)) {
+    throw new Error(`${label} leaks notification secret material`);
   }
 }
 

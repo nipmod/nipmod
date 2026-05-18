@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createOwnerNotificationPlan, notificationOptionsFromEnv } from "./scout-notify.mjs";
 
 const DEFAULT_NODE_URL = "https://node.nipmod.com";
 const DEFAULT_CLAIM_INDEX_URL = "https://nipmod.com/claims/index.json";
@@ -11,6 +12,7 @@ export async function runScoutCycle({
   generatedAt = new Date().toISOString(),
   limit = numberFromEnv(process.env.NIPMOD_SCOUT_LIMIT, 500),
   nodeUrl = process.env.NIPMOD_SCOUT_NODE_URL ?? process.env.GITLAWB_NODE ?? DEFAULT_NODE_URL,
+  notificationOptions = notificationOptionsFromEnv(process.env),
   registryUrl = process.env.NIPMOD_SCOUT_REGISTRY_URL ?? DEFAULT_REGISTRY_URL,
   scoutUrl = process.env.NIPMOD_SCOUT_PUBLIC_URL ?? DEFAULT_SCOUT_URL
 } = {}) {
@@ -30,7 +32,7 @@ export async function runScoutCycle({
       })
     );
 
-  return {
+  const cycle = {
     candidates,
     drafts,
     claimIndex: {
@@ -62,6 +64,13 @@ export async function runScoutCycle({
       unclaimedDrafts: drafts.filter((draft) => draft.status === "unclaimed").length
     },
     type: "dev.nipmod.scout-cycle.v1"
+  };
+  return {
+    ...cycle,
+    ownerNotifications: createOwnerNotificationPlan(cycle, {
+      ...notificationOptions,
+      generatedAt
+    })
   };
 }
 

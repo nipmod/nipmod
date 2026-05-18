@@ -2,22 +2,39 @@
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { createPackagePatch, repoFromGitlawbSource, runScoutCycle } from "./scout-agent.mjs";
+import {
+  createOwnerNotificationPlan,
+  loadNotificationIdentityFromEnv,
+  notificationOptionsFromEnv,
+  runOwnerNotificationDelivery
+} from "./scout-notify.mjs";
 
 const DEFAULT_INTERVAL_MS = 5 * 60 * 1000;
 const DEFAULT_PORT = 8080;
 
 export async function startScoutServer({
   intervalMs = numberFromEnv(process.env.NIPMOD_SCOUT_INTERVAL_MS, DEFAULT_INTERVAL_MS),
+  notificationAutoRun = booleanFromEnv(process.env.NIPMOD_SCOUT_NOTIFY_AUTORUN, false),
+  notificationDeliveryFn = runOwnerNotificationDelivery,
+  notificationFetchFn = fetch,
+  notificationIdentity = undefined,
+  notificationOptions = notificationOptionsFromEnv(process.env),
+  notificationRemoteWrites = booleanFromEnv(process.env.NIPMOD_SCOUT_NOTIFY_REMOTE_WRITES, false),
   port = numberFromEnv(process.env.PORT, DEFAULT_PORT),
   publicOrigin = process.env.NIPMOD_SCOUT_PUBLIC_URL,
   runToken = process.env.NIPMOD_SCOUT_RUN_TOKEN,
   runScoutCycleFn = runScoutCycle
 } = {}) {
+  const resolvedNotificationIdentity = notificationIdentity === undefined
+    ? await loadNotificationIdentityFromEnv(process.env)
+    : notificationIdentity;
   const state = {
     intervalMs,
     lastCycle: null,
     lastError: null,
+    lastNotificationDelivery: null,
     lastRunAt: null,
+    notificationLedger: new Map(),
     runs: 0,
     startedAt: new Date().toISOString()
   };
@@ -32,10 +49,21 @@ export async function startScoutServer({
     running = true;
     try {
       const cycle = await runScoutCycleFn();
-      state.lastCycle = cycle;
+      state.lastCycle = withOwnerNotifications(cycle, notificationOptions);
       state.lastError = null;
       state.lastRunAt = new Date().toISOString();
       state.runs += 1;
+      if (notificationAutoRun) {
+        state.lastNotificationDelivery = await notificationDeliveryFn({
+          cycle: state.lastCycle,
+          fetchFn: notificationFetchFn,
+          identity: resolvedNotificationIdentity,
+          ledger: state.notificationLedger,
+          nodeUrl: state.lastCycle.node?.url,
+          plan: state.lastCycle.ownerNotifications,
+          remoteWrites: notificationRemoteWrites
+        });
+      }
     } catch (error) {
       state.lastError = error instanceof Error ? error.message : String(error);
       state.lastRunAt = new Date().toISOString();
@@ -99,6 +127,15 @@ export async function startScoutServer({
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/notifications") {
+      if (!state.lastCycle) {
+        sendJson(response, 404, { error: "no completed scout cycle yet", ok: false });
+        return;
+      }
+      sendJson(response, state.lastCycle.ownerNotifications);
+      return;
+    }
+
     if (request.method === "GET" && url.pathname === "/draft") {
       try {
         const source = repoFromGitlawbSource(url.searchParams.get("repo"));
@@ -134,6 +171,38 @@ export async function startScoutServer({
       return;
     }
 
+    if (request.method === "POST" && url.pathname === "/notifications/run") {
+      if (!runToken || request.headers.authorization !== `Bearer ${runToken}`) {
+        sendJson(response, 403, { error: "notification run is not authorized", ok: false });
+        return;
+      }
+      if (!state.lastCycle) {
+        sendJson(response, 404, { error: "no completed scout cycle yet", ok: false });
+        return;
+      }
+      notificationDeliveryFn({
+        cycle: state.lastCycle,
+        fetchFn: notificationFetchFn,
+        identity: resolvedNotificationIdentity,
+        ledger: state.notificationLedger,
+        nodeUrl: state.lastCycle.node?.url,
+        plan: state.lastCycle.ownerNotifications,
+        remoteWrites: notificationRemoteWrites
+      })
+        .then((result) => {
+          state.lastNotificationDelivery = result;
+          sendJson(response, result.ok ? 200 : 502, result);
+        })
+        .catch((error) => {
+          sendJson(response, 502, {
+            error: error instanceof Error ? error.message : String(error),
+            ok: false,
+            type: "dev.nipmod.scout-owner-notification-delivery.v1"
+          });
+        });
+      return;
+    }
+
     sendJson(response, 404, { error: "not found", ok: false });
   });
 
@@ -163,8 +232,23 @@ function publicLastCycle(cycle) {
     generatedAt: cycle.generatedAt,
     node: cycle.node,
     ok: cycle.ok,
+    ownerNotifications: {
+      ready: cycle.ownerNotifications?.ready ?? false,
+      summary: cycle.ownerNotifications?.summary ?? null,
+      type: cycle.ownerNotifications?.type ?? "dev.nipmod.scout-owner-notifications.v1"
+    },
     summary: cycle.summary,
     type: "dev.nipmod.scout-last-public.v1"
+  };
+}
+
+function withOwnerNotifications(cycle, notificationOptions) {
+  if (cycle.ownerNotifications?.type === "dev.nipmod.scout-owner-notifications.v1") {
+    return cycle;
+  }
+  return {
+    ...cycle,
+    ownerNotifications: createOwnerNotificationPlan(cycle, notificationOptions)
   };
 }
 
@@ -283,6 +367,13 @@ function numberFromEnv(value, fallback) {
     return fallback;
   }
   return parsed;
+}
+
+function booleanFromEnv(value, fallback) {
+  if (value === undefined) {
+    return fallback;
+  }
+  return /^(1|true|yes)$/i.test(value);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

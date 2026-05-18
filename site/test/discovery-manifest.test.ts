@@ -83,7 +83,18 @@ describe("nipmod discovery manifest", () => {
       "indexCommand",
       "verifyCommand"
     ]);
-    expect(Object.keys(manifest.scout).sort()).toEqual(["candidates", "draft", "draftParam", "drafts", "health", "intervalMs", "last", "patch", "patchParam"]);
+    expect(Object.keys(manifest.scout).sort()).toEqual([
+      "candidates",
+      "draft",
+      "draftParam",
+      "drafts",
+      "health",
+      "intervalMs",
+      "last",
+      "notifications",
+      "patch",
+      "patchParam"
+    ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",
@@ -246,6 +257,7 @@ describe("nipmod discovery manifest", () => {
       health: "https://nipmod.com/scout/health",
       intervalMs: 300000,
       last: "https://nipmod.com/scout/last",
+      notifications: "https://nipmod.com/scout/notifications",
       patch: "https://nipmod.com/scout/patch",
       patchParam: "repo"
     });

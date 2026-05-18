@@ -62,6 +62,46 @@ describe("scout API contract", () => {
       status: "claimed",
       type: "dev.nipmod.package-draft.v1"
     });
+    expect(cycle.ownerNotifications).toMatchObject({
+      dryRun: true,
+      ready: true,
+      remoteWrites: false,
+      summary: {
+        planned: 0
+      },
+      type: "dev.nipmod.scout-owner-notifications.v1"
+    });
+  });
+
+  test("plans Scout owner notifications without remote writes", async () => {
+    const cycle = await buildScoutCycle({
+      claimIndex: {
+        verifiedClaims: []
+      },
+      fetchReposFn: async () => [repoFixture()],
+      generatedAt: "2026-05-17T21:30:00.000Z",
+      nodeUrl: "https://node.nipmod.com",
+      registry: registryFixture(),
+      scoutBaseUrl: "https://nipmod.com/scout"
+    });
+
+    expect(cycle.ownerNotifications).toMatchObject({
+      dryRun: true,
+      ready: true,
+      remoteWrites: false,
+      summary: {
+        eligible: 1,
+        planned: 1
+      }
+    });
+    expect(cycle.ownerNotifications.notifications[0]).toMatchObject({
+      channel: "gitlawb-issue",
+      package: `pkg:${owner}/gitlawb-repo-reader`,
+      remoteWrites: false,
+      source: `gitlawb://${owner}/gitlawb-repo-reader`,
+      status: "planned"
+    });
+    expect(JSON.stringify(cycle.ownerNotifications)).not.toMatch(/token|secret|private|victim@example.com/i);
   });
 
   test("creates package patches without remote writes", () => {

@@ -14,6 +14,7 @@ describe("secret scanner", () => {
         `FLY_API_TOKEN=${"FlyV1"} ${"abcdefghijklmnopqrstuvwxyz123456"}`,
         `-----BEGIN ${"PRIVATE KEY"}-----`,
         `NPM_TOKEN=${"npm_"}${"a".repeat(36)}`,
+        `NIPMOD_SCOUT_NOTIFY_IDENTITY_JSON=${"a".repeat(36)}`,
         `GITHUB_TOKEN=${"ghp_"}${"a".repeat(36)}`,
         `Authorization: Bearer ${"a".repeat(36)}`,
         `SIGNING_PRIVATE_KEY=${"a".repeat(36)}`
@@ -25,6 +26,7 @@ describe("secret scanner", () => {
       "fly-token",
       "private-key",
       "npm-token",
+      "generic-secret-assignment",
       "generic-secret-assignment",
       "github-token",
       "generic-secret-assignment",

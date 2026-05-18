@@ -1,12 +1,12 @@
 # Nipmod Scout Agent
 
-Scout Agent is the read only service that keeps Nipmod close to Gitlawb without taking control of anyone's repo.
+Scout Agent is the read mostly service that keeps Nipmod close to Gitlawb without taking control of anyone's repo.
 
-It runs continuously, scans public Gitlawb repositories, checks the public claim index and exposes package-ready candidates and claim-safe package drafts for humans and agents.
+It runs continuously, scans public Gitlawb repositories, checks the public claim index and exposes package-ready candidates, claim-safe package drafts and owner notification plans for humans and agents.
 
 ## Contract
 
-Scout Agent never writes to Gitlawb.
+The public Scout API never writes to Gitlawb.
 
 It does:
 
@@ -17,16 +17,20 @@ It does:
 - mark candidates as claimed only when the claim index verifies
 - prepare unsigned package drafts from public repo metadata
 - expose package patch JSON that owners or agents can apply locally
+- expose dry run owner notification plans for unclaimed unpublished drafts
+- optionally deliver deduped Gitlawb issue notifications only through an authenticated operator run
 
 It does not:
 
-- create issues
+- create issues from public GET routes
 - create pull requests
 - publish packages
 - claim ownership
 - write package drafts back to Gitlawb
 - use X, GitHub or email as ownership proof
 - store secrets
+- notify already claimed or already published packages
+- notify when the claim index or registry snapshot is stale
 
 ## Public API
 
@@ -37,6 +41,7 @@ GET https://nipmod.com/scout/candidates
 GET https://nipmod.com/scout/drafts
 GET https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo
 GET https://nipmod.com/scout/patch?repo=gitlawb://did:key:.../repo
+GET https://nipmod.com/scout/notifications
 ```
 
 `/candidates` returns the current machine-readable list:
@@ -101,6 +106,41 @@ GET https://nipmod.com/scout/patch?repo=gitlawb://did:key:.../repo
 }
 ```
 
+`/notifications` returns the public dry run plan for owners who could be notified:
+
+```json
+{
+  "type": "dev.nipmod.scout-owner-notifications.v1",
+  "dryRun": true,
+  "remoteWrites": false,
+  "ready": true,
+  "summary": {
+    "eligible": 4,
+    "planned": 4,
+    "deduped": 0,
+    "optedOut": 0,
+    "rateLimited": 0
+  },
+  "notifications": [
+    {
+      "channel": "gitlawb-issue",
+      "status": "planned",
+      "package": "pkg:did:key:.../repo",
+      "source": "gitlawb://did:key:.../repo"
+    }
+  ]
+}
+```
+
+Delivery is a separate operator action:
+
+```text
+POST /notifications/run
+Authorization: Bearer <run token>
+```
+
+Delivery still requires explicit remote write mode, a Scout signing identity, local dedupe state and a remote issue dedupe check. Without all of those, the delivery result is blocked and no Gitlawb write happens.
+
 ## Production Runtime
 
 The public Scout API is served under `https://nipmod.com/scout`.
@@ -126,3 +166,16 @@ That dedicated runtime uses `auto_stop_machines = "off"` and `min_machines_runni
 8. Run the returned `claim.verifyCommand`.
 
 Only the Gitlawb repo owner can make a candidate claimed.
+
+## Owner Notification Flow
+
+1. Scout scans repos and builds drafts.
+2. Scout blocks notification planning unless the claim index and registry snapshot are fresh.
+3. Scout plans only `unclaimed-draft` candidates with an unclaimed package draft.
+4. Scout dedupes by package id and rate limits by cycle and owner DID.
+5. Public `/notifications` shows the plan with `remoteWrites: false`.
+6. A configured operator may run `/notifications/run`.
+7. The delivery path checks existing Gitlawb issues for the dedupe key before any write.
+8. The issue body points owners to the generated draft and owner-only claim commands.
+
+This makes Scout useful for ecosystem growth without pretending that Nipmod owns another repo.

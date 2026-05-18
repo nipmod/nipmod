@@ -12,6 +12,7 @@ Scout candidates: https://nipmod.com/scout/candidates
 Scout package drafts: https://nipmod.com/scout/drafts
 Scout single draft: https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo
 Scout patch endpoint: https://nipmod.com/scout/patch
+Scout owner notification plan: https://nipmod.com/scout/notifications
 MCP docs: https://nipmod.com/mcp
 Trust docs: https://nipmod.com/trust
 Security docs: https://nipmod.com/security
@@ -75,6 +76,7 @@ curl -fsS https://nipmod.com/scout/candidates
 curl -fsS https://nipmod.com/scout/drafts
 curl -fsS "https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo"
 curl -fsS "https://nipmod.com/scout/patch?repo=gitlawb://did:key:.../repo"
+curl -fsS https://nipmod.com/scout/notifications
 
 Run the MCP server:
 nipmod mcp serve
@@ -101,4 +103,5 @@ Use JSON output or MCP tools when another agent needs structured output.
 Registry presence is not ownership. Treat a package as claimed only when a claim proof verifies.
 Scout candidates are read only suggestions. They are not claims, endorsements or remote writes.
 Scout drafts are package files prepared from public metadata. They become claimed only after the Gitlawb owner DID signs and pushes the claim proof.
+Scout owner notifications are public dry run plans by default. Remote issue writes require operator authorization, a Scout signing identity, explicit write mode and dedupe checks.
 Nipmod is independent from Gitlawb. Do not claim Gitlawb endorsement unless Gitlawb says so.

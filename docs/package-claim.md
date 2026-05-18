@@ -128,6 +128,14 @@ needs-work 8
 
 The Scout service runs 24/7. It never creates issues, pull requests, claims or packages on behalf of another owner.
 
+Scout also exposes a dry run owner notification plan:
+
+```text
+https://nipmod.com/scout/notifications
+```
+
+That plan is public, read only and marked `remoteWrites: false`. It lists only unclaimed unpublished drafts after the claim index and registry have both refreshed.
+
 ### 2. Candidate Page Exists
 
 Every candidate gets a page:
@@ -209,7 +217,7 @@ git commit -m "feat: add nipmod package manifest"
 GITLAWB_NODE=https://node.nipmod.com git push
 ```
 
-Remote writes stay human controlled until Gitlawb PR and issue APIs are stable and explicit approval exists.
+Remote writes stay operator controlled. Scout can deliver a Gitlawb issue notification only when the operator provides authorization, explicit write mode and a Scout signing identity. The delivery path dedupes locally and checks existing Gitlawb issues before writing.
 
 Later, a Gitlawb PR assistant can use the same local patch to open:
 
@@ -218,6 +226,39 @@ Later, a Gitlawb PR assistant can use the same local patch to open:
 - install command
 - Package Claim badge
 - permission summary
+
+## Owner Notification Delivery
+
+The notification feature is designed to help repo owners discover a ready package draft without stealing the repo or claiming endorsement.
+
+Eligibility:
+
+- candidate status is `unclaimed-draft`
+- claim status is `unclaimed`
+- package is not already in the registry
+- matching draft exists
+- claim index is fresh
+- registry snapshot is fresh
+
+Safety gates:
+
+- public endpoints are dry run only
+- no notification for published packages
+- no notification for claimed packages
+- no X, GitHub or email ownership inference
+- opt-out list support
+- per-cycle and per-owner rate limits
+- local dedupe ledger
+- remote Gitlawb issue dedupe by marker
+
+Operator run:
+
+```bash
+curl -X POST https://nipmod.com/scout/notifications/run \
+  -H "Authorization: Bearer $NIPMOD_SCOUT_RUN_TOKEN"
+```
+
+Production should keep `NIPMOD_SCOUT_NOTIFY_REMOTE_WRITES` off until the operator identity and opt-out policy are reviewed.
 
 ## CLI Surface
 

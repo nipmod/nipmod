@@ -7,6 +7,7 @@ import {
   type PackageCandidate
 } from "./candidates";
 import type { RegistryIndex, RegistryPackage } from "./registry";
+import { createOwnerNotificationPlan, type OwnerNotificationPlan } from "./scout-notifications";
 
 export const SCOUT_BASE_URL = "https://nipmod.com/scout";
 export const SCOUT_INTERVAL_MS = 300_000;
@@ -80,6 +81,7 @@ export interface ScoutCycle {
     url: string;
   };
   ok: true;
+  ownerNotifications: OwnerNotificationPlan;
   summary: {
     claimed: number;
     drafts: number;
@@ -132,7 +134,7 @@ export async function buildScoutCycle({
       })
     );
 
-  return {
+  const cycle: Omit<ScoutCycle, "ownerNotifications"> = {
     candidates,
     drafts,
     formatVersion: 1,
@@ -151,6 +153,17 @@ export async function buildScoutCycle({
       unclaimedDrafts: drafts.filter((draft) => draft.status === "unclaimed").length
     },
     type: "dev.nipmod.scout-cycle.v1"
+  };
+  return {
+    ...cycle,
+    ownerNotifications: createOwnerNotificationPlan({
+      candidates,
+      claimIndexOk: true,
+      drafts,
+      generatedAt,
+      nodeUrl,
+      registryOk: true
+    })
   };
 }
 
