@@ -335,9 +335,16 @@ h1 {
   border: 1px solid var(--border);
   font-size: 15px;
   font-weight: 650;
+  gap: 8px;
   min-height: 48px;
   min-width: 128px;
   padding: 0 20px;
+}
+
+.button-with-icon img {
+  display: block;
+  height: 18px;
+  width: 18px;
 }
 
 .button:hover {

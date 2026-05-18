@@ -36,6 +36,16 @@ export function SiteHeader() {
               />
             </svg>
           </a>
+          <a
+            className="brand-icon-button"
+            href={homeContent.links.github}
+            aria-label="Open Nipmod GitHub repository in a new tab"
+            rel="noreferrer"
+            target="_blank"
+            title="GitHub"
+          >
+            <img alt="" height="18" src="/github-logo.svg" width="18" />
+          </a>
         </div>
       </div>
       <nav className="nav-actions" aria-label="Site">
@@ -70,6 +80,14 @@ export function SiteHeader() {
             </a>
             <a href={homeContent.links.x} aria-label="Open Nipmod on X in a new tab" rel="noreferrer" target="_blank">
               X
+            </a>
+            <a
+              href={homeContent.links.github}
+              aria-label="Open Nipmod GitHub repository in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              GitHub
             </a>
             <a
               href={homeContent.links.gitlawbSource}

@@ -44,6 +44,16 @@ export default async function Home({ searchParams }: HomeProps) {
             <a className="button button-ghost" href="/packages">
               Browse packages
             </a>
+            <a
+              className="button button-ghost button-with-icon"
+              href={homeContent.links.github}
+              aria-label="Open Nipmod GitHub repository in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <img alt="" height="18" src="/github-logo.svg" width="18" />
+              <span>GitHub</span>
+            </a>
           </div>
         </div>
 

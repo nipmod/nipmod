@@ -30,6 +30,10 @@ describe("home content", () => {
     expect(homeContent.links.x).toBe("https://x.com/Nipmod");
   });
 
+  test("links to the public GitHub mirror", () => {
+    expect(homeContent.links.github).toBe("https://github.com/nipmod/nipmod");
+  });
+
   test("links source review to the canonical Gitlawb repo page", () => {
     expect(homeContent.links.gitlawbProfile).toBe("https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R");
     expect(homeContent.links.gitlawbSource).toBe("https://gitlawb.com/node/repos/z6Mkwbud/nipmod");

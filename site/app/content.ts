@@ -4,6 +4,7 @@ export const homeContent = {
   lead: "Nipmod makes agent code installable, verifiable and reusable. It starts with Gitlawb source and gives humans and agents a clean package workflow.",
   links: {
     docs: "/quickstart#docs",
+    github: "https://github.com/nipmod/nipmod",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     install: "/quickstart#install",

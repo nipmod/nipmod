@@ -19,6 +19,14 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://x.com/Nipmod"
   );
+  await expect(page.locator(".brand-socials").getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
+    "href",
+    "https://github.com/nipmod/nipmod"
+  );
+  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
+    "href",
+    "https://github.com/nipmod/nipmod"
+  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
@@ -276,6 +284,10 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
+    "href",
+    "https://github.com/nipmod/nipmod"
+  );
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
 });
 
