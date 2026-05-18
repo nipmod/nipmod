@@ -32,7 +32,7 @@ describe("nipmod CLI", () => {
 
     expect(parsed.ok).toBe(true);
     expect(parsed.data.commands).toEqual(
-      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "dist-tag", "deprecate", "yank", "mcp"])
+      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "dist-tag", "deprecate", "yank", "mcp", "setup"])
     );
     expect(parsed.data.exitCodes).toEqual(
       expect.arrayContaining([
@@ -1536,7 +1536,7 @@ describe("nipmod CLI", () => {
     expect(result.stdout).toContain("nipmod ready");
     expect(result.stdout).toContain("WARN Publish helper");
     expect(result.stdout).toContain("Install is ready");
-    expect(result.stdout).toContain("verified checksum");
+    expect(result.stdout).toContain("nipmod setup gitlawb");
     expect(result.stdout).toContain("Publish needs the Gitlawb helper:");
     expect(result.stdout).not.toContain("nipmod needs setup");
     expect(result.stdout).not.toContain("FAIL Gitlawb helper");
@@ -1544,6 +1544,46 @@ describe("nipmod CLI", () => {
     expect(result.stdout).not.toContain("curl -fsSL");
     expect(result.stdout).not.toContain("| sh");
   });
+
+  test("prints a safe dry run for Gitlawb publish setup", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-setup-gitlawb-"));
+    const binDir = join(workspace, "bin");
+    const result = await execaNode([
+      "src/cli.ts",
+      "setup",
+      "gitlawb",
+      "--version",
+      "v9.9.9",
+      "--bin-dir",
+      binDir,
+      "--dry-run",
+      "--json"
+    ]);
+    const parsed = JSON.parse(result.stdout) as {
+      ok: true;
+      data: {
+        installed: false;
+        archiveUrl: string;
+        checksumUrl: string;
+        helperPath: string;
+        message: string;
+        nodeUrl: string;
+        version: string;
+      };
+    };
+
+    expect(parsed.ok).toBe(true);
+    expect(parsed.data).toMatchObject({
+      installed: false,
+      helperPath: join(binDir, "git-remote-gitlawb"),
+      nodeUrl: "https://node.nipmod.com",
+      version: "v9.9.9"
+    });
+    expect(parsed.data.archiveUrl).toContain("github.com/gitlawb/releases/releases/download/v9.9.9/");
+    expect(parsed.data.checksumUrl).toBe(`${parsed.data.archiveUrl}.sha256`);
+    expect(parsed.data.message).toContain("dry run");
+    expect(parsed.data.message).toContain("verified Gitlawb release");
+  }, 15_000);
 
   test("doctor exits non-zero when required online checks fail", async () => {
     const failed = await expectCliJsonFailure([

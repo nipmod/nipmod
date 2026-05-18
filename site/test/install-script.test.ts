@@ -276,11 +276,10 @@ describe("install script", () => {
     expect(result.stderr).toContain("release package contains postinstall script");
   });
 
-  test("does not execute Gitlawb helper installer without a pinned checksum", async () => {
+  test("uses nipmod setup for Gitlawb helper instead of executing a remote shell installer", async () => {
     const fakeBin = await makeFakeBin({ checksumFails: false });
     const temp = await mkdtemp(join(tmpdir(), "nipmod-install-script-"));
     const result = await runScript({
-      GITLAWB_INSTALL_URL: "https://gitlawb.example/install.sh",
       NIPMOD_ALLOW_UNVERIFIED: "1",
       NIPMOD_BASE_URL: "https://example.test",
       NIPMOD_BIN_DIR: join(temp, "bin"),
@@ -290,11 +289,15 @@ describe("install script", () => {
       PATH: `${fakeBin}:/bin:/usr/bin`
     });
 
-    expect(result.code).toBe(1);
-    expect(result.stderr).toContain("GITLAWB_INSTALL_SHA256 is required");
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("Setting up Gitlawb publish helper");
+    expect(result.stdout).not.toContain("curl -fsSL");
+    expect(result.stdout).not.toContain("| sh");
+    expect(result.stdout).not.toContain("gitlawb-install.sh");
+    expect(result.stderr).not.toContain("GITLAWB_INSTALL_SHA256");
   });
 
-  test("does not require a helper installer checksum when Gitlawb helper already exists", async () => {
+  test("still normalizes Gitlawb publish setup when a PATH helper already exists", async () => {
     const fakeBin = await makeFakeBin({
       checksumFails: true,
       signatureFails: true
@@ -315,6 +318,7 @@ describe("install script", () => {
 
     expect(result.code).toBe(0);
     expect(result.stderr).not.toContain("GITLAWB_INSTALL_SHA256 is required");
+    expect(result.stdout).toContain("Setting up Gitlawb publish helper");
     expect(result.stdout).toContain("Installed nipmod");
   });
 });

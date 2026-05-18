@@ -66,4 +66,4 @@ That is the same boundary as a market data layer: it can rate and warn, but it d
 
 Gitlawb stores repos, refs and blobs. Nipmod does not treat a moving Gitlawb ref as enough trust by itself. Install trust comes from the package digest, bundle signature, signed release event, transparency inclusion, witness statement and advisory state.
 
-Publish currently needs `git-remote-gitlawb` and a package slug that Gitlawb can store as a repo name. Dotted or scoped names can be used for local drafts only when their canonical slug resolves to a Gitlawb compatible repo name.
+Publish uses `git-remote-gitlawb` and a package slug that Gitlawb can store as a repo name. Run `nipmod setup gitlawb` to install the helper from a checksum verified Gitlawb release with `https://node.nipmod.com` as the default node. Dotted or scoped names can be used for local drafts only when their canonical slug resolves to a Gitlawb compatible repo name.

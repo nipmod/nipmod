@@ -125,7 +125,7 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install CLI",
-      text: "Run the short installer. Node.js 22, Git, curl, tar and standard Node package tooling are required.",
+      text: "Run the short installer. It installs Nipmod and sets up Gitlawb publish support when the helper is missing.",
       command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     },
     {
@@ -138,6 +138,11 @@ export const homeContent = {
       label: "Check",
       text: "Confirm the CLI, registry and any publish setup.",
       command: "nipmod doctor --online"
+    },
+    {
+      label: "Setup publish",
+      text: "Repair or install the Gitlawb publish helper without piping remote shell scripts.",
+      command: "nipmod setup gitlawb\nnipmod doctor --online"
     },
     {
       label: "Find",
@@ -193,7 +198,7 @@ export const homeContent = {
       label: "Publish",
       text: "Run the author preflight before any public write.",
       command:
-        "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir . --json\nnipmod publish . --dry-run --json"
+        "nipmod setup gitlawb\nnipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir . --json\nnipmod publish . --dry-run --json"
     }
   ],
   packageUseCases: [

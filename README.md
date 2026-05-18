@@ -27,7 +27,7 @@ Nipmod is not a Gitlawb authority and not a central upload gate. Gitlawb remains
 
 ## What works now
 
-- CLI release `1.2.0` with signed installer and signed tarball.
+- CLI release `1.2.1` with signed installer and signed tarball.
 - Public verified registry sourced from Gitlawb.
 - Install, add, update, audit, CI, SBOM and explain commands.
 - Deterministic `.nipmod` bundles signed by Ed25519 `did:key` identities.
@@ -42,6 +42,7 @@ Nipmod is not a Gitlawb authority and not a central upload gate. Gitlawb remains
 ## Install
 
 Requirements: Node.js 22 or newer, npm, Git, curl and tar. The CLI is not published to npm; install uses the signed release installer from `nipmod.com`.
+The installer also sets up or normalizes Gitlawb publish support through `nipmod setup gitlawb`.
 
 Standard:
 
@@ -61,6 +62,7 @@ bash install.sh
 ## First package
 
 ```bash
+nipmod setup gitlawb
 nipmod doctor --online
 nipmod search gitlawb --online
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0

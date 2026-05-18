@@ -93,6 +93,7 @@ describe("home content", () => {
       "Install CLI",
       "Verify",
       "Check",
+      "Setup publish",
       "Find",
 	      "Inspect",
       "Plan install",

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${NIPMOD_VERSION:-1.2.0}"
+VERSION="${NIPMOD_VERSION:-1.2.1}"
 BASE_URL="${NIPMOD_BASE_URL:-https://nipmod.com}"
 PACKAGE_NAME="${NIPMOD_PACKAGE_NAME:-nipmod-${VERSION}.tgz}"
 PACKAGE_URL="${NIPMOD_PACKAGE_URL:-${BASE_URL}/releases/${PACKAGE_NAME}}"
@@ -12,9 +12,8 @@ NIPMOD_BIN_DIR="${NIPMOD_BIN_DIR:-${HOME}/.local/bin}"
 NIPMOD_SKIP_GITLAWB="${NIPMOD_SKIP_GITLAWB:-0}"
 NIPMOD_DRY_RUN="${NIPMOD_DRY_RUN:-0}"
 NIPMOD_ALLOW_UNVERIFIED="${NIPMOD_ALLOW_UNVERIFIED:-0}"
-NIPMOD_INSTALL_GITLAWB="${NIPMOD_INSTALL_GITLAWB:-0}"
-GITLAWB_INSTALL_URL="${GITLAWB_INSTALL_URL:-https://gitlawb.com/install.sh}"
-GITLAWB_INSTALL_SHA256="${GITLAWB_INSTALL_SHA256:-}"
+NIPMOD_INSTALL_GITLAWB="${NIPMOD_INSTALL_GITLAWB:-1}"
+GITLAWB_NODE="${GITLAWB_NODE:-https://node.nipmod.com}"
 NIPMOD_RELEASE_PUBLIC_KEY_SPKI_BASE64="MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo="
 NIPMOD_RELEASE_PUBLIC_KEY_SPKI_SHA256="49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
 INITIAL_PATH="$PATH"
@@ -238,30 +237,18 @@ fi
 run npm install --ignore-scripts --omit=dev --prefix "$NIPMOD_HOME" "$archive"
 run ln -sf "$NIPMOD_HOME/node_modules/.bin/nipmod" "$NIPMOD_BIN_DIR/nipmod"
 
-if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && ! command -v git-remote-gitlawb >/dev/null 2>&1; then
-  helper_script="${tmp_dir}/gitlawb-install.sh"
+if [ "$NIPMOD_INSTALL_GITLAWB" = "1" ] && [ "$NIPMOD_SKIP_GITLAWB" != "1" ]; then
+  echo ""
+  echo "Setting up Gitlawb publish helper"
   if [ "$NIPMOD_DRY_RUN" = "1" ]; then
-    echo "dry run: curl -fsSL ${GITLAWB_INSTALL_URL} -o ${helper_script}"
-    echo "dry run: verify GITLAWB_INSTALL_SHA256"
-    echo "dry run: sh ${helper_script}"
-  else
-    if [ -z "$GITLAWB_INSTALL_SHA256" ]; then
-      echo "error: GITLAWB_INSTALL_SHA256 is required when NIPMOD_INSTALL_GITLAWB=1" >&2
-      exit 1
-    fi
-    curl -fsSL "$GITLAWB_INSTALL_URL" -o "$helper_script"
-    actual_helper_sha256="$(sha256_file "$helper_script")"
-    if [ "$GITLAWB_INSTALL_SHA256" != "$actual_helper_sha256" ]; then
-      echo "error: Gitlawb helper installer checksum mismatch" >&2
-      echo "  expected: $GITLAWB_INSTALL_SHA256" >&2
-      echo "  actual:   $actual_helper_sha256" >&2
-      exit 1
-    fi
-    sh "$helper_script"
+    echo "dry run: $NIPMOD_BIN_DIR/nipmod setup gitlawb --bin-dir $NIPMOD_BIN_DIR --node $GITLAWB_NODE"
+  elif ! "$NIPMOD_BIN_DIR/nipmod" setup gitlawb --bin-dir "$NIPMOD_BIN_DIR" --node "$GITLAWB_NODE"; then
+    echo "warning: Gitlawb publish setup failed" >&2
+    echo "  Run later: nipmod setup gitlawb" >&2
   fi
 elif [ "$NIPMOD_SKIP_GITLAWB" != "1" ] && ! command -v git-remote-gitlawb >/dev/null 2>&1; then
   echo "Gitlawb publish helper not installed"
-  echo "Install works. Publish needs git-remote-gitlawb."
+  echo "Install works. Publish setup: nipmod setup gitlawb"
 fi
 
 if [ "$NIPMOD_DRY_RUN" != "1" ]; then

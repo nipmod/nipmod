@@ -116,6 +116,7 @@ describe("nipmod discovery manifest", () => {
       "publishDryRun",
       "sbom",
       "search",
+      "setupPublish",
       "verifyInstaller"
     ]);
     expect(Object.keys(manifest.mcp).sort()).toEqual(["docs", "serverCommand", "tools"]);
@@ -290,6 +291,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.agent.workflow).toEqual([
       "install",
       "verifyInstaller",
+      "setupPublish",
       "doctor",
       "search",
       "inspect",
@@ -317,6 +319,7 @@ describe("nipmod discovery manifest", () => {
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
+      setupPublish: "nipmod setup gitlawb",
       verifyInstaller: verifyInstallerCommand
     });
     expect(manifest.mcp).toEqual({

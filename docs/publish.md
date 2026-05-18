@@ -5,6 +5,7 @@ Nipmod publishes agent packages through Gitlawb while keeping package truth outs
 ## Author flow
 
 ```sh
+nipmod setup gitlawb
 nipmod init --name @you/example-agent --dir example-agent
 cd example-agent
 nipmod manifest validate

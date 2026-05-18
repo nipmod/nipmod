@@ -46,7 +46,19 @@ Expected result:
 
 - CLI is available.
 - Public registry is reachable.
-- Missing publish setup is shown as a warning, not an install blocker.
+- Publish setup is ready, or the command prints `nipmod setup gitlawb` as the repair path.
+
+## Set up publish
+
+```sh
+nipmod setup gitlawb
+nipmod doctor --online
+```
+
+Expected result:
+
+- `git-remote-gitlawb` is installed from a checksum verified Gitlawb release.
+- Publish defaults to `https://node.nipmod.com` unless `GITLAWB_NODE` overrides it.
 
 ## Find a package
 

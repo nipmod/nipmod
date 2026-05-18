@@ -72,6 +72,7 @@ import {
   type RegistrySearchPackage,
   type RegistrySearchResult
 } from "./registry.js";
+import { setupGitlawbHelper, type SetupGitlawbHelperResult } from "./gitlawb-setup.js";
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
 import { createUpdatePlan, executeUpdatePlan, type UpdatePlan } from "./update.js";
@@ -117,6 +118,7 @@ const CLI_COMMANDS = [
   "policy",
   "mcp",
   "version",
+  "setup",
   "setup-cloudflare"
 ] as const;
 
@@ -223,6 +225,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return policyCommand(args);
     case "mcp":
       return mcpCommand(args);
+    case "setup":
+      return setupCommand(args);
     case "setup-cloudflare":
       return setupCloudflareCommand(args);
     default:
@@ -1231,6 +1235,47 @@ async function doctorCommand(args: string[]): Promise<CliResult> {
   };
 }
 
+async function setupCommand(args: string[]): Promise<CliResult> {
+  const subcommand = args[0];
+  const rest = args.slice(1);
+  switch (subcommand) {
+    case "gitlawb": {
+      const options: Parameters<typeof setupGitlawbHelper>[0] = {
+        dryRun: hasFlag(rest, "--dry-run"),
+        force: hasFlag(rest, "--force"),
+        nodeUrl: configuredNodeUrl(rest)
+      };
+      const binDir = optionalFlagValue(rest, "--bin-dir");
+      const version = optionalFlagValue(rest, "--version");
+      const releaseBaseUrl = optionalFlagValue(rest, "--release-base");
+      const latestApiUrl = optionalFlagValue(rest, "--latest-api");
+      if (binDir) {
+        options.binDir = binDir;
+      }
+      if (version) {
+        options.version = version;
+      }
+      if (releaseBaseUrl) {
+        options.releaseBaseUrl = releaseBaseUrl;
+      }
+      if (latestApiUrl) {
+        options.latestApiUrl = latestApiUrl;
+      }
+      const result = await setupGitlawbHelper(options);
+      return {
+        ok: result.ready,
+        data: {
+          ...result,
+          message: formatGitlawbSetup(result)
+        },
+        exitCode: result.ready ? 0 : 12
+      };
+    }
+    default:
+      throw new Error("usage: nipmod setup gitlawb [--version vX.Y.Z] [--bin-dir <dir>] [--force] [--dry-run]");
+  }
+}
+
 async function auditCommand(args: string[]): Promise<CliResult> {
   assertCustomTrustRoots(args, "audit");
   const { dir, options } = auditProjectOptionsFromFlags(args, "audit");
@@ -2177,6 +2222,10 @@ function formatDoctor(doctor: DoctorGitlawbResult): string {
   }
 
   return lines.join("\n");
+}
+
+function formatGitlawbSetup(result: SetupGitlawbHelperResult): string {
+  return result.message;
 }
 
 function formatPackageScan(candidates: PackageCandidateReport[]): string {

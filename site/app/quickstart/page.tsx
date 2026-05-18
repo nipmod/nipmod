@@ -67,6 +67,7 @@ const stepIds: Record<string, string> = {
   Publish: "publish",
   Restore: "restore",
   SBOM: "sbom",
+  "Setup publish": "setup-publish",
   Update: "update",
   Verify: "verify"
 };

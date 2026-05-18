@@ -508,7 +508,7 @@ describe("Gitlawb integration", () => {
 
     expect(found).toMatchObject({ ok: true, path: helperPath, source: "PATH" });
     expect(missing.ok).toBe(false);
-    expect(missing.installCommand).toContain("verified checksum");
+    expect(missing.installCommand).toBe("nipmod setup gitlawb");
     expect(missing.installCommand).not.toContain("curl -fsSL");
     expect(doctor.ready).toBe(true);
     expect(doctor.checks.map((check) => `${check.id}:${check.status}`)).toEqual([
@@ -541,7 +541,7 @@ describe("Gitlawb integration", () => {
       "registry:warn"
     ]);
     expect(doctor.checks.find((check) => check.id === "gitlawb-helper")).toMatchObject({
-      detail: expect.stringContaining("verified checksum"),
+      detail: "nipmod setup gitlawb",
       message: "publish needs git-remote-gitlawb; install still works"
     });
   });
