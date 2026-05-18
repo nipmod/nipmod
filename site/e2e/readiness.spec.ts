@@ -173,6 +173,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
     "/agents",
     "/audit",
+    "/bankr",
     "/trust",
     "/security",
     "/launch",
@@ -292,6 +293,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Bankr agents" })).toHaveAttribute("href", "/bankr");
   await expect(panel.getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
     "href",
     "https://github.com/nipmod/nipmod"
@@ -301,6 +303,36 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
     "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
   );
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
+});
+
+test("Bankr page gives agents a complete local integration path", async ({ page, request }) => {
+  await page.goto("/bankr");
+
+  await expect(page.getByRole("heading", { name: "Nipmod for Bankr agents" })).toBeVisible();
+  await expect(page.getByText("A free Bankr-ready integration pack for agent skills")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open Bankr skill file" })).toHaveAttribute(
+    "href",
+    "/integrations/bankr/nipmod/SKILL.md"
+  );
+  await expect(page.getByRole("link", { name: "Open free service map" })).toHaveAttribute(
+    "href",
+    "/integrations/bankr/bankr.free.json"
+  );
+  await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
+  await expect(page.getByText("The skill follows the Bankr")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Free services" })).toBeVisible();
+  await expect(page.getByText("Core Nipmod workflows stay free for Bankr agents.")).toBeVisible();
+  await expect(page.getByText("Free package search")).toBeVisible();
+  await expect(page.getByText("Free package audit")).toBeVisible();
+  await expect(page.getByText("Free repo draft")).toBeVisible();
+
+  const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
+  await expect(skill).toBeOK();
+  await expect(skill.text()).resolves.toContain("name: nipmod");
+
+  const config = await request.get("/integrations/bankr/bankr.free.json");
+  await expect(config).toBeOK();
+  expect((await config.json()).pricing).toBe("free");
 });
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {

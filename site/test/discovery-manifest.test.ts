@@ -33,6 +33,7 @@ describe("nipmod discovery manifest", () => {
       "advisoriesPublicKey",
       "advisoriesSignature",
       "agent",
+      "bankr",
       "claims",
       "docs",
       "formatVersion",
@@ -74,6 +75,7 @@ describe("nipmod discovery manifest", () => {
     expect(Object.keys(manifest.docs).sort()).toEqual([
       "agents",
       "audit",
+      "bankr",
       "createPackage",
       "docs",
       "install",
@@ -102,6 +104,9 @@ describe("nipmod discovery manifest", () => {
       "sourceNodes"
     ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
+    expect(Object.keys(manifest.bankr).sort()).toEqual(["app", "coin", "freeServices", "skill"]);
+    expect(Object.keys(manifest.bankr.skill).sort()).toEqual(["catalogStatus", "githubFolder", "publicSkill", "source"]);
+    expect(Object.keys(manifest.bankr.freeServices).sort()).toEqual(["map", "services", "status"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",
       "audit",
@@ -278,6 +283,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.docs).toEqual({
       agents: "https://nipmod.com/agents",
       audit: "https://nipmod.com/audit",
+      bankr: "https://nipmod.com/bankr",
       createPackage: "https://nipmod.com/package",
       docs: "https://nipmod.com/quickstart#docs",
       install: "https://nipmod.com/quickstart#install",
@@ -354,6 +360,7 @@ describe("nipmod discovery manifest", () => {
       expect(url.search).toBe("");
       expect([
         "github.com",
+        "bankr.bot",
         "gitlawb.com",
         "nipmod.com",
         "node.gitlawb.com",

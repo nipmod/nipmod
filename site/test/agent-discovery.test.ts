@@ -17,6 +17,9 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("Registry index: https://nipmod.com/registry/packages.json");
     expect(llmsText).toContain("Scout health: https://nipmod.com/scout/health");
     expect(llmsText).toContain("Owner status page template: https://nipmod.com/gitlawb/{owner}");
+    expect(llmsText).toContain("Bankr integration: https://nipmod.com/bankr");
+    expect(llmsText).toContain("Bankr free service map: https://nipmod.com/integrations/bankr/bankr.free.json");
+    expect(llmsText).toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
   });
 
   test("lists the commands an agent needs for the full lifecycle", () => {

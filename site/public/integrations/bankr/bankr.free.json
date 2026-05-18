@@ -1,0 +1,27 @@
+{
+  "type": "dev.nipmod.bankr.free.v1",
+  "name": "Nipmod Bankr free integration",
+  "pricing": "free",
+  "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
+  "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+  "services": {
+    "package-search": {
+      "description": "Search and read verified Nipmod packages without payment.",
+      "primary": "nipmod search <query> --online",
+      "api": "https://nipmod.com/registry/packages.json",
+      "docs": "https://nipmod.com/packages"
+    },
+    "package-audit": {
+      "description": "Inspect trust, provenance, permissions and advisory state without payment.",
+      "primary": "nipmod inspect <package> --json",
+      "commands": ["nipmod install --plan <package> --json", "nipmod audit --online"],
+      "docs": "https://nipmod.com/audit"
+    },
+    "repo-package-draft": {
+      "description": "Prepare a package draft path for a public Gitlawb repo without payment.",
+      "primary": "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json",
+      "api": "https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo",
+      "human": "https://nipmod.com/package?repo=gitlawb://did:key:.../repo"
+    }
+  }
+}
