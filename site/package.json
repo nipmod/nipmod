@@ -12,6 +12,7 @@
     "security:deps": "pnpm audit --audit-level high",
     "security:secrets": "node ../tools/secret-scan.mjs",
     "test": "vitest run --testTimeout 20000",
+    "test:operator": "NIPMOD_INCLUDE_OPERATOR_TESTS=1 vitest run --testTimeout 20000",
     "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
