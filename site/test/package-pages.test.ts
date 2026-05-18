@@ -3,6 +3,7 @@ import { findEvidencePackage } from "../app/evidence/evidence-view";
 import {
   findPackage,
   packageBrowseData,
+  packageBrowseHighlights,
   packageDependencyEntries,
   packageDependencyText,
   packageEvidenceHref,
@@ -42,6 +43,17 @@ describe("package pages", () => {
     expect(all.packages.length).toBeGreaterThan(0);
     expect(filtered.packages.every((pkg) => pkg.type === type)).toBe(true);
     expect(filtered.types).toContain(type);
+  });
+
+  test("builds trending, newest and quality highlights for package browse", () => {
+    const browse = packageBrowseData({ query: "", type: "" });
+    const highlights = packageBrowseHighlights(browse.registry.packages);
+
+    expect(highlights.qualityStats.map((item) => item.label)).toEqual(["Quality avg", "Excellent", "Needs review"]);
+    expect(highlights.trending.length).toBeGreaterThan(0);
+    expect(highlights.newest.length).toBeGreaterThan(0);
+    expect(highlights.trending[0]?.canonical).toMatch(/^pkg:did:key:/);
+    expect(highlights.newest[0]?.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   test("renders install variants and dependency copy for package decisions", () => {

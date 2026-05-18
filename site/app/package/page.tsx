@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { homeContent } from "../content";
 import { PackageDraftForm } from "./package-draft-form";
 
+type PackagePageProps = {
+  searchParams?: Promise<{
+    repo?: string | string[] | undefined;
+  }>;
+};
+
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/package"
@@ -15,7 +21,10 @@ export const metadata: Metadata = {
   title: "Package a Gitlawb repo"
 };
 
-export default function PackagePage() {
+export default async function PackagePage({ searchParams }: PackagePageProps) {
+  const params = searchParams ? await searchParams : {};
+  const initialRepo = firstParam(params.repo);
+
   return (
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="package-title">
@@ -33,6 +42,7 @@ export default function PackagePage() {
       </section>
 
       <PackageDraftForm
+        initialRepo={initialRepo}
         inputLabel={homeContent.repoToPackage.inputLabel}
         inputPlaceholder={homeContent.repoToPackage.inputPlaceholder}
       />
@@ -79,4 +89,12 @@ export default function PackagePage() {
       </section>
     </main>
   );
+}
+
+function firstParam(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) {
+    return value[0] ?? "";
+  }
+
+  return value ?? "";
 }

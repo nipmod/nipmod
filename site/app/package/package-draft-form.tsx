@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import { CommandBlock } from "../command-block";
 
 type PackageDraftFormProps = {
+  initialRepo?: string;
   inputLabel: string;
   inputPlaceholder: string;
 };
 
-export function PackageDraftForm({ inputLabel, inputPlaceholder }: PackageDraftFormProps) {
-  const [repo, setRepo] = useState("");
+export function PackageDraftForm({ initialRepo = "", inputLabel, inputPlaceholder }: PackageDraftFormProps) {
+  const [repo, setRepo] = useState(initialRepo);
   const draft = useMemo(() => draftFromRepo(repo), [repo]);
   const invalid = draft.status === "invalid";
 
@@ -73,6 +74,10 @@ export function draftFromRepo(input: string) {
     helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`,
     status: "valid" as const
   };
+}
+
+export function candidatePackageHref(source: string): string {
+  return `/package?repo=${encodeURIComponent(source)}`;
 }
 
 export function isValidGitlawbRepo(input: string): boolean {

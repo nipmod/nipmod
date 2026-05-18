@@ -46,8 +46,8 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="candidates-title">
         <p className="eyebrow">Package Claim</p>
-        <h1 id="candidates-title">Scout prepares package drafts.</h1>
-        <p className="lead">Nipmod scans public Gitlawb repos, prepares unclaimed package drafts and lets owners verify them with Gitlawb proof.</p>
+        <h1 id="candidates-title">Claim package drafts.</h1>
+        <p className="lead">Scout finds public Gitlawb repos, prepares package paths and lets owners verify with their own DID.</p>
       </section>
 
       <section className="registry-section" aria-labelledby="candidate-browse-title">
@@ -182,20 +182,44 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
       </pre>
 
       <div className="package-links">
-        <a href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
+        <a
+          href={candidate.gitlawbHref}
+          aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
+          rel="noreferrer"
+          target="_blank"
+        >
           Gitlawb
         </a>
         {candidate.draftEndpoint && candidate.status !== "published" ? (
-          <a href={candidate.draftEndpoint} rel="noreferrer" target="_blank">
-            Draft JSON
+          <a
+            href={candidate.draftEndpoint}
+            aria-label={`Open ${candidate.repoName} draft in a new tab`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Draft
           </a>
         ) : null}
-        <a href={candidate.status === "published" || candidate.status === "claimed" ? `/packages?q=${encodeURIComponent(candidate.repoName)}` : "/package"}>
-          {candidate.status === "published" || candidate.status === "claimed" ? "Package" : "Prepare"}
+        {candidate.status === "published" || candidate.status === "claimed" ? (
+          <a href={`/packages?q=${encodeURIComponent(candidate.repoName)}`}>Package</a>
+        ) : (
+          <a href={packageHrefForSource(candidate.source)}>Claim package</a>
+        )}
+        <a href={shareHref(candidate)} aria-label={`Share ${candidate.repoName} on X in a new tab`} rel="noreferrer" target="_blank">
+          Share
         </a>
       </div>
     </article>
   );
+}
+
+function packageHrefForSource(source: string): string {
+  return `/package?repo=${encodeURIComponent(source)}`;
+}
+
+function shareHref(candidate: PackageCandidate): string {
+  const text = `Nipmod prepared a package draft for ${candidate.repoName}. Claim it here: https://nipmod.com${packageHrefForSource(candidate.source)}`;
+  return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }
 
 function firstParam(value: string | string[] | undefined): string {

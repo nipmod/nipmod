@@ -1,4 +1,5 @@
 import registryData from "../registry-data.json";
+import { newPackages, packageQualityStats, trendingPackages } from "../../lib/package-quality";
 import {
   homepagePackages,
   searchPackages,
@@ -55,10 +56,20 @@ export function packageBrowseData(options: { query: string; type: string }) {
   const packages = homepagePackages(registry.packages);
   const searched = searchPackages(packages, options.query);
   const filtered = options.type ? searched.filter((pkg) => pkg.type === options.type) : searched;
+  const highlights = packageBrowseHighlights(packages);
   return {
+    ...highlights,
     packages: filtered,
     registry: { ...registry, packages },
     types: [...new Set(packages.map((pkg) => pkg.type))].sort()
+  };
+}
+
+export function packageBrowseHighlights(packages: readonly RegistryPackage[]) {
+  return {
+    newest: newPackages(packages, 4),
+    qualityStats: packageQualityStats(packages),
+    trending: trendingPackages(packages, 4)
   };
 }
 

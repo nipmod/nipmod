@@ -4,7 +4,7 @@ Nipmod is a package layer for agent tools published from Gitlawb source.
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 Human docs: https://nipmod.com/quickstart#docs
-Agent runbook: https://nipmod.com/quickstart#agents
+Agent runbook: https://nipmod.com/agents
 Package registry: https://nipmod.com/packages
 Registry index: https://nipmod.com/registry/packages.json
 Claim index: https://nipmod.com/claims/index.json
@@ -14,6 +14,7 @@ Scout single draft: https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../re
 Scout patch endpoint: https://nipmod.com/scout/patch
 Scout owner notification plan: https://nipmod.com/scout/notifications
 MCP docs: https://nipmod.com/mcp
+Audit docs: https://nipmod.com/audit
 Trust docs: https://nipmod.com/trust
 Security docs: https://nipmod.com/security
 

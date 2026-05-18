@@ -87,7 +87,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Install Nipmod" })).toHaveAttribute("href", "/quickstart#install");
-  await expect(page.getByRole("link", { name: "Read agent docs" })).toHaveAttribute("href", "/quickstart#agents");
+  await expect(page.getByRole("link", { name: "Read agent docs" })).toHaveAttribute("href", "/agents");
 });
 
 test("docs and install navigation have distinct, correct destinations", async ({ page }) => {
@@ -122,7 +122,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
 
   const llms = await request.get("/llms.txt");
   await expect(llms).toBeOK();
-  await expect(llms.text()).resolves.toContain("Agent runbook: https://nipmod.com/quickstart#agents");
+  await expect(llms.text()).resolves.toContain("Agent runbook: https://nipmod.com/agents");
 
   const manifest = await request.get("/.well-known/nipmod.json");
   await expect(manifest).toBeOK();
@@ -132,7 +132,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
 });
 
 test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(180_000);
 
   const routes = [
     "/",
@@ -140,6 +140,8 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/package",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/agents",
+    "/audit",
     "/trust",
     "/security",
     "/launch",
@@ -147,6 +149,8 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/mcp",
     "/evidence"
   ];
+  const checkedPages = new Set<string>();
+  const checkedAnchors = new Set<string>();
 
   for (const route of routes) {
     await page.goto(route);
@@ -166,12 +170,20 @@ test("internal button and navigation links resolve to existing pages and anchors
       }
 
       const target = new URL(href, `https://nipmod.com${route}`);
-      const response = await request.get(`${target.pathname}${target.search}`);
-      expect(response.ok(), `${route} links to ${href}`).toBe(true);
+      const pageKey = `${target.pathname}${target.search}`;
+      if (!checkedPages.has(pageKey)) {
+        const response = await request.get(pageKey);
+        expect(response.ok(), `${route} links to ${href}`).toBe(true);
+        checkedPages.add(pageKey);
+      }
 
       if (target.hash) {
-        await page.goto(`${target.pathname}${target.search}${target.hash}`);
-        await expect(page.locator(target.hash)).toBeVisible();
+        const anchorKey = `${pageKey}${target.hash}`;
+        if (!checkedAnchors.has(anchorKey)) {
+          await page.goto(anchorKey);
+          await expect(page.locator(target.hash)).toBeVisible();
+          checkedAnchors.add(anchorKey);
+        }
       }
     }
   }
@@ -185,6 +197,8 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await page.locator(".more-menu summary").click();
   const panel = page.locator(".more-menu-panel");
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Agents" })).toHaveAttribute("href", "/agents");
+  await expect(panel.getByRole("link", { name: "Audit" })).toHaveAttribute("href", "/audit");
   await expect(panel.getByRole("link", { name: "Launch" })).toHaveAttribute("href", "/launch");
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
@@ -269,6 +283,8 @@ test("human pages do not promote raw artifact links", async ({ page }) => {
     "/package",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/agents",
+    "/audit",
     "/trust",
     "/security",
     "/launch",

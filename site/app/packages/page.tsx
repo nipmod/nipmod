@@ -5,6 +5,7 @@ import {
   safeSourceRepoHref,
   type RegistryPackage
 } from "../../lib/registry";
+import { packageQuality } from "../../lib/package-quality";
 import { packageBrowseData, packageEvidenceHref, packagePageHref } from "./content";
 
 type PackagesPageProps = {
@@ -31,7 +32,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   const params = searchParams ? await searchParams : {};
   const query = firstParam(params.q);
   const type = firstParam(params.type);
-  const { packages, registry, types } = packageBrowseData({ query, type });
+  const { newest, packages, qualityStats, registry, trending, types } = packageBrowseData({ query, type });
 
   return (
     <main className="page-shell" id="main">
@@ -67,12 +68,17 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
         </div>
 
         <div className="registry-stats" aria-label="Registry stats">
-          {registryStats(registry).map((item) => (
+          {[...registryStats(registry), ...qualityStats].map((item) => (
             <div className="stat-tile" key={item.label}>
               <span>{item.value}</span>
               <p>{item.label}</p>
             </div>
           ))}
+        </div>
+
+        <div className="package-shelf-grid" aria-label="Package highlights">
+          <PackageShelf title="Trending packages" packages={trending} />
+          <PackageShelf title="New packages" packages={newest} />
         </div>
 
         <nav className="filter-row" aria-label="Package type filters">
@@ -107,8 +113,31 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   );
 }
 
+function PackageShelf({ packages, title }: { packages: RegistryPackage[]; title: string }) {
+  return (
+    <section className="package-shelf" aria-labelledby={slugId(title)}>
+      <div className="section-head">
+        <p className="eyebrow">Index</p>
+        <h2 id={slugId(title)}>{title}</h2>
+      </div>
+      <div className="package-mini-list">
+        {packages.map((pkg) => {
+          const quality = packageQuality(pkg);
+          return (
+            <a className="package-mini" href={packagePageHref(pkg)} key={`${title}:${pkg.canonical}@${pkg.version}`}>
+              <span>{pkg.name}</span>
+              <small>{quality.score}/100</small>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
   const sourceRepoHref = safeSourceRepoHref(pkg.sourceRepo);
+  const quality = packageQuality(pkg);
 
   return (
     <article className="package-card">
@@ -119,7 +148,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
           </h3>
           <p>{pkg.description}</p>
         </div>
-        <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+        <div className="badge-stack">
+          <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+          <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
+        </div>
       </div>
 
       <dl className="package-meta">
@@ -134,6 +166,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
         <div>
           <dt>Type</dt>
           <dd>{pkg.type}</dd>
+        </div>
+        <div>
+          <dt>Quality</dt>
+          <dd>{quality.label}</dd>
         </div>
       </dl>
 
@@ -152,6 +188,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
       </div>
     </article>
   );
+}
+
+function slugId(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function firstParam(value: string | string[] | undefined): string {

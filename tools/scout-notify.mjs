@@ -99,7 +99,7 @@ export function createOwnerNotificationPlan(cycle, options = {}) {
     summary,
     transport: {
       channel: "gitlawb-issue",
-      writeEndpointTemplate: `${trimTrailingSlash(cycle?.node?.url ?? DEFAULT_NODE_URL)}/api/v1/repos/{owner}/{repo}/issues`,
+      writeEndpointTemplate: "{notification.nodeUrl}/api/v1/repos/{owner}/{repo}/issues",
       writeRequires: [
         "operator authorization",
         "explicit remote write mode",
@@ -145,7 +145,8 @@ export async function runOwnerNotificationDelivery({
       continue;
     }
 
-    const existing = await remoteIssueHasDedupeKey({ fetchFn, nodeUrl, notification });
+    const notificationNodeUrl = notification.nodeUrl ?? nodeUrl;
+    const existing = await remoteIssueHasDedupeKey({ fetchFn, nodeUrl: notificationNodeUrl, notification });
     if (existing.found) {
       sentLedger.set(notification.dedupeKey, { issue: existing.issueId ?? null, sentAt: generatedAt });
       summary.deduped += 1;
@@ -158,7 +159,7 @@ export async function runOwnerNotificationDelivery({
       continue;
     }
 
-    const write = await postGitlawbIssue({ fetchFn, generatedAt, identity, nodeUrl, notification });
+    const write = await postGitlawbIssue({ fetchFn, generatedAt, identity, nodeUrl: notificationNodeUrl, notification });
     if (write.ok) {
       sentLedger.set(notification.dedupeKey, { issue: write.issueId ?? null, sentAt: generatedAt });
       summary.written += 1;
@@ -195,6 +196,7 @@ export function notificationDedupeKey(packageId) {
 function ownerNotification(candidate, dedupeKey, generatedAt) {
   const ownerDid = ownerDidFromSource(candidate.source);
   const shortOwner = ownerSegment(ownerDid);
+  const nodeUrl = nodeUrlFromCloneUrl(candidate.cloneUrl);
   const title = "Package this repo with Nipmod";
   const body = [
     "Nipmod Scout prepared a package draft for this Gitlawb repo.",
@@ -207,7 +209,7 @@ function ownerNotification(candidate, dedupeKey, generatedAt) {
     candidate.commands?.packagePr ?? `nipmod package pr ${candidate.source} --dir . --identity .nipmod/identity.json --json`,
     "git add nipmod.json README.nipmod.md .nipmod/package-claim.json",
     "git commit -m \"feat: add nipmod package manifest\"",
-    "GITLAWB_NODE=https://node.nipmod.com git push",
+    `GITLAWB_NODE=${nodeUrl} git push`,
     "```",
     "",
     "Nothing is claimed until the Gitlawb owner DID signs and pushes `.nipmod/package-claim.json`.",
@@ -229,6 +231,7 @@ function ownerNotification(candidate, dedupeKey, generatedAt) {
     },
     package: candidate.package,
     remoteWrites: false,
+    nodeUrl,
     repo: {
       gitlawbUrl: candidate.gitlawbUrl,
       name: candidate.repoName,
@@ -495,6 +498,18 @@ function numberOr(value, fallback) {
 
 function trimTrailingSlash(value) {
   return String(value).replace(/\/+$/, "");
+}
+
+function nodeUrlFromCloneUrl(value, fallback = DEFAULT_NODE_URL) {
+  try {
+    const url = new URL(String(value ?? ""));
+    if ((url.protocol === "https:" || url.protocol === "http:") && url.host) {
+      return `${url.protocol}//${url.host}`;
+    }
+  } catch {
+    return trimTrailingSlash(fallback);
+  }
+  return trimTrailingSlash(fallback);
 }
 
 function stableJson(value) {

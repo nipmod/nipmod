@@ -237,6 +237,75 @@ describe("nipmod scout agent", () => {
     expect(result.drafts.map((draft) => draft.package)).toEqual([`pkg:${owner}/agent-runtime-compat-check`]);
   });
 
+  test("scans multiple Gitlawb nodes, dedupes mirrors and keeps node coverage metadata", async () => {
+    const result = await runScoutCycle({
+      fetchFn: async (url) => {
+        if (String(url) === "https://node-a.example/api/v1/repos") {
+          return jsonResponse([
+            repoFixture({
+              clone_url: `https://node-a.example/${owner.slice("did:key:".length)}/repo-reader.git`,
+              description: "mirrored from peer",
+              name: "repo-reader",
+              updated_at: "2026-05-17T00:00:00.000Z"
+            })
+          ]);
+        }
+        if (String(url) === "https://node-b.example/api/v1/repos") {
+          return jsonResponse([
+            repoFixture({
+              clone_url: `https://node-b.example/${owner.slice("did:key:".length)}/repo-reader.git`,
+              description: "Read Gitlawb repos for agents",
+              name: "repo-reader",
+              updated_at: "2026-05-18T00:00:00.000Z"
+            }),
+            repoFixture({
+              clone_url: `https://node-b.example/${owner.slice("did:key:".length)}/fresh-audit.git`,
+              description: "Audit new Gitlawb repos for package readiness",
+              name: "fresh-audit"
+            })
+          ]);
+        }
+        if (String(url) === "https://node-c.example/api/v1/repos") {
+          return new Response("unavailable", { status: 503 });
+        }
+        if (String(url) === "https://claims.example/index.json") {
+          return jsonResponse({ verifiedClaims: [] });
+        }
+        if (String(url) === "https://registry.example/packages.json") {
+          return jsonResponse({ packages: [] });
+        }
+        return new Response("not found", { status: 404 });
+      },
+      claimIndexUrl: "https://claims.example/index.json",
+      nodeUrls: ["https://node-a.example", "https://node-b.example", "https://node-c.example"],
+      registryUrl: "https://registry.example/packages.json"
+    });
+
+    expect(result.summary.scanned).toBe(2);
+    expect(result.node).toMatchObject({
+      url: "https://node-a.example",
+      urls: ["https://node-a.example", "https://node-b.example", "https://node-c.example"]
+    });
+    expect(result.node.errors).toEqual([
+      {
+        message: "Gitlawb repo scan failed with HTTP 503",
+        nodeUrl: "https://node-c.example"
+      }
+    ]);
+    expect(result.candidates.map((candidate) => candidate.repoName).sort()).toEqual(["fresh-audit", "repo-reader"]);
+    expect(result.candidates.find((candidate) => candidate.repoName === "repo-reader")).toMatchObject({
+      cloneUrl: `https://node-b.example/${owner.slice("did:key:".length)}/repo-reader.git`,
+      description: "Read Gitlawb repos for agents",
+      package: `pkg:${owner}/repo-reader`
+    });
+    expect(result.drafts.find((draft) => draft.package === `pkg:${owner}/repo-reader`).nextCommands).toContain(
+      "GITLAWB_NODE=https://node-b.example git push"
+    );
+    expect(result.ownerNotifications.notifications.find((notification) => notification.package === `pkg:${owner}/repo-reader`)).toMatchObject({
+      nodeUrl: "https://node-b.example"
+    });
+  });
+
   test("surfaces claim index failure without failing candidate generation", async () => {
     const result = await runScoutCycle({
       fetchFn: async (url) => {
@@ -407,7 +476,7 @@ describe("nipmod scout agent", () => {
         did: owner,
         privateKeyPem: testPrivateKeyPem
       },
-      nodeUrl: "https://node.example",
+      nodeUrl: "https://wrong-node.example",
       plan,
       remoteWrites: true
     });

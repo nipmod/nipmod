@@ -69,6 +69,8 @@ describe("nipmod discovery manifest", () => {
       "spkiSha256"
     ]);
     expect(Object.keys(manifest.docs).sort()).toEqual([
+      "agents",
+      "audit",
       "createPackage",
       "docs",
       "install",
@@ -93,7 +95,8 @@ describe("nipmod discovery manifest", () => {
       "last",
       "notifications",
       "patch",
-      "patchParam"
+      "patchParam",
+      "sourceNodes"
     ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
@@ -259,12 +262,15 @@ describe("nipmod discovery manifest", () => {
       last: "https://nipmod.com/scout/last",
       notifications: "https://nipmod.com/scout/notifications",
       patch: "https://nipmod.com/scout/patch",
-      patchParam: "repo"
+      patchParam: "repo",
+      sourceNodes: ["https://node.nipmod.com", "https://node.gitlawb.com", "https://node2.gitlawb.com"]
     });
   });
 
   test("publishes a complete agent runbook from the machine manifest", () => {
     expect(manifest.docs).toEqual({
+      agents: "https://nipmod.com/agents",
+      audit: "https://nipmod.com/audit",
       createPackage: "https://nipmod.com/package",
       docs: "https://nipmod.com/quickstart#docs",
       install: "https://nipmod.com/quickstart#install",
@@ -274,7 +280,7 @@ describe("nipmod discovery manifest", () => {
       trust: "https://nipmod.com/trust"
     });
     expect(manifest.agent.llms).toBe("https://nipmod.com/llms.txt");
-    expect(manifest.agent.runbook).toBe("https://nipmod.com/quickstart#agents");
+    expect(manifest.agent.runbook).toBe("https://nipmod.com/agents");
     expect(manifest.agent.workflow).toEqual([
       "install",
       "verifyInstaller",
@@ -337,7 +343,7 @@ describe("nipmod discovery manifest", () => {
       expect(url.username).toBe("");
       expect(url.password).toBe("");
       expect(url.search).toBe("");
-      expect(["nipmod.com", "node.nipmod.com", "nipmod-witness.fly.dev", "nipmod-scout.fly.dev"]).toContain(url.hostname);
+      expect(["nipmod.com", "node.nipmod.com", "node.gitlawb.com", "node2.gitlawb.com", "nipmod-witness.fly.dev", "nipmod-scout.fly.dev"]).toContain(url.hostname);
     }
   });
 

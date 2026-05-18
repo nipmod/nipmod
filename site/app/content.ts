@@ -119,7 +119,7 @@ export const homeContent = {
     {
       title: "Read agent docs",
       text: "Connect the CLI and MCP server to agent workflows.",
-      href: "/quickstart#agents"
+      href: "/agents"
     }
   ],
   quickstartSteps: [

@@ -10,8 +10,9 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("# Nipmod");
     expect(llmsText).toContain("Primary machine manifest: https://nipmod.com/.well-known/nipmod.json");
     expect(llmsText).toContain("Human docs: https://nipmod.com/quickstart#docs");
-    expect(llmsText).toContain("Agent runbook: https://nipmod.com/quickstart#agents");
+    expect(llmsText).toContain("Agent runbook: https://nipmod.com/agents");
     expect(llmsText).toContain("MCP docs: https://nipmod.com/mcp");
+    expect(llmsText).toContain("Audit docs: https://nipmod.com/audit");
     expect(llmsText).toContain("Registry index: https://nipmod.com/registry/packages.json");
   });
 

@@ -7,9 +7,11 @@
   "docs": {
     "docs": "https://nipmod.com/quickstart#docs",
     "install": "https://nipmod.com/quickstart#install",
+    "agents": "https://nipmod.com/agents",
     "packages": "https://nipmod.com/packages",
     "createPackage": "https://nipmod.com/package",
     "mcp": "https://nipmod.com/mcp",
+    "audit": "https://nipmod.com/audit",
     "trust": "https://nipmod.com/trust",
     "security": "https://nipmod.com/security"
   },
@@ -29,11 +31,12 @@
     "notifications": "https://nipmod.com/scout/notifications",
     "patch": "https://nipmod.com/scout/patch",
     "patchParam": "repo",
+    "sourceNodes": ["https://node.nipmod.com", "https://node.gitlawb.com", "https://node2.gitlawb.com"],
     "intervalMs": 300000
   },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",
-    "runbook": "https://nipmod.com/quickstart#agents",
+    "runbook": "https://nipmod.com/agents",
     "workflow": [
       "install",
       "verifyInstaller",

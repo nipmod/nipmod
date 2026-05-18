@@ -2,6 +2,7 @@
 import { createOwnerNotificationPlan, notificationOptionsFromEnv } from "./scout-notify.mjs";
 
 const DEFAULT_NODE_URL = "https://node.nipmod.com";
+const DEFAULT_NODE_URLS = ["https://node.nipmod.com", "https://node.gitlawb.com", "https://node2.gitlawb.com"];
 const DEFAULT_CLAIM_INDEX_URL = "https://nipmod.com/claims/index.json";
 const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_SCOUT_URL = "https://nipmod.com/scout";
@@ -11,12 +12,15 @@ export async function runScoutCycle({
   fetchFn = fetch,
   generatedAt = new Date().toISOString(),
   limit = numberFromEnv(process.env.NIPMOD_SCOUT_LIMIT, 500),
-  nodeUrl = process.env.NIPMOD_SCOUT_NODE_URL ?? process.env.GITLAWB_NODE ?? DEFAULT_NODE_URL,
+  nodeUrl = undefined,
+  nodeUrls = nodeUrlsFromEnv(process.env.NIPMOD_SCOUT_NODE_URLS, nodeUrl),
   notificationOptions = notificationOptionsFromEnv(process.env),
   registryUrl = process.env.NIPMOD_SCOUT_REGISTRY_URL ?? DEFAULT_REGISTRY_URL,
   scoutUrl = process.env.NIPMOD_SCOUT_PUBLIC_URL ?? DEFAULT_SCOUT_URL
 } = {}) {
-  const repos = await fetchPublicRepos({ fetchFn, limit, nodeUrl });
+  const repoScan = await fetchPublicReposFromNodes({ fetchFn, limit, nodeUrls });
+  const repos = repoScan.repos;
+  const primaryNodeUrl = trimTrailingSlash(nodeUrl ?? nodeUrls[0] ?? DEFAULT_NODE_URL);
   const claimIndex = await fetchClaimIndex({ claimIndexUrl, fetchFn });
   const registry = await fetchRegistry({ fetchFn, registryUrl });
   const candidates = repos
@@ -27,6 +31,7 @@ export async function runScoutCycle({
     .map((candidate) =>
       createPackageDraft(candidate, {
         generatedAt,
+        nodeUrl: nodeUrlFromCloneUrl(candidate.cloneUrl, primaryNodeUrl),
         scoutUrl,
         status: candidate.claimStatus === "claimed" ? "claimed" : candidate.status === "needs-work" ? "needs-work" : "unclaimed"
       })
@@ -45,8 +50,11 @@ export async function runScoutCycle({
     formatVersion: 1,
     generatedAt,
     node: {
-      reposUrl: `${trimTrailingSlash(nodeUrl)}/api/v1/repos`,
-      url: trimTrailingSlash(nodeUrl)
+      reposUrl: `${primaryNodeUrl}/api/v1/repos`,
+      reposUrls: nodeUrls.map((url) => `${trimTrailingSlash(url)}/api/v1/repos`),
+      url: primaryNodeUrl,
+      urls: nodeUrls.map(trimTrailingSlash),
+      errors: repoScan.errors
     },
     ok: true,
     registry: {
@@ -84,7 +92,7 @@ export function createPackagePatch(input, { generatedAt = new Date().toISOString
     nextCommands: [
       "git add nipmod.json README.nipmod.md",
       "git commit -m \"feat: add nipmod package manifest\"",
-      "GITLAWB_NODE=https://node.nipmod.com git push"
+      `GITLAWB_NODE=${trimTrailingSlash(nodeUrl)} git push`
     ],
     package: draft.package,
     remoteWrites: false,
@@ -164,7 +172,7 @@ export function createPackageDraft(
       `nipmod package pr ${source} --dir . --identity .nipmod/identity.json --json`,
       "git add nipmod.json README.nipmod.md .nipmod/package-claim.json",
       "git commit -m \"feat: add nipmod package manifest\"",
-      "GITLAWB_NODE=https://node.nipmod.com git push",
+      `GITLAWB_NODE=${trimTrailingSlash(nodeUrl)} git push`,
       `nipmod claim verify ${source} --json`
     ],
     package: packageId,
@@ -200,6 +208,25 @@ export function repoFromGitlawbSource(source) {
   };
 }
 
+async function fetchPublicReposFromNodes({ fetchFn, limit, nodeUrls }) {
+  const repos = [];
+  const errors = [];
+  for (const nodeUrl of nodeUrls) {
+    try {
+      repos.push(...(await fetchPublicRepos({ fetchFn, limit, nodeUrl })));
+    } catch (error) {
+      errors.push({
+        message: error instanceof Error ? error.message : String(error),
+        nodeUrl: trimTrailingSlash(nodeUrl)
+      });
+    }
+  }
+  if (repos.length === 0 && errors.length > 0) {
+    throw new Error(errors.map((error) => `${error.nodeUrl}: ${error.message}`).join("; "));
+  }
+  return { errors, repos: dedupeRepos(repos).slice(0, limit) };
+}
+
 async function fetchPublicRepos({ fetchFn, limit, nodeUrl }) {
   const response = await fetchFn(`${trimTrailingSlash(nodeUrl)}/api/v1/repos`, {
     headers: { accept: "application/json" }
@@ -216,6 +243,49 @@ async function fetchPublicRepos({ fetchFn, limit, nodeUrl }) {
         ? payload.repositories
         : [];
   return rawRepos.map((repo) => normalizeRepo(repo)).filter(isScoutableRepo).slice(0, limit);
+}
+
+function dedupeRepos(repos) {
+  const byPackage = new Map();
+  for (const repo of repos) {
+    const key = `${repo.owner_did}/${repo.name}`;
+    const current = byPackage.get(key);
+    if (!current || compareRepoPreference(repo, current) < 0) {
+      byPackage.set(key, repo);
+    }
+  }
+  return [...byPackage.values()];
+}
+
+function compareRepoPreference(left, right) {
+  const leftMirror = isMirrorDescription(left.description);
+  const rightMirror = isMirrorDescription(right.description);
+  if (leftMirror !== rightMirror) {
+    return leftMirror ? 1 : -1;
+  }
+  const leftUpdated = Date.parse(left.updated_at);
+  const rightUpdated = Date.parse(right.updated_at);
+  if (Number.isFinite(leftUpdated) && Number.isFinite(rightUpdated) && leftUpdated !== rightUpdated) {
+    return rightUpdated - leftUpdated;
+  }
+  return sourceNodeRank(left.clone_url) - sourceNodeRank(right.clone_url);
+}
+
+function isMirrorDescription(value) {
+  return String(value).trim().toLowerCase() === "mirrored from peer";
+}
+
+function sourceNodeRank(value) {
+  try {
+    const host = new URL(value).hostname;
+    if (host === "node.nipmod.com") return 0;
+    if (host === "node.gitlawb.com") return 1;
+    if (host === "node2.gitlawb.com") return 2;
+    if (host === "node3.gitlawb.com") return 3;
+    return 4;
+  } catch {
+    return 5;
+  }
 }
 
 async function fetchClaimIndex({ claimIndexUrl, fetchFn }) {
@@ -502,12 +572,45 @@ function trimTrailingSlash(value) {
   return String(value).replace(/\/+$/, "");
 }
 
+function nodeUrlFromCloneUrl(value, fallback = DEFAULT_NODE_URL) {
+  try {
+    const url = new URL(String(value ?? ""));
+    if ((url.protocol === "https:" || url.protocol === "http:") && url.host) {
+      return `${url.protocol}//${url.host}`;
+    }
+  } catch {
+    return trimTrailingSlash(fallback);
+  }
+  return trimTrailingSlash(fallback);
+}
+
 function numberFromEnv(value, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return fallback;
   }
   return parsed;
+}
+
+function nodeUrlsFromEnv(value, fallbackNodeUrl) {
+  const fromEnv = parseNodeUrls(value);
+  if (fromEnv.length > 0) {
+    return fromEnv;
+  }
+  const fallbackEnvNode = fallbackNodeUrl ?? process.env.NIPMOD_SCOUT_NODE_URL ?? process.env.GITLAWB_NODE;
+  return parseNodeUrls(fallbackEnvNode).length > 0 ? parseNodeUrls(fallbackEnvNode) : DEFAULT_NODE_URLS;
+}
+
+function parseNodeUrls(value) {
+  return [
+    ...new Set(
+      String(value ?? "")
+        .split(/[,\s]+/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .map(trimTrailingSlash)
+    )
+  ];
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {

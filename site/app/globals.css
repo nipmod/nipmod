@@ -926,6 +926,13 @@ h1 {
   min-width: 0;
 }
 
+.badge-stack {
+  align-items: flex-end;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
 .package-card h3 {
   color: var(--text);
   font-size: 22px;
@@ -986,6 +993,21 @@ h1 {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.quality-excellent {
+  background: rgba(143, 255, 193, 0.13);
+  border-color: rgba(143, 255, 193, 0.28);
+}
+
+.quality-good {
+  background: rgba(41, 151, 255, 0.14);
+  border-color: rgba(41, 151, 255, 0.3);
+}
+
+.quality-review {
+  background: rgba(255, 217, 138, 0.12);
+  border-color: rgba(255, 217, 138, 0.25);
+}
+
 .candidate-claimed {
   background: rgba(143, 255, 193, 0.13);
   border-color: rgba(143, 255, 193, 0.28);
@@ -1034,6 +1056,60 @@ h1 {
   gap: 8px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
+}
+
+.package-shelf-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.package-shelf {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.package-shelf .section-head h2 {
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.package-mini-list {
+  display: grid;
+  gap: 8px;
+}
+
+.package-mini {
+  align-items: center;
+  backdrop-filter: blur(30px) saturate(180%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 58px;
+  min-width: 0;
+  padding: 12px 14px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.package-mini:hover {
+  background: var(--surface-strong);
+  transform: translateY(-1px);
+}
+
+.package-mini span {
+  font-size: 15px;
+  font-weight: 660;
+  overflow-wrap: anywhere;
+}
+
+.package-mini small {
+  color: var(--quiet);
+  flex: 0 0 auto;
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
 }
 
 .package-meta div {
@@ -1437,6 +1513,7 @@ h1 {
   .registry-stats,
   .candidate-flow,
   .package-grid,
+  .package-shelf-grid,
   .trust-grid,
   .safety-strip,
   .host-grid,
@@ -1492,6 +1569,10 @@ h1 {
 
   .trust-badge {
     width: max-content;
+  }
+
+  .badge-stack {
+    align-items: flex-start;
   }
 
   .package-meta {

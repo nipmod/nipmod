@@ -6,6 +6,7 @@ import {
   permissionHighlights,
   safeSourceRepoHref
 } from "../../../lib/registry";
+import { auditSummaryForPackage, packageQuality } from "../../../lib/package-quality";
 import {
   findPackage,
   packageEvidenceHref,
@@ -56,6 +57,8 @@ export default async function PackagePage({ params }: PackagePageProps) {
 
   const versions = packageVersions(pkg);
   const sourceRepoHref = safeSourceRepoHref(pkg.sourceRepo);
+  const quality = packageQuality(pkg);
+  const audit = auditSummaryForPackage(pkg);
 
   return (
     <main className="page-shell" id="main">
@@ -71,6 +74,9 @@ export default async function PackagePage({ params }: PackagePageProps) {
             <a className="button button-ghost" href={packageEvidenceHref(pkg)}>
               Evidence
             </a>
+            <a className="button button-ghost" href="#audit">
+              Audit
+            </a>
             {sourceRepoHref ? (
               <a
                 className="button button-ghost"
@@ -85,7 +91,10 @@ export default async function PackagePage({ params }: PackagePageProps) {
           </div>
         </div>
         <aside className="package-side" aria-label="Package facts">
-          <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+          <div className="badge-stack">
+            <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+            <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
+          </div>
           <dl className="proof-facts">
             <div>
               <dt>Version</dt>
@@ -95,12 +104,16 @@ export default async function PackagePage({ params }: PackagePageProps) {
               <dt>Type</dt>
               <dd>{pkg.type}</dd>
             </div>
+            <div>
+              <dt>Quality</dt>
+              <dd>{quality.label}</dd>
+            </div>
           </dl>
         </aside>
       </section>
 
       <nav className="package-tabs" aria-label="Package sections">
-        {["readme", "install", "versions", "dependencies", "trust", "advisories", "provenance", "agent-use"].map((item) => (
+        {["readme", "install", "versions", "dependencies", "trust", "audit", "advisories", "provenance", "agent-use"].map((item) => (
           <a href={`#${item}`} key={item}>
             {item.replace("-", " ")}
           </a>
@@ -200,7 +213,8 @@ export default async function PackagePage({ params }: PackagePageProps) {
               { label: "Artifact digest", value: pkg.trust.evidence.artifactDigestVerified ? "verified" : "missing" },
               { label: "Bundle signature", value: pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing" },
               { label: "Source provenance", value: pkg.trust.evidence.sourceProvenanceVerified ? "verified" : "missing" },
-              { label: "Transparency", value: pkg.trust.evidence.transparencyLogVerified ? "verified" : "missing" }
+              { label: "Transparency", value: pkg.trust.evidence.transparencyLogVerified ? "verified" : "missing" },
+              { label: "Quality", value: `${quality.score}/100 ${quality.label}` }
             ].map((fact) => (
               <div key={fact.label}>
                 <dt>{fact.label}</dt>
@@ -208,6 +222,25 @@ export default async function PackagePage({ params }: PackagePageProps) {
               </div>
             ))}
           </dl>
+        </div>
+      </section>
+
+      <section className="trust-section" id="audit" aria-labelledby="audit-title">
+        <div>
+          <p className="eyebrow">Audit</p>
+          <h2 id="audit-title">Install decision</h2>
+        </div>
+        <div className="proof-panel">
+          <span className={`status-pill ${audit.status === "Ready" ? "status-ok" : "status-review"}`}>{audit.status}</span>
+          <dl className="proof-facts">
+            {audit.items.map((item) => (
+              <div key={item.label}>
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <CommandBlock command={audit.command} label="Copy audit command" />
         </div>
       </section>
 

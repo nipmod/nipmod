@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { draftFromRepo, inferRepoName, isValidGitlawbRepo, shellQuote } from "../app/package/package-draft-form";
+import { candidatePackageHref, draftFromRepo, inferRepoName, isValidGitlawbRepo, shellQuote } from "../app/package/package-draft-form";
 
 describe("package draft form", () => {
   test("accepts canonical Gitlawb repo inputs", () => {
@@ -22,5 +22,11 @@ describe("package draft form", () => {
     expect(inferRepoName("gitlawb://did:key:z6Mkabc/Repo Name.git")).toBe("repo-name");
     expect(inferRepoName("https://gitlawb.com/node/repos/z6Mkabc/repo-name")).toBe("repo-name");
     expect(shellQuote("repo'name")).toBe("'repo'\\''name'");
+  });
+
+  test("builds a claim funnel href that preloads the draft generator", () => {
+    const source = "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader";
+
+    expect(candidatePackageHref(source)).toBe(`/package?repo=${encodeURIComponent(source)}`);
   });
 });
