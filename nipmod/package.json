@@ -2,6 +2,7 @@
   "name": "nipmod",
   "version": "1.2.1",
   "private": true,
+  "packageManager": "pnpm@10.30.0",
   "type": "module",
   "bin": {
     "nipmod": "./dist/cli.js"
