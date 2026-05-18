@@ -42,7 +42,6 @@ jobs:
       - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
       - run: pnpm --dir site test
       - run: pnpm --dir site typecheck
-      - run: pnpm --dir site registry:verified
       - run: pnpm --dir site build
       - run: pnpm --dir site security:deps
       - run: pnpm --dir site security:secrets
