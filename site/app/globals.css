@@ -372,6 +372,7 @@ h1 {
 .terminal-panel,
 .usage-item,
 .stat-tile,
+.live-stat,
 .package-card,
 .empty-state,
 .quickstart-card,
@@ -574,6 +575,88 @@ h1 {
 
 .usage-item p {
   margin-top: 8px;
+}
+
+.live-section {
+  display: grid;
+  gap: 16px;
+  padding: clamp(28px, 4vw, 54px) 0;
+  width: 100%;
+}
+
+.live-head {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.live-head h2 {
+  color: var(--text);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 650;
+  letter-spacing: 0;
+  line-height: 1.04;
+  margin: 0;
+}
+
+.live-status {
+  align-items: center;
+  backdrop-filter: blur(24px) saturate(170%);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 9px;
+  line-height: 1.2;
+  margin: 0;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.live-status span {
+  border-radius: 999px;
+  display: block;
+  height: 8px;
+  width: 8px;
+}
+
+.live-ok span {
+  background: var(--green);
+  box-shadow: 0 0 18px rgba(143, 255, 193, 0.36);
+}
+
+.live-warn span {
+  background: var(--yellow);
+  box-shadow: 0 0 18px rgba(255, 217, 138, 0.28);
+}
+
+.live-stat-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.live-stat {
+  padding: 18px;
+}
+
+.live-stat span {
+  color: var(--text);
+  display: block;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 660;
+  letter-spacing: 0;
+}
+
+.live-stat p {
+  color: var(--quiet);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 4px 0 0;
 }
 
 .explain-section,
@@ -1344,6 +1427,7 @@ h1 {
 
   .hero,
   .usage-strip,
+  .live-stat-grid,
   .comparison-grid,
   .claim-flow,
   .faq-grid,
@@ -1368,6 +1452,11 @@ h1 {
   .hero {
     min-height: auto;
     padding-top: 70px;
+  }
+
+  .live-head {
+    align-items: start;
+    flex-direction: column;
   }
 
   h1 {

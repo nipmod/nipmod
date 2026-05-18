@@ -1,6 +1,7 @@
 import { homeContent } from "./content";
 import { packageEvidenceHref, packagePageHref } from "./packages/content";
 import registryData from "./registry-data.json";
+import { loadLiveStats } from "../lib/live-stats";
 import {
   installCommand,
   homepagePackages,
@@ -25,6 +26,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const publicRegistry = { ...registry, packages: homepagePackages(registry.packages) };
   const packageResults = searchPackages(publicRegistry.packages, query);
   const packages = query ? packageResults : packageResults.slice(0, 6);
+  const liveStats = await loadLiveStats({ registry });
 
   return (
     <main className="page-shell" id="main">
@@ -70,6 +72,27 @@ export default async function Home({ searchParams }: HomeProps) {
             <p>{item.text}</p>
           </article>
         ))}
+      </section>
+
+      <section className="live-section" id="live" aria-labelledby="live-title">
+        <div className="live-head">
+          <div>
+            <p className="eyebrow">Live</p>
+            <h2 id="live-title">Live network</h2>
+          </div>
+          <p className={`live-status ${liveStats.healthy ? "live-ok" : "live-warn"}`}>
+            <span aria-hidden="true" />
+            {liveStats.status}
+          </p>
+        </div>
+        <div className="live-stat-grid" aria-label="Live Nipmod network stats">
+          {liveStats.tiles.map((item) => (
+            <div className="live-stat" key={item.label}>
+              <span>{item.value}</span>
+              <p>{item.label}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="explain-section" id="why" aria-labelledby="why-title">
