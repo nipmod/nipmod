@@ -4,7 +4,6 @@ export const homeContent = {
   lead: "Nipmod makes agent code installable, verifiable and reusable. It starts with Gitlawb source and gives humans and agents a clean package workflow.",
   links: {
     docs: "/quickstart#docs",
-    bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     install: "/quickstart#install",
@@ -81,7 +80,7 @@ export const homeContent = {
     {
       question: "Is this only for Gitlawb?",
       answer:
-        "Gitlawb is the first canonical source network. Bankr agents can already read the Nipmod skill and x402 blueprints, and the package layer is designed to cover more agent code platforms over time."
+        "Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time."
     },
     {
       question: "Can humans use it?",
@@ -89,7 +88,7 @@ export const homeContent = {
     },
     {
       question: "Can agents use it directly?",
-      answer: "Yes. Agents can use the CLI, the read only MCP server, the machine readable discovery files and the public Bankr skill."
+      answer: "Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files."
     },
     {
       question: "Who owns packages?",

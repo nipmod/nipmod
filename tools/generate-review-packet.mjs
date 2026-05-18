@@ -41,7 +41,6 @@ Evidence directory: ${evidenceDir ? resolve(evidenceDir) : "not attached"}
 
 - Website: https://nipmod.com
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
-- Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Security: https://nipmod.com/security
 - security.txt: https://nipmod.com/.well-known/security.txt
 - Registry: https://nipmod.com/registry/packages.json

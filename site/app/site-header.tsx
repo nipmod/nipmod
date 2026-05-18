@@ -36,16 +36,6 @@ export function SiteHeader() {
               />
             </svg>
           </a>
-          <a
-            className="brand-icon-button"
-            href={homeContent.links.bankrCoin}
-            aria-label="Open Nipmod coin on Bankr in a new tab"
-            rel="noreferrer"
-            target="_blank"
-            title="Bankr"
-          >
-            <img alt="" height="18" src="/bankr-logo.svg" width="18" />
-          </a>
         </div>
       </div>
       <nav className="nav-actions" aria-label="Site">
@@ -70,7 +60,6 @@ export function SiteHeader() {
             <a href="/trust">Trust</a>
             <a href="/security">Security</a>
             <a href="/mcp">MCP</a>
-            <a href="/bankr">Bankr agents</a>
             <a
               href={homeContent.links.gitlawbProfile}
               aria-label="Open Nipmod Gitlawb profile in a new tab"
@@ -81,14 +70,6 @@ export function SiteHeader() {
             </a>
             <a href={homeContent.links.x} aria-label="Open Nipmod on X in a new tab" rel="noreferrer" target="_blank">
               X
-            </a>
-            <a
-              href={homeContent.links.bankrCoin}
-              aria-label="Open Nipmod coin on Bankr in a new tab"
-              rel="noreferrer"
-              target="_blank"
-            >
-              Bankr
             </a>
             <a
               href={homeContent.links.gitlawbSource}

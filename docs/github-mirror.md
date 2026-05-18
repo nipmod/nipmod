@@ -7,7 +7,6 @@ GitHub exists as a public mirror for:
 - external review
 - GitHub Actions CI
 - security audits
-- Bankr skill review
 - developers who are not yet using Gitlawb
 
 Canonical source:

@@ -19,10 +19,6 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://x.com/Nipmod"
   );
-  await expect(page.getByRole("link", { name: "Open Nipmod coin on Bankr in a new tab" })).toHaveAttribute(
-    "href",
-    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
-  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
@@ -84,9 +80,9 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Quick answers" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
-  await expect(page.getByText("Gitlawb is the first canonical source network. Bankr agents can already read the Nipmod skill and x402 blueprints, and the package layer is designed to cover more agent code platforms over time.")).toBeVisible();
+  await expect(page.getByText("Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Agents can use the CLI, the read only MCP server, the machine readable discovery files and the public Bankr skill.")).toBeVisible();
+  await expect(page.getByText("Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
   await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
 
@@ -166,8 +162,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/launch",
     "/proof",
     "/mcp",
-    "/evidence",
-    "/bankr"
+    "/evidence"
   ];
   const checkedPages = new Set<string>();
   const checkedAnchors = new Set<string>();
@@ -281,36 +276,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
-  await expect(panel.getByRole("link", { name: "Bankr agents" })).toHaveAttribute("href", "/bankr");
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
-});
-
-test("Bankr page gives agents a complete install and paid service path", async ({ page, request }) => {
-  await page.goto("/bankr");
-
-  await expect(page.getByRole("heading", { name: "Nipmod for Bankr agents" })).toBeVisible();
-  await expect(page.getByText("Install the skill, search packages, inspect trust and call paid package services from Bankr.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
-  await expect(page.getByText("https://nipmod.com/integrations/bankr/nipmod/SKILL.md")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "x402 services" })).toBeVisible();
-  await expect(page.getByText("USDC config is deploy ready. The $NPM asset file is a custom asset blueprint for Bankr review.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Bankr skill file" })).toHaveAttribute(
-    "href",
-    "/integrations/bankr/nipmod/SKILL.md"
-  );
-  await expect(page.getByRole("link", { name: "Open x402 config" })).toHaveAttribute(
-    "href",
-    "/integrations/bankr/bankr.x402.json"
-  );
-
-  const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
-  await expect(skill).toBeOK();
-  await expect(skill.text()).resolves.toContain("name: nipmod");
-
-  const config = await request.get("/integrations/bankr/bankr.x402.json");
-  await expect(config).toBeOK();
-  const body = await config.json();
-  expect(body.services["package-search"].methods).toEqual(["GET"]);
 });
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {

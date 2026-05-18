@@ -31,7 +31,6 @@ describe("independent review packet generator", () => {
       expect(packet).toContain("## Trust Model");
       expect(packet).toContain("https://nipmod.com/.well-known/security.txt");
       expect(packet).toContain("https://gitlawb.com/node/repos/z6Mkwbud/nipmod");
-      expect(packet).toContain("https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
       expect(packet).toContain("Do not claim adoption from page views alone");
       expect(packet).toContain("Conflicting digests fail closed");
     } finally {

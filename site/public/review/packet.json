@@ -12,7 +12,6 @@
   "targets": {
     "website": "https://nipmod.com",
     "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
-    "bankrToken": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     "launch": "https://nipmod.com/launch",
     "security": "https://nipmod.com/security",
     "discovery": "https://nipmod.com/.well-known/nipmod.json",
