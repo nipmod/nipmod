@@ -16,6 +16,7 @@ const llmsPath = join(siteRoot, "public", "llms.txt");
 const x402ConfigPath = join(integrationRoot, "bankr.x402.json");
 const x402NpmConfigPath = join(integrationRoot, "bankr.x402.npm-asset.example.json");
 const publicSkillUrl = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
+const githubSkillFolder = "https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod";
 
 function read(path: string) {
   return readFileSync(path, "utf8");
@@ -65,6 +66,7 @@ describe("Bankr integration", () => {
 
     expect(workflow).toContain("Install in Bankr");
     expect(workflow).toContain(publicSkillUrl);
+    expect(workflow).toContain(githubSkillFolder);
     expect(workflow).toContain("If the GitHub mirror is unavailable");
     expect(workflow).toContain("Bankr skill catalog uses public GitHub folders");
 
@@ -131,7 +133,8 @@ describe("Bankr integration", () => {
       app: "https://nipmod.com/bankr",
       docs: "https://nipmod.com/bankr",
       skill: {
-        catalogStatus: "ready for public GitHub mirror or Bankr skill catalog PR",
+        catalogStatus: "ready for Bankr skill catalog PR",
+        githubMirror: githubSkillFolder,
         primaryInstall: `open ${publicSkillUrl}`,
         publicSkill: publicSkillUrl,
         source: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
@@ -150,7 +153,8 @@ describe("Bankr integration", () => {
 
     expect(llms).toContain("Bankr integration: https://nipmod.com/bankr");
     expect(llms).toContain(`Bankr skill: ${publicSkillUrl}`);
-    expect(llms).toContain("Bankr catalog status: ready for public GitHub mirror or Bankr skill catalog PR");
+    expect(llms).toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
+    expect(llms).toContain("Bankr catalog status: ready for Bankr skill catalog PR");
     expect(llms).toContain("Bankr x402 config: https://nipmod.com/integrations/bankr/bankr.x402.json");
   });
 

@@ -9,10 +9,21 @@ Public links:
 - X: https://x.com/Nipmod
 - Bankr token: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
+- GitHub mirror: https://github.com/HazarKemalOkur/nipmod
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Registry: https://nipmod.com/registry/packages.json
 - Scout: https://nipmod.com/scout/candidates
 - Scout drafts: https://nipmod.com/scout/drafts
+
+Canonical source: gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+
+GitHub is a public mirror for review, CI and integrations. Gitlawb remains the canonical source for signed agent-owned repository history and provenance.
+
+License: `MIT`
+
+Security: `SECURITY.md`
+
+Trademark and affiliation notice: `TRADEMARKS.md`
 
 ## Founder-facing pitch
 

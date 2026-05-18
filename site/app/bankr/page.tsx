@@ -3,6 +3,7 @@ import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 
 const skillInstall = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
+const githubSkillFolder = "https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod";
 
 const services = [
   {
@@ -65,7 +66,7 @@ export default function BankrPage() {
         <div className="section-head">
           <p className="eyebrow">Skill</p>
           <h2 id="bankr-install-title">Install the skill</h2>
-          <p>Bankr installs skills from public GitHub folders. Gitlawb stays the canonical source, and the website exposes a public skill file for manual install.</p>
+          <p>Bankr installs skills from public GitHub folders. Gitlawb stays the canonical source, and GitHub mirrors the skill folder for review.</p>
         </div>
         <div className="quickstart-grid">
           <article className="quickstart-card">
@@ -77,8 +78,8 @@ export default function BankrPage() {
           <article className="quickstart-card">
             <span>Catalog</span>
             <h2>Ready for review</h2>
-            <p>The same skill folder is ready for a public GitHub mirror or Bankr catalog PR.</p>
-            <CommandBlock command="integrations/bankr/nipmod" label="Copy skill folder path" />
+            <p>The same skill folder is ready for Bankr catalog review.</p>
+            <CommandBlock command={githubSkillFolder} label="Copy GitHub skill folder" />
           </article>
         </div>
       </section>

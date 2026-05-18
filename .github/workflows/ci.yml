@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  nipmod-cli:
+    name: CLI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir nipmod test
+      - run: pnpm --dir nipmod typecheck
+      - run: pnpm --dir nipmod build
+      - run: pnpm --dir nipmod security:deps
+
+  site:
+    name: Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm --dir site install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir site test
+      - run: pnpm --dir site typecheck
+      - run: pnpm --dir site registry:verified
+      - run: pnpm --dir site build
+      - run: pnpm --dir site security:deps
+      - run: pnpm --dir site security:secrets
+
+  release-surface:
+    name: Release surface
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir site install --frozen-lockfile --ignore-scripts
+      - run: node tools/open-source-readiness-check.mjs
+      - run: node tools/supply-chain-check.mjs

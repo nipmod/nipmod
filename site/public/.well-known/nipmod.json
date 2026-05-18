@@ -21,10 +21,11 @@
     "app": "https://nipmod.com/bankr",
     "docs": "https://nipmod.com/bankr",
     "skill": {
-      "catalogStatus": "ready for public GitHub mirror or Bankr skill catalog PR",
+      "catalogStatus": "ready for Bankr skill catalog PR",
       "primaryInstall": "open https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
       "publicSkill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
-      "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
+      "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+      "githubMirror": "https://github.com/HazarKemalOkur/nipmod/tree/main/integrations/bankr/nipmod"
     },
     "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     "x402": {
