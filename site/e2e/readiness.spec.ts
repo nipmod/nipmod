@@ -242,10 +242,22 @@ test("candidate claim page guides owners from repo to verified package", async (
   await expect(conversionStats.getByText("Owner noticed", { exact: true })).toBeVisible();
   await expect(conversionStats.getByText("Claimed", { exact: true })).toBeVisible();
   await expect(conversionStats.getByText("Published", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Notice dashboard" })).toBeVisible();
+  const noticeStats = page.getByLabel("Scout notice stats");
+  await expect(noticeStats.getByText("Notice planned", { exact: true })).toBeVisible();
+  await expect(noticeStats.getByText("Sent", { exact: true })).toBeVisible();
+  await expect(noticeStats.getByText("Deduped", { exact: true })).toBeVisible();
+  await expect(noticeStats.getByText("Failed", { exact: true })).toBeVisible();
+  await expect(noticeStats.getByText("Claimed after notice", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Public update" })).toBeVisible();
+  await expect(page.getByText("Nipmod Scout update:")).toBeVisible();
   await expect(page.getByText("Ready to claim").first()).toBeVisible();
   const firstCandidate = page.locator(".candidate-card").first();
-  await expect(firstCandidate.getByText("Claim link")).toBeVisible();
-  await expect(firstCandidate.getByText("Notice status")).toBeVisible();
+  await expect(firstCandidate.getByText("Claim link", { exact: true })).toBeVisible();
+  await expect(firstCandidate.getByText("Notice status", { exact: true })).toBeVisible();
+  await expect(firstCandidate.getByText("Owner outreach")).toBeVisible();
+  await expect(firstCandidate.getByText("Nipmod Scout prepared a package draft").first()).toBeVisible();
+  await expect(firstCandidate.getByRole("link", { name: "Ready claim link" })).toHaveAttribute("href", /^\/package\?repo=/);
   await expect(firstCandidate.getByRole("link", { name: "Claim package" })).toHaveAttribute("href", /^\/package\?repo=/);
   await expect(firstCandidate.getByRole("link", { name: "Owner page" })).toHaveAttribute(
     "href",

@@ -1,9 +1,12 @@
 import { describe, expect, test } from "vitest";
 import {
+  candidateActivationPost,
   candidateConversionStats,
   candidateFromRepo,
   candidateNoticeLabel,
   candidateNoticeStateFromScoutPayloads,
+  candidateNoticeStats,
+  candidateOutreachKit,
   candidateStats,
   searchCandidates,
   type GitlawbRepoSummary
@@ -135,5 +138,90 @@ describe("candidate content", () => {
     expect(candidateNoticeLabel(unclaimed, notices)).toBe("Owner notice active");
     expect(candidateNoticeLabel(claimed, notices)).toBe("Owner claimed");
     expect(candidateNoticeLabel(published, notices)).toBe("Published");
+  });
+
+  test("builds notice dashboard metrics and owner safe outreach copy", () => {
+    const unclaimed = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set()
+    });
+    const claimed = candidateFromRepo(
+      { ...repo, name: "claimed-repo" },
+      {
+        claimedPackages: new Set([`pkg:${repo.owner_did}/claimed-repo`]),
+        publishedPackages: new Set()
+      }
+    );
+    const notices = candidateNoticeStateFromScoutPayloads({
+      healthPayload: {
+        ownerNotificationDelivery: {
+          summary: {
+            blocked: 0,
+            deduped: 2,
+            failed: 1,
+            planned: 4,
+            skipped: 1,
+            written: 1
+          }
+        }
+      },
+      notificationsPayload: {
+        notifications: [{ package: unclaimed.packageId }, { package: claimed.packageId }]
+      }
+    });
+
+    expect(candidateNoticeStats([unclaimed, claimed], notices)).toEqual([
+      { label: "Notice planned", value: "4" },
+      { label: "Sent", value: "1" },
+      { label: "Deduped", value: "2" },
+      { label: "Failed", value: "1" },
+      { label: "Claimed after notice", value: "1" }
+    ]);
+    expect(candidateOutreachKit(unclaimed)).toMatchObject({
+      claimUrl: "https://nipmod.com/package?repo=gitlawb%3A%2F%2Fdid%3Akey%3Az6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD%2Frepo-reader",
+      gitlawbIssueTitle: "Nipmod package draft ready for repo-reader"
+    });
+    expect(candidateOutreachKit(unclaimed).xDm).toContain("Nipmod Scout prepared a package draft for repo-reader");
+    expect(candidateOutreachKit(unclaimed).gitlawbIssueBody).toContain(unclaimed.draftCommand);
+    expect(candidateOutreachKit(unclaimed).communityReply).toContain("claim it with the owner DID");
+  });
+
+  test("builds a public update post from real candidate counts", () => {
+    const candidates = [
+      candidateFromRepo(repo, {
+        claimedPackages: new Set(),
+        publishedPackages: new Set()
+      }),
+      candidateFromRepo(
+        { ...repo, name: "published-repo" },
+        {
+          claimedPackages: new Set(),
+          publishedPackages: new Set([`pkg:${repo.owner_did}/published-repo`])
+        }
+      ),
+      candidateFromRepo(
+        { ...repo, name: "claimed-repo" },
+        {
+          claimedPackages: new Set([`pkg:${repo.owner_did}/claimed-repo`]),
+          publishedPackages: new Set()
+        }
+      )
+    ];
+    const notices = candidateNoticeStateFromScoutPayloads({
+      healthPayload: {
+        ownerNotificationDelivery: {
+          summary: {
+            deduped: 1,
+            failed: 0,
+            planned: 1,
+            written: 0
+          }
+        }
+      }
+    });
+
+    expect(candidateActivationPost(candidates, notices)).toBe(
+      "Nipmod Scout update:\n\n- 3 Gitlawb repos found\n- 1 package drafts ready to claim\n- 1 verified packages indexed\n- 1 owner notices active\n\nPackaging should come to the repo.\n\nClaim yours: https://nipmod.com/candidates"
+    );
   });
 });

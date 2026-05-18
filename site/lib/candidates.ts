@@ -61,10 +61,22 @@ export interface PackageClaimIndex {
 }
 
 export interface CandidateNoticeState {
+  blocked: number;
+  deduped: number;
   failed: number;
   packageIds: ReadonlySet<string>;
   planned: number;
+  skipped: number;
   touched: number;
+  written: number;
+}
+
+export interface CandidateOutreachKit {
+  claimUrl: string;
+  communityReply: string;
+  gitlawbIssueBody: string;
+  gitlawbIssueTitle: string;
+  xDm: string;
 }
 
 export function candidateClaimState(options: {
@@ -244,6 +256,67 @@ export function candidateNoticeLabel(candidate: PackageCandidate, notices: Candi
   return "Ready for owner";
 }
 
+export function candidateNoticeStats(
+  candidates: readonly PackageCandidate[],
+  notices: CandidateNoticeState = emptyCandidateNoticeState()
+): Array<{ label: string; value: string }> {
+  const claimedAfterNotice = candidates.filter(
+    (candidate) => notices.packageIds.has(candidate.packageId) && (candidate.status === "claimed" || candidate.status === "published")
+  ).length;
+  return [
+    { label: "Notice planned", value: String(notices.planned) },
+    { label: "Sent", value: String(notices.written) },
+    { label: "Deduped", value: String(notices.deduped) },
+    { label: "Failed", value: String(notices.failed) },
+    { label: "Claimed after notice", value: String(claimedAfterNotice) }
+  ];
+}
+
+export function candidateOutreachKit(candidate: PackageCandidate): CandidateOutreachKit {
+  const claimUrl = canonicalClaimUrl(candidate.source);
+  const xDm = `Nipmod Scout prepared a package draft for ${candidate.repoName}. You can review it and claim it with your Gitlawb DID here: ${claimUrl}`;
+  const gitlawbIssueTitle = `Nipmod package draft ready for ${candidate.repoName}`;
+  const gitlawbIssueBody = [
+    `Nipmod Scout found this public Gitlawb repo and prepared a package draft for ${candidate.repoName}.`,
+    "",
+    `Claim page: ${claimUrl}`,
+    "",
+    "Local draft command:",
+    candidate.draftCommand,
+    "",
+    "Nothing is published or owned by Nipmod until the repo owner signs the claim proof with the matching DID."
+  ].join("\n");
+  const communityReply = `We prepared a Nipmod package draft for ${candidate.repoName}. The owner can review it and claim it with the owner DID: ${claimUrl}`;
+  return {
+    claimUrl,
+    communityReply,
+    gitlawbIssueBody,
+    gitlawbIssueTitle,
+    xDm
+  };
+}
+
+export function candidateActivationPost(
+  candidates: readonly PackageCandidate[],
+  notices: CandidateNoticeState = emptyCandidateNoticeState()
+): string {
+  const published = candidates.filter((candidate) => candidate.status === "published").length;
+  const readyToClaim = candidates.filter((candidate) => candidate.status === "unclaimed").length;
+  const ownerNotices = Math.min(candidates.length, Math.max(notices.touched, notices.packageIds.size));
+  return [
+    "Nipmod Scout update:",
+    "",
+    `- ${candidates.length} Gitlawb repos found`,
+    `- ${readyToClaim} package drafts ready to claim`,
+    `- ${published} verified packages indexed`,
+    `- ${ownerNotices} owner notices active`,
+    "",
+    "Packaging should come to the repo.",
+    "",
+    "Claim yours: https://nipmod.com/candidates"
+  ].join("\n");
+}
+
 export function candidateNoticeStateFromScoutPayloads({
   healthPayload,
   notificationsPayload
@@ -271,21 +344,31 @@ export function candidateNoticeStateFromScoutPayloads({
     (readFiniteNumber(deliverySummary?.written) ?? 0) +
     (readFiniteNumber(deliverySummary?.deduped) ?? 0);
   const failed = readFiniteNumber(deliverySummary?.failed) ?? 0;
+  const written = readFiniteNumber(deliverySummary?.written) ?? 0;
+  const deduped = readFiniteNumber(deliverySummary?.deduped) ?? 0;
 
   return {
+    blocked: readFiniteNumber(deliverySummary?.blocked) ?? 0,
+    deduped,
     failed,
     packageIds,
     planned,
-    touched
+    skipped: readFiniteNumber(deliverySummary?.skipped) ?? 0,
+    touched,
+    written
   };
 }
 
 export function emptyCandidateNoticeState(): CandidateNoticeState {
   return {
+    blocked: 0,
+    deduped: 0,
     failed: 0,
     packageIds: new Set(),
     planned: 0,
-    touched: 0
+    skipped: 0,
+    touched: 0,
+    written: 0
   };
 }
 
@@ -375,6 +458,10 @@ function candidateGitlawbPath(candidate: Pick<PackageCandidate, "packageId" | "r
 
 function draftEndpointForSource(source: string): string {
   return `/scout/draft?repo=${encodeURIComponent(source)}`;
+}
+
+function canonicalClaimUrl(source: string): string {
+  return `https://nipmod.com/package?repo=${encodeURIComponent(source)}`;
 }
 
 function isDidKey(value: string): boolean {

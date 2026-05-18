@@ -3,6 +3,7 @@ import claimIndexData from "../claim-index.json";
 import registryData from "../registry-data.json";
 import { OwnerClaimFlow } from "../owner-claim-flow";
 import {
+  candidateActivationPost,
   candidateClaimState,
   candidateConversionStats,
   candidateFromScout,
@@ -10,6 +11,8 @@ import {
   candidateGitlawbOwnerHref,
   candidateGitlawbPackageHref,
   candidateNoticeLabel,
+  candidateNoticeStats,
+  candidateOutreachKit,
   candidateStats,
   emptyCandidateNoticeState,
   fetchGitlawbRepos,
@@ -113,6 +116,35 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
           {notices.failed > 0 ? <p className="ranking-note">Owner notice delivery has {notices.failed} failed writes.</p> : null}
         </section>
 
+        <section className="activation-grid" aria-label="Claim activation">
+          <article className="activation-panel" aria-labelledby="notice-dashboard-title">
+            <div className="section-head compact-section-head">
+              <p className="eyebrow">Scout</p>
+              <h2 id="notice-dashboard-title">Notice dashboard</h2>
+              <p>Track outreach without pretending a draft is claimed before the owner signs it.</p>
+            </div>
+            <div className="registry-stats notice-stats" aria-label="Scout notice stats">
+              {candidateNoticeStats(candidates, notices).map((item) => (
+                <div className="stat-tile" key={item.label}>
+                  <span>{item.value}</span>
+                  <p>{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="activation-panel" aria-labelledby="public-update-title">
+            <div className="section-head compact-section-head">
+              <p className="eyebrow">Post</p>
+              <h2 id="public-update-title">Public update</h2>
+              <p>Use real Scout numbers. No inflated adoption claims.</p>
+            </div>
+            <pre className="install-command activation-post">
+              <code>{candidateActivationPost(candidates, notices)}</code>
+            </pre>
+          </article>
+        </section>
+
         <div className="registry-stats" aria-label="Candidate stats">
           {candidateStats(candidates).map((item) => (
             <div className="stat-tile" key={item.label}>
@@ -193,6 +225,7 @@ async function loadNoticeState(): Promise<CandidateNoticeState> {
 function CandidateCard({ candidate, notices }: { candidate: PackageCandidate; notices: CandidateNoticeState }) {
   const statusLabel = candidateStatusLabel(candidate);
   const claimHref = packageHrefForSource(candidate.source);
+  const outreach = candidateOutreachKit(candidate);
 
   return (
     <article className="package-card candidate-card">
@@ -243,6 +276,24 @@ function CandidateCard({ candidate, notices }: { candidate: PackageCandidate; no
       <pre className="install-command">
         <code>{candidate.status === "claimed" || candidate.status === "published" ? `nipmod add ${candidate.packageId}` : candidate.draftCommand}</code>
       </pre>
+
+      <div className="outreach-kit" aria-label={`${candidate.repoName} owner outreach`}>
+        <div>
+          <h4>Owner outreach</h4>
+          <p>{outreach.xDm}</p>
+        </div>
+        <details>
+          <summary>Gitlawb issue</summary>
+          <pre className="outreach-copy">
+            <code>{`${outreach.gitlawbIssueTitle}\n\n${outreach.gitlawbIssueBody}`}</code>
+          </pre>
+        </details>
+        <details>
+          <summary>Community reply</summary>
+          <p>{outreach.communityReply}</p>
+        </details>
+        <a href={claimHref}>Ready claim link</a>
+      </div>
 
       <div className="package-links">
         <a
