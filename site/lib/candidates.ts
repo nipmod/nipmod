@@ -60,6 +60,13 @@ export interface PackageClaimIndex {
   verifiedClaims?: Array<{ package: string; status: string }>;
 }
 
+export interface CandidateNoticeState {
+  failed: number;
+  packageIds: ReadonlySet<string>;
+  planned: number;
+  touched: number;
+}
+
 export function candidateClaimState(options: {
   claimIndex: PackageClaimIndex;
   publishedPackages: ReadonlySet<string>;
@@ -211,6 +218,77 @@ export function candidateStats(candidates: readonly PackageCandidate[]): Array<{
   ];
 }
 
+export function candidateConversionStats(
+  candidates: readonly PackageCandidate[],
+  notices: CandidateNoticeState = emptyCandidateNoticeState()
+): Array<{ label: string; value: string }> {
+  const claimed = candidates.filter((candidate) => candidate.status === "claimed").length;
+  const published = candidates.filter((candidate) => candidate.status === "published").length;
+  const draftReady = candidates.filter((candidate) => candidate.status !== "published").length;
+  const ownerNoticed = Math.min(candidates.length, Math.max(notices.touched, notices.packageIds.size));
+  return [
+    { label: "Found", value: String(candidates.length) },
+    { label: "Draft ready", value: String(draftReady) },
+    { label: "Owner noticed", value: String(ownerNoticed) },
+    { label: "Claimed", value: String(claimed) },
+    { label: "Published", value: String(published) }
+  ];
+}
+
+export function candidateNoticeLabel(candidate: PackageCandidate, notices: CandidateNoticeState = emptyCandidateNoticeState()): string {
+  if (candidate.status === "published") return "Published";
+  if (candidate.status === "claimed") return "Owner claimed";
+  if (candidate.status === "needs-work") return "Needs cleanup";
+  if (notices.packageIds.has(candidate.packageId)) return "Owner notice active";
+  if (notices.touched > 0 || notices.planned > 0) return "Scout outreach running";
+  return "Ready for owner";
+}
+
+export function candidateNoticeStateFromScoutPayloads({
+  healthPayload,
+  notificationsPayload
+}: {
+  healthPayload?: unknown;
+  notificationsPayload?: unknown;
+}): CandidateNoticeState {
+  const packageIds = new Set<string>();
+  const notifications = readArray(readRecord(notificationsPayload)?.notifications);
+  for (const notification of notifications) {
+    const packageId = readRecord(notification)?.package;
+    if (typeof packageId === "string" && isPackageId(packageId)) {
+      packageIds.add(packageId);
+    }
+  }
+
+  const notificationSummary = readRecord(readRecord(notificationsPayload)?.summary);
+  const deliverySummary = readRecord(readRecord(readRecord(healthPayload)?.ownerNotificationDelivery)?.summary);
+  const planned = Math.max(
+    packageIds.size,
+    readFiniteNumber(notificationSummary?.planned) ?? 0,
+    readFiniteNumber(deliverySummary?.planned) ?? 0
+  );
+  const touched =
+    (readFiniteNumber(deliverySummary?.written) ?? 0) +
+    (readFiniteNumber(deliverySummary?.deduped) ?? 0);
+  const failed = readFiniteNumber(deliverySummary?.failed) ?? 0;
+
+  return {
+    failed,
+    packageIds,
+    planned,
+    touched
+  };
+}
+
+export function emptyCandidateNoticeState(): CandidateNoticeState {
+  return {
+    failed: 0,
+    packageIds: new Set(),
+    planned: 0,
+    touched: 0
+  };
+}
+
 export async function fetchGitlawbRepos(options: { nodeUrl: string }): Promise<GitlawbRepoSummary[]> {
   const response = await fetch(`${options.nodeUrl.replace(/\/$/, "")}/api/v1/repos`, {
     next: { revalidate: 300 }
@@ -233,6 +311,19 @@ export async function fetchScoutCandidates(options: { scoutUrl: string }): Promi
   return Array.isArray(data.candidates)
     ? data.candidates.filter((candidate) => isPackageId(candidate.package) && isGitlawbSource(candidate.source) && isRepoName(candidate.repoName))
     : [];
+}
+
+export async function fetchScoutNoticeState(options: { scoutUrl: string }): Promise<CandidateNoticeState> {
+  const base = options.scoutUrl.replace(/\/$/, "");
+  const [notifications, health] = await Promise.allSettled([
+    fetchScoutJson(`${base}/notifications`),
+    fetchScoutJson(`${base}/health`)
+  ]);
+
+  return candidateNoticeStateFromScoutPayloads({
+    healthPayload: health.status === "fulfilled" ? health.value : undefined,
+    notificationsPayload: notifications.status === "fulfilled" ? notifications.value : undefined
+  });
 }
 
 function scoreRepoCandidate(repo: GitlawbRepoSummary): number {
@@ -300,6 +391,31 @@ function isPackageId(value: string): boolean {
 
 function isGitlawbSource(value: string): boolean {
   return /^gitlawb:\/\/did:key:z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/.test(value);
+}
+
+async function fetchScoutJson(url: string): Promise<unknown> {
+  const response = await fetch(url, {
+    headers: {
+      accept: "application/json"
+    },
+    next: { revalidate: 300 }
+  });
+  if (!response.ok) {
+    throw new Error(`Nipmod scout fetch failed with HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+function readRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function readArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function readFiniteNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function isProbeRepo(repo: GitlawbRepoSummary): boolean {

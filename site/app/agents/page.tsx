@@ -13,6 +13,11 @@ const commands = [
     command: "curl -fsSL https://nipmod.com/llms.txt"
   },
   {
+    label: "Claim drafts",
+    text: "Use Scout candidates when an existing Gitlawb repo should become a claimed package.",
+    command: "curl -fsS https://nipmod.com/scout/candidates\ncurl -fsS https://nipmod.com/scout/health"
+  },
+  {
     label: "Search",
     text: "Find packages from the public registry without a Nipmod account.",
     command: "nipmod search gitlawb --online"

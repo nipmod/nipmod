@@ -6,8 +6,12 @@ import { OwnerClaimFlow } from "../../owner-claim-flow";
 import {
   candidateGitlawbPackageHref,
   candidateFromScout,
+  candidateNoticeLabel,
   candidatesByGitlawbOwner,
+  emptyCandidateNoticeState,
   fetchScoutCandidates,
+  fetchScoutNoticeState,
+  type CandidateNoticeState,
   type PackageCandidate
 } from "../../../lib/candidates";
 import {
@@ -54,6 +58,7 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
 
   const packages = packagesByGitlawbOwner(registry.packages, owner);
   const candidates = await loadOwnerCandidates(owner);
+  const notices = await loadNoticeState();
 
   if (packages.length === 0 && candidates.length === 0) {
     notFound();
@@ -167,7 +172,7 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
         </div>
         <div className="package-grid">
           {claimableOnly.length > 0 ? (
-            claimableOnly.map((candidate) => <OwnerCandidateCard candidate={candidate} key={candidate.packageId} />)
+            claimableOnly.map((candidate) => <OwnerCandidateCard candidate={candidate} key={candidate.packageId} notices={notices} />)
           ) : (
             <div className="empty-state">
               <p>No claimable drafts for this owner right now.</p>
@@ -229,7 +234,7 @@ function OwnerPackageCard({ pkg }: { pkg: RegistryPackage }) {
   );
 }
 
-function OwnerCandidateCard({ candidate }: { candidate: PackageCandidate }) {
+function OwnerCandidateCard({ candidate, notices }: { candidate: PackageCandidate; notices: CandidateNoticeState }) {
   const claimHref = `/package?repo=${encodeURIComponent(candidate.source)}`;
 
   return (
@@ -255,6 +260,16 @@ function OwnerCandidateCard({ candidate }: { candidate: PackageCandidate }) {
         <div>
           <dt>Updated</dt>
           <dd>{candidate.updatedAt.slice(0, 10)}</dd>
+        </div>
+        <div>
+          <dt>Notice status</dt>
+          <dd>{candidateNoticeLabel(candidate, notices)}</dd>
+        </div>
+        <div>
+          <dt>Claim link</dt>
+          <dd>
+            <a href={claimHref}>ready</a>
+          </dd>
         </div>
       </dl>
       <pre className="install-command">
@@ -292,6 +307,14 @@ async function loadOwnerCandidates(owner: string): Promise<PackageCandidate[]> {
     return candidatesByGitlawbOwner(scoutCandidates.map(candidateFromScout), owner);
   } catch {
     return [];
+  }
+}
+
+async function loadNoticeState(): Promise<CandidateNoticeState> {
+  try {
+    return await fetchScoutNoticeState({ scoutUrl: "https://nipmod.com/scout" });
+  } catch {
+    return emptyCandidateNoticeState();
   }
 }
 

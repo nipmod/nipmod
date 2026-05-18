@@ -1,5 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { candidateFromRepo, candidateStats, searchCandidates, type GitlawbRepoSummary } from "../lib/candidates";
+import {
+  candidateConversionStats,
+  candidateFromRepo,
+  candidateNoticeLabel,
+  candidateNoticeStateFromScoutPayloads,
+  candidateStats,
+  searchCandidates,
+  type GitlawbRepoSummary
+} from "../lib/candidates";
 
 describe("candidate content", () => {
   const repo: GitlawbRepoSummary = {
@@ -83,5 +91,49 @@ describe("candidate content", () => {
       { label: "Published", value: "1" },
       { label: "Unclaimed drafts", value: "1" }
     ]);
+  });
+
+  test("summarizes the claim conversion funnel with verified notice delivery", () => {
+    const unclaimed = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set()
+    });
+    const published = candidateFromRepo(repo, {
+      claimedPackages: new Set(),
+      publishedPackages: new Set([`pkg:${repo.owner_did}/${repo.name}`])
+    });
+    const claimed = candidateFromRepo(
+      { ...repo, name: "claimed-repo" },
+      {
+        claimedPackages: new Set([`pkg:${repo.owner_did}/claimed-repo`]),
+        publishedPackages: new Set()
+      }
+    );
+    const notices = candidateNoticeStateFromScoutPayloads({
+      healthPayload: {
+        ownerNotificationDelivery: {
+          summary: {
+            deduped: 1,
+            failed: 0,
+            planned: 2,
+            written: 1
+          }
+        }
+      },
+      notificationsPayload: {
+        notifications: [{ package: unclaimed.packageId }]
+      }
+    });
+
+    expect(candidateConversionStats([unclaimed, published, claimed], notices)).toEqual([
+      { label: "Found", value: "3" },
+      { label: "Draft ready", value: "2" },
+      { label: "Owner noticed", value: "2" },
+      { label: "Claimed", value: "1" },
+      { label: "Published", value: "1" }
+    ]);
+    expect(candidateNoticeLabel(unclaimed, notices)).toBe("Owner notice active");
+    expect(candidateNoticeLabel(claimed, notices)).toBe("Owner claimed");
+    expect(candidateNoticeLabel(published, notices)).toBe("Published");
   });
 });

@@ -843,6 +843,10 @@ h1 {
   max-width: 760px;
 }
 
+.compact-section-head h2 {
+  font-size: clamp(28px, 3.2vw, 42px);
+}
+
 .search-form {
   align-items: center;
   backdrop-filter: blur(30px) saturate(180%);
@@ -875,6 +879,15 @@ h1 {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.claim-conversion {
+  display: grid;
+  gap: 14px;
+}
+
+.claim-conversion-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .stat-tile {
@@ -1065,6 +1078,10 @@ h1 {
   gap: 8px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
+}
+
+.candidate-card .package-meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .package-shelf-grid {

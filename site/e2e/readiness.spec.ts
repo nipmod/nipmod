@@ -135,6 +135,17 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
 });
 
+test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
+  await page.goto("/agents");
+
+  await expect(page.getByRole("heading", { name: "One link. Full package workflow." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Claim drafts" })).toBeVisible();
+  await expect(page.getByText("Use Scout candidates when an existing Gitlawb repo should become a claimed package.")).toBeVisible();
+  await expect(page.getByText("curl -fsS https://nipmod.com/scout/candidates")).toBeVisible();
+  await expect(page.getByText("curl -fsS https://nipmod.com/scout/health")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Browse packages" })).toHaveAttribute("href", "/packages");
+});
+
 test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }) => {
   test.setTimeout(180_000);
 
@@ -224,8 +235,19 @@ test("candidate claim page guides owners from repo to verified package", async (
   await expect(page.getByRole("heading", { name: "Find your repo. Claim the package." })).toBeVisible();
   await expect(page.getByText("Search by repo name, DID owner or package id.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Package one repo manually" })).toHaveAttribute("href", "/package");
+  await expect(page.getByRole("heading", { name: "Claim conversion" })).toBeVisible();
+  const conversionStats = page.getByLabel("Claim conversion stats");
+  await expect(conversionStats.getByText("Found", { exact: true })).toBeVisible();
+  await expect(conversionStats.getByText("Draft ready", { exact: true })).toBeVisible();
+  await expect(conversionStats.getByText("Owner noticed", { exact: true })).toBeVisible();
+  await expect(conversionStats.getByText("Claimed", { exact: true })).toBeVisible();
+  await expect(conversionStats.getByText("Published", { exact: true })).toBeVisible();
   await expect(page.getByText("Ready to claim").first()).toBeVisible();
-  await expect(page.locator(".candidate-card").first().getByRole("link", { name: "Owner page" })).toHaveAttribute(
+  const firstCandidate = page.locator(".candidate-card").first();
+  await expect(firstCandidate.getByText("Claim link")).toBeVisible();
+  await expect(firstCandidate.getByText("Notice status")).toBeVisible();
+  await expect(firstCandidate.getByRole("link", { name: "Claim package" })).toHaveAttribute("href", /^\/package\?repo=/);
+  await expect(firstCandidate.getByRole("link", { name: "Owner page" })).toHaveAttribute(
     "href",
     /^\/gitlawb\/z[A-Za-z0-9]+$/
   );

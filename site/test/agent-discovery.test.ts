@@ -11,9 +11,12 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("Primary machine manifest: https://nipmod.com/.well-known/nipmod.json");
     expect(llmsText).toContain("Human docs: https://nipmod.com/quickstart#docs");
     expect(llmsText).toContain("Agent runbook: https://nipmod.com/agents");
+    expect(llmsText).toContain("Claim conversion page: https://nipmod.com/candidates");
     expect(llmsText).toContain("MCP docs: https://nipmod.com/mcp");
     expect(llmsText).toContain("Audit docs: https://nipmod.com/audit");
     expect(llmsText).toContain("Registry index: https://nipmod.com/registry/packages.json");
+    expect(llmsText).toContain("Scout health: https://nipmod.com/scout/health");
+    expect(llmsText).toContain("Owner status page template: https://nipmod.com/gitlawb/{owner}");
   });
 
   test("lists the commands an agent needs for the full lifecycle", () => {
@@ -32,6 +35,9 @@ describe("agent discovery text", () => {
       "nipmod audit --online",
       "nipmod sbom --json",
       "nipmod publish . --dry-run --json",
+      "Claim conversion page:",
+      "https://nipmod.com/candidates",
+      "curl -fsS https://nipmod.com/scout/health",
       "nipmod mcp serve"
     ]) {
       expect(llmsText).toContain(command);

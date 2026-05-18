@@ -4,14 +4,19 @@ import registryData from "../registry-data.json";
 import { OwnerClaimFlow } from "../owner-claim-flow";
 import {
   candidateClaimState,
+  candidateConversionStats,
   candidateFromScout,
   candidateFromRepo,
   candidateGitlawbOwnerHref,
   candidateGitlawbPackageHref,
+  candidateNoticeLabel,
   candidateStats,
+  emptyCandidateNoticeState,
   fetchGitlawbRepos,
   fetchScoutCandidates,
+  fetchScoutNoticeState,
   searchCandidates,
+  type CandidateNoticeState,
   type PackageCandidate
 } from "../../lib/candidates";
 import type { PackageClaimIndex } from "../../lib/candidates";
@@ -43,6 +48,7 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
   const params = searchParams ? await searchParams : {};
   const query = firstParam(params.q);
   const candidates = await loadCandidates();
+  const notices = await loadNoticeState();
   const filtered = searchCandidates(candidates, query);
   const visibleLimit = query ? 80 : 48;
   const visibleCandidates = filtered.slice(0, visibleLimit);
@@ -90,6 +96,23 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
           </form>
         </div>
 
+        <section className="claim-conversion" aria-labelledby="claim-conversion-title">
+          <div className="section-head compact-section-head">
+            <p className="eyebrow">Funnel</p>
+            <h2 id="claim-conversion-title">Claim conversion</h2>
+            <p>Found repos become drafts. Owners turn drafts into verified packages.</p>
+          </div>
+          <div className="registry-stats claim-conversion-stats" aria-label="Claim conversion stats">
+            {candidateConversionStats(candidates, notices).map((item) => (
+              <div className="stat-tile" key={item.label}>
+                <span>{item.value}</span>
+                <p>{item.label}</p>
+              </div>
+            ))}
+          </div>
+          {notices.failed > 0 ? <p className="ranking-note">Owner notice delivery has {notices.failed} failed writes.</p> : null}
+        </section>
+
         <div className="registry-stats" aria-label="Candidate stats">
           {candidateStats(candidates).map((item) => (
             <div className="stat-tile" key={item.label}>
@@ -108,7 +131,7 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
 
         <div className="package-grid" aria-live="polite">
           {visibleCandidates.length > 0 ? (
-            visibleCandidates.map((candidate) => <CandidateCard candidate={candidate} key={candidate.packageId} />)
+            visibleCandidates.map((candidate) => <CandidateCard candidate={candidate} key={candidate.packageId} notices={notices} />)
           ) : (
             <div className="empty-state">
               <p>No candidates found.</p>
@@ -159,15 +182,17 @@ async function loadCandidates(): Promise<PackageCandidate[]> {
   }
 }
 
-function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
-  const statusLabel =
-    candidate.status === "claimed"
-      ? "claimed"
-      : candidate.status === "published"
-        ? "published"
-        : candidate.status === "unclaimed"
-          ? "Ready to claim"
-          : "needs work";
+async function loadNoticeState(): Promise<CandidateNoticeState> {
+  try {
+    return await fetchScoutNoticeState({ scoutUrl: "https://nipmod.com/scout" });
+  } catch {
+    return emptyCandidateNoticeState();
+  }
+}
+
+function CandidateCard({ candidate, notices }: { candidate: PackageCandidate; notices: CandidateNoticeState }) {
+  const statusLabel = candidateStatusLabel(candidate);
+  const claimHref = packageHrefForSource(candidate.source);
 
   return (
     <article className="package-card candidate-card">
@@ -203,6 +228,16 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
           <dt>Source</dt>
           <dd>{candidate.status === "published" ? "published" : candidate.draftStatus === "claimed" ? "claimed draft" : "draft ready"}</dd>
         </div>
+        <div>
+          <dt>Notice status</dt>
+          <dd>{candidateNoticeLabel(candidate, notices)}</dd>
+        </div>
+        <div>
+          <dt>Claim link</dt>
+          <dd>
+            <a href={claimHref}>{candidate.status === "published" || candidate.status === "claimed" ? "done" : "ready"}</a>
+          </dd>
+        </div>
       </dl>
 
       <pre className="install-command">
@@ -231,7 +266,7 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
         {candidate.status === "published" || candidate.status === "claimed" ? (
           <a href={`/packages?q=${encodeURIComponent(candidate.repoName)}`}>Package</a>
         ) : (
-          <a href={packageHrefForSource(candidate.source)}>Claim package</a>
+          <a href={claimHref}>Claim package</a>
         )}
         <a href={candidateGitlawbOwnerHref(candidate)}>Owner page</a>
         <a href={candidateGitlawbPackageHref(candidate)}>Repo status</a>
@@ -241,6 +276,13 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
       </div>
     </article>
   );
+}
+
+function candidateStatusLabel(candidate: PackageCandidate): string {
+  if (candidate.status === "claimed") return "claimed";
+  if (candidate.status === "published") return "published";
+  if (candidate.status === "unclaimed") return "Ready to claim";
+  return "needs work";
 }
 
 function packageHrefForSource(source: string): string {
