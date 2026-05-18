@@ -3,12 +3,13 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Package layer for agent built software" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Live network" })).toBeVisible();
-  await expect(page.getByText(/Scout running every|Registry snapshot live/)).toBeVisible();
-  await expect(page.getByText("Repos scanned")).toBeVisible();
-  await expect(page.getByText("Packages indexed")).toBeVisible();
-  await expect(page.getByText("Claimable drafts")).toBeVisible();
-  await expect(page.getByText("Scan interval")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Package count" })).toBeVisible();
+  await expect(page.getByText(/Live package count|Registry snapshot/)).toBeVisible();
+  await expect(page.getByText("Nipmod packages")).toBeVisible();
+  await expect(page.getByText("Claimable packages")).toBeVisible();
+  await expect(page.getByText("Repos scanned")).toHaveCount(0);
+  await expect(page.getByText("Scan interval")).toHaveCount(0);
+  await expect(page.getByText("Scout running every")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveAttribute(
     "href",
     "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R"

@@ -1,4 +1,3 @@
-import { SCOUT_INTERVAL_MS } from "./scout";
 import type { RegistryIndex } from "./registry";
 
 export interface ScoutHealthPayload {
@@ -10,7 +9,7 @@ export interface ScoutHealthPayload {
 }
 
 export interface LiveStatTile {
-  label: "Repos scanned" | "Packages indexed" | "Claimable drafts" | "Scan interval";
+  label: "Nipmod packages" | "Claimable packages";
   value: string;
 }
 
@@ -24,7 +23,6 @@ export interface LiveStats {
 
 interface ScoutSummary {
   published: number;
-  scanned: number;
   unclaimedDrafts: number;
 }
 
@@ -66,8 +64,7 @@ export async function loadLiveStats({
 
 export function liveStatsFromScoutHealth(payload: ScoutHealthPayload): LiveStats | null {
   const summary = parseScoutSummary(payload.summary);
-  const intervalMs = typeof payload.intervalMs === "number" && Number.isFinite(payload.intervalMs) ? payload.intervalMs : null;
-  if (!summary || !intervalMs) {
+  if (!summary) {
     return null;
   }
 
@@ -76,11 +73,9 @@ export function liveStatsFromScoutHealth(payload: ScoutHealthPayload): LiveStats
     generatedAt: typeof payload.lastRunAt === "string" ? payload.lastRunAt : null,
     healthy,
     source: "live",
-    status: healthy ? `Scout running every ${formatScoutCadence(intervalMs)}` : "Scout status needs attention",
+    status: healthy ? "Live package count" : "Registry status pending",
     tiles: liveStatTiles({
-      intervalMs,
       packagesIndexed: summary.published,
-      reposScanned: summary.scanned,
       unclaimedDrafts: summary.unclaimedDrafts
     })
   };
@@ -92,37 +87,24 @@ export function fallbackLiveStats(registry: RegistryIndex): LiveStats {
     generatedAt: null,
     healthy: false,
     source: "registry",
-    status: "Registry snapshot live, Scout status pending",
+    status: "Registry snapshot",
     tiles: liveStatTiles({
-      intervalMs: SCOUT_INTERVAL_MS,
       packagesIndexed: packageCount,
-      reposScanned: packageCount,
       unclaimedDrafts: 0
     })
   };
 }
 
-export function formatScoutInterval(intervalMs: number): string {
-  const minutes = Math.max(1, Math.round(intervalMs / 60_000));
-  return `${minutes} min`;
-}
-
 function liveStatTiles({
-  intervalMs,
   packagesIndexed,
-  reposScanned,
   unclaimedDrafts
 }: {
-  intervalMs: number;
   packagesIndexed: number;
-  reposScanned: number;
   unclaimedDrafts: number;
 }): LiveStatTile[] {
   return [
-    { label: "Repos scanned", value: String(reposScanned) },
-    { label: "Packages indexed", value: String(packagesIndexed) },
-    { label: "Claimable drafts", value: String(unclaimedDrafts) },
-    { label: "Scan interval", value: formatScoutInterval(intervalMs) }
+    { label: "Nipmod packages", value: String(packagesIndexed) },
+    { label: "Claimable packages", value: String(unclaimedDrafts) }
   ];
 }
 
@@ -131,21 +113,15 @@ function parseScoutSummary(value: unknown): ScoutSummary | null {
     return null;
   }
   const published = readFiniteNumber(value.published);
-  const scanned = readFiniteNumber(value.scanned);
   const unclaimedDrafts = readFiniteNumber(value.unclaimedDrafts);
-  if (published === null || scanned === null || unclaimedDrafts === null) {
+  if (published === null || unclaimedDrafts === null) {
     return null;
   }
-  return { published, scanned, unclaimedDrafts };
+  return { published, unclaimedDrafts };
 }
 
 function readFiniteNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function formatScoutCadence(intervalMs: number): string {
-  const minutes = Math.max(1, Math.round(intervalMs / 60_000));
-  return minutes === 1 ? "1 minute" : `${minutes} minutes`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

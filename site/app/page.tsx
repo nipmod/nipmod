@@ -77,15 +77,15 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="live-section" id="live" aria-labelledby="live-title">
         <div className="live-head">
           <div>
-            <p className="eyebrow">Live</p>
-            <h2 id="live-title">Live network</h2>
+            <p className="eyebrow">Registry</p>
+            <h2 id="live-title">Package count</h2>
           </div>
           <p className={`live-status ${liveStats.healthy ? "live-ok" : "live-warn"}`}>
             <span aria-hidden="true" />
             {liveStats.status}
           </p>
         </div>
-        <div className="live-stat-grid" aria-label="Live Nipmod network stats">
+        <div className="live-stat-grid" aria-label="Live Nipmod package stats">
           {liveStats.tiles.map((item) => (
             <div className="live-stat" key={item.label}>
               <span>{item.value}</span>
