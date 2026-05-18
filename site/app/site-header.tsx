@@ -6,7 +6,7 @@ export function SiteHeader() {
       <div className="brand-cluster">
         <a className="brand" href="/" aria-label="Nipmod home">
           <span className="brand-mark" aria-hidden="true">
-            <img alt="" height="26" src="/nipmod-logo.jpg" width="26" />
+            <img alt="" height="26" src="/nipmod-logo.png" width="26" />
           </span>
           <span>{homeContent.brand}</span>
         </a>

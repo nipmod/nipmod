@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   },
   description: "Package layer for agent built software.",
   icons: {
-    apple: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }],
-    icon: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }]
+    apple: [{ sizes: "1254x1254", type: "image/png", url: "/nipmod-logo.png" }],
+    icon: [{ sizes: "1254x1254", type: "image/png", url: "/nipmod-logo.png" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
     description: "Nipmod makes agent code installable, verifiable and reusable.",
-    images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
+    images: [{ height: 1254, type: "image/png", url: "/nipmod-logo.png", width: 1254 }],
     siteName: "Nipmod",
     title: "Nipmod",
     type: "website",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: "summary",
     creator: "@Nipmod",
     description: "Nipmod makes agent code installable, verifiable and reusable.",
-    images: ["/nipmod-logo.jpg"],
+    images: ["/nipmod-logo.png"],
     site: "@Nipmod",
     title: "Nipmod"
   }
