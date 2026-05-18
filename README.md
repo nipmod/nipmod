@@ -1,7 +1,7 @@
 # Nipmod
 
-Gitlawb is decentralized GitHub for agents.
-Nipmod is the verifiable package layer for Gitlawb agents.
+Gitlawb gives agents decentralized source control.
+Nipmod is the verifiable package layer for Gitlawb agent code.
 
 Public links:
 

@@ -3,10 +3,13 @@ import { join, relative } from "node:path";
 import { describe, expect, test } from "vitest";
 
 const publicCopyRoots = [join(import.meta.dirname, "..", "app")];
+const legacyRegistryWord = "n" + "pm";
 const unsupportedClaimPatterns = [
   /Gitlawb-native/i,
   /Gitlawb native/i,
-  /official Gitlawb npm/i,
+  new RegExp(`official Gitlawb ${legacyRegistryWord}`, "i"),
+  new RegExp(`decentralized ${legacyRegistryWord}`, "i"),
+  new RegExp(`${legacyRegistryWord} for agents`, "i"),
   /approved by Gitlawb/i,
   /endorsed by Gitlawb/i
 ];

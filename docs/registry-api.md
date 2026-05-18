@@ -5,7 +5,7 @@ Date: 2026-05-17
 
 ## Why this exists
 
-npm has package documents, often called packuments, that group all versions and dist tags for one package. Nipmod currently publishes a flat search index. That is enough for launch search, but not enough for npm parity because `latest`, `beta`, version ranges, package pages, `outdated`, `update`, `view`, deprecation and dependency resolution need a package document contract.
+Package registries often expose package documents that group all versions and dist tags for one package. Nipmod currently publishes a flat search index. That is enough for launch search, but not enough for package manager parity because `latest`, `beta`, version ranges, package pages, `outdated`, `update`, `view`, deprecation and dependency resolution need a package document contract.
 
 ## Package document
 
@@ -57,7 +57,7 @@ Dist tags are signed lifecycle events. `latest` can be derived only when no sign
 
 Lifecycle events use `dev.nipmod.lifecycle.v1` signed envelopes. Supported actions are `dist-tag.set`, `dist-tag.remove`, `deprecate` and `yank`. The registry materializes verified events into `distTags`, `deprecated` and `yanked` fields. Search hides yanked releases unless explicitly included; install, inspect, audit and CI fail closed on yanked releases.
 
-## Decentralized differences from npm
+## Decentralized differences
 
 - Global names are not authoritative. Canonical identity is `pkg:<did>/<slug>`.
 - Unscoped display names can be ambiguous. Resolvers must fail closed unless a canonical package id is provided.

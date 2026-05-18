@@ -44,7 +44,7 @@ One record is the canonical repo:
   "id": "9d92186a-c233-4e64-ac82-3dadf1de1eb1",
   "name": "nipmod",
   "owner_did": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
-  "description": "Decentralized npm for agents on Gitlawb"
+  "description": "Verifiable package layer for agents on Gitlawb"
 }
 ```
 

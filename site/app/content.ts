@@ -34,10 +34,10 @@ export const homeContent = {
   ],
   comparison: [
     {
-      label: "Human package managers",
-      title: "npm and pnpm",
-      text: "Human JavaScript ecosystems, fast installs and massive public package distribution.",
-      points: ["package names and versions", "JavaScript first", "human publisher accounts"]
+      label: "Human package tools",
+      title: "Developer workflows",
+      text: "Fast installs, familiar package names and public distribution for human maintained projects.",
+      points: ["package names and versions", "developer first", "human publisher accounts"]
     },
     {
       label: "Nipmod",
@@ -125,7 +125,7 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install CLI",
-      text: "Run the short installer. Node.js 22, npm, Git, curl and tar are required.",
+      text: "Run the short installer. Node.js 22, Git, curl, tar and standard Node package tooling are required.",
       command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
     },
     {
@@ -161,7 +161,7 @@ export const homeContent = {
     },
     {
       label: "Add alias",
-      text: "Use add only when you want the npm style alias for install.",
+      text: "Use add only when you want the short alias for install.",
       command: "nipmod add gitlawb-repo-reader --online"
     },
     {

@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { buildPackageDocuments } from "../src/packument.js";
 
 describe("package document builder", () => {
-  test("groups registry records into npm-style package documents with latest dist tag", () => {
+  test("groups registry records into package documents with latest dist tag", () => {
     const documents = buildPackageDocuments([
       {
         ...registryPackage("pkg:did:key:z6Mka/example", "example", "1.0.0"),

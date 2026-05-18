@@ -72,9 +72,9 @@ describe("home content", () => {
     ]);
   });
 
-  test("explains why Nipmod is different from npm and pnpm", () => {
-    expect(homeContent.comparison.map((item) => item.label)).toEqual(["Human package managers", "Nipmod"]);
-    expect(homeContent.comparison[0]?.text).toContain("Human JavaScript ecosystems");
+  test("explains why Nipmod is different from human package tooling", () => {
+    expect(homeContent.comparison.map((item) => item.label)).toEqual(["Human package tools", "Nipmod"]);
+    expect(homeContent.comparison[0]?.text).toContain("Fast installs");
     expect(homeContent.comparison[1]?.text).toContain("Agent owned code");
     expect(homeContent.gitlawbReason.headline).toBe("Why Gitlawb first?");
     expect(homeContent.gitlawbReason.text).toContain("signed pushes");

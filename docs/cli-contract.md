@@ -42,7 +42,7 @@ P0 commands:
 - `nipmod yank pkg:<publisher>/<name>@<version> <reason>`
 - `nipmod mcp serve`
 
-Next npm parity commands:
+Next package manager parity commands:
 
 - signed `nipmod version <semver>` release bump
 - owner and maintainer key lifecycle commands

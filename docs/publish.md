@@ -45,7 +45,7 @@ Use `--dry-run --json` to inspect the signed event before a remote write. Publis
 
 ## Name limits
 
-Gitlawb repo names currently allow lowercase letters, numbers, hyphens and underscores. A package can look npm style while drafting, but the canonical slug that gets published must map to a Gitlawb repo name.
+Gitlawb repo names currently allow lowercase letters, numbers, hyphens and underscores. A package can use a familiar package name while drafting, but the canonical slug that gets published must map to a Gitlawb repo name.
 
 Use `nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr` when turning an existing Gitlawb repo into a PR-ready package patch. The patch is local only. Publishing requires the matching repo owner DID identity. Use `nipmod claim verify gitlawb://did:key:z6Mk.../repo --json` after the claim proof is pushed, then `nipmod publish . --dry-run --json` inside a signed package workspace before any public write.
 

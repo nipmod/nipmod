@@ -258,7 +258,7 @@ describe("package indexer rules", () => {
     });
   });
 
-  test("builds npm-style public package documents with URL-safe canonical paths", () => {
+  test("builds public package documents with URL-safe canonical paths", () => {
     const canonical = "pkg:did:key:z6Mkowner/alpha";
     const encoded = encodeCanonicalForRegistryPath(canonical);
     const documents = buildPublicPackageDocuments({

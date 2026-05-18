@@ -9,11 +9,11 @@ const SemverSchema = z.string().regex(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
 const SemverTagSchema = z.string().regex(/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/, "expected immutable vX.Y.Z tag");
 const PackageNameSchema = z
   .string()
-  .regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/, "expected npm-style package name");
+  .regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/, "expected package-style name");
 const DependencyNameSchema = z.union([PackageIdSchema, PackageNameSchema]);
 const DistTagSchema = z
   .string()
-  .regex(/^[a-z][a-z0-9._-]{0,31}$/, "expected npm-style dist tag")
+  .regex(/^[a-z][a-z0-9._-]{0,31}$/, "expected package-style dist tag")
   .refine((value) => !/^(?:v?\d|\d)/.test(value), "dist tag must not look like a version");
 const VersionRangeSchema = z
   .string()

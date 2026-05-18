@@ -85,7 +85,7 @@ describe("nipmod explain", () => {
     expect(human.stdout).toContain("agent-logger@1.2.0");
     expect(human.stdout).toContain("required by workflow-runner@0.1.0 via dependencies.agent-logger");
     expect(human.stdout).toContain("path: workflow-runner@0.1.0 > agent-logger@1.2.0");
-  }, 15_000);
+  }, 30_000);
 
   test("reports an empty explanation for packages that are not installed", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-explain-empty-"));

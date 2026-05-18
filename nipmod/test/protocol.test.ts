@@ -19,7 +19,7 @@ describe("manifest validation", () => {
     expect(result.permissions.postinstall.allowed).toBe(false);
   });
 
-  test("accepts npm-parity agent metadata and dependency maps", async () => {
+  test("accepts package manager parity agent metadata and dependency maps", async () => {
     const manifest = (await readJson(fixture("valid-skill", "nipmod.json"))) as Record<string, unknown>;
     manifest.formatVersion = 2;
     manifest.keywords = ["gitlawb", "agent-package"];
@@ -72,7 +72,7 @@ describe("manifest validation", () => {
     ["dependency range", { dependencies: { "valid-skill": "git+https://example.com/repo.git" } }, /dependencies/i],
     ["dist tag", { publishConfig: { tag: "v1.0.0" } }, /publishConfig/i],
     ["repository", { repository: { type: "gitlawb", url: "https://github.com/example/repo" } }, /repository/i]
-  ])("rejects unsafe npm-parity metadata for %s", async (_label, patch, errorPattern) => {
+  ])("rejects unsafe package manager parity metadata for %s", async (_label, patch, errorPattern) => {
     const manifest = (await readJson(fixture("valid-skill", "nipmod.json"))) as Record<string, unknown>;
     Object.assign(manifest, patch);
 

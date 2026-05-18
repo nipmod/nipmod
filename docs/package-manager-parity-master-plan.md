@@ -1,13 +1,13 @@
-# npm parity master plan
+# package manager parity master plan
 
 Status: accepted implementation plan
 Date: 2026-05-17
 
 ## Goal
 
-Nipmod should become a package layer for Gitlawb sourced agent capabilities: npm level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default. Any claim that it is the primary Gitlawb package path requires Gitlawb review first.
+Nipmod should become a package layer for Gitlawb sourced agent capabilities: package manager level ergonomics, Gitlawb as canonical decentralized source, agent safe trust checks by default. Any claim that it is the primary Gitlawb package path requires Gitlawb review first.
 
-The target is not a literal npm clone. npm parity means users and agents get the same product primitives people expect from npm, but with DID identity, signed Gitlawb artifacts, permission manifests, transparency proofs, witness evidence and policy gated activation.
+The target is not a clone of any existing registry. Package manager parity means users and agents get the core product primitives people expect from package infrastructure, but with DID identity, signed Gitlawb artifacts, permission manifests, transparency proofs, witness evidence and policy gated activation.
 
 ## Non negotiable boundary
 
@@ -15,33 +15,33 @@ Gitlawb owns source, refs and package artifacts. Nipmod can index, resolve, veri
 
 ## Parity matrix
 
-| Layer | npm primitive | Nipmod equivalent | Status |
+| Layer | Common package primitive | Nipmod equivalent | Status |
 | --- | --- | --- | --- |
 | Package manifest | `package.json` | `nipmod.json` with package type, exports, permissions, dependencies and agent host metadata | in progress |
 | Version specifiers | exact, caret, tilde, tags | exact, caret, tilde, wildcard, dist tags | started |
 | Dependency graph | dependencies, dev, peer, optional | agent dependencies, dev dependencies, peer agent dependencies, optional capabilities | in progress |
 | Lockfile | `package-lock.json` | `nipmod.lock.json` with verified package records and dependency graph snapshots | in progress |
 | Local store | `node_modules` plus cache | `.nipmod/store/sha256/<digest>` plus host activation adapters | started |
-| Install | `npm install` | `nipmod install <package>`, graph install and lockfile restore with `nipmod install` | shipped |
-| Clean CI | `npm ci` | `nipmod ci` with trust, advisory and policy gates | partial |
-| Search | `npm search`, website search | trust ranked package search across signed registries | partial |
-| View | `npm view`, npm package pages | exact package metadata CLI/API and `/packages/[name]` pages | started |
-| Publish | `npm publish` | signed bundle and release event published through Gitlawb | partial |
-| Outdated | `npm outdated` | lockfile versus registry report with current, wanted, latest and policy-safe status | done |
-| Update | `npm update` | verified root dependency update plans, signed bundle fetch and stale lockfile prune | done |
-| Pack | `npm pack` | signed `.nipmod` bundle | done |
-| Dist tags | `npm dist-tag` | signed lifecycle event mapping tags to versions, consumed by registry/search/view | shipped |
-| Version bump | `npm version` | signed version update and immutable Gitlawb release tag | missing |
-| Deprecation | `npm deprecate` | signed deprecation lifecycle event surfaced in CLI, MCP and package pages | shipped |
-| Removal | `npm unpublish` | no destructive delete; signed yank/deprecate/quarantine events only; yanked releases are hidden and blocked | shipped |
-| Ownership | npm owner/collaborator | DID owner, maintainer keys, org DIDs, key rotation and recovery | missing |
-| Orgs and teams | npm org/team/access | Gitlawb DID org/team proof with package policy | missing |
-| Auth tokens | npm tokens/OIDC | no long lived registry tokens for public packages; trusted Gitlawb publishing receipts | missing |
-| Audit | npm audit | signed advisories, quarantine, transparency and witness checks | partial |
-| Provenance | npm provenance | Gitlawb source tag, release event, transparency inclusion and witness proof | partial |
-| SBOM | `npm sbom` | agent capability SBOM with manifests, exports, permissions and dependency graph | done |
-| Runtime | `npm exec`, scripts | explicit host adapters only; no arbitrary postinstall or default exec | missing |
-| Workspaces | npm workspaces | multi package agent workspace and monorepo publishing | missing |
+| Install | install command | `nipmod install <package>`, graph install and lockfile restore with `nipmod install` | shipped |
+| Clean CI | clean install command | `nipmod ci` with trust, advisory and policy gates | partial |
+| Search | search command and website search | trust ranked package search across signed registries | partial |
+| View | metadata view and package pages | exact package metadata CLI/API and `/packages/[name]` pages | started |
+| Publish | publish command | signed bundle and release event published through Gitlawb | partial |
+| Outdated | outdated report | lockfile versus registry report with current, wanted, latest and policy-safe status | done |
+| Update | update command | verified root dependency update plans, signed bundle fetch and stale lockfile prune | done |
+| Pack | package archive command | signed `.nipmod` bundle | done |
+| Dist tags | dist tag command | signed lifecycle event mapping tags to versions, consumed by registry/search/view | shipped |
+| Version bump | version command | signed version update and immutable Gitlawb release tag | missing |
+| Deprecation | deprecate command | signed deprecation lifecycle event surfaced in CLI, MCP and package pages | shipped |
+| Removal | destructive unpublish | no destructive delete; signed yank/deprecate/quarantine events only; yanked releases are hidden and blocked | shipped |
+| Ownership | owner and collaborator controls | DID owner, maintainer keys, org DIDs, key rotation and recovery | missing |
+| Orgs and teams | org, team and access controls | Gitlawb DID org/team proof with package policy | missing |
+| Auth tokens | registry tokens and OIDC | no long lived registry tokens for public packages; trusted Gitlawb publishing receipts | missing |
+| Audit | audit command | signed advisories, quarantine, transparency and witness checks | partial |
+| Provenance | provenance statement | Gitlawb source tag, release event, transparency inclusion and witness proof | partial |
+| SBOM | SBOM command | agent capability SBOM with manifests, exports, permissions and dependency graph | done |
+| Runtime | exec and scripts | explicit host adapters only; no arbitrary postinstall or default exec | missing |
+| Workspaces | workspace support | multi package agent workspace and monorepo publishing | missing |
 
 ## P0 implementation order
 
@@ -130,14 +130,14 @@ Gitlawb owns source, refs and package artifacts. Nipmod can index, resolve, veri
 
 ## Current first slice
 
-The first slice establishes manifest dependency fields, a semver/dist tag resolver, an npm style package document builder, a content addressed local bundle store, package browse/detail pages and basic `ls`/`uninstall` package operations.
+The first slice establishes manifest dependency fields, a semver/dist tag resolver, a package document builder, a content addressed local bundle store, package browse/detail pages and basic `ls`/`uninstall` package operations.
 
 The second slice adds additive Registry dependency metadata, v1 readable / v2 written lockfiles, root dependency intent, package snapshots, direct dependency edges and an atomic graph install primitive for pre verified bundles. This is the base for registry driven transitive install, `outdated`, `update`, `explain`, `sbom` and signed lifecycle events.
 
 The third slice adds `nipmod sbom` for verified agent capability inventories from lockfiles and local store bundles. It gives agents one JSON surface for package identity, manifest exports, permission counts and dependency edges without fetching network data.
 
-The fourth slice adds `nipmod explain` for lockfile root intent, dependent records and dependency paths. It gives agents the missing npm style answer to why a package is installed without network access or package execution.
+The fourth slice adds `nipmod explain` for lockfile root intent, dependent records and dependency paths. It gives agents a clear answer to why a package is installed without network access or package execution.
 
 The fifth slice adds `nipmod update` and MCP `nipmod.update_plan` for verified root package updates. Plans are read only, execution reuses the signed graph install path and stale package records are pruned only when they are unreachable from all root dependencies.
 
-The sixth slice adds the public static Registry API: base64url canonical package documents, exact version documents, latest dependency sidecars, latest provenance sidecars and discovery-manifest templates. This moves Nipmod closer to npm packuments while preserving Gitlawb canonical IDs and static auditability.
+The sixth slice adds the public static Registry API: base64url canonical package documents, exact version documents, latest dependency sidecars, latest provenance sidecars and discovery-manifest templates. This moves Nipmod closer to complete package document support while preserving Gitlawb canonical IDs and static auditability.

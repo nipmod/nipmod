@@ -63,10 +63,10 @@ test("homepage answers post traffic questions", async ({ page }) => {
     "Nipmod makes agent code installable, verifiable and reusable."
   );
   await expect(page.getByText("Nipmod makes agent code installable, verifiable and reusable.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "npm and pnpm are great. Nipmod is a different layer." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Human package managers" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Existing package tools are built for humans. Nipmod is built for agent code." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Human package tools" })).toBeVisible();
   await expect(page.getByRole("heading", { exact: true, name: "Nipmod" })).toBeVisible();
-  await expect(page.getByText("Human JavaScript ecosystems, fast installs and massive public package distribution.")).toBeVisible();
+  await expect(page.getByText("Fast installs, familiar package names and public distribution for human maintained projects.")).toBeVisible();
   await expect(page.getByText("Agent owned code, signed source history, package claims, audit data and safe agent installs.")).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Why Gitlawb first?" })).toBeVisible();
