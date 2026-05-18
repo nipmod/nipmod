@@ -144,6 +144,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/package",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
     "/agents",
     "/audit",
@@ -192,6 +193,25 @@ test("internal button and navigation links resolve to existing pages and anchors
       }
     }
   }
+});
+
+test("Gitlawb owner page gives repo owners a complete claim overview", async ({ page, request }) => {
+  const owner = "z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD";
+  await page.goto(`/gitlawb/${owner}`);
+
+  await expect(page.getByRole("heading", { name: "Owner package status" })).toBeVisible();
+  await expect(page.getByText(owner).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Published packages" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Claimable drafts" })).toBeVisible();
+  await expect(page.getByText("nipmod claim index --node https://node.nipmod.com --json")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Repo status" }).first()).toHaveAttribute(
+    "href",
+    /^\/gitlawb\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
+  );
+
+  const manifest = await request.get("/.well-known/nipmod.json");
+  const body = await manifest.json();
+  expect(body.registry.gitlawbOwnerPageTemplate).toBe("https://nipmod.com/gitlawb/{owner}");
 });
 
 test("mobile more menu exposes secondary navigation", async ({ page }) => {

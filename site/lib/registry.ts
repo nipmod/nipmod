@@ -330,6 +330,20 @@ export function gitlawbPackageHref(pkg: Pick<RegistryPackage, "canonical" | "own
   return `/gitlawb/${packageOwnerSegment(pkg)}/${pkg.repo}`;
 }
 
+export function gitlawbOwnerHref(pkg: Pick<RegistryPackage, "canonical" | "owner" | "publisher">): string {
+  return `/gitlawb/${packageOwnerSegment(pkg)}`;
+}
+
+export function packagesByGitlawbOwner(packages: readonly RegistryPackage[], owner: string): RegistryPackage[] {
+  const ownerDid = didFromOwnerSegment(owner);
+  if (!ownerDid) {
+    return [];
+  }
+  return packages
+    .filter((pkg) => [canonicalOwnerDid(pkg.canonical), pkg.owner, pkg.publisher].includes(ownerDid))
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt) || left.name.localeCompare(right.name));
+}
+
 export function findPackageByGitlawbPath(
   packages: readonly RegistryPackage[],
   owner: string,

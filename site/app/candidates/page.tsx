@@ -5,6 +5,7 @@ import {
   candidateClaimState,
   candidateFromScout,
   candidateFromRepo,
+  candidateGitlawbOwnerHref,
   candidateGitlawbPackageHref,
   candidateStats,
   fetchGitlawbRepos,
@@ -170,7 +171,9 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
         </div>
         <div>
           <dt>Owner</dt>
-          <dd>{candidate.shortOwner}</dd>
+          <dd>
+            <a href={candidateGitlawbOwnerHref(candidate)}>{candidate.shortOwner}</a>
+          </dd>
         </div>
         <div>
           <dt>Source</dt>

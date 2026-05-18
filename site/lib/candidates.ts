@@ -151,6 +151,23 @@ export function candidateGitlawbPackageHref(candidate: Pick<PackageCandidate, "p
   return `/gitlawb/${path.owner}/${path.repo}`;
 }
 
+export function candidateGitlawbOwnerHref(candidate: Pick<PackageCandidate, "packageId" | "repoName" | "source">): string {
+  const path = candidateGitlawbPath(candidate);
+  if (!path) {
+    return "/candidates";
+  }
+  return `/gitlawb/${path.owner}`;
+}
+
+export function candidatesByGitlawbOwner(candidates: readonly PackageCandidate[], owner: string): PackageCandidate[] {
+  if (!/^z[A-Za-z0-9]+$/.test(owner)) {
+    return [];
+  }
+  return candidates
+    .filter((candidate) => candidateGitlawbPath(candidate)?.owner === owner)
+    .sort(compareCandidates);
+}
+
 export function findCandidateByGitlawbPath(
   candidates: readonly PackageCandidate[],
   owner: string,

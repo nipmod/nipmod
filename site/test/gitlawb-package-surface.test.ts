@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import registryData from "../app/registry-data.json";
 import { GET as badgeGET } from "../app/badge/[owner]/[repo]/route";
 import {
+  candidateGitlawbOwnerHref,
   candidateFromRepo,
   candidateGitlawbPackageHref,
   findCandidateByGitlawbPath,
@@ -11,6 +12,7 @@ import {
   didFromOwnerSegment,
   findPackageByGitlawbPath,
   gitlawbPackageHref,
+  gitlawbOwnerHref,
   ownerSegmentFromDid,
   type RegistryIndex
 } from "../lib/registry";
@@ -29,6 +31,7 @@ describe("Gitlawb package surface", () => {
     const owner = ownerSegmentFromDid(pkg.publisher);
     expect(owner).toMatch(/^z[A-Za-z0-9]+$/);
     expect(didFromOwnerSegment(owner)).toBe(pkg.publisher);
+    expect(gitlawbOwnerHref(pkg)).toBe(`/gitlawb/${owner}`);
     expect(gitlawbPackageHref(pkg)).toBe(`/gitlawb/${owner}/${pkg.repo}`);
     expect(findPackageByGitlawbPath(registry.packages, owner, pkg.repo)?.canonical).toBe(pkg.canonical);
     expect(findPackageByGitlawbPath(registry.packages, "bad-owner", pkg.repo)).toBeNull();
@@ -49,6 +52,7 @@ describe("Gitlawb package surface", () => {
       publishedPackages: new Set()
     });
 
+    expect(candidateGitlawbOwnerHref(candidate)).toBe("/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD");
     expect(candidateGitlawbPackageHref(candidate)).toBe(
       "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
     );

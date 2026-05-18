@@ -10,6 +10,7 @@ import {
 } from "../../../../lib/candidates";
 import {
   findPackageByGitlawbPath,
+  gitlawbOwnerHref,
   ownerSegmentFromDid,
   safeSourceRepoHref,
   type RegistryIndex,
@@ -102,6 +103,9 @@ function PublishedPackageSurface({ owner, pkg, repo }: { owner: string; pkg: Reg
                 Gitlawb
               </a>
             ) : null}
+            <a className="button button-ghost" href={gitlawbOwnerHref(pkg)}>
+              Owner
+            </a>
           </div>
         </div>
         <aside className="package-side" aria-label="Gitlawb package facts">
@@ -141,6 +145,7 @@ function PublishedPackageSurface({ owner, pkg, repo }: { owner: string; pkg: Reg
         badgeUrl={badgeUrl}
         links={[
           { href: packagePageHref(pkg), label: "Package page" },
+          { href: gitlawbOwnerHref(pkg), label: "Owner page" },
           { href: packageEvidenceHref(pkg), label: "Evidence" },
           { href: packageDocumentHref(pkg.canonical), label: "Package JSON" },
           { href: packageVersionHref(pkg.canonical, pkg.version), label: "Version JSON" },
@@ -173,6 +178,9 @@ function CandidatePackageSurface({ candidate, owner, repo }: { candidate: Packag
             ) : null}
             <a className="button button-ghost" href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
               Gitlawb
+            </a>
+            <a className="button button-ghost" href={`/gitlawb/${owner}`}>
+              Owner
             </a>
           </div>
         </div>
@@ -226,6 +234,7 @@ function CandidatePackageSurface({ candidate, owner, repo }: { candidate: Packag
         badgeUrl={badgeUrl}
         links={[
           { href: claimHref, label: "Claim page" },
+          { href: `/gitlawb/${owner}`, label: "Owner page" },
           ...(candidate.draftEndpoint ? [{ href: candidate.draftEndpoint, label: "Draft JSON" }] : []),
           { href: "/candidates", label: "Candidates" },
           { href: "/.well-known/nipmod.json", label: "Discovery" }

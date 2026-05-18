@@ -162,10 +162,12 @@ Acceptance:
 
 Acceptance:
 
+- `/gitlawb/[owner]` shows every published package and claimable draft for that DID.
 - `/candidates` groups by owner DID.
 - owner can copy claim, verify and dry run commands.
 - claim pages show exact source, DID, draft status and package ID.
 - machine JSON has no HTML dependency.
+- candidate, package and repo status pages link back to the owner surface.
 
 ### C. Agent install certainty
 
