@@ -99,7 +99,13 @@ function PublishedPackageSurface({ owner, pkg, repo }: { owner: string; pkg: Reg
               Evidence
             </a>
             {sourceRepoHref ? (
-              <a className="button button-ghost" href={sourceRepoHref} rel="noreferrer" target="_blank">
+              <a
+                className="button button-ghost"
+                href={sourceRepoHref}
+                aria-label={`Open ${pkg.name} on Gitlawb in a new tab`}
+                rel="noreferrer"
+                target="_blank"
+              >
                 Gitlawb
               </a>
             ) : null}
@@ -172,11 +178,23 @@ function CandidatePackageSurface({ candidate, owner, repo }: { candidate: Packag
               Claim
             </a>
             {candidate.draftEndpoint ? (
-              <a className="button button-ghost" href={candidate.draftEndpoint} rel="noreferrer" target="_blank">
+              <a
+                className="button button-ghost"
+                href={candidate.draftEndpoint}
+                aria-label={`Open ${candidate.repoName} draft JSON in a new tab`}
+                rel="noreferrer"
+                target="_blank"
+              >
                 Draft
               </a>
             ) : null}
-            <a className="button button-ghost" href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
+            <a
+              className="button button-ghost"
+              href={candidate.gitlawbHref}
+              aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
+              rel="noreferrer"
+              target="_blank"
+            >
               Gitlawb
             </a>
             <a className="button button-ghost" href={`/gitlawb/${owner}`}>

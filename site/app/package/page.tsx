@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { homeContent } from "../content";
+import { OwnerClaimFlow } from "../owner-claim-flow";
 import { PackageDraftForm } from "./package-draft-form";
 
 type PackagePageProps = {
@@ -40,6 +41,16 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
           </a>
         </div>
       </section>
+
+      <OwnerClaimFlow
+        actions={[
+          { href: "/candidates", label: "Browse prepared drafts", variant: "primary" },
+          { href: "/agents", label: "Agent docs" }
+        ]}
+        eyebrow="Package path"
+        lead="Use this path when you already know the Gitlawb repo. If Scout found it first, start from the prepared draft."
+        title="Package path"
+      />
 
       <PackageDraftForm
         initialRepo={initialRepo}

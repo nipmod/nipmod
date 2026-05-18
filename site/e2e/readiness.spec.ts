@@ -142,6 +142,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/",
     "/quickstart",
     "/package",
+    "/candidates",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
@@ -200,6 +201,9 @@ test("Gitlawb owner page gives repo owners a complete claim overview", async ({ 
   await page.goto(`/gitlawb/${owner}`);
 
   await expect(page.getByRole("heading", { name: "Owner package status" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Owner next steps" })).toBeVisible();
+  await expect(page.getByText("Use a prepared draft when Scout found one. Package another public repo when it has no draft yet.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Package another repo" })).toHaveAttribute("href", "/package");
   await expect(page.getByText(owner).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Published packages" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Claimable drafts" })).toBeVisible();
@@ -212,6 +216,19 @@ test("Gitlawb owner page gives repo owners a complete claim overview", async ({ 
   const manifest = await request.get("/.well-known/nipmod.json");
   const body = await manifest.json();
   expect(body.registry.gitlawbOwnerPageTemplate).toBe("https://nipmod.com/gitlawb/{owner}");
+});
+
+test("candidate claim page guides owners from repo to verified package", async ({ page }) => {
+  await page.goto("/candidates");
+
+  await expect(page.getByRole("heading", { name: "Find your repo. Claim the package." })).toBeVisible();
+  await expect(page.getByText("Search by repo name, DID owner or package id.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Package one repo manually" })).toHaveAttribute("href", "/package");
+  await expect(page.getByText("Ready to claim").first()).toBeVisible();
+  await expect(page.locator(".candidate-card").first().getByRole("link", { name: "Owner page" })).toHaveAttribute(
+    "href",
+    /^\/gitlawb\/z[A-Za-z0-9]+$/
+  );
 });
 
 test("mobile more menu exposes secondary navigation", async ({ page }) => {
@@ -249,6 +266,11 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
   );
 
   await expect(page.getByText("Drafting as gitlawb-repo-reader")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Package path" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Draft locally" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Verify owner claim" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Dry run publish" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Browse prepared drafts" })).toHaveAttribute("href", "/candidates");
   await expect(
     page.getByText(
       "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr"
@@ -306,8 +328,10 @@ test("human pages do not promote raw artifact links", async ({ page }) => {
     "/",
     "/quickstart",
     "/package",
+    "/candidates",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
     "/agents",
     "/audit",
     "/trust",

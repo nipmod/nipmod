@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import registryData from "../../registry-data.json";
 import { CommandBlock } from "../../command-block";
+import { OwnerClaimFlow } from "../../owner-claim-flow";
 import {
   candidateGitlawbPackageHref,
   candidateFromScout,
@@ -98,6 +99,16 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
           </dl>
         </aside>
       </section>
+
+      <OwnerClaimFlow
+        actions={[
+          { href: "/package", label: "Package another repo", variant: "primary" },
+          { href: "/candidates", label: "All candidates" }
+        ]}
+        eyebrow="Owner path"
+        lead="Use a prepared draft when Scout found one. Package another public repo when it has no draft yet."
+        title="Owner next steps"
+      />
 
       <section className="trust-section" aria-labelledby="owner-commands-title">
         <div>
@@ -204,7 +215,12 @@ function OwnerPackageCard({ pkg }: { pkg: RegistryPackage }) {
         <a href={packagePageHref(pkg)}>Package</a>
         <a href={packageEvidenceHref(pkg)}>Evidence</a>
         {sourceRepoHref ? (
-          <a href={sourceRepoHref} rel="noreferrer" target="_blank">
+          <a
+            href={sourceRepoHref}
+            aria-label={`Open ${pkg.name} on Gitlawb in a new tab`}
+            rel="noreferrer"
+            target="_blank"
+          >
             Gitlawb
           </a>
         ) : null}
@@ -248,11 +264,21 @@ function OwnerCandidateCard({ candidate }: { candidate: PackageCandidate }) {
         <a href={claimHref}>Claim</a>
         <a href={candidateGitlawbPackageHref(candidate)}>Repo status</a>
         {candidate.draftEndpoint ? (
-          <a href={candidate.draftEndpoint} rel="noreferrer" target="_blank">
+          <a
+            href={candidate.draftEndpoint}
+            aria-label={`Open ${candidate.repoName} draft JSON in a new tab`}
+            rel="noreferrer"
+            target="_blank"
+          >
             Draft JSON
           </a>
         ) : null}
-        <a href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
+        <a
+          href={candidate.gitlawbHref}
+          aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
+          rel="noreferrer"
+          target="_blank"
+        >
           Gitlawb
         </a>
       </div>

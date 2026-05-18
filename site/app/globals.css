@@ -672,6 +672,7 @@ h1 {
 
 .comparison-grid,
 .claim-flow,
+.owner-flow,
 .faq-grid,
 .start-grid {
   display: grid;
@@ -686,6 +687,10 @@ h1 {
 .claim-flow,
 .faq-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.owner-flow {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .faq-grid {
@@ -731,6 +736,10 @@ h1 {
   font-size: 15px;
   line-height: 1.5;
   margin: 0;
+}
+
+.owner-claim-section .section-head {
+  align-content: start;
 }
 
 .comparison-card ul {
@@ -1506,6 +1515,7 @@ h1 {
   .live-stat-grid,
   .comparison-grid,
   .claim-flow,
+  .owner-flow,
   .faq-grid,
   .start-grid,
   .fact-row,

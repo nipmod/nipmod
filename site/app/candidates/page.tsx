@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import claimIndexData from "../claim-index.json";
 import registryData from "../registry-data.json";
+import { OwnerClaimFlow } from "../owner-claim-flow";
 import {
   candidateClaimState,
   candidateFromScout,
@@ -43,14 +44,27 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
   const query = firstParam(params.q);
   const candidates = await loadCandidates();
   const filtered = searchCandidates(candidates, query);
+  const visibleLimit = query ? 80 : 48;
+  const visibleCandidates = filtered.slice(0, visibleLimit);
+  const hiddenCount = Math.max(filtered.length - visibleCandidates.length, 0);
 
   return (
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="candidates-title">
         <p className="eyebrow">Package Claim</p>
-        <h1 id="candidates-title">Claim package drafts.</h1>
-        <p className="lead">Scout finds public Gitlawb repos, prepares package paths and lets owners verify with their own DID.</p>
+        <h1 id="candidates-title">Find your repo. Claim the package.</h1>
+        <p className="lead">Search by repo name, DID owner or package id.</p>
       </section>
+
+      <OwnerClaimFlow
+        actions={[
+          { href: "/package", label: "Package one repo manually", variant: "primary" },
+          { href: "/agents", label: "Agent docs" }
+        ]}
+        eyebrow="Owner path"
+        lead="Scout can prepare a draft, but the source owner decides when it becomes a verified package."
+        title="How package claim works"
+      />
 
       <section className="registry-section" aria-labelledby="candidate-browse-title">
         <div className="registry-head">
@@ -93,14 +107,19 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
         </div>
 
         <div className="package-grid" aria-live="polite">
-          {filtered.length > 0 ? (
-            filtered.map((candidate) => <CandidateCard candidate={candidate} key={candidate.packageId} />)
+          {visibleCandidates.length > 0 ? (
+            visibleCandidates.map((candidate) => <CandidateCard candidate={candidate} key={candidate.packageId} />)
           ) : (
             <div className="empty-state">
               <p>No candidates found.</p>
             </div>
           )}
         </div>
+        {hiddenCount > 0 ? (
+          <p className="ranking-note">
+            Showing {visibleCandidates.length} of {filtered.length}. Search by repo name or DID owner to narrow the list.
+          </p>
+        ) : null}
       </section>
     </main>
   );
@@ -147,7 +166,7 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
       : candidate.status === "published"
         ? "published"
         : candidate.status === "unclaimed"
-          ? "unclaimed"
+          ? "Ready to claim"
           : "needs work";
 
   return (
@@ -155,7 +174,12 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
       <div className="package-card-top">
         <div>
           <h3>
-            <a href={candidate.gitlawbHref} rel="noreferrer" target="_blank">
+            <a
+              href={candidate.gitlawbHref}
+              aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
+              rel="noreferrer"
+              target="_blank"
+            >
               {candidate.repoName}
             </a>
           </h3>
@@ -209,6 +233,7 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
         ) : (
           <a href={packageHrefForSource(candidate.source)}>Claim package</a>
         )}
+        <a href={candidateGitlawbOwnerHref(candidate)}>Owner page</a>
         <a href={candidateGitlawbPackageHref(candidate)}>Repo status</a>
         <a href={shareHref(candidate)} aria-label={`Share ${candidate.repoName} on X in a new tab`} rel="noreferrer" target="_blank">
           Share
