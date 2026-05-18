@@ -375,6 +375,10 @@ h1 {
 .package-card,
 .empty-state,
 .quickstart-card,
+.comparison-card,
+.claim-step,
+.faq-card,
+.start-card,
 .draft-input,
 .proof-panel,
 .package-side,
@@ -570,6 +574,146 @@ h1 {
 
 .usage-item p {
   margin-top: 8px;
+}
+
+.explain-section,
+.gitlawb-section,
+.claim-section,
+.faq-section,
+.start-section {
+  display: grid;
+  gap: 18px;
+  padding: clamp(30px, 5vw, 62px) 0;
+  width: 100%;
+}
+
+.comparison-grid,
+.claim-flow,
+.faq-grid,
+.start-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.comparison-grid,
+.start-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.claim-flow,
+.faq-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.faq-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.comparison-card,
+.claim-step,
+.faq-card,
+.start-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+}
+
+.comparison-title {
+  color: var(--quiet);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.comparison-card h3,
+.claim-step h3,
+.faq-card h3,
+.start-card h3 {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 660;
+  letter-spacing: 0;
+  line-height: 1.18;
+  margin: 0;
+}
+
+.comparison-card p,
+.claim-step p,
+.faq-card p,
+.start-card p,
+.section-head p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.comparison-card ul {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.comparison-card li {
+  align-items: center;
+  color: var(--muted);
+  display: grid;
+  font-size: 14px;
+  gap: 9px;
+  grid-template-columns: 7px minmax(0, 1fr);
+  line-height: 1.35;
+}
+
+.comparison-card li::before {
+  background: rgba(247, 247, 248, 0.7);
+  border-radius: 999px;
+  content: "";
+  height: 7px;
+  width: 7px;
+}
+
+.fact-row {
+  backdrop-filter: blur(30px) saturate(180%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 10px;
+}
+
+.fact-row span {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.35;
+  min-height: 54px;
+  padding: 14px;
+}
+
+.section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.start-card {
+  color: inherit;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.start-card:hover {
+  background: var(--surface-strong);
+  transform: translateY(-2px);
 }
 
 .registry-section,
@@ -1200,6 +1344,11 @@ h1 {
 
   .hero,
   .usage-strip,
+  .comparison-grid,
+  .claim-flow,
+  .faq-grid,
+  .start-grid,
+  .fact-row,
   .registry-head,
   .registry-stats,
   .candidate-flow,

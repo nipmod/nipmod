@@ -1,7 +1,7 @@
 export const homeContent = {
   brand: "Nipmod",
-  headline: "Packages agents can verify",
-  lead: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
+  headline: "Package layer for agent built software",
+  lead: "Nipmod makes agent code installable, verifiable and reusable. It starts with Gitlawb source and gives humans and agents a clean package workflow.",
   links: {
     docs: "/quickstart#docs",
     bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
@@ -21,15 +21,105 @@ export const homeContent = {
   usage: [
     {
       label: "Search",
-      text: "Find agent packages without an account."
+      text: "Find agent packages and package candidates without a Nipmod account."
     },
     {
-      label: "Inspect",
-      text: "Read source and permissions first."
+      label: "Verify",
+      text: "Check identity, source, claims, signatures and audit evidence before install."
     },
     {
       label: "Install",
-      text: "Pin exact bytes in a workspace lockfile."
+      text: "Pin exact package bytes in a workspace lockfile for humans and agents."
+    }
+  ],
+  comparison: [
+    {
+      label: "Human package managers",
+      title: "npm and pnpm",
+      text: "Human JavaScript ecosystems, fast installs and massive public package distribution.",
+      points: ["package names and versions", "JavaScript first", "human publisher accounts"]
+    },
+    {
+      label: "Nipmod",
+      title: "Agent package layer",
+      text: "Agent owned code, signed source history, package claims, audit data and safe agent installs.",
+      points: ["source identity", "DID ownership claims", "agent readable trust metadata"]
+    }
+  ],
+  gitlawbReason: {
+    headline: "Why Gitlawb first?",
+    text: "Gitlawb already gives agents source identity, signed pushes and public provenance. Nipmod adds the installable package layer on top.",
+    facts: [
+      "source history stays on Gitlawb",
+      "package truth is verified from signed evidence",
+      "the same model can cover more agent code platforms over time"
+    ]
+  },
+  claimFlow: {
+    headline: "Found your repo? Claim the package.",
+    lead: "Nipmod can prepare a package path, but the repo owner keeps control.",
+    steps: [
+      {
+        label: "Discover",
+        text: "Scout finds public Gitlawb repos that can become packages."
+      },
+      {
+        label: "Draft",
+        text: "Nipmod prepares the manifest, install path and trust checklist."
+      },
+      {
+        label: "Claim",
+        text: "The repo owner signs the claim with the Gitlawb DID."
+      },
+      {
+        label: "Use",
+        text: "Agents can search, inspect, install and audit the verified package."
+      }
+    ]
+  },
+  faq: [
+    {
+      question: "Is this only for Gitlawb?",
+      answer:
+        "Gitlawb is the first source network. The package layer is designed to cover more agent code platforms over time."
+    },
+    {
+      question: "Can humans use it?",
+      answer: "Yes. Humans can search packages, inspect proof, install from the CLI and claim package drafts for their repos."
+    },
+    {
+      question: "Can agents use it directly?",
+      answer: "Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files."
+    },
+    {
+      question: "Who owns packages?",
+      answer: "The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos."
+    },
+    {
+      question: "Can Nipmod delete Gitlawb packages?",
+      answer:
+        "No. Nipmod can publish trust ratings, warnings and advisories, but it cannot delete decentralized source content."
+    },
+    {
+      question: "What can I do now?",
+      answer: "Install the CLI, browse verified packages or check whether your Gitlawb repo has a package candidate."
+    }
+  ],
+  startCards: [
+    {
+      title: "Install Nipmod",
+      text: "Use the CLI to search, inspect, install and audit packages.",
+      href: "/quickstart#install"
+    },
+    {
+      title: "Claim a repo",
+      text: "Turn a Gitlawb repo into a package path you control.",
+      href: "/candidates"
+    },
+    {
+      title: "Read agent docs",
+      text: "Connect the CLI and MCP server to agent workflows.",
+      href: "/quickstart#agents"
     }
   ],
   quickstartSteps: [

@@ -22,8 +22,8 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("Nipmod");
-    expect(homeContent.headline).toBe("Packages agents can verify");
-    expect(homeContent.lead.length).toBeLessThanOrEqual(110);
+    expect(homeContent.headline).toBe("Package layer for agent built software");
+    expect(homeContent.lead.length).toBeLessThanOrEqual(180);
   });
 
   test("links to the canonical X handle", () => {
@@ -63,13 +63,24 @@ describe("home content", () => {
   });
 
   test("states what people can do on the site", () => {
-    expect(homeContent.usage.map((item) => item.label)).toEqual(["Search", "Inspect", "Install"]);
+    expect(homeContent.usage.map((item) => item.label)).toEqual(["Search", "Verify", "Install"]);
 	    expect(homeContent.commands).toEqual([
 	      "nipmod search gitlawb --online",
 	      "nipmod inspect gitlawb-repo-reader",
 	      "nipmod install gitlawb-repo-reader",
       "nipmod audit --online"
     ]);
+  });
+
+  test("explains why Nipmod is different from npm and pnpm", () => {
+    expect(homeContent.comparison.map((item) => item.label)).toEqual(["Human package managers", "Nipmod"]);
+    expect(homeContent.comparison[0]?.text).toContain("Human JavaScript ecosystems");
+    expect(homeContent.comparison[1]?.text).toContain("Agent owned code");
+    expect(homeContent.gitlawbReason.headline).toBe("Why Gitlawb first?");
+    expect(homeContent.gitlawbReason.text).toContain("signed pushes");
+    expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
+    expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
+    expect(homeContent.startCards.map((card) => card.title)).toEqual(["Install Nipmod", "Claim a repo", "Read agent docs"]);
   });
 
   test("links to the human install flow", () => {

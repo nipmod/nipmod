@@ -72,6 +72,98 @@ export default async function Home({ searchParams }: HomeProps) {
         ))}
       </section>
 
+      <section className="explain-section" id="why" aria-labelledby="why-title">
+        <div className="section-head">
+          <p className="eyebrow">Position</p>
+          <h2 id="why-title">npm and pnpm are great. Nipmod is a different layer.</h2>
+          <p>
+            Existing package managers are proven infrastructure for human developer ecosystems. Nipmod focuses on the
+            trust layer agents need before code becomes part of an autonomous workflow.
+          </p>
+        </div>
+        <div className="comparison-grid">
+          {homeContent.comparison.map((item) => (
+            <article className="comparison-card" key={item.label}>
+              <h3>{item.label}</h3>
+              <p className="comparison-title">{item.title}</p>
+              <p>{item.text}</p>
+              <ul>
+                {item.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="gitlawb-section" id="gitlawb" aria-labelledby="gitlawb-title">
+        <div className="section-head">
+          <p className="eyebrow">Source</p>
+          <h2 id="gitlawb-title">{homeContent.gitlawbReason.headline}</h2>
+          <p>{homeContent.gitlawbReason.text}</p>
+        </div>
+        <div className="fact-row" aria-label="Gitlawb reasons">
+          {homeContent.gitlawbReason.facts.map((fact) => (
+            <span key={fact}>{fact}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="claim-section" id="claim" aria-labelledby="claim-title">
+        <div className="section-head">
+          <p className="eyebrow">Claim</p>
+          <h2 id="claim-title">{homeContent.claimFlow.headline}</h2>
+          <p>{homeContent.claimFlow.lead}</p>
+        </div>
+        <div className="claim-flow">
+          {homeContent.claimFlow.steps.map((step) => (
+            <article className="claim-step" key={step.label}>
+              <h3>{step.label}</h3>
+              <p>{step.text}</p>
+            </article>
+          ))}
+        </div>
+        <div className="section-actions">
+          <a className="button button-primary" href="/candidates">
+            View package candidates
+          </a>
+          <a className="button button-ghost" href="/package">
+            Create package draft
+          </a>
+        </div>
+      </section>
+
+      <section className="faq-section" id="faq" aria-labelledby="faq-title">
+        <div className="section-head">
+          <p className="eyebrow">Answers</p>
+          <h2 id="faq-title">Quick answers</h2>
+        </div>
+        <div className="faq-grid">
+          {homeContent.faq.map((item) => (
+            <article className="faq-card" key={item.question}>
+              <h3>{item.question}</h3>
+              <p>{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="start-section" id="start" aria-labelledby="start-title">
+        <div className="section-head">
+          <p className="eyebrow">Use</p>
+          <h2 id="start-title">Start here</h2>
+        </div>
+        <div className="start-grid">
+          {homeContent.startCards.map((card) => (
+            <a className="start-card" href={card.href} key={card.title}>
+              <h3>{card.title}</h3>
+              <p>{card.text}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <section className="registry-section" id="registry" aria-labelledby="registry-title">
         <div className="registry-head">
           <div>

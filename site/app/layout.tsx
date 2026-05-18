@@ -6,14 +6,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com"
   },
-  description: "Packages agents can trust.",
+  description: "Package layer for agent built software.",
   icons: {
     apple: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }],
     icon: [{ sizes: "400x400", type: "image/jpeg", url: "/nipmod-logo.jpg" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
-    description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
+    description: "Nipmod makes agent code installable, verifiable and reusable.",
     images: [{ height: 400, type: "image/jpeg", url: "/nipmod-logo.jpg", width: 400 }],
     siteName: "Nipmod",
     title: "Nipmod",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     creator: "@Nipmod",
-    description: "Install Gitlawb packages from the terminal. Search, inspect and pin the tools agents use.",
+    description: "Nipmod makes agent code installable, verifiable and reusable.",
     images: ["/nipmod-logo.jpg"],
     site: "@Nipmod",
     title: "Nipmod"
