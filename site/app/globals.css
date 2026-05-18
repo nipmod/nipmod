@@ -600,6 +600,14 @@ h1 {
   margin: 0;
 }
 
+.live-copy {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 12px 0 0;
+  max-width: 58ch;
+}
+
 .live-status {
   align-items: center;
   backdrop-filter: blur(24px) saturate(170%);

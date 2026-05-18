@@ -3,10 +3,11 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Package layer for agent built software" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Package count" })).toBeVisible();
-  await expect(page.getByText(/Live package count|Registry snapshot/)).toBeVisible();
-  await expect(page.getByText("Nipmod packages")).toBeVisible();
-  await expect(page.getByText("Claimable packages")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Registry and Scout counts" })).toBeVisible();
+  await expect(page.getByText(/Live registry \+ Scout|Registry snapshot/)).toBeVisible();
+  await expect(page.locator(".live-stat-grid").getByText("Published packages", { exact: true })).toBeVisible();
+  await expect(page.locator(".live-stat-grid").getByText("Claimable drafts", { exact: true })).toBeVisible();
+  await expect(page.getByText("not published packages yet")).toBeVisible();
   await expect(page.getByText("Repos scanned")).toHaveCount(0);
   await expect(page.getByText("Scan interval")).toHaveCount(0);
   await expect(page.getByText("Scout running every")).toHaveCount(0);
@@ -83,9 +84,9 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Quick answers" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
-  await expect(page.getByText("Gitlawb is the first source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
+  await expect(page.getByText("Gitlawb is the first canonical source network. Bankr agents can already read the Nipmod skill and x402 blueprints, and the package layer is designed to cover more agent code platforms over time.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files.")).toBeVisible();
+  await expect(page.getByText("Yes. Agents can use the CLI, the read only MCP server, the machine readable discovery files and the public Bankr skill.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
   await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
 

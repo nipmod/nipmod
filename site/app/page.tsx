@@ -80,14 +80,18 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="live-head">
           <div>
             <p className="eyebrow">Registry</p>
-            <h2 id="live-title">Package count</h2>
+            <h2 id="live-title">Registry and Scout counts</h2>
+            <p className="live-copy">
+              Published packages are verified registry entries. Claimable drafts are unclaimed Gitlawb repos Scout found,
+              not published packages yet.
+            </p>
           </div>
           <p className={`live-status ${liveStats.healthy ? "live-ok" : "live-warn"}`}>
             <span aria-hidden="true" />
             {liveStats.status}
           </p>
         </div>
-        <div className="live-stat-grid" aria-label="Live Nipmod package stats">
+        <div className="live-stat-grid" aria-label="Live Nipmod registry and Scout stats">
           {liveStats.tiles.map((item) => (
             <div className="live-stat" key={item.label}>
               <span>{item.value}</span>

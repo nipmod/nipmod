@@ -9,7 +9,7 @@ export interface ScoutHealthPayload {
 }
 
 export interface LiveStatTile {
-  label: "Nipmod packages" | "Claimable packages";
+  label: "Published packages" | "Claimable drafts";
   value: string;
 }
 
@@ -73,7 +73,7 @@ export function liveStatsFromScoutHealth(payload: ScoutHealthPayload): LiveStats
     generatedAt: typeof payload.lastRunAt === "string" ? payload.lastRunAt : null,
     healthy,
     source: "live",
-    status: healthy ? "Live package count" : "Registry status pending",
+    status: healthy ? "Live registry + Scout" : "Registry status pending",
     tiles: liveStatTiles({
       packagesIndexed: summary.published,
       unclaimedDrafts: summary.unclaimedDrafts
@@ -103,8 +103,8 @@ function liveStatTiles({
   unclaimedDrafts: number;
 }): LiveStatTile[] {
   return [
-    { label: "Nipmod packages", value: String(packagesIndexed) },
-    { label: "Claimable packages", value: String(unclaimedDrafts) }
+    { label: "Published packages", value: String(packagesIndexed) },
+    { label: "Claimable drafts", value: String(unclaimedDrafts) }
   ];
 }
 

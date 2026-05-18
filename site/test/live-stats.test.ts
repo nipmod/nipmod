@@ -28,10 +28,10 @@ describe("live stats", () => {
       generatedAt: "2026-05-18T02:16:42.579Z",
       healthy: true,
       source: "live",
-      status: "Live package count",
+      status: "Live registry + Scout",
       tiles: [
-        { label: "Nipmod packages", value: "28" },
-        { label: "Claimable packages", value: "4" }
+        { label: "Published packages", value: "28" },
+        { label: "Claimable drafts", value: "4" }
       ]
     });
   });
@@ -55,8 +55,8 @@ describe("live stats", () => {
       source: "registry",
       status: "Registry snapshot",
       tiles: [
-        { label: "Nipmod packages", value: "2" },
-        { label: "Claimable packages", value: "0" }
+        { label: "Published packages", value: "2" },
+        { label: "Claimable drafts", value: "0" }
       ]
     });
   });
@@ -71,6 +71,6 @@ describe("live stats", () => {
     });
 
     expect(stats.source).toBe("registry");
-    expect(stats.tiles[0]).toEqual({ label: "Nipmod packages", value: "1" });
+    expect(stats.tiles[0]).toEqual({ label: "Published packages", value: "1" });
   });
 });
