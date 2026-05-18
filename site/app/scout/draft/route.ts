@@ -1,6 +1,8 @@
 import { packageDraftFromScoutCycle } from "../../../lib/scout";
 import { readScoutCycle } from "../data";
+import { runtimePath, scoutRuntimeJson } from "../runtime";
 
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
@@ -11,6 +13,11 @@ export async function GET(request: Request) {
   }
 
   try {
+    const live = await scoutRuntimeJson(runtimePath("/draft", request));
+    if (live) {
+      return Response.json(live.payload, { status: live.status });
+    }
+
     const cycle = await readScoutCycle();
     const draft = packageDraftFromScoutCycle(cycle, repo);
     if (!draft) {

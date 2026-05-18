@@ -1,10 +1,16 @@
 import { SCOUT_INTERVAL_MS } from "../../../lib/scout";
 import { readScoutCycle } from "../data";
+import { scoutRuntimeJson } from "../runtime";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
+  const live = await scoutRuntimeJson("/health");
+  if (live) {
+    return Response.json(live.payload, { status: live.status });
+  }
+
   try {
     const cycle = await readScoutCycle();
     return Response.json({

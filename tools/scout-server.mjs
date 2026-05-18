@@ -310,8 +310,22 @@ function healthPayload(state, running) {
     runs: state.runs,
     stale,
     startedAt: state.startedAt,
+    ownerNotificationDelivery: notificationDeliverySummary(state.lastNotificationDelivery),
     summary: state.lastCycle?.summary ?? null,
     type: "dev.nipmod.scout-health.v1"
+  };
+}
+
+function notificationDeliverySummary(delivery) {
+  if (!delivery) {
+    return null;
+  }
+  return {
+    generatedAt: delivery.generatedAt,
+    ok: delivery.ok,
+    remoteWrites: delivery.remoteWrites,
+    summary: delivery.summary,
+    type: delivery.type
   };
 }
 

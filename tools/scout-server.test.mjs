@@ -222,6 +222,63 @@ describe("nipmod scout server", () => {
       await server.close();
     }
   });
+
+  test("can run notification delivery automatically and expose only safe health summary", async () => {
+    const deliveries = [];
+    const server = await startScoutServer({
+      intervalMs: 1_000,
+      notificationAutoRun: true,
+      notificationDeliveryFn: async (options) => {
+        deliveries.push(options);
+        return {
+          formatVersion: 1,
+          generatedAt: "2026-05-17T21:00:00.000Z",
+          ok: true,
+          remoteWrites: true,
+          results: [
+            {
+              package: "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/repo-reader",
+              status: "written"
+            }
+          ],
+          summary: {
+            blocked: 0,
+            deduped: 0,
+            failed: 0,
+            planned: 1,
+            skipped: 0,
+            written: 1
+          },
+          type: "dev.nipmod.scout-owner-notification-delivery.v1"
+        };
+      },
+      notificationIdentity: {
+        did: "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+        privateKeyPem: "redacted"
+      },
+      notificationRemoteWrites: true,
+      port: 0,
+      runScoutCycleFn: async () => scoutCycle(1)
+    });
+
+    try {
+      await waitFor(async () => (await fetchJson(`${server.url}/health`)).ownerNotificationDelivery?.summary?.written === 1);
+      const health = await fetchJson(`${server.url}/health`);
+
+      expect(deliveries).toHaveLength(1);
+      expect(health.ownerNotificationDelivery).toMatchObject({
+        ok: true,
+        remoteWrites: true,
+        summary: {
+          written: 1
+        },
+        type: "dev.nipmod.scout-owner-notification-delivery.v1"
+      });
+      expect(JSON.stringify(health.ownerNotificationDelivery)).not.toMatch(/redacted|privateKey|Signature|Bearer/i);
+    } finally {
+      await server.close();
+    }
+  });
 });
 
 function scoutCycle(run) {
