@@ -10,10 +10,28 @@
     "agents": "https://nipmod.com/agents",
     "packages": "https://nipmod.com/packages",
     "createPackage": "https://nipmod.com/package",
+    "bankr": "https://nipmod.com/bankr",
     "mcp": "https://nipmod.com/mcp",
     "audit": "https://nipmod.com/audit",
     "trust": "https://nipmod.com/trust",
     "security": "https://nipmod.com/security"
+  },
+  "bankr": {
+    "agentProfile": "https://bankr.bot/agents/nipmod",
+    "app": "https://nipmod.com/bankr",
+    "docs": "https://nipmod.com/bankr",
+    "skill": {
+      "catalogStatus": "ready for public GitHub mirror or Bankr skill catalog PR",
+      "primaryInstall": "open https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+      "publicSkill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+      "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
+    },
+    "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
+    "x402": {
+      "config": "https://nipmod.com/integrations/bankr/bankr.x402.json",
+      "npmAssetExample": "https://nipmod.com/integrations/bankr/bankr.x402.npm-asset.example.json",
+      "services": ["package-search", "package-audit", "repo-package-draft"]
+    }
   },
   "claims": {
     "index": "https://nipmod.com/claims/index.json",

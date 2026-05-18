@@ -1,0 +1,97 @@
+{
+  "network": "base",
+  "currency": "USDC",
+  "tokenAddress": null,
+  "services": {
+    "package-search": {
+      "description": "Search verified Nipmod agent packages from Bankr.",
+      "price": "0.001",
+      "methods": ["GET"],
+      "category": "developer-tools",
+      "tags": ["nipmod", "packages", "agents", "gitlawb"],
+      "paymentScheme": "exact",
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "Search query for package name, description or package id"
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum result count from 1 to 20"
+            }
+          },
+          "required": ["q"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string", "description": "Search query" },
+            "count": { "type": "integer", "description": "Number of returned packages" },
+            "packages": { "type": "array", "description": "Matching Nipmod packages" }
+          }
+        }
+      }
+    },
+    "package-audit": {
+      "description": "Read trust, permissions and install commands for one Nipmod package.",
+      "price": "0.005",
+      "methods": ["GET"],
+      "category": "developer-tools",
+      "tags": ["nipmod", "audit", "supply-chain", "agents"],
+      "paymentScheme": "exact",
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "description": "Package name or canonical Nipmod package id"
+            }
+          },
+          "required": ["package"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "package": { "type": "string", "description": "Resolved package name" },
+            "canonical": { "type": "string", "description": "Canonical package id" },
+            "trustScore": { "type": "integer", "description": "Nipmod trust score" },
+            "permissions": { "type": "object", "description": "Permission summary" },
+            "commands": { "type": "object", "description": "Safe next commands" }
+          }
+        }
+      }
+    },
+    "repo-package-draft": {
+      "description": "Prepare a package draft for a public Gitlawb repo through Nipmod Scout.",
+      "price": "0.01",
+      "methods": ["GET"],
+      "category": "developer-tools",
+      "tags": ["nipmod", "gitlawb", "scout", "packages"],
+      "paymentScheme": "exact",
+      "schema": {
+        "input": {
+          "type": "object",
+          "properties": {
+            "repo": {
+              "type": "string",
+              "description": "Gitlawb repo URL or gitlawb:// DID path"
+            }
+          },
+          "required": ["repo"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "repo": { "type": "string", "description": "Repo requested" },
+            "claimUrl": { "type": "string", "description": "Human claim flow" },
+            "draft": { "type": "object", "description": "Prepared package draft" }
+          }
+        }
+      }
+    }
+  }
+}

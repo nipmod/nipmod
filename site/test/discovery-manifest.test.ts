@@ -33,6 +33,7 @@ describe("nipmod discovery manifest", () => {
       "advisoriesPublicKey",
       "advisoriesSignature",
       "agent",
+      "bankr",
       "claims",
       "docs",
       "formatVersion",
@@ -74,6 +75,7 @@ describe("nipmod discovery manifest", () => {
     expect(Object.keys(manifest.docs).sort()).toEqual([
       "agents",
       "audit",
+      "bankr",
       "createPackage",
       "docs",
       "install",
@@ -278,6 +280,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.docs).toEqual({
       agents: "https://nipmod.com/agents",
       audit: "https://nipmod.com/audit",
+      bankr: "https://nipmod.com/bankr",
       createPackage: "https://nipmod.com/package",
       docs: "https://nipmod.com/quickstart#docs",
       install: "https://nipmod.com/quickstart#install",
@@ -352,7 +355,17 @@ describe("nipmod discovery manifest", () => {
       expect(url.username).toBe("");
       expect(url.password).toBe("");
       expect(url.search).toBe("");
-      expect(["nipmod.com", "node.nipmod.com", "node.gitlawb.com", "node2.gitlawb.com", "nipmod-witness.fly.dev", "nipmod-scout.fly.dev"]).toContain(url.hostname);
+      expect([
+        "bankr.bot",
+        "github.com",
+        "gitlawb.com",
+        "nipmod.com",
+        "node.gitlawb.com",
+        "node.nipmod.com",
+        "node2.gitlawb.com",
+        "nipmod-scout.fly.dev",
+        "nipmod-witness.fly.dev"
+      ]).toContain(url.hostname);
     }
   });
 

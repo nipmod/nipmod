@@ -165,7 +165,8 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/launch",
     "/proof",
     "/mcp",
-    "/evidence"
+    "/evidence",
+    "/bankr"
   ];
   const checkedPages = new Set<string>();
   const checkedAnchors = new Set<string>();
@@ -273,13 +274,42 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await page.locator(".more-menu summary").click();
   const panel = page.locator(".more-menu-panel");
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
-  await expect(panel.getByRole("link", { name: "Agents" })).toHaveAttribute("href", "/agents");
+  await expect(panel.getByRole("link", { exact: true, name: "Agents" })).toHaveAttribute("href", "/agents");
   await expect(panel.getByRole("link", { name: "Audit" })).toHaveAttribute("href", "/audit");
   await expect(panel.getByRole("link", { name: "Launch" })).toHaveAttribute("href", "/launch");
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();
+  await expect(panel.getByRole("link", { name: "Bankr agents" })).toHaveAttribute("href", "/bankr");
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
+});
+
+test("Bankr page gives agents a complete install and paid service path", async ({ page, request }) => {
+  await page.goto("/bankr");
+
+  await expect(page.getByRole("heading", { name: "Nipmod for Bankr agents" })).toBeVisible();
+  await expect(page.getByText("Install the skill, search packages, inspect trust and call paid package services from Bankr.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
+  await expect(page.getByText("https://nipmod.com/integrations/bankr/nipmod/SKILL.md")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "x402 services" })).toBeVisible();
+  await expect(page.getByText("USDC config is deploy ready. The $NPM asset file is a custom asset blueprint for Bankr review.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open Bankr skill file" })).toHaveAttribute(
+    "href",
+    "/integrations/bankr/nipmod/SKILL.md"
+  );
+  await expect(page.getByRole("link", { name: "Open x402 config" })).toHaveAttribute(
+    "href",
+    "/integrations/bankr/bankr.x402.json"
+  );
+
+  const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
+  await expect(skill).toBeOK();
+  await expect(skill.text()).resolves.toContain("name: nipmod");
+
+  const config = await request.get("/integrations/bankr/bankr.x402.json");
+  await expect(config).toBeOK();
+  const body = await config.json();
+  expect(body.services["package-search"].methods).toEqual(["GET"]);
 });
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {
