@@ -100,6 +100,8 @@
     "url": "https://nipmod.com/registry/packages.json",
     "source": "https://node.nipmod.com",
     "canonicalEncoding": "base64url(canonical package id), no padding",
+    "gitlawbPackagePageTemplate": "https://nipmod.com/gitlawb/{owner}/{repo}",
+    "badgeTemplate": "https://nipmod.com/badge/{owner}/{repo}",
     "packageDocumentTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}.json",
     "packageVersionTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
     "dependenciesTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",

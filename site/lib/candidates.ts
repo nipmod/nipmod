@@ -143,6 +143,30 @@ export function candidateFromScout(candidate: ScoutCandidateSummary): PackageCan
   return packageCandidate;
 }
 
+export function candidateGitlawbPackageHref(candidate: Pick<PackageCandidate, "packageId" | "repoName" | "source">): string {
+  const path = candidateGitlawbPath(candidate);
+  if (!path) {
+    return "/candidates";
+  }
+  return `/gitlawb/${path.owner}/${path.repo}`;
+}
+
+export function findCandidateByGitlawbPath(
+  candidates: readonly PackageCandidate[],
+  owner: string,
+  repo: string
+): PackageCandidate | null {
+  if (!/^z[A-Za-z0-9]+$/.test(owner) || !isRepoName(repo)) {
+    return null;
+  }
+  return (
+    candidates.find((candidate) => {
+      const path = candidateGitlawbPath(candidate);
+      return path?.owner === owner && path.repo.toLowerCase() === repo.toLowerCase();
+    }) ?? null
+  );
+}
+
 export function searchCandidates(candidates: readonly PackageCandidate[], query: string): PackageCandidate[] {
   const normalized = query.trim().toLowerCase();
   const sorted = [...candidates].sort(compareCandidates);
@@ -225,6 +249,20 @@ function statusWeight(status: CandidateStatus): number {
 
 function ownerSegment(ownerDid: string): string {
   return ownerDid.replace(/^did:key:/, "");
+}
+
+function candidateGitlawbPath(candidate: Pick<PackageCandidate, "packageId" | "repoName" | "source">): {
+  owner: string;
+  repo: string;
+} | null {
+  const sourceMatch = /^gitlawb:\/\/did:key:(z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*)$/i.exec(candidate.source);
+  const packageMatch = /^pkg:did:key:(z[A-Za-z0-9]+)\/([a-z0-9][a-z0-9._-]*)$/i.exec(candidate.packageId);
+  const owner = sourceMatch?.[1] ?? packageMatch?.[1];
+  const repo = sourceMatch?.[2] ?? packageMatch?.[2] ?? candidate.repoName;
+  if (!owner || !isRepoName(repo)) {
+    return null;
+  }
+  return { owner, repo };
 }
 
 function draftEndpointForSource(source: string): string {

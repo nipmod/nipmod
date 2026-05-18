@@ -49,6 +49,10 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     /^https:\/\/gitlawb\.com\/node\/repos\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
   );
+  await expect(page.locator("#registry .package-card").first().getByRole("link", { name: "Repo status" })).toHaveAttribute(
+    "href",
+    /^\/gitlawb\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/
+  );
 });
 
 test("homepage answers post traffic questions", async ({ page }) => {
@@ -140,6 +144,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/package",
     "/packages",
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
+    "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
     "/agents",
     "/audit",
     "/trust",

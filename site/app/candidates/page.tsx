@@ -5,6 +5,7 @@ import {
   candidateClaimState,
   candidateFromScout,
   candidateFromRepo,
+  candidateGitlawbPackageHref,
   candidateStats,
   fetchGitlawbRepos,
   fetchScoutCandidates,
@@ -205,6 +206,7 @@ function CandidateCard({ candidate }: { candidate: PackageCandidate }) {
         ) : (
           <a href={packageHrefForSource(candidate.source)}>Claim package</a>
         )}
+        <a href={candidateGitlawbPackageHref(candidate)}>Repo status</a>
         <a href={shareHref(candidate)} aria-label={`Share ${candidate.repoName} on X in a new tab`} rel="noreferrer" target="_blank">
           Share
         </a>

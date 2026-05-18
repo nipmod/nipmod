@@ -311,6 +311,44 @@ export function installCommand(pkg: RegistryPackage): string {
   return `nipmod install ${pkg.name}`;
 }
 
+export function ownerSegmentFromDid(ownerDid: string): string {
+  const match = /^did:key:(z[A-Za-z0-9]+)$/.exec(ownerDid);
+  if (!match?.[1]) {
+    throw new Error(`invalid Gitlawb DID: ${ownerDid}`);
+  }
+  return match[1];
+}
+
+export function didFromOwnerSegment(owner: string): string | null {
+  if (!/^z[A-Za-z0-9]+$/.test(owner)) {
+    return null;
+  }
+  return `did:key:${owner}`;
+}
+
+export function gitlawbPackageHref(pkg: Pick<RegistryPackage, "canonical" | "owner" | "publisher" | "repo">): string {
+  return `/gitlawb/${packageOwnerSegment(pkg)}/${pkg.repo}`;
+}
+
+export function findPackageByGitlawbPath(
+  packages: readonly RegistryPackage[],
+  owner: string,
+  repo: string
+): RegistryPackage | null {
+  const ownerDid = didFromOwnerSegment(owner);
+  if (!ownerDid || !isRepoName(repo)) {
+    return null;
+  }
+
+  const matches = packages.filter(
+    (pkg) =>
+      pkg.repo.toLowerCase() === repo.toLowerCase() &&
+      [canonicalOwnerDid(pkg.canonical), pkg.owner, pkg.publisher].includes(ownerDid)
+  );
+
+  return matches.find((pkg) => pkg.distTags?.latest === pkg.version) ?? matches[0] ?? null;
+}
+
 const allowedSourceRepoHosts = new Set([
   "gitlawb.com",
   "node.gitlawb.com",
@@ -351,6 +389,19 @@ function parseSourceRepoPath(url: URL): { owner: string; repo: string } | null {
   }
 
   return { owner, repo };
+}
+
+function packageOwnerSegment(pkg: Pick<RegistryPackage, "canonical" | "owner" | "publisher">): string {
+  return ownerSegmentFromDid(canonicalOwnerDid(pkg.canonical) ?? pkg.owner ?? pkg.publisher);
+}
+
+function canonicalOwnerDid(canonical: string): string | null {
+  const match = /^pkg:did:key:(z[A-Za-z0-9]+)\//.exec(canonical);
+  return match?.[1] ? `did:key:${match[1]}` : null;
+}
+
+function isRepoName(value: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]*$/i.test(value);
 }
 
 export function permissionHighlights(pkg: RegistryPackage): string[] {

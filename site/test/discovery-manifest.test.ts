@@ -53,8 +53,10 @@ describe("nipmod discovery manifest", () => {
 
   test("keeps nested objects exact and discovery only", () => {
     expect(Object.keys(manifest.registry).sort()).toEqual([
+      "badgeTemplate",
       "canonicalEncoding",
       "dependenciesTemplate",
+      "gitlawbPackagePageTemplate",
       "packageDocumentTemplate",
       "packageVersionTemplate",
       "provenanceTemplate",
@@ -231,8 +233,10 @@ describe("nipmod discovery manifest", () => {
 
   test("matches the verified registry and transparency roots", () => {
     expect(manifest.registry).toEqual({
+      badgeTemplate: "https://nipmod.com/badge/{owner}/{repo}",
       canonicalEncoding: "base64url(canonical package id), no padding",
       dependenciesTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
+      gitlawbPackagePageTemplate: "https://nipmod.com/gitlawb/{owner}/{repo}",
       packageDocumentTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}.json",
       packageVersionTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
       provenanceTemplate: "https://nipmod.com/registry/packages/{encodedCanonical}/provenance.json",

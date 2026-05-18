@@ -3,6 +3,7 @@ import { packageEvidenceHref, packagePageHref } from "./packages/content";
 import registryData from "./registry-data.json";
 import { loadLiveStats } from "../lib/live-stats";
 import {
+  gitlawbPackageHref,
   installCommand,
   homepagePackages,
   registryStats,
@@ -303,6 +304,9 @@ function PackageCard({ pkg }: { pkg: RegistryPackage }) {
         ) : null}
         <a href={packagePageHref(pkg)} aria-label={`View ${pkg.name} package page`}>
           Package
+        </a>
+        <a href={gitlawbPackageHref(pkg)}>
+          Repo status
         </a>
         <a href={packageEvidenceHref(pkg, "package-proof")} aria-label={`View ${pkg.name} evidence`}>
           Evidence

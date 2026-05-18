@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import {
+  gitlawbPackageHref,
   installCommand,
   registryStats,
   safeSourceRepoHref,
@@ -179,6 +180,7 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
 
       <div className="package-links">
         <a href={packagePageHref(pkg)}>Package</a>
+        <a href={gitlawbPackageHref(pkg)}>Repo status</a>
         <a href={packageEvidenceHref(pkg)}>Evidence</a>
         {sourceRepoHref ? (
           <a href={sourceRepoHref} aria-label={`Open ${pkg.name} Git source in a new tab`} rel="noreferrer" target="_blank">
