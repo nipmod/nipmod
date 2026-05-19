@@ -63,6 +63,10 @@ await run("pnpm", ["--dir", "site", "build"]);
 await run("pnpm", ["--dir", "site", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "build"]);
+await run(process.execPath, ["tools/platform-readiness-check.mjs"], { timeoutMs: 30_000 });
+if (process.env.NIPMOD_INCLUDE_HOST_SMOKE === "1") {
+  await run(process.execPath, ["tools/platform-readiness-check.mjs", "--host-smoke"], { timeoutMs: 120_000 });
+}
 await run("pnpm", ["--dir", "site", "test:e2e"], {
   env: {
     NIPMOD_E2E_PORT: String(await freePort())
@@ -135,6 +139,7 @@ async function verifyProduction() {
     (payload) => payload.type === "dev.nipmod.scout-candidates.v1" && Array.isArray(payload.candidates),
     "scout candidates failed"
   );
+  await run(process.execPath, ["tools/platform-readiness-check.mjs", "--live"], { timeoutMs: 120_000 });
   await assertJson(
     "https://nipmod.com/registry/packages.json",
     (payload) =>

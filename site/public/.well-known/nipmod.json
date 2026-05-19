@@ -170,6 +170,7 @@
     "evidenceLedger": "https://nipmod.com/review/evidence-ledger.json",
     "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json",
     "proofTranscript": "https://nipmod.com/proof/transcript.json",
+    "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
     "launch": "https://nipmod.com/launch"
   },
   "install": {

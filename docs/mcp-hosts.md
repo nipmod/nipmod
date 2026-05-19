@@ -113,6 +113,22 @@ printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion
 
 The response must list the fifteen tools above. Host approval UI should show one controlled workspace write tool, read-only tools and the gated `nipmod.publish_plan` dry run.
 
+## Platform Readiness
+
+The public host readiness receipt is published at:
+
+```text
+https://nipmod.com/compatibility/platform-readiness.json
+```
+
+Run the repeatable local/live proof from this repo:
+
+```bash
+node tools/platform-readiness-check.mjs --live --host-smoke
+```
+
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json` and the Bankr agent-proof commands. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+
 ## Agent Demo
 
 ```bash
@@ -131,4 +147,4 @@ Host syntax references:
 
 - Codex MCP docs: https://developers.openai.com/learn/docs-mcp
 - Claude Code MCP docs: https://code.claude.com/docs/en/mcp
-- OpenCode MCP docs: https://dev.opencode.ai/docs/mcp-servers
+- OpenCode MCP docs: https://opencode.ai/docs/mcp-servers

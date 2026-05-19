@@ -1,0 +1,119 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.platform-readiness.v1",
+  "generatedAt": "2026-05-19T13:45:00.000Z",
+  "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
+  "archive": {
+    "registry": "https://nipmod.com/registry/packages.json",
+    "setup": "https://nipmod.com/setup",
+    "llms": "https://nipmod.com/llms.txt",
+    "discovery": "https://nipmod.com/.well-known/nipmod.json"
+  },
+  "criteria": [
+    "public source is reachable",
+    "public setup path exists",
+    "agent discovery documents expose exact commands",
+    "MCP server lists all expected tools",
+    "read-only and controlled-write tools are separated",
+    "proof package can be found, inspected and install-planned",
+    "repo package draft path has no remote write",
+    "no secrets or payment requirement are needed for core package workflows"
+  ],
+  "platforms": [
+    {
+      "id": "github",
+      "name": "GitHub",
+      "productReadiness": 100,
+      "status": "ready",
+      "claim": "Public open-source mirror and contribution surface.",
+      "evidence": ["https://github.com/nipmod/nipmod"],
+      "checks": ["git ls-remote origin refs/heads/main matches the released commit"]
+    },
+    {
+      "id": "gitlawb",
+      "name": "Gitlawb",
+      "productReadiness": 100,
+      "status": "ready",
+      "claim": "Gitlawb source flow, package claims, Scout draft and package archive paths are live.",
+      "evidence": [
+        "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+        "https://nipmod.com/candidates",
+        "https://nipmod.com/claims/index.json"
+      ],
+      "checks": [
+        "git ls-remote gitlawb refs/heads/main matches the released commit",
+        "nipmod claim index --node https://node.nipmod.com --json",
+        "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json"
+      ]
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "productReadiness": 100,
+      "status": "ready",
+      "claim": "Codex can register Nipmod as a local stdio MCP server.",
+      "setupCommand": "codex mcp add nipmod -- nipmod mcp serve",
+      "verifyCommand": "codex mcp get nipmod",
+      "checks": [
+        "fresh HOME codex mcp add succeeds",
+        "codex mcp get shows command nipmod and args mcp serve",
+        "nipmod mcp serve exposes the expected tool list"
+      ]
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "productReadiness": 100,
+      "status": "ready",
+      "claim": "Claude Code can load the committed project .mcp.json and connect to Nipmod.",
+      "setupCommand": "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      "config": ".mcp.json",
+      "verifyCommand": "claude mcp list",
+      "checks": [
+        "official claude-code CLI accepts the setup command",
+        "project .mcp.json contains nipmod stdio config",
+        "claude mcp list reports nipmod connected when nipmod is on PATH"
+      ]
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "productReadiness": 100,
+      "status": "ready",
+      "claim": "OpenCode can load the committed opencode.json and connect to Nipmod.",
+      "config": "opencode.json",
+      "verifyCommand": "opencode mcp list",
+      "checks": [
+        "official OpenCode config schema accepts local MCP command arrays",
+        "project opencode.json contains nipmod local MCP config",
+        "opencode mcp list reports nipmod connected when nipmod is on PATH"
+      ]
+    },
+    {
+      "id": "bankr",
+      "name": "Bankr",
+      "productReadiness": 100,
+      "status": "agent-proof-ready",
+      "claim": "Bankr-compatible skill, free service map and agent-proof workflow are public and runnable without wallet actions.",
+      "evidence": [
+        "https://nipmod.com/bankr",
+        "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+        "https://nipmod.com/integrations/bankr/bankr.free.json",
+        "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
+        "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md"
+      ],
+      "checks": [
+        "skill can be read from the public site",
+        "proof package can be searched, inspected and install-planned",
+        "Gitlawb repo package draft is generated locally with remoteWrites false",
+        "core package workflows do not require x402 or Nipmod payment"
+      ],
+      "externalDependency": "Native Bankr catalog acceptance is external and not claimed by this receipt."
+    }
+  ],
+  "notClaimed": [
+    "third-party users have already adopted every host",
+    "Bankr has accepted the skill into a native marketplace",
+    "wallet, trading, token launch or paid x402 workflows are part of core package use"
+  ]
+}

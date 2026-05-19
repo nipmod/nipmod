@@ -156,7 +156,7 @@ args = ["mcp", "serve"]`,
     },
     {
       label: "OpenCode MCP docs",
-      href: "https://dev.opencode.ai/docs/mcp-servers"
+      href: "https://opencode.ai/docs/mcp-servers"
     }
   ]
 } as const;

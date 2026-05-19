@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "nipmod": {
+      "type": "stdio",
+      "command": "nipmod",
+      "args": [
+        "mcp",
+        "serve"
+      ],
+      "env": {}
+    }
+  }
+}

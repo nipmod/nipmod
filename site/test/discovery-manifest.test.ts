@@ -149,6 +149,7 @@ describe("nipmod discovery manifest", () => {
       "launch",
       "packet",
       "packetMarkdown",
+      "platformReadiness",
       "proofTranscript"
     ]);
     expect(Object.keys(manifest.install).sort()).toEqual(["release", "script", "scriptSha256", "shortCommand", "verifyCommand"]);
@@ -277,6 +278,7 @@ describe("nipmod discovery manifest", () => {
       launch: "https://nipmod.com/launch",
       packet: "https://nipmod.com/review/packet.json",
       packetMarkdown: "https://nipmod.com/review/packet.md",
+      platformReadiness: "https://nipmod.com/compatibility/platform-readiness.json",
       proofTranscript: "https://nipmod.com/proof/transcript.json"
     });
     expect(manifest.scout).toEqual({
