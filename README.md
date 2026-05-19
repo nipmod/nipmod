@@ -42,7 +42,7 @@ Nipmod is not a Gitlawb authority and not a central upload gate. Gitlawb remains
 
 ## What works now
 
-- CLI release `1.2.2` with signed installer and signed tarball.
+- CLI release `1.2.3` with signed installer and signed tarball.
 - Public verified registry sourced from Gitlawb.
 - Install, add, update, audit, CI, SBOM and explain commands.
 - Deterministic `.nipmod` bundles signed by Ed25519 `did:key` identities.
