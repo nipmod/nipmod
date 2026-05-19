@@ -74,7 +74,10 @@ export default function AgentsPage() {
         <h1 id="agents-title">One link. Full package workflow.</h1>
         <p className="lead">Agents can discover Nipmod, search packages, inspect trust, plan installs, use MCP and install with explicit approval.</p>
         <div className="actions" aria-label="Agent actions">
-          <a className="button button-primary" href="/packages">
+          <a className="button button-primary" href="/setup">
+            Setup agent
+          </a>
+          <a className="button button-ghost" href="/packages">
             Browse packages
           </a>
           <a className="button button-ghost" href="/mcp">

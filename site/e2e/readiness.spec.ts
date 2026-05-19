@@ -38,7 +38,7 @@ test("home registry search stays usable", async ({ page }) => {
   const siteNav = page.getByRole("navigation", { name: "Site" });
   await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
-  await expect(siteNav.getByRole("link", { name: "Install" })).toBeVisible();
+  await expect(siteNav.getByRole("link", { name: "Setup" })).toBeVisible();
   const viewport = page.viewportSize();
   await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 2 : 3);
   if ((await page.locator('a[href="/security"]:visible').count()) === 0) {
@@ -46,7 +46,7 @@ test("home registry search stays usable", async ({ page }) => {
   }
   await expect(page.locator('a[href="/security"]:visible').first()).toBeVisible();
   await expect(siteNav.locator('a[href="/trust"]:visible').first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "Install" }).first()).toHaveAttribute("href", "/quickstart#install");
+  await expect(page.getByRole("link", { name: "Setup" }).first()).toHaveAttribute("href", "/setup");
   await expect(page.getByText("nipmod install gitlawb-repo-reader").first()).toBeVisible();
   await expect(page.getByText("Signed", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Digest pinned", { exact: true })).toHaveCount(0);
@@ -101,7 +101,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByText("controlled install")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
-  await expect(platformRoadmap.getByRole("link", { name: "View MCP setup" })).toHaveAttribute("href", "/mcp");
+  await expect(platformRoadmap.getByRole("link", { name: "Setup agent" })).toHaveAttribute("href", "/setup");
 
   await expect(page.getByRole("heading", { name: "Found your repo? Claim the package." })).toBeVisible();
   await expect(page.getByText("Scout finds public Gitlawb repos that can become packages.")).toBeVisible();
@@ -112,16 +112,16 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
   await expect(page.getByText("Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Agents can use the CLI, the MCP server and the machine readable discovery files.")).toBeVisible();
+  await expect(page.getByText("Yes. Install once, connect the MCP server, then tell the agent to use Nipmod before package installs.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
   await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Install Nipmod" })).toHaveAttribute("href", "/quickstart#install");
+  await expect(page.locator(".start-grid").getByRole("link", { name: "Setup Nipmod" })).toHaveAttribute("href", "/setup");
   await expect(page.getByRole("link", { name: "Read agent docs" })).toHaveAttribute("href", "/agents");
 });
 
-test("docs and install navigation have distinct, correct destinations", async ({ page }) => {
+test("docs and setup navigation have distinct, correct destinations", async ({ page }) => {
   await page.goto("/");
   const siteNav = page.getByRole("navigation", { name: "Site" });
   if ((await siteNav.locator('a[href="/quickstart#docs"]:visible').count()) === 0) {
@@ -129,7 +129,7 @@ test("docs and install navigation have distinct, correct destinations", async ({
   }
 
   await expect(siteNav.locator('a[href="/quickstart#docs"]:visible').first()).toBeVisible();
-  await expect(siteNav.getByRole("link", { name: "Install" })).toHaveAttribute("href", "/quickstart#install");
+  await expect(siteNav.locator(".nav-install")).toHaveAttribute("href", "/setup");
 
   await siteNav.locator('a[href="/quickstart#docs"]:visible').first().click();
   await expect(page).toHaveURL(/\/quickstart#docs$/);
@@ -139,10 +139,11 @@ test("docs and install navigation have distinct, correct destinations", async ({
   await expect(page.getByLabel("Docs sections").getByRole("link", { name: "MCP" })).toHaveAttribute("href", "/mcp");
 
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Install" }).click();
-  await expect(page).toHaveURL(/\/quickstart#install$/);
+  await page.getByRole("navigation", { name: "Site" }).locator(".nav-install").click();
+  await expect(page).toHaveURL(/\/setup$/);
   await expect(page.locator("#install")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Install CLI" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Use Nipmod in your agent" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install Nipmod once" })).toBeVisible();
 });
 
 test("homepage exposes machine readable agent discovery", async ({ page, request }) => {
@@ -158,6 +159,8 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   const manifest = await request.get("/.well-known/nipmod.json");
   await expect(manifest).toBeOK();
   const body = await manifest.json();
+  expect(body.docs.setup).toBe("https://nipmod.com/setup");
+  expect(body.agent.commands.setupCodexMcp).toBe("codex mcp add nipmod -- nipmod mcp serve");
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
   expect(body.mcp.tools).toContain("nipmod.install");
@@ -168,6 +171,7 @@ test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
   await page.goto("/agents");
 
   await expect(page.getByRole("heading", { name: "One link. Full package workflow." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Setup agent" })).toHaveAttribute("href", "/setup");
   await expect(page.getByRole("heading", { name: "Tell your agent once" })).toBeVisible();
   await expect(page.getByText("Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "MCP demo" })).toBeVisible();
@@ -177,6 +181,42 @@ test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
   await expect(page.getByText("curl -fsS https://nipmod.com/scout/candidates")).toBeVisible();
   await expect(page.getByText("curl -fsS https://nipmod.com/scout/health")).toBeVisible();
   await expect(page.getByRole("link", { name: "Browse packages" })).toHaveAttribute("href", "/packages");
+});
+
+test("setup page gives non technical agent onboarding", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (text: string) => {
+          (window as Window & { __nipmodCopied?: string }).__nipmodCopied = text;
+          return Promise.resolve();
+        }
+      }
+    });
+  });
+  await page.goto("/setup");
+
+  await expect(page.getByRole("heading", { name: "Use Nipmod in your agent" })).toBeVisible();
+  await expect(page.getByText("Install once, connect your agent once")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open Terminal" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Install Nipmod once" })).toBeVisible();
+  await expect(
+    page.getByLabel("First setup command").getByText("curl -fsSLO https://nipmod.com/install.sh && bash install.sh")
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
+  await expect(page.getByText("codex mcp add nipmod -- nipmod mcp serve")).toBeVisible();
+  await expect(page.getByText("claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve")).toBeVisible();
+  await expect(page.getByText("cat > opencode.json <<'JSON")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tell the agent" })).toBeVisible();
+  await expect(page.getByText("Search the Nipmod archive first")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Agent archive access" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Copy agent setup prompt" }).click();
+  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => (window as Window & { __nipmodCopied?: string }).__nipmodCopied ?? "")).toContain(
+    "Search the Nipmod archive first"
+  );
 });
 
 test("internal button and navigation links resolve to existing pages and anchors", async ({ page, request }) => {
@@ -192,6 +232,7 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
     "/agents",
+    "/setup",
     "/audit",
     "/bankr",
     "/trust",
@@ -306,6 +347,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(page.locator(".more-menu summary")).toBeVisible();
   await page.locator(".more-menu summary").click();
   const panel = page.locator(".more-menu-panel");
+  await expect(panel.getByRole("link", { name: "Setup" })).toHaveAttribute("href", "/setup");
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
   await expect(panel.getByRole("link", { exact: true, name: "Agents" })).toHaveAttribute("href", "/agents");
   await expect(panel.getByRole("link", { name: "Audit" })).toHaveAttribute("href", "/audit");
@@ -464,6 +506,7 @@ test("human pages do not promote raw artifact links", async ({ page }) => {
     "/packages/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD-gitlawb-repo-reader",
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
     "/agents",
+    "/setup",
     "/audit",
     "/trust",
     "/security",

@@ -8,10 +8,10 @@ export const homeContent = {
     github: "https://github.com/nipmod/nipmod",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
-    install: "/quickstart#install",
+    install: "/setup",
     x: "https://x.com/Nipmod"
   },
-  primaryAction: "Install CLI",
+  primaryAction: "Setup Nipmod",
   secondaryAction: "X",
   commands: [
     "nipmod search gitlawb --online",
@@ -82,9 +82,9 @@ export const homeContent = {
         name: "Agent hosts",
         status: "MCP ready",
         label: "Codex, Claude Code, OpenCode",
-        text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
-        href: "/mcp",
-        cta: "View MCP setup"
+      text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
+      href: "/setup",
+      cta: "Setup agent"
       }
     ]
   },
@@ -122,7 +122,7 @@ export const homeContent = {
     },
     {
       question: "Can agents use it directly?",
-      answer: "Yes. Agents can use the CLI, the MCP server and the machine readable discovery files."
+      answer: "Yes. Install once, connect the MCP server, then tell the agent to use Nipmod before package installs."
     },
     {
       question: "Who owns packages?",
@@ -140,9 +140,9 @@ export const homeContent = {
   ],
   startCards: [
     {
-      title: "Install Nipmod",
-      text: "Use the CLI to search, inspect, install and audit packages.",
-      href: "/quickstart#install"
+      title: "Setup Nipmod",
+      text: "Connect Codex, Claude Code or OpenCode to the package archive.",
+      href: "/setup"
     },
     {
       title: "Claim a repo",

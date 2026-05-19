@@ -93,12 +93,12 @@ describe("home content", () => {
     expect(homeContent.platformRoadmap.items[2]?.text).toContain("controlled install");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
-    expect(homeContent.startCards.map((card) => card.title)).toEqual(["Install Nipmod", "Claim a repo", "Read agent docs"]);
+    expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Claim a repo", "Read agent docs"]);
   });
 
-  test("links to the human install flow", () => {
-    expect(homeContent.primaryAction).toBe("Install CLI");
-    expect(homeContent.links.install).toBe("/quickstart#install");
+  test("links to the human setup flow", () => {
+    expect(homeContent.primaryAction).toBe("Setup Nipmod");
+    expect(homeContent.links.install).toBe("/setup");
   });
 
   test("exposes a complete first run path", () => {

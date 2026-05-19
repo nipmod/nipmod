@@ -82,6 +82,7 @@ describe("nipmod discovery manifest", () => {
       "mcp",
       "packages",
       "security",
+      "setup",
       "trust"
     ]);
     expect(Object.keys(manifest.claims).sort()).toEqual([
@@ -131,6 +132,9 @@ describe("nipmod discovery manifest", () => {
       "publishDryRun",
       "sbom",
       "search",
+      "setupClaudeMcp",
+      "setupCodexMcp",
+      "setupOpenCodeMcp",
       "setupPublish",
       "verifyInstaller",
       "view"
@@ -301,12 +305,16 @@ describe("nipmod discovery manifest", () => {
       mcp: "https://nipmod.com/mcp",
       packages: "https://nipmod.com/packages",
       security: "https://nipmod.com/security",
+      setup: "https://nipmod.com/setup",
       trust: "https://nipmod.com/trust"
     });
     expect(manifest.agent.llms).toBe("https://nipmod.com/llms.txt");
     expect(manifest.agent.runbook).toBe("https://nipmod.com/agents");
     expect(manifest.agent.workflow).toEqual([
       "install",
+      "setupCodexMcp",
+      "setupClaudeMcp",
+      "setupOpenCodeMcp",
       "verifyInstaller",
       "setupPublish",
       "doctor",
@@ -343,6 +351,10 @@ describe("nipmod discovery manifest", () => {
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
+      setupClaudeMcp: "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      setupCodexMcp: "codex mcp add nipmod -- nipmod mcp serve",
+      setupOpenCodeMcp:
+        "cat > opencode.json <<'JSON'\n{\n  \"$schema\": \"https://opencode.ai/config.json\",\n  \"mcp\": {\n    \"nipmod\": {\n      \"type\": \"local\",\n      \"command\": [\"nipmod\", \"mcp\", \"serve\"],\n      \"enabled\": true\n    }\n  }\n}\nJSON",
       setupPublish: "nipmod setup gitlawb",
       view: "nipmod view gitlawb-repo-reader --json",
       verifyInstaller: verifyInstallerCommand

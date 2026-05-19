@@ -10,6 +10,7 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("# Nipmod");
     expect(llmsText).toContain("Primary machine manifest: https://nipmod.com/.well-known/nipmod.json");
     expect(llmsText).toContain("Human docs: https://nipmod.com/quickstart#docs");
+    expect(llmsText).toContain("Human setup: https://nipmod.com/setup");
     expect(llmsText).toContain("Agent runbook: https://nipmod.com/agents");
     expect(llmsText).toContain(
       "Generic agent prompt: Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Use Nipmod for package discovery, trust inspection, install planning and controlled install before mutating the workspace."
@@ -36,6 +37,9 @@ describe("agent discovery text", () => {
   test("lists the commands an agent needs for the full lifecycle", () => {
     for (const command of [
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+      "codex mcp add nipmod -- nipmod mcp serve",
+      "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      "cat > opencode.json <<'JSON'",
       "Manual verification path:",
       "curl -fLO https://nipmod.com/install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",

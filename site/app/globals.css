@@ -1438,6 +1438,7 @@ h1 {
 }
 
 .quickstart-hero,
+.setup-hero,
 .trust-hero,
 .mcp-hero,
 .proof-hero {
@@ -1448,6 +1449,7 @@ h1 {
 }
 
 .quickstart-hero h1,
+.setup-hero h1,
 .trust-hero h1,
 .mcp-hero h1,
 .proof-hero h1 {
@@ -1459,6 +1461,48 @@ h1 {
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 10px 0 28px;
+}
+
+.setup-hero {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 430px);
+  max-width: none;
+  padding-bottom: 10px;
+}
+
+.setup-hero-copy {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.setup-hero h1 {
+  font-size: clamp(46px, 6vw, 82px);
+}
+
+.setup-hero-panel {
+  align-self: end;
+}
+
+.setup-path {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 10px 0 28px;
+}
+
+.setup-section {
+  scroll-margin-top: 96px;
+}
+
+.setup-command-stack {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.setup-step-card {
+  min-height: 168px;
 }
 
 .quickstart-card {
@@ -1729,6 +1773,7 @@ h1 {
   }
 
   .hero,
+  .setup-hero,
   .usage-strip,
   .live-stat-grid,
   .comparison-grid,
@@ -1750,6 +1795,7 @@ h1 {
   .proof-section,
   .block-grid,
   .quickstart-grid,
+  .setup-path,
   .package-draft,
   .package-hero {
     grid-template-columns: 1fr;

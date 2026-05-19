@@ -8,6 +8,7 @@
     "bankr": "https://nipmod.com/bankr",
     "docs": "https://nipmod.com/quickstart#docs",
     "install": "https://nipmod.com/quickstart#install",
+    "setup": "https://nipmod.com/setup",
     "agents": "https://nipmod.com/agents",
     "packages": "https://nipmod.com/packages",
     "createPackage": "https://nipmod.com/package",
@@ -40,6 +41,9 @@
     "runbook": "https://nipmod.com/agents",
     "workflow": [
       "install",
+      "setupCodexMcp",
+      "setupClaudeMcp",
+      "setupOpenCodeMcp",
       "verifyInstaller",
       "setupPublish",
       "doctor",
@@ -60,6 +64,9 @@
     ],
     "commands": {
       "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+      "setupCodexMcp": "codex mcp add nipmod -- nipmod mcp serve",
+      "setupClaudeMcp": "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      "setupOpenCodeMcp": "cat > opencode.json <<'JSON'\n{\n  \"$schema\": \"https://opencode.ai/config.json\",\n  \"mcp\": {\n    \"nipmod\": {\n      \"type\": \"local\",\n      \"command\": [\"nipmod\", \"mcp\", \"serve\"],\n      \"enabled\": true\n    }\n  }\n}\nJSON",
       "verifyInstaller": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
       "setupPublish": "nipmod setup gitlawb",
       "doctor": "nipmod doctor --online",

@@ -23,7 +23,7 @@ export default function McpPage() {
         <h1 id="mcp-title">{mcpContent.headline}</h1>
         <p className="lead">{mcpContent.lead}</p>
         <div className="actions" aria-label="MCP actions">
-          <a className="button button-primary" href="/quickstart#install">
+          <a className="button button-primary" href="/setup">
             {mcpContent.primaryAction}
           </a>
           <a className="button button-ghost" href="/trust">

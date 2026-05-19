@@ -65,13 +65,14 @@ export function SiteHeader() {
         <a className="nav-link nav-link-wide nav-primary nav-primary-optional" href={homeContent.links.docs}>
           Docs
         </a>
-        <a className="nav-link nav-link-wide nav-install" href="/quickstart#install">
-          Install
+        <a className="nav-link nav-link-wide nav-install" href={homeContent.links.install}>
+          Setup
         </a>
         <details className="more-menu">
           <summary className="nav-more-button">More</summary>
           <div className="more-menu-panel">
             <a href={homeContent.links.docs}>Docs</a>
+            <a href="/setup">Setup</a>
             <a href="/agents">Agents</a>
             <a href="/audit">Audit</a>
             <a href="/candidates">Package Claim</a>
