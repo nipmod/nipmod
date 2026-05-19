@@ -75,10 +75,10 @@ test("packages page exposes one central human archive", async ({ page, request }
 
   await page.goto("/packages");
 
-  await expect(page.getByRole("heading", { name: "All Nipmod packages in one place." })).toBeVisible();
-  await expect(page.getByText("Every public package registered in Nipmod appears here")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Verified packages for agents." })).toBeVisible();
+  await expect(page.getByText("Search one clean registry.")).toBeVisible();
   await expect(page.getByText("Published package source today is Gitlawb.")).toBeVisible();
-  await expect(page.getByText("Codex / Claude / MCP")).toBeVisible();
+  await expect(page.getByText("Codex + Claude Code")).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Nipmod registry machine file" })).toHaveAttribute(
     "href",
     "/registry/packages.json",
@@ -87,6 +87,10 @@ test("packages page exposes one central human archive", async ({ page, request }
   await expect(page.locator(".archive-package-row")).toHaveCount(registry.packages.length);
   await expect(page.locator(".archive-package-row").first()).toContainText("Gitlawb");
   await expect(page.locator(".archive-package-row").first()).toContainText("Install");
+  await expect(page.locator(".archive-package-row").first().getByRole("link", { name: "Details" })).toHaveAttribute(
+    "href",
+    /^\/packages\/z[A-Za-z0-9]+-[a-z0-9][a-z0-9._-]*$/,
+  );
   await expect(page.locator(".archive-package-row").first().getByRole("link", { name: "Git source" })).toHaveAttribute(
     "href",
     /^https:\/\/gitlawb\.com\/node\/repos\/z[A-Za-z0-9]+\/[a-z0-9][a-z0-9._-]*$/

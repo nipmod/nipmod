@@ -1,12 +1,5 @@
 import type { Metadata } from "next";
-import {
-  gitlawbOwnerHref,
-  gitlawbPackageHref,
-  installCommand,
-  registryStats,
-  safeSourceRepoHref,
-  type RegistryPackage
-} from "../../lib/registry";
+import { installCommand, safeSourceRepoHref, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
 import { packageQuality } from "../../lib/package-quality";
 import { packageBrowseData, packageEvidenceHref, packagePageHref } from "./content";
 
@@ -22,9 +15,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/packages"
   },
-  description: "Browse the Nipmod package archive with source, trust, install and agent usage context.",
+  description: "Search verified Nipmod packages for agents with trust, source and install context.",
   openGraph: {
-    description: "Browse the Nipmod package archive with source, trust, install and agent usage context.",
+    description: "Search verified Nipmod packages for agents with trust, source and install context.",
     title: "Nipmod archive",
     url: "https://nipmod.com/packages"
   },
@@ -36,29 +29,29 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   const query = firstParam(params.q);
   const source = firstParam(params.source);
   const type = firstParam(params.type);
-  const { newest, packages, qualityStats, registry, trending, types } = packageBrowseData({ query, type });
+  const { packages, registry, types } = packageBrowseData({ query, type });
   const sourceOptions = packageSourceOptions(registry.packages);
   const filteredPackages = source ? packages.filter((pkg) => packageSourceLabel(pkg) === source) : packages;
-  const sourceStats = sourceOptions.map((item) => ({ label: item.label, value: String(item.count) }));
+  const summaryStats = archiveSummaryStats(registry, sourceOptions);
 
   return (
     <main className="page-shell" id="main">
       <section className="quickstart-hero package-archive-hero" aria-labelledby="packages-title">
-        <p className="eyebrow">Archive</p>
-        <h1 id="packages-title">All Nipmod packages in one place.</h1>
+        <p className="eyebrow">Package archive</p>
+        <h1 id="packages-title">Verified packages for agents.</h1>
         <p className="lead">
-          Every public package registered in Nipmod appears here with source, proof, permissions, install commands and
-          agent setup paths.
+          Search one clean registry. See what a package does, where it came from, whether it is verified and how an
+          agent can install it.
         </p>
         <div className="actions" aria-label="Archive actions">
           <a className="button button-primary" href="#archive">
-            Browse archive
-          </a>
-          <a className="data-link" href="/registry/packages.json" aria-label="Open Nipmod registry machine file">
-            Registry JSON
+            Search archive
           </a>
           <a className="button button-ghost" href="/setup">
             Setup agents
+          </a>
+          <a className="data-link" href="/registry/packages.json" aria-label="Open Nipmod registry machine file">
+            Registry JSON
           </a>
         </div>
       </section>
@@ -66,23 +59,18 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
       <section className="archive-overview" aria-label="Nipmod archive coverage">
         <article className="archive-overview-card">
           <span>{registry.packages.length}</span>
-          <h2>Published packages</h2>
-          <p>The public archive is generated from the live Nipmod registry.</p>
+          <h2>Verified packages</h2>
+          <p>Generated from the live Nipmod registry.</p>
         </article>
         <article className="archive-overview-card">
-          <span>{sourceStats.map((item) => `${item.label} ${item.value}`).join(" / ")}</span>
-          <h2>Current sources</h2>
-          <p>Published package source today is Gitlawb. Future indexed sources land in the same archive.</p>
+          <span>{sourceOptions.map((item) => `${item.label} ${item.count}`).join(" / ")}</span>
+          <h2>Current source</h2>
+          <p>Published package source today is Gitlawb. New indexed sources will appear here.</p>
         </article>
         <article className="archive-overview-card">
-          <span>Codex / Claude / MCP</span>
-          <h2>Agent access</h2>
-          <p>Agent hosts use the same package archive through setup workflows and MCP-compatible tools.</p>
-        </article>
-        <article className="archive-overview-card">
-          <span>nipmod.com + node.nipmod.com</span>
-          <h2>Storage map</h2>
-          <p>Metadata lives on Nipmod. Current bundles and source repos resolve through node.nipmod.com.</p>
+          <span>Codex + Claude Code</span>
+          <h2>Agent-ready</h2>
+          <p>Connect once, then agents can search and inspect the same archive.</p>
         </article>
       </section>
 
@@ -90,7 +78,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
         <div className="registry-head">
           <div>
             <p className="eyebrow">Browse</p>
-            <h2 id="packages-browse-title">The shared package archive.</h2>
+            <h2 id="packages-browse-title">Explore packages.</h2>
           </div>
           <form className="search-form" action="/packages">
             <label className="sr-only" htmlFor="package-search">
@@ -112,65 +100,68 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           </form>
         </div>
 
-        <div className="registry-stats" aria-label="Registry stats">
-          {[...registryStats(registry), ...qualityStats, ...sourceStats].map((item) => (
-            <div className="stat-tile" key={item.label}>
+        <div className="archive-summary-strip" aria-label="Archive summary">
+          {summaryStats.map((item) => (
+            <div className="archive-summary-item" key={item.label}>
               <span>{item.value}</span>
               <p>{item.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="package-shelf-grid" aria-label="Package highlights">
-          <PackageShelf title="Trending packages" packages={trending} />
-          <PackageShelf title="New packages" packages={newest} />
-        </div>
-
-        <nav className="filter-row" aria-label="Package type filters">
-          <a
-            aria-current={!type ? "page" : undefined}
-            className={!type ? "filter-pill filter-active" : "filter-pill"}
-            href={packageFilterHref({ query, source })}
-          >
-            All
-          </a>
-          {types.map((item) => {
-            const href = packageFilterHref({ query, source, type: item });
-            return (
-              <a aria-current={type === item ? "page" : undefined} className={type === item ? "filter-pill filter-active" : "filter-pill"} href={href} key={item}>
-                {item}
-              </a>
-            );
-          })}
-        </nav>
-
-        <nav className="filter-row" aria-label="Package source filters">
-          <a
-            aria-current={!source ? "page" : undefined}
-            className={!source ? "filter-pill filter-active" : "filter-pill"}
-            href={packageFilterHref({ query, type })}
-          >
-            All sources
-          </a>
-          {sourceOptions.map((item) => {
-            const href = packageFilterHref({ query, source: item.label, type });
-            return (
+        <div className="archive-controls" aria-label="Archive filters">
+          <div className="archive-control-group">
+            <p>Type</p>
+            <nav className="filter-row" aria-label="Package type filters">
               <a
-                aria-current={source === item.label ? "page" : undefined}
-                className={source === item.label ? "filter-pill filter-active" : "filter-pill"}
-                href={href}
-                key={item.label}
+                aria-current={!type ? "page" : undefined}
+                className={!type ? "filter-pill filter-active" : "filter-pill"}
+                href={packageFilterHref({ query, source })}
               >
-                {item.label}
+                All
               </a>
-            );
-          })}
-        </nav>
+              {types.map((item) => {
+                const href = packageFilterHref({ query, source, type: item });
+                return (
+                  <a
+                    aria-current={type === item ? "page" : undefined}
+                    className={type === item ? "filter-pill filter-active" : "filter-pill"}
+                    href={href}
+                    key={item}
+                  >
+                    {item}
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
 
-        <p className="archive-note">
-          This page is the human-readable archive. Published packages from any future indexed source should appear here
-          once they are registered, verified and added to Nipmod.
-        </p>
+          <div className="archive-control-group">
+            <p>Source</p>
+            <nav className="filter-row" aria-label="Package source filters">
+              <a
+                aria-current={!source ? "page" : undefined}
+                className={!source ? "filter-pill filter-active" : "filter-pill"}
+                href={packageFilterHref({ query, type })}
+              >
+                All sources
+              </a>
+              {sourceOptions.map((item) => {
+                const href = packageFilterHref({ query, source: item.label, type });
+                return (
+                  <a
+                    aria-current={source === item.label ? "page" : undefined}
+                    className={source === item.label ? "filter-pill filter-active" : "filter-pill"}
+                    href={href}
+                    key={item.label}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
 
         <div className="archive-list" aria-live="polite">
           {filteredPackages.length > 0 ? (
@@ -186,96 +177,62 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   );
 }
 
-function PackageShelf({ packages, title }: { packages: RegistryPackage[]; title: string }) {
-  return (
-    <section className="package-shelf" aria-labelledby={slugId(title)}>
-      <div className="section-head">
-        <p className="eyebrow">Index</p>
-        <h2 id={slugId(title)}>{title}</h2>
-      </div>
-      <div className="package-mini-list">
-        {packages.map((pkg) => {
-          const quality = packageQuality(pkg);
-          return (
-            <a className="package-mini" href={packagePageHref(pkg)} key={`${title}:${pkg.canonical}@${pkg.version}`}>
-              <span>{pkg.name}</span>
-              <small>{quality.score}/100</small>
-            </a>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
   const sourceRepoHref = safeSourceRepoHref(pkg.sourceRepo);
   const quality = packageQuality(pkg);
   const sourceLabel = packageSourceLabel(pkg);
-  const compatibility = pkg.compatibilityReceipts?.filter((receipt) => receipt.provenanceLoss.length === 0).map((receipt) => receipt.label) ?? [];
+  const isLatest = pkg.distTags?.latest === pkg.version;
 
   return (
     <article className="archive-package-row">
-      <div className="archive-package-main">
-        <div>
+      <div className="archive-package-top">
+        <div className="archive-package-main">
+          <div className="archive-package-kicker" aria-label={`${pkg.name} package facts`}>
+            <span>{pkg.type}</span>
+            <span>v{pkg.version}</span>
+            {isLatest ? <span>latest</span> : null}
+          </div>
           <h3>
             <a href={packagePageHref(pkg)}>{pkg.name}</a>
           </h3>
           <p>{pkg.description}</p>
         </div>
+
+        <div className="archive-package-status" aria-label={`${pkg.name} status`}>
+          <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+          <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
+          <span className="trust-badge source-badge">{sourceLabel}</span>
+        </div>
       </div>
 
-      <div className="archive-package-badges" aria-label={`${pkg.name} status`}>
-        <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
-        <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
-        <span className="trust-badge source-badge">{sourceLabel}</span>
-      </div>
+      <div className="archive-package-bottom">
+        <div className="archive-install">
+          <span>Install</span>
+          <code>{installCommand(pkg)}</code>
+        </div>
 
-      <dl className="archive-package-meta">
-        <div>
-          <dt>Version</dt>
-          <dd>
-            {pkg.version}
-            {pkg.distTags?.latest === pkg.version ? " latest" : ""}
-            {pkg.deprecated?.active !== false && pkg.deprecated ? " deprecated" : ""}
-          </dd>
-        </div>
-        <div>
-          <dt>Type</dt>
-          <dd>{pkg.type}</dd>
-        </div>
-        <div>
-          <dt>Quality</dt>
-          <dd>{quality.label}</dd>
-        </div>
-        <div>
-          <dt>Agent formats</dt>
-          <dd>{compatibility.length > 0 ? compatibility.join(", ") : "Nipmod native"}</dd>
-        </div>
-      </dl>
-
-      <div className="archive-install">
-        <span>Install</span>
-        <code>{installCommand(pkg)}</code>
-      </div>
-
-      <div className="package-links">
-        <a href={packagePageHref(pkg)}>Package</a>
-        <a href={gitlawbPackageHref(pkg)}>Repo status</a>
-        <a href={gitlawbOwnerHref(pkg)}>Owner</a>
-        <a href={packageEvidenceHref(pkg)}>Evidence</a>
-        {sourceRepoHref ? (
-          <a href={sourceRepoHref} aria-label={`Open ${pkg.name} Git source in a new tab`} rel="noreferrer" target="_blank">
-            Git source
+        <nav className="archive-actions" aria-label={`${pkg.name} links`}>
+          <a className="button button-primary button-small" href={packagePageHref(pkg)}>
+            Details
           </a>
-        ) : null}
+          <a className="button button-ghost button-small" href={packageEvidenceHref(pkg)}>
+            Proof
+          </a>
+          {sourceRepoHref ? (
+            <a
+              className="button button-ghost button-small"
+              href={sourceRepoHref}
+              aria-label={`Open ${pkg.name} Git source in a new tab`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Git source
+            </a>
+          ) : null}
+        </nav>
       </div>
     </article>
   );
-}
-
-function slugId(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function packageFilterHref({ query, source, type }: { query?: string; source?: string; type?: string }): string {
@@ -302,6 +259,20 @@ function packageSourceOptions(packages: readonly RegistryPackage[]): Array<{ cou
   return [...counts.entries()]
     .map(([label, count]) => ({ count, label }))
     .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+}
+
+function archiveSummaryStats(registry: Pick<RegistryIndex, "packages">, sources: Array<{ count: number; label: string }>): Array<{ label: string; value: string }> {
+  const verified = registry.packages.filter((pkg) => pkg.trust.level === "verified").length;
+  const averageQuality = registry.packages.length
+    ? Math.round(registry.packages.reduce((total, pkg) => total + (pkg.trust.score ?? 0), 0) / registry.packages.length)
+    : 0;
+
+  return [
+    { label: "Packages", value: String(registry.packages.length) },
+    { label: "Verified", value: String(verified) },
+    { label: "Sources", value: String(sources.length) },
+    { label: "Avg score", value: String(averageQuality) }
+  ];
 }
 
 function packageSourceLabel(pkg: Pick<RegistryPackage, "sourceRepo" | "cloneUrl" | "resolved">): string {
