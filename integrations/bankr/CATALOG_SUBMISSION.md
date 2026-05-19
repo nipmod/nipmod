@@ -7,7 +7,7 @@ This file is the submission packet for adding Nipmod to the Bankr skill catalog.
 Provider path:
 
 ```text
-nipmod/nipmod
+nipmod
 ```
 
 Source folder in this repository:
@@ -31,8 +31,8 @@ https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 ## Catalog PR Steps
 
 1. Fork `https://github.com/BankrBot/skills`.
-2. Create `nipmod/nipmod/`.
-3. Copy this repository's `integrations/bankr/nipmod/` folder into `nipmod/nipmod/`.
+2. Create `nipmod/`.
+3. Copy this repository's `integrations/bankr/nipmod/` folder into `nipmod/`.
 4. Open a PR titled:
 
 ```text
