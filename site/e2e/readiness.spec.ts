@@ -320,6 +320,9 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
   );
   await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
   await expect(page.getByText("The skill follows the Bankr")).toBeVisible();
+  await expect(page.getByText("Tell your agent")).toBeVisible();
+  await expect(page.getByText("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md")).toBeVisible();
+  await expect(page.getByText("Catalog packet")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Free services" })).toBeVisible();
   await expect(page.getByText("Core Nipmod workflows stay free for Bankr agents.")).toBeVisible();
   await expect(page.getByText("Free package search")).toBeVisible();
@@ -329,6 +332,10 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
   const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
   await expect(skill).toBeOK();
   await expect(skill.text()).resolves.toContain("name: nipmod");
+
+  const submission = await request.get("/integrations/bankr/CATALOG_SUBMISSION.md");
+  await expect(submission).toBeOK();
+  await expect(submission.text()).resolves.toContain("Bankr Skill Catalog Submission");
 
   const config = await request.get("/integrations/bankr/bankr.free.json");
   await expect(config).toBeOK();

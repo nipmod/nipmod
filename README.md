@@ -8,6 +8,8 @@ Public links:
 - Website: https://nipmod.com
 - X: https://x.com/Nipmod
 - Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
+- Bankr integration: https://nipmod.com/bankr
+- Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - GitHub mirror: https://github.com/nipmod/nipmod
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
@@ -117,6 +119,22 @@ Scout drafts and `package pr` write local files only. The Gitlawb repo owner can
 - Package candidates: `https://nipmod.com/candidates`
 - Scout API: `https://nipmod.com/scout/candidates`
 - Scout drafts: `https://nipmod.com/scout/drafts`
+- Bankr integration: `https://nipmod.com/bankr`
+- Bankr skill: `https://nipmod.com/integrations/bankr/nipmod/SKILL.md`
+
+## Bankr agents
+
+Tell a Bankr agent:
+
+```text
+Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
+```
+
+The skill lets a Bankr agent discover packages, inspect trust metadata, plan installs before workspace mutation and prepare Gitlawb repo package drafts. For review, forks or catalog submission, use:
+
+```text
+https://github.com/nipmod/nipmod/tree/main/integrations/bankr
+```
 
 ## Operator flow
 

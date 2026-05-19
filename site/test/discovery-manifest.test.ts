@@ -105,7 +105,13 @@ describe("nipmod discovery manifest", () => {
     ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
     expect(Object.keys(manifest.bankr).sort()).toEqual(["app", "coin", "freeServices", "skill"]);
-    expect(Object.keys(manifest.bankr.skill).sort()).toEqual(["catalogStatus", "githubFolder", "publicSkill", "source"]);
+    expect(Object.keys(manifest.bankr.skill).sort()).toEqual([
+      "catalogStatus",
+      "catalogSubmission",
+      "githubFolder",
+      "publicSkill",
+      "source"
+    ]);
     expect(Object.keys(manifest.bankr.freeServices).sort()).toEqual(["map", "services", "status"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",

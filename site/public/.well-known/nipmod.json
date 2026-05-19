@@ -77,6 +77,7 @@
     "app": "https://nipmod.com/bankr",
     "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     "skill": {
+      "catalogSubmission": "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md",
       "catalogStatus": "ready for Bankr skill catalog review",
       "githubFolder": "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod",
       "publicSkill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",

@@ -22,7 +22,9 @@ Trust docs: https://nipmod.com/trust
 Security docs: https://nipmod.com/security
 Bankr integration: https://nipmod.com/bankr
 Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md
+Bankr agent prompt: Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
 Bankr GitHub skill folder: https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
+Bankr catalog submission: https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md
 Bankr free service map: https://nipmod.com/integrations/bankr/bankr.free.json
 Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 

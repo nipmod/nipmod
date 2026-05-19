@@ -6,6 +6,21 @@ It is intentionally split into two pieces:
 
 - `nipmod/` is the Bankr-compatible skill folder.
 - `bankr.free.json` maps free Bankr agent workflows to public Nipmod endpoints and CLI commands.
+- `CATALOG_SUBMISSION.md` is the Bankr skill catalog PR packet.
+
+## Use with a Bankr agent
+
+Tell the agent:
+
+```text
+Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
+```
+
+For GitHub review or catalog installation, point the agent at:
+
+```text
+https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
+```
 
 ## Local validation
 

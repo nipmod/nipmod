@@ -4,7 +4,13 @@
 
 Bankr skills use one `SKILL.md` file with optional sibling `references/` files. The Nipmod folder follows that layout and is ready for a public GitHub mirror or Bankr skill catalog PR.
 
-Target public skill file once the Bankr branch is published:
+Tell a Bankr agent:
+
+```text
+Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
+```
+
+Public skill file:
 
 ```text
 https://nipmod.com/integrations/bankr/nipmod/SKILL.md
@@ -16,10 +22,10 @@ Public GitHub skill folder:
 https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 ```
 
-Target public GitHub skill folder:
+Catalog submission packet:
 
 ```text
-https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
+https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md
 ```
 
 The canonical source remains Gitlawb:

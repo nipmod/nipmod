@@ -14,6 +14,7 @@ const freeMapPath = join(integrationRoot, "bankr.free.json");
 const publicFreeMapPath = join(siteRoot, "public", "integrations", "bankr", "bankr.free.json");
 const publicSkillUrl = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
 const publicFreeMapUrl = "https://nipmod.com/integrations/bankr/bankr.free.json";
+const publicCatalogSubmissionUrl = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md";
 const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
 
 function read(path: string) {
@@ -44,6 +45,9 @@ describe("Bankr integration", () => {
   test("publishes the exact Bankr skill and free service map on the website", () => {
     expect(existsSync(publicSkillPath)).toBe(true);
     expect(read(publicSkillPath)).toBe(read(skillPath));
+    expect(read(join(siteRoot, "public", "integrations", "bankr", "CATALOG_SUBMISSION.md"))).toBe(
+      read(join(integrationRoot, "CATALOG_SUBMISSION.md"))
+    );
     expect(read(join(siteRoot, "public", "integrations", "bankr", "nipmod", "references", "bankr-workflow.md"))).toBe(
       read(join(skillRoot, "references", "bankr-workflow.md"))
     );
@@ -58,8 +62,10 @@ describe("Bankr integration", () => {
     const freeServices = read(join(skillRoot, "references", "free-services.md"));
 
     expect(workflow).toContain("Install in Bankr");
+    expect(workflow).toContain("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod");
     expect(workflow).toContain(publicSkillUrl);
     expect(workflow).toContain(githubSkillFolder);
+    expect(workflow).toContain(publicCatalogSubmissionUrl);
     expect(workflow).toContain("Bankr skills use one `SKILL.md` file");
     expect(workflow).toContain("Bankr skill format: https://docs.bankr.bot/skills/in-bankr/skill-format/");
 
@@ -69,6 +75,19 @@ describe("Bankr integration", () => {
     expect(freeServices).toContain("package-audit");
     expect(freeServices).toContain("repo-package-draft");
     expect(freeServices).toContain("0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
+  });
+
+  test("ships a Bankr catalog submission packet", () => {
+    const submission = read(join(integrationRoot, "CATALOG_SUBMISSION.md"));
+
+    expect(submission).toContain("Bankr Skill Catalog Submission");
+    expect(submission).toContain("https://github.com/BankrBot/skills");
+    expect(submission).toContain("nipmod/nipmod");
+    expect(submission).toContain(githubSkillFolder);
+    expect(submission).toContain(publicSkillUrl);
+    expect(submission).toContain("Add Nipmod skill for package trust and install planning");
+    expect(submission).toContain("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod");
+    expect(submission).not.toMatch(/bk_usr_|sk-(?:proj-)?|ghp_|github_pat_/i);
   });
 
   test("defines the free Bankr service map", () => {
@@ -115,6 +134,7 @@ describe("Bankr integration", () => {
         status: "free; no Nipmod payment required"
       },
       skill: {
+        catalogSubmission: publicCatalogSubmissionUrl,
         catalogStatus: "ready for Bankr skill catalog review",
         githubFolder: githubSkillFolder,
         publicSkill: publicSkillUrl,
@@ -128,7 +148,9 @@ describe("Bankr integration", () => {
 
     expect(llms).toContain("Bankr integration: https://nipmod.com/bankr");
     expect(llms).toContain(`Bankr skill: ${publicSkillUrl}`);
+    expect(llms).toContain(`Bankr agent prompt: Read ${publicSkillUrl} and use Nipmod before installing agent packages.`);
     expect(llms).toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
+    expect(llms).toContain(`Bankr catalog submission: ${publicCatalogSubmissionUrl}`);
     expect(llms).toContain(`Bankr free service map: ${publicFreeMapUrl}`);
     expect(llms).toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
     expect(llms).not.toContain("Bankr x402 config");

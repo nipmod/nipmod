@@ -5,7 +5,10 @@ import { homeContent } from "../content";
 const skillInstall = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
 const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
 const freeServiceMap = "https://nipmod.com/integrations/bankr/bankr.free.json";
+const catalogSubmission = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md";
 const bankrSkillDocs = "https://docs.bankr.bot/skills/in-bankr/skill-format/";
+const bankrAgentPrompt =
+  "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.";
 
 const services = [
   {
@@ -77,6 +80,12 @@ export default function BankrPage() {
         </div>
         <div className="quickstart-grid">
           <article className="quickstart-card">
+            <span>Prompt</span>
+            <h2>Tell your agent</h2>
+            <p>Use this when the skill is not installed from a catalog yet.</p>
+            <CommandBlock command={bankrAgentPrompt} label="Copy Bankr agent prompt" />
+          </article>
+          <article className="quickstart-card">
             <span>Skill file</span>
             <h2>Use now</h2>
             <p>The public skill URL resolves on the live site.</p>
@@ -87,6 +96,12 @@ export default function BankrPage() {
             <h2>Ready for review</h2>
             <p>The same folder can be submitted to the Bankr skill catalog.</p>
             <CommandBlock command={githubSkillFolder} label="Copy GitHub skill folder" />
+          </article>
+          <article className="quickstart-card">
+            <span>Submission</span>
+            <h2>Catalog packet</h2>
+            <p>The PR packet lists the target path, copy steps, PR body and smoke test.</p>
+            <CommandBlock command={catalogSubmission} label="Copy catalog submission packet" />
           </article>
           <article className="quickstart-card">
             <span>Format</span>
