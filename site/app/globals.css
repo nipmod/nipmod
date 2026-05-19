@@ -236,7 +236,10 @@ summary:focus-visible {
   box-shadow: var(--shadow);
   display: grid;
   gap: 3px;
+  max-height: min(70vh, 680px);
   min-width: 164px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px;
   position: absolute;
   right: 0;

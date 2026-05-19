@@ -19,6 +19,14 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://x.com/Nipmod"
   );
+  await expect(page.locator(".brand-socials").getByRole("link", { name: "Open Nipmod Telegram group in a new tab" })).toHaveAttribute(
+    "href",
+    "https://t.me/+05Kux7Iyah9jZjAy"
+  );
+  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod Telegram group in a new tab" })).toHaveAttribute(
+    "href",
+    "https://t.me/+05Kux7Iyah9jZjAy"
+  );
   await expect(page.locator(".brand-socials").getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
     "href",
     "https://github.com/nipmod/nipmod"
@@ -418,6 +426,10 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Open Nipmod Bankr coin in a new tab" })).toHaveAttribute(
     "href",
     "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  );
+  await expect(panel.getByRole("link", { name: "Open Nipmod Telegram group in a new tab" })).toHaveAttribute(
+    "href",
+    "https://t.me/+05Kux7Iyah9jZjAy"
   );
   await expect(panel.getByRole("link", { name: "Source" })).toBeVisible();
 });

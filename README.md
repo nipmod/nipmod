@@ -7,6 +7,7 @@ Public links:
 
 - Website: https://nipmod.com
 - X: https://x.com/Nipmod
+- Telegram: https://t.me/+05Kux7Iyah9jZjAy
 - Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 - Bankr integration: https://nipmod.com/bankr
 - Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md

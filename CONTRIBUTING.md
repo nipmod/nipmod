@@ -34,6 +34,10 @@ node tools/supply-chain-check.mjs
 - Do not commit `.env` files, private keys, tokens, local identity files or generated local service state.
 - Do not claim third party endorsement unless the third party has explicitly approved it.
 
+## Community
+
+Use https://t.me/+05Kux7Iyah9jZjAy for public community discussion. Keep active vulnerability details out of public chats and use `SECURITY.md` for security reports.
+
 ## Security reports
 
 Use `SECURITY.md`. Do not open public issues for active vulnerabilities.

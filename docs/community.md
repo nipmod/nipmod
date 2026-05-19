@@ -38,6 +38,8 @@ Website: https://nipmod.com
 
 X: https://x.com/Nipmod
 
+Telegram: https://t.me/+05Kux7Iyah9jZjAy
+
 Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 
 First user evidence:

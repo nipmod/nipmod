@@ -46,6 +46,16 @@ export default async function Home({ searchParams }: HomeProps) {
             </a>
             <a
               className="button button-ghost button-with-icon"
+              href={homeContent.links.telegram}
+              aria-label="Open Nipmod Telegram group in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <img alt="" height="18" src="/telegram-logo.svg" width="18" />
+              <span>Telegram</span>
+            </a>
+            <a
+              className="button button-ghost button-with-icon"
               href={homeContent.links.github}
               aria-label="Open Nipmod GitHub repository in a new tab"
               rel="noreferrer"

@@ -38,6 +38,16 @@ export function SiteHeader() {
           </a>
           <a
             className="brand-icon-button"
+            href={homeContent.links.telegram}
+            aria-label="Open Nipmod Telegram group in a new tab"
+            rel="noreferrer"
+            target="_blank"
+            title="Telegram"
+          >
+            <img alt="" height="18" src="/telegram-logo.svg" width="18" />
+          </a>
+          <a
+            className="brand-icon-button"
             href={homeContent.links.github}
             aria-label="Open Nipmod GitHub repository in a new tab"
             rel="noreferrer"
@@ -97,6 +107,14 @@ export function SiteHeader() {
             </a>
             <a href={homeContent.links.x} aria-label="Open Nipmod on X in a new tab" rel="noreferrer" target="_blank">
               X
+            </a>
+            <a
+              href={homeContent.links.telegram}
+              aria-label="Open Nipmod Telegram group in a new tab"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Telegram
             </a>
             <a
               href={homeContent.links.github}

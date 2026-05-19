@@ -78,6 +78,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 ## Review links
 
 - Website: https://nipmod.com
+- Telegram: https://t.me/+05Kux7Iyah9jZjAy
 - Launch path: https://nipmod.com/launch
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Registry: https://nipmod.com/registry/packages.json

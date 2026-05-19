@@ -30,6 +30,10 @@ describe("home content", () => {
     expect(homeContent.links.x).toBe("https://x.com/Nipmod");
   });
 
+  test("links to the public Telegram group", () => {
+    expect(homeContent.links.telegram).toBe("https://t.me/+05Kux7Iyah9jZjAy");
+  });
+
   test("links to the Bankr coin", () => {
     expect(homeContent.links.bankrCoin).toBe("https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
   });

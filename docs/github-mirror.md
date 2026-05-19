@@ -27,4 +27,10 @@ GitHub mirror:
 https://github.com/nipmod/nipmod
 ```
 
+Community:
+
+```text
+https://t.me/+05Kux7Iyah9jZjAy
+```
+
 Do not treat GitHub as the authority for package ownership, DID identity, signed Gitlawb pushes or Nipmod registry provenance.
