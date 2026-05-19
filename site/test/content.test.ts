@@ -87,7 +87,7 @@ describe("home content", () => {
     expect(homeContent.platformRoadmap.items.map((item) => `${item.name}:${item.status}`)).toEqual([
       "Gitlawb:Live",
       "Bankr:PR open",
-      "Next:Planned"
+      "Agent hosts:MCP ready"
     ]);
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");

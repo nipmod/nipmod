@@ -116,6 +116,7 @@ Scout drafts and `package pr` write local files only. The Gitlawb repo owner can
 - Discovery manifest: `https://nipmod.com/.well-known/nipmod.json`
 - Agent runbook: `https://nipmod.com/quickstart#agents`
 - MCP docs: `https://nipmod.com/mcp`
+- MCP hosts: Codex, Claude Code and OpenCode through `nipmod mcp serve`
 - Package candidates: `https://nipmod.com/candidates`
 - Scout API: `https://nipmod.com/scout/candidates`
 - Scout drafts: `https://nipmod.com/scout/drafts`

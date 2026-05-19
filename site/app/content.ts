@@ -59,7 +59,7 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Gitlawb is live. Bankr is under review. New platforms get added only when the package path can stay verifiable and safe.",
+      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local read only server.",
     note: "Statuses describe Nipmod integration work, not partner approval.",
     items: [
       {
@@ -79,12 +79,12 @@ export const homeContent = {
         cta: "View Bankr path"
       },
       {
-        name: "Next",
-        status: "Planned",
-        label: "agent hosts",
-        text: "The next integrations use the same path: read instructions, discover packages, inspect trust and plan before install.",
-        href: "/agents",
-        cta: "View agent setup"
+        name: "Agent hosts",
+        status: "MCP ready",
+        label: "Codex, Claude Code, OpenCode",
+        text: "Codex, Claude Code and OpenCode can read Nipmod through MCP for package discovery, trust inspection and install planning.",
+        href: "/mcp",
+        cta: "View MCP setup"
       }
     ]
   },

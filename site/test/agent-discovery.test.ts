@@ -14,6 +14,7 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain(
       "Generic agent prompt: Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Use Nipmod for package discovery, trust inspection and install planning before mutating the workspace."
     );
+    expect(llmsText).toContain("Agent host MCP setup: https://nipmod.com/mcp");
     expect(llmsText).toContain("Claim conversion page: https://nipmod.com/candidates");
     expect(llmsText).toContain("MCP docs: https://nipmod.com/mcp");
     expect(llmsText).toContain("Audit docs: https://nipmod.com/audit");

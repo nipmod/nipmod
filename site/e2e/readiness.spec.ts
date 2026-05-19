@@ -95,11 +95,12 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByText("Live", { exact: true })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
   await expect(platformRoadmap.getByText("PR open", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByRole("heading", { name: "Next" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Planned", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Agent hosts" })).toBeVisible();
+  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode can read Nipmod through MCP")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
-  await expect(platformRoadmap.getByRole("link", { name: "View agent setup" })).toHaveAttribute("href", "/agents");
+  await expect(platformRoadmap.getByRole("link", { name: "View MCP setup" })).toHaveAttribute("href", "/mcp");
 
   await expect(page.getByRole("heading", { name: "Found your repo? Claim the package." })).toBeVisible();
   await expect(page.getByText("Scout finds public Gitlawb repos that can become packages.")).toBeVisible();
