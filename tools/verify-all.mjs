@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { createHash } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 import { createServer as createNetServer } from "node:net";
 import { readFileSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
-import { readAdvisoryPublicKeyInfo, verifyAdvisorySignature } from "./advisory-signing.mjs";
+import { createAdvisoryPublicKeyInfo, readAdvisoryPublicKeyInfo, verifyAdvisorySignature } from "./advisory-signing.mjs";
 import { writeAuditSmokeLockfile } from "./live-audit-smoke.mjs";
 import { assertUnauthenticatedReceivePackBlocked } from "./receive-pack-abuse-smoke.mjs";
 import { readReleasePublicKeyInfo, verifyReleaseSignature } from "./release-signing.mjs";
@@ -183,7 +183,10 @@ async function verifyProduction() {
   );
   await assertText(
     "https://nipmod.com",
-    (text) => text.includes("Packages agents can verify") && text.includes("https://x.com/Nipmod"),
+    (text) =>
+      text.includes("Nipmod makes agent code installable") &&
+      text.includes("https://x.com/Nipmod") &&
+      text.includes("https://github.com/nipmod/nipmod"),
     "homepage product surface missing"
   );
   await assertText(
@@ -214,10 +217,52 @@ async function verifyProduction() {
   await verifyLiveAdvisorySignature();
   await smokeLiveInstalledAudit();
   await run(process.execPath, ["tools/public-proof-loop.mjs", "--registry", "https://nipmod.com/registry/packages.json", "--quiet"]);
-  await run(process.execPath, ["tools/advisory-drill.mjs", "--registry", "https://nipmod.com/registry/packages.json", "--quiet"]);
+  await runAdvisoryDrillWithEphemeralKey();
+}
+
+async function runAdvisoryDrillWithEphemeralKey() {
+  const dir = await mkdtemp(join(tmpdir(), "nipmod-prod-advisory-key-"));
+  try {
+    const privateKeyPath = join(dir, "advisory-private.pem");
+    const publicKeyPath = join(dir, "advisory-public.json");
+    const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+    await writeFile(privateKeyPath, privateKey.export({ format: "pem", type: "pkcs8" }), { mode: 0o600 });
+    await writeFile(publicKeyPath, `${JSON.stringify(createAdvisoryPublicKeyInfo(publicKey), null, 2)}\n`);
+    await run(process.execPath, [
+      "tools/advisory-drill.mjs",
+      "--registry",
+      "https://nipmod.com/registry/packages.json",
+      "--private-key",
+      privateKeyPath,
+      "--public-key",
+      publicKeyPath,
+      "--quiet"
+    ]);
+  } finally {
+    await rm(dir, { force: true, recursive: true });
+  }
 }
 
 async function verifyAlertProbe() {
+  if (process.env.NIPMOD_MONITOR_PROBE_URL) {
+    const headers = {};
+    if (process.env.NIPMOD_MONITOR_PROBE_BEARER_TOKEN) {
+      headers.authorization = `Bearer ${process.env.NIPMOD_MONITOR_PROBE_BEARER_TOKEN}`;
+    }
+    const response = await fetch(process.env.NIPMOD_MONITOR_PROBE_URL, {
+      headers,
+      redirect: "error"
+    });
+    if (!response.ok) {
+      throw new Error(`monitor probe failed: ${response.status}`);
+    }
+    const payload = await response.json();
+    if (payload?.ok !== true || payload?.mode !== "probe" || payload?.alertSent !== true) {
+      throw new Error("monitor probe did not prove alert delivery");
+    }
+    return;
+  }
+
   if (hasLocalAlertDestination()) {
     await run(process.execPath, ["tools/prod-alert-runner.mjs", "--probe"], { timeoutMs: 60_000 });
     return;
