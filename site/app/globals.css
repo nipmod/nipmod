@@ -184,6 +184,12 @@ summary:focus-visible {
   border-radius: 5px;
 }
 
+.brand-icon-button .brand-gitlawb-icon {
+  border-radius: 7px;
+  height: 24px;
+  width: 24px;
+}
+
 .nav-actions {
   align-items: center;
   display: flex;
@@ -2082,6 +2088,11 @@ h1 {
   .brand-icon-button svg {
     height: 15px;
     width: 15px;
+  }
+
+  .brand-icon-button .brand-gitlawb-icon {
+    height: 21px;
+    width: 21px;
   }
 
   .nav-actions {

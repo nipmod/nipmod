@@ -19,7 +19,7 @@ export function SiteHeader() {
             target="_blank"
             title="Gitlawb"
           >
-            <img alt="" height="18" src="/gitlawb-logo.png" width="18" />
+            <img alt="" className="brand-gitlawb-icon" height="24" src="/gitlawb-logo.png" width="24" />
           </a>
           <a
             className="brand-icon-button"
