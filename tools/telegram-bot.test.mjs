@@ -3,6 +3,7 @@ import { describe, test } from "node:test";
 import {
   createTelegramBotReply,
   isChatAllowed,
+  isRelevantGroupQuestion,
   parseTelegramCommand,
   searchRegistryPackages,
   shouldReplyToPlainText
@@ -40,6 +41,15 @@ describe("telegram bot command parsing", () => {
     assert.equal(shouldReplyToPlainText("hello everyone", "nipmodbot"), false);
     assert.equal(shouldReplyToPlainText("@nipmodbot how do I install?", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("nipmod install help", "nipmodbot"), true);
+  });
+
+  test("answers relevant group questions without requiring a mention", () => {
+    assert.equal(isRelevantGroupQuestion("how do I install this?"), true);
+    assert.equal(isRelevantGroupQuestion("does this work with Codex?"), true);
+    assert.equal(isRelevantGroupQuestion("where are the GitHub links?"), true);
+    assert.equal(isRelevantGroupQuestion("what time is it?"), false);
+    assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot", { answerGroupQuestions: false }), false);
   });
 });
 
@@ -145,6 +155,34 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /Bankr has a Nipmod page and skill/);
     assert.match(reply.text, /https:\/\/nipmod\.com\/bankr/);
     assert.match(reply.text, /https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
+  });
+
+  test("answers a plain install question without a mention", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("how do I install this?"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Install Nipmod/);
+    assert.match(reply.text, /curl -fsSLO https:\/\/nipmod\.com\/install\.sh/);
+  });
+
+  test("does not answer off-topic questions without a mention", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("what time is it?"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.equal(reply.ignored, true);
+    assert.equal(reply.reason, "plain-text-not-addressed");
   });
 
   test("answers API key questions as security questions", async () => {

@@ -10,6 +10,7 @@ const DEFAULT_STATE_PATH = join(root, ".nipmod", "telegram-bot-state.json");
 const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_BOT_USERNAME = "nipmodbot";
 const DEFAULT_POLL_TIMEOUT_SECONDS = 45;
+const DEFAULT_ANSWER_GROUP_QUESTIONS = true;
 const OFFICIAL_LINKS = [
   ["Website", "https://nipmod.com"],
   ["Packages", "https://nipmod.com/packages"],
@@ -48,6 +49,54 @@ const FACTS = {
   safety:
     "Nipmod never needs private keys, seed phrases or wallet secrets in Telegram. Package text is treated as untrusted data."
 };
+
+const QUESTION_MARKERS = [
+  "?",
+  "can ",
+  "does ",
+  "how ",
+  "is ",
+  "what ",
+  "where ",
+  "why ",
+  "wie ",
+  "ist ",
+  "kann ",
+  "was ",
+  "wo ",
+  "warum ",
+  "wieso "
+];
+
+const NIPMOD_CONTEXT_TERMS = [
+  "agent",
+  "agents",
+  "archive",
+  "archiv",
+  "bankr",
+  "bankrcoin",
+  "claude",
+  "codex",
+  "coin",
+  "github",
+  "gitlawb",
+  "install",
+  "link",
+  "links",
+  "mcp",
+  "mirror",
+  "nipmod",
+  "package",
+  "packages",
+  "paket",
+  "registry",
+  "repo",
+  "security",
+  "setup",
+  "source",
+  "token",
+  "x402"
+];
 
 export function isLikelyTelegramBotToken(value) {
   return /^[0-9]+:[A-Za-z0-9_-]{20,}$/.test(String(value ?? ""));
@@ -115,10 +164,22 @@ export function isChatAllowed(chat, { allowedChatId = null, groupOnly = true } =
   return true;
 }
 
-export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME) {
+export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { answerGroupQuestions = true } = {}) {
   const normalized = String(text ?? "").trim().toLowerCase();
   const botMention = `@${normalizeBotUsername(username)}`;
-  return normalized.includes(botMention) || normalized.startsWith("nipmod ");
+  return (
+    normalized.includes(botMention) ||
+    normalized.startsWith("nipmod ") ||
+    (answerGroupQuestions && isRelevantGroupQuestion(normalized))
+  );
+}
+
+export function isRelevantGroupQuestion(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return QUESTION_MARKERS.some((marker) => normalized.includes(marker)) && mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
 }
 
 export async function createTelegramBotReply(update, options = {}) {
@@ -133,6 +194,7 @@ export async function createTelegramBotReply(update, options = {}) {
   const groupOnly = options.groupOnly !== false;
   const bindFirstGroup = options.bindFirstGroup !== false;
   const allowedChatId = options.allowedChatId ?? null;
+  const answerGroupQuestions = options.answerGroupQuestions ?? DEFAULT_ANSWER_GROUP_QUESTIONS;
 
   if (!allowedChatId && bindFirstGroup) {
     if (!isGroupChat(message.chat) || command?.name !== "start") {
@@ -158,7 +220,7 @@ export async function createTelegramBotReply(update, options = {}) {
     };
   }
 
-  if (!shouldReplyToPlainText(text, username)) {
+  if (!shouldReplyToPlainText(text, username, { answerGroupQuestions })) {
     return { ignored: true, reason: "plain-text-not-addressed" };
   }
 
@@ -358,7 +420,8 @@ export async function runTelegramBot({
   signal = undefined,
   statePath = DEFAULT_STATE_PATH,
   token,
-  username = DEFAULT_BOT_USERNAME
+  username = DEFAULT_BOT_USERNAME,
+  answerGroupQuestions = DEFAULT_ANSWER_GROUP_QUESTIONS
 } = {}) {
   if (!isLikelyTelegramBotToken(token)) {
     throw new Error("TELEGRAM_BOT_TOKEN is missing or invalid");
@@ -376,7 +439,7 @@ export async function runTelegramBot({
   log(
     `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; chat=${
       activeState.allowedChatId ?? "waiting-for-/start"
-    }`
+    }; answerGroupQuestions=${answerGroupQuestions}`
   );
 
   while (!signal?.aborted) {
@@ -392,6 +455,7 @@ export async function runTelegramBot({
           bindFirstGroup,
           fetchFn,
           groupOnly,
+          answerGroupQuestions,
           now: new Date().toISOString(),
           packages: null,
           registryUrl,
@@ -673,7 +737,8 @@ async function main() {
         "  NIPMOD_TELEGRAM_BOT_USERNAME=nipmodbot",
         "  NIPMOD_TELEGRAM_ALLOWED_CHAT_ID=<group chat id>",
         "  NIPMOD_TELEGRAM_GROUP_ONLY=1",
-        "  NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1"
+        "  NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1",
+        "  NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1"
       ].join("\n") + "\n"
     );
     return;
@@ -686,6 +751,7 @@ async function main() {
   const token = env.TELEGRAM_BOT_TOKEN || env.NIPMOD_TELEGRAM_BOT_TOKEN;
   await runTelegramBot({
     allowedChatId: env.NIPMOD_TELEGRAM_ALLOWED_CHAT_ID || null,
+    answerGroupQuestions: env.NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS !== "0",
     bindFirstGroup: env.NIPMOD_TELEGRAM_BIND_FIRST_GROUP !== "0",
     groupOnly: env.NIPMOD_TELEGRAM_GROUP_ONLY !== "0",
     registryUrl: env.NIPMOD_REGISTRY_URL || DEFAULT_REGISTRY_URL,
