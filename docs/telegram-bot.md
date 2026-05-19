@@ -35,14 +35,24 @@ After that the bot ignores private chats and other groups unless `NIPMOD_TELEGRA
 
 ```text
 /help
+/links
 /search <term>
 /packages
 /install
 /codex
 /claude
+/github
+/gitlawb
+/bankr
+/mcp
+/security
 /submit
 /status
 ```
 
 The bot also answers plain text only when the message directly mentions `@nipmodbot` or starts with `nipmod`.
 This keeps the community chat quiet while still making the archive easy to query.
+
+## Voice
+
+The bot answers short and factual. It avoids filler language, avoids dash separated list copy and points to official links instead of guessing.

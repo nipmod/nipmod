@@ -114,6 +114,93 @@ describe("telegram bot package search", () => {
   });
 });
 
+describe("telegram bot knowledge base", () => {
+  test("lists all important public links without dash list separators", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("/links"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Website https:\/\/nipmod\.com/);
+    assert.match(reply.text, /GitHub https:\/\/github\.com\/nipmod\/nipmod/);
+    assert.match(reply.text, /Gitlawb https:\/\/gitlawb\.com\/node\/repos\/z6Mkwbud\/nipmod/);
+    assert.match(reply.text, /Install script https:\/\/nipmod\.com\/install\.sh/);
+    assert.match(reply.text, /Demo https:\/\/nipmod\.com\/demo/);
+    assert.match(reply.text, /Bankr coin https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
+    assert.doesNotMatch(reply.text, / - /);
+  });
+
+  test("answers Bankr questions directly", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot bankr"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Bankr has a Nipmod page and skill/);
+    assert.match(reply.text, /https:\/\/nipmod\.com\/bankr/);
+    assert.match(reply.text, /https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
+  });
+
+  test("answers API key questions as security questions", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot where do I put api keys?"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Nipmod never needs private keys/);
+    assert.doesNotMatch(reply.text, /Bankr has a Nipmod page and skill/);
+  });
+
+  test("returns a clean registry failure answer", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("/search gitlawb"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      fetchFn: async () => new Response("down", { status: 503 }),
+      groupOnly: true,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Search unavailable/);
+    assert.match(reply.text, /https:\/\/nipmod\.com\/status/);
+  });
+
+  test("uses concise fallback instead of fake certainty", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot random question"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /I cannot answer that cleanly/);
+    assert.doesNotMatch(reply.text, /Unknown command/);
+  });
+
+  test("help text has no dash list separators", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("/help"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Nipmod commands/);
+    assert.match(reply.text, /\/links shows official links/);
+    assert.doesNotMatch(reply.text, / - /);
+  });
+});
+
 function groupUpdate(text, id = "-100123") {
   return {
     message: {

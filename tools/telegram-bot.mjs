@@ -10,6 +10,44 @@ const DEFAULT_STATE_PATH = join(root, ".nipmod", "telegram-bot-state.json");
 const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_BOT_USERNAME = "nipmodbot";
 const DEFAULT_POLL_TIMEOUT_SECONDS = 45;
+const OFFICIAL_LINKS = [
+  ["Website", "https://nipmod.com"],
+  ["Packages", "https://nipmod.com/packages"],
+  ["Registry", "https://nipmod.com/registry/packages.json"],
+  ["GitHub", "https://github.com/nipmod/nipmod"],
+  ["Gitlawb", "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"],
+  ["Telegram", "https://t.me/+05Kux7Iyah9jZjAy"],
+  ["X", "https://x.com/Nipmod"],
+  ["Install script", "https://nipmod.com/install.sh"],
+  ["Bankr coin", "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"],
+  ["Bankr integration", "https://nipmod.com/bankr"],
+  ["Bankr skill", "https://nipmod.com/integrations/bankr/nipmod/SKILL.md"],
+  ["Agent discovery", "https://nipmod.com/.well-known/nipmod.json"],
+  ["Agent instructions", "https://nipmod.com/llms.txt"],
+  ["Quickstart", "https://nipmod.com/quickstart"],
+  ["Demo", "https://nipmod.com/demo"],
+  ["MCP", "https://nipmod.com/mcp"],
+  ["Status", "https://nipmod.com/status"],
+  ["System readiness", "https://nipmod.com/compatibility/system-readiness.json"],
+  ["Platform readiness", "https://nipmod.com/compatibility/platform-readiness.json"],
+  ["Scout candidates", "https://nipmod.com/scout/candidates"],
+  ["Scout drafts", "https://nipmod.com/scout/drafts"]
+];
+
+const FACTS = {
+  archive:
+    "Nipmod is the shared package archive for agents. Packages are verified, signed, digest pinned and sourced from Gitlawb.",
+  bankr:
+    "Bankr has a Nipmod page and skill. Bankr agents can read the skill before installing agent packages.",
+  github:
+    "GitHub is the public mirror for review, CI and developer access. Gitlawb stays the canonical source for signed provenance.",
+  gitlawb:
+    "Gitlawb is the canonical source network for Nipmod packages. Nipmod indexes, verifies and installs from that source layer.",
+  mcp:
+    "Nipmod exposes MCP tools for agent search, view, inspect, install planning, controlled install, audit, SBOM and explain.",
+  safety:
+    "Nipmod never needs private keys, seed phrases or wallet secrets in Telegram. Package text is treated as untrusted data."
+};
 
 export function isLikelyTelegramBotToken(value) {
   return /^[0-9]+:[A-Za-z0-9_-]{20,}$/.test(String(value ?? ""));
@@ -135,22 +173,34 @@ export async function renderCommandReply(command, options = {}) {
       return startText({ newlyBound: false });
     case "help":
       return helpText();
+    case "links":
+      return linksText();
     case "install":
       return installText();
     case "codex":
       return codexText();
     case "claude":
       return claudeText();
+    case "github":
+      return githubText();
+    case "gitlawb":
+      return gitlawbText();
+    case "bankr":
+      return bankrText();
+    case "mcp":
+      return mcpText();
+    case "security":
+      return securityText();
     case "packages":
-      return packagesText(await getRegistryPackages(options));
+      return packagesText(await getRegistryPackagesForReply(options));
     case "search":
-      return searchText(command.args, await getRegistryPackages(options));
+      return searchText(command.args, await getRegistryPackagesForReply(options));
     case "submit":
       return submitText();
     case "status":
       return statusText();
     default:
-      return `Unknown command: /${command.name}\n\n${helpText()}`;
+      return conciseFallbackText();
   }
 }
 
@@ -160,19 +210,40 @@ export async function renderPlainTextReply(text, options = {}) {
     .trim();
   const lower = cleaned.toLowerCase();
 
-  if (lower.includes("codex")) {
+  if (mentionsAny(lower, ["link", "url", "links", "official", "offiziell"])) {
+    return linksText();
+  }
+  if (mentionsAny(lower, ["github", "mirror"])) {
+    return githubText();
+  }
+  if (mentionsAny(lower, ["gitlawb", "canonical", "source", "quelle"])) {
+    return gitlawbText();
+  }
+  if (mentionsAny(lower, ["safe", "safety", "security", "secret", "key", "sicher"])) {
+    return securityText();
+  }
+  if (mentionsAny(lower, ["bankr", "bankrcoin", "coin", "investor", "x402"])) {
+    return bankrText();
+  }
+  if (mentionsAny(lower, ["mcp", "tool"])) {
+    return mcpText();
+  }
+  if (mentionsAny(lower, ["codex"])) {
     return codexText();
   }
-  if (lower.includes("claude")) {
+  if (mentionsAny(lower, ["claude"])) {
     return claudeText();
   }
-  if (lower.includes("install") || lower.includes("setup")) {
+  if (mentionsAny(lower, ["install", "setup", "einrichten"])) {
     return installText();
   }
-  if (lower.includes("package") || lower.includes("archive") || lower.includes("registry")) {
-    return packagesText(await getRegistryPackages(options));
+  if (mentionsAny(lower, ["package", "packages", "archive", "archiv", "registry", "paket"])) {
+    return packagesText(await getRegistryPackagesForReply(options));
   }
-  return helpText();
+  if (mentionsAny(lower, ["was ist", "what is", "nipmod"])) {
+    return aboutText();
+  }
+  return conciseFallbackText();
 }
 
 export async function getRegistryPackages({ packages = null, registryUrl = DEFAULT_REGISTRY_URL, fetchFn = fetch } = {}) {
@@ -189,6 +260,14 @@ export async function getRegistryPackages({ packages = null, registryUrl = DEFAU
   }
   const body = await response.json();
   return Array.isArray(body.packages) ? body.packages : [];
+}
+
+async function getRegistryPackagesForReply(options) {
+  try {
+    return await getRegistryPackages(options);
+  } catch {
+    return null;
+  }
 }
 
 export function searchRegistryPackages(query, packages, limit = 5) {
@@ -343,108 +422,197 @@ export async function runTelegramBot({
 
 function startText({ newlyBound }) {
   const prefix = newlyBound
-    ? "Nipmod Bot is now bound to this group. I will ignore private chats and other groups."
-    : "Nipmod Bot is active in this group.";
-  return `${prefix}\n\nUse /help, /search <term>, /install, /codex, /claude, /packages, /submit or /status.`;
+    ? "Nipmod is bound to this group. Private chats and other groups are ignored."
+    : "Nipmod is active in this group.";
+  return `${prefix}\n\n/help shows commands. /links shows official links.`;
 }
 
 function helpText() {
   return [
-    "Nipmod Bot commands:",
-    "/search <term> - find packages in the shared archive",
-    "/packages - show the live archive link and package count",
-    "/install - install Nipmod locally",
-    "/codex - Codex setup",
-    "/claude - Claude Code setup",
-    "/submit - prepare a package from a Gitlawb repo",
-    "/status - official links and health pages"
+    "Nipmod commands",
+    "/search <term> finds packages",
+    "/packages shows archive and count",
+    "/links shows official links",
+    "/install shows install",
+    "/codex shows Codex setup",
+    "/claude shows Claude Code setup",
+    "/bankr shows Bankr links",
+    "/github shows GitHub mirror",
+    "/gitlawb shows source network",
+    "/mcp shows agent tools",
+    "/security shows safety rules",
+    "/submit shows package flow",
+    "/status shows live checks"
   ].join("\n");
 }
 
 function installText() {
   return [
-    "Install Nipmod:",
+    "Install Nipmod",
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "nipmod setup agents",
     "",
-    "Then tell your agent:",
+    "Then tell the agent",
     "Read https://nipmod.com/llms.txt and use Nipmod for package search, inspection and controlled install."
   ].join("\n");
 }
 
 function codexText() {
   return [
-    "Codex setup:",
+    "Codex Setup",
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "nipmod setup codex",
     "",
-    "Then tell Codex:",
+    "Then tell Codex",
     "Read https://nipmod.com/llms.txt and use Nipmod before installing agent packages."
   ].join("\n");
 }
 
 function claudeText() {
   return [
-    "Claude Code setup:",
+    "Claude Code Setup",
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "nipmod setup claude",
     "",
-    "Then tell Claude Code:",
+    "Then tell Claude Code",
     "Read https://nipmod.com/llms.txt and use Nipmod before installing agent packages."
   ].join("\n");
 }
 
 function packagesText(packages) {
+  if (!Array.isArray(packages)) {
+    return [
+      "Archive status",
+      "The bot cannot reach the registry right now.",
+      "Registry https://nipmod.com/registry/packages.json",
+      "Status https://nipmod.com/status"
+    ].join("\n");
+  }
   return [
-    `Live archive: ${packages.length} verified packages`,
-    "Browse: https://nipmod.com/packages",
-    "Registry JSON: https://nipmod.com/registry/packages.json",
+    `Live archive ${packages.length} verified packages`,
+    FACTS.archive,
+    "Packages https://nipmod.com/packages",
+    "Registry https://nipmod.com/registry/packages.json",
     "",
-    "Use /search <term> to find one."
+    "Search with /search <term>"
   ].join("\n");
 }
 
 function searchText(query, packages) {
+  if (!Array.isArray(packages)) {
+    return [
+      "Search unavailable",
+      "The bot cannot reach the registry right now.",
+      "Registry https://nipmod.com/registry/packages.json",
+      "Status https://nipmod.com/status"
+    ].join("\n");
+  }
   const results = searchRegistryPackages(query, packages, 5);
   if (!String(query ?? "").trim()) {
-    return "Use: /search <term>\nExample: /search gitlawb";
+    return "Format\n/search <term>\n\nExample\n/search gitlawb";
   }
   if (results.length === 0) {
-    return `No package found for "${query}".\nTry /packages or browse https://nipmod.com/packages`;
+    return `No match for "${query}".\n/packages shows the archive.\nhttps://nipmod.com/packages`;
   }
-  const lines = [`Top matches for "${query}":`];
+  const lines = [`Matches for "${query}"`];
   for (const pkg of results) {
     lines.push("");
     lines.push(`${pkg.name}@${pkg.version}`);
     if (pkg.description) {
       lines.push(String(pkg.description));
     }
-    lines.push(`Inspect: nipmod inspect ${pkg.canonical}@${pkg.version}`);
+    lines.push(`Inspect\nnipmod inspect ${pkg.canonical}@${pkg.version}`);
   }
   return lines.join("\n");
 }
 
 function submitText() {
   return [
-    "To prepare a Nipmod package:",
-    "1. Put the repo on Gitlawb.",
-    "2. Run: nipmod package doctor gitlawb://did:key:.../repo --json",
-    "3. Run: nipmod package pr gitlawb://did:key:.../repo --dir repo-pr --json",
-    "4. Review locally, then publish through the owner flow.",
+    "Package Flow",
+    "1. Put the repo on Gitlawb",
+    "2. Check locally",
+    "nipmod package doctor gitlawb://did:key:.../repo --json",
+    "3. Build the package patch",
+    "nipmod package pr gitlawb://did:key:.../repo --dir repo-pr --json",
+    "4. Review locally, then publish through the owner flow",
     "",
-    "Never paste private keys, seed phrases or API keys into Telegram."
+    "Never post private keys, seed phrases or API keys in Telegram."
   ].join("\n");
 }
 
 function statusText() {
   return [
-    "Official Nipmod links:",
-    "Website: https://nipmod.com",
-    "GitHub: https://github.com/nipmod/nipmod",
-    "Gitlawb: https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
-    "Telegram: https://t.me/+05Kux7Iyah9jZjAy",
-    "Status: https://nipmod.com/status",
-    "System readiness: https://nipmod.com/compatibility/system-readiness.json"
+    "Live Status",
+    "Status https://nipmod.com/status",
+    "System readiness https://nipmod.com/compatibility/system-readiness.json",
+    "Platform readiness https://nipmod.com/compatibility/platform-readiness.json",
+    "Registry https://nipmod.com/registry/packages.json"
+  ].join("\n");
+}
+
+function linksText() {
+  return ["Official Nipmod links", ...OFFICIAL_LINKS.map(([label, url]) => `${label} ${url}`)].join("\n");
+}
+
+function githubText() {
+  return [
+    "GitHub",
+    FACTS.github,
+    "Repo https://github.com/nipmod/nipmod"
+  ].join("\n");
+}
+
+function gitlawbText() {
+  return [
+    "Gitlawb",
+    FACTS.gitlawb,
+    "Source https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
+  ].join("\n");
+}
+
+function bankrText() {
+  return [
+    "Bankr",
+    FACTS.bankr,
+    "Integration https://nipmod.com/bankr",
+    "Skill https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+    "Coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  ].join("\n");
+}
+
+function mcpText() {
+  return [
+    "MCP",
+    FACTS.mcp,
+    "Docs https://nipmod.com/mcp",
+    "Agent discovery https://nipmod.com/.well-known/nipmod.json",
+    "Agent instructions https://nipmod.com/llms.txt"
+  ].join("\n");
+}
+
+function securityText() {
+  return [
+    "Security",
+    FACTS.safety,
+    "Security policy https://github.com/nipmod/nipmod/blob/main/SECURITY.md",
+    "Status https://nipmod.com/status"
+  ].join("\n");
+}
+
+function aboutText() {
+  return [
+    "Nipmod",
+    FACTS.archive,
+    FACTS.gitlawb,
+    "Start https://nipmod.com"
+  ].join("\n");
+}
+
+function conciseFallbackText() {
+  return [
+    "I cannot answer that cleanly.",
+    "/help shows commands.",
+    "/links shows official links."
   ].join("\n");
 }
 
@@ -468,6 +636,10 @@ function packageSearchScore(pkg, terms) {
     }
   }
   return score;
+}
+
+function mentionsAny(text, terms) {
+  return terms.some((term) => text.includes(term));
 }
 
 function unquoteEnvValue(value) {
