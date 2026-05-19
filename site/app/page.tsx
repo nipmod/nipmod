@@ -159,6 +159,30 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
+      <section className="platform-section" id="platforms" aria-labelledby="platforms-title">
+        <div className="section-head">
+          <p className="eyebrow">Platforms</p>
+          <h2 id="platforms-title">{homeContent.platformRoadmap.headline}</h2>
+          <p>{homeContent.platformRoadmap.lead}</p>
+        </div>
+        <div className="platform-grid" aria-label="Nipmod platform roadmap">
+          {homeContent.platformRoadmap.items.map((item) => (
+            <article className="platform-card" key={item.name}>
+              <div className="platform-top">
+                <div>
+                  <p className="platform-label">{item.label}</p>
+                  <h3>{item.name}</h3>
+                </div>
+                <span className={`platform-status ${platformStatusClass(item.status)}`}>{item.status}</span>
+              </div>
+              <p>{item.text}</p>
+              <a href={item.href}>{item.cta}</a>
+            </article>
+          ))}
+        </div>
+        <p className="platform-note">{homeContent.platformRoadmap.note}</p>
+      </section>
+
       <section className="claim-section" id="claim" aria-labelledby="claim-title">
         <div className="section-head">
           <p className="eyebrow">Claim</p>
@@ -282,6 +306,18 @@ export default async function Home({ searchParams }: HomeProps) {
       </section>
     </main>
   );
+}
+
+function platformStatusClass(status: string): string {
+  if (status === "Live") {
+    return "platform-status-live";
+  }
+
+  if (status === "PR open") {
+    return "platform-status-review";
+  }
+
+  return "platform-status-planned";
 }
 
 function PackageCard({ pkg }: { pkg: RegistryPackage }) {

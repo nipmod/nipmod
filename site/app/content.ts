@@ -56,6 +56,38 @@ export const homeContent = {
       "the same model can cover more agent code platforms over time"
     ]
   },
+  platformRoadmap: {
+    headline: "Platform status",
+    lead:
+      "Gitlawb is live. Bankr is under review. New platforms get added only when the package path can stay verifiable and safe.",
+    note: "Statuses describe Nipmod integration work, not partner approval.",
+    items: [
+      {
+        name: "Gitlawb",
+        status: "Live",
+        label: "source network",
+        text: "Nipmod source, package drafts and DID ownership checks already run on Gitlawb repos.",
+        href: "/candidates",
+        cta: "View candidates"
+      },
+      {
+        name: "Bankr",
+        status: "PR open",
+        label: "agent skill",
+        text: "The Bankr skill and agent workflow are ready for review. Agents can read, inspect and plan without wallet actions.",
+        href: "/bankr",
+        cta: "View Bankr path"
+      },
+      {
+        name: "Next",
+        status: "Planned",
+        label: "agent hosts",
+        text: "The next integrations use the same path: read instructions, discover packages, inspect trust and plan before install.",
+        href: "/agents",
+        cta: "View agent setup"
+      }
+    ]
+  },
   claimFlow: {
     headline: "Found your repo? Claim the package.",
     lead: "Nipmod can prepare a package path, but the repo owner keeps control.",

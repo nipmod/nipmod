@@ -89,6 +89,18 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Why Gitlawb first?" })).toBeVisible();
   await expect(page.getByText("Gitlawb already gives agents source identity, signed pushes and public provenance.")).toBeVisible();
 
+  await expect(page.getByRole("heading", { name: "Platform status" })).toBeVisible();
+  const platformRoadmap = page.getByLabel("Nipmod platform roadmap");
+  await expect(platformRoadmap.getByRole("heading", { name: "Gitlawb" })).toBeVisible();
+  await expect(platformRoadmap.getByText("Live", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
+  await expect(platformRoadmap.getByText("PR open", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Next" })).toBeVisible();
+  await expect(platformRoadmap.getByText("Planned", { exact: true })).toBeVisible();
+  await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
+  await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
+  await expect(platformRoadmap.getByRole("link", { name: "View agent setup" })).toHaveAttribute("href", "/agents");
+
   await expect(page.getByRole("heading", { name: "Found your repo? Claim the package." })).toBeVisible();
   await expect(page.getByText("Scout finds public Gitlawb repos that can become packages.")).toBeVisible();
   await expect(page.getByText("The repo owner signs the claim with the Gitlawb DID.")).toBeVisible();
