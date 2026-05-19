@@ -381,6 +381,8 @@ h1 {
 .stat-tile,
 .live-stat,
 .package-card,
+.archive-overview-card,
+.archive-package-row,
 .empty-state,
 .quickstart-card,
 .comparison-card,
@@ -1002,7 +1004,7 @@ h1 {
 .registry-stats {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .claim-conversion {
@@ -1067,6 +1069,183 @@ h1 {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.package-archive-hero {
+  max-width: 980px;
+}
+
+.archive-overview {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 4px 0 18px;
+}
+
+.archive-overview-card {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+}
+
+.archive-overview-card span {
+  color: var(--text);
+  display: block;
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.archive-overview-card h2 {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.archive-overview-card p,
+.archive-note {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.archive-note {
+  max-width: 820px;
+}
+
+.archive-list {
+  display: grid;
+  gap: 10px;
+}
+
+.archive-package-row {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(120px, 0.45fr) minmax(260px, 0.95fr);
+  min-width: 0;
+  padding: 16px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.archive-package-row:hover {
+  background: var(--surface-strong);
+  transform: translateY(-1px);
+}
+
+.archive-package-main {
+  min-width: 0;
+}
+
+.archive-package-main h3 {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.16;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.archive-package-main h3 a {
+  border-radius: 8px;
+}
+
+.archive-package-main h3 a:hover {
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.42);
+  text-underline-offset: 4px;
+}
+
+.archive-package-main p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.48;
+  margin: 8px 0 0;
+}
+
+.archive-package-badges {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.source-badge {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.archive-package-meta {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.archive-package-meta div {
+  background: var(--surface-deep);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.archive-package-meta dt {
+  color: var(--quiet);
+  font-size: 11px;
+  font-weight: 760;
+  margin: 0 0 5px;
+}
+
+.archive-package-meta dd {
+  color: var(--text);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.archive-install {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  display: flex;
+  gap: 10px;
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 11px 12px;
+}
+
+.archive-install span {
+  color: var(--quiet);
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.archive-install code {
+  color: var(--text);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-package-row .package-links {
+  grid-column: 1 / -1;
 }
 
 .registry-more {
@@ -1792,6 +1971,8 @@ h1 {
   .fact-row,
   .registry-head,
   .registry-stats,
+  .archive-overview,
+  .archive-package-row,
   .candidate-flow,
   .package-grid,
   .package-shelf-grid,
@@ -1859,6 +2040,19 @@ h1 {
 
   .package-meta {
     grid-template-columns: 1fr;
+  }
+
+  .archive-package-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-install {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .archive-install code {
+    max-width: 100%;
   }
 
   .pin-list div,
