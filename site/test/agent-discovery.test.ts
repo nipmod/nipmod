@@ -21,6 +21,8 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain(
       "Bankr agent prompt: Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages."
     );
+    expect(llmsText).toContain("Bankr agent proof: https://nipmod.com/integrations/bankr/bankr.agent-proof.json");
+    expect(llmsText).toContain("Bankr proof prompt: Do not trade");
     expect(llmsText).toContain("Bankr catalog submission: https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md");
     expect(llmsText).toContain("Bankr free service map: https://nipmod.com/integrations/bankr/bankr.free.json");
     expect(llmsText).toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");

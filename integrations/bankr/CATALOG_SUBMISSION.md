@@ -22,6 +22,12 @@ Public skill URL:
 https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 ```
 
+Agent proof manifest:
+
+```text
+https://nipmod.com/integrations/bankr/bankr.agent-proof.json
+```
+
 Public review folder:
 
 ```text
@@ -50,6 +56,7 @@ Included:
 - SKILL.md with Bankr-compatible frontmatter
 - references/bankr-workflow.md
 - references/free-services.md
+- public agent proof manifest at https://nipmod.com/integrations/bankr/bankr.agent-proof.json
 
 Requirements:
 - curl
@@ -63,9 +70,17 @@ Safety:
 - no wallet, signing, token or transfer actions without explicit user approval
 - no x402 requirement for core package workflows
 
+Agent workflow proof:
+- read the skill
+- find gitlawb-repo-reader
+- inspect trust, provenance and permissions
+- return an install plan without installing
+- prepare a Gitlawb package draft without remote writes
+
 Validation:
 - public skill URL returns 200
 - public service map returns 200
+- public agent proof manifest returns 200
 - Bankr Agent API smoke test confirmed the skill is reachable and service map pricing is free
 - repository tests, typecheck, production build and secret scan pass
 ```
@@ -82,6 +97,12 @@ For a GitHub folder install flow:
 
 ```text
 Install the nipmod skill from https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
+```
+
+For a complete proof run:
+
+```text
+Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.
 ```
 
 ## Runtime Smoke Test

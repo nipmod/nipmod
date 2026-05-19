@@ -12,10 +12,14 @@ const manifestPath = join(siteRoot, "public", ".well-known", "nipmod.json");
 const llmsPath = join(siteRoot, "public", "llms.txt");
 const freeMapPath = join(integrationRoot, "bankr.free.json");
 const publicFreeMapPath = join(siteRoot, "public", "integrations", "bankr", "bankr.free.json");
+const agentProofPath = join(integrationRoot, "bankr.agent-proof.json");
+const publicAgentProofPath = join(siteRoot, "public", "integrations", "bankr", "bankr.agent-proof.json");
 const publicSkillUrl = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
 const publicFreeMapUrl = "https://nipmod.com/integrations/bankr/bankr.free.json";
+const publicAgentProofUrl = "https://nipmod.com/integrations/bankr/bankr.agent-proof.json";
 const publicCatalogSubmissionUrl = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md";
 const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
+const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 
 function read(path: string) {
   return readFileSync(path, "utf8");
@@ -55,6 +59,7 @@ describe("Bankr integration", () => {
       read(join(skillRoot, "references", "free-services.md"))
     );
     expect(read(publicFreeMapPath)).toBe(read(freeMapPath));
+    expect(read(publicAgentProofPath)).toBe(read(agentProofPath));
   });
 
   test("documents free Bankr workflows", () => {
@@ -66,6 +71,9 @@ describe("Bankr integration", () => {
     expect(workflow).toContain(publicSkillUrl);
     expect(workflow).toContain(githubSkillFolder);
     expect(workflow).toContain(publicCatalogSubmissionUrl);
+    expect(workflow).toContain("Agent proof run");
+    expect(workflow).toContain(publicAgentProofUrl);
+    expect(workflow).toContain(`nipmod inspect ${proofPackage} --json`);
     expect(workflow).toContain("Bankr skills use one `SKILL.md` file");
     expect(workflow).toContain("Bankr skill format: https://docs.bankr.bot/skills/in-bankr/skill-format/");
 
@@ -85,9 +93,59 @@ describe("Bankr integration", () => {
     expect(submission).toContain("nipmod/nipmod");
     expect(submission).toContain(githubSkillFolder);
     expect(submission).toContain(publicSkillUrl);
+    expect(submission).toContain(publicAgentProofUrl);
     expect(submission).toContain("Add Nipmod skill for package trust and install planning");
+    expect(submission).toContain("Agent workflow proof");
     expect(submission).toContain("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod");
     expect(submission).not.toMatch(/bk_usr_|sk-(?:proj-)?|ghp_|github_pat_/i);
+  });
+
+  test("ships a runnable Bankr agent proof manifest", () => {
+    const proof = JSON.parse(read(agentProofPath));
+    const packageDoc = JSON.parse(read(join(siteRoot, "public", "registry", "packages", "cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI", "0.1.0.json")));
+
+    expect(proof).toMatchObject({
+      type: "dev.nipmod.bankr.agent-proof.v1",
+      status: "ready",
+      skill: publicSkillUrl,
+      freeServiceMap: publicFreeMapUrl,
+      proofPackage: {
+        name: "gitlawb-repo-reader",
+        canonical: packageDoc.canonical,
+        version: "0.1.0",
+        specifier: proofPackage,
+        sourceCommit: packageDoc.sourceCommit
+      },
+      expectedResult: {
+        packageFound: "gitlawb-repo-reader 0.1.0",
+        trustChecked: {
+          readyToInstall: true,
+          sourceProvenanceVerified: true,
+          trust: "verified/100",
+          verdict: "verified"
+        },
+        installPlanReady: {
+          workspaceMutation: false
+        },
+        repoDraftReady: {
+          remoteWrites: false
+        }
+      }
+    });
+    expect(proof.demoPrompt).toContain(publicSkillUrl);
+    expect(proof.demoPrompt).toContain(publicAgentProofUrl);
+    expect(proof.demoPrompt).toContain("Do not trade");
+    expect(proof.workflow.map((step: { id: string }) => step.id)).toEqual([
+      "read-skill",
+      "find-package",
+      "check-trust",
+      "plan-install",
+      "prepare-repo-draft"
+    ]);
+    expect(proof.workflow.map((step: { command: string }) => step.command).join("\n")).toContain(
+      `nipmod install --plan ${proofPackage} --json`
+    );
+    expect(JSON.stringify(proof)).not.toMatch(/bk_usr_|sk-(?:proj-)?|ghp_|github_pat_/i);
   });
 
   test("defines the free Bankr service map", () => {
@@ -110,6 +168,10 @@ describe("Bankr integration", () => {
       api: "https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo",
       primary: "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json"
     });
+    expect(freeMap.proof).toMatchObject({
+      agentWorkflow: publicAgentProofUrl
+    });
+    expect(freeMap.proof.demoPrompt).toContain(publicAgentProofUrl);
     expect(JSON.stringify(freeMap)).not.toMatch(/price|paymentScheme|x402|USDC/i);
   });
 
@@ -133,7 +195,13 @@ describe("Bankr integration", () => {
         services: ["package-search", "package-audit", "repo-package-draft"],
         status: "free; no Nipmod payment required"
       },
+      proof: {
+        agentWorkflow: publicAgentProofUrl,
+        expectedSteps: ["read-skill", "find-package", "check-trust", "plan-install", "prepare-repo-draft"],
+        package: proofPackage
+      },
       skill: {
+        agentProof: publicAgentProofUrl,
         catalogSubmission: publicCatalogSubmissionUrl,
         catalogStatus: "ready for Bankr skill catalog review",
         githubFolder: githubSkillFolder,
@@ -149,6 +217,8 @@ describe("Bankr integration", () => {
     expect(llms).toContain("Bankr integration: https://nipmod.com/bankr");
     expect(llms).toContain(`Bankr skill: ${publicSkillUrl}`);
     expect(llms).toContain(`Bankr agent prompt: Read ${publicSkillUrl} and use Nipmod before installing agent packages.`);
+    expect(llms).toContain(`Bankr agent proof: ${publicAgentProofUrl}`);
+    expect(llms).toContain(`Read ${publicSkillUrl} and ${publicAgentProofUrl}`);
     expect(llms).toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
     expect(llms).toContain(`Bankr catalog submission: ${publicCatalogSubmissionUrl}`);
     expect(llms).toContain(`Bankr free service map: ${publicFreeMapUrl}`);

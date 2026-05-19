@@ -5,10 +5,14 @@ import { homeContent } from "../content";
 const skillInstall = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
 const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
 const freeServiceMap = "https://nipmod.com/integrations/bankr/bankr.free.json";
+const agentProof = "https://nipmod.com/integrations/bankr/bankr.agent-proof.json";
 const catalogSubmission = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md";
 const bankrSkillDocs = "https://docs.bankr.bot/skills/in-bankr/skill-format/";
 const bankrAgentPrompt =
   "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.";
+const bankrProofPrompt =
+  "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.";
+const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 
 const services = [
   {
@@ -25,6 +29,40 @@ const services = [
     label: "Draft",
     title: "Free repo draft",
     text: "A public Gitlawb repo can become a package draft with a clear owner claim path."
+  }
+];
+
+const proofSteps = [
+  {
+    label: "Read",
+    title: "Skill loaded",
+    text: "The agent reads the Bankr skill and returns the safety boundaries before touching packages.",
+    command: "curl -fsSL https://nipmod.com/integrations/bankr/nipmod/SKILL.md"
+  },
+  {
+    label: "Find",
+    title: "Package found",
+    text: "The agent finds a real package in the public registry with verified trust and no permissions.",
+    command: "nipmod search gitlawb-repo-reader --online --json"
+  },
+  {
+    label: "Trust",
+    title: "Trust checked",
+    text: "The agent inspects provenance, witness evidence, digest, signature and permissions before install.",
+    command: `nipmod inspect ${proofPackage} --json`
+  },
+  {
+    label: "Plan",
+    title: "Install plan only",
+    text: "The agent prepares a plan and waits for approval before any workspace mutation.",
+    command: `nipmod install --plan ${proofPackage} --json`
+  },
+  {
+    label: "Draft",
+    title: "Gitlawb draft ready",
+    text: "The agent prepares package files in a temp directory with no remote write.",
+    command:
+      "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir /tmp/nipmod-bankr-proof-draft --json"
   }
 ];
 
@@ -56,6 +94,9 @@ export default function BankrPage() {
           </a>
           <a className="button button-ghost" href="/integrations/bankr/bankr.free.json">
             Open free service map
+          </a>
+          <a className="button button-ghost" href="/integrations/bankr/bankr.agent-proof.json">
+            Open agent proof
           </a>
           <a
             className="button button-ghost"
@@ -109,6 +150,39 @@ export default function BankrPage() {
             <p>The folder uses Bankr's portable skill format.</p>
             <CommandBlock command={bankrSkillDocs} label="Copy Bankr skill docs" />
           </article>
+        </div>
+      </section>
+
+      <section className="registry-section" aria-labelledby="bankr-proof-title">
+        <div className="section-head">
+          <p className="eyebrow">Proof</p>
+          <h2 id="bankr-proof-title">Agent proof workflow</h2>
+          <p>
+            A Bankr agent can now prove the full Nipmod path: read the skill, find a package, check trust, return an
+            install plan and prepare a Gitlawb package draft without installing or pushing.
+          </p>
+        </div>
+        <div className="quickstart-grid">
+          <article className="quickstart-card">
+            <span>Prompt</span>
+            <h2>Run with a Bankr agent</h2>
+            <p>The prompt blocks wallet actions and asks for machine-readable proof output.</p>
+            <CommandBlock command={bankrProofPrompt} label="Copy Bankr proof prompt" />
+          </article>
+          <article className="quickstart-card">
+            <span>Manifest</span>
+            <h2>Agent proof JSON</h2>
+            <p>The manifest pins the package, expected trust result and safe workflow commands.</p>
+            <CommandBlock command={agentProof} label="Copy agent proof manifest" />
+          </article>
+          {proofSteps.map((step) => (
+            <article className="quickstart-card" key={step.title}>
+              <span>{step.label}</span>
+              <h2>{step.title}</h2>
+              <p>{step.text}</p>
+              <CommandBlock command={step.command} label={`Copy ${step.title} command`} />
+            </article>
+          ))}
         </div>
       </section>
 

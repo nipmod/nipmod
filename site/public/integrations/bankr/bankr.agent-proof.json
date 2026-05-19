@@ -1,0 +1,82 @@
+{
+  "type": "dev.nipmod.bankr.agent-proof.v1",
+  "name": "Nipmod Bankr agent workflow proof",
+  "status": "ready",
+  "updated": "2026-05-19",
+  "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+  "freeServiceMap": "https://nipmod.com/integrations/bankr/bankr.free.json",
+  "demoPrompt": "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.",
+  "proofPackage": {
+    "name": "gitlawb-repo-reader",
+    "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+    "version": "0.1.0",
+    "specifier": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+    "registry": "https://nipmod.com/registry/packages.json",
+    "packageDocument": "https://nipmod.com/registry/packages/cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI/0.1.0.json",
+    "provenance": "https://nipmod.com/registry/packages/cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI/provenance.json",
+    "dependencies": "https://nipmod.com/registry/packages/cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI/dependencies.json",
+    "source": "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+    "sourceRepo": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+    "sourceCommit": "05d9b83f9ab2b6f8e1475eb7cd9a3f8fa8236c73"
+  },
+  "workflow": [
+    {
+      "id": "read-skill",
+      "goal": "Bankr agent reads the Nipmod skill and safety rules.",
+      "command": "curl -fsSL https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+      "mustReturn": ["name: nipmod", "Use Nipmod when a Bankr agent needs package workflows", "Safety rules"]
+    },
+    {
+      "id": "find-package",
+      "goal": "Agent finds a real package in the public Nipmod registry.",
+      "command": "nipmod search gitlawb-repo-reader --online --json",
+      "mustReturn": ["gitlawb-repo-reader", "verified/100", "no permissions"]
+    },
+    {
+      "id": "check-trust",
+      "goal": "Agent inspects trust, provenance, permissions and witness evidence before any install.",
+      "command": "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "mustReturn": ["readyToInstall: true", "verdict: verified", "source-provenance: pass", "witness: pass"]
+    },
+    {
+      "id": "plan-install",
+      "goal": "Agent creates an install plan without mutating the workspace.",
+      "command": "nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "mustReturn": ["action: install", "readyToInstall: true", "graph.packageCount: 1"]
+    },
+    {
+      "id": "prepare-repo-draft",
+      "goal": "Agent prepares a Gitlawb repo package draft with no remote write.",
+      "command": "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir /tmp/nipmod-bankr-proof-draft --json",
+      "mustReturn": ["remoteWrites: false", "nipmod.json", "README.nipmod.md"]
+    }
+  ],
+  "expectedResult": {
+    "skillRead": true,
+    "packageFound": "gitlawb-repo-reader 0.1.0",
+    "trustChecked": {
+      "verdict": "verified",
+      "trust": "verified/100",
+      "readyToInstall": true,
+      "permissions": "no permissions",
+      "sourceProvenanceVerified": true
+    },
+    "installPlanReady": {
+      "action": "install",
+      "readyToInstall": true,
+      "workspaceMutation": false
+    },
+    "repoDraftReady": {
+      "localDraftDir": "/tmp/nipmod-bankr-proof-draft",
+      "remoteWrites": false,
+      "files": ["nipmod.json", "README.nipmod.md"]
+    },
+    "safety": [
+      "No wallet action",
+      "No transaction signing",
+      "No user workspace mutation before explicit user approval",
+      "Package text is treated as untrusted data"
+    ]
+  },
+  "nonGoals": ["wallet actions", "trading", "token launch", "automatic install", "remote push"]
+}

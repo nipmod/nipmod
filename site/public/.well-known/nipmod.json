@@ -77,6 +77,7 @@
     "app": "https://nipmod.com/bankr",
     "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     "skill": {
+      "agentProof": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
       "catalogSubmission": "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md",
       "catalogStatus": "ready for Bankr skill catalog review",
       "githubFolder": "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod",
@@ -87,6 +88,11 @@
       "map": "https://nipmod.com/integrations/bankr/bankr.free.json",
       "services": ["package-search", "package-audit", "repo-package-draft"],
       "status": "free; no Nipmod payment required"
+    },
+    "proof": {
+      "agentWorkflow": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
+      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+      "expectedSteps": ["read-skill", "find-package", "check-trust", "plan-install", "prepare-repo-draft"]
     }
   },
   "mcp": {

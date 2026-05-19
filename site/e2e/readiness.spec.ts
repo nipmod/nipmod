@@ -318,11 +318,24 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
     "href",
     "/integrations/bankr/bankr.free.json"
   );
+  await expect(page.getByRole("link", { name: "Open agent proof" })).toHaveAttribute(
+    "href",
+    "/integrations/bankr/bankr.agent-proof.json"
+  );
   await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
   await expect(page.getByText("The skill follows the Bankr")).toBeVisible();
   await expect(page.getByText("Tell your agent")).toBeVisible();
-  await expect(page.getByText("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md")).toBeVisible();
+  await expect(
+    page.getByText("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.", {
+      exact: true
+    })
+  ).toBeVisible();
   await expect(page.getByText("Catalog packet")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Agent proof workflow" })).toBeVisible();
+  await expect(page.getByText("Prove the Nipmod workflow by returning JSON")).toBeVisible();
+  await expect(page.getByText("Trust checked")).toBeVisible();
+  await expect(page.getByText("Install plan only")).toBeVisible();
+  await expect(page.getByText("Gitlawb draft ready")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Free services" })).toBeVisible();
   await expect(page.getByText("Core Nipmod workflows stay free for Bankr agents.")).toBeVisible();
   await expect(page.getByText("Free package search")).toBeVisible();
@@ -340,6 +353,10 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
   const config = await request.get("/integrations/bankr/bankr.free.json");
   await expect(config).toBeOK();
   expect((await config.json()).pricing).toBe("free");
+
+  const proof = await request.get("/integrations/bankr/bankr.agent-proof.json");
+  await expect(proof).toBeOK();
+  expect((await proof.json()).type).toBe("dev.nipmod.bankr.agent-proof.v1");
 });
 
 test("package draft converts a Gitlawb repo into commands", async ({ page }) => {
