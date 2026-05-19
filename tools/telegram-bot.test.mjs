@@ -3,9 +3,11 @@ import { describe, test } from "node:test";
 import {
   createTelegramBotReply,
   isChatAllowed,
+  isQuestionLike,
   isRelevantGroupQuestion,
   parseTelegramCommand,
   searchRegistryPackages,
+  shouldAnswerGroupText,
   shouldReplyToPlainText
 } from "./telegram-bot.mjs";
 
@@ -48,8 +50,18 @@ describe("telegram bot command parsing", () => {
     assert.equal(isRelevantGroupQuestion("does this work with Codex?"), true);
     assert.equal(isRelevantGroupQuestion("where are the GitHub links?"), true);
     assert.equal(isRelevantGroupQuestion("what time is it?"), false);
+    assert.equal(isQuestionLike("what time is it?"), true);
+    assert.equal(shouldAnswerGroupText("what time is it?"), true);
+    assert.equal(shouldAnswerGroupText("github link bitte"), true);
+    assert.equal(shouldAnswerGroupText("hello everyone"), false);
     assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot", { answerGroupQuestions: false }), false);
+  });
+
+  test("answers bot support messages without a mention", () => {
+    assert.equal(shouldReplyToPlainText("der bot reagiert nicht auf meine fragen", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("warum reagiert der bot nicht?", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), true);
   });
 });
 
@@ -171,7 +183,7 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /curl -fsSLO https:\/\/nipmod\.com\/install\.sh/);
   });
 
-  test("does not answer off-topic questions without a mention", async () => {
+  test("answers off-topic questions with a concise fallback", async () => {
     const reply = await createTelegramBotReply(groupUpdate("what time is it?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
@@ -181,8 +193,20 @@ describe("telegram bot knowledge base", () => {
       username: "nipmodbot"
     });
 
-    assert.equal(reply.ignored, true);
-    assert.equal(reply.reason, "plain-text-not-addressed");
+    assert.match(reply.text, /I cannot answer that cleanly/);
+  });
+
+  test("answers bot support questions directly", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("der bot reagiert nicht auf meine fragen"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /I answer normal group questions/);
   });
 
   test("answers API key questions as security questions", async () => {
@@ -212,7 +236,7 @@ describe("telegram bot knowledge base", () => {
   });
 
   test("uses concise fallback instead of fake certainty", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot random question"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot tell me something random"), {
       allowedChatId: "-100123",
       bindFirstGroup: true,
       groupOnly: true,

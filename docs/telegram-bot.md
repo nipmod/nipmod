@@ -61,8 +61,8 @@ With privacy enabled, Telegram only sends commands, mentions and selected bot ev
 /status
 ```
 
-The bot answers plain text when the message directly mentions `@nipmodbot`, starts with `nipmod`, or looks like a relevant Nipmod question.
-Off topic group chatter is ignored.
+The bot answers plain text when the message directly mentions `@nipmodbot`, starts with `nipmod`, mentions a Nipmod related topic, or looks like a normal question.
+Non question group chatter is ignored.
 
 ## Voice
 

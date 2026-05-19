@@ -52,13 +52,18 @@ const FACTS = {
 
 const QUESTION_MARKERS = [
   "?",
+  "answer ",
   "can ",
   "does ",
   "how ",
   "is ",
+  "question ",
   "what ",
   "where ",
   "why ",
+  "antwort",
+  "frage",
+  "fragen",
   "wie ",
   "ist ",
   "kann ",
@@ -71,13 +76,18 @@ const QUESTION_MARKERS = [
 const NIPMOD_CONTEXT_TERMS = [
   "agent",
   "agents",
+  "answer",
+  "antwort",
   "archive",
   "archiv",
   "bankr",
   "bankrcoin",
+  "bot",
   "claude",
   "codex",
   "coin",
+  "frage",
+  "fragen",
   "github",
   "gitlawb",
   "install",
@@ -89,6 +99,9 @@ const NIPMOD_CONTEXT_TERMS = [
   "package",
   "packages",
   "paket",
+  "question",
+  "questions",
+  "reagiert",
   "registry",
   "repo",
   "security",
@@ -170,8 +183,13 @@ export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { 
   return (
     normalized.includes(botMention) ||
     normalized.startsWith("nipmod ") ||
-    (answerGroupQuestions && isRelevantGroupQuestion(normalized))
+    (answerGroupQuestions && shouldAnswerGroupText(normalized))
   );
+}
+
+export function shouldAnswerGroupText(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  return isQuestionLike(normalized) || mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
 }
 
 export function isRelevantGroupQuestion(text) {
@@ -179,7 +197,15 @@ export function isRelevantGroupQuestion(text) {
   if (!normalized) {
     return false;
   }
-  return QUESTION_MARKERS.some((marker) => normalized.includes(marker)) && mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
+  return isQuestionLike(normalized) && mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
+}
+
+export function isQuestionLike(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return QUESTION_MARKERS.some((marker) => normalized.includes(marker));
 }
 
 export async function createTelegramBotReply(update, options = {}) {
@@ -284,6 +310,9 @@ export async function renderPlainTextReply(text, options = {}) {
   if (mentionsAny(lower, ["safe", "safety", "security", "secret", "key", "sicher"])) {
     return securityText();
   }
+  if (mentionsAny(lower, ["answer", "antwort", "bot", "frage", "fragen", "question", "questions", "reagiert"])) {
+    return botText();
+  }
   if (mentionsAny(lower, ["bankr", "bankrcoin", "coin", "investor", "x402"])) {
     return bankrText();
   }
@@ -302,7 +331,7 @@ export async function renderPlainTextReply(text, options = {}) {
   if (mentionsAny(lower, ["package", "packages", "archive", "archiv", "registry", "paket"])) {
     return packagesText(await getRegistryPackagesForReply(options));
   }
-  if (mentionsAny(lower, ["was ist", "what is", "nipmod"])) {
+  if (mentionsAny(lower, ["how does", "was ist", "was kann", "what can", "what is", "wie funktioniert", "nipmod"])) {
     return aboutText();
   }
   return conciseFallbackText();
@@ -469,6 +498,9 @@ export async function runTelegramBot({
         }
         if (reply.text) {
           await client.sendMessage(update.message.chat.id, reply.text);
+          log(`[nipmod-telegram-bot] replied chat=${update.message.chat.id} update=${update.update_id}`);
+        } else if (reply.ignored) {
+          log(`[nipmod-telegram-bot] ignored reason=${reply.reason} chat=${update.message.chat.id} update=${update.update_id}`);
         }
       }
       if (updates.length > 0) {
@@ -660,6 +692,15 @@ function securityText() {
     FACTS.safety,
     "Security policy https://github.com/nipmod/nipmod/blob/main/SECURITY.md",
     "Status https://nipmod.com/status"
+  ].join("\n");
+}
+
+function botText() {
+  return [
+    "Bot",
+    "I answer normal group questions when Telegram privacy is disabled.",
+    "I know Nipmod links, install, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, packages, registry and security.",
+    "Use /links for official links."
   ].join("\n");
 }
 
