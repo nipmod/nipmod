@@ -164,6 +164,8 @@ test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
   await page.goto("/agents");
 
   await expect(page.getByRole("heading", { name: "One link. Full package workflow." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tell your agent once" })).toBeVisible();
+  await expect(page.getByText("Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Claim drafts" })).toBeVisible();
   await expect(page.getByText("Use Scout candidates when an existing Gitlawb repo should become a claimed package.")).toBeVisible();
   await expect(page.getByText("curl -fsS https://nipmod.com/scout/candidates")).toBeVisible();
