@@ -72,14 +72,14 @@ export default function BankrPage() {
           <h2 id="bankr-install-title">Install the skill</h2>
           <p>
             The skill follows the Bankr <code>SKILL.md</code> layout with optional references. Gitlawb stays the canonical
-            source, and GitHub gives Bankr a public folder for review and installation once this branch is published.
+            source, and GitHub gives Bankr a public folder for review and installation.
           </p>
         </div>
         <div className="quickstart-grid">
           <article className="quickstart-card">
             <span>Skill file</span>
             <h2>Use now</h2>
-            <p>The public skill URL resolves after the Bankr branch is deployed.</p>
+            <p>The public skill URL resolves on the live site.</p>
             <CommandBlock command={skillInstall} label="Copy public skill URL" />
           </article>
           <article className="quickstart-card">

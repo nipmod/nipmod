@@ -115,7 +115,7 @@ describe("Bankr integration", () => {
         status: "free; no Nipmod payment required"
       },
       skill: {
-        catalogStatus: "ready for Bankr skill catalog review after public branch publish",
+        catalogStatus: "ready for Bankr skill catalog review",
         githubFolder: githubSkillFolder,
         publicSkill: publicSkillUrl,
         source: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
