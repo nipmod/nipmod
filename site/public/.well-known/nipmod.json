@@ -171,6 +171,7 @@
     "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json",
     "proofTranscript": "https://nipmod.com/proof/transcript.json",
     "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
+    "systemReadiness": "https://nipmod.com/compatibility/system-readiness.json",
     "launch": "https://nipmod.com/launch"
   },
   "install": {

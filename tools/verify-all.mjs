@@ -64,6 +64,7 @@ await run("pnpm", ["--dir", "site", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "typecheck"]);
 await run("pnpm", ["--dir", "nipmod", "build"]);
 await run(process.execPath, ["tools/platform-readiness-check.mjs"], { timeoutMs: 30_000 });
+await run(process.execPath, ["tools/system-readiness-check.mjs"], { timeoutMs: 60_000 });
 if (process.env.NIPMOD_INCLUDE_HOST_SMOKE === "1") {
   await run(process.execPath, ["tools/platform-readiness-check.mjs", "--host-smoke"], { timeoutMs: 120_000 });
 }
@@ -140,6 +141,7 @@ async function verifyProduction() {
     "scout candidates failed"
   );
   await run(process.execPath, ["tools/platform-readiness-check.mjs", "--live"], { timeoutMs: 120_000 });
+  await run(process.execPath, ["tools/system-readiness-check.mjs", "--live", "--parallel"], { timeoutMs: 180_000 });
   await assertJson(
     "https://nipmod.com/registry/packages.json",
     (payload) =>

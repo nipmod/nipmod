@@ -14,6 +14,8 @@ Public links:
 - GitHub mirror: https://github.com/nipmod/nipmod
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Registry: https://nipmod.com/registry/packages.json
+- System readiness: https://nipmod.com/compatibility/system-readiness.json
+- Platform readiness: https://nipmod.com/compatibility/platform-readiness.json
 - Scout: https://nipmod.com/scout/candidates
 - Scout drafts: https://nipmod.com/scout/drafts
 
@@ -117,6 +119,7 @@ Scout drafts and `package pr` write local files only. The Gitlawb repo owner can
 - Agent runbook: `https://nipmod.com/quickstart#agents`
 - MCP docs: `https://nipmod.com/mcp`
 - MCP hosts: Codex, Claude Code and OpenCode through `nipmod mcp serve`
+- System proof: `node tools/system-readiness-check.mjs --live --parallel`
 - MCP agent demo: `nipmod.demo` returns the search, view, inspect, plan, controlled install, audit and SBOM flow.
 - MCP controlled install: `nipmod.install` writes only when `confirmInstall` is `write-lockfile`.
 - Package candidates: `https://nipmod.com/candidates`

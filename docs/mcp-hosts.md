@@ -119,15 +119,17 @@ The public host readiness receipt is published at:
 
 ```text
 https://nipmod.com/compatibility/platform-readiness.json
+https://nipmod.com/compatibility/system-readiness.json
 ```
 
 Run the repeatable local/live proof from this repo:
 
 ```bash
 node tools/platform-readiness-check.mjs --live --host-smoke
+node tools/system-readiness-check.mjs --live --parallel
 ```
 
-This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json` and the Bankr agent-proof commands. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json`, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
 
 ## Agent Demo
 

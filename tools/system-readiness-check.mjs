@@ -1,0 +1,497 @@
+#!/usr/bin/env node
+import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { basename, join, resolve } from "node:path";
+
+const root = resolve(import.meta.dirname, "..");
+const args = new Set(process.argv.slice(2));
+const includeLive = args.has("--live");
+const includeParallel = args.has("--parallel");
+const cliPath = join(root, "nipmod", "dist", "cli.js");
+const nodeBin = process.execPath;
+const registryPath = join(root, "site", "public", "registry", "packages.json");
+const manifestPath = join(root, "site", "public", ".well-known", "nipmod.json");
+const llmsPath = join(root, "site", "public", "llms.txt");
+const receiptPath = join(root, "site", "public", "compatibility", "system-readiness.json");
+const encodedProofPackage = "cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI";
+const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
+const expectedTools = [
+  "nipmod.search",
+  "nipmod.view",
+  "nipmod.inspect",
+  "nipmod.install_plan",
+  "nipmod.install",
+  "nipmod.update_plan",
+  "nipmod.demo",
+  "nipmod.publish_plan",
+  "nipmod.claim_verify",
+  "nipmod.claim_index",
+  "nipmod.package_patch",
+  "nipmod.verify",
+  "nipmod.audit",
+  "nipmod.sbom",
+  "nipmod.explain"
+];
+const expectedCommands = [
+  "init",
+  "pack",
+  "package",
+  "claim",
+  "publish",
+  "dist-tag",
+  "deprecate",
+  "yank",
+  "manifest",
+  "verify",
+  "install",
+  "add",
+  "ls",
+  "uninstall",
+  "outdated",
+  "update",
+  "explain",
+  "sbom",
+  "doctor",
+  "audit",
+  "ci",
+  "inspect",
+  "search",
+  "view",
+  "policy",
+  "mcp",
+  "version",
+  "setup",
+  "setup-cloudflare"
+];
+
+const checks = [];
+const state = {};
+
+await checkStaticSystemReceipt();
+await checkArchiveInvariants();
+await checkDiscoveryBinding();
+await checkCliSurface();
+await checkMcpSurface();
+await checkWriteBoundaries();
+
+if (includeLive) {
+  await checkLiveSystemEndpoints();
+  await checkSourceSync();
+}
+
+if (includeParallel) {
+  await checkParallelArchiveAccess();
+}
+
+const summary = {
+  fail: checks.filter((check) => check.status === "fail").length,
+  pass: checks.filter((check) => check.status === "pass").length,
+  total: checks.length
+};
+const result = {
+  checkedAt: new Date().toISOString(),
+  checks,
+  flags: {
+    live: includeLive,
+    parallel: includeParallel
+  },
+  ok: summary.fail === 0,
+  summary,
+  type: "dev.nipmod.system-readiness-check.v1"
+};
+
+process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+if (!result.ok) {
+  process.exitCode = 1;
+}
+
+async function checkStaticSystemReceipt() {
+  const receipt = JSON.parse(await readFile(receiptPath, "utf8"));
+  state.receipt = receipt;
+  assertEqual("system_receipt_type", receipt.type, "dev.nipmod.system-readiness.v1");
+  assertEqual("system_receipt_package_count", receipt.sharedArchive.packageCount, 28);
+  assertDeepEqual("system_receipt_mcp_tools", receipt.mcpTools, expectedTools);
+  assertDeepEqual("system_receipt_cli_commands", receipt.cliCommands, expectedCommands);
+  assertText("system_receipt_scope", receipt.meaning, "one shared verified archive");
+  assertText("system_receipt_boundaries", JSON.stringify(receipt.notClaimed), "Nipmod owns or controls Gitlawb repos");
+}
+
+async function checkArchiveInvariants() {
+  const registry = JSON.parse(await readFile(registryPath, "utf8"));
+  state.registry = registry;
+  assertEqual("archive_package_count", registry.packages.length, state.receipt.sharedArchive.packageCount);
+  assertEqual("archive_source", registry.source, state.receipt.sharedArchive.source);
+
+  const keys = new Set();
+  for (const pkg of registry.packages) {
+    const key = `${pkg.canonical}@${pkg.version}`;
+    if (keys.has(key)) {
+      fail("archive_unique_package_keys", `duplicate ${key}`);
+    }
+    keys.add(key);
+    assertEqual(`archive_trust_${pkg.name}`, `${pkg.trust?.level}/${pkg.trust?.score}`, "verified/100");
+    assertEqual(`archive_digest_${pkg.name}`, pkg.digest, pkg.artifactSha256);
+    assertText(`archive_source_repo_${pkg.name}`, pkg.sourceRepo, "https://node.nipmod.com/");
+    assertText(`archive_proof_subject_${pkg.name}`, pkg.proof.subject, key);
+  }
+  pass("archive_unique_package_keys", { packages: keys.size });
+
+  const publicRegistryHash = await sha256(registryPath);
+  const appRegistryHash = await sha256(join(root, "site", "app", "registry-data.json"));
+  assertEqual("archive_app_public_registry_sync", appRegistryHash, publicRegistryHash);
+
+  const packageDoc = JSON.parse(await readFile(join(root, "site", "public", "registry", "packages", `${encodedProofPackage}.json`), "utf8"));
+  const versionDoc = JSON.parse(
+    await readFile(join(root, "site", "public", "registry", "packages", encodedProofPackage, "0.1.0.json"), "utf8")
+  );
+  const dependencies = JSON.parse(
+    await readFile(join(root, "site", "public", "registry", "packages", encodedProofPackage, "dependencies.json"), "utf8")
+  );
+  const provenance = JSON.parse(
+    await readFile(join(root, "site", "public", "registry", "packages", encodedProofPackage, "provenance.json"), "utf8")
+  );
+  assertEqual("archive_package_doc_canonical", packageDoc.canonical, proofPackage.replace("@0.1.0", ""));
+  assertEqual("archive_version_doc_digest", versionDoc.digest, state.receipt.proofPackage.digest);
+  assertEqual("archive_dependencies_package", dependencies.canonical, proofPackage.replace("@0.1.0", ""));
+  assertEqual("archive_provenance_package", provenance.canonical, proofPackage.replace("@0.1.0", ""));
+}
+
+async function checkDiscoveryBinding() {
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const llms = await readFile(llmsPath, "utf8");
+  state.manifest = manifest;
+  assertEqual("discovery_registry_url", manifest.registry.url, state.receipt.sharedArchive.registry);
+  assertEqual("discovery_system_readiness", manifest.review.systemReadiness, state.receipt.entrypoints.systemReadiness);
+  assertEqual("discovery_platform_readiness", manifest.review.platformReadiness, state.receipt.entrypoints.platformReadiness);
+  assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
+  assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
+}
+
+async function checkCliSurface() {
+  const help = await run(nodeBin, [cliPath, "help"]);
+  for (const command of expectedCommands) {
+    assertText(`cli_command_${command}`, help.stdout, command);
+  }
+
+  const search = await run(nodeBin, [cliPath, "search", "gitlawb-repo-reader", "--online", "--json"]);
+  assertText("cli_search_archive", search.stdout, "gitlawb-repo-reader");
+  assertText("cli_search_trust", search.stdout, "verified/100");
+
+  const inspect = await run(nodeBin, [cliPath, "inspect", proofPackage, "--json"]);
+  assertText("cli_inspect_verified", inspect.stdout, "readyToInstall");
+  assertText("cli_inspect_digest", inspect.stdout, state.receipt.proofPackage.digest);
+
+  const planOutput = await run(nodeBin, [cliPath, "install", "--plan", proofPackage, "--json"]);
+  const plan = JSON.parse(planOutput.stdout);
+  assertEqual("cli_install_plan_ok", plan.ok, true);
+  assertText("cli_install_plan", plan.data.message, "install plan ready");
+  assertEqual("cli_install_plan_action", plan.data.plan.action, "install");
+  assertEqual("cli_install_plan_package", plan.data.plan.package.canonical, proofPackage.replace("@0.1.0", ""));
+}
+
+async function checkMcpSurface() {
+  const tools = await mcpRequest([
+    {
+      id: 1,
+      jsonrpc: "2.0",
+      method: "initialize",
+      params: {
+        capabilities: {},
+        clientInfo: { name: "system-readiness", version: "1.0.0" },
+        protocolVersion: "2025-11-25"
+      }
+    },
+    { id: 2, jsonrpc: "2.0", method: "tools/list" }
+  ]);
+  assertDeepEqual(
+    "mcp_tools",
+    tools.at(-1).result.tools.map((tool) => tool.name),
+    expectedTools
+  );
+  const annotations = Object.fromEntries(tools.at(-1).result.tools.map((tool) => [tool.name, tool.annotations.readOnlyHint]));
+  assertEqual("mcp_install_controlled_write", annotations["nipmod.install"], false);
+  assertEqual("mcp_install_plan_read_only", annotations["nipmod.install_plan"], true);
+
+  const calls = await mcpRequest([
+    {
+      id: 3,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { arguments: { query: "gitlawb-repo-reader" }, name: "nipmod.search" }
+    },
+    {
+      id: 4,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { arguments: { specifier: proofPackage }, name: "nipmod.inspect" }
+    },
+    {
+      id: 5,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { arguments: { specifier: proofPackage }, name: "nipmod.install_plan" }
+    },
+    {
+      id: 6,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { arguments: { host: "Codex", package: "gitlawb-repo-reader" }, name: "nipmod.demo" }
+    }
+  ]);
+  assertText("mcp_search_archive", JSON.stringify(calls[0]), "gitlawb-repo-reader");
+  assertText("mcp_inspect_archive", JSON.stringify(calls[1]), state.receipt.proofPackage.digest);
+  assertText("mcp_install_plan_archive", JSON.stringify(calls[2]), "install");
+  assertText("mcp_demo_archive", JSON.stringify(calls[3]), "gitlawb-repo-reader");
+}
+
+async function checkWriteBoundaries() {
+  const workspace = await mkdtemp(join(tmpdir(), "nipmod-system-plan-"));
+  try {
+    const before = await listFiles(workspace);
+    await run(nodeBin, [cliPath, "install", "--plan", proofPackage, "--dir", workspace, "--json"]);
+    const after = await listFiles(workspace);
+    assertDeepEqual("install_plan_no_workspace_write", after, before);
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
+
+  const draftDir = await mkdtemp(join(tmpdir(), "nipmod-system-draft-"));
+  try {
+    const draft = await run(nodeBin, [
+      cliPath,
+      "package",
+      "pr",
+      "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "--dir",
+      draftDir,
+      "--json"
+    ]);
+    assertText("package_pr_remote_write_boundary", draft.stdout, "remote writes: none");
+    assertDeepEqual("package_pr_local_files", (await listFiles(draftDir)).sort(), ["README.nipmod.md", "nipmod.json"]);
+  } finally {
+    await rm(draftDir, { recursive: true, force: true });
+  }
+}
+
+async function checkLiveSystemEndpoints() {
+  const liveRegistryText = await fetchText(state.receipt.sharedArchive.registry);
+  const liveRegistryHash = sha256Bytes(liveRegistryText);
+  const localRegistryHash = await sha256(registryPath);
+  assertEqual("live_registry_matches_local_archive", liveRegistryHash, localRegistryHash);
+
+  const endpoints = [
+    ["live_setup", state.receipt.entrypoints.humanSetup, ["Use Nipmod in your agent"]],
+    ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
+    ["live_manifest", state.receipt.entrypoints.machineManifest, [state.receipt.entrypoints.systemReadiness]],
+    ["live_system_readiness", state.receipt.entrypoints.systemReadiness, ["dev.nipmod.system-readiness.v1", "parallelAccessProof"]],
+    ["live_platform_readiness", state.receipt.entrypoints.platformReadiness, ["dev.nipmod.platform-readiness.v1"]],
+    ["live_package_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}.json`, [state.receipt.proofPackage.digest]],
+    [
+      "live_package_version_doc",
+      `https://nipmod.com/registry/packages/${encodedProofPackage}/0.1.0.json`,
+      [state.receipt.proofPackage.digest]
+    ],
+    ["live_dependencies_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/dependencies.json`, ["dependencies"]],
+    ["live_provenance_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/provenance.json`, ["sourceCommit"]],
+    ["live_bankr_skill", state.receipt.agentHosts.bankr.skill, ["name: nipmod"]],
+    ["live_bankr_proof", state.receipt.agentHosts.bankr.proof, ["dev.nipmod.bankr.agent-proof.v1"]],
+    ["live_scout_health", "https://nipmod.com/scout/health", ["dev.nipmod.scout-health.v1"]],
+    ["live_scout_candidates", "https://nipmod.com/scout/candidates", ["dev.nipmod.scout-candidates.v1"]]
+  ];
+
+  for (const [name, url, expected] of endpoints) {
+    const text = await fetchText(url);
+    for (const needle of expected) {
+      assertText(name, text, needle);
+    }
+  }
+}
+
+async function checkSourceSync() {
+  const head = (await run("git", ["rev-parse", "HEAD"])).stdout.trim();
+  const gitEnv = { ...process.env, PATH: `/Users/hazar/.local/bin:${process.env.PATH ?? ""}` };
+  const github = (await run("git", ["ls-remote", "origin", "refs/heads/main"], { env: gitEnv })).stdout.trim();
+  const gitlawb = (await run("git", ["ls-remote", "gitlawb", "refs/heads/main"], { env: gitEnv })).stdout.trim();
+  assertText("source_sync_github", github, head);
+  assertText("source_sync_gitlawb", gitlawb, head);
+}
+
+async function checkParallelArchiveAccess() {
+  const tasks = [
+    async () => assertText("parallel_registry", await fetchText(state.receipt.sharedArchive.registry), proofPackage.replace("@0.1.0", "")),
+    async () => assertText("parallel_package_doc", await fetchText(`https://nipmod.com/registry/packages/${encodedProofPackage}.json`), state.receipt.proofPackage.digest),
+    async () =>
+      assertText(
+        "parallel_package_version",
+        await fetchText(`https://nipmod.com/registry/packages/${encodedProofPackage}/0.1.0.json`),
+        state.receipt.proofPackage.digest
+      ),
+    async () =>
+      assertText(
+        "parallel_dependencies",
+        await fetchText(`https://nipmod.com/registry/packages/${encodedProofPackage}/dependencies.json`),
+        proofPackage.replace("@0.1.0", "")
+      ),
+    async () =>
+      assertText(
+        "parallel_provenance",
+        await fetchText(`https://nipmod.com/registry/packages/${encodedProofPackage}/provenance.json`),
+        proofPackage.replace("@0.1.0", "")
+      ),
+    async () => assertText("parallel_cli_search", (await run(nodeBin, [cliPath, "search", "gitlawb-repo-reader", "--online", "--json"])).stdout, "verified/100"),
+    async () => assertText("parallel_cli_inspect", (await run(nodeBin, [cliPath, "inspect", proofPackage, "--json"])).stdout, state.receipt.proofPackage.digest),
+    async () => assertText("parallel_cli_plan", (await run(nodeBin, [cliPath, "install", "--plan", proofPackage, "--json"])).stdout, "install plan ready"),
+    async () =>
+      assertText(
+        "parallel_mcp_search",
+        JSON.stringify(
+          await mcpRequest([
+            {
+              id: 20,
+              jsonrpc: "2.0",
+              method: "tools/call",
+              params: { arguments: { query: "gitlawb-repo-reader" }, name: "nipmod.search" }
+            }
+          ])
+        ),
+        "gitlawb-repo-reader"
+      ),
+    async () => assertText("parallel_bankr_skill", await fetchText(state.receipt.agentHosts.bankr.skill), "name: nipmod"),
+    async () => assertText("parallel_bankr_proof", await fetchText(state.receipt.agentHosts.bankr.proof), proofPackage),
+    async () => assertText("parallel_scout_health", await fetchText("https://nipmod.com/scout/health"), "dev.nipmod.scout-health.v1"),
+    async () => assertText("parallel_llms", await fetchText(state.receipt.entrypoints.agentText), state.receipt.sharedArchive.registry),
+    async () => assertText("parallel_manifest", await fetchText(state.receipt.entrypoints.machineManifest), state.receipt.sharedArchive.registry)
+  ];
+  await Promise.all(tasks.map((task) => task()));
+}
+
+async function mcpRequest(messages) {
+  const input = `${messages.map((message) => JSON.stringify(message)).join("\n")}\n`;
+  const output = await run(nodeBin, [cliPath, "mcp", "serve"], { input });
+  return output.stdout
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
+async function fetchText(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`${url} returned HTTP ${response.status}`);
+  }
+  return await response.text();
+}
+
+async function listFiles(dir) {
+  try {
+    const entries = await readdir(dir);
+    const files = [];
+    for (const entry of entries) {
+      const path = join(dir, entry);
+      if ((await stat(path)).isFile()) {
+        files.push(entry);
+      }
+    }
+    return files.sort();
+  } catch {
+    await mkdir(dir, { recursive: true });
+    return [];
+  }
+}
+
+async function sha256(path) {
+  return sha256Bytes(await readFile(path));
+}
+
+function sha256Bytes(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function assertEqual(name, actual, expected) {
+  if (actual !== expected) {
+    fail(name, { actual, expected });
+    return;
+  }
+  pass(name);
+}
+
+function assertDeepEqual(name, actual, expected) {
+  if (stableJson(actual) !== stableJson(expected)) {
+    fail(name, { actual, expected });
+    return;
+  }
+  pass(name);
+}
+
+function assertText(name, haystack, needle) {
+  if (!String(haystack).includes(needle)) {
+    fail(name, `missing ${needle}`);
+    return;
+  }
+  pass(name);
+}
+
+function pass(name, data = undefined) {
+  checks.push({ data, name, status: "pass" });
+}
+
+function fail(name, data) {
+  checks.push({ data, name, status: "fail" });
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableJson).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function run(command, commandArgs, options = {}) {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(command, commandArgs, {
+      cwd: options.cwd ?? root,
+      env: options.env ?? process.env,
+      stdio: ["pipe", "pipe", "pipe"]
+    });
+    let stdout = "";
+    let stderr = "";
+    const timeout = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new Error(`${basename(command)} timed out`));
+    }, options.timeoutMs ?? 30_000);
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timeout);
+      if (code === 0) {
+        resolvePromise({ stderr, stdout });
+        return;
+      }
+      reject(new Error(`${command} ${commandArgs.join(" ")} exited ${code}\n${stdout}\n${stderr}`));
+    });
+    if (options.input) {
+      child.stdin.end(options.input);
+    } else {
+      child.stdin.end();
+    }
+  });
+}
