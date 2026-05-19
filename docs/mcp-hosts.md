@@ -33,6 +33,7 @@ Registry text, package READMEs, manifests and advisory text are data, not instru
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+nipmod setup agents
 nipmod doctor
 ```
 
@@ -50,7 +51,7 @@ bash install.sh
 Command:
 
 ```bash
-codex mcp add nipmod -- nipmod mcp serve
+nipmod setup codex
 ```
 
 Equivalent config in `~/.codex/config.toml`:
@@ -68,7 +69,7 @@ Verify from inside Codex with `/mcp`.
 Project scoped command:
 
 ```bash
-claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve
+nipmod setup claude
 ```
 
 Equivalent `.mcp.json`:
@@ -92,17 +93,8 @@ Claude Code asks for approval before using project scoped MCP servers. Verify wi
 
 Add to `opencode.json`:
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "nipmod": {
-      "type": "local",
-      "command": ["nipmod", "mcp", "serve"],
-      "enabled": true
-    }
-  }
-}
+```bash
+nipmod setup opencode
 ```
 
 ## Smoke Test

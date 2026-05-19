@@ -31,7 +31,7 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
       <section className="quickstart-hero" aria-labelledby="package-title">
         <p className="eyebrow">Create</p>
         <h1 id="package-title">Package a Gitlawb repo.</h1>
-        <p className="lead">Paste a repo. Get commands, manifest checks and a safe publish dry run.</p>
+        <p className="lead">Paste a repo. Get package doctor, draft files, claim check and a safe publish dry run.</p>
         <div className="actions" aria-label="Package actions">
           <a className="button button-primary" href="/quickstart#install">
             Install
@@ -69,7 +69,7 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
             manifest and registry candidate.
           </p>
           <pre className="install-command">
-            <code>{"nipmod manifest validate --dir repo --json\nnipmod publish repo --dry-run --json"}</code>
+            <code>{"nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod manifest validate --dir repo --json\nnipmod publish repo --dry-run --json"}</code>
           </pre>
         </div>
       </section>

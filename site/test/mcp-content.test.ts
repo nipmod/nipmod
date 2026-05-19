@@ -4,11 +4,10 @@ import { mcpContent } from "../app/mcp/content";
 describe("MCP host content", () => {
   test("documents the expected host setup commands", () => {
     expect(mcpContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode"]);
-    expect(mcpContent.hosts[0].command).toBe("codex mcp add nipmod -- nipmod mcp serve");
+    expect(mcpContent.hosts[0].command).toBe("nipmod setup codex");
     expect(mcpContent.hosts[0].verify).toBe("codex mcp list");
-    expect(mcpContent.hosts[1].command).toBe(
-      "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve"
-    );
+    expect(mcpContent.hosts[1].command).toBe("nipmod setup claude");
+    expect(mcpContent.hosts[2].command).toBe("nipmod setup opencode");
     expect(mcpContent.hosts[1].config).toContain('"type": "stdio"');
     expect(mcpContent.hosts[2].config).toContain('"command": ["nipmod", "mcp", "serve"]');
     expect(mcpContent.hosts.every((host) => host.prompt.includes("Nipmod") || host.prompt.includes("nipmod"))).toBe(true);

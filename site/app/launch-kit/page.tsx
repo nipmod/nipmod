@@ -1,0 +1,97 @@
+import type { Metadata } from "next";
+import { CommandBlock } from "../command-block";
+
+const posts = [
+  {
+    label: "Codex and Claude Code",
+    text:
+      "Nipmod now works with Codex and Claude Code.\n\nJust tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.\n\nhttps://nipmod.com/setup"
+  },
+  {
+    label: "Proof reply",
+    text:
+      "Proof path is public:\n\nSystem readiness: https://nipmod.com/compatibility/system-readiness.json\nPlatform readiness: https://nipmod.com/compatibility/platform-readiness.json\nDemo: https://nipmod.com/demo"
+  },
+  {
+    label: "Package author",
+    text:
+      "Got a Gitlawb repo you want agents to reuse?\n\nPaste it here and Nipmod creates the draft path, claim check and publish dry run:\nhttps://nipmod.com/package"
+  }
+];
+
+const assets = [
+  { label: "Demo", href: "/demo" },
+  { label: "Status", href: "/status" },
+  { label: "Setup", href: "/setup" },
+  { label: "Examples", href: "/examples" },
+  { label: "GitHub", href: "https://github.com/nipmod/nipmod" }
+];
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://nipmod.com/launch-kit"
+  },
+  description: "Nipmod launch kit with posts, proof links, demo links and package author next steps.",
+  openGraph: {
+    description: "Shareable Nipmod launch kit for proof links, demo paths and short posts.",
+    title: "Nipmod launch kit",
+    url: "https://nipmod.com/launch-kit"
+  },
+  title: "Nipmod launch kit"
+};
+
+export default function LaunchKitPage() {
+  return (
+    <main className="page-shell" id="main">
+      <section className="quickstart-hero" aria-labelledby="launch-kit-title">
+        <p className="eyebrow">Launch kit</p>
+        <h1 id="launch-kit-title">Short posts with proof behind them</h1>
+        <p className="lead">Use the copy below only when the matching product path is live and green.</p>
+        <div className="actions" aria-label="Launch kit actions">
+          <a className="button button-primary" href="/status">
+            Check status
+          </a>
+          <a className="button button-ghost" href="/demo">
+            Demo
+          </a>
+          <a className="button button-ghost" href="/proof">
+            Proof
+          </a>
+        </div>
+      </section>
+
+      <section className="registry-section" aria-labelledby="posts-title">
+        <div className="section-head">
+          <p className="eyebrow">Copy</p>
+          <h2 id="posts-title">Post drafts</h2>
+          <p>Keep public claims tied to what the receipts prove. Do not claim partner approval unless the partner says it.</p>
+        </div>
+        <div className="quickstart-grid">
+          {posts.map((post) => (
+            <article className="quickstart-card" key={post.label}>
+              <span>{post.label}</span>
+              <h2>{post.label}</h2>
+              <p>Short copy for X or a reply under a technical question.</p>
+              <CommandBlock command={post.text} label={`Copy ${post.label} post`} />
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="proof-section" aria-labelledby="assets-title">
+        <div>
+          <p className="eyebrow">Links</p>
+          <h2 id="assets-title">Shareable surfaces</h2>
+          <p>These are human pages. Raw JSON receipts stay behind data links on the status page.</p>
+        </div>
+        <div className="fact-row">
+          {assets.map((asset) => (
+            <a key={asset.label} href={asset.href}>
+              {asset.label}
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}

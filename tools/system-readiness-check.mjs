@@ -115,6 +115,7 @@ async function checkStaticSystemReceipt() {
   assertDeepEqual("system_receipt_mcp_tools", receipt.mcpTools, expectedTools);
   assertDeepEqual("system_receipt_cli_commands", receipt.cliCommands, expectedCommands);
   assertText("system_receipt_scope", receipt.meaning, "one shared verified archive");
+  assertText("system_receipt_install_receipts", receipt.meaning, "install receipts");
   assertText("system_receipt_boundaries", JSON.stringify(receipt.notClaimed), "Nipmod owns or controls Gitlawb repos");
 }
 
@@ -165,8 +166,12 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_registry_url", manifest.registry.url, state.receipt.sharedArchive.registry);
   assertEqual("discovery_system_readiness", manifest.review.systemReadiness, state.receipt.entrypoints.systemReadiness);
   assertEqual("discovery_platform_readiness", manifest.review.platformReadiness, state.receipt.entrypoints.platformReadiness);
+  assertEqual("discovery_agent_prompts", manifest.agent.prompts, state.receipt.entrypoints.agentPrompts);
+  assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
+  assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
+  assertText("llms_setup_agents", llms, "nipmod setup agents");
 }
 
 async function checkCliSurface() {
@@ -189,6 +194,15 @@ async function checkCliSurface() {
   assertText("cli_install_plan", plan.data.message, "install plan ready");
   assertEqual("cli_install_plan_action", plan.data.plan.action, "install");
   assertEqual("cli_install_plan_package", plan.data.plan.package.canonical, proofPackage.replace("@0.1.0", ""));
+
+  const setupDir = await mkdtemp(join(tmpdir(), "nipmod-system-setup-"));
+  try {
+    const setup = JSON.parse((await run(nodeBin, [cliPath, "setup", "agents", "--dir", setupDir, "--dry-run", "--json"])).stdout);
+    assertEqual("cli_setup_agents_ok", setup.ok, true);
+    assertText("cli_setup_agents_prompt", setup.data.prompt, "Use Nipmod before installing agent packages");
+  } finally {
+    await rm(setupDir, { recursive: true, force: true });
+  }
 }
 
 async function checkMcpSurface() {
@@ -273,6 +287,34 @@ async function checkWriteBoundaries() {
   } finally {
     await rm(draftDir, { recursive: true, force: true });
   }
+
+  const installRoot = await mkdtemp(join(tmpdir(), "nipmod-system-receipt-"));
+  try {
+    const pkgDir = join(installRoot, "pkg");
+    const appDir = join(installRoot, "app");
+    await run(nodeBin, [cliPath, "init", "--name", "receipt-agent", "--dir", pkgDir]);
+    const packed = JSON.parse((await run(nodeBin, [cliPath, "pack", pkgDir, "--out", installRoot, "--json"])).stdout);
+    const installed = JSON.parse(
+      (
+        await run(nodeBin, [
+          cliPath,
+          "install",
+          `file:${packed.data.path}`,
+          "--dir",
+          appDir,
+          "--integrity",
+          `sha256-${packed.data.digest}`,
+          "--json"
+        ])
+      ).stdout
+    );
+    assertText("install_receipt_path", installed.data.receiptPath, ".nipmod/receipts");
+    const receipts = await readdir(join(appDir, ".nipmod", "receipts"));
+    assertEqual("install_receipt_count", receipts.length, 1);
+    assertText("install_receipt_type", await readFile(join(appDir, ".nipmod", "receipts", receipts[0]), "utf8"), "dev.nipmod.install-receipt.v1");
+  } finally {
+    await rm(installRoot, { recursive: true, force: true });
+  }
 }
 
 async function checkLiveSystemEndpoints() {
@@ -284,6 +326,9 @@ async function checkLiveSystemEndpoints() {
   const endpoints = [
     ["live_setup", state.receipt.entrypoints.humanSetup, ["Use Nipmod in your agent"]],
     ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
+    ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1", "nipmod setup codex"]],
+    ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],
+    ["live_status", state.receipt.entrypoints.status, ["Public proof dashboard"]],
     ["live_manifest", state.receipt.entrypoints.machineManifest, [state.receipt.entrypoints.systemReadiness]],
     ["live_system_readiness", state.receipt.entrypoints.systemReadiness, ["dev.nipmod.system-readiness.v1", "parallelAccessProof"]],
     ["live_platform_readiness", state.receipt.entrypoints.platformReadiness, ["dev.nipmod.platform-readiness.v1"]],

@@ -4,6 +4,7 @@ export const setupContent = {
     "Install once, connect your agent once, then tell Codex, Claude Code or OpenCode to search the Nipmod archive before installing agent packages.",
   installCommand: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
   checkCommand: "nipmod doctor --online",
+  allAgentsCommand: "nipmod setup agents",
   agentPrompt:
     "Use Nipmod before installing agent packages. Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Search the Nipmod archive first, view exact metadata, inspect trust, create an install plan, ask before writing files, then audit and export SBOM.",
   steps: [
@@ -28,34 +29,23 @@ export const setupContent = {
     {
       name: "Codex",
       label: "Codex desktop and CLI",
-      command: "codex mcp add nipmod -- nipmod mcp serve",
+      command: "nipmod setup codex",
       verify: "codex mcp list",
-      text: "Adds Nipmod as a local MCP server for Codex."
+      text: "Registers Nipmod as a local MCP server through the Codex CLI."
     },
     {
       name: "Claude Code",
       label: "Project scoped MCP",
-      command: "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      command: "nipmod setup claude",
       verify: "claude mcp list",
-      text: "Adds Nipmod to the current Claude Code project."
+      text: "Writes the project .mcp.json file and preserves other MCP servers."
     },
     {
       name: "OpenCode",
       label: "Local opencode.json",
-      command: `cat > opencode.json <<'JSON'
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "nipmod": {
-      "type": "local",
-      "command": ["nipmod", "mcp", "serve"],
-      "enabled": true
-    }
-  }
-}
-JSON`,
+      command: "nipmod setup opencode",
       verify: "opencode mcp list",
-      text: "Creates the local OpenCode MCP config."
+      text: "Writes opencode.json with the local Nipmod MCP server."
     }
   ],
   capabilities: [

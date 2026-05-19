@@ -74,10 +74,14 @@ export function SiteHeader() {
             <a href={homeContent.links.docs}>Docs</a>
             <a href="/setup">Setup</a>
             <a href="/agents">Agents</a>
+            <a href="/demo">Demo</a>
+            <a href="/status">Status</a>
+            <a href="/examples">Examples</a>
             <a href="/audit">Audit</a>
             <a href="/candidates">Package Claim</a>
             <a href="/package">Create</a>
             <a href="/launch">Launch</a>
+            <a href="/launch-kit">Launch kit</a>
             <a href="/trust">Trust</a>
             <a href="/security">Security</a>
             <a href="/mcp">MCP</a>

@@ -77,12 +77,16 @@ describe("nipmod discovery manifest", () => {
       "audit",
       "bankr",
       "createPackage",
+      "demo",
       "docs",
+      "examples",
       "install",
+      "launchKit",
       "mcp",
       "packages",
       "security",
       "setup",
+      "status",
       "trust"
     ]);
     expect(Object.keys(manifest.claims).sort()).toEqual([
@@ -104,7 +108,7 @@ describe("nipmod discovery manifest", () => {
       "patchParam",
       "sourceNodes"
     ]);
-    expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "runbook", "workflow"]);
+    expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "prompts", "runbook", "workflow"]);
     expect(Object.keys(manifest.bankr).sort()).toEqual(["app", "coin", "freeServices", "proof", "skill"]);
     expect(Object.keys(manifest.bankr.skill).sort()).toEqual([
       "agentProof",
@@ -132,6 +136,7 @@ describe("nipmod discovery manifest", () => {
       "publishDryRun",
       "sbom",
       "search",
+      "setupAgents",
       "setupClaudeMcp",
       "setupCodexMcp",
       "setupOpenCodeMcp",
@@ -304,18 +309,24 @@ describe("nipmod discovery manifest", () => {
       audit: "https://nipmod.com/audit",
       bankr: "https://nipmod.com/bankr",
       createPackage: "https://nipmod.com/package",
+      demo: "https://nipmod.com/demo",
       docs: "https://nipmod.com/quickstart#docs",
+      examples: "https://nipmod.com/examples",
       install: "https://nipmod.com/quickstart#install",
+      launchKit: "https://nipmod.com/launch-kit",
       mcp: "https://nipmod.com/mcp",
       packages: "https://nipmod.com/packages",
       security: "https://nipmod.com/security",
       setup: "https://nipmod.com/setup",
+      status: "https://nipmod.com/status",
       trust: "https://nipmod.com/trust"
     });
     expect(manifest.agent.llms).toBe("https://nipmod.com/llms.txt");
+    expect(manifest.agent.prompts).toBe("https://nipmod.com/agent-prompts.json");
     expect(manifest.agent.runbook).toBe("https://nipmod.com/agents");
     expect(manifest.agent.workflow).toEqual([
       "install",
+      "setupAgents",
       "setupCodexMcp",
       "setupClaudeMcp",
       "setupOpenCodeMcp",
@@ -355,10 +366,10 @@ describe("nipmod discovery manifest", () => {
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
-      setupClaudeMcp: "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
-      setupCodexMcp: "codex mcp add nipmod -- nipmod mcp serve",
-      setupOpenCodeMcp:
-        "cat > opencode.json <<'JSON'\n{\n  \"$schema\": \"https://opencode.ai/config.json\",\n  \"mcp\": {\n    \"nipmod\": {\n      \"type\": \"local\",\n      \"command\": [\"nipmod\", \"mcp\", \"serve\"],\n      \"enabled\": true\n    }\n  }\n}\nJSON",
+      setupAgents: "nipmod setup agents",
+      setupClaudeMcp: "nipmod setup claude",
+      setupCodexMcp: "nipmod setup codex",
+      setupOpenCodeMcp: "nipmod setup opencode",
       setupPublish: "nipmod setup gitlawb",
       view: "nipmod view gitlawb-repo-reader --json",
       verifyInstaller: verifyInstallerCommand

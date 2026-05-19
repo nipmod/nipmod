@@ -32,9 +32,12 @@ describe("system readiness receipt", () => {
     expect(discovery.review.platformReadiness).toBe("https://nipmod.com/compatibility/platform-readiness.json");
     expect(llms).toContain("System readiness receipt: https://nipmod.com/compatibility/system-readiness.json");
     expect(readiness.entrypoints).toMatchObject({
+      agentPrompts: "https://nipmod.com/agent-prompts.json",
       agentText: "https://nipmod.com/llms.txt",
+      demo: "https://nipmod.com/demo",
       machineManifest: "https://nipmod.com/.well-known/nipmod.json",
       platformReadiness: "https://nipmod.com/compatibility/platform-readiness.json",
+      status: "https://nipmod.com/status",
       systemReadiness: "https://nipmod.com/compatibility/system-readiness.json"
     });
   });
@@ -107,9 +110,14 @@ describe("system readiness receipt", () => {
         skill: "https://nipmod.com/integrations/bankr/nipmod/SKILL.md"
       },
       claudeCode: {
+        setup: "nipmod setup claude",
         config: ".mcp.json"
       },
+      codex: {
+        setup: "nipmod setup codex"
+      },
       openCode: {
+        setup: "nipmod setup opencode",
         config: "opencode.json"
       }
     });
@@ -123,5 +131,6 @@ describe("system readiness receipt", () => {
     ]);
     expect(readiness.parallelAccessProof.checkedBy).toBe("node tools/system-readiness-check.mjs --live --parallel");
     expect(readiness.writeBoundaries).toContain("install writes only after confirmInstall is write-lockfile");
+    expect(readiness.writeBoundaries).toContain("install writes a local receipt under .nipmod/receipts");
   });
 });

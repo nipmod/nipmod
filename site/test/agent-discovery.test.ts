@@ -12,6 +12,9 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("Human docs: https://nipmod.com/quickstart#docs");
     expect(llmsText).toContain("Human setup: https://nipmod.com/setup");
     expect(llmsText).toContain("Agent runbook: https://nipmod.com/agents");
+    expect(llmsText).toContain("Agent prompt pack: https://nipmod.com/agent-prompts.json");
+    expect(llmsText).toContain("Demo: https://nipmod.com/demo");
+    expect(llmsText).toContain("Public status: https://nipmod.com/status");
     expect(llmsText).toContain("Platform readiness receipt: https://nipmod.com/compatibility/platform-readiness.json");
     expect(llmsText).toContain("System readiness receipt: https://nipmod.com/compatibility/system-readiness.json");
     expect(llmsText).toContain(
@@ -39,9 +42,10 @@ describe("agent discovery text", () => {
   test("lists the commands an agent needs for the full lifecycle", () => {
     for (const command of [
       "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-      "codex mcp add nipmod -- nipmod mcp serve",
-      "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
-      "cat > opencode.json <<'JSON'",
+      "nipmod setup codex",
+      "nipmod setup claude",
+      "nipmod setup opencode",
+      "nipmod setup agents",
       "Manual verification path:",
       "curl -fLO https://nipmod.com/install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",
@@ -61,6 +65,7 @@ describe("agent discovery text", () => {
       "nipmod publish . --dry-run --json",
       "Claim conversion page:",
       "https://nipmod.com/candidates",
+      "nipmod package doctor gitlawb://did:key:.../repo --json",
       "curl -fsS https://nipmod.com/scout/health",
       "nipmod mcp serve"
     ]) {

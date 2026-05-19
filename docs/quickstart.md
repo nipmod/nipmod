@@ -14,6 +14,7 @@ This is the public first run path. It is designed for a clean macOS or Linux wor
 
 ```sh
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+nipmod setup agents
 ```
 
 Manual verification:
@@ -47,6 +48,21 @@ Expected result:
 - CLI is available.
 - Public registry is reachable.
 - Publish setup is ready, or the command prints `nipmod setup gitlawb` as the repair path.
+
+## Set up agent hosts
+
+```sh
+nipmod setup codex
+nipmod setup claude
+nipmod setup opencode
+```
+
+Expected result:
+
+- Codex is registered through its MCP CLI.
+- Claude Code receives a project `.mcp.json`.
+- OpenCode receives a project `opencode.json`.
+- Existing host config entries are preserved.
 
 ## Set up publish
 
@@ -109,11 +125,13 @@ Create a demo workspace first. The first lockfile mutation should not happen in 
 mkdir -p nipmod-demo
 cd nipmod-demo
 nipmod install gitlawb-repo-reader
+ls .nipmod/receipts
 ```
 
 Expected result:
 
 - `nipmod.lock.json` is written or updated inside `nipmod-demo`.
+- `.nipmod/receipts` contains the install receipt with package, version, integrity and timestamp.
 - The lockfile pins the artifact digest.
 - A trust or advisory failure exits before lockfile mutation.
 

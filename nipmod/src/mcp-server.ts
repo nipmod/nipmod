@@ -8,6 +8,7 @@ import { verifyBundle } from "./bundle.js";
 import { explainPackage } from "./explain.js";
 import { DEFAULT_GITLAWB_NODE, createPublishDryRunPlan } from "./gitlawb.js";
 import { executeInstallPlan, resolveAddInstallPlan } from "./install-plan.js";
+import { writeInstallReceipt } from "./install-receipt.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
 import {
@@ -393,6 +394,16 @@ async function installTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonV
     ...(policy ? { policy } : {}),
     projectDir
   });
+  const receipt = await writeInstallReceipt({
+    action: "mcp-install",
+    graphPackageCount: plan.graph?.packageCount ?? 1,
+    integrity: plan.integrity,
+    lockfileChanged: result.lockfileChanged,
+    package: plan.package,
+    projectDir,
+    registryUrl: args.registryUrl ?? DEFAULT_REGISTRY_URL,
+    ...(plan.resolved ? { resolved: plan.resolved } : {})
+  });
 
   return toJsonValue({
     type: "dev.nipmod.mcp-install-result.v1",
@@ -402,6 +413,7 @@ async function installTool(raw: unknown, fetchImpl: typeof fetch): Promise<JsonV
     integrity: plan.integrity,
     graphPackageCount: plan.graph?.packageCount ?? 1,
     lockfile: plan.lockfile,
+    receiptPath: receipt.path,
     next: {
       audit: "nipmod.audit",
       sbom: "nipmod.sbom"
@@ -519,27 +531,17 @@ function hostSetup(host: "Codex" | "Claude Code" | "Generic" | "OpenCode"): Json
   switch (host) {
     case "Codex":
       return {
-        command: "codex mcp add nipmod -- nipmod mcp serve",
+        command: "nipmod setup codex",
         verify: "codex mcp list"
       };
     case "Claude Code":
       return {
-        command: "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+        command: "nipmod setup claude",
         verify: "claude mcp list, then /mcp inside Claude Code"
       };
     case "OpenCode":
       return {
-        configFile: "opencode.json",
-        config: {
-          $schema: "https://opencode.ai/config.json",
-          mcp: {
-            nipmod: {
-              command: ["nipmod", "mcp", "serve"],
-              enabled: true,
-              type: "local"
-            }
-          }
-        },
+        command: "nipmod setup opencode",
         verify: "opencode mcp list"
       };
     case "Generic":

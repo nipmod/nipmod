@@ -142,8 +142,10 @@ async function checkSourceMirrors() {
 
 async function checkLiveEndpoints() {
   const endpoints = [
-    ["setup_page", "https://nipmod.com/setup", ["Use Nipmod in your agent", "codex mcp add nipmod"]],
-    ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "Connect Claude Code:", "Connect OpenCode:"]],
+    ["setup_page", "https://nipmod.com/setup", ["Use Nipmod in your agent", "nipmod setup codex"]],
+    ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "nipmod setup claude", "nipmod setup opencode"]],
+    ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
+    ["status_page", "https://nipmod.com/status", ["Public proof dashboard", "System readiness"]],
     [
       "discovery_manifest",
       "https://nipmod.com/.well-known/nipmod.json",
@@ -224,7 +226,7 @@ async function checkCodex() {
   const tempBin = await createTempNipmodBin();
   try {
     const env = { ...process.env, HOME: tempHome, PATH: `${tempBin}:${process.env.PATH ?? ""}` };
-    await run(codex, ["mcp", "add", "nipmod", "--", "nipmod", "mcp", "serve"], { env });
+    await run(nodeBinPath, [cliPath, "setup", "codex", "--codex-bin", codex], { env });
     const get = await run(codex, ["mcp", "get", "nipmod"], { env });
     assertText("codex_mcp_get", stripAnsi(get.stdout), "args: mcp serve");
   } finally {

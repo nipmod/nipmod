@@ -605,7 +605,7 @@ describe("nipmod MCP server", () => {
       host: "Codex",
       package: "gitlawb-repo-reader",
       setup: {
-        command: "codex mcp add nipmod -- nipmod mcp serve"
+        command: "nipmod setup codex"
       },
       type: "dev.nipmod.agent-demo.v1"
     });

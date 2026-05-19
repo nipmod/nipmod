@@ -118,7 +118,8 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
   await expect(page.locator(".start-grid").getByRole("link", { name: "Setup Nipmod" })).toHaveAttribute("href", "/setup");
-  await expect(page.getByRole("link", { name: "Read agent docs" })).toHaveAttribute("href", "/agents");
+  await expect(page.getByRole("link", { name: "Run demo" })).toHaveAttribute("href", "/demo");
+  await expect(page.getByRole("link", { name: "Read status" })).toHaveAttribute("href", "/status");
 });
 
 test("docs and setup navigation have distinct, correct destinations", async ({ page }) => {
@@ -160,7 +161,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   await expect(manifest).toBeOK();
   const body = await manifest.json();
   expect(body.docs.setup).toBe("https://nipmod.com/setup");
-  expect(body.agent.commands.setupCodexMcp).toBe("codex mcp add nipmod -- nipmod mcp serve");
+  expect(body.agent.commands.setupCodexMcp).toBe("nipmod setup codex");
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
   expect(body.mcp.tools).toContain("nipmod.install");
@@ -205,9 +206,10 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
     page.getByLabel("First setup command").getByText("curl -fsSLO https://nipmod.com/install.sh && bash install.sh")
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
-  await expect(page.getByText("codex mcp add nipmod -- nipmod mcp serve")).toBeVisible();
-  await expect(page.getByText("claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve")).toBeVisible();
-  await expect(page.getByText("cat > opencode.json <<'JSON")).toBeVisible();
+  await expect(page.getByText("nipmod setup agents")).toBeVisible();
+  await expect(page.getByText("nipmod setup codex")).toBeVisible();
+  await expect(page.getByText("nipmod setup claude")).toBeVisible();
+  await expect(page.getByText("nipmod setup opencode")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Tell the agent" })).toBeVisible();
   await expect(page.getByText("Search the Nipmod archive first")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Agent archive access" })).toBeVisible();
@@ -216,6 +218,22 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => (window as Window & { __nipmodCopied?: string }).__nipmodCopied ?? "")).toContain(
     "Search the Nipmod archive first"
+  );
+});
+
+test("demo and status pages expose proof backed product paths", async ({ page }) => {
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { name: "Search, inspect, plan, receipt." })).toBeVisible();
+  await expect(page.getByText("ls .nipmod/receipts")).toBeVisible();
+  await expect(page.getByText("nipmod install --plan")).toBeVisible();
+
+  await page.goto("/status");
+  await expect(page.getByRole("heading", { name: "Public proof dashboard" })).toBeVisible();
+  await expect(page.getByText("System readiness")).toBeVisible();
+  await expect(page.getByText("Platform readiness")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open JSON receipt" }).first()).toHaveAttribute(
+    "href",
+    "/compatibility/system-readiness.json"
   );
 });
 
@@ -233,11 +251,15 @@ test("internal button and navigation links resolve to existing pages and anchors
     "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
     "/agents",
     "/setup",
+    "/demo",
+    "/status",
+    "/examples",
     "/audit",
     "/bankr",
     "/trust",
     "/security",
     "/launch",
+    "/launch-kit",
     "/proof",
     "/mcp",
     "/evidence"
@@ -351,7 +373,7 @@ test("mobile more menu exposes secondary navigation", async ({ page }) => {
   await expect(panel.getByRole("link", { name: "Create" })).toBeVisible();
   await expect(panel.getByRole("link", { exact: true, name: "Agents" })).toHaveAttribute("href", "/agents");
   await expect(panel.getByRole("link", { name: "Audit" })).toHaveAttribute("href", "/audit");
-  await expect(panel.getByRole("link", { name: "Launch" })).toHaveAttribute("href", "/launch");
+  await expect(panel.getByRole("link", { exact: true, name: "Launch" })).toHaveAttribute("href", "/launch");
   await expect(panel.getByRole("link", { name: "Security" })).toBeVisible();
   await expect(panel.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   await expect(panel.getByRole("link", { name: "MCP" })).toBeVisible();

@@ -12,7 +12,7 @@
   "criteria": [
     "public source is reachable",
     "public setup path exists",
-    "agent discovery documents expose exact commands",
+    "agent discovery documents expose exact setup commands",
     "MCP server lists all expected tools",
     "read-only and controlled-write tools are separated",
     "proof package can be found, inspected and install-planned",
@@ -51,11 +51,11 @@
       "name": "Codex",
       "productReadiness": 100,
       "status": "ready",
-      "claim": "Codex can register Nipmod as a local stdio MCP server.",
-      "setupCommand": "codex mcp add nipmod -- nipmod mcp serve",
+      "claim": "Codex can register Nipmod as a local stdio MCP server through one Nipmod setup command.",
+      "setupCommand": "nipmod setup codex",
       "verifyCommand": "codex mcp get nipmod",
       "checks": [
-        "fresh HOME codex mcp add succeeds",
+        "nipmod setup codex delegates to the Codex MCP registration path",
         "codex mcp get shows command nipmod and args mcp serve",
         "nipmod mcp serve exposes the expected tool list"
       ]
@@ -66,11 +66,11 @@
       "productReadiness": 100,
       "status": "ready",
       "claim": "Claude Code can load the committed project .mcp.json and connect to Nipmod.",
-      "setupCommand": "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      "setupCommand": "nipmod setup claude",
       "config": ".mcp.json",
       "verifyCommand": "claude mcp list",
       "checks": [
-        "official claude-code CLI accepts the setup command",
+        "nipmod setup claude writes a project scoped .mcp.json",
         "project .mcp.json contains nipmod stdio config",
         "claude mcp list reports nipmod connected when nipmod is on PATH"
       ]
@@ -81,6 +81,7 @@
       "productReadiness": 100,
       "status": "ready",
       "claim": "OpenCode can load the committed opencode.json and connect to Nipmod.",
+      "setupCommand": "nipmod setup opencode",
       "config": "opencode.json",
       "verifyCommand": "opencode mcp list",
       "checks": [

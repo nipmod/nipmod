@@ -51,7 +51,7 @@ export function draftFromRepo(input: string) {
   if (trimmed.length === 0) {
     return {
       commands:
-        "nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
+        "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
       helper: "Paste a public Gitlawb repo to generate exact commands.",
       status: "empty" as const
     };
@@ -70,7 +70,7 @@ export function draftFromRepo(input: string) {
   const quotedDir = shellQuote(`${repoName}-pr`);
 
   return {
-    commands: `nipmod package pr ${quotedInput} --dir ${quotedDir}\nnipmod claim verify ${quotedInput} --json\nnipmod publish ${quotedDir} --dry-run --json`,
+    commands: `nipmod package doctor ${quotedInput} --json\nnipmod package pr ${quotedInput} --dir ${quotedDir}\nnipmod claim verify ${quotedInput} --json\nnipmod publish ${quotedDir} --dry-run --json`,
     helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`,
     status: "valid" as const
   };

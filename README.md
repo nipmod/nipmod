@@ -63,6 +63,7 @@ Standard:
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+nipmod setup agents
 ```
 
 Manual checksum verification:
@@ -85,6 +86,7 @@ nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4f
 mkdir -p nipmod-demo
 cd nipmod-demo
 nipmod install gitlawb-repo-reader
+ls .nipmod/receipts
 nipmod install
 nipmod update --plan
 nipmod sbom --json
@@ -106,6 +108,7 @@ nipmod publish . --dry-run --json
 
 ```bash
 curl -fsS "https://nipmod.com/scout/draft?repo=gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
+nipmod package doctor gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
 nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
 nipmod claim gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir . --identity .nipmod/identity.json
 nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
@@ -117,8 +120,11 @@ Scout drafts and `package pr` write local files only. The Gitlawb repo owner can
 
 - Discovery manifest: `https://nipmod.com/.well-known/nipmod.json`
 - Agent runbook: `https://nipmod.com/quickstart#agents`
+- Agent prompts: `https://nipmod.com/agent-prompts.json`
+- Demo: `https://nipmod.com/demo`
+- Status dashboard: `https://nipmod.com/status`
 - MCP docs: `https://nipmod.com/mcp`
-- MCP hosts: Codex, Claude Code and OpenCode through `nipmod mcp serve`
+- MCP hosts: Codex, Claude Code and OpenCode through `nipmod setup codex`, `nipmod setup claude` and `nipmod setup opencode`
 - System proof: `node tools/system-readiness-check.mjs --live --parallel`
 - MCP agent demo: `nipmod.demo` returns the search, view, inspect, plan, controlled install, audit and SBOM flow.
 - MCP controlled install: `nipmod.install` writes only when `confirmInstall` is `write-lockfile`.

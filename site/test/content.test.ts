@@ -93,7 +93,7 @@ describe("home content", () => {
     expect(homeContent.platformRoadmap.items[2]?.text).toContain("controlled install");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
-    expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Claim a repo", "Read agent docs"]);
+    expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Run demo", "Read status"]);
   });
 
   test("links to the human setup flow", () => {
@@ -168,6 +168,7 @@ describe("home content", () => {
     expect(homeContent.repoToPackage.claim.text).toContain("DID signature");
     expect(homeContent.repoToPackage.claim.text).not.toContain("login");
     expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package doctor gitlawb://did:key:z6Mk.../repo --json");
     expect(homeContent.repoToPackage.outputCommand).toContain("nipmod claim verify gitlawb://did:key:z6Mk.../repo --json");
   });
 });

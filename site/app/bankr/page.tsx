@@ -10,6 +10,8 @@ const catalogSubmission = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISS
 const bankrSkillDocs = "https://docs.bankr.bot/skills/in-bankr/skill-format/";
 const bankrAgentPrompt =
   "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.";
+const bankrCodexPrompt =
+  "Use Nipmod to prepare a Bankr safe package workflow. Search for gitlawb-repo-reader, inspect trust, create an install plan, and do not run wallet, trading or signing actions.";
 const bankrProofPrompt =
   "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
@@ -183,6 +185,31 @@ export default function BankrPage() {
               <CommandBlock command={step.command} label={`Copy ${step.title} command`} />
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="registry-section" aria-labelledby="bankr-agent-host-title">
+        <div className="section-head">
+          <p className="eyebrow">Agent hosts</p>
+          <h2 id="bankr-agent-host-title">Use Bankr proof from Codex or Claude Code</h2>
+          <p>
+            Bankr remains a workflow proof path. Codex and Claude Code can read the same Bankr skill files and the same
+            Nipmod archive before any install, wallet or signing action.
+          </p>
+        </div>
+        <div className="quickstart-grid">
+          <article className="quickstart-card">
+            <span>Setup</span>
+            <h2>Connect agent host</h2>
+            <p>Run the host setup first, then paste the safe Bankr prompt.</p>
+            <CommandBlock command={"nipmod setup codex\nnipmod setup claude"} label="Copy Bankr host setup commands" />
+          </article>
+          <article className="quickstart-card">
+            <span>Prompt</span>
+            <h2>Safe workflow</h2>
+            <p>The prompt keeps Bankr proof work away from wallet actions.</p>
+            <CommandBlock command={bankrCodexPrompt} label="Copy Bankr safe agent prompt" />
+          </article>
         </div>
       </section>
 

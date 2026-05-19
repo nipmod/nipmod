@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { auditProject, type AuditProjectOptions, type AuditResult } from "./audit.js";
 import { packProject, verifyBundle } from "./bundle.js";
 import { ciProject, type CiPolicyProfile, type CiResult } from "./ci.js";
@@ -41,7 +41,6 @@ import {
 } from "./install-plan.js";
 import {
   installBundlePackage,
-  installFilePackage,
   installLockfilePackages,
   listInstalledPackages,
   uninstallPackage,
@@ -73,8 +72,10 @@ import {
   type RegistrySearchResult
 } from "./registry.js";
 import { setupGitlawbHelper, type SetupGitlawbHelperResult } from "./gitlawb-setup.js";
+import { setupAgentHost, type AgentSetupResult } from "./agent-setup.js";
 import { startSetupServer } from "./setup-web.js";
 import { serveNipmodMcpStdio } from "./mcp-server.js";
+import { writeInstallReceipt } from "./install-receipt.js";
 import { createUpdatePlan, executeUpdatePlan, type UpdatePlan } from "./update.js";
 import { NIPMOD_VERSION } from "./version.js";
 import {
@@ -913,21 +914,54 @@ async function installCommand(args: string[]): Promise<CliResult> {
         version: expected.version
       }
     });
+    const bundle = verifyBundle(remote.bytes, digestFromIntegrity(integrity), { requireSignature: true });
+    const receipt = await writeInstallReceipt({
+      action: "install",
+      integrity,
+      lockfileChanged: result.lockfileChanged,
+      package: {
+        canonical: bundle.manifest.canonical,
+        name: bundle.manifest.name,
+        type: bundle.manifest.type,
+        version: bundle.manifest.version
+      },
+      projectDir: dir,
+      resolved: remote.resolved
+    });
     return {
       ok: true,
       data: {
         message: result.lockfileChanged ? "installed package" : "package already installed",
-        lockfileChanged: result.lockfileChanged
+        lockfileChanged: result.lockfileChanged,
+        receiptPath: receipt.path
       }
     };
   }
 
-  const result = await installFilePackage(parseFileSpecifier(spec), dir, { integrity });
+  const filePath = parseFileSpecifier(spec);
+  const fileBytes = await readFile(filePath);
+  const resolved = pathToFileURL(filePath).href;
+  const result = await installBundlePackage(fileBytes, resolved, dir, { integrity });
+  const bundle = verifyBundle(fileBytes, digestFromIntegrity(integrity), { requireSignature: true });
+  const receipt = await writeInstallReceipt({
+    action: "install",
+    integrity,
+    lockfileChanged: result.lockfileChanged,
+    package: {
+      canonical: bundle.manifest.canonical,
+      name: bundle.manifest.name,
+      type: bundle.manifest.type,
+      version: bundle.manifest.version
+    },
+    projectDir: dir,
+    resolved
+  });
   return {
     ok: true,
     data: {
       message: result.lockfileChanged ? "installed package" : "package already installed",
-      lockfileChanged: result.lockfileChanged
+      lockfileChanged: result.lockfileChanged,
+      receiptPath: receipt.path
     }
   };
 }
@@ -1061,6 +1095,16 @@ async function registryInstallCommand(options: {
     }
     throw error;
   }
+  const receipt = await writeInstallReceipt({
+    action: options.commandName === "install" ? "install" : "add",
+    graphPackageCount: plan.graph?.packageCount ?? 1,
+    integrity: plan.integrity,
+    lockfileChanged: result.lockfileChanged,
+    package: plan.package,
+    projectDir: options.dir,
+    registryUrl: registryUrlFromFlagsOrEnv(options.args) ?? DEFAULT_REGISTRY_URL,
+    ...(plan.resolved ? { resolved: plan.resolved } : {})
+  });
   return {
     ok: true,
     data: {
@@ -1069,6 +1113,7 @@ async function registryInstallCommand(options: {
       integrity: plan.integrity,
       lockfileChanged: result.lockfileChanged,
       package: plan.package.canonical,
+      receiptPath: receipt.path,
       resolved: plan.resolved,
       version: plan.package.version
     }
@@ -1239,6 +1284,29 @@ async function setupCommand(args: string[]): Promise<CliResult> {
   const subcommand = args[0];
   const rest = args.slice(1);
   switch (subcommand) {
+    case "agents":
+    case "claude":
+    case "codex":
+    case "opencode": {
+      const codexBin = optionalFlagValue(rest, "--codex-bin");
+      const setupOptions: Parameters<typeof setupAgentHost>[1] = {
+        dryRun: hasFlag(rest, "--dry-run"),
+        includeCodex: hasFlag(rest, "--include-codex"),
+        projectDir: optionalFlagValue(rest, "--dir") ?? process.cwd()
+      };
+      if (codexBin) {
+        setupOptions.codexBin = codexBin;
+      }
+      const result = await setupAgentHost(subcommand, setupOptions);
+      return {
+        ok: result.ready,
+        data: {
+          ...result,
+          message: formatAgentSetup(result)
+        },
+        exitCode: result.ready ? 0 : 12
+      };
+    }
     case "gitlawb": {
       const options: Parameters<typeof setupGitlawbHelper>[0] = {
         dryRun: hasFlag(rest, "--dry-run"),
@@ -1272,7 +1340,9 @@ async function setupCommand(args: string[]): Promise<CliResult> {
       };
     }
     default:
-      throw new Error("usage: nipmod setup gitlawb [--version vX.Y.Z] [--bin-dir <dir>] [--force] [--dry-run]");
+      throw new Error(
+        "usage: nipmod setup <agents|codex|claude|opencode|gitlawb> [--dir <project>] [--dry-run]"
+      );
   }
 }
 
@@ -2228,6 +2298,32 @@ function formatGitlawbSetup(result: SetupGitlawbHelperResult): string {
   return result.message;
 }
 
+function formatAgentSetup(result: AgentSetupResult): string {
+  const lines = [`nipmod setup ${result.host} ${result.ready ? "ready" : "blocked"}`];
+  if (result.files.length > 0) {
+    for (const file of result.files) {
+      lines.push(`${file.changed ? "updated" : "kept"} ${file.path}`);
+    }
+  }
+  if (result.commands.length > 0) {
+    lines.push("", "Commands:");
+    for (const command of result.commands) {
+      lines.push(`  ${command}`);
+    }
+  }
+  if (result.verifyCommands.length > 0) {
+    lines.push("", "Verify:");
+    for (const command of result.verifyCommands) {
+      lines.push(`  ${command}`);
+    }
+  }
+  lines.push("", "Tell your agent:", `  ${result.prompt}`);
+  for (const note of result.notes) {
+    lines.push("", note);
+  }
+  return lines.join("\n");
+}
+
 function formatPackageScan(candidates: PackageCandidateReport[]): string {
   const ready = candidates.filter((candidate) => candidate.status === "ready").length;
   const almost = candidates.filter((candidate) => candidate.status === "almost").length;
@@ -2352,6 +2448,7 @@ const VALUE_FLAGS = new Set([
   "--advisory-key",
   "--advisory-key-sha256",
   "--created-at",
+  "--codex-bin",
   "--dir",
   "--discovery",
   "--env",

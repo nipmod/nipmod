@@ -84,6 +84,9 @@ site/public/releases/*
 !site/public/releases/nipmod-1.2.2.tgz
 !site/public/releases/nipmod-1.2.2.tgz.sha256
 !site/public/releases/nipmod-1.2.2.tgz.sig
+!site/public/releases/nipmod-1.2.3.tgz
+!site/public/releases/nipmod-1.2.3.tgz.sha256
+!site/public/releases/nipmod-1.2.3.tgz.sig
 site/public/releases/nipmod-* [0-9].tgz*
 
 # Secrets

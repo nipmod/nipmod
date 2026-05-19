@@ -795,16 +795,23 @@ h1 {
   padding: 10px;
 }
 
-.fact-row span {
+.fact-row span,
+.fact-row a {
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid var(--border-soft);
   border-radius: 16px;
   color: var(--text);
+  display: grid;
   font-size: 14px;
   font-weight: 650;
+  place-items: center;
   line-height: 1.35;
   min-height: 54px;
   padding: 14px;
+}
+
+.fact-row a:hover {
+  background: rgba(255, 255, 255, 0.09);
 }
 
 .section-actions {

@@ -59,7 +59,7 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local server with controlled install.",
+      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local server, one command setup and controlled install.",
     note: "Statuses describe Nipmod integration work, not partner approval.",
     items: [
       {
@@ -82,9 +82,9 @@ export const homeContent = {
         name: "Agent hosts",
         status: "MCP ready",
         label: "Codex, Claude Code, OpenCode",
-      text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
-      href: "/setup",
-      cta: "Setup agent"
+        text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
+        href: "/setup",
+        cta: "Setup agent"
       }
     ]
   },
@@ -145,14 +145,14 @@ export const homeContent = {
       href: "/setup"
     },
     {
-      title: "Claim a repo",
-      text: "Turn a Gitlawb repo into a package path you control.",
-      href: "/candidates"
+      title: "Run demo",
+      text: "Search, inspect, plan and write an install receipt from one package path.",
+      href: "/demo"
     },
     {
-      title: "Read agent docs",
-      text: "Connect the CLI and MCP server to agent workflows.",
-      href: "/agents"
+      title: "Read status",
+      text: "Check system and platform receipts before repeating a claim.",
+      href: "/status"
     }
   ],
   quickstartSteps: [
@@ -462,7 +462,7 @@ export const homeContent = {
     inputLabel: "Gitlawb repo",
     inputPlaceholder: "gitlawb://did:key:z6Mk.../repo",
     outputTitle: "Draft output",
-    outputCommand: "nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
+    outputCommand: "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
     steps: [
       {
         label: "Paste",
@@ -470,7 +470,7 @@ export const homeContent = {
       },
       {
         label: "Draft",
-        text: "Nipmod creates a package manifest, permissions checklist and install preview."
+        text: "Nipmod creates a package manifest, permissions checklist, owner claim check and publish dry run."
       },
       {
         label: "Claim",

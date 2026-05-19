@@ -5,8 +5,8 @@ export const mcpContent = {
   secondaryAction: "Trust",
   oneCommand: {
     title: "One local command",
-    text: "Install the CLI once, add the MCP server to the host, then tell the agent to use Nipmod before installing agent packages.",
-    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod mcp serve"
+    text: "Install the CLI once, run a host setup command, then tell the agent to use Nipmod before installing agent packages.",
+    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents"
   },
   safety: [
     {
@@ -88,7 +88,7 @@ export const mcpContent = {
   hosts: [
     {
       name: "Codex",
-      command: "codex mcp add nipmod -- nipmod mcp serve",
+      command: "nipmod setup codex",
       configName: "~/.codex/config.toml",
       config: `[mcp_servers.nipmod]
 command = "nipmod"
@@ -98,7 +98,7 @@ args = ["mcp", "serve"]`,
     },
     {
       name: "Claude Code",
-      command: "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
+      command: "nipmod setup claude",
       configName: ".mcp.json",
       config: `{
   "mcpServers": {
@@ -115,7 +115,7 @@ args = ["mcp", "serve"]`,
     },
     {
       name: "OpenCode",
-      command: "Create opencode.json",
+      command: "nipmod setup opencode",
       configName: "opencode.json",
       config: `{
   "$schema": "https://opencode.ai/config.json",

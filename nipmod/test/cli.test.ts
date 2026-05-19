@@ -1,5 +1,5 @@
 import { createHash, generateKeyPairSync, sign } from "node:crypto";
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -53,6 +53,45 @@ describe("nipmod CLI", () => {
     expect(short.stdout).toBe(`${NIPMOD_VERSION}\n`);
   }, 15_000);
 
+  test("sets up Claude Code and OpenCode project MCP config", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-agent-setup-"));
+
+    const claude = JSON.parse((await execaNode(["src/cli.ts", "setup", "claude", "--dir", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { changed: boolean; files: Array<{ path: string }>; host: string; prompt: string };
+    };
+    const opencode = JSON.parse((await execaNode(["src/cli.ts", "setup", "opencode", "--dir", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { changed: boolean; files: Array<{ path: string }>; host: string };
+    };
+
+    expect(claude.ok).toBe(true);
+    expect(claude.data.host).toBe("claude");
+    expect(claude.data.changed).toBe(true);
+    expect(claude.data.prompt).toContain("Use Nipmod before installing agent packages");
+    expect(opencode.ok).toBe(true);
+    expect(opencode.data.host).toBe("opencode");
+    expect(opencode.data.changed).toBe(true);
+
+    await expect(readFile(join(workspace, ".mcp.json"), "utf8")).resolves.toContain('"nipmod"');
+    await expect(readFile(join(workspace, "opencode.json"), "utf8")).resolves.toContain('"nipmod"');
+  }, 15_000);
+
+  test("dry run agent setup does not write project files", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-agent-dry-run-"));
+    const result = JSON.parse((await execaNode(["src/cli.ts", "setup", "agents", "--dir", workspace, "--dry-run", "--json"])).stdout) as {
+      ok: true;
+      data: { commands: string[]; host: string; ready: boolean };
+    };
+
+    expect(result.ok).toBe(true);
+    expect(result.data.host).toBe("agents");
+    expect(result.data.ready).toBe(true);
+    expect(result.data.commands).toContain("nipmod setup claude");
+    await expect(readFile(join(workspace, ".mcp.json"), "utf8")).rejects.toThrow(/ENOENT/);
+    await expect(readFile(join(workspace, "opencode.json"), "utf8")).rejects.toThrow(/ENOENT/);
+  }, 15_000);
+
   test("initializes, packs, verifies, and installs a local package", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-"));
     const pkg = join(workspace, "pkg");
@@ -77,6 +116,11 @@ describe("nipmod CLI", () => {
     expect(packageKeys).toHaveLength(1);
     expect(packageKeys[0]).toMatch(/^pkg:did:key:z[A-Za-z0-9]+\/cli-skill@0\.1\.0$/);
     expect(lockfile.packages[packageKeys[0]].integrity).toBe(`sha256-${packed.data.digest}`);
+    const receiptFiles = await readdir(join(app, ".nipmod", "receipts"));
+    expect(receiptFiles).toHaveLength(1);
+    await expect(readFile(join(app, ".nipmod", "receipts", receiptFiles[0]!), "utf8")).resolves.toContain(
+      "dev.nipmod.install-receipt.v1"
+    );
   }, 15_000);
 
   test("init rejects invalid package names before writing a manifest", async () => {
@@ -166,6 +210,22 @@ describe("nipmod CLI", () => {
         app,
         "--json"
       ]);
+      const receiptFiles = await readdir(join(app, ".nipmod", "receipts"));
+      expect(receiptFiles).toHaveLength(1);
+      const receipt = JSON.parse(await readFile(join(app, ".nipmod", "receipts", receiptFiles[0]!), "utf8")) as {
+        action: string;
+        package: { canonical: string; name: string; version: string };
+        type: string;
+      };
+      expect(receipt).toMatchObject({
+        action: "add",
+        package: {
+          canonical: manifest.canonical,
+          name: "remote-agent",
+          version: manifest.version
+        },
+        type: "dev.nipmod.install-receipt.v1"
+      });
       await rm(join(app, ".nipmod"), { force: true, recursive: true });
 
       const failed = await expectCliJsonFailure(["src/cli.ts", "install", "--dir", app, "--offline", "--json"]);

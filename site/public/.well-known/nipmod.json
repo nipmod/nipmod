@@ -10,6 +10,10 @@
     "install": "https://nipmod.com/quickstart#install",
     "setup": "https://nipmod.com/setup",
     "agents": "https://nipmod.com/agents",
+    "demo": "https://nipmod.com/demo",
+    "status": "https://nipmod.com/status",
+    "examples": "https://nipmod.com/examples",
+    "launchKit": "https://nipmod.com/launch-kit",
     "packages": "https://nipmod.com/packages",
     "createPackage": "https://nipmod.com/package",
     "mcp": "https://nipmod.com/mcp",
@@ -38,9 +42,11 @@
   },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",
+    "prompts": "https://nipmod.com/agent-prompts.json",
     "runbook": "https://nipmod.com/agents",
     "workflow": [
       "install",
+      "setupAgents",
       "setupCodexMcp",
       "setupClaudeMcp",
       "setupOpenCodeMcp",
@@ -64,9 +70,10 @@
     ],
     "commands": {
       "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-      "setupCodexMcp": "codex mcp add nipmod -- nipmod mcp serve",
-      "setupClaudeMcp": "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve",
-      "setupOpenCodeMcp": "cat > opencode.json <<'JSON'\n{\n  \"$schema\": \"https://opencode.ai/config.json\",\n  \"mcp\": {\n    \"nipmod\": {\n      \"type\": \"local\",\n      \"command\": [\"nipmod\", \"mcp\", \"serve\"],\n      \"enabled\": true\n    }\n  }\n}\nJSON",
+      "setupAgents": "nipmod setup agents",
+      "setupCodexMcp": "nipmod setup codex",
+      "setupClaudeMcp": "nipmod setup claude",
+      "setupOpenCodeMcp": "nipmod setup opencode",
       "verifyInstaller": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
       "setupPublish": "nipmod setup gitlawb",
       "doctor": "nipmod doctor --online",
@@ -179,16 +186,16 @@
     "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.2.2",
-      "artifact": "https://nipmod.com/releases/nipmod-1.2.2.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.2.2.tgz.sig",
+      "version": "1.2.3",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.3.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.3.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEAtTumyHEstKhOe5W5FNo4nOzhxzBLGq+I7AIN9oUCELQ=",
         "spkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
       },
-      "artifactSha256": "170012ebd5c2add54ed8b38326149ae68a883ace3ff44584ce6312cd90ad2ac6"
+      "artifactSha256": "2f74630d8ae37b95b6b428760fa514d510b844e69d4119a3e18eada170775a24"
     },
-    "scriptSha256": "bf1c38c5eef84bc58aeb86de0f71c4271d3df007a8dd7c0a4d8843ef7387594d"
+    "scriptSha256": "a442d4c4675c5e925f37e4ba623e6e870215f17c87bb8ff1265eb9db1d30f607"
   }
 }
