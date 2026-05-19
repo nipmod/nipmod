@@ -173,6 +173,7 @@ node tools/supply-chain-check.mjs
 - Publishing: `docs/publish.md`
 - Package Claim: `docs/package-claim.md`
 - Scout Agent: `docs/scout-agent.md`
+- Telegram bot: `docs/telegram-bot.md`
 - MCP hosts: `docs/mcp-hosts.md`
 - Public launch packet: `docs/public-launch-packet.md`
 - Security: `SECURITY.md`
