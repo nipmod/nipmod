@@ -97,7 +97,8 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByText("PR open", { exact: true })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Agent hosts" })).toBeVisible();
   await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode can read Nipmod through MCP")).toBeVisible();
+  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode can use Nipmod through MCP")).toBeVisible();
+  await expect(platformRoadmap.getByText("controlled install")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
   await expect(platformRoadmap.getByRole("link", { name: "View MCP setup" })).toHaveAttribute("href", "/mcp");
@@ -111,7 +112,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
   await expect(page.getByText("Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files.")).toBeVisible();
+  await expect(page.getByText("Yes. Agents can use the CLI, the MCP server and the machine readable discovery files.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
   await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
 
@@ -159,6 +160,8 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   const body = await manifest.json();
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
+  expect(body.mcp.tools).toContain("nipmod.install");
+  expect(body.mcp.tools).toContain("nipmod.demo");
 });
 
 test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
@@ -167,6 +170,8 @@ test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "One link. Full package workflow." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Tell your agent once" })).toBeVisible();
   await expect(page.getByText("Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "MCP demo" })).toBeVisible();
+  await expect(page.getByText("nipmod.demo")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Claim drafts" })).toBeVisible();
   await expect(page.getByText("Use Scout candidates when an existing Gitlawb repo should become a claimed package.")).toBeVisible();
   await expect(page.getByText("curl -fsS https://nipmod.com/scout/candidates")).toBeVisible();

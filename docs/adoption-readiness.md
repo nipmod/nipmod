@@ -10,7 +10,7 @@ Adoption readiness is not the same as real adoption. Readiness can be made compl
 | Package author | Init, validate, publish dry run | Registry candidate JSON. |
 | Gitlawb repo owner | Package draft and manifest validate | Claim preview without ownership claim. |
 | Security reviewer | Review packet and proof loop | Signed review packet or findings. |
-| Agent host maintainer | MCP read only setup | Host compatibility report. |
+| Agent host maintainer | MCP setup with controlled install | Host compatibility report. |
 
 ## Public Ask Requirements
 

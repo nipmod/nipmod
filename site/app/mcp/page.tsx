@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CommandBlock } from "../command-block";
 import { mcpContent } from "./content";
 
 export const metadata: Metadata = {
@@ -29,6 +30,15 @@ export default function McpPage() {
             {mcpContent.secondaryAction}
           </a>
         </div>
+      </section>
+
+      <section className="trust-section" aria-labelledby="one-command-title">
+        <div>
+          <p className="eyebrow">Setup</p>
+          <h2 id="one-command-title">{mcpContent.oneCommand.title}</h2>
+          <p>{mcpContent.oneCommand.text}</p>
+        </div>
+        <CommandBlock command={mcpContent.oneCommand.command} label="Copy MCP setup command" />
       </section>
 
       <section className="safety-strip" aria-label="MCP safety model">
@@ -93,7 +103,48 @@ export default function McpPage() {
               <pre className="host-config">
                 <code>{host.config}</code>
               </pre>
+              <p className="panel-copy">{host.verify}</p>
+              <CommandBlock command={host.prompt} label={`Copy ${host.name} prompt`} />
             </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="trust-section" aria-labelledby="demo-title">
+        <div>
+          <p className="eyebrow">Demo</p>
+          <h2 id="demo-title">{mcpContent.demo.headline}</h2>
+          <p>{mcpContent.demo.lead}</p>
+        </div>
+        <div className="check-list">
+          <article className="check-row">
+            <span className="check-dot check-ok" aria-hidden="true" />
+            <div>
+              <h3>Tell the agent</h3>
+              <CommandBlock command={mcpContent.demo.prompt} label="Copy demo prompt" />
+            </div>
+          </article>
+          {mcpContent.demo.steps.map((step) => (
+            <article className="check-row" key={step}>
+              <span className="check-dot check-ok" aria-hidden="true" />
+              <div>
+                <h3>{step}</h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="trust-section" aria-labelledby="official-docs-title">
+        <div>
+          <p className="eyebrow">References</p>
+          <h2 id="official-docs-title">Host docs</h2>
+        </div>
+        <div className="package-links">
+          {mcpContent.docs.map((doc) => (
+            <a aria-label={`${doc.label} opens in a new tab`} href={doc.href} key={doc.href} rel="noreferrer" target="_blank">
+              {doc.label}
+            </a>
           ))}
         </div>
       </section>

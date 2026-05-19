@@ -1,13 +1,16 @@
 import { spawn } from "node:child_process";
+import { createServer } from "node:http";
 import { chmod, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, test } from "vitest";
+import { packProject } from "../src/bundle.js";
 import { createNipmodMcpServer } from "../src/mcp-server.js";
 import { generateIdentity } from "../src/identity.js";
 import { createPackageClaimProof } from "../src/package-claim.js";
 import { createTransparencyLogFromLeaves, signWitnessStatement } from "../src/transparency.js";
+import { createSignedSkillProject } from "./helpers/package.js";
 
 describe("nipmod MCP server", () => {
   test("initializes and lists accurate default tool safety annotations", async () => {
@@ -42,7 +45,9 @@ describe("nipmod MCP server", () => {
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.install",
       "nipmod.update_plan",
+      "nipmod.demo",
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
@@ -65,7 +70,9 @@ describe("nipmod MCP server", () => {
       "nipmod.view": true,
 	      "nipmod.inspect": true,
 	      "nipmod.install_plan": true,
+	      "nipmod.install": false,
 	      "nipmod.update_plan": true,
+	      "nipmod.demo": true,
 	      "nipmod.publish_plan": true,
       "nipmod.claim_verify": true,
       "nipmod.claim_index": true,
@@ -426,6 +433,11 @@ describe("nipmod MCP server", () => {
 
     expect(result.error).toBeUndefined();
     expect(result.result.structuredContent).toMatchObject({
+      agent: {
+        installSafety: "quiet manifest permissions; still inspect, plan and audit before use",
+        trustSummary: "verified/100 trust, no permissions",
+        useCase: "agent skill instructions or workflow guidance"
+      },
       canonical: fixture.canonical,
       canonicalInstall: `nipmod install ${fixture.canonical}@0.1.0`,
       install: "nipmod install view-agent",
@@ -509,6 +521,96 @@ describe("nipmod MCP server", () => {
       }
     });
     await expect(readFile(join(app, "nipmod.lock.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  test("installs through MCP only with explicit lockfile confirmation", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-install-"));
+    const app = join(workspace, "app");
+    const project = await createSignedSkillProject("nipmod-mcp-install-package-");
+    const packed = await packProject(project.dir, {
+      signingPrivateKeyPem: project.identity.privateKeyPem
+    });
+    const serverFixture = await serveBundle(packed.bytes, project.manifest.canonical, project.manifest.version);
+    const transparency = cliTransparency(project.manifest.canonical, project.identity.did, packed.digest);
+    const registryPath = join(workspace, "registry.json");
+    const registry = cliRegistry(project.manifest.canonical, project.identity.did, packed.digest, transparency);
+    registry.packages[0]!.resolved = serverFixture.resolved;
+    registry.packages[0]!.sourceRepo = serverFixture.sourceRepo;
+    await mkdir(app, { recursive: true });
+    await writeFile(registryPath, `${JSON.stringify(registry)}\n`);
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    try {
+      const result = await server.handleRequest({
+        id: 42,
+        jsonrpc: "2.0",
+        method: "tools/call",
+        params: {
+          arguments: {
+            allowCustomRoots: true,
+            allowedLogIds: [transparency.log.treeHead.logId],
+            allowedWitnesses: [transparency.witness.witness],
+            confirmInstall: "write-lockfile",
+            expectedCanonical: project.manifest.canonical,
+            expectedIntegrity: `sha256-${packed.digest}`,
+            expectedVersion: project.manifest.version,
+            projectDir: app,
+            registryUrl: pathToFileURL(registryPath).href,
+            specifier: `${project.manifest.canonical}@${project.manifest.version}`
+          },
+          name: "nipmod.install"
+        }
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.result.structuredContent).toMatchObject({
+        graphPackageCount: 1,
+        installed: true,
+        lockfileChanged: true,
+        package: {
+          canonical: project.manifest.canonical,
+          version: project.manifest.version
+        },
+        type: "dev.nipmod.mcp-install-result.v1"
+      });
+      const lockfile = JSON.parse(await readFile(join(app, "nipmod.lock.json"), "utf8")) as {
+        packages: Record<string, unknown>;
+      };
+      expect(Object.keys(lockfile.packages)).toEqual([`${project.manifest.canonical}@${project.manifest.version}`]);
+    } finally {
+      await serverFixture.close();
+    }
+  });
+
+  test("returns a complete agent demo flow through tools/call", async () => {
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 43,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          host: "Codex",
+          package: "gitlawb-repo-reader"
+        },
+        name: "nipmod.demo"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      host: "Codex",
+      package: "gitlawb-repo-reader",
+      setup: {
+        command: "codex mcp add nipmod -- nipmod mcp serve"
+      },
+      type: "dev.nipmod.agent-demo.v1"
+    });
+    expect(JSON.stringify(result.result.structuredContent)).toContain("nipmod.install");
+    expect(JSON.stringify(result.result.structuredContent)).toContain("write-lockfile");
   });
 
   test("creates an update plan without applying a default policy profile", async () => {
@@ -793,7 +895,9 @@ describe("nipmod MCP server", () => {
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.install",
       "nipmod.update_plan",
+      "nipmod.demo",
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
@@ -965,6 +1069,62 @@ function cliRegistry(
       ...transparency.log,
       witnesses: [transparency.witness]
     }
+  };
+}
+
+async function serveBundle(
+  bytes: Buffer,
+  canonical: string,
+  version: string
+): Promise<{
+  close: () => Promise<void>;
+  resolved: string;
+  sourceRepo: string;
+}> {
+  const owner = canonical.slice("pkg:did:key:".length, canonical.indexOf("/"));
+  const name = canonical.split("/").at(-1);
+  if (!name) {
+    throw new Error("missing package name");
+  }
+  const bundlePath = `/api/v1/repos/${owner}/${name}/blob/releases/${version}/bundle.nipmod`;
+  const server = createServer((request, response) => {
+    if (request.url !== bundlePath) {
+      response.writeHead(404);
+      response.end("not found");
+      return;
+    }
+    response.writeHead(200, {
+      "content-length": String(bytes.byteLength),
+      "content-type": "application/octet-stream"
+    });
+    response.end(bytes);
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      server.off("error", reject);
+      resolve();
+    });
+  });
+  const address = server.address();
+  if (!address || typeof address === "string") {
+    throw new Error("test server did not bind to tcp");
+  }
+  const origin = `http://127.0.0.1:${address.port}`;
+  return {
+    close: () =>
+      new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      }),
+    resolved: `${origin}${bundlePath}`,
+    sourceRepo: `${origin}/${owner}/${name}.git`
   };
 }
 

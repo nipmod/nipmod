@@ -1,12 +1,21 @@
 export const mcpContent = {
   headline: "Connect Nipmod to agents",
-  lead: "Run the CLI as MCP for search, view, trust reports, install and update plans, claim proof, verify, audit, SBOM and explain.",
+  lead: "Run the CLI as MCP for search, view, trust reports, plans, controlled install, claim proof, verify, audit, SBOM and explain.",
   primaryAction: "Install",
   secondaryAction: "Trust",
+  oneCommand: {
+    title: "One local command",
+    text: "Install the CLI once, add the MCP server to the host, then tell the agent to use Nipmod before installing agent packages.",
+    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod mcp serve"
+  },
   safety: [
     {
-      label: "Default safe",
-      text: "Hosts can ask for package facts, exact metadata, trust reports and install plans. They cannot add or install through MCP."
+      label: "Read first",
+      text: "Hosts can search, view exact metadata, inspect trust and create install plans before any workspace write."
+    },
+    {
+      label: "Controlled install",
+      text: "nipmod.install writes only after confirmInstall is set to write-lockfile. Agents can pin expected package, version and integrity."
     },
     {
       label: "Unsigned preview",
@@ -30,7 +39,9 @@ export const mcpContent = {
     { name: "nipmod.view", safety: "read only" },
     { name: "nipmod.inspect", safety: "read only" },
     { name: "nipmod.install_plan", safety: "read only" },
+    { name: "nipmod.install", safety: "controlled workspace write" },
     { name: "nipmod.update_plan", safety: "read only" },
+    { name: "nipmod.demo", safety: "read only" },
     { name: "nipmod.publish_plan", safety: "gated dry run" },
     { name: "nipmod.claim_verify", safety: "read only" },
     { name: "nipmod.claim_index", safety: "read only" },
@@ -54,14 +65,24 @@ export const mcpContent = {
         '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"specifier":"gitlawb-repo-reader"}}}'
     },
     {
+      label: "Install after approval",
+      command:
+        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.install","arguments":{"specifier":"gitlawb-repo-reader","confirmInstall":"write-lockfile"}}}'
+    },
+    {
+      label: "Demo flow",
+      command:
+        '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"nipmod.demo","arguments":{"host":"Codex","package":"gitlawb-repo-reader"}}}'
+    },
+    {
       label: "Verify claim",
       command:
-        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.claim_verify","arguments":{"repo":"gitlawb://did:key:z6Mk.../repo"}}}'
+        '{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"nipmod.claim_verify","arguments":{"repo":"gitlawb://did:key:z6Mk.../repo"}}}'
     },
     {
       label: "Audit",
       command:
-        '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"nipmod.audit","arguments":{"online":true}}}'
+        '{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"nipmod.audit","arguments":{}}}'
     }
   ],
   hosts: [
@@ -71,7 +92,9 @@ export const mcpContent = {
       configName: "~/.codex/config.toml",
       config: `[mcp_servers.nipmod]
 command = "nipmod"
-args = ["mcp", "serve"]`
+args = ["mcp", "serve"]`,
+      verify: "codex mcp list",
+      prompt: "Use Nipmod to find gitlawb-repo-reader, inspect it, plan install, then install only after I approve the lockfile write."
     },
     {
       name: "Claude Code",
@@ -86,7 +109,9 @@ args = ["mcp", "serve"]`
       "env": {}
     }
   }
-}`
+}`,
+      verify: "claude mcp list, then /mcp inside Claude Code",
+      prompt: "Use the nipmod MCP server. Search, view, inspect and plan before installing any agent package."
     },
     {
       name: "OpenCode",
@@ -101,7 +126,37 @@ args = ["mcp", "serve"]`
       "enabled": true
     }
   }
-}`
+}`,
+      verify: "opencode mcp list",
+      prompt: "use nipmod to search packages, inspect trust and install only after a plan is ready"
+    }
+  ],
+  demo: {
+    headline: "Agent demo path",
+    lead: "This is the proof path agents can run through MCP with gitlawb-repo-reader as the live package.",
+    prompt:
+      "Use Nipmod for package discovery before installing agent packages. Search first, view exact metadata, inspect trust, run an install plan, install only after approval, then audit and export SBOM.",
+    steps: [
+      "Search gitlawb-repo-reader",
+      "View exact metadata and agent use case",
+      "Inspect trust, source, digest and permissions",
+      "Create an install plan without writes",
+      "Call nipmod.install only with confirmInstall set to write-lockfile",
+      "Run audit and SBOM after install"
+    ]
+  },
+  docs: [
+    {
+      label: "Codex docs",
+      href: "https://developers.openai.com/learn/docs-mcp"
+    },
+    {
+      label: "Claude Code MCP docs",
+      href: "https://code.claude.com/docs/en/mcp"
+    },
+    {
+      label: "OpenCode MCP docs",
+      href: "https://dev.opencode.ai/docs/mcp-servers"
     }
   ]
 } as const;

@@ -84,11 +84,13 @@ describe("home content", () => {
     expect(homeContent.gitlawbReason.text).toContain("signed pushes");
     expect(homeContent.platformRoadmap.headline).toBe("Platform status");
     expect(homeContent.platformRoadmap.note).toContain("not partner approval");
+    expect(homeContent.platformRoadmap.lead).toContain("controlled install");
     expect(homeContent.platformRoadmap.items.map((item) => `${item.name}:${item.status}`)).toEqual([
       "Gitlawb:Live",
       "Bankr:PR open",
       "Agent hosts:MCP ready"
     ]);
+    expect(homeContent.platformRoadmap.items[2]?.text).toContain("controlled install");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
     expect(homeContent.startCards.map((card) => card.title)).toEqual(["Install Nipmod", "Claim a repo", "Read agent docs"]);

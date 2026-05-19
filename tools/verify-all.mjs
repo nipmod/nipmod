@@ -22,33 +22,41 @@ const SOURCE_COMMIT = /^[a-f0-9]{40}$/;
 const SOURCE_TAG = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
 await run("pnpm", ["--dir", "site", "test"]);
-await run("pnpm", [
-  "--dir",
-  "site",
-  "exec",
-  "vitest",
-  "run",
-	  "../tools/release-signing.test.mjs",
-	  "../tools/advisory-signing.test.mjs",
-	  "../tools/advisory-drill.test.mjs",
-	  "../tools/witness-server.test.mjs",
-	  "../tools/witness-worker.test.mjs",
-	  "../tools/build-package-index.test.mjs",
-	  "../tools/rebuild-verified-registry.test.mjs",
-	  "../tools/live-audit-smoke.test.mjs",
-	  "../tools/receive-pack-abuse-smoke.test.mjs",
-	  "../tools/prod-synthetic-monitor.test.mjs",
-	  "../tools/restore-drill.test.mjs",
-	  "../tools/prod-alert-runner.test.mjs",
-	  "../tools/monitor-server.test.mjs",
-	  "../tools/scout-agent.test.mjs",
-	  "../tools/scout-server.test.mjs",
-	  "../tools/prod-load-smoke.test.mjs",
-	  "../tools/node-edge-resilience-smoke.test.mjs",
-	  "../tools/first-party-packages.test.mjs",
-	  "../tools/generate-review-packet.test.mjs",
-	  "../tools/public-proof-loop.test.mjs"
-	]);
+await run(
+  "pnpm",
+  [
+    "--dir",
+    "site",
+    "exec",
+    "vitest",
+    "run",
+    "../tools/release-signing.test.mjs",
+    "../tools/advisory-signing.test.mjs",
+    "../tools/advisory-drill.test.mjs",
+    "../tools/witness-server.test.mjs",
+    "../tools/witness-worker.test.mjs",
+    "../tools/build-package-index.test.mjs",
+    "../tools/rebuild-verified-registry.test.mjs",
+    "../tools/live-audit-smoke.test.mjs",
+    "../tools/receive-pack-abuse-smoke.test.mjs",
+    "../tools/prod-synthetic-monitor.test.mjs",
+    "../tools/restore-drill.test.mjs",
+    "../tools/prod-alert-runner.test.mjs",
+    "../tools/monitor-server.test.mjs",
+    "../tools/scout-agent.test.mjs",
+    "../tools/scout-server.test.mjs",
+    "../tools/prod-load-smoke.test.mjs",
+    "../tools/node-edge-resilience-smoke.test.mjs",
+    "../tools/first-party-packages.test.mjs",
+    "../tools/generate-review-packet.test.mjs",
+    "../tools/public-proof-loop.test.mjs"
+  ],
+  {
+    env: {
+      NIPMOD_INCLUDE_OPERATOR_TESTS: "1"
+    }
+  }
+);
 await run("pnpm", ["--dir", "nipmod", "test"]);
 await cleanBuildArtifacts();
 await run("pnpm", ["--dir", "site", "build"]);

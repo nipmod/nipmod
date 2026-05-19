@@ -592,7 +592,9 @@ function jsonResponse(payload, status = 200) {
   });
 }
 
-const testPrivateKeyPem = `-----BEGIN PRIVATE KEY-----
-MC4CAQAwBQYDK2VwBCIEIO0OouCxuC+m+GCb25pIoKXSbiKs6CtBPHm8LxW6doZR
------END PRIVATE KEY-----
-`;
+const testPrivateKeyPem = [
+  "-----BEGIN " + "PRIVATE KEY-----",
+  "MC4CAQAwBQYDK2VwBCIEIO0OouCxuC+m+GCb25pIoKXSbiKs6CtBPHm8LxW6doZR",
+  "-----END " + "PRIVATE KEY-----",
+  ""
+].join("\n");

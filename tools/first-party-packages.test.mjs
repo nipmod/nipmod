@@ -1,11 +1,15 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { generateKeyPairSync } from "node:crypto";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import { describe, expect, test } from "vitest";
 
 const root = resolve(import.meta.dirname, "..");
+const requireFromNipmod = createRequire(join(root, "nipmod", "package.json"));
+const { base58 } = requireFromNipmod("@scure/base");
 const packageRoot = join(root, "packages", "first-party");
 const starterPackages = [
   "github-issue-triage",
@@ -140,10 +144,24 @@ describe("first-party starter packages", () => {
 async function expectPackable(dir, name) {
   const outDir = await mkdtemp(join(tmpdir(), "nipmod-first-party-pack-"));
   const identityPath = join(root, ".nipmod", "first-party-identities", `${name}.json`);
+  const packable = existsSync(identityPath) ? { dir, identityPath, tempRoot: null } : await createTempSignedPackageCopy(dir, name);
   try {
     const result = spawnSync(
       "pnpm",
-      ["--dir", "nipmod", "exec", "tsx", "src/cli.ts", "pack", dir, "--identity", identityPath, "--out", outDir, "--json"],
+      [
+        "--dir",
+        "nipmod",
+        "exec",
+        "tsx",
+        "src/cli.ts",
+        "pack",
+        packable.dir,
+        "--identity",
+        packable.identityPath,
+        "--out",
+        outDir,
+        "--json"
+      ],
       {
         cwd: root,
         encoding: "utf8"
@@ -155,5 +173,44 @@ async function expectPackable(dir, name) {
     expect(payload.data.digest).toMatch(/^[a-f0-9]{64}$/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
+    if (packable.tempRoot) {
+      await rm(packable.tempRoot, { recursive: true, force: true });
+    }
   }
+}
+
+async function createTempSignedPackageCopy(dir, name) {
+  const tempRoot = await mkdtemp(join(tmpdir(), "nipmod-first-party-signed-copy-"));
+  const tempPackageDir = join(tempRoot, name);
+  await cp(dir, tempPackageDir, { recursive: true });
+
+  const identity = generateTestIdentity();
+  const manifestPath = join(tempPackageDir, "nipmod.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const slug = manifest.canonical.slice(manifest.canonical.lastIndexOf("/") + 1);
+  manifest.canonical = `pkg:${identity.did}/${slug}`;
+  manifest.publish.signingKey = identity.did;
+
+  const identityDir = join(tempPackageDir, ".nipmod");
+  const identityPath = join(identityDir, "identity.json");
+  await mkdir(identityDir, { recursive: true });
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeFile(identityPath, `${JSON.stringify(identity, null, 2)}\n`, { mode: 0o600 });
+
+  return { dir: tempPackageDir, identityPath, tempRoot };
+}
+
+function generateTestIdentity() {
+  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
+  const privateKeyPem = privateKey.export({ format: "pem", type: "pkcs8" }).toString();
+  const publicKeyPem = publicKey.export({ format: "pem", type: "spki" }).toString();
+  const spkiDer = publicKey.export({ format: "der", type: "spki" });
+  const rawPublicKey = Buffer.from(spkiDer).subarray(-32);
+  const did = `did:key:z${base58.encode(Buffer.concat([Buffer.from([0xed, 0x01]), rawPublicKey]))}`;
+
+  return {
+    did,
+    privateKeyPem,
+    publicKeyPem
+  };
 }

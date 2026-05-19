@@ -125,14 +125,17 @@ describe("nipmod discovery manifest", () => {
       "install",
       "installPackage",
       "installPlan",
+      "mcpControlledInstall",
+      "mcpDemo",
       "packagePr",
       "publishDryRun",
       "sbom",
       "search",
       "setupPublish",
-      "verifyInstaller"
+      "verifyInstaller",
+      "view"
     ]);
-    expect(Object.keys(manifest.mcp).sort()).toEqual(["docs", "serverCommand", "tools"]);
+    expect(Object.keys(manifest.mcp).sort()).toEqual(["demoPackage", "docs", "installConfirmation", "serverCommand", "tools"]);
     expect(Object.keys(manifest.node).sort()).toEqual(["health", "url"]);
     expect(Object.keys(manifest.witness).sort()).toEqual(["did", "health", "statements"]);
     expect(Object.keys(manifest.transparency).sort()).toEqual(["checkpoint", "log", "logId"]);
@@ -309,7 +312,10 @@ describe("nipmod discovery manifest", () => {
       "doctor",
       "search",
       "inspect",
+      "view",
       "installPlan",
+      "mcpDemo",
+      "mcpControlledInstall",
       "installPackage",
       "addPackage",
       "audit",
@@ -328,23 +334,32 @@ describe("nipmod discovery manifest", () => {
       inspect: `nipmod inspect ${agentDemoPackage} --json`,
       install: shortInstallerCommand,
       installPlan: `nipmod install --plan ${agentDemoPackage} --json`,
+      mcpControlledInstall:
+        "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.install\",\"arguments\":{\"specifier\":\"gitlawb-repo-reader\",\"confirmInstall\":\"write-lockfile\"}}}",
+      mcpDemo:
+        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.demo\",\"arguments\":{\"host\":\"Codex\",\"package\":\"gitlawb-repo-reader\"}}}",
       installPackage: `nipmod install ${agentDemoPackage}`,
       packagePr: "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json",
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
       setupPublish: "nipmod setup gitlawb",
+      view: "nipmod view gitlawb-repo-reader --json",
       verifyInstaller: verifyInstallerCommand
     });
     expect(manifest.mcp).toEqual({
+      demoPackage: "gitlawb-repo-reader",
       docs: "https://nipmod.com/mcp",
+      installConfirmation: "confirmInstall must be write-lockfile before nipmod.install writes a local lockfile",
       serverCommand: "nipmod mcp serve",
       tools: [
         "nipmod.search",
         "nipmod.view",
         "nipmod.inspect",
         "nipmod.install_plan",
+        "nipmod.install",
         "nipmod.update_plan",
+        "nipmod.demo",
         "nipmod.publish_plan",
         "nipmod.claim_verify",
         "nipmod.claim_index",

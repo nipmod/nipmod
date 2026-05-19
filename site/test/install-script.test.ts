@@ -13,6 +13,9 @@ const releaseName = `nipmod-${version}.tgz`;
 const releasePath = join(import.meta.dirname, "..", "public", "releases", releaseName);
 const releaseChecksumPath = `${releasePath}.sha256`;
 const releaseSignaturePath = `${releasePath}.sig`;
+const releasePublicKey = JSON.parse(
+  await readFile(join(import.meta.dirname, "..", "..", "tools", "release-signing-public-key.json"), "utf8")
+) as { publicKeySpkiSha256: string };
 const doctorSuccess = {
   ok: true,
   data: {
@@ -235,7 +238,7 @@ describe("install script", () => {
       signatureContent: JSON.stringify({
         algorithm: "Ed25519",
         artifact: releaseName,
-        publicKeySpkiSha256: "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e",
+        publicKeySpkiSha256: releasePublicKey.publicKeySpkiSha256,
         signatureBase64: Buffer.alloc(64).toString("base64"),
         type: "dev.nipmod.release.signature.v1"
       })
@@ -383,7 +386,7 @@ async function makeFakeBin(options: {
     JSON.stringify({
       algorithm: "Ed25519",
       artifact: releaseName,
-      publicKeySpkiSha256: "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e",
+      publicKeySpkiSha256: releasePublicKey.publicKeySpkiSha256,
       signatureBase64: "fake",
       type: "dev.nipmod.release.signature.v1"
     });

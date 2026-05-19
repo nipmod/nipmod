@@ -59,7 +59,7 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local read only server.",
+      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local server with controlled install.",
     note: "Statuses describe Nipmod integration work, not partner approval.",
     items: [
       {
@@ -82,7 +82,7 @@ export const homeContent = {
         name: "Agent hosts",
         status: "MCP ready",
         label: "Codex, Claude Code, OpenCode",
-        text: "Codex, Claude Code and OpenCode can read Nipmod through MCP for package discovery, trust inspection and install planning.",
+        text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
         href: "/mcp",
         cta: "View MCP setup"
       }
@@ -122,7 +122,7 @@ export const homeContent = {
     },
     {
       question: "Can agents use it directly?",
-      answer: "Yes. Agents can use the CLI, the read only MCP server and the machine readable discovery files."
+      answer: "Yes. Agents can use the CLI, the MCP server and the machine readable discovery files."
     },
     {
       question: "Who owns packages?",

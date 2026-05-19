@@ -45,7 +45,10 @@
       "doctor",
       "search",
       "inspect",
+      "view",
       "installPlan",
+      "mcpDemo",
+      "mcpControlledInstall",
       "installPackage",
       "addPackage",
       "audit",
@@ -62,7 +65,10 @@
       "doctor": "nipmod doctor --online",
       "search": "nipmod search gitlawb --online",
       "inspect": "nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "view": "nipmod view gitlawb-repo-reader --json",
       "installPlan": "nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json",
+      "mcpDemo": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.demo\",\"arguments\":{\"host\":\"Codex\",\"package\":\"gitlawb-repo-reader\"}}}",
+      "mcpControlledInstall": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.install\",\"arguments\":{\"specifier\":\"gitlawb-repo-reader\",\"confirmInstall\":\"write-lockfile\"}}}",
       "installPackage": "nipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
       "addPackage": "nipmod add pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --online",
       "audit": "nipmod audit --online",
@@ -98,12 +104,16 @@
   "mcp": {
     "docs": "https://nipmod.com/mcp",
     "serverCommand": "nipmod mcp serve",
+    "demoPackage": "gitlawb-repo-reader",
+    "installConfirmation": "confirmInstall must be write-lockfile before nipmod.install writes a local lockfile",
     "tools": [
       "nipmod.search",
       "nipmod.view",
       "nipmod.inspect",
       "nipmod.install_plan",
+      "nipmod.install",
       "nipmod.update_plan",
+      "nipmod.demo",
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
@@ -160,16 +170,16 @@
     "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.2.1",
-      "artifact": "https://nipmod.com/releases/nipmod-1.2.1.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.2.1.tgz.sig",
+      "version": "1.2.2",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.2.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.2.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
-        "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6UL61NzfF+0vGOVLk12np1u3ukcPq3dsh6Y6IbzkRGo=",
-        "spkiSha256": "49de8ed6bb670abcefc579534811a1f48c0e478f8427479e0ea05f839f96964e"
+        "publicKeySpkiBase64": "MCowBQYDK2VwAyEAtTumyHEstKhOe5W5FNo4nOzhxzBLGq+I7AIN9oUCELQ=",
+        "spkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
       },
-      "artifactSha256": "29cbeefbb2404951babc21280a59c2b4f58290b9afd42014220e97953bfef9ca"
+      "artifactSha256": "170012ebd5c2add54ed8b38326149ae68a883ace3ff44584ce6312cd90ad2ac6"
     },
-    "scriptSha256": "d5b06c973089dfda9ae2cb0234e54d1e6302eecf83bca2101d17569773f51ea0"
+    "scriptSha256": "bf1c38c5eef84bc58aeb86de0f71c4271d3df007a8dd7c0a4d8843ef7387594d"
   }
 }

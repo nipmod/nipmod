@@ -105,6 +105,12 @@ const RegistrySearchIndexSchema = z.strictObject({
 }).passthrough();
 
 export interface RegistrySearchPackage {
+  agent: {
+    installSafety: string;
+    nextSteps: string[];
+    trustSummary: string;
+    useCase: string;
+  };
   advisories: string[];
   canonical: string;
   compatibilityReceipts: string[];
@@ -401,6 +407,7 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     ? yankBlockedReason(yanked)
     : undefined;
   return {
+    agent: agentPackageMetadata(pkg),
     advisories: quarantine ? [quarantine.advisoryId] : [],
     canonical: pkg.canonical,
     compatibilityReceipts: (pkg.compatibilityReceipts ?? []).map((receipt) => receipt.label),
@@ -433,6 +440,62 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     yanked: Boolean(yanked),
     ...(yanked ? { yankReason: yanked.reason } : {})
   };
+}
+
+function agentPackageMetadata(pkg: RegistryPackageWithSource): RegistrySearchPackage["agent"] {
+  const installSafety = hasQuietPermissions(pkg.permissions)
+    ? "quiet manifest permissions; still inspect, plan and audit before use"
+    : "package requests permissions; inspect exact permission details and use a policy profile before install";
+  return {
+    installSafety,
+    nextSteps: [
+      `nipmod inspect ${pkg.canonical}@${pkg.version}`,
+      `nipmod install --plan ${pkg.canonical}@${pkg.version}`,
+      "nipmod audit --online",
+      "nipmod sbom --json"
+    ],
+    trustSummary: `${pkg.trust.level}/${pkg.trust.score} trust, ${permissionSummary(pkg.permissions)}`,
+    useCase: packageUseCase(pkg)
+  };
+}
+
+function packageUseCase(pkg: RegistryPackageWithSource): string {
+  const type = pkg.type ?? "package";
+  if (type === "skill") {
+    return "agent skill instructions or workflow guidance";
+  }
+  if (type === "mcp-server") {
+    return "MCP server package for agent host tooling";
+  }
+  if (type === "tool-bundle") {
+    return "tool bundle for repeated agent operations";
+  }
+  if (type === "workflow-pack") {
+    return "workflow pack for repeatable agent tasks";
+  }
+  if (type === "policy-pack") {
+    return "policy pack for safer agent execution";
+  }
+  if (type === "eval-pack") {
+    return "evaluation pack for checking agent behavior";
+  }
+  if (type === "adapter") {
+    return "adapter package for connecting an agent platform";
+  }
+  return "agent package";
+}
+
+function hasQuietPermissions(permissions: z.infer<typeof PermissionCountsSchema> | undefined): boolean {
+  return (
+    Boolean(permissions) &&
+    (permissions?.filesystem ?? 0) === 0 &&
+    (permissions?.network ?? 0) === 0 &&
+    (permissions?.mcpTools ?? 0) === 0 &&
+    (permissions?.env ?? 0) === 0 &&
+    (permissions?.secrets ?? 0) === 0 &&
+    permissions?.exec !== true &&
+    permissions?.postinstall !== true
+  );
 }
 
 function isActivelyQuarantined(pkg: z.infer<typeof RegistrySearchPackageSchema>): boolean {
