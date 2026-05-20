@@ -128,6 +128,22 @@ Cursor also has a public setup page with an Add to Cursor MCP button:
 https://nipmod.com/cursor
 ```
 
+Cursor Marketplace review material lives in:
+
+```text
+.cursor-plugin/marketplace.json
+plugins/nipmod/.cursor-plugin/plugin.json
+plugins/nipmod/mcp.json
+plugins/nipmod/skills/nipmod/SKILL.md
+plugins/nipmod/rules/nipmod-package-safety.mdc
+```
+
+Validate the Cursor plugin package:
+
+```bash
+node scripts/validate-template.mjs
+```
+
 Tell the agent:
 
 ```text

@@ -1,0 +1,17 @@
+{
+  "name": "nipmod",
+  "owner": {
+    "name": "Nipmod"
+  },
+  "metadata": {
+    "description": "Cursor plugin package for connecting Cursor agents to the Nipmod shared package archive.",
+    "version": "1.2.5"
+  },
+  "plugins": [
+    {
+      "name": "nipmod",
+      "source": "./plugins/nipmod",
+      "description": "Search agent packages, inspect trust evidence and create install plans through Nipmod MCP."
+    }
+  ]
+}

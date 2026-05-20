@@ -59,5 +59,6 @@ jobs:
       - run: corepack prepare pnpm@10.30.0 --activate
       - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
       - run: pnpm --dir site install --frozen-lockfile --ignore-scripts
+      - run: node scripts/validate-template.mjs
       - run: node tools/open-source-readiness-check.mjs
       - run: node tools/supply-chain-check.mjs

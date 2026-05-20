@@ -58,6 +58,36 @@ Connection matrix: https://nipmod.com/compatibility/platform-connections.json
 
 Readiness receipt: https://nipmod.com/compatibility/platform-readiness.json
 
+Cursor plugin manifest: https://github.com/nipmod/nipmod/tree/main/plugins/nipmod
+
+Marketplace manifest: https://github.com/nipmod/nipmod/blob/main/.cursor-plugin/marketplace.json
+
+Validation command:
+
+```bash
+node scripts/validate-template.mjs
+```
+
+## Cursor application fields
+
+Organization name: `Nipmod`
+
+Organization handle: `@nipmod`
+
+Contact email: use the email you want Cursor to reply to.
+
+Logotype URL: `https://nipmod.com/nipmod-logo-transparent.png`
+
+Description:
+
+```text
+Nipmod is a shared package archive for agents. The Cursor plugin connects Cursor to Nipmod MCP so agents can search agent packages, view package metadata, inspect trust evidence and create safe install plans before workspace writes.
+```
+
+GitHub repository: `https://github.com/nipmod/nipmod`
+
+Website URL: `https://nipmod.com/cursor`
+
 ## Tools exposed
 
 ```text

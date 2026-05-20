@@ -1,0 +1,20 @@
+{
+  "name": "nipmod",
+  "displayName": "Nipmod",
+  "version": "1.2.5",
+  "description": "Shared package archive for agents with package search, trust inspection and safe install plans.",
+  "author": {
+    "name": "Nipmod"
+  },
+  "publisher": "Nipmod",
+  "homepage": "https://nipmod.com/cursor",
+  "repository": "https://github.com/nipmod/nipmod",
+  "license": "MIT",
+  "logo": "https://nipmod.com/nipmod-logo-transparent.png",
+  "keywords": ["agent-packages", "mcp", "packages", "security", "trust"],
+  "category": "Developer Tools",
+  "tags": ["agent", "mcp", "package-manager", "supply-chain"],
+  "skills": "skills/nipmod/SKILL.md",
+  "rules": "rules/*.mdc",
+  "mcpServers": "mcp.json"
+}

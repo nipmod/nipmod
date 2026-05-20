@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "nipmod": {
+      "command": "nipmod",
+      "args": ["mcp", "serve"],
+      "env": {}
+    }
+  }
+}
