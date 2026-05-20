@@ -8,8 +8,10 @@ import {
   filterOutgoingReply,
   getTelegramMessageText,
   getTelegramMessageType,
+  getTelegramUpdateMessage,
   hasNipmodContext,
   isChatAllowed,
+  isOnboardingQuestion,
   isQuestionLike,
   isRelevantGroupQuestion,
   matchesAny,
@@ -74,7 +76,7 @@ describe("telegram bot command parsing", () => {
   test("answers bot support messages without a mention", () => {
     assert.equal(shouldReplyToPlainText("der bot reagiert nicht auf meine fragen", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("warum reagiert der bot nicht?", "nipmodbot"), true);
-    assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), false);
+    assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("@nipmodbot was kann das?", "nipmodbot"), true);
   });
 
@@ -86,6 +88,7 @@ describe("telegram bot command parsing", () => {
     assert.equal(shouldReplyToPlainText("wi instalier ich das", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("linsk bitte", "nipmodbot"), true);
     assert.equal(hasNipmodContext("was kann das?"), false);
+    assert.equal(isOnboardingQuestion("was kann das?"), true);
     assert.equal(hasNipmodContext("was kann nipmod?"), true);
   });
 });
@@ -104,8 +107,24 @@ describe("telegram bot message metadata", () => {
 
     assert.equal(getTelegramMessageText(captionUpdate.message), "secret words should not be logged");
     assert.equal(getTelegramMessageType(captionUpdate.message), "caption");
+    assert.equal(getTelegramUpdateMessage(captionUpdate), captionUpdate.message);
     assert.equal(safeTelegramMessageLogMeta(captionUpdate), "update=22 chat=-100123 user=7 type=caption hasText=true textLength=33 thread=none");
     assert.doesNotMatch(safeTelegramMessageLogMeta(captionUpdate), /secret words/);
+  });
+
+  test("reads edited messages as normal update text", () => {
+    const editedUpdate = {
+      edited_message: {
+        chat: { id: "-100123", type: "supergroup" },
+        from: { id: "7" },
+        message_thread_id: 12,
+        text: "what is this?"
+      },
+      update_id: 23
+    };
+
+    assert.equal(getTelegramUpdateMessage(editedUpdate), editedUpdate.edited_message);
+    assert.equal(safeTelegramMessageLogMeta(editedUpdate), "update=23 chat=-100123 user=7 type=text hasText=true textLength=13 thread=12");
   });
 });
 
@@ -252,6 +271,19 @@ describe("telegram bot knowledge base", () => {
     });
 
     assert.match(reply.text, /I answer normal group questions/);
+  });
+
+  test("answers short onboarding questions in the Nipmod group", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("was kann das?"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Nipmod is the shared package archive for agents/);
   });
 
   test("routes typo heavy questions to the right answers", async () => {

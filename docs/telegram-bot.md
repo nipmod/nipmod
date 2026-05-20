@@ -71,10 +71,12 @@ With privacy enabled, Telegram only sends commands, mentions and selected bot ev
 /resume
 ```
 
-The bot receives group messages but answers plain text only when the message directly mentions `@nipmodbot`, starts with `nipmod`, or looks like a Nipmod related question or request.
+The bot receives group messages, edited group messages and caption text.
+It answers plain text only when the message directly mentions `@nipmodbot`, starts with `nipmod`, looks like a Nipmod related question or request, or is a short onboarding question such as `what is this?`.
 Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
 If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
 General group chatter and unrelated questions are ignored.
+In topic based groups the bot replies in the same topic.
 
 ## AI layer
 

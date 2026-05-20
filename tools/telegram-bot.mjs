@@ -22,6 +22,7 @@ const AI_REPLY_MAX_CHARS = 1200;
 const DEFAULT_RATE_LIMIT_MAX = 6;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 const ADMIN_COMMANDS = new Set(["pause", "resume", "kill", "disable", "enable", "botstatus"]);
+const TELEGRAM_ALLOWED_UPDATES = ["message", "edited_message", "channel_post", "edited_channel_post"];
 const OFFICIAL_LINKS = [
   ["Website", "https://nipmod.com"],
   ["Packages", "https://nipmod.com/packages"],
@@ -174,6 +175,20 @@ const CLAUDE_TERMS = ["claude", "claude code", "cluade", "cloude"];
 const INSTALL_TERMS = ["einrichten", "install", "installieren", "instalieren", "instaliere", "instalier", "setup"];
 const PACKAGE_TERMS = ["archive", "archiv", "package", "packages", "paket", "registry"];
 const ABOUT_TERMS = ["how does", "nipmod", "was ist", "was kann", "what can", "what is", "wie funktioniert"];
+const ONBOARDING_QUESTION_TERMS = [
+  "how does this work",
+  "how to use this",
+  "was ist das",
+  "was kann das",
+  "what can it do",
+  "what can this do",
+  "what does it do",
+  "what does this do",
+  "what is it",
+  "what is this",
+  "wie benutze ich das",
+  "wie funktioniert das"
+];
 
 const SECRET_VALUE_PATTERNS = [
   /\bsk-ant-[A-Za-z0-9_-]{20,}\b/,
@@ -305,6 +320,10 @@ export function isChatAllowed(chat, { allowedChatId = null, groupOnly = true } =
   return true;
 }
 
+export function getTelegramUpdateMessage(update) {
+  return update?.message ?? update?.edited_message ?? update?.channel_post ?? update?.edited_channel_post ?? null;
+}
+
 export function getTelegramMessageText(message) {
   if (typeof message?.text === "string") {
     return message.text;
@@ -350,7 +369,7 @@ export function getTelegramMessageType(message) {
 }
 
 export function safeTelegramMessageLogMeta(update) {
-  const message = update?.message;
+  const message = getTelegramUpdateMessage(update);
   if (!message) {
     return `update=${update?.update_id ?? "unknown"} type=no-message`;
   }
@@ -383,6 +402,9 @@ export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { 
 
 export function shouldAnswerGroupText(text) {
   const normalized = String(text ?? "").trim().toLowerCase();
+  if (isOnboardingQuestion(normalized)) {
+    return true;
+  }
   if (!hasNipmodContext(normalized)) {
     return false;
   }
@@ -399,7 +421,7 @@ export function isRelevantGroupQuestion(text) {
   if (!normalized) {
     return false;
   }
-  return isQuestionLike(normalized) && hasNipmodContext(normalized);
+  return isQuestionLike(normalized) && (hasNipmodContext(normalized) || isOnboardingQuestion(normalized));
 }
 
 export function hasNipmodContext(text) {
@@ -421,6 +443,14 @@ export function hasNipmodContext(text) {
     ...INSTALL_TERMS,
     ...PACKAGE_TERMS
   ]);
+}
+
+export function isOnboardingQuestion(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (!normalized || !isQuestionLike(normalized)) {
+    return false;
+  }
+  return matchesAny(normalized, ONBOARDING_QUESTION_TERMS);
 }
 
 export function isQuestionLike(text) {
@@ -496,7 +526,7 @@ export function filterOutgoingReply(text) {
 }
 
 export async function createTelegramBotReply(update, options = {}) {
-  const message = update?.message;
+  const message = getTelegramUpdateMessage(update);
   const text = getTelegramMessageText(message);
   if (!message || !text) {
     return { ignored: true, reason: "no-text-message" };
@@ -980,7 +1010,7 @@ export class TelegramClient {
 
   getUpdates({ offset = undefined, timeout = DEFAULT_POLL_TIMEOUT_SECONDS } = {}) {
     return this.call("getUpdates", {
-      allowed_updates: ["message"],
+      allowed_updates: TELEGRAM_ALLOWED_UPDATES,
       offset,
       timeout
     });
@@ -992,10 +1022,11 @@ export class TelegramClient {
     });
   }
 
-  sendMessage(chatId, text) {
+  sendMessage(chatId, text, { messageThreadId = undefined } = {}) {
     return this.call("sendMessage", {
       chat_id: chatId,
       disable_web_page_preview: true,
+      ...(messageThreadId === undefined ? {} : { message_thread_id: messageThreadId }),
       text
     });
   }
@@ -1055,7 +1086,7 @@ export async function runTelegramBot({
       });
       for (const update of updates) {
         activeState.offset = update.update_id + 1;
-        const message = update.message;
+        const message = getTelegramUpdateMessage(update);
         if (!message) {
           log(`[nipmod-telegram-bot] ignored reason=no-message update=${update.update_id}`);
           continue;
@@ -1122,15 +1153,19 @@ export async function runTelegramBot({
               windowMs: rateLimitWindowMs
             });
             if (!rate.allowed) {
-              await client.sendMessage(message.chat.id, "Rate limit. Try again in a minute.");
+              await client.sendMessage(message.chat.id, "Rate limit. Try again in a minute.", {
+                messageThreadId: message.message_thread_id
+              });
               log(`[nipmod-telegram-bot] rate_limited chat=${message.chat.id} user=${userId ?? "unknown"} update=${update.update_id}`);
               continue;
             }
           }
-          await client.sendMessage(update.message.chat.id, reply.text);
-          log(`[nipmod-telegram-bot] replied chat=${update.message.chat.id} update=${update.update_id}${reply.safetyEvent ? ` safety=${reply.safetyEvent}` : ""}${reply.adminAction ? ` admin=${reply.adminAction}` : ""}`);
+          await client.sendMessage(message.chat.id, reply.text, {
+            messageThreadId: message.message_thread_id
+          });
+          log(`[nipmod-telegram-bot] replied chat=${message.chat.id} update=${update.update_id}${reply.safetyEvent ? ` safety=${reply.safetyEvent}` : ""}${reply.adminAction ? ` admin=${reply.adminAction}` : ""}`);
         } else if (reply.ignored) {
-          log(`[nipmod-telegram-bot] ignored reason=${reply.reason} chat=${update.message.chat.id} update=${update.update_id}`);
+          log(`[nipmod-telegram-bot] ignored reason=${reply.reason} chat=${message.chat.id} update=${update.update_id}`);
         }
       }
       if (updates.length > 0) {
