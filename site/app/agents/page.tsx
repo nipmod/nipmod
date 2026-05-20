@@ -95,6 +95,9 @@ export default function AgentsPage() {
           <a className="button button-ghost" href="/packages">
             Browse packages
           </a>
+          <a className="button button-ghost" href="/agents/codex-claude">
+            Codex and Claude
+          </a>
           <a className="button button-ghost" href="/mcp">
             MCP
           </a>

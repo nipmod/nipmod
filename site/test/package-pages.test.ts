@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { findEvidencePackage } from "../app/evidence/evidence-view";
 import {
+  featuredPackages,
   findPackage,
   packageBrowseData,
   packageBrowseHighlights,
@@ -54,6 +55,17 @@ describe("package pages", () => {
     expect(highlights.newest.length).toBeGreaterThan(0);
     expect(highlights.trending[0]?.canonical).toMatch(/^pkg:did:key:/);
     expect(highlights.newest[0]?.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  test("selects a strong featured start set for the archive", () => {
+    const browse = packageBrowseData({ query: "", type: "" });
+    const featured = featuredPackages(browse.registry.packages);
+
+    expect(featured.length).toBe(10);
+    expect(featured.map((pkg) => pkg.name)).toContain("gitlawb-repo-reader");
+    expect(featured.map((pkg) => pkg.name)).toContain("prompt-injection-scan");
+    expect(new Set(featured.map((pkg) => pkg.canonical)).size).toBe(featured.length);
+    expect(featured.every((pkg) => pkg.trust.level === "verified")).toBe(true);
   });
 
   test("renders install variants and dependency copy for package decisions", () => {

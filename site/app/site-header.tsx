@@ -84,6 +84,7 @@ export function SiteHeader() {
             <a href={homeContent.links.docs}>Docs</a>
             <a href="/setup">Setup</a>
             <a href="/agents">Agents</a>
+            <a href="/agents/codex-claude">Codex and Claude</a>
             <a href="/demo">Demo</a>
             <a href="/status">Status</a>
             <a href="/examples">Examples</a>

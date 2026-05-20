@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 import { OwnerClaimFlow } from "../owner-claim-flow";
 import { PackageDraftForm } from "./package-draft-form";
@@ -21,6 +22,40 @@ export const metadata: Metadata = {
   },
   title: "Package a Gitlawb repo"
 };
+
+const publishPath = [
+  {
+    label: "Check source",
+    text: "Run the repo doctor first. It catches missing manifest, missing release evidence and source shape issues before a public claim.",
+    command: "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json"
+  },
+  {
+    label: "Create draft",
+    text: "Generate package files locally. The command writes a review folder, not a remote listing.",
+    command: "nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr --json"
+  },
+  {
+    label: "Verify owner",
+    text: "The source owner proves control with the Gitlawb DID. Nipmod does not treat a random submitted repo as owned.",
+    command: "nipmod claim verify gitlawb://did:key:z6Mk.../repo --json"
+  },
+  {
+    label: "Dry run publish",
+    text: "Preview the registry candidate, trust evidence and install surface before anything becomes public.",
+    command: "nipmod publish repo-pr --dry-run --json"
+  }
+] as const;
+
+const publicListingChecks = [
+  "canonical package id",
+  "source repo and source tag",
+  "artifact digest",
+  "bundle signature",
+  "transparency proof",
+  "witness checkpoint",
+  "advisory state",
+  "install command"
+] as const;
 
 export default async function PackagePage({ searchParams }: PackagePageProps) {
   const params = searchParams ? await searchParams : {};
@@ -57,6 +92,44 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
         inputLabel={homeContent.repoToPackage.inputLabel}
         inputPlaceholder={homeContent.repoToPackage.inputPlaceholder}
       />
+
+      <section className="registry-section" aria-labelledby="submit-flow-title">
+        <div className="section-head">
+          <p className="eyebrow">Submit flow</p>
+          <h2 id="submit-flow-title">From repo to public package without guessing.</h2>
+          <p>
+            This path is designed for humans and agents. Every step is local or read only until the owner claim and
+            publish dry run are clean.
+          </p>
+        </div>
+        <div className="publish-flow-grid">
+          {publishPath.map((step, index) => (
+            <article className="quickstart-card" key={step.label}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h2>{step.label}</h2>
+              <p>{step.text}</p>
+              <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="trust-section" aria-labelledby="public-listing-title">
+        <div>
+          <p className="eyebrow">Listing</p>
+          <h2 id="public-listing-title">What has to exist before agents see it</h2>
+        </div>
+        <div className="check-list">
+          {publicListingChecks.map((item) => (
+            <article className="check-row" key={item}>
+              <span className="check-dot check-ok" aria-hidden="true" />
+              <div>
+                <h3>{item}</h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <section className="proof-section" aria-labelledby="publish-requirements-title">
         <div>

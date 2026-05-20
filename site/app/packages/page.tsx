@@ -29,7 +29,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   const query = firstParam(params.q);
   const source = firstParam(params.source);
   const type = firstParam(params.type);
-  const { packages, registry, types } = packageBrowseData({ query, type });
+  const { featured, packages, registry, types } = packageBrowseData({ query, type });
   const sourceOptions = packageSourceOptions(registry.packages);
   const filteredPackages = source ? packages.filter((pkg) => packageSourceLabel(pkg) === source) : packages;
   const summaryStats = archiveSummaryStats(registry, sourceOptions);
@@ -50,6 +50,9 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           <a className="button button-ghost" href="/setup">
             Setup agents
           </a>
+          <a className="button button-ghost" href="/package">
+            Submit package
+          </a>
           <a className="data-link" href="/registry/packages.json" aria-label="Open Nipmod registry machine file">
             Registry JSON
           </a>
@@ -63,6 +66,11 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           <p>Generated from the live Nipmod registry.</p>
         </article>
         <article className="archive-overview-card">
+          <span>{featured.length}</span>
+          <h2>Featured start set</h2>
+          <p>Packages that show the core archive use cases first.</p>
+        </article>
+        <article className="archive-overview-card">
           <span>{sourceOptions.map((item) => `${item.label} ${item.count}`).join(" / ")}</span>
           <h2>Current source</h2>
           <p>Published package source today is Gitlawb. New indexed sources will appear here.</p>
@@ -72,6 +80,22 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           <h2>Agent-ready</h2>
           <p>Connect once, then agents can search and inspect the same archive.</p>
         </article>
+      </section>
+
+      <section className="featured-section" aria-labelledby="featured-packages-title">
+        <div className="section-head">
+          <p className="eyebrow">Featured</p>
+          <h2 id="featured-packages-title">Start with these packages.</h2>
+          <p>
+            This set shows the archive working across source reading, package safety, MCP access, onboarding, evidence
+            and CI. The full archive stays searchable below.
+          </p>
+        </div>
+        <div className="featured-package-grid">
+          {featured.map((pkg) => (
+            <FeaturedPackageCard key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
+          ))}
+        </div>
       </section>
 
       <section className="registry-section" id="archive" aria-labelledby="packages-browse-title">
@@ -231,6 +255,50 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
           ) : null}
         </nav>
       </div>
+
+      <div className="archive-proof-row" aria-label={`${pkg.name} proof summary`}>
+        <span>
+          <strong>source</strong>
+          {sourceLabel}
+        </span>
+        <span>
+          <strong>digest</strong>
+          <code>{shortHash(pkg.digest)}</code>
+        </span>
+        <span>
+          <strong>signature</strong>
+          {pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing"}
+        </span>
+        <span>
+          <strong>commit</strong>
+          <code>{shortHash(pkg.sourceCommit ?? "missing")}</code>
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function FeaturedPackageCard({ pkg }: { pkg: RegistryPackage }) {
+  const quality = packageQuality(pkg);
+  const purpose = featuredPurpose(pkg);
+
+  return (
+    <article className="featured-package-card">
+      <div>
+        <p className="platform-label">{pkg.type}</p>
+        <h3>
+          <a href={packagePageHref(pkg)}>{pkg.name}</a>
+        </h3>
+        <p>{purpose}</p>
+      </div>
+      <div className="featured-package-meta">
+        <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+        <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
+      </div>
+      <div className="archive-install">
+        <span>Use</span>
+        <code>{installCommand(pkg)}</code>
+      </div>
     </article>
   );
 }
@@ -284,6 +352,30 @@ function packageSourceLabel(pkg: Pick<RegistryPackage, "sourceRepo" | "cloneUrl"
     return "GitHub";
   }
   return "Other";
+}
+
+function featuredPurpose(pkg: RegistryPackage): string {
+  const purposeByName: Record<string, string> = {
+    "agent-permission-review": "Review package permissions before an agent exposes tools, files, network or secrets.",
+    "dependency-risk-review": "Check dependency and lockfile risk before package code enters a workspace.",
+    "first-user-onboarding": "Guide a new user through install, inspect, add, audit and publish dry run.",
+    "gitlawb-repo-reader": "Read a Gitlawb repo and return a provenance focused summary for agents.",
+    "gitlawb-review-tool-bundle": "Bundle source review, diff summary and release review in one package path.",
+    "nipmod-audit-ci": "Turn Nipmod audit and policy output into CI decisions agents can explain.",
+    "package-evidence-brief": "Convert inspect output into a short human review brief.",
+    "package-migration-planner": "Plan migration from Gitlawb, MCP or APM source into Nipmod metadata.",
+    "prompt-injection-scan": "Scan package docs and prompts for instruction smuggling before reuse.",
+    "readonly-registry-mcp-server": "Expose read only registry search and inspect tools through MCP."
+  };
+
+  return purposeByName[pkg.name] ?? pkg.description;
+}
+
+function shortHash(value: string): string {
+  if (value.length <= 14) {
+    return value;
+  }
+  return `${value.slice(0, 8)}...${value.slice(-6)}`;
 }
 
 function hostMatches(value: string, hosts: string[]): boolean {

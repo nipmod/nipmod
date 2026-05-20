@@ -19,6 +19,18 @@ export type PackageDependencyEntry = {
 };
 
 const registry = registryData as RegistryIndex;
+const featuredPackageNames = [
+  "gitlawb-repo-reader",
+  "gitlawb-review-tool-bundle",
+  "prompt-injection-scan",
+  "agent-permission-review",
+  "dependency-risk-review",
+  "readonly-registry-mcp-server",
+  "package-evidence-brief",
+  "first-user-onboarding",
+  "package-migration-planner",
+  "nipmod-audit-ci"
+];
 
 export function packagePageParams(): Array<{ packageName: string }> {
   return registry.packages.map((pkg) => ({ packageName: packagePageSlug(pkg) }));
@@ -59,10 +71,24 @@ export function packageBrowseData(options: { query: string; type: string }) {
   const highlights = packageBrowseHighlights(packages);
   return {
     ...highlights,
+    featured: featuredPackages(packages, 10),
     packages: filtered,
     registry: { ...registry, packages },
     types: [...new Set(packages.map((pkg) => pkg.type))].sort()
   };
+}
+
+export function featuredPackages(packages: readonly RegistryPackage[], limit = 10): RegistryPackage[] {
+  const byName = new Map(packages.map((pkg) => [pkg.name, pkg]));
+  const picked = featuredPackageNames
+    .map((name) => byName.get(name))
+    .filter((pkg): pkg is RegistryPackage => Boolean(pkg));
+  const seen = new Set(picked.map((pkg) => pkg.canonical));
+  const fallback = trendingPackages(packages, limit)
+    .filter((pkg) => !seen.has(pkg.canonical))
+    .slice(0, Math.max(0, limit - picked.length));
+
+  return [...picked, ...fallback].slice(0, limit);
 }
 
 export function packageBrowseHighlights(packages: readonly RegistryPackage[]) {

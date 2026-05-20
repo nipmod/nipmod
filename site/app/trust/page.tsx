@@ -12,6 +12,33 @@ const treeHead = registry.transparencyLog?.treeHead;
 const witness = registry.transparencyLog?.witnesses?.[0]?.witness ?? "missing";
 const installerHash = discovery.install.scriptSha256;
 const releaseKey = discovery.install.release.publicKey.spkiSha256;
+const trustContract = [
+  {
+    label: "Registry",
+    text: "The public package archive. Agents read package ids, versions, digests, source refs, trust evidence and warnings here.",
+    href: "/registry/packages.json"
+  },
+  {
+    label: "Transparency",
+    text: "The append only log and checkpoint pin the current registry state so package evidence can be audited.",
+    href: "/transparency/checkpoint.json"
+  },
+  {
+    label: "Witness",
+    text: "The external witness signs the checkpoint so the registry is not the only trust root.",
+    href: discovery.witness.statements
+  },
+  {
+    label: "Advisories",
+    text: "The signed advisory feed can warn or block risky versions without deleting source content.",
+    href: "/advisories.json"
+  },
+  {
+    label: "Discovery",
+    text: "The well known file tells agents where the registry, installer, releases, advisories and proof files live.",
+    href: "/.well-known/nipmod.json"
+  }
+] as const;
 
 export const metadata: Metadata = {
   alternates: {
@@ -59,6 +86,31 @@ export default function TrustPage() {
             <p>{card.label}</p>
           </article>
         ))}
+      </section>
+
+      <section className="trust-section" aria-labelledby="contract-title">
+        <div>
+          <p className="eyebrow">Contract</p>
+          <h2 id="contract-title">The public trust layer agents can check</h2>
+          <p className="panel-copy">
+            These files are the archive contract. The website explains them, but agents can verify the raw files
+            directly.
+          </p>
+        </div>
+        <div className="check-list">
+          {trustContract.map((item) => (
+            <article className="check-row" key={item.label}>
+              <span className="check-dot check-ok" aria-hidden="true" />
+              <div>
+                <h3>{item.label}</h3>
+                <p>{item.text}</p>
+                <a className="data-link" href={item.href} aria-label={`Open ${item.label} machine file`}>
+                  Machine file
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="trust-section" aria-labelledby="chain-title">

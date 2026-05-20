@@ -392,6 +392,7 @@ h1 {
 .package-card,
 .archive-overview-card,
 .archive-package-row,
+.featured-package-card,
 .empty-state,
 .quickstart-card,
 .comparison-card,
@@ -556,6 +557,12 @@ h1 {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.agent-workflow-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .usage-item {
@@ -842,6 +849,7 @@ h1 {
 }
 
 .registry-section,
+.featured-section,
 .ecosystem-section,
 .platform-section,
 .host-section {
@@ -1087,7 +1095,7 @@ h1 {
 .archive-overview {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   padding: 4px 0 18px;
 }
 
@@ -1176,6 +1184,55 @@ h1 {
 .archive-list {
   display: grid;
   gap: 10px;
+}
+
+.featured-package-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.featured-package-card {
+  align-content: start;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.featured-package-card:hover {
+  background: var(--surface-strong);
+  transform: translateY(-1px);
+}
+
+.featured-package-card h3 {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.14;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.featured-package-card h3 a:hover {
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.42);
+  text-underline-offset: 4px;
+}
+
+.featured-package-card p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.48;
+  margin: 8px 0 0;
+}
+
+.featured-package-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
 }
 
 .archive-package-row {
@@ -1307,6 +1364,41 @@ h1 {
 .archive-actions .button {
   min-height: 38px;
   padding: 0 12px;
+}
+
+.archive-proof-row {
+  border-top: 1px solid var(--border-soft);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding-top: 14px;
+}
+
+.archive-proof-row span {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  color: var(--text);
+  display: grid;
+  font-size: 12px;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.archive-proof-row strong {
+  color: var(--quiet);
+  font-size: 11px;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.archive-proof-row code {
+  color: var(--text);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .registry-more {
@@ -1656,6 +1748,12 @@ h1 {
   padding: 10px 0 28px;
 }
 
+.publish-flow-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .setup-hero {
   align-items: end;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 430px);
@@ -1968,6 +2066,7 @@ h1 {
   .hero,
   .setup-hero,
   .usage-strip,
+  .agent-workflow-grid,
   .live-stat-grid,
   .comparison-grid,
   .platform-grid,
@@ -1982,6 +2081,8 @@ h1 {
   .archive-overview,
   .archive-package-top,
   .archive-package-bottom,
+  .archive-proof-row,
+  .featured-package-grid,
   .candidate-flow,
   .package-grid,
   .trust-grid,
@@ -1991,6 +2092,7 @@ h1 {
   .proof-section,
   .block-grid,
   .quickstart-grid,
+  .publish-flow-grid,
   .setup-path,
   .package-draft,
   .package-hero {

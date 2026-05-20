@@ -33,6 +33,9 @@ export default function SetupPage() {
             <a className="button button-ghost" href="/mcp">
               MCP details
             </a>
+            <a className="button button-ghost" href="/agents/codex-claude">
+              Codex and Claude
+            </a>
           </div>
         </div>
         <aside className="quickstart-card setup-hero-panel" aria-label="First setup command">
