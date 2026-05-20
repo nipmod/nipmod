@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com"
   },
-  description: "Package layer for agents.",
+  description: "Verified package archive for agents.",
   icons: {
     apple: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }],
     icon: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }]

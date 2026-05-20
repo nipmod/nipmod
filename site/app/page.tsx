@@ -43,7 +43,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <main className="page-shell" id="main">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
-          <p className="product-line">Built on Gitlawb</p>
+          <p className="product-line">Package layer for agent code</p>
           <h1 id="hero-title">{homeContent.headline}</h1>
           <p className="lead">{homeContent.lead}</p>
         </div>
@@ -62,6 +62,11 @@ export default async function Home({ searchParams }: HomeProps) {
               <code key={command}>
                 <span aria-hidden="true">$ </span>
                 {command}
+              </code>
+            ))}
+            {homeContent.terminalOutput.map((line) => (
+              <code className="terminal-output" key={line}>
+                {line}
               </code>
             ))}
           </pre>

@@ -22,7 +22,7 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("Nipmod");
-    expect(homeContent.headline).toBe("Package layer for agents");
+    expect(homeContent.headline).toBe("Packages for every agent, everywhere.");
     expect(homeContent.lead.length).toBeLessThanOrEqual(180);
   });
 
@@ -58,6 +58,7 @@ describe("home content", () => {
     const text = collectText({
       ...homeContent,
       commands: [],
+      terminalOutput: [],
       demoFlow: demoCopy,
       ecosystemPackages: ecosystemCopy,
       quickstartSteps: quickstartCopy,
@@ -72,12 +73,8 @@ describe("home content", () => {
 
   test("states what people can do on the site", () => {
     expect(homeContent.usage.map((item) => item.label)).toEqual(["Search", "Verify", "Install"]);
-	    expect(homeContent.commands).toEqual([
-	      "nipmod search gitlawb --online",
-	      "nipmod inspect gitlawb-repo-reader",
-	      "nipmod install gitlawb-repo-reader",
-      "nipmod audit --online"
-    ]);
+    expect(homeContent.commands).toEqual(["curl https://nipmod.com/i|bash"]);
+    expect(homeContent.terminalOutput[0]).toBe("Installing nipmod 1.2.5");
   });
 
   test("states platform boundaries and package flow", () => {

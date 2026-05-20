@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Package layer for agents" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Packages for every agent, everywhere." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Live package count" })).toBeVisible();
   await expect(page.locator(".live-status")).toContainText(/Live archive|Local archive/);
   await expect(page.locator(".live-stat-grid").getByText("Nipmod archive packages", { exact: true })).toBeVisible();
@@ -45,7 +45,7 @@ test("home registry search stays usable", async ({ page }) => {
   await expect(page.locator('a[href="/security"]:visible').first()).toBeVisible();
   await expect(siteNav.locator('a[href="/trust"]:visible').first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Setup" }).first()).toHaveAttribute("href", "/setup");
-  await expect(page.getByText("nipmod install gitlawb-repo-reader").first()).toBeVisible();
+  await expect(page.getByText("curl https://nipmod.com/i|bash").first()).toBeVisible();
   await expect(page.getByText("Signed", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Digest pinned", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Witnessed", { exact: true })).toHaveCount(0);
@@ -104,13 +104,13 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    "Package layer for agents."
+    "Verified package archive for agents."
   );
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
     "content",
     "Search, inspect and install verified agent packages."
   );
-  await expect(page.getByText("Search, inspect and install verified agent packages from one shared archive.")).toBeVisible();
+  await expect(page.getByText("Search the public archive. Read source, signatures")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Live package count" })).toBeVisible();
   await expect(page.getByText("Current package count from the public Nipmod archive.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Packages made for agent workflows." })).toHaveCount(0);

@@ -1,7 +1,7 @@
 export const homeContent = {
   brand: "Nipmod",
-  headline: "Package layer for agents",
-  lead: "Search, inspect and install verified agent packages from one shared archive.",
+  headline: "Packages for every agent, everywhere.",
+  lead: "Search the public archive. Read source, signatures, witness proof and install plans before code enters an agent workspace.",
   links: {
     bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     docs: "/quickstart#docs",
@@ -14,11 +14,12 @@ export const homeContent = {
   },
   primaryAction: "Setup Nipmod",
   secondaryAction: "X",
-  commands: [
-    "nipmod search gitlawb --online",
-    "nipmod inspect gitlawb-repo-reader",
-    "nipmod install gitlawb-repo-reader",
-    "nipmod audit --online"
+  commands: ["curl https://nipmod.com/i|bash"],
+  terminalOutput: [
+    "Installing nipmod 1.2.5",
+    "Release and signature verified",
+    "Installed nipmod",
+    "Next: nipmod doctor --online"
   ],
   usage: [
     {

@@ -590,8 +590,21 @@ h1 {
   animation-delay: 540ms;
 }
 
+.terminal-panel code:nth-child(5) {
+  animation-delay: 720ms;
+}
+
+.terminal-panel code:nth-child(6) {
+  animation-delay: 900ms;
+}
+
 .terminal-panel code span {
   color: var(--quiet);
+}
+
+.terminal-output {
+  color: rgba(237, 237, 239, 0.66);
+  padding-left: 16px;
 }
 
 @keyframes terminal-line {
