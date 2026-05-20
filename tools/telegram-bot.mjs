@@ -403,7 +403,7 @@ export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { 
 
 export function shouldAnswerGroupText(text) {
   const normalized = String(text ?? "").trim().toLowerCase();
-  if (isOnboardingQuestion(normalized)) {
+  if (isQuestionLike(normalized) || isGeneralRequestLike(normalized) || isOnboardingQuestion(normalized)) {
     return true;
   }
   if (!hasNipmodContext(normalized)) {
@@ -422,7 +422,7 @@ export function isRelevantGroupQuestion(text) {
   if (!normalized) {
     return false;
   }
-  return isQuestionLike(normalized) && (hasNipmodContext(normalized) || isOnboardingQuestion(normalized));
+  return isQuestionLike(normalized);
 }
 
 export function hasNipmodContext(text) {
@@ -472,6 +472,14 @@ export function isRequestLike(text) {
     return false;
   }
   return matchesAny(normalized, REQUEST_MARKERS) && matchesAny(normalized, NIPMOD_CONTEXT_TERMS);
+}
+
+export function isGeneralRequestLike(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return matchesAny(normalized, REQUEST_MARKERS) && normalizeTextForMatching(normalized).split(/\s+/).filter(Boolean).length >= 3;
 }
 
 export function classifyIncomingText(text) {
@@ -917,8 +925,11 @@ export function buildAiSystemPrompt(packages = null) {
     "Use plain short lines.",
     "Never ask for private keys, seed phrases, wallet secrets or API keys in Telegram.",
     "Do not give trading advice, token price predictions or financial recommendations.",
-    "You may answer only about Nipmod, its official links, Gitlawb source, GitHub mirror, Bankr integration, Codex, Claude Code, MCP, install, packages, registry, safety and status.",
-    "If the question is outside scope or you are not sure, answer exactly:",
+    "Answer normal community questions like a helpful human when they are harmless.",
+    "For harmless small talk, simple jokes, wording help or casual requests, answer naturally and briefly.",
+    "Keep Nipmod context when the question is about Nipmod, agents, packages, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, install, registry, safety or status.",
+    "If a question needs live data you do not have, say that briefly and give the safest useful answer.",
+    "If you are not sure, answer exactly:",
     conciseFallbackText(),
     "",
     "Facts:",

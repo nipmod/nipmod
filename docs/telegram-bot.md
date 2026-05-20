@@ -72,10 +72,10 @@ With privacy enabled, Telegram only sends commands, mentions and selected bot ev
 ```
 
 The bot receives group messages, edited group messages and caption text.
-It answers plain text only when the message directly mentions `@nipmodbot`, starts with `nipmod`, looks like a Nipmod related question or request, or is a short onboarding question such as `what is this?`.
+It answers normal questions in the group, direct mentions, messages that start with `nipmod`, and Nipmod related requests.
 Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
 If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
-General group chatter and unrelated questions are ignored.
+General non question chatter is ignored.
 In topic based groups the bot replies in the same topic.
 
 ## AI layer
@@ -84,8 +84,8 @@ Commands, exact link requests, coin requests and security questions are handled 
 When `NIPMOD_TELEGRAM_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` is present and `NIPMOD_TELEGRAM_AI_PROVIDER=anthropic`, normal Nipmod questions go to Anthropic's Messages API with the local knowledge base injected into the system prompt.
 If the AI request fails, the local knowledge base answers as a fallback.
 OpenAI compatible chat completions are still supported through `NIPMOD_TELEGRAM_AI_PROVIDER=openai`.
-The AI system prompt is restricted to Nipmod, official links, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, install, packages, registry, safety and status.
-If the question is outside scope, the AI must use the same short fallback.
+The AI system prompt keeps Nipmod context for project questions while allowing harmless general community questions.
+If the answer needs live data the bot does not have, it says that briefly instead of guessing.
 
 ## Safety controls
 

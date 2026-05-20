@@ -11,6 +11,7 @@ import {
   getTelegramUpdateMessage,
   hasNipmodContext,
   isChatAllowed,
+  isGeneralRequestLike,
   isOnboardingQuestion,
   isQuestionLike,
   isRelevantGroupQuestion,
@@ -64,9 +65,11 @@ describe("telegram bot command parsing", () => {
     assert.equal(isRelevantGroupQuestion("how do I install this?"), true);
     assert.equal(isRelevantGroupQuestion("does this work with Codex?"), true);
     assert.equal(isRelevantGroupQuestion("where are the GitHub links?"), true);
-    assert.equal(isRelevantGroupQuestion("what time is it?"), false);
+    assert.equal(isRelevantGroupQuestion("what time is it?"), true);
     assert.equal(isQuestionLike("what time is it?"), true);
-    assert.equal(shouldAnswerGroupText("what time is it?"), false);
+    assert.equal(shouldAnswerGroupText("what time is it?"), true);
+    assert.equal(isGeneralRequestLike("tell me a joke"), true);
+    assert.equal(shouldAnswerGroupText("tell me a joke"), true);
     assert.equal(shouldAnswerGroupText("github link bitte"), true);
     assert.equal(shouldAnswerGroupText("hello everyone"), false);
     assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot"), true);
@@ -271,7 +274,7 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /curl -fsSLO https:\/\/nipmod\.com\/install\.sh/);
   });
 
-  test("answers off-topic questions with a concise fallback", async () => {
+  test("answers general questions instead of silently ignoring them", async () => {
     const reply = await createTelegramBotReply(groupUpdate("what time is it?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
@@ -281,8 +284,7 @@ describe("telegram bot knowledge base", () => {
       username: "nipmodbot"
     });
 
-    assert.equal(reply.ignored, true);
-    assert.equal(reply.reason, "plain-text-not-addressed");
+    assert.match(reply.text, /I cannot answer that cleanly/);
   });
 
   test("answers bot support questions directly", async () => {
@@ -421,7 +423,7 @@ describe("telegram bot safety controls", () => {
     assert.match(reply.text, /cannot give trading advice/);
   });
 
-  test("ignores unrelated trading chatter when the bot is not addressed", async () => {
+  test("blocks unrelated trading chatter instead of giving advice", async () => {
     const reply = await createTelegramBotReply(groupUpdate("should I buy eth?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
@@ -430,8 +432,8 @@ describe("telegram bot safety controls", () => {
       username: "nipmodbot"
     });
 
-    assert.equal(reply.ignored, true);
-    assert.equal(reply.reason, "plain-text-not-addressed");
+    assert.equal(reply.safetyEvent, "trading");
+    assert.match(reply.text, /cannot give trading advice/);
   });
 
   test("filters unsafe outgoing replies", () => {
@@ -628,6 +630,8 @@ describe("telegram bot AI fallback", () => {
     const prompt = buildAiSystemPrompt(packages);
     assert.match(prompt, /Always answer in English/);
     assert.match(prompt, /still answer in English/);
+    assert.match(prompt, /Answer normal community questions/);
+    assert.match(prompt, /harmless small talk/);
     assert.match(prompt, /Do not give trading advice/);
     assert.match(prompt, /Website: https:\/\/nipmod\.com/);
     assert.match(prompt, /GitHub: https:\/\/github\.com\/nipmod\/nipmod/);
