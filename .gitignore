@@ -107,3 +107,4 @@ keys/
 *.env
 *.env.*
 tools/verified-registry.env
+.vercel
