@@ -28,6 +28,8 @@ Catalog submission packet:
 https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md
 ```
 
+The Bankr catalog path requires a fork and PR to `BankrBot/skills`. Until that PR is merged, users can install the skill directly from the public GitHub folder.
+
 The canonical source remains Gitlawb:
 
 ```text
@@ -89,6 +91,16 @@ nipmod search gitlawb-repo-reader --online --json
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
 nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
 ```
+
+## Real Bankr Agent API smoke
+
+Use this only with a Bankr API key that has Agent API access enabled:
+
+```bash
+BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
+```
+
+The smoke submits the safe proof prompt to `https://api.bankr.bot/agent/prompt`, polls the job, and expects JSON fields for `skillRead`, `packageFound`, `trustChecked`, `installPlanReady` and `safety`. It does not request wallet, trading, signing, token launch or workspace mutation actions.
 
 ## Bankr profile
 

@@ -25,6 +25,7 @@ describe("system readiness receipt", () => {
     expect(readiness.meaning).toContain("one shared verified archive");
     expect(readiness.notClaimed).toContain("third-party users have already adopted every host");
     expect(readiness.notClaimed).toContain("Nipmod owns or controls Gitlawb repos");
+    expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
   });
 
   test("binds system proof into public discovery and llms entrypoints", () => {
@@ -106,6 +107,7 @@ describe("system readiness receipt", () => {
     expect(readiness.agentHosts).toMatchObject({
       bankr: {
         proof: "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
+        runtimeSmoke: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
         skill: "https://nipmod.com/integrations/bankr/nipmod/SKILL.md"
       },
       claudeCode: {

@@ -90,12 +90,14 @@ describe("Bankr integration", () => {
 
     expect(submission).toContain("Bankr Skill Catalog Submission");
     expect(submission).toContain("https://github.com/BankrBot/skills");
+    expect(submission).toContain("| [Nipmod](https://nipmod.com) | [nipmod](nipmod/) |");
     expect(submission).toContain("nipmod/nipmod");
     expect(submission).toContain(githubSkillFolder);
     expect(submission).toContain(publicSkillUrl);
     expect(submission).toContain(publicAgentProofUrl);
     expect(submission).toContain("Add Nipmod skill for package trust and install planning");
     expect(submission).toContain("Agent workflow proof");
+    expect(submission).toContain("BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
     expect(submission).toContain("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod");
     expect(submission).not.toMatch(/bk_usr_|sk-(?:proj-)?|ghp_|github_pat_/i);
   });
@@ -109,6 +111,12 @@ describe("Bankr integration", () => {
       status: "ready",
       skill: publicSkillUrl,
       freeServiceMap: publicFreeMapUrl,
+      runtimeSmoke: {
+        api: "https://api.bankr.bot/agent/prompt",
+        auth: "requires BANKR_API_KEY with Agent API access",
+        command: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+        status: "auth-required"
+      },
       proofPackage: {
         name: "gitlawb-repo-reader",
         canonical: packageDoc.canonical,
@@ -165,7 +173,8 @@ describe("Bankr integration", () => {
       primary: "nipmod install --plan <package> --json"
     });
     expect(freeMap.proof).toMatchObject({
-      agentWorkflow: publicAgentProofUrl
+      agentWorkflow: publicAgentProofUrl,
+      runtimeSmoke: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth"
     });
     expect(freeMap.proof.demoPrompt).toContain(publicAgentProofUrl);
     expect(JSON.stringify(freeMap)).not.toMatch(/price|paymentScheme|x402|USDC/i);
@@ -194,7 +203,8 @@ describe("Bankr integration", () => {
       proof: {
         agentWorkflow: publicAgentProofUrl,
         expectedSteps: ["read-skill", "find-package", "check-trust", "plan-install"],
-        package: proofPackage
+        package: proofPackage,
+        runtimeSmoke: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth"
       },
       skill: {
         agentProof: publicAgentProofUrl,
@@ -218,6 +228,7 @@ describe("Bankr integration", () => {
     expect(llms).toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
     expect(llms).toContain(`Bankr catalog submission: ${publicCatalogSubmissionUrl}`);
     expect(llms).toContain(`Bankr free service map: ${publicFreeMapUrl}`);
+    expect(llms).toContain("Bankr runtime smoke: BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
     expect(llms).toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
     expect(llms).not.toContain("Bankr x402 config");
   });

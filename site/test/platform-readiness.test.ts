@@ -29,6 +29,7 @@ describe("platform readiness receipt", () => {
     );
     expect(readiness.meaning).toContain("does not claim third-party adoption");
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
+    expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
   });
 
   test("binds readiness proof to public discovery and agent entrypoints", () => {
@@ -71,6 +72,8 @@ describe("platform readiness receipt", () => {
     expect(bankr.status).toBe("agent-proof-ready");
     expect(bankr.claim).toContain("without wallet actions");
     expect(bankr.externalDependency).toContain("not claimed");
+    expect(bankr.runtimeSmoke).toBe("BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
+    expect(bankr.checks).toContain("real Bankr Agent API smoke is available with BANKR_API_KEY");
     expect(bankr.checks).toContain("core package workflows do not require x402 or Nipmod payment");
     expect(JSON.stringify(bankr)).not.toMatch(/paymentScheme|walletTransfer|trade|swap/i);
   });

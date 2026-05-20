@@ -14,6 +14,7 @@ const bankrCodexPrompt =
   "Use Nipmod to prepare a Bankr safe package workflow. Search for gitlawb-repo-reader, inspect trust, create an install plan, and do not run wallet, trading or signing actions.";
 const bankrProofPrompt =
   "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.";
+const bankrRuntimeSmoke = "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 
 const services = [
@@ -136,7 +137,7 @@ export default function BankrPage() {
           <article className="quickstart-card">
             <span>Submission</span>
             <h2>Catalog packet</h2>
-            <p>The PR packet lists the target path, copy steps, PR body and smoke test.</p>
+            <p>The PR packet lists the target path, README row, PR body and smoke test.</p>
             <CommandBlock command={catalogSubmission} label="Copy catalog submission packet" />
           </article>
           <article className="quickstart-card">
@@ -169,6 +170,12 @@ export default function BankrPage() {
             <h2>Agent proof JSON</h2>
             <p>The manifest pins the package, expected trust result and safe workflow commands.</p>
             <CommandBlock command={agentProof} label="Copy agent proof manifest" />
+          </article>
+          <article className="quickstart-card">
+            <span>Runtime</span>
+            <h2>Bankr API smoke</h2>
+            <p>Run this only with a Bankr API key that has Agent API access. The prompt forbids wallet actions.</p>
+            <CommandBlock command={bankrRuntimeSmoke} label="Copy Bankr runtime smoke command" />
           </article>
           {proofSteps.map((step) => (
             <article className="quickstart-card" key={step.title}>

@@ -29,6 +29,8 @@ For GitHub review or catalog installation, point the agent at:
 https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 ```
 
+For Bankr's public skill catalog, use the PR packet in `CATALOG_SUBMISSION.md`. It includes the target folder, README row, PR body and runtime smoke command.
+
 ## Local validation
 
 Run from the repository root:
@@ -37,6 +39,14 @@ Run from the repository root:
 pnpm --dir site test test/bankr-integration.test.ts
 pnpm --dir site typecheck
 ```
+
+With a Bankr API key that has Agent API access enabled, run the real Bankr Agent API smoke:
+
+```bash
+BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
+```
+
+Without `BANKR_API_KEY`, the smoke reports that Bankr auth is required and exits without calling Bankr.
 
 ## Bankr path
 

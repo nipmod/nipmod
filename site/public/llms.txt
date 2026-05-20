@@ -31,6 +31,7 @@ Bankr proof prompt: Do not trade, transfer, sign, deploy, launch, swap, buy, sel
 Bankr GitHub skill folder: https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 Bankr catalog submission: https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md
 Bankr free service map: https://nipmod.com/integrations/bankr/bankr.free.json
+Bankr runtime smoke: BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
 Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 
 Use this order for a fresh agent workspace.

@@ -39,7 +39,13 @@ https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 1. Fork `https://github.com/BankrBot/skills`.
 2. Create `nipmod/`.
 3. Copy this repository's `integrations/bankr/nipmod/` folder into `nipmod/`.
-4. Open a PR titled:
+4. Add this README row:
+
+```markdown
+| [Nipmod](https://nipmod.com) | [nipmod](nipmod/) | Package network for agents. Search Gitlawb sourced packages, inspect trust metadata, and produce safe install plans before workspace mutation. |
+```
+
+5. Open a PR titled:
 
 ```text
 Add Nipmod skill for package trust and install planning
@@ -80,7 +86,8 @@ Validation:
 - public skill URL returns 200
 - public service map returns 200
 - public agent proof manifest returns 200
-- Bankr Agent API smoke test confirmed the skill is reachable and service map pricing is free
+- local Bankr proof commands return search, trust and install plan output
+- real Bankr Agent API smoke is available with `BANKR_API_KEY` and does not run wallet, trading, signing or install actions
 - repository tests, typecheck, production build and secret scan pass
 ```
 
@@ -109,12 +116,17 @@ Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything
 Use a Bankr API key with Agent API enabled:
 
 ```bash
-bankr agent prompt "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.free.json. Reply only with whether the Nipmod Bankr skill is reachable and whether the service map pricing is free."
+BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
 ```
 
 Expected result:
 
-```text
-the nipmod bankr skill is reachable.
-the service map pricing is free.
+```json
+{
+  "ok": true,
+  "status": "pass",
+  "type": "dev.nipmod.bankr-agent-smoke.v1"
+}
 ```
+
+If `BANKR_API_KEY` is missing, the smoke test reports that auth is required. That is expected for local review and should not be treated as a failed public proof.

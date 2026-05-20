@@ -104,7 +104,7 @@ describe("nipmod discovery manifest", () => {
       "source"
     ]);
     expect(Object.keys(manifest.bankr.freeServices).sort()).toEqual(["map", "services", "status"]);
-    expect(Object.keys(manifest.bankr.proof).sort()).toEqual(["agentWorkflow", "expectedSteps", "package"]);
+    expect(Object.keys(manifest.bankr.proof).sort()).toEqual(["agentWorkflow", "expectedSteps", "package", "runtimeSmoke"]);
     expect(Object.keys(manifest.agent.commands).sort()).toEqual([
       "addPackage",
       "audit",

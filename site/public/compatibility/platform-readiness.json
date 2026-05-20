@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-19T13:45:00.000Z",
+  "generatedAt": "2026-05-20T02:55:00.000Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -105,14 +105,17 @@
       "checks": [
         "skill can be read from the public site",
         "proof package can be searched, inspected and install-planned",
+        "real Bankr Agent API smoke is available with BANKR_API_KEY",
         "core package workflows do not require x402 or Nipmod payment"
       ],
-      "externalDependency": "Native Bankr catalog acceptance is external and not claimed by this receipt."
+      "runtimeSmoke": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+      "externalDependency": "Native Bankr catalog acceptance and authenticated Bankr Agent API execution are external and not claimed without Bankr auth."
     }
   ],
   "notClaimed": [
     "third-party users have already adopted every host",
     "Bankr has accepted the skill into a native marketplace",
+    "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

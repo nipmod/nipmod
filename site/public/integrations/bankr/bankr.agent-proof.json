@@ -6,6 +6,13 @@
   "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
   "freeServiceMap": "https://nipmod.com/integrations/bankr/bankr.free.json",
   "demoPrompt": "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.",
+  "runtimeSmoke": {
+    "api": "https://api.bankr.bot/agent/prompt",
+    "auth": "requires BANKR_API_KEY with Agent API access",
+    "command": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+    "status": "auth-required",
+    "safety": "The smoke prompt forbids wallet, trading, signing, token launch, package install and workspace mutation actions."
+  },
   "proofPackage": {
     "name": "gitlawb-repo-reader",
     "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",

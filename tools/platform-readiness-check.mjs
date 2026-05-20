@@ -8,8 +8,10 @@ const root = resolve(import.meta.dirname, "..");
 const args = new Set(process.argv.slice(2));
 const includeLive = args.has("--live");
 const includeHostSmoke = args.has("--host-smoke");
+const includeBankrAgentSmoke = args.has("--bankr-agent-smoke") || process.env.NIPMOD_INCLUDE_BANKR_AGENT_SMOKE === "1";
 const nodeBinPath = process.execPath;
 const cliPath = join(root, "nipmod", "dist", "cli.js");
+const bankrAgentSmokePath = join(root, "tools", "bankr-agent-smoke.mjs");
 const expectedTools = [
   "nipmod.search",
   "nipmod.view",
@@ -37,6 +39,9 @@ if (includeLive) {
   await checkSourceMirrors();
   await checkLiveEndpoints();
   await checkBankrProofPath();
+  if (includeBankrAgentSmoke) {
+    await checkBankrAgentSmoke();
+  }
 }
 
 if (includeHostSmoke) {
@@ -56,6 +61,7 @@ const result = {
   checkedAt: new Date().toISOString(),
   checks,
   flags: {
+    bankrAgentSmoke: includeBankrAgentSmoke,
     hostSmoke: includeHostSmoke,
     live: includeLive
   },
@@ -194,6 +200,27 @@ async function checkBankrProofPath() {
     "packageCount"
   ]);
 
+}
+
+async function checkBankrAgentSmoke() {
+  try {
+    const output = await run(nodeBinPath, [bankrAgentSmokePath], { timeoutMs: 140_000 });
+    const payload = JSON.parse(output.stdout);
+    if (payload.status === "skip") {
+      skip("bankr_agent_api_smoke", payload.reason);
+      return;
+    }
+    if (payload.ok) {
+      pass("bankr_agent_api_smoke", {
+        jobId: payload.jobId,
+        threadId: payload.threadId
+      });
+      return;
+    }
+    fail("bankr_agent_api_smoke", payload);
+  } catch (error) {
+    fail("bankr_agent_api_smoke", String(error));
+  }
 }
 
 async function checkCodex() {
