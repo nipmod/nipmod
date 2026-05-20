@@ -13,6 +13,10 @@ const DEFAULT_POLL_TIMEOUT_SECONDS = 45;
 const DEFAULT_ANSWER_GROUP_QUESTIONS = true;
 const DEFAULT_AI_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_AI_MODEL = "gpt-4o-mini";
+const DEFAULT_AI_PROVIDER = "openai";
+const DEFAULT_ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
+const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5";
+const ANTHROPIC_VERSION = "2023-06-01";
 const AI_TIMEOUT_MS = 12000;
 const AI_REPLY_MAX_CHARS = 1200;
 const OFFICIAL_LINKS = [
@@ -445,35 +449,13 @@ export async function renderAiReply(text, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ai.timeoutMs);
   try {
-    const response = await ai.fetchFn(`${ai.baseUrl}/chat/completions`, {
-      body: JSON.stringify({
-        max_tokens: 240,
-        messages: [
-          {
-            content: buildAiSystemPrompt(packages),
-            role: "system"
-          },
-          {
-            content: String(text ?? "").slice(0, 1200),
-            role: "user"
-          }
-        ],
-        model: ai.model,
-        temperature: 0.2
-      }),
-      headers: {
-        authorization: `Bearer ${ai.apiKey}`,
-        "content-type": "application/json"
-      },
-      method: "POST",
-      signal: controller.signal
-    });
-    if (!response.ok) {
+    const response = ai.provider === "anthropic"
+      ? await callAnthropicMessagesApi({ ai, packages, signal: controller.signal, text })
+      : await callOpenAiChatCompletionsApi({ ai, packages, signal: controller.signal, text });
+    if (!response) {
       return null;
     }
-    const body = await response.json().catch(() => null);
-    const content = body?.choices?.[0]?.message?.content;
-    return sanitizeAiReply(content);
+    return sanitizeAiReply(response);
   } catch {
     return null;
   } finally {
@@ -481,16 +463,87 @@ export async function renderAiReply(text, options = {}) {
   }
 }
 
+async function callOpenAiChatCompletionsApi({ ai, packages, signal, text }) {
+  const response = await ai.fetchFn(`${ai.baseUrl}/chat/completions`, {
+    body: JSON.stringify({
+      max_tokens: 240,
+      messages: [
+        {
+          content: buildAiSystemPrompt(packages),
+          role: "system"
+        },
+        {
+          content: String(text ?? "").slice(0, 1200),
+          role: "user"
+        }
+      ],
+      model: ai.model,
+      temperature: 0.2
+    }),
+    headers: {
+      authorization: `Bearer ${ai.apiKey}`,
+      "content-type": "application/json"
+    },
+    method: "POST",
+    signal
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const body = await response.json().catch(() => null);
+  return body?.choices?.[0]?.message?.content ?? null;
+}
+
+async function callAnthropicMessagesApi({ ai, packages, signal, text }) {
+  const response = await ai.fetchFn(`${ai.baseUrl}/messages`, {
+    body: JSON.stringify({
+      max_tokens: 240,
+      messages: [
+        {
+          content: String(text ?? "").slice(0, 1200),
+          role: "user"
+        }
+      ],
+      model: ai.model,
+      system: buildAiSystemPrompt(packages),
+      temperature: 0.2
+    }),
+    headers: {
+      "anthropic-version": ANTHROPIC_VERSION,
+      "content-type": "application/json",
+      "x-api-key": ai.apiKey
+    },
+    method: "POST",
+    signal
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const body = await response.json().catch(() => null);
+  return Array.isArray(body?.content)
+    ? body.content.filter((part) => part?.type === "text").map((part) => part.text).join("\n").trim()
+    : null;
+}
+
 export function resolveAiOptions(options = {}) {
   const apiKey = options.aiApiKey || options.openaiApiKey || null;
+  const provider = normalizeAiProvider(options.aiProvider || DEFAULT_AI_PROVIDER);
   return {
     apiKey,
-    baseUrl: trimTrailingSlash(options.aiBaseUrl || DEFAULT_AI_BASE_URL),
+    baseUrl: trimTrailingSlash(
+      options.aiBaseUrl || (provider === "anthropic" ? DEFAULT_ANTHROPIC_BASE_URL : DEFAULT_AI_BASE_URL)
+    ),
     enabled: options.aiEnabled !== false && Boolean(apiKey),
     fetchFn: options.aiFetchFn || options.fetchFn || fetch,
-    model: options.aiModel || DEFAULT_AI_MODEL,
+    model: options.aiModel || (provider === "anthropic" ? DEFAULT_ANTHROPIC_MODEL : DEFAULT_AI_MODEL),
+    provider,
     timeoutMs: options.aiTimeoutMs || AI_TIMEOUT_MS
   };
+}
+
+function normalizeAiProvider(provider) {
+  const normalized = String(provider ?? "").trim().toLowerCase();
+  return normalized === "anthropic" || normalized === "claude" ? "anthropic" : "openai";
 }
 
 export function buildAiSystemPrompt(packages = null) {
@@ -508,6 +561,8 @@ export function buildAiSystemPrompt(packages = null) {
     "Keep answers under 6 short lines.",
     "No hype, no filler, no invented roadmap, no fake certainty.",
     "Do not use markdown dash bullets.",
+    "Do not use bullet symbols, en dashes or em dashes.",
+    "Use plain short lines.",
     "Never ask for private keys, seed phrases, wallet secrets or API keys in Telegram.",
     "Do not give trading advice, token price predictions or financial recommendations.",
     "You may answer only about Nipmod, its official links, Gitlawb source, GitHub mirror, Bankr integration, Codex, Claude Code, MCP, install, packages, registry, safety and status.",
@@ -535,7 +590,7 @@ export function sanitizeAiReply(value) {
   }
   return text
     .split(/\r?\n/)
-    .map((line) => line.replace(/^\s*[-*]\s+/, "").trimEnd())
+    .map((line) => line.replace(/^\s*[-*•‣◦]\s+/, "").replace(/\s+[–—-]\s+/g, " ").trimEnd())
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .slice(0, AI_REPLY_MAX_CHARS)
@@ -625,6 +680,7 @@ export async function runTelegramBot({
   aiBaseUrl = DEFAULT_AI_BASE_URL,
   aiEnabled = false,
   aiModel = DEFAULT_AI_MODEL,
+  aiProvider = DEFAULT_AI_PROVIDER,
   bindFirstGroup = true,
   fetchFn = fetch,
   groupOnly = true,
@@ -653,7 +709,7 @@ export async function runTelegramBot({
   log(
     `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; chat=${
       activeState.allowedChatId ?? "waiting-for-/start"
-    }; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? aiModel : "off"}`
+    }; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? `${aiProvider}:${aiModel}` : "off"}`
   );
 
   while (!signal?.aborted) {
@@ -670,6 +726,7 @@ export async function runTelegramBot({
           aiBaseUrl,
           aiEnabled,
           aiModel,
+          aiProvider,
           bindFirstGroup,
           fetchFn,
           groupOnly,
@@ -1056,8 +1113,9 @@ async function main() {
         "  NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1",
         "  NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1",
         "  NIPMOD_TELEGRAM_AI_ENABLED=1",
-        "  NIPMOD_TELEGRAM_AI_MODEL=gpt-4o-mini",
-        "  NIPMOD_TELEGRAM_AI_API_KEY=<openai-or-compatible-key>"
+        "  NIPMOD_TELEGRAM_AI_PROVIDER=anthropic",
+        "  NIPMOD_TELEGRAM_AI_MODEL=claude-sonnet-4-5",
+        "  NIPMOD_TELEGRAM_ANTHROPIC_API_KEY=<anthropic-key>"
       ].join("\n") + "\n"
     );
     return;
@@ -1068,14 +1126,18 @@ async function main() {
     ...process.env
   };
   const token = env.TELEGRAM_BOT_TOKEN || env.NIPMOD_TELEGRAM_BOT_TOKEN;
-  const aiApiKey = env.NIPMOD_TELEGRAM_AI_API_KEY || env.OPENAI_API_KEY || null;
+  const anthropicApiKey = env.NIPMOD_TELEGRAM_ANTHROPIC_API_KEY || env.ANTHROPIC_API_KEY || null;
+  const openAiApiKey = env.NIPMOD_TELEGRAM_AI_API_KEY || env.OPENAI_API_KEY || null;
+  const aiProvider = normalizeAiProvider(env.NIPMOD_TELEGRAM_AI_PROVIDER || (anthropicApiKey ? "anthropic" : "openai"));
+  const aiApiKey = aiProvider === "anthropic" ? anthropicApiKey : openAiApiKey;
   await runTelegramBot({
     allowedChatId: env.NIPMOD_TELEGRAM_ALLOWED_CHAT_ID || null,
     answerGroupQuestions: env.NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS !== "0",
     aiApiKey,
-    aiBaseUrl: env.NIPMOD_TELEGRAM_AI_BASE_URL || DEFAULT_AI_BASE_URL,
+    aiBaseUrl: env.NIPMOD_TELEGRAM_AI_BASE_URL || (aiProvider === "anthropic" ? DEFAULT_ANTHROPIC_BASE_URL : DEFAULT_AI_BASE_URL),
     aiEnabled: env.NIPMOD_TELEGRAM_AI_ENABLED !== "0" && Boolean(aiApiKey),
-    aiModel: env.NIPMOD_TELEGRAM_AI_MODEL || DEFAULT_AI_MODEL,
+    aiModel: env.NIPMOD_TELEGRAM_AI_MODEL || (aiProvider === "anthropic" ? DEFAULT_ANTHROPIC_MODEL : DEFAULT_AI_MODEL),
+    aiProvider,
     bindFirstGroup: env.NIPMOD_TELEGRAM_BIND_FIRST_GROUP !== "0",
     groupOnly: env.NIPMOD_TELEGRAM_GROUP_ONLY !== "0",
     registryUrl: env.NIPMOD_REGISTRY_URL || DEFAULT_REGISTRY_URL,

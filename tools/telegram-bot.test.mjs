@@ -335,6 +335,47 @@ describe("telegram bot AI fallback", () => {
     assert.match(reply.text, /package layer for agents/);
   });
 
+  test("uses Anthropic Messages API when Claude provider is configured", async () => {
+    const calls = [];
+    const reply = await createTelegramBotReply(groupUpdate("kannst du das grob einordnen?"), {
+      allowedChatId: "-100123",
+      aiApiKey: "sk-ant-test",
+      aiBaseUrl: "https://api.anthropic.test/v1/",
+      aiModel: "claude-sonnet-4-5",
+      aiProvider: "anthropic",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      fetchFn: async (url, init) => {
+        calls.push({
+          body: JSON.parse(init.body),
+          headers: init.headers,
+          url
+        });
+        return jsonResponse({
+          content: [
+            {
+              text: "Nipmod is the package layer for agents.\nUse /links for official links.",
+              type: "text"
+            }
+          ],
+          type: "message"
+        });
+      },
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "https://api.anthropic.test/v1/messages");
+    assert.equal(calls[0].headers["anthropic-version"], "2023-06-01");
+    assert.equal(calls[0].headers["x-api-key"], "sk-ant-test");
+    assert.equal(calls[0].body.model, "claude-sonnet-4-5");
+    assert.match(calls[0].body.system, /Official links:/);
+    assert.equal(calls[0].body.messages[0].role, "user");
+    assert.match(reply.text, /package layer for agents/);
+  });
+
   test("keeps exact local answers ahead of AI fallback", async () => {
     const reply = await renderPlainTextReply("githb link bitte", {
       aiApiKey: "sk-test",
@@ -358,7 +399,10 @@ describe("telegram bot AI fallback", () => {
   });
 
   test("sanitizes AI dash bullets", () => {
-    assert.equal(sanitizeAiReply("- Website https://nipmod.com\n- GitHub https://github.com/nipmod/nipmod"), "Website https://nipmod.com\nGitHub https://github.com/nipmod/nipmod");
+    assert.equal(
+      sanitizeAiReply("- Website https://nipmod.com\n• GitHub https://github.com/nipmod/nipmod\n/help – Shows commands"),
+      "Website https://nipmod.com\nGitHub https://github.com/nipmod/nipmod\n/help Shows commands"
+    );
   });
 
   test("AI prompt contains hard boundaries and official links", () => {

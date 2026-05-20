@@ -14,8 +14,9 @@ NIPMOD_TELEGRAM_GROUP_ONLY=1
 NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1
 NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1
 NIPMOD_TELEGRAM_AI_ENABLED=1
-NIPMOD_TELEGRAM_AI_MODEL=gpt-4o-mini
-NIPMOD_TELEGRAM_AI_API_KEY=<openai-or-compatible-key>
+NIPMOD_TELEGRAM_AI_PROVIDER=anthropic
+NIPMOD_TELEGRAM_AI_MODEL=claude-sonnet-4-5
+NIPMOD_TELEGRAM_ANTHROPIC_API_KEY=<anthropic-key>
 ```
 
 `.env.local` is ignored by git and skipped by the secret scan.
@@ -72,7 +73,8 @@ Non question group chatter is ignored.
 ## AI layer
 
 The local knowledge base answers exact public facts first.
-When `NIPMOD_TELEGRAM_AI_API_KEY` or `OPENAI_API_KEY` is present, broad questions fall through to an OpenAI compatible chat completions endpoint.
+When `NIPMOD_TELEGRAM_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` is present and `NIPMOD_TELEGRAM_AI_PROVIDER=anthropic`, broad questions fall through to Anthropic's Messages API.
+OpenAI compatible chat completions are still supported through `NIPMOD_TELEGRAM_AI_PROVIDER=openai`.
 The AI system prompt is restricted to Nipmod, official links, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, install, packages, registry, safety and status.
 If the question is outside scope, the AI must use the same short fallback.
 
