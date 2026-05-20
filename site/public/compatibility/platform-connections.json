@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T11:02:06.565Z",
+  "generatedAt": "2026-05-20T13:16:37.242Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -22,13 +22,13 @@
     }
   ],
   "hostSmoke": {
-    "checkedAt": "2026-05-20T03:44:46.771Z",
+    "checkedAt": "2026-05-20T13:16:37.242Z",
     "command": "node tools/platform-readiness-check.mjs --host-smoke --live",
     "summary": {
-      "pass": 36,
+      "pass": 50,
       "fail": 0,
       "skip": 0,
-      "total": 36
+      "total": 50
     }
   },
   "connections": [

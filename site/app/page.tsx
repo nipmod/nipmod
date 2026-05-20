@@ -1,6 +1,8 @@
 import { homeContent } from "./content";
 import { packageEvidenceHref, packagePageHref } from "./packages/content";
+import { PlatformMark, platformStatusClass } from "./platform-brand";
 import registryData from "./registry-data.json";
+import platformConnections from "../public/compatibility/platform-connections.json";
 import { loadLiveStats } from "../lib/live-stats";
 import {
   gitlawbOwnerHref,
@@ -21,6 +23,12 @@ type HomeProps = {
 };
 
 const registry = registryData as RegistryIndex;
+const platformPathLabel: Record<string, string> = {
+  Candidate: "Review needed",
+  Live: "Live",
+  "MCP ready": "MCP",
+  "Under review": "Review"
+};
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = searchParams ? await searchParams : {};
@@ -131,18 +139,32 @@ export default async function Home({ searchParams }: HomeProps) {
           <h2 id="platforms-title">{homeContent.platformRoadmap.headline}</h2>
           <p>{homeContent.platformRoadmap.lead}</p>
         </div>
+        <div className="platform-logo-rail" aria-label="Current Nipmod platform paths">
+          {platformConnections.connections.map((connection) => (
+            <a className="platform-logo-tile" href={connection.url} key={connection.id}>
+              <PlatformMark id={connection.id} name={connection.name} />
+              <span className="platform-logo-copy">
+                <strong>{connection.name}</strong>
+                <span>{platformPathLabel[connection.status] ?? connection.status}</span>
+              </span>
+            </a>
+          ))}
+        </div>
         <div className="platform-grid" aria-label="Nipmod platform roadmap">
-          {homeContent.platformRoadmap.items.map((item) => (
-            <article className="platform-card" key={item.name}>
+          {platformConnections.connections.map((connection) => (
+            <article className="platform-card" key={connection.id}>
               <div className="platform-top">
-                <div>
-                  <p className="platform-label">{item.label}</p>
-                  <h3>{item.name}</h3>
+                <div className="platform-title-row">
+                  <PlatformMark id={connection.id} name={connection.name} />
+                  <div>
+                    <p className="platform-label">{connection.category}</p>
+                    <h3>{connection.name}</h3>
+                  </div>
                 </div>
-                <span className={`platform-status ${platformStatusClass(item.status)}`}>{item.status}</span>
+                <span className={`platform-status ${platformStatusClass(connection.status)}`}>{connection.status}</span>
               </div>
-              <p>{item.text}</p>
-              <a href={item.href}>{item.cta}</a>
+              <p>{connection.scope}</p>
+              <a href={connection.url}>{connection.externalApprovalRequired ? "Review path" : "Open path"}</a>
             </article>
           ))}
         </div>
@@ -269,26 +291,6 @@ export default async function Home({ searchParams }: HomeProps) {
       </section>
     </main>
   );
-}
-
-function platformStatusClass(status: string): string {
-  if (status === "Live") {
-    return "platform-status-live";
-  }
-
-  if (status === "Under review") {
-    return "platform-status-review";
-  }
-
-  if (status === "MCP ready") {
-    return "platform-status-mcp";
-  }
-
-  if (status === "Candidate") {
-    return "platform-status-candidate";
-  }
-
-  return "platform-status-planned";
 }
 
 function PackageCard({ pkg }: { pkg: RegistryPackage }) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PlatformMark, platformStatusClass } from "../platform-brand";
 import platformConnections from "../../public/compatibility/platform-connections.json";
 
 type PlatformConnection = (typeof platformConnections.connections)[number];
@@ -61,8 +62,8 @@ export default function PlatformsPage() {
       <section className="registry-section" aria-labelledby="legend-title">
         <div className="section-head">
           <p className="eyebrow">Status labels</p>
-          <h2 id="legend-title">Every label has a boundary.</h2>
-          <p>Use these labels in posts, docs and review messages so the project does not overclaim native support.</p>
+          <h2 id="legend-title">The platform list is status scoped.</h2>
+          <p>Logos show where Nipmod has a connection path. Status labels show how far that path actually goes.</p>
           <a className="data-link" href="/compatibility/platform-connections.json">
             Open connection matrix JSON
           </a>
@@ -92,6 +93,17 @@ export default function PlatformsPage() {
           <h2 id="connection-title">Current platform connections</h2>
           <p>Each card points to a public page, a repo kit and a smoke or review path.</p>
         </div>
+        <div className="platform-logo-rail platform-logo-rail-wide" aria-label="Current Nipmod platform logos">
+          {platformConnections.connections.map((connection) => (
+            <a className="platform-logo-tile" href={connection.url} key={connection.id}>
+              <PlatformMark id={connection.id} name={connection.name} />
+              <span className="platform-logo-copy">
+                <strong>{connection.name}</strong>
+                <span>{connection.status}</span>
+              </span>
+            </a>
+          ))}
+        </div>
         <div className="platform-proof-grid">
           {platformConnections.connections.map((connection) => (
             <ConnectionCard connection={connection} key={connection.id} />
@@ -107,9 +119,12 @@ function ConnectionCard({ connection }: { connection: PlatformConnection }) {
   return (
     <article className="platform-card">
       <div className="platform-top">
-        <div>
-          <p className="platform-label">{connection.category}</p>
-          <h3>{connection.name}</h3>
+        <div className="platform-title-row">
+          <PlatformMark id={connection.id} name={connection.name} />
+          <div>
+            <p className="platform-label">{connection.category}</p>
+            <h3>{connection.name}</h3>
+          </div>
         </div>
         <span className={`platform-status ${platformStatusClass(connection.status)}`}>{connection.status}</span>
       </div>
@@ -135,24 +150,4 @@ function ConnectionCard({ connection }: { connection: PlatformConnection }) {
       <a href={connection.url}>Open public path</a>
     </article>
   );
-}
-
-function platformStatusClass(status: string): string {
-  if (status === "Live") {
-    return "platform-status-live";
-  }
-
-  if (status === "Under review") {
-    return "platform-status-review";
-  }
-
-  if (status === "MCP ready") {
-    return "platform-status-mcp";
-  }
-
-  if (status === "Candidate") {
-    return "platform-status-candidate";
-  }
-
-  return "platform-status-planned";
 }

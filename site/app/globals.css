@@ -944,6 +944,114 @@ h1 {
   max-width: 760px;
 }
 
+.platform-logo-rail {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+}
+
+.platform-logo-rail-wide {
+  grid-template-columns: repeat(9, minmax(88px, 1fr));
+}
+
+.platform-logo-tile {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  color: inherit;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  min-height: 116px;
+  padding: 14px 10px;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.platform-logo-tile:hover {
+  background: rgba(255, 255, 255, 0.085);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.platform-logo-copy {
+  display: grid;
+  gap: 4px;
+  line-height: 1.1;
+}
+
+.platform-logo-copy strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.platform-logo-copy span {
+  color: var(--quiet);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.platform-mark {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  overflow: hidden;
+  width: 48px;
+}
+
+.platform-mark img {
+  display: block;
+  height: 30px;
+  max-width: 34px;
+  object-fit: contain;
+  width: auto;
+}
+
+.platform-mark .platform-mark-github {
+  height: 25px;
+  max-width: 28px;
+}
+
+.platform-mark .platform-mark-opencode {
+  height: 32px;
+  max-width: 32px;
+}
+
+.platform-mark-text {
+  color: var(--text);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 820;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.platform-mark-mcp {
+  background:
+    radial-gradient(circle at 30% 32%, rgba(143, 255, 193, 0.85) 0 4px, transparent 5px),
+    radial-gradient(circle at 68% 32%, rgba(41, 151, 255, 0.85) 0 4px, transparent 5px),
+    radial-gradient(circle at 50% 68%, rgba(255, 217, 138, 0.9) 0 4px, transparent 5px),
+    rgba(255, 255, 255, 0.08);
+  color: transparent;
+}
+
+.platform-mark-codex {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(41, 151, 255, 0.12));
+}
+
+.platform-mark-aeon {
+  background: linear-gradient(135deg, rgba(255, 122, 74, 0.18), rgba(255, 255, 255, 0.08));
+}
+
 .platform-grid {
   display: grid;
   gap: 14px;
@@ -967,6 +1075,24 @@ h1 {
   display: flex;
   gap: 14px;
   justify-content: space-between;
+}
+
+.platform-title-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.platform-title-row .platform-mark {
+  flex: 0 0 auto;
+  height: 42px;
+  width: 42px;
+}
+
+.platform-title-row .platform-mark img {
+  height: 27px;
+  max-width: 30px;
 }
 
 .platform-label {
@@ -2225,6 +2351,11 @@ h1 {
   .archive-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .platform-logo-rail,
+  .platform-logo-rail-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
@@ -2253,6 +2384,8 @@ h1 {
   .comparison-grid,
   .platform-grid,
   .platform-proof-grid,
+  .platform-logo-rail,
+  .platform-logo-rail-wide,
   .claim-flow,
   .owner-flow,
   .faq-grid,
@@ -2280,6 +2413,11 @@ h1 {
   .package-draft,
   .package-hero {
     grid-template-columns: 1fr;
+  }
+
+  .platform-logo-rail,
+  .platform-logo-rail-wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .hero {
@@ -2366,6 +2504,19 @@ h1 {
 }
 
 @media (max-width: 560px) {
+  .platform-logo-rail,
+  .platform-logo-rail-wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar {
+    padding: 0 6px;
+  }
+
+  .brand-socials {
+    gap: 3px;
+  }
+
   .brand span:last-child {
     display: none;
   }
@@ -2392,6 +2543,10 @@ h1 {
 
   .nav-actions {
     gap: 4px;
+  }
+
+  .nav-link-wide:not(.nav-install) {
+    display: none;
   }
 
   .nav-link,

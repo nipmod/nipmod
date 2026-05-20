@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T11:02:06.565Z",
+  "generatedAt": "2026-05-20T13:16:37.242Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
