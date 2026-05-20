@@ -4,7 +4,7 @@ export const setupContent = {
     "Install Nipmod, connect your agent and ask it to search the archive before package installs.",
   installCommand: "curl https://nipmod.com/i|bash",
   checkCommand: "nipmod doctor --online",
-  allAgentsCommand: "nipmod setup agents --include-codex --include-hermes",
+  allAgentsCommand: "nipmod setup agents",
   agentPrompt:
     "Use Nipmod before installing agent packages. Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Search the Nipmod archive first, view exact metadata, inspect trust, create an install plan, ask before writing files, then audit and export SBOM.",
   steps: [

@@ -359,7 +359,7 @@ describe("nipmod discovery manifest", () => {
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
-      setupAgents: "nipmod setup agents --include-codex --include-hermes",
+      setupAgents: "nipmod setup agents",
       setupClaudeMcp: "nipmod setup claude",
       setupCodexMcp: "nipmod setup codex",
       setupHermesMcp: "nipmod setup hermes",

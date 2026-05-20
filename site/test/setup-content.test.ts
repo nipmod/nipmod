@@ -16,7 +16,7 @@ describe("setup content", () => {
   test("publishes copyable setup commands for major agent hosts", () => {
     expect(setupContent.installCommand).toBe("curl https://nipmod.com/i|bash");
     expect(setupContent.checkCommand).toBe("nipmod doctor --online");
-    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents --include-codex --include-hermes");
+    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents");
     expect(setupContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode", "Hermes"]);
     expect(setupContent.hosts[0]?.command).toBe("nipmod setup codex");
     expect(setupContent.hosts[1]?.command).toBe("nipmod setup claude");

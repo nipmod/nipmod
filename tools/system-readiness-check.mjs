@@ -209,7 +209,7 @@ async function checkDiscoveryBinding() {
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
   assertText("llms_remote_mcp", llms, state.receipt.entrypoints.remoteMcp);
-  assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex --include-hermes");
+  assertText("llms_setup_agents", llms, "nipmod setup agents");
 }
 
 async function checkCliSurface() {

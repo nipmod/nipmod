@@ -298,7 +298,7 @@ function installPlanTool(args: Record<string, unknown>): JsonValue {
     remoteWrites: false,
     setup: {
       installCli: LOCAL_INSTALL_COMMAND,
-      connectLocalMcp: "nipmod setup agents --include-codex --include-hermes"
+      connectLocalMcp: "nipmod setup agents"
     },
     type: "dev.nipmod.remote-mcp.install-plan.v1"
   };

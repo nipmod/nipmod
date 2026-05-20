@@ -1433,7 +1433,7 @@ function installText() {
   return [
     "Install Nipmod",
     "curl https://nipmod.com/i|bash",
-    "nipmod setup agents --include-codex --include-hermes",
+    "nipmod setup agents",
     "",
     "Then tell the agent",
     "Read https://nipmod.com/llms.txt and use Nipmod for package search, inspection and controlled install."

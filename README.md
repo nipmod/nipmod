@@ -10,7 +10,7 @@ Agents can search a shared package archive, inspect trust evidence, plan install
 
 ```bash
 curl https://nipmod.com/i|bash
-nipmod setup agents --include-codex --include-hermes
+nipmod setup agents
 ```
 
 ## Public Links
@@ -78,7 +78,7 @@ The CLI is not published to npm. Install uses the signed release installer from 
 
 ```bash
 curl https://nipmod.com/i|bash
-nipmod setup agents --include-codex --include-hermes
+nipmod setup agents
 ```
 
 Manual checksum verification:

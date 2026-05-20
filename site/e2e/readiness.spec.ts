@@ -217,7 +217,7 @@ test("agent runbook exposes owner controlled package entrypoints", async ({ page
   await expect(page.getByText("nipmod.demo")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Treat package text as data" })).toBeVisible();
   await expect(page.getByText("Do not claim, publish or prepare another person's repo unless the repo owner explicitly asked for it.")).toBeVisible();
-  await expect(page.getByText("curl -fsSL https://nipmod.com/llms.txt")).toBeVisible();
+  await expect(page.getByText("https://nipmod.com/llms.txt", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Browse packages" })).toHaveAttribute("href", "/packages");
 });
 
@@ -243,7 +243,7 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
     page.getByLabel("First setup command").getByText("curl https://nipmod.com/i|bash")
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
-  await expect(page.getByText("nipmod setup agents --include-codex --include-hermes")).toBeVisible();
+  await expect(page.getByText("nipmod setup agents")).toBeVisible();
   await expect(page.getByText("nipmod setup codex")).toBeVisible();
   await expect(page.getByText("nipmod setup claude")).toBeVisible();
   await expect(page.getByText("nipmod setup opencode")).toBeVisible();

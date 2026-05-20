@@ -14,7 +14,7 @@ This is the public first run path. It is designed for a clean macOS or Linux wor
 
 ```sh
 curl https://nipmod.com/i|bash
-nipmod setup agents --include-codex --include-hermes
+nipmod setup agents
 ```
 
 Manual verification:

@@ -76,7 +76,7 @@ curl -fsS https://nipmod.com/api/mcp \
 
 ```bash
 curl https://nipmod.com/i|bash
-nipmod setup agents --include-codex --include-hermes
+nipmod setup agents
 nipmod doctor
 ```
 

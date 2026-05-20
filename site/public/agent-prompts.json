@@ -17,6 +17,6 @@
     "hermes": "nipmod setup hermes",
     "opencode": "nipmod setup opencode",
     "remoteMcp": "https://nipmod.com/api/mcp",
-    "projectAgents": "nipmod setup agents --include-codex --include-hermes"
+    "projectAgents": "nipmod setup agents"
   }
 }

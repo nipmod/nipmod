@@ -90,7 +90,8 @@ describe("home content", () => {
       "MCP:MCP ready",
       "Codex:MCP ready",
       "Claude Code:MCP ready",
-      "OpenCode:MCP ready"
+      "OpenCode:MCP ready",
+      "Hermes:MCP ready"
     ]);
     expect(homeContent.platformRoadmap.items[3]?.text).toContain("Codex can register");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Prepare", "Verify", "Publish", "Use"]);
@@ -105,7 +106,6 @@ describe("home content", () => {
   test("exposes a complete first run path", () => {
     expect(homeContent.quickstartSteps.map((step) => step.label)).toEqual([
       "Install CLI",
-      "Verify",
       "Check",
       "Setup publish",
       "Find",
@@ -123,7 +123,6 @@ describe("home content", () => {
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install CLI")?.command).toBe(
       "curl https://nipmod.com/i|bash"
     );
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Plan install")?.command).toMatch(
       /^nipmod install --plan pkg:did:key:z[A-Za-z0-9]+\/gitlawb-repo-reader@0\.1\.0 --json$/

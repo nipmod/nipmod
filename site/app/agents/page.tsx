@@ -23,17 +23,17 @@ const commands = [
   {
     label: "Read manifest",
     text: "Start with the machine file. It points to docs, registry, MCP and safety rules.",
-    command: "curl -fsSL https://nipmod.com/.well-known/nipmod.json"
+    command: "https://nipmod.com/.well-known/nipmod.json"
   },
   {
     label: "Read runbook",
     text: "Use the plain text entrypoint when an agent needs the full workflow in one place.",
-    command: "curl -fsSL https://nipmod.com/llms.txt"
+    command: "https://nipmod.com/llms.txt"
   },
   {
     label: "Read prompts",
     text: "Use the machine prompt pack when an agent needs copyable host specific instructions.",
-    command: "curl -fsSL https://nipmod.com/agent-prompts.json"
+    command: "https://nipmod.com/agent-prompts.json"
   },
   {
     label: "Search",

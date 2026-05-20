@@ -87,6 +87,14 @@ export const homeContent = {
         text: "OpenCode can load the project config and connect to the local Nipmod MCP server.",
         href: "/setup",
         cta: "Setup OpenCode"
+      },
+      {
+        name: "Hermes",
+        status: "MCP ready",
+        label: "agent host",
+        text: "Hermes can load the local Nipmod MCP server from its MCP config.",
+        href: "/setup",
+        cta: "Setup Hermes"
       }
     ]
   },
@@ -134,12 +142,6 @@ export const homeContent = {
       label: "Install CLI",
       text: "Paste one command.",
       command: "curl https://nipmod.com/i|bash"
-    },
-    {
-      label: "Verify",
-      text: "Use the checksum path when you want manual verification before execution.",
-      command:
-        "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh"
     },
     {
       label: "Check",

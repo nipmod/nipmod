@@ -19,7 +19,7 @@ const docSections = [
   {
     href: "#install",
     label: "Install",
-    text: "Set up the CLI and verify the installer."
+    text: "Set up the CLI in one command."
   },
   {
     href: "#find",
@@ -69,7 +69,6 @@ const stepIds: Record<string, string> = {
   SBOM: "sbom",
   "Setup publish": "setup-publish",
   Update: "update",
-  Verify: "verify"
 };
 
 const firstRunLabels = new Set(["Install CLI", "Find", "Inspect", "Plan install", "Install package", "Audit"]);
@@ -122,10 +121,10 @@ export default function QuickstartPage() {
       <section className="proof-section" aria-labelledby="flow-title">
         <div>
           <p className="eyebrow">Flow</p>
-          <h2 id="flow-title">Short command first. Verification when needed.</h2>
+          <h2 id="flow-title">Install in one line.</h2>
         </div>
         <div className="proof-panel">
-          <p className="panel-copy">Use the short installer for normal setup. Use the checksum path when reviewing security.</p>
+          <p className="panel-copy">Paste one command, then connect the agent you use.</p>
           <pre className="install-command">
             <code>{"curl https://nipmod.com/i|bash"}</code>
           </pre>
@@ -142,7 +141,7 @@ export default function QuickstartPage() {
             Agents should fetch the text runbook, then the JSON manifest for exact endpoints, commands, trust roots and MCP tools.
           </p>
           <pre className="install-command">
-            <code>{"curl -fsSL https://nipmod.com/llms.txt\ncurl -fsSL https://nipmod.com/.well-known/nipmod.json\nnipmod mcp serve"}</code>
+            <code>{"https://nipmod.com/llms.txt\nhttps://nipmod.com/.well-known/nipmod.json\nnipmod mcp serve"}</code>
           </pre>
           <div className="actions">
             <a className="button button-primary" href="/mcp">

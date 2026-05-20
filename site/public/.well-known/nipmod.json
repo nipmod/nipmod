@@ -58,7 +58,7 @@
     ],
     "commands": {
       "install": "curl https://nipmod.com/i|bash",
-      "setupAgents": "nipmod setup agents --include-codex --include-hermes",
+      "setupAgents": "nipmod setup agents",
       "setupCodexMcp": "nipmod setup codex",
       "setupClaudeMcp": "nipmod setup claude",
       "setupOpenCodeMcp": "nipmod setup opencode",

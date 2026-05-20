@@ -55,7 +55,7 @@ export default function SetupPage() {
         <div className="setup-command-stack">
           <CommandBlock command={setupContent.installCommand} label="Copy Nipmod install command" />
           <CommandBlock command={setupContent.checkCommand} label="Copy Nipmod check command" />
-          <CommandBlock command={setupContent.allAgentsCommand} label="Copy all agents setup command" />
+          <CommandBlock command={setupContent.allAgentsCommand} label="Copy project agent setup command" />
         </div>
       </section>
 

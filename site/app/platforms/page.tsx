@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/platforms"
   },
-  description: "Public Nipmod platform connection matrix with live, MCP ready, under review and candidate statuses.",
+  description: "Public Nipmod platform paths that are live or MCP ready.",
   openGraph: {
-    description: "Check which Nipmod platform paths are live, MCP ready, under review or candidates.",
+    description: "Check which Nipmod platform paths are live or MCP ready.",
     title: "Nipmod platform connections",
     url: "https://nipmod.com/platforms"
   },
@@ -18,9 +18,14 @@ export const metadata: Metadata = {
 };
 
 export default function PlatformsPage() {
-  const live = platformConnections.connections.filter((connection) => connection.status === "Live").length;
-  const mcpReady = platformConnections.connections.filter((connection) => connection.status === "MCP ready").length;
-  const external = platformConnections.connections.filter((connection) => connection.externalApprovalRequired).length;
+  const visibleConnections = platformConnections.connections.filter(
+    (connection) => connection.status === "Live" || connection.status === "MCP ready"
+  );
+  const visibleLegend = platformConnections.statusLegend.filter(
+    (item) => item.status === "Live" || item.status === "MCP ready"
+  );
+  const live = visibleConnections.filter((connection) => connection.status === "Live").length;
+  const mcpReady = visibleConnections.filter((connection) => connection.status === "MCP ready").length;
 
   return (
     <main className="page-shell" id="main">
@@ -28,8 +33,7 @@ export default function PlatformsPage() {
         <p className="eyebrow">Platforms</p>
         <h1 id="platforms-title">Connection matrix</h1>
         <p className="lead">
-          This page separates live Nipmod controlled paths from MCP ready host paths and external review work. It is a
-          proof surface, not a partner approval claim.
+          This page shows the paths people can use now: Nipmod controlled paths and MCP ready agent hosts.
         </p>
         <div className="actions" aria-label="Platform actions">
           <a className="button button-primary" href="/status">
@@ -54,16 +58,16 @@ export default function PlatformsPage() {
           <p>MCP ready paths</p>
         </article>
         <article className="stat-tile">
-          <span>{external}</span>
-          <p>External approvals</p>
+          <span>{visibleConnections.length}</span>
+          <p>Visible paths</p>
         </article>
       </section>
 
       <section className="registry-section" aria-labelledby="legend-title">
         <div className="section-head">
           <p className="eyebrow">Status labels</p>
-          <h2 id="legend-title">The platform list is status scoped.</h2>
-          <p>Logos show where Nipmod has a connection path. Status labels show how far that path actually goes.</p>
+          <h2 id="legend-title">Only usable paths are shown.</h2>
+          <p>Future paths stay in the public machine file until they are ready for users.</p>
           <a className="data-link" href="/compatibility/platform-connections.json">
             Open connection matrix JSON
           </a>
@@ -72,7 +76,7 @@ export default function PlatformsPage() {
           </a>
         </div>
         <div className="platform-grid">
-          {platformConnections.statusLegend.map((item) => (
+          {visibleLegend.map((item) => (
             <article className="platform-card" key={item.status}>
               <div className="platform-top">
                 <div>
@@ -91,10 +95,10 @@ export default function PlatformsPage() {
         <div className="section-head">
           <p className="eyebrow">Proof paths</p>
           <h2 id="connection-title">Current platform connections</h2>
-          <p>Each card points to a public page, a repo kit and a smoke or review path.</p>
+          <p>Each card points to a public page, a repo kit and a smoke path.</p>
         </div>
         <div className="platform-logo-rail platform-logo-rail-wide" aria-label="Current Nipmod platform logos">
-          {platformConnections.connections.map((connection) => (
+          {visibleConnections.map((connection) => (
             <a className="platform-logo-tile" href={connection.url} key={connection.id}>
               <PlatformMark id={connection.id} name={connection.name} />
               <span className="platform-logo-copy">
@@ -105,11 +109,11 @@ export default function PlatformsPage() {
           ))}
         </div>
         <div className="platform-proof-grid">
-          {platformConnections.connections.map((connection) => (
+          {visibleConnections.map((connection) => (
             <ConnectionCard connection={connection} key={connection.id} />
           ))}
         </div>
-        <p className="platform-note">{platformConnections.meaning}</p>
+        <p className="platform-note">The full JSON keeps future paths for audit without promoting them in the product UI.</p>
       </section>
     </main>
   );
