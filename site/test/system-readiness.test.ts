@@ -42,6 +42,7 @@ describe("system readiness receipt", () => {
       demo: "https://nipmod.com/demo",
       machineManifest: "https://nipmod.com/.well-known/nipmod.json",
       platformReadiness: "https://nipmod.com/compatibility/platform-readiness.json",
+      remoteMcp: "https://nipmod.com/api/mcp",
       status: "https://nipmod.com/status",
       systemReadiness: "https://nipmod.com/compatibility/system-readiness.json"
     });
@@ -106,6 +107,14 @@ describe("system readiness receipt", () => {
       "nipmod.sbom",
       "nipmod.explain"
     ]);
+    expect(readiness.remoteMcpTools).toEqual([
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.demo"
+    ]);
+    expect(readiness.remoteMcpNotExposed).toContain("nipmod.install");
   });
 
   test("connects every platform to the same archive story", () => {
@@ -143,7 +152,9 @@ describe("system readiness receipt", () => {
       "opencode"
     ]);
     expect(readiness.parallelAccessProof.checkedBy).toBe("node tools/system-readiness-check.mjs --live --parallel");
+    expect(readiness.parallelAccessProof.surfaces).toContain("Hosted MCP search");
     expect(readiness.writeBoundaries).toContain("install writes only after confirmInstall is write-lockfile");
+    expect(readiness.writeBoundaries).toContain("hosted read-only MCP exposes no workspace-write, local-file or publish tools");
     expect(readiness.writeBoundaries).toContain("install writes a local receipt under .nipmod/receipts");
   });
 });

@@ -1939,7 +1939,8 @@ h1 {
 .compatibility-row a,
 .filter-pill,
 .package-tabs a,
-.package-links a {
+.package-links a,
+.package-links span {
   align-items: center;
   border: 1px solid var(--border-soft);
   border-radius: 999px;

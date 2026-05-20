@@ -188,6 +188,22 @@ Use `sbom` for inventory, `explain` for lockfile reasons, `audit` for a report a
 
 ## Use MCP
 
+Hosted read-only MCP is available without installing the CLI:
+
+```sh
+curl -fsS https://nipmod.com/api/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}'
+```
+
+Expected result:
+
+- The endpoint returns public registry data only.
+- It exposes search, view, inspect, install plan and demo tools.
+- It does not expose workspace writes, local file reads, audit, SBOM, claim checks or publish planning.
+
+Use local MCP when the agent needs workspace-aware tools:
+
 ```sh
 nipmod mcp serve
 ```

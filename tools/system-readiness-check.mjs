@@ -38,6 +38,13 @@ const expectedTools = [
   "nipmod.sbom",
   "nipmod.explain"
 ];
+const expectedRemoteMcpTools = [
+  "nipmod.search",
+  "nipmod.view",
+  "nipmod.inspect",
+  "nipmod.install_plan",
+  "nipmod.demo"
+];
 const expectedCommands = [
   "init",
   "pack",
@@ -82,6 +89,7 @@ await checkWriteBoundaries();
 
 if (includeLive) {
   await checkLiveSystemEndpoints();
+  await checkRemoteMcpSurface();
   await checkSourceSync();
 }
 
@@ -117,8 +125,10 @@ async function checkStaticSystemReceipt() {
   assertEqual("system_receipt_type", receipt.type, "dev.nipmod.system-readiness.v1");
   assertEqual("system_receipt_package_count", receipt.sharedArchive.packageCount, 28);
   assertDeepEqual("system_receipt_mcp_tools", receipt.mcpTools, expectedTools);
+  assertDeepEqual("system_receipt_remote_mcp_tools", receipt.remoteMcpTools, expectedRemoteMcpTools);
   assertDeepEqual("system_receipt_cli_commands", receipt.cliCommands, expectedCommands);
   assertText("system_receipt_scope", receipt.meaning, "one shared verified archive");
+  assertText("system_receipt_remote_mcp", receipt.meaning, "hosted read-only MCP access");
   assertText("system_receipt_quorum", receipt.meaning, "quorum approved package digests");
   assertText("system_receipt_install_receipts", receipt.meaning, "install receipts");
   assertText("system_receipt_boundaries", JSON.stringify(receipt.notClaimed), "Nipmod owns or controls Gitlawb repos");
@@ -190,12 +200,15 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_quorum_receipts", manifest.quorum.receipts, "https://nipmod.com/quorum/receipts.json");
   assertEqual("discovery_quorum_signers", manifest.quorum.signers, "https://nipmod.com/quorum/signers.json");
   assertEqual("discovery_agent_prompts", manifest.agent.prompts, state.receipt.entrypoints.agentPrompts);
+  assertEqual("discovery_remote_mcp", manifest.mcp.remoteEndpoint, state.receipt.entrypoints.remoteMcp);
+  assertDeepEqual("discovery_remote_mcp_tools", manifest.mcp.remoteTools, expectedRemoteMcpTools);
   assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
   assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
+  assertText("llms_remote_mcp", llms, state.receipt.entrypoints.remoteMcp);
   assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex --include-hermes");
 }
 
@@ -295,6 +308,44 @@ async function checkMcpSurface() {
   assertText("mcp_demo_archive", JSON.stringify(calls[3]), "gitlawb-repo-reader");
 }
 
+async function checkRemoteMcpSurface() {
+  const list = await remoteMcpRequest({ id: 30, jsonrpc: "2.0", method: "tools/list" });
+  assertDeepEqual(
+    "remote_mcp_tools",
+    list.result.tools.map((tool) => tool.name),
+    expectedRemoteMcpTools
+  );
+  if (list.result.tools.some((tool) => tool.name === "nipmod.install")) {
+    fail("remote_mcp_no_install_tool", "hosted MCP exposed nipmod.install");
+  } else {
+    pass("remote_mcp_no_install_tool");
+  }
+
+  const search = await remoteMcpRequest({
+    id: 31,
+    jsonrpc: "2.0",
+    method: "tools/call",
+    params: { arguments: { query: "gitlawb-repo-reader" }, name: "nipmod.search" }
+  });
+  assertText("remote_mcp_search_archive", JSON.stringify(search), "gitlawb-repo-reader");
+
+  const inspect = await remoteMcpRequest({
+    id: 32,
+    jsonrpc: "2.0",
+    method: "tools/call",
+    params: { arguments: { specifier: proofPackage }, name: "nipmod.inspect" }
+  });
+  assertText("remote_mcp_inspect_archive", JSON.stringify(inspect), state.receipt.proofPackage.digest);
+
+  const install = await remoteMcpRequest({
+    id: 33,
+    jsonrpc: "2.0",
+    method: "tools/call",
+    params: { arguments: { specifier: proofPackage, confirmInstall: "write-lockfile" }, name: "nipmod.install" }
+  });
+  assertText("remote_mcp_install_blocked", install.error?.message, "does not expose nipmod.install");
+}
+
 async function checkWriteBoundaries() {
   const workspace = await mkdtemp(join(tmpdir(), "nipmod-system-plan-"));
   try {
@@ -345,6 +396,7 @@ async function checkLiveSystemEndpoints() {
     ["live_setup", state.receipt.entrypoints.humanSetup, ["Connect your agent"]],
     ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
     ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1", "nipmod setup codex"]],
+    ["live_remote_mcp", state.receipt.entrypoints.remoteMcp, ["dev.nipmod.remote-mcp.v1", "remote-read-only"]],
     ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],
     ["live_status", state.receipt.entrypoints.status, ["Public proof dashboard"]],
     ["live_manifest", state.receipt.entrypoints.machineManifest, [state.receipt.entrypoints.systemReadiness]],
@@ -422,6 +474,32 @@ async function checkParallelArchiveAccess() {
         ),
         "gitlawb-repo-reader"
       ),
+    async () =>
+      assertText(
+        "parallel_remote_mcp_search",
+        JSON.stringify(
+          await remoteMcpRequest({
+            id: 40,
+            jsonrpc: "2.0",
+            method: "tools/call",
+            params: { arguments: { query: "gitlawb-repo-reader" }, name: "nipmod.search" }
+          })
+        ),
+        "gitlawb-repo-reader"
+      ),
+    async () =>
+      assertText(
+        "parallel_remote_mcp_plan",
+        JSON.stringify(
+          await remoteMcpRequest({
+            id: 41,
+            jsonrpc: "2.0",
+            method: "tools/call",
+            params: { arguments: { specifier: proofPackage }, name: "nipmod.install_plan" }
+          })
+        ),
+        "remote-read-only"
+      ),
     async () => assertText("parallel_bankr_skill", await fetchText(state.receipt.agentHosts.bankr.skill), "name: nipmod"),
     async () => assertText("parallel_bankr_proof", await fetchText(state.receipt.agentHosts.bankr.proof), proofPackage),
     async () => assertText("parallel_llms", await fetchText(state.receipt.entrypoints.agentText), state.receipt.sharedArchive.registry),
@@ -438,6 +516,18 @@ async function mcpRequest(messages) {
     .split("\n")
     .filter(Boolean)
     .map((line) => JSON.parse(line));
+}
+
+async function remoteMcpRequest(message) {
+  const response = await fetch(state.receipt.entrypoints.remoteMcp, {
+    body: JSON.stringify(message),
+    headers: { "content-type": "application/json" },
+    method: "POST"
+  });
+  if (!response.ok) {
+    throw new Error(`${state.receipt.entrypoints.remoteMcp} returned HTTP ${response.status}`);
+  }
+  return await response.json();
 }
 
 async function fetchText(url) {

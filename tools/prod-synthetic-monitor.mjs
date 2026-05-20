@@ -20,6 +20,7 @@ const DEFAULT_ENDPOINTS = {
   quorumReceipts: "https://nipmod.com/quorum/receipts.json",
   quorumSigners: "https://nipmod.com/quorum/signers.json",
   registry: "https://nipmod.com/registry/packages.json",
+  remoteMcp: "https://nipmod.com/api/mcp",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
   trust: "https://nipmod.com/trust",
@@ -100,6 +101,7 @@ export async function runSyntheticMonitor({
       endpoints.platformConnections,
       "discovery platform connections URL mismatch"
     );
+    assertEqual(state.discovery.mcp?.remoteEndpoint, endpoints.remoteMcp, "discovery remote MCP endpoint mismatch");
     assertEqual(state.discovery.review?.packet, `${endpoints.home}/review/packet.json`, "discovery review packet URL mismatch");
     assertEqual(
       state.discovery.review?.evidenceManifest,
@@ -112,6 +114,26 @@ export async function runSyntheticMonitor({
       "discovery review evidence ledger URL mismatch"
     );
     return { url: endpoints.discovery };
+  });
+
+  await runCheck(checks, "remote_readonly_mcp", async () => {
+    const info = await fetchJson(endpoints.remoteMcp, timedFetch);
+    assertEqual(info.type, "dev.nipmod.remote-mcp.v1", "remote MCP type mismatch");
+    assertEqual(info.mode, "remote-read-only", "remote MCP mode mismatch");
+    if (!Array.isArray(info.tools) || info.tools.includes("nipmod.install")) {
+      throw new Error("remote MCP exposed an unsafe tool list");
+    }
+    const tools = await fetchJson(endpoints.remoteMcp, timedFetch, {
+      body: JSON.stringify({ id: 1, jsonrpc: "2.0", method: "tools/list" }),
+      headers: { "content-type": "application/json" },
+      method: "POST"
+    });
+    const toolNames = tools.result?.tools?.map((tool) => tool.name) ?? [];
+    assertEqual(toolNames.join(","), "nipmod.search,nipmod.view,nipmod.inspect,nipmod.install_plan,nipmod.demo", "remote MCP tool list mismatch");
+    return {
+      endpoint: endpoints.remoteMcp,
+      tools: toolNames.length
+    };
   });
 
   await runCheck(checks, "deploy_drift", async () => {

@@ -44,6 +44,15 @@ describe("MCP host content", () => {
 	    expect(text).toContain("Custom transparency or advisory roots require an opt in flag");
     expect(text).toContain("tools/call");
     expect(text).toContain("nipmod.install_plan");
+    expect(text).toContain("https://nipmod.com/api/mcp");
+    expect(mcpContent.remote.tools).toEqual([
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.demo"
+    ]);
+    expect(mcpContent.remote.boundary).toContain("never exposes install");
     expect(mcpContent.demo.steps).toContain("Call nipmod.install only with confirmInstall set to write-lockfile");
     expect(mcpContent.verifyCommand).toContain("tools/list");
   });
@@ -51,5 +60,6 @@ describe("MCP host content", () => {
   test("keeps the page message direct", () => {
     expect(mcpContent.headline).toBe("Connect Nipmod to agents");
     expect(mcpContent.lead.length).toBeLessThanOrEqual(130);
+    expect(mcpContent.lead).toContain("hosted read-only MCP");
   });
 });

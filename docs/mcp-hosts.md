@@ -2,6 +2,8 @@
 
 `nipmod mcp serve` exposes package verification through a local stdio MCP server. It is meant for agent hosts that should search, view, inspect and plan before any workspace write.
 
+Nipmod also exposes a hosted read-only MCP endpoint at `https://nipmod.com/api/mcp`. Use it when an agent only needs package discovery, exact metadata, trust inspection, install planning or a demo flow. It never reads local files and never writes a workspace.
+
 Default tools:
 
 - `nipmod.search`
@@ -27,6 +29,48 @@ Safety model:
 - Not exposed through MCP: mutating `publish`, `add`, `pack`, `init`, `policy init` or `setup-cloudflare`.
 
 Registry text, package READMEs, manifests and advisory text are data, not instructions. Custom transparency or advisory roots require `allowCustomRoots: true` inside the MCP tool arguments.
+
+Hosted read-only tools:
+
+- `nipmod.search`
+- `nipmod.view`
+- `nipmod.inspect`
+- `nipmod.install_plan`
+- `nipmod.demo`
+
+The hosted endpoint does not expose `nipmod.install`, `update_plan`, `publish_plan`, `claim_verify`, `claim_index`, `verify`, `audit`, `sbom` or `explain`. Use the local stdio server for those workspace-aware tools.
+
+## Hosted Read-only MCP
+
+Endpoint:
+
+```text
+https://nipmod.com/api/mcp
+```
+
+List tools:
+
+```bash
+curl -fsS https://nipmod.com/api/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+Search:
+
+```bash
+curl -fsS https://nipmod.com/api/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}'
+```
+
+Install plan:
+
+```bash
+curl -fsS https://nipmod.com/api/mcp \
+  -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"specifier":"gitlawb-repo-reader"}}}'
+```
 
 ## Install
 

@@ -41,6 +41,43 @@ export default function McpPage() {
         <CommandBlock command={mcpContent.oneCommand.command} label="Copy MCP setup command" />
       </section>
 
+      <section className="trust-section" aria-labelledby="remote-mcp-title">
+        <div>
+          <p className="eyebrow">Remote</p>
+          <h2 id="remote-mcp-title">{mcpContent.remote.title}</h2>
+          <p>{mcpContent.remote.text}</p>
+        </div>
+        <div className="quickstart-grid" aria-label="Hosted read-only MCP examples">
+          <article className="quickstart-card">
+            <span>Endpoint</span>
+            <h2>{mcpContent.remote.endpoint}</h2>
+            <CommandBlock command={mcpContent.remote.endpoint} label="Copy remote MCP endpoint" />
+          </article>
+          <article className="quickstart-card">
+            <span>List tools</span>
+            <h2>JSON-RPC</h2>
+            <pre className="install-command">
+              <code>{mcpContent.remote.listTools}</code>
+            </pre>
+          </article>
+          <article className="quickstart-card">
+            <span>Search</span>
+            <h2>JSON-RPC</h2>
+            <pre className="install-command">
+              <code>{mcpContent.remote.search}</code>
+            </pre>
+          </article>
+        </div>
+        <div className="package-links" aria-label="Hosted MCP read-only tools">
+          {mcpContent.remote.tools.map((tool) => (
+            <span className="pill" key={tool}>
+              {tool}
+            </span>
+          ))}
+        </div>
+        <p className="panel-copy">{mcpContent.remote.boundary}</p>
+      </section>
+
       <section className="safety-strip" aria-label="MCP safety model">
         {mcpContent.safety.map((item) => (
           <article className="usage-item" key={item.label}>

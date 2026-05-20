@@ -1,8 +1,25 @@
 export const mcpContent = {
   headline: "Connect Nipmod to agents",
-  lead: "Run the CLI as MCP for search, view, trust reports, plans, controlled install, claim proof, verify, audit, SBOM and explain.",
+  lead: "Use hosted read-only MCP for package discovery, then local MCP for controlled workspace installs.",
   primaryAction: "Setup agent",
   secondaryAction: "Trust",
+  remote: {
+    title: "Hosted read-only endpoint",
+    text: "Agents can search the public archive, view exact metadata, inspect trust and create install plans over HTTPS without a local install. Workspace writes stay local.",
+    endpoint: "https://nipmod.com/api/mcp",
+    listTools:
+      '{"jsonrpc":"2.0","id":1,"method":"tools/list"}',
+    search:
+      '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}',
+    tools: [
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.demo"
+    ],
+    boundary: "Remote endpoint never exposes install, audit, SBOM, local file verification, claim checks or publish planning."
+  },
   oneCommand: {
     title: "One local command",
     text: "Install the CLI once, run a host setup command, then tell the agent to use Nipmod before installing agent packages.",

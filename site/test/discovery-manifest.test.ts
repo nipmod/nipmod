@@ -132,7 +132,17 @@ describe("nipmod discovery manifest", () => {
       "verifyInstaller",
       "view"
     ]);
-    expect(Object.keys(manifest.mcp).sort()).toEqual(["demoPackage", "docs", "installConfirmation", "serverCommand", "tools"]);
+    expect(Object.keys(manifest.mcp).sort()).toEqual([
+      "demoPackage",
+      "docs",
+      "installConfirmation",
+      "remoteEndpoint",
+      "remoteMode",
+      "remoteNotExposed",
+      "remoteTools",
+      "serverCommand",
+      "tools"
+    ]);
     expect(Object.keys(manifest.node).sort()).toEqual(["health", "url"]);
     expect(Object.keys(manifest.witness).sort()).toEqual(["did", "health", "statements"]);
     expect(Object.keys(manifest.transparency).sort()).toEqual(["checkpoint", "log", "logId"]);
@@ -362,6 +372,26 @@ describe("nipmod discovery manifest", () => {
       demoPackage: "gitlawb-repo-reader",
       docs: "https://nipmod.com/mcp",
       installConfirmation: "confirmInstall must be write-lockfile before nipmod.install writes a local lockfile",
+      remoteEndpoint: "https://nipmod.com/api/mcp",
+      remoteMode: "read-only registry MCP over HTTPS; no workspace writes",
+      remoteTools: [
+        "nipmod.search",
+        "nipmod.view",
+        "nipmod.inspect",
+        "nipmod.install_plan",
+        "nipmod.demo"
+      ],
+      remoteNotExposed: [
+        "nipmod.install",
+        "nipmod.update_plan",
+        "nipmod.publish_plan",
+        "nipmod.claim_verify",
+        "nipmod.claim_index",
+        "nipmod.verify",
+        "nipmod.audit",
+        "nipmod.sbom",
+        "nipmod.explain"
+      ],
       serverCommand: "nipmod mcp serve",
       tools: [
         "nipmod.search",

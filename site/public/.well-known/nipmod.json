@@ -115,6 +115,26 @@
   },
   "mcp": {
     "docs": "https://nipmod.com/mcp",
+    "remoteEndpoint": "https://nipmod.com/api/mcp",
+    "remoteMode": "read-only registry MCP over HTTPS; no workspace writes",
+    "remoteTools": [
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.demo"
+    ],
+    "remoteNotExposed": [
+      "nipmod.install",
+      "nipmod.update_plan",
+      "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.verify",
+      "nipmod.audit",
+      "nipmod.sbom",
+      "nipmod.explain"
+    ],
     "serverCommand": "nipmod mcp serve",
     "demoPackage": "gitlawb-repo-reader",
     "installConfirmation": "confirmInstall must be write-lockfile before nipmod.install writes a local lockfile",

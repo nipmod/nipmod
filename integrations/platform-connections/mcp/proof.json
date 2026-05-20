@@ -4,8 +4,27 @@
   "id": "mcp",
   "name": "MCP",
   "status": "Live",
-  "proofLevel": "MCP tool list readiness",
+  "proofLevel": "Local MCP tool list readiness plus hosted read-only tool subset",
   "publicPath": "https://nipmod.com/mcp",
+  "remoteEndpoint": "https://nipmod.com/api/mcp",
+  "remoteTools": [
+    "nipmod.search",
+    "nipmod.view",
+    "nipmod.inspect",
+    "nipmod.install_plan",
+    "nipmod.demo"
+  ],
+  "remoteNotExposed": [
+    "nipmod.install",
+    "nipmod.update_plan",
+    "nipmod.publish_plan",
+    "nipmod.claim_verify",
+    "nipmod.claim_index",
+    "nipmod.verify",
+    "nipmod.audit",
+    "nipmod.sbom",
+    "nipmod.explain"
+  ],
   "setupCommand": "nipmod mcp serve",
   "smokeCommand": "node tools/platform-readiness-check.mjs",
   "externalApprovalRequired": false

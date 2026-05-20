@@ -24,6 +24,7 @@ nipmod setup agents --include-codex --include-hermes
 - Quorum receipts: https://nipmod.com/quorum/receipts.json
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Agent instructions: https://nipmod.com/llms.txt
+- Hosted read-only MCP: https://nipmod.com/api/mcp
 - GitHub mirror: https://github.com/nipmod/nipmod
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - X: https://x.com/Nipmod
@@ -51,7 +52,8 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 - Gitlawb publish and install against `https://node.nipmod.com`.
 - Owner Package Claim for proving that a Gitlawb repo owner accepts a Nipmod package identity.
 - Self service package flow for repo owners to prepare local package files, verify DID ownership and run publish dry runs.
-- MCP server for agents with read-first tools and controlled install.
+- Local MCP server for agents with read-first tools and controlled install.
+- Hosted read-only MCP endpoint for registry search, view, inspect, install plans and demo flows without workspace writes.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
 - Codex, Claude Code, OpenCode, Hermes and Bankr agent entrypoints.
 
@@ -109,7 +111,7 @@ nipmod ci --online
 
 ## Agent Hosts
 
-Nipmod exposes one local MCP server for agent hosts.
+Nipmod exposes one local MCP server for agent hosts and one hosted read-only endpoint for archive access.
 
 ```bash
 nipmod setup codex
@@ -125,6 +127,14 @@ Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.
 ```
 
 The MCP server provides search, view, inspect, install plan, controlled install, audit, SBOM and dry-run publish planning. Mutating installs require explicit approval.
+
+Hosted read-only MCP:
+
+```text
+https://nipmod.com/api/mcp
+```
+
+The hosted endpoint exposes only `nipmod.search`, `nipmod.view`, `nipmod.inspect`, `nipmod.install_plan` and `nipmod.demo`. It does not read local files, write lockfiles, run audit/SBOM, verify local bundles, check Gitlawb claims or prepare publish plans. Use `nipmod mcp serve` locally for those workspace-aware tools.
 
 ## Publish Dry Run
 

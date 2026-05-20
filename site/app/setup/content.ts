@@ -57,6 +57,10 @@ export const setupContent = {
   ],
   capabilities: [
     {
+      label: "Read without install",
+      text: "Hosted MCP at https://nipmod.com/api/mcp lets agents search, inspect and plan from the public archive."
+    },
+    {
       label: "Find packages",
       text: "Your agent can search the public Nipmod registry."
     },
@@ -76,7 +80,7 @@ export const setupContent = {
     },
     {
       label: "Agent archive access",
-      text: "After MCP is connected, the agent can call Nipmod tools instead of guessing package names from chat memory."
+      text: "Agents can use hosted read-only MCP first, then local MCP when workspace writes are needed."
     },
     {
       label: "Controlled writes",

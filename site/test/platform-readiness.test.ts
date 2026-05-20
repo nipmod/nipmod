@@ -55,7 +55,9 @@ describe("platform readiness receipt", () => {
 
   test("binds readiness proof to public discovery and agent entrypoints", () => {
     expect(discovery.review.platformReadiness).toBe("https://nipmod.com/compatibility/platform-readiness.json");
+    expect(discovery.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
     expect(llms).toContain("Platform readiness receipt: https://nipmod.com/compatibility/platform-readiness.json");
+    expect(llms).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");
     expect(readiness.archive).toEqual({
       discovery: "https://nipmod.com/.well-known/nipmod.json",
       llms: "https://nipmod.com/llms.txt",
@@ -99,6 +101,17 @@ describe("platform readiness receipt", () => {
     expect(hermesConnection.externalApprovalRequired).toBe(true);
     expect(hermesConnection.proofLevel).toContain("discovered all 14 Nipmod MCP tools");
     expect(hermesConnection.externalDependency).toContain("NousResearch acknowledgement");
+  });
+
+  test("keeps hosted MCP read-only and separated from local writes", () => {
+    const mcp = readiness.platforms.find((platform: { id: string }) => platform.id === "mcp");
+    const mcpConnection = connections.connections.find((connection: { id: string }) => connection.id === "mcp");
+
+    expect(mcp.claim).toContain("hosted endpoint exposes a read-only registry subset");
+    expect(mcp.evidence).toContain("https://nipmod.com/api/mcp");
+    expect(mcp.checks).toContain("https://nipmod.com/api/mcp exposes only search, view, inspect, install_plan and demo");
+    expect(mcpConnection.evidence).toContain("https://nipmod.com/api/mcp");
+    expect(mcpConnection.proofLevel).toContain("hosted read-only tool subset");
   });
 
   test("keeps Bankr readiness scoped to safe package workflows", () => {

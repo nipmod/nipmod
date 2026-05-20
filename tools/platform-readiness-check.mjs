@@ -181,7 +181,12 @@ async function checkLiveEndpoints() {
     [
       "discovery_manifest",
       "https://nipmod.com/.well-known/nipmod.json",
-      ["https://nipmod.com/setup", "setupCodexMcp", "platformReadiness", "platformConnections"]
+      ["https://nipmod.com/setup", "setupCodexMcp", "platformReadiness", "platformConnections", "https://nipmod.com/api/mcp"]
+    ],
+    [
+      "remote_readonly_mcp",
+      "https://nipmod.com/api/mcp",
+      ["dev.nipmod.remote-mcp.v1", "remote-read-only", "nipmod.install_plan"]
     ],
     [
       "platform_connections_live",

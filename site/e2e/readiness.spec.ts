@@ -194,6 +194,14 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   expect(body.agent.commands.setupCodexMcp).toBe("nipmod setup codex");
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
+  expect(body.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
+  expect(body.mcp.remoteTools).toEqual([
+    "nipmod.search",
+    "nipmod.view",
+    "nipmod.inspect",
+    "nipmod.install_plan",
+    "nipmod.demo"
+  ]);
   expect(body.mcp.tools).toContain("nipmod.install");
   expect(body.mcp.tools).toContain("nipmod.demo");
 });

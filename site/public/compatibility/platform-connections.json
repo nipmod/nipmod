@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T15:38:07.715Z",
+  "generatedAt": "2026-05-20T17:27:37.000Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -75,16 +75,17 @@
       "name": "MCP",
       "status": "Live",
       "category": "agent protocol",
-      "scope": "Local stdio server exposing search, view, inspect, install plan, controlled install, audit, SBOM and proof tools.",
-      "proofLevel": "The MCP tool list is checked by platform and system readiness tests.",
+      "scope": "Local stdio server exposing full package tools plus hosted read-only endpoint exposing safe registry tools.",
+      "proofLevel": "The local MCP tool list and hosted read-only tool subset are checked by platform and system readiness tests.",
       "url": "https://nipmod.com/mcp",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/mcp",
       "setupCommand": "nipmod mcp serve",
       "smokeCommand": "node tools/platform-readiness-check.mjs",
       "externalApprovalRequired": false,
-      "externalDependency": "No marketplace approval is required to run the local stdio MCP server.",
+      "externalDependency": "No marketplace approval is required to run the local stdio MCP server or hosted read-only endpoint.",
       "evidence": [
         "https://nipmod.com/mcp",
+        "https://nipmod.com/api/mcp",
         "https://nipmod.com/.well-known/nipmod.json",
         "https://nipmod.com/llms.txt"
       ]

@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T15:38:07.715Z",
-  "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
+  "generatedAt": "2026-05-20T17:27:37.000Z",
+  "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, local host MCP contracts, hosted read-only MCP, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "setup": "https://nipmod.com/setup",
@@ -14,7 +14,8 @@
     "public source is reachable",
     "public setup path exists",
     "agent discovery documents expose exact setup commands",
-    "MCP server lists all expected tools",
+    "local MCP server lists all expected tools",
+    "hosted read-only MCP lists only safe registry tools",
     "read-only and controlled-write tools are separated",
     "proof package can be found, inspected and install-planned",
     "no secrets or payment requirement are needed for core package workflows"
@@ -56,15 +57,17 @@
       "productReadiness": 100,
       "connectionStatus": "Live",
       "status": "ready",
-      "claim": "The local Nipmod MCP server exposes the expected package tools for agent runtimes.",
+      "claim": "The local Nipmod MCP server exposes the expected package tools for agent runtimes, and the hosted endpoint exposes a read-only registry subset.",
       "connectionKit": "integrations/platform-connections/mcp",
       "evidence": [
         "https://nipmod.com/mcp",
+        "https://nipmod.com/api/mcp",
         "https://nipmod.com/.well-known/nipmod.json",
         "https://nipmod.com/llms.txt"
       ],
       "checks": [
         "nipmod mcp serve exposes the expected tool list",
+        "https://nipmod.com/api/mcp exposes only search, view, inspect, install_plan and demo",
         "read-only and controlled-write tools are separated"
       ]
     },

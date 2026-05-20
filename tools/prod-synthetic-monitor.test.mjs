@@ -15,13 +15,14 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 15, total: 15 });
+    expect(result.summary).toEqual({ fail: 0, pass: 16, total: 16 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
       "platform_connections",
       "security_disclosure",
       "discovery_manifest",
+      "remote_readonly_mcp",
       "deploy_drift",
       "release_artifacts",
       "registry_verified",
@@ -282,6 +283,7 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     quorumReceipts: "https://nipmod.test/quorum/receipts.json",
     quorumSigners: "https://nipmod.test/quorum/signers.json",
     registry: "https://nipmod.test/registry/packages.json",
+    remoteMcp: "https://nipmod.test/api/mcp",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
     trust: "https://nipmod.test/trust",
@@ -324,6 +326,9 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
         },
         script: "https://nipmod.test/install.sh",
         scriptSha256: expected.installerSha256
+      },
+      mcp: {
+        remoteEndpoint: endpoints.remoteMcp
       },
       name: "nipmod",
       node: {
@@ -376,6 +381,26 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
       `Contact: https://nipmod.test/security\nCanonical: ${endpoints.securityTxt}\nPolicy: ${endpoints.security}`
     ),
     [`GET ${endpoints.discovery}`]: jsonResponse(discovery),
+    [`GET ${endpoints.remoteMcp}`]: jsonResponse({
+      endpoint: endpoints.remoteMcp,
+      mode: "remote-read-only",
+      notExposed: ["nipmod.install"],
+      tools: ["nipmod.search", "nipmod.view", "nipmod.inspect", "nipmod.install_plan", "nipmod.demo"],
+      type: "dev.nipmod.remote-mcp.v1"
+    }),
+    [`POST ${endpoints.remoteMcp}`]: jsonResponse({
+      id: 1,
+      jsonrpc: "2.0",
+      result: {
+        tools: [
+          { name: "nipmod.search" },
+          { name: "nipmod.view" },
+          { name: "nipmod.inspect" },
+          { name: "nipmod.install_plan" },
+          { name: "nipmod.demo" }
+        ]
+      }
+    }),
     [`GET ${endpoints.registry}`]: jsonResponse(registryFixture(checkpoint, registryPackagePatch)),
     [`GET ${endpoints.quorumPolicy}`]: jsonResponse({
       id: "nipmod-quorum-release-v1",

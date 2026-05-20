@@ -6,7 +6,7 @@ MCP is the neutral agent runtime path. It lets hosts connect to Nipmod without e
 
 Use this wording:
 
-> Nipmod exposes a local MCP server for package search, trust inspection, install planning and controlled install.
+> Nipmod exposes local MCP for workspace-aware tools and hosted read-only MCP for public archive search, inspect and install planning.
 
 Do not claim:
 
@@ -16,6 +16,18 @@ Public path:
 
 https://nipmod.com/mcp
 
+Hosted read-only endpoint:
+
+https://nipmod.com/api/mcp
+
+Hosted tools:
+
+- `nipmod.search`
+- `nipmod.view`
+- `nipmod.inspect`
+- `nipmod.install_plan`
+- `nipmod.demo`
+
 Smoke:
 
 ```sh
@@ -24,7 +36,7 @@ node tools/platform-readiness-check.mjs
 
 Agent instruction:
 
-Connect to `nipmod mcp serve`. Search first, inspect trust, create an install plan, ask before writes, then audit.
+Use `https://nipmod.com/api/mcp` for read-only archive access. Connect to `nipmod mcp serve` when the agent needs controlled install, audit, SBOM, local file verification, claim checks or publish planning.
 
 Submission note:
 

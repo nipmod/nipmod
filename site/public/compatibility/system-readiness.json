@@ -1,9 +1,9 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-20T14:05:03.947Z",
+  "generatedAt": "2026-05-20T17:27:37.000Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
@@ -21,6 +21,7 @@
     "humanSetup": "https://nipmod.com/setup",
     "agentText": "https://nipmod.com/llms.txt",
     "agentPrompts": "https://nipmod.com/agent-prompts.json",
+    "remoteMcp": "https://nipmod.com/api/mcp",
     "machineManifest": "https://nipmod.com/.well-known/nipmod.json",
     "demo": "https://nipmod.com/demo",
     "status": "https://nipmod.com/status",
@@ -40,6 +41,15 @@
     "mcp": {
       "setup": "nipmod mcp serve",
       "access": "MCP stdio",
+      "remoteEndpoint": "https://nipmod.com/api/mcp",
+      "remoteAccess": "HTTPS JSON-RPC read-only MCP",
+      "remoteTools": [
+        "nipmod.search",
+        "nipmod.view",
+        "nipmod.inspect",
+        "nipmod.install_plan",
+        "nipmod.demo"
+      ],
       "status": "Live"
     },
     "codex": {
@@ -126,6 +136,24 @@
     "nipmod.sbom",
     "nipmod.explain"
   ],
+  "remoteMcpTools": [
+    "nipmod.search",
+    "nipmod.view",
+    "nipmod.inspect",
+    "nipmod.install_plan",
+    "nipmod.demo"
+  ],
+  "remoteMcpNotExposed": [
+    "nipmod.install",
+    "nipmod.update_plan",
+    "nipmod.publish_plan",
+    "nipmod.claim_verify",
+    "nipmod.claim_index",
+    "nipmod.verify",
+    "nipmod.audit",
+    "nipmod.sbom",
+    "nipmod.explain"
+  ],
   "proofPackage": {
     "name": "gitlawb-repo-reader",
     "specifier": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
@@ -134,7 +162,7 @@
     "compatibility": ["MCP import"]
   },
   "parallelAccessProof": {
-    "claim": "CLI, MCP, website, Bankr skill and machine discovery can read the same archive concurrently without creating separate package truth.",
+    "claim": "CLI, local MCP, hosted read-only MCP, website, Bankr skill and machine discovery can read the same archive concurrently without creating separate package truth.",
     "checkedBy": "node tools/system-readiness-check.mjs --live --parallel",
     "surfaces": [
       "registry index",
@@ -149,6 +177,10 @@
       "MCP search",
       "MCP inspect",
       "MCP install_plan",
+      "Hosted MCP tools/list",
+      "Hosted MCP search",
+      "Hosted MCP inspect",
+      "Hosted MCP install_plan",
       "Bankr skill",
       "Bankr agent proof",
       "llms.txt",
@@ -158,6 +190,7 @@
   "writeBoundaries": [
     "install writes only after confirmInstall is write-lockfile",
     "install writes a local receipt under .nipmod/receipts",
+    "hosted read-only MCP exposes no workspace-write, local-file or publish tools",
     "setup claude and setup opencode write only local project config files",
     "install plan does not mutate the workspace",
     "publish_plan through MCP never signs locally and never writes remotely",
@@ -169,6 +202,7 @@
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Nipmod owns or controls Gitlawb repos",
+    "hosted read-only MCP can mutate a user's workspace",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }
