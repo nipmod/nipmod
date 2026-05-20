@@ -143,7 +143,10 @@ describe("system readiness receipt", () => {
       },
       hermes: {
         setup: "nipmod setup hermes",
-        config: "~/.hermes/config.yaml"
+        config: "~/.hermes/config.yaml",
+        skill: "~/.hermes/skills/nipmod/SKILL.md",
+        skillBundle: "~/.hermes/skill-bundles/nipmod.yaml",
+        bundleCommand: "/nipmod"
       }
     });
     expect(platformReadiness.platforms.map((platform: { id: string }) => platform.id).sort()).toEqual([

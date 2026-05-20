@@ -17,6 +17,7 @@ describe("agent prompt pack", () => {
       cursor: "nipmod setup cursor",
       cursorOneClick: expect.stringContaining("cursor://anysphere.cursor-deeplink/mcp/install"),
       hermes: "nipmod setup hermes",
+      hermesBundle: "/nipmod",
       opencode: "nipmod setup opencode",
       projectAgents: "nipmod setup agents"
     });

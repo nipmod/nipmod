@@ -65,7 +65,7 @@ Expected result:
 - Claude Code receives a project `.mcp.json`.
 - Cursor receives a project `.cursor/mcp.json`. The public Cursor page also exposes an Add to Cursor button at `https://nipmod.com/cursor`.
 - OpenCode receives a project `opencode.json`.
-- Hermes receives a `~/.hermes/config.yaml` MCP server entry.
+- Hermes receives a `~/.hermes/config.yaml` MCP server entry, a `~/.hermes/skills/nipmod/SKILL.md` skill and a `~/.hermes/skill-bundles/nipmod.yaml` bundle for `/nipmod`.
 - Existing host config entries are preserved.
 
 ## Set up publish

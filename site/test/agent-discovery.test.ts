@@ -48,6 +48,7 @@ describe("agent discovery text", () => {
       "cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=",
       "nipmod setup opencode",
       "nipmod setup hermes",
+      "/nipmod",
       "nipmod setup agents",
       "Manual verification path:",
       "curl -fLO https://nipmod.com/install.sh.sha256",

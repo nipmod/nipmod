@@ -174,17 +174,19 @@
       "name": "Hermes",
       "status": "MCP ready",
       "category": "agent runtime",
-      "scope": "Hermes Agent can load Nipmod as a local stdio MCP server through ~/.hermes/config.yaml.",
-      "proofLevel": "Nipmod setup hermes writes mcp_servers.nipmod and an isolated Hermes v0.14.0 runtime smoke discovered all 14 Nipmod MCP tools through hermes mcp test nipmod.",
+      "scope": "Hermes Agent can load Nipmod as a local stdio MCP server and use a local /nipmod skill bundle.",
+      "proofLevel": "Nipmod setup hermes writes mcp_servers.nipmod, a Nipmod skill and a /nipmod skill bundle. An isolated Hermes v0.14.0 runtime smoke discovered all 14 Nipmod MCP tools through hermes mcp test nipmod.",
       "url": "https://nipmod.com/setup",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/hermes",
       "setupCommand": "nipmod setup hermes",
-      "smokeCommand": "hermes mcp test nipmod",
+      "smokeCommand": "hermes mcp test nipmod && hermes bundles list",
       "externalApprovalRequired": true,
       "externalDependency": "NousResearch acknowledgement is required before native, official or partner wording is valid.",
       "evidence": [
         "https://nipmod.com/setup",
         "https://nipmod.com/mcp",
+        "https://nipmod.com/integrations/hermes/nipmod/SKILL.md",
+        "https://nipmod.com/integrations/hermes/skill-bundles/nipmod.yaml",
         "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/hermes/runtime-smoke.json",
         "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp"
       ]

@@ -1267,7 +1267,7 @@ async function setupCommand(args: string[]): Promise<CliResult> {
     }
     default:
       throw new Error(
-        "usage: nipmod setup <agents|codex|claude|hermes|opencode|gitlawb> [--dir <project>] [--dry-run]"
+        "usage: nipmod setup <agents|codex|claude|cursor|hermes|opencode|gitlawb> [--dir <project>] [--dry-run]"
       );
   }
 }

@@ -137,10 +137,16 @@ async function checkHermesConfigGeneration() {
   try {
     await run(nodeBinPath, [cliPath, "setup", "hermes", "--hermes-config", hermesConfig, "--json"]);
     const config = await readFile(hermesConfig, "utf8");
+    const skill = await readFile(join(tempHome, ".hermes", "skills", "nipmod", "SKILL.md"), "utf8");
+    const bundle = await readFile(join(tempHome, ".hermes", "skill-bundles", "nipmod.yaml"), "utf8");
     assertText("hermes_mcp_config", config, "mcp_servers:");
     assertText("hermes_mcp_config", config, "nipmod:");
     assertText("hermes_mcp_config", config, 'command: "nipmod"');
     assertText("hermes_mcp_config", config, 'args: ["mcp", "serve"]');
+    assertText("hermes_skill", skill, "name: nipmod");
+    assertText("hermes_skill", skill, "package trust evidence");
+    assertText("hermes_skill_bundle", bundle, "name: nipmod");
+    assertText("hermes_skill_bundle", bundle, "skills:\n  - nipmod");
   } finally {
     await rm(tempHome, { recursive: true, force: true });
   }
@@ -223,7 +229,17 @@ async function checkLiveEndpoints() {
     [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
-      ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "aeon"]
+      ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "/nipmod", "aeon"]
+    ],
+    [
+      "hermes_skill",
+      "https://nipmod.com/integrations/hermes/nipmod/SKILL.md",
+      ["name: nipmod", "package trust evidence"]
+    ],
+    [
+      "hermes_skill_bundle",
+      "https://nipmod.com/integrations/hermes/skill-bundles/nipmod.yaml",
+      ["name: nipmod", "skills:", "- nipmod"]
     ],
     [
       "bankr_skill",
@@ -238,7 +254,7 @@ async function checkLiveEndpoints() {
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
-      ["dev.nipmod.platform-readiness.v1", "claude-code", "cursor", "opencode", "hermes", "aeon"]
+      ["dev.nipmod.platform-readiness.v1", "claude-code", "cursor", "opencode", "hermes", "/nipmod", "aeon"]
     ]
   ];
 

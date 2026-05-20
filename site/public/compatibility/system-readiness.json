@@ -3,7 +3,7 @@
   "type": "dev.nipmod.system-readiness.v1",
   "generatedAt": "2026-05-20T21:33:25.012Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Cursor MCP-ready path, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Cursor MCP-ready path, Hermes MCP-ready path with /nipmod skill bundle, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
@@ -80,7 +80,10 @@
     "hermes": {
       "setup": "nipmod setup hermes",
       "config": "~/.hermes/config.yaml",
-      "access": "MCP stdio through Hermes mcp_servers",
+      "skill": "~/.hermes/skills/nipmod/SKILL.md",
+      "skillBundle": "~/.hermes/skill-bundles/nipmod.yaml",
+      "bundleCommand": "/nipmod",
+      "access": "MCP stdio through Hermes mcp_servers plus local Hermes skill bundle",
       "runtimeSmoke": "hermes mcp test nipmod discovered 14 Nipmod MCP tools",
       "status": "MCP ready"
     },

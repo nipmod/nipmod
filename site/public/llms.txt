@@ -66,6 +66,9 @@ nipmod setup opencode
 Connect Hermes:
 nipmod setup hermes
 
+Hermes bundle:
+/nipmod
+
 Connect project agents:
 nipmod setup agents
 

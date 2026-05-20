@@ -165,7 +165,7 @@ args = ["mcp", "serve"]`,
     {
       name: "Hermes",
       command: "nipmod setup hermes",
-      configName: "~/.hermes/config.yaml",
+      configName: "~/.hermes/config.yaml + /nipmod bundle",
       config: `mcp_servers:
   nipmod:
     command: "nipmod"
@@ -175,9 +175,13 @@ args = ["mcp", "serve"]`,
     connect_timeout: 60
     tools:
       resources: false
-      prompts: false`,
-      verify: "hermes chat, then /reload-mcp",
-      prompt: "use Nipmod to search packages, inspect trust and prepare an install plan before any package write"
+      prompts: false
+
+# Also written by setup:
+# ~/.hermes/skills/nipmod/SKILL.md
+# ~/.hermes/skill-bundles/nipmod.yaml`,
+      verify: "hermes mcp test nipmod, hermes bundles list",
+      prompt: "/nipmod search for the package, inspect trust and prepare an install plan before any package write"
     }
   ],
   demo: {

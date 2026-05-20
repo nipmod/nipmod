@@ -56,10 +56,10 @@ export const setupContent = {
     },
     {
       name: "Hermes",
-      label: "Global Hermes MCP config",
+      label: "Hermes MCP plus bundle",
       command: "nipmod setup hermes",
-      verify: "hermes chat, then /reload-mcp",
-      text: "Adds Nipmod under mcp_servers in ~/.hermes/config.yaml."
+      verify: "hermes mcp test nipmod, hermes bundles list",
+      text: "Adds Nipmod under mcp_servers and installs the Nipmod skill plus /nipmod skill bundle."
     }
   ],
   capabilities: [

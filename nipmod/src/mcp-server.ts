@@ -540,7 +540,7 @@ function hostSetup(host: "Codex" | "Claude Code" | "Cursor" | "Generic" | "Herme
     case "Hermes":
       return {
         command: "nipmod setup hermes",
-        verify: "hermes chat, then /reload-mcp and list Nipmod tools"
+        verify: "hermes mcp test nipmod, hermes bundles list, then /nipmod inside Hermes"
       };
     case "Generic":
       return {

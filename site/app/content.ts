@@ -100,7 +100,7 @@ export const homeContent = {
         name: "Hermes",
         status: "MCP ready",
         label: "agent host",
-        text: "Hermes can load the local Nipmod MCP server from its MCP config.",
+        text: "Hermes can load Nipmod MCP and a local /nipmod skill bundle.",
         href: "/setup",
         cta: "Setup Hermes"
       }
@@ -261,7 +261,7 @@ export const homeContent = {
     },
     {
       label: "Agent setup",
-      text: "Codex, Claude Code, Cursor, OpenCode and Hermes can use the read only MCP server path."
+      text: "Codex, Claude Code, Cursor, OpenCode and Hermes can use the read only MCP server path. Hermes also has a /nipmod bundle."
     }
   ],
   founderOutreach: {

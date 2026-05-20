@@ -207,11 +207,13 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_setup_cursor", manifest.agent.commands.setupCursorMcp, "nipmod setup cursor");
   assertText("discovery_setup_cursor_oneclick", manifest.agent.commands.setupCursorOneClick, "cursor://anysphere.cursor-deeplink/mcp/install");
   assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
+  assertEqual("discovery_setup_hermes_bundle", manifest.agent.commands.setupHermesBundle, "/nipmod");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
   assertText("llms_remote_mcp", llms, state.receipt.entrypoints.remoteMcp);
   assertText("llms_setup_agents", llms, "nipmod setup agents");
+  assertText("llms_setup_hermes_bundle", llms, "/nipmod");
 }
 
 async function checkCliSurface() {

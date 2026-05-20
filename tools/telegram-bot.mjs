@@ -1490,12 +1490,13 @@ function hermesText() {
     "Hermes Setup",
     "curl https://nipmod.com/i|bash",
     "nipmod setup hermes",
+    "/nipmod",
     "",
     "Then tell Hermes",
-    "Read https://nipmod.com/llms.txt and use Nipmod before installing agent packages.",
+    "Use the /nipmod bundle and Nipmod MCP before installing agent packages.",
     "",
     "Note",
-    "This is the prepared MCP setup path, not official Hermes partner support."
+    "This is the prepared MCP and skill bundle path, not official Hermes partner support."
   ].join("\n");
 }
 

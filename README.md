@@ -144,6 +144,13 @@ Validate the Cursor plugin package:
 node scripts/validate-template.mjs
 ```
 
+Hermes setup also installs a Nipmod skill and `/nipmod` skill bundle:
+
+```text
+~/.hermes/skills/nipmod/SKILL.md
+~/.hermes/skill-bundles/nipmod.yaml
+```
+
 Tell the agent:
 
 ```text

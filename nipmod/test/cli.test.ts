@@ -96,6 +96,12 @@ describe("nipmod CLI", () => {
     await expect(readFile(join(workspace, ".cursor", "mcp.json"), "utf8")).resolves.toContain('"args": [');
     await expect(readFile(hermesConfig, "utf8")).resolves.toContain('command: "nipmod"');
     await expect(readFile(hermesConfig, "utf8")).resolves.toContain('args: ["mcp", "serve"]');
+    await expect(readFile(join(workspace, ".hermes", "skills", "nipmod", "SKILL.md"), "utf8")).resolves.toContain(
+      "name: nipmod"
+    );
+    await expect(readFile(join(workspace, ".hermes", "skill-bundles", "nipmod.yaml"), "utf8")).resolves.toContain(
+      "skills:\n  - nipmod"
+    );
 
     const existingCursorConfig = join(workspace, ".cursor-existing", "mcp.json");
     await mkdir(join(workspace, ".cursor-existing"), { recursive: true });
@@ -114,6 +120,12 @@ describe("nipmod CLI", () => {
     expect(mergedHermes).toContain("theme: dark");
     expect(mergedHermes).toContain("other:");
     expect(mergedHermes).toContain("nipmod:");
+    await expect(readFile(join(existingHermesDir, "skills", "nipmod", "SKILL.md"), "utf8")).resolves.toContain(
+      "package trust evidence"
+    );
+    await expect(readFile(join(existingHermesDir, "skill-bundles", "nipmod.yaml"), "utf8")).resolves.toContain(
+      "name: nipmod"
+    );
   }, 15_000);
 
   test("dry run agent setup does not write project files", async () => {

@@ -151,19 +151,23 @@
     {
       "id": "hermes",
       "name": "Hermes",
-      "productReadiness": 75,
+      "productReadiness": 90,
       "connectionStatus": "MCP ready",
       "status": "runtime-smoke-passed",
-      "claim": "Hermes can load Nipmod as a local stdio MCP server through ~/.hermes/config.yaml.",
+      "claim": "Hermes can load Nipmod as a local stdio MCP server and use a local /nipmod skill bundle.",
       "connectionKit": "integrations/platform-connections/hermes",
       "setupCommand": "nipmod setup hermes",
-      "config": "~/.hermes/config.yaml",
-      "verifyCommand": "hermes mcp test nipmod",
+      "config": "~/.hermes/config.yaml + ~/.hermes/skill-bundles/nipmod.yaml",
+      "verifyCommand": "hermes mcp test nipmod && hermes bundles list",
       "checks": [
         "nipmod setup hermes writes mcp_servers.nipmod without replacing unrelated config",
+        "nipmod setup hermes writes ~/.hermes/skills/nipmod/SKILL.md",
+        "nipmod setup hermes writes ~/.hermes/skill-bundles/nipmod.yaml for /nipmod",
         "Nipmod MCP server exposes the expected tool list",
         "isolated Hermes v0.14.0 runtime smoke discovered all 14 Nipmod MCP tools with hermes mcp test nipmod"
       ],
+      "skill": "https://nipmod.com/integrations/hermes/nipmod/SKILL.md",
+      "skillBundle": "https://nipmod.com/integrations/hermes/skill-bundles/nipmod.yaml",
       "runtimeSmoke": "integrations/platform-connections/hermes/runtime-smoke.json",
       "externalDependency": "NousResearch acknowledgement is external before native, official or partner wording is valid."
     },

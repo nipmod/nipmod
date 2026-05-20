@@ -31,7 +31,7 @@ describe("platform readiness receipt", () => {
       "aeon"
     ]);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(75);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(20);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
@@ -122,9 +122,12 @@ describe("platform readiness receipt", () => {
     expect(hermes.connectionStatus).toBe("MCP ready");
     expect(hermes.status).toBe("runtime-smoke-passed");
     expect(hermes.claim).toContain("local stdio MCP server");
+    expect(hermes.claim).toContain("/nipmod skill bundle");
+    expect(hermes.skillBundle).toBe("https://nipmod.com/integrations/hermes/skill-bundles/nipmod.yaml");
     expect(hermes.runtimeSmoke).toBe("integrations/platform-connections/hermes/runtime-smoke.json");
     expect(hermesConnection.externalApprovalRequired).toBe(true);
     expect(hermesConnection.proofLevel).toContain("discovered all 14 Nipmod MCP tools");
+    expect(hermesConnection.proofLevel).toContain("/nipmod skill bundle");
     expect(hermesConnection.externalDependency).toContain("NousResearch acknowledgement");
   });
 
