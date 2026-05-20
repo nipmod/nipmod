@@ -24,8 +24,26 @@
     ]
   },
   "publisher": "did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZDTUF4cWt2b01OdG94bVUzeW9uMllHbmlndlF4UnoyUUYzTHRmZXE1eFJLL3BhY2thZ2UtZXZpZGVuY2UtYnJpZWZAMC4xLjA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief/blob/releases/0.1.0/bundle.nipmod",
+  "lifecycleEvents": [],
   "sourceCommit": "95ca0b252fb83b86a9d4027ae03f6532fc05a233",
   "sourceRepo": "https://node.nipmod.com/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief.git",
   "sourceTag": "v0.1.0",

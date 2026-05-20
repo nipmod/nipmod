@@ -42,6 +42,7 @@ describe("nipmod discovery manifest", () => {
       "mcp",
       "name",
       "node",
+      "quorum",
       "registry",
       "review",
       "transparency",
@@ -265,6 +266,11 @@ describe("nipmod discovery manifest", () => {
       checkpoint: "https://nipmod.com/transparency/checkpoint.json",
       log: "https://nipmod.com/transparency/log.json",
       logId: checkpoint.logId
+    });
+    expect(manifest.quorum).toMatchObject({
+      policy: "https://nipmod.com/quorum/policy.json",
+      receipts: "https://nipmod.com/quorum/receipts.json",
+      signers: "https://nipmod.com/quorum/signers.json"
     });
     expect(manifest.review).toEqual({
       evidenceLedger: "https://nipmod.com/review/evidence-ledger.json",

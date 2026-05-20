@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-20T12:05:18.373Z",
+  "policyId": "nipmod-quorum-release-v1",
+  "signers": [
+    {
+      "algorithm": "Ed25519",
+      "id": "nipmod-release-gate",
+      "label": "Nipmod release gate",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEA0khhtXRh4/mtQ3W6IgDzOnuTxnB8Gbkh1fJPUznrDhc=",
+      "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+      "role": "release"
+    },
+    {
+      "algorithm": "Ed25519",
+      "id": "nipmod-security-gate",
+      "label": "Nipmod security gate",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEAh9hZeuYtwEtnn4yvr/ZRGcCdonjeBYqjzaHhWa2Guo0=",
+      "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+      "role": "security"
+    }
+  ],
+  "type": "dev.nipmod.quorum-signers.v1"
+}

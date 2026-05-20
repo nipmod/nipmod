@@ -1,0 +1,1021 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-20T12:05:18.373Z",
+  "policy": {
+    "formatVersion": 1,
+    "generatedAt": "2026-05-20T12:05:18.373Z",
+    "id": "nipmod-quorum-release-v1",
+    "meaning": "Verified public Nipmod packages require matching release and security approval signatures for the exact package digest and source tuple.",
+    "mode": "registry-enforced",
+    "receipts": "https://nipmod.com/quorum/receipts.json",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "scope": "verified public Nipmod registry packages",
+    "signers": "https://nipmod.com/quorum/signers.json",
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-policy.v1"
+  },
+  "receipts": [
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "82209bd85e5833242576460d96fa69960711ae8209326f452f378dc72c621fd9",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "gJtN/eg0POrB2+UbfoELuGGsBRmBJZDM+BB6ApGprIDBhyIK0h9HVI5jlbgBZRrP7xNpFYA1344HiGtNI59KBw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "9ac464f2ec031d05d1f4af7dbbab417f1f160a7fe45405a86eedb1bc58f94966",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "TWzymOYWgYnLnz4ku8gLFWA/JMfRNBu5LmGyLdlhXDtzUjTXP/zKwkucT15ivMYEiSB+mx8fMXOguIRTsxTGCQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2ZBWlA1YXlxUGRYOWJpeXBBQVpBanRETTFBYnp0RlRtVUZOR1ZxanBuNDFOL2dpdGxhd2ItcmVsZWFzZS1yZXZpZXdAMC4xLjA",
+      "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "0f5c87a40c410111b620895184bb410206e1c770",
+      "sourceRepo": "https://node.nipmod.com/z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "6ef724f3026a5c8835e668d4c94054de2f429ff526162b33c422f6dc2299fd69",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "6iqYeNNs9vyafspxQbig6VKk5u3Gnlq0cW0z5h2cEWZ6UIx0U9U3PvczDdVhC+tHAisjCbMl6BLkP9D8IrE/Dg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "74fbc4e7bf7e451bcc950c009c7ec1cd3c7d21aa905e80de5abb088469bd32b5",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "dL5ab/1R2ceqs0qL14fY15gB0qnoK/ugVAxlKnRweWOlkPvSTgH63GkNIrOnkrFFbALNOllqgej2U4+1EeHXAQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2ZDTUF4cWt2b01OdG94bVUzeW9uMllHbmlndlF4UnoyUUYzTHRmZXE1eFJLL3BhY2thZ2UtZXZpZGVuY2UtYnJpZWZAMC4xLjA",
+      "package": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "95ca0b252fb83b86a9d4027ae03f6532fc05a233",
+      "sourceRepo": "https://node.nipmod.com/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "48c6ac3705aef84584cebffb9f4ebede1277ec495f7fc1f9d4d1d3ada766be3e",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "ErXwedof6pAsXUgQbxrjqqNrz+Y1V2K6g6urxqbQsqV1OwcdVsARaDE39HFmmoPIQpH8/mE4mJVnMN2bOr0IAA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "9d77a1a4b28180a12bb7f79fbee742ac55cc7b1201c08d9a74bb180f3bd60ea7",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "Xa8KpvLVNCIWTjmIffqvenW+epZg5sEIMuVJDX6VOEAhlXwSEyraQmLKK2ggAlJvVu9ZzBqZ/yyxeYJ03wysCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2ZKVnBuWnJIRUdLdmhTUXo1U1hhSFBEM2JNNmt0SEhCMTh1MTF2Y0R3QW5TL3JlZ2lzdHJ5LW1pcnJvci1jb21wYXJlQDAuMS4w",
+      "package": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "a4150243a0ed9b4a7d2bbeba9184468f91a05ec4",
+      "sourceRepo": "https://node.nipmod.com/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "fdfd646dfdb136963c574ffd8e96cafb36f7a905046e5d01aa11b254b870f2ce",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "O4rcvF/gjhjCgiwKIlSSP7rGcwzumgTiMLm9TBq+V1rD+dNzx71wgDNkfyY/S9vyoZxc/RHq696xLH0CHLTjAg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "13061a39c3907f041597691cf4c9c27975158627f1a0d55fc632820767e225c3",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "NEoZhe7tSGYE+sSH0XQrBrpsw1TMD+nfSKpPvjA+noIsBwaVoUWghrhKZdC+L539/qfgqNbg8AoZcZ4FT0eeBQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0QDAuMS4w",
+      "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+      "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "8ccbe2a617444f9b561b28b9f4e3a27ff3cb9d4193062394cc4a59304b83cf83",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "bQu9g2CosHaKDmsWZgj25i3TlO2qXi+MIx4FNuWjxzvEd7a2ushbY/lBf7asF4DqcRdvBSDZ3HdUoEsUt66mAQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "1e096ef982f3757b25c54acfa0cbc60aa4e077394dbaf79c228aa2de63ed33c0",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "sMDeC4qNmnUcCTKJSuDLvXx8eJcR33cgAHip4Y6nesT8aDHJydW203eQ19WqAp/QzI3EcG9ZFeRnNy22+RxQCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlckAwLjEuMA",
+      "package": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "47fb8fee60b381b2d5fdf23409a36213c0627be3",
+      "sourceRepo": "https://node.nipmod.com/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "70a305e99a852fcd0cb2296691fc68cee94f0d6397c90f9ce83df39144322d3e",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "/ywdbClK8NAHjTer4gvLDGH60ISSAOAxKvOqHLUF/IbyPLoJ5xd9/1n3FdCcJ3A2JIc5mUPM8rgaUQ5Ypc7KCQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "fc35b4132efb7fc474f905eb2324e2fa4395ed4d354527b73c3ffb67e5b3a3ae",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "LwpGQyN44ge0HgpXY/42vAE4nBraINoqV+ycOvo3zQnkOqrLA3tqOygR+l2VAPbDjju/9mQ8OfkT/Y8JrcybBQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2htZEJzV0R6NGdlanV0WnpWM2JIWlVZWGFmMlVpZ05UN1FOOE1Tb3RiSEhOL3N0cmljdC1jaS1wb2xpY3lAMC4xLjA",
+      "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "63477a439e561eba8035858ef9bee338b4528721",
+      "sourceRepo": "https://node.nipmod.com/z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "b2aab9343b919e544c36c4571d46ae826da6b6248785ccb6f5c890b2e81245ad",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "dPG0NSQIdhrYwkSBGk1iPY71DPNEcpxHepeW/6hQRQzeoEUXzoJwxK+UtOGmXObXWmRC051QTR5BbSnUHOW3BA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "6f01ba80c605c0eb51011a2d7986075c0ab3c9e80c7b34f091c6a3bc61413182",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "ZuWx3XdHQkTowebSKwgpG+guqGMlBRk4Ht3KFe9aGlCaY+ywQEZf/g6Itnj/V0CS4oBecPLWHk5PBMfGvQjZCQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZ0AwLjEuMA",
+      "package": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "1b6212908a6b1baf03dbc47251c39d01c8b1348a",
+      "sourceRepo": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "fe6d864c1dbd51856a8b2e68b1bdc713a385ca7944e6ea49c9638a5420cd7fc6",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "W1VlQA0m1t9Yq28KaEa7S6+RgMfqYj4JLB5aaS7Hw+7UWwdqIHqjOZSo3NUERohlgriLvKtez9ZZ/lKQKdUuAQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "f518fa3d1549227a0326db02b9178129a37fdf49d294956f4ecca3b3a4765081",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "gFWZSyv4tM8i0knYAsrCJz50wWemRB/H6oxWVimsqlaw+RDV2BHtdqscgM8XFaFeZtX8+tXcqQjsK8lMrwrCCg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2hTNHVvRFBRWFdNNkJlM3AxbnJ5cGhtUTFHRFFyR1ZxeUh1eXFhU3MyWFd2L3Byb21wdC1pbmplY3Rpb24tc2NhbkAwLjEuMA",
+      "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "e14de1d95a19f7f04f193992189948a9299e9690",
+      "sourceRepo": "https://node.nipmod.com/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "f9d93e8a8457e43f50e0d817b62bb8b6ab44002477b0aefec77014df31e52ef7",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "+peQ/sVpmOd7QrYp+sugPDhdABQccB6wp7rboMYouqusCTcmp2wTXrzq+Gre8n2izEP7zzWuhefSeXLhGNyJAg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "006fd68aff32bb933127b66964f75edff576b5743bb53e66959e4ccbd75be263",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "2hLpcEQ24fKX6KHON9Xa+6zrX3mi0+DJ1sdmHIYHzQRhU5cdBEhcgFgOMH5fvIXGRt1KZ0Ob+j2nGYhc4CFUAw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa2tzcWpTTXNiVUFNb3pqaVJnSFhyUmVrc2pnWXFvN1VSbjVvcHQzVXM2a250L25pcG1vZC1hdWRpdC1jaUAwLjEuMA",
+      "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "048cf26e8bacfb85c33ff8d2c651edf611ca6603",
+      "sourceRepo": "https://node.nipmod.com/z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "11587f9154a9fc02914c34ad675be1219e3170a8f7d86ba6bfad676d8f416245",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "qmsRZPRN/tkfFLWgjX7F6U8k8MiG/z0xep4YZaWzHLY32IB6wmhTuHILyryktbhe/BLhAdQemVFF+JCM5qOfBg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "decb65b7027a1a502b97e02ab0d73f4ffce7dd496750a5bf2552e9a027f3873f",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "hCb+bwyJtJ1ebWHxv47cF8kG6Kh2aFY/xqGd1Wk5Yhy6BoJqJpuCIChOMHYZN90gpon9/76gsm+aph2J2ab+DQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa201Q25rWnVDN1hLQmJCMVVReEtzS1FHbUVrdGNwRDdyV1hQTW5SbnJyQjhCL3BhY2thZ2Utb25ib2FyZGluZy1jaGVja2xpc3RAMC4xLjA",
+      "package": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "6291479ad72a823d6643e728bf412fe334a1c4ef",
+      "sourceRepo": "https://node.nipmod.com/z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "7aee54dd580b5aa68adc16fa6b2f0bdb78526304f2ac403a7263a3c04edd7202",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "YSFMhO+Y6taOel0XKSMy4NYazALNCA9gXNr/5CUtFpP2gzlrLMqaUhQyo66mb65ndqquTuWjETSLfy51FyQ8DA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "d255a305dfe0d64f2c5f7d1bb6eb11b159ced82960c7674c4b1f9646eac5dc68",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "hiWVdJk0RGWgS/jTg/SrQDWMgaXpl5nbaHUFYrioQ+A+w9wfmkCXf3VKIeM/CgxOmfrpvpFaquGEF/jPjdK8CA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa25lQ1BLZWRmelhhUnpFdEdrRnJuaVV5NWFXcm1oQU5mUDl1d2FqbjNrWFVTL2dpdGh1Yi1pc3N1ZS10cmlhZ2VAMC4xLjA",
+      "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "c454a839ce89a0446dcc0010afd991dc3e4f25b8",
+      "sourceRepo": "https://node.nipmod.com/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "0b3ec1347a0012a539c2e5ac87f9330ce0d5c0cb98cb133684b311c0b45708aa",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "QZxmwWy0FvuNZ5Fh9ruOWDJ8tYYwWDmb2blpgd0zsZPYj/rmcbA2kOGqly8LvrwjyWyEZLb/XTkpKqzeuQ4mDg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "6bc8b619e2e099b06bda6f065b86eb7d20f4f206b742e68a47fefa521784683b",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "n3+s64hrXxDbZi9hML95b6Z0H2DI7Ik3yyzt3VTQVrMu/eiJF5fjrAM2sV7iqZye84KwoA0cp/JiwCN8VughDA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa25mMUtWZVZXUlBYY0hVRmZMMVAzTkhRY2R6WHkyd0t1YUJqeFg5THI4Vm1kL21jcC1zZXJ2ZXItaW1wb3J0LWV4YW1wbGVAMC4xLjA",
+      "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "47fac7bef0a2d8e93adb58558d64cd01681078df",
+      "sourceRepo": "https://node.nipmod.com/z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "fb1849cec8e2cac2872111e5747d6c12ece5f30b1a402c8382aa42e5793e2519",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "7WK5gR8m3iO39iFgHlSHaVV4STeKGLI3QaL3TTSVyKNmgHAWcAXcSmS6ZwLHleTmTznW/llbx39hgxkmzo2pCw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "00977f29338ca69066d0999510c206da53330a99269ed877f2db46af72726bd6",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "0rvRGgTPdCQJZAkYkRdnQVN6Vm7YN06n+uORr2MH5fpzeSAHH+hg/bADwNBMP2ubCxq6yV4ksOZLhIoMr3NACg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxlQDAuMS4w",
+      "package": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "4b89193645af4a222bb6e8b7fb1f0a4419b6d715",
+      "sourceRepo": "https://node.nipmod.com/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "322cfe96e24247a2605dde31ce923b0b354307af04b790c930ee9da507f624f0",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "2/HaTIP6Hc9jBTPQBkPLIJs8Oyo5ECvTHIYgXQIESDC8QbAOyk8mpqi8zj6KU6FFf43L+vHw3br/EsEOJ4iiCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "007fe28f40e04a9cce340e547a231d5775176135ad55500a1e5ef88bcf0aa08c",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "FKOqHvBnuVP2vsB8CK+B0FIC6Nbs2eUpDL33HXyi5j054O9AM76ynGTQm0q6YV/OYIFRHatVwO51uiFm39AoDA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa25OWFFvVHAxSkJUMk1NcFRyR25CZXJ2R0JDVzR6OGJXZlJIVVJlTjdFUFdQL21hbGljaW91cy1za2lsbC1maXh0dXJlc0AwLjEuMA",
+      "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "60a3a7fc876369b6512a079c319fa10aacf5ddf4",
+      "sourceRepo": "https://node.nipmod.com/z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "044550a8d1584e029f03e5e9b0d17cf5bc60553473a03c5e0e40d31fe5ef074c",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "s/OqU74Z1VQ0zvcIynefN9Nz3fY195QnuwdL3z2VmsnmLBvhtIbQx9T5JmBamRII/7ImA0qFP9zqjGzIviqkDQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "f0fe8ec2abe975847be2e1a4242a81ec4bb28f27115278228da9a8d37e3d7bca",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "7LYqsQ96fUJGiYGLbuKKpVaHPe81e9d8FjlY4Wz+nwTMIVBgRg/udTgvlT/uzI0qI793AxZr1oeesl6Zzsb6Ag==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFja0AwLjEuMA",
+      "package": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "6c04f95135756f796a74db277c80f1fd31767d2e",
+      "sourceRepo": "https://node.nipmod.com/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "75ec6febd71fd9a9ff53c205ef256aa80ba3cff6b7a993d2f99a54f86c9ae2b4",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "kqTe+Dvk3kiuyiiaRhJjWoj5zbRf1erRGXZiTH3vA6bU0yBCr4XNSn+lqxMgVClNzZpT68HnqF2PANvw9U7hBQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "dbdd94fda0f4c7c09b17540c32b52c991f12786f6e3a5090010b921363bf31e2",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "HdV9hQFNNsf0elBI5UBXH75m6ghpxBza/zmU7X65vtGwbHJNLvJvzEOeRLuVywTYkFj4W8mU9yIjNQ7ikiSDAw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3A3dnB1R1kxYlJLWk5ISDlxbnVrOGZQVjVEdHF1RTRxMTgyQm5ZRUFxRzl6L3BhY2thZ2UtbWlncmF0aW9uLXBsYW5uZXJAMC4xLjA",
+      "package": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "6c0dfc3da14be08ebe3afb9dffcabc341ca122d2",
+      "sourceRepo": "https://node.nipmod.com/z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "824e228c01f7f6369d065de8c449b829aeb360225ed40b4d6f6a43a930dfe326",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "XA0WdU02n+ZDRcoSXU8OMRk/jGFMcRx0KgdEGtmB5f2anWRr/XwNj1MKKxs4tPXK4cepMBsWv4s0somITkhIBw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "59d0e218b73c530d08169ce82aa7371ec630772405b8a099bfd518c7fde5f4c5",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "sslMEQWBzpeFAgYsxPwY6K3Qt424U6mIcVR7k6J0pY4tK1G9FCeftKOoeeKW6o3O+TXnVlrfrcExhSg2iGWKCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3QDAuMS4w",
+      "package": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "38d0928c7cb747d85a390c964c9e552b3f2f215d",
+      "sourceRepo": "https://node.nipmod.com/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "82843450ebcf9023de0250661ee47e114f55f1314e1dda8ba8fb9b0249fd2a3a",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "3nkn6iSE42ibKOlfSg2eUhf+K9llL2NFU6rkXzC6jVOyNfFuzx/ASnsV7YCZh7+DnRl266IKpRfs0wrjUlKNAw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "f55bb4a3980a5f03129a90ef3439e4d95e26a0fa1e28208faca9ae360c5295d3",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "O8nE7cuhiRPGQOcwvcVqyZH4w4KeFw0DAETiNHmGAf9KZ2xuj4/VQbYfNxoPkYa80ZCRY7awQgG5IUu32ei6BA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXJAMC4xLjA",
+      "package": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "1ab073a75f7f0390a3e40ace949bde404b6645c3",
+      "sourceRepo": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "5c24a518279a460fac6da7c9ac66678cbe4ad694b0ee88ae1e574280bc1ea3a8",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "2isAMfAJ4Jd0kA9p0l21Bw6OZbIeSMCYHKgGo/ua2AuVjyhX6nbz208gVdFNQyjUHLg0s/FcITjNEEaP5vzAAA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "1c85f71a8289d2731862ed42839b11e037cb7955e30236f560c60e22f2205dbc",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "LW71I2/hr/odCTqC7alPCigI0EnKOJWc08c9xYBuyfdZyDgKONldMx28vLvh6nXteXHn6Xzj9BHT6LdavBD+Bg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXJAMC4xLjA",
+      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "05d9b83f9ab2b6f8e1475eb7cd9a3f8fa8236c73",
+      "sourceRepo": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "3ced168cc2964ddb74c4f3da9ad86fb7f74a8e05abd2bf3d13bc8e658fc0df10",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "3JWUxHzZADV+qMMY+df9l7d38TMcrbmBwwX9hpzwYMWyjM6JHd338zcagJYLEIAtGiKChiceBjLJId4qpcoLBw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "83bdb8c5709904cc59456a24537a06d1728bff1df3fe8b5ad0ec78ddd93f331e",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "aVEWDSCDmUgZXG+T4GUWA4QnxDIsEdKKssWFINSWMSWHwn4frJ7Y7b1VcAtN57y7eJWcpq+r4lSyAnpzhUwaBw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "f1d1bf9e3df101cca7eb00294dc129e8958ae3dfc823d10665e29f491c084c0e",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3FlZDRUZUh2eG9ac2NzSzhIc2ZqTGYzUFMzbWhQVGUzd0hCMlFrOXFtdUR1L2dpdGxhd2ItZGlmZi1zdW1tYXJpemVyQDAuMS4w",
+      "package": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "4fdf176081510999230d28ca9b90b2c6c4ea3a78",
+      "sourceRepo": "https://node.nipmod.com/z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "22a60aabe4c3e56e6c661758002e88ccb46e74b340661c7c656fc507d56290c0",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "xZaTP2uDqushGbd+P7vrmXUGje0mIUokg0NZDWtL1cd6w0OKf2EGdeNbWeP9Nu2HSPEUSGi9BfImSxZnCerUCw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "65f0711734eb7b714e8ab11ceef76dc0a09f15af79bd96aeb8cfbb5aafbea91f",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "FIukjuyjYNLgur34W42MwIpxP/5JUyc0Fex3V2XbBvXW8Kf6r0obmcUvFkH14zA7jK5QYIMxdYVCUQJcMyCgAw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3FtOFViMXdiQTc5c2lSb3pGMVE3ajFEaml4eEZOQXNIblNTZlBhVDJpQTFDL2RlcGVuZGVuY3ktcmlzay1yZXZpZXdAMC4xLjA",
+      "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "d763aee9761f18708d9b82cba65d92a056695862",
+      "sourceRepo": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "6c988edcd1f431b84b5b5b10eeca0a726090bde94844eb68d4f3e6dd27f45f5d",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "cUmqwrj2nIWQxuNG57uD8tE1UNtJQAb9v00KQL6aK2GDW59JzbbRjGT5bFRmzyKJNzYKnrjzhbR+QMEVEydOCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "ab833f04907719eb8bc8194998e858618c0a5a025eea583abfb01897cf8884f2",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "B7rObVt50ooe/PZiryWxSh806pEFbVsv8qpjFQOVSMJbcStaQ2COhGgDDBe8+xejfA8TPBSu69TkKoXtVj3aCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "23c94ad2278906090f031278fa12aed35f3f207dceabadfdaa8d92d66f721590",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3I4aktVU29EcFJKQnUxQXAzczdmZkJWaGdKRndramNRYndmQUp6MVI5VXlFL2xhdW5jaC1zdHJpY3QtcG9saWN5LXBhY2tAMC4xLjA",
+      "package": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "debf802eec9da17a971f84befa75b1b21c4238f9",
+      "sourceRepo": "https://node.nipmod.com/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "7b784533e7aca8ec02c57296cfce088abf82cfd5242f03efdd0a2d736525d7d8",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "0ygNho4eBGLpd8POZTx7HguOaz/a4GDHat55b0bPQZY7LPfqiFDnVhEUrPqZK674Ozgh36X+dszGdLMGdu7vCA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "c86636070a88e09f7be994fcb04614bb144df9c591dda83ef247909f65706a27",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "F1DXW3Qf77V/96JYsk5Jfmasyt9L9XnPEmvSimk32FO26IGrfxjG0Siaak8URSCJQyjPKQ1OlrfrG03WklhuBQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "60a18ebdeed5973bdd6000ce4ca54f8781ac8a17841bfe1b438c668fed2ae087",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3JFVUhMRTZYUXE4ZThXM0VYS1lWZHpuYnNqNEJKVkdTS1h1dThhaE51NjhqL3NlY3VyaXR5LWFkdmlzb3J5LXRyaWFnZUAwLjEuMA",
+      "package": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "a3b4c31fcc3e4ecfe06d07310f5dae90ef71d851",
+      "sourceRepo": "https://node.nipmod.com/z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "b795bba9677137b9b2108993df3f9a9998bcdf21bdf0ec2d59316385649bf3fa",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "0np0SsEaBRmIXn0eTsF2P2PzEScnclPrh1M+4uZbkvBKBav8ekFsc9/yV2Zd74K8JTtLcE3bOeUoYGzvcafzCw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "c13dc8374100cbe592cf06fb4944b66cafaf8006d3a26b7c65c13bdd73a50592",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "PzW64T0cHDgReYkC5FEwyhvzCvJAq24nGMEXEXnsfRAEPPUuXlJrSq+nTONiF36ARsv60jPPTdMA8pZg3F0XCg==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3JMY2VhYnhnUXo2d21RQk1EQ3BiUXB5NU1GOUJ3Smk3S3ltYXlvc041Q1JuL2FwbS1pbXBvcnQtZXhhbXBsZUAwLjEuMA",
+      "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "1d9077e315d22cfdb1a35671c708017619aa0b2a",
+      "sourceRepo": "https://node.nipmod.com/z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "42a115c5ad8d7be90196e1affd98a4358104072e23e7951a7168c1736a509e74",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "da+Pz2LkSV2GJIpVfOOkH5A8bU9fvJlTSt/R8SdNmYGyikZyeu4gZZtqBkTOMBUiFP5Zs9DGfr2IwIKPTmNhBQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "87e821229d18aec8ff58ccabb55ba70e383809fba6c760d06101ebbcb4814372",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "mLlXyITq3wxEHkTyitb3j7NYz/d4kXMrRkKMz09dvGxIz7klnHip+IwMxdjKYoJ0WC2OkKShYJnjTGSh4TCjAQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3NGcm1DdFlHVHFKelVNc2kzaThhQUJnSDdtOTd6ZjRtaGZtaHZmbUY1cEFlL2RldmVsb3Blci1kZWZhdWx0LXBvbGljeUAwLjEuMA",
+      "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "5e4ed66e3a8eb635e66a02df960f22bc27664700",
+      "sourceRepo": "https://node.nipmod.com/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "ba6a4d6a9b7a7e347dcba87053a7cb034ba0e2dafad56040fba84998bf020ae8",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "J4pDuFi3HwjNn5AZmtWHAlvtrSl3v32LJ40mp3ogGf6lGSjDlHpEC3ARmBl7BQ6z2nnuWCWkXuZExhIur30nAA==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "957fac8626f13205dc0246420bf11c52dafed345bec62d7b9bcfbcd0eb963564",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "tl17E4o5gw53XQ1a6KPmMbUXK0I+GWLaNKTtOB1qrSAUvoL8SgS5iWXFsb6CUg8tswsqJFZNlarOpSbH4dwqCw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXRAMC4xLjA",
+      "package": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "964c6bbf808e337ffbdc192d94de6693e355bc36",
+      "sourceRepo": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "12107639bada2f0792ab15fd3ca8c5c3873368530b1efe4440b1a554144139e4",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "VCQtd2Y5Jxa7H/vSrNqOolK3AMpFWSRe+rC3Vsf/nQom/kyeMhOAbocvluKxxom8ao07lPxIJ8qmfCJAeKVZDw==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "6ee165e320db8513742e7ddc31de43a49870e5ae7d67d9308a98f7dcc8179a58",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "mKIEDEGr5JWlq2sSXcG52Z8MEKB5vsvuvzWorYg0I1/e8oG8hLy5QxkuZFvoJG/ZUW6dM0HrYrZRjtrSjphPCQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3dOdmdveGM3OTRIand0Ujl3Yk5Zd1hnbnc4U29CUXIxOXZlMU5RcUVaZEVRL2FnZW50LXJ1bnRpbWUtY29tcGF0LWNoZWNrQDAuMS4w",
+      "package": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "ccfeee27513b6bb5bdd0b4a272252fc6e59c3c0e",
+      "sourceRepo": "https://node.nipmod.com/z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    },
+    {
+      "approvals": [
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "dcff901bc1a15f42f4fde10e95c881ebf5fa57a3f3375b67702d0372a7656098",
+          "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+          "role": "release",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-release-gate",
+          "signatureBase64": "bWCDSbPyYyL8T+8zgemqJW3oapJ3NFCNgIsdJLRiOS1L632HM1eYw3RYmw7OFpP+T6dRfyfZMuGb2CmtjWrsAQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        },
+        {
+          "algorithm": "Ed25519",
+          "payloadSha256": "cd1847b088a9b22cee244d81783fb3c4171e39a9c9ce02122c1487f6a11514e7",
+          "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+          "role": "security",
+          "signedAt": "2026-05-20T12:05:18.373Z",
+          "signer": "nipmod-security-gate",
+          "signatureBase64": "fGWtY3v5voB5UUhnEcVQwm82+KlW4OALCTcbvC14W5cYHV5AJVM+6XtB/Ol9CxdbtUmQQtlicrF6PDahuqzeCQ==",
+          "type": "dev.nipmod.quorum-approval.v1"
+        }
+      ],
+      "artifactSha256": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+      "id": "quorum.cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3QDAuMS4w",
+      "package": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "policyId": "nipmod-quorum-release-v1",
+      "sourceCommit": "49b058505bf74c24975805d29cfb071359d76d29",
+      "sourceRepo": "https://node.nipmod.com/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review.git",
+      "sourceTag": "v0.1.0",
+      "status": "passed",
+      "threshold": 2,
+      "type": "dev.nipmod.quorum-receipt.v1",
+      "version": "0.1.0"
+    }
+  ],
+  "signers": [
+    {
+      "algorithm": "Ed25519",
+      "id": "nipmod-release-gate",
+      "label": "Nipmod release gate",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEA0khhtXRh4/mtQ3W6IgDzOnuTxnB8Gbkh1fJPUznrDhc=",
+      "publicKeySpkiSha256": "87666008ba9f310873b13df867fab0e1c89b975fbe4fac04d8843ca01c47948b",
+      "role": "release"
+    },
+    {
+      "algorithm": "Ed25519",
+      "id": "nipmod-security-gate",
+      "label": "Nipmod security gate",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEAh9hZeuYtwEtnn4yvr/ZRGcCdonjeBYqjzaHhWa2Guo0=",
+      "publicKeySpkiSha256": "e1a0f15fea4992f8c123ecee7561a3d154f789a5a163cca20f07e4f80764c7ab",
+      "role": "security"
+    }
+  ],
+  "type": "dev.nipmod.quorum-receipts.v1"
+}

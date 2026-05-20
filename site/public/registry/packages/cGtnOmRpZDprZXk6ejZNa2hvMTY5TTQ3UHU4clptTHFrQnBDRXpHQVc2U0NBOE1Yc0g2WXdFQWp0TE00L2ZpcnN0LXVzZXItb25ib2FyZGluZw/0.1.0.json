@@ -44,6 +44,23 @@
     ]
   },
   "publisher": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZ0AwLjEuMA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "repo": "first-user-onboarding",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding/blob/releases/0.1.0/bundle.nipmod",
@@ -51,6 +68,9 @@
   "sourceRepo": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
   "sourceTag": "v0.1.0",
   "stars": 0,
+  "tags": [
+    "latest"
+  ],
   "trust": {
     "evidence": {
       "artifactDigestVerified": true,

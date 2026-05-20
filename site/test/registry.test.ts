@@ -122,7 +122,7 @@ describe("registry data", () => {
     );
 
     expect(summary.ready).toBe(true);
-    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Witnesses", "Root hash", "Quarantine", "Yanked"]);
+    expect(summary.cards.map((card) => card.label)).toEqual(["Packages", "Quorum", "Witnesses", "Root hash", "Quarantine", "Yanked"]);
     expect(summary.checks.every((check) => check.ok)).toBe(true);
   });
 
@@ -315,6 +315,7 @@ describe("registry data", () => {
     expect(registryStats(indexFixture([verified, unsigned]))).toEqual([
       { label: "Packages", value: "2" },
       { label: "Verified", value: "1" },
+      { label: "Quorum", value: "0" },
       { label: "Publishers", value: "2" }
     ]);
   });

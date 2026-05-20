@@ -3,11 +3,14 @@
   "type": "dev.nipmod.system-readiness.v1",
   "generatedAt": "2026-05-20T11:02:08.006Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes setup path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes setup path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
-    "trustRequirement": "all public packages are verified/100",
+    "trustRequirement": "all public packages are verified/100 and quorum passed",
+    "quorumPolicy": "https://nipmod.com/quorum/policy.json",
+    "quorumReceipts": "https://nipmod.com/quorum/receipts.json",
+    "quorumSigners": "https://nipmod.com/quorum/signers.json",
     "source": "https://node.nipmod.com",
     "packageDocumentTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}.json",
     "packageVersionTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
@@ -23,6 +26,9 @@
     "status": "https://nipmod.com/status",
     "platformConnections": "https://nipmod.com/compatibility/platform-connections.json",
     "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
+    "quorumPolicy": "https://nipmod.com/quorum/policy.json",
+    "quorumReceipts": "https://nipmod.com/quorum/receipts.json",
+    "quorumSigners": "https://nipmod.com/quorum/signers.json",
     "systemReadiness": "https://nipmod.com/compatibility/system-readiness.json"
   },
   "sourceSurfaces": {
@@ -123,6 +129,7 @@
     "name": "gitlawb-repo-reader",
     "specifier": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
     "digest": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+    "quorum": "passed 2/2",
     "compatibility": ["MCP import"]
   },
   "parallelAccessProof": {

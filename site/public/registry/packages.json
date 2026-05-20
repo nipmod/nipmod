@@ -81,6 +81,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxlQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -162,6 +179,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFja0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -243,6 +277,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3I4aktVU29EcFJKQnUxQXAzczdmZkJWaGdKRndramNRYndmQUp6MVI5VXlFL2xhdW5jaC1zdHJpY3QtcG9saWN5LXBhY2tAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -324,6 +375,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -405,6 +473,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3A3dnB1R1kxYlJLWk5ISDlxbnVrOGZQVjVEdHF1RTRxMTgyQm5ZRUFxRzl6L3BhY2thZ2UtbWlncmF0aW9uLXBsYW5uZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -486,6 +571,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZ0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -567,6 +669,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXRAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -648,6 +767,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3dOdmdveGM3OTRIand0Ujl3Yk5Zd1hnbnc4U29CUXIxOXZlMU5RcUVaZEVRL2FnZW50LXJ1bnRpbWUtY29tcGF0LWNoZWNrQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -729,6 +865,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZDTUF4cWt2b01OdG94bVUzeW9uMllHbmlndlF4UnoyUUYzTHRmZXE1eFJLL3BhY2thZ2UtZXZpZGVuY2UtYnJpZWZAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -810,6 +963,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZKVnBuWnJIRUdLdmhTUXo1U1hhSFBEM2JNNmt0SEhCMTh1MTF2Y0R3QW5TL3JlZ2lzdHJ5LW1pcnJvci1jb21wYXJlQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -891,6 +1061,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa201Q25rWnVDN1hLQmJCMVVReEtzS1FHbUVrdGNwRDdyV1hQTW5SbnJyQjhCL3BhY2thZ2Utb25ib2FyZGluZy1jaGVja2xpc3RAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -972,6 +1159,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1053,6 +1257,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1134,6 +1355,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3JFVUhMRTZYUXE4ZThXM0VYS1lWZHpuYnNqNEJKVkdTS1h1dThhaE51NjhqL3NlY3VyaXR5LWFkdmlzb3J5LXRyaWFnZUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1215,6 +1453,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlckAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1296,6 +1551,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FlZDRUZUh2eG9ac2NzSzhIc2ZqTGYzUFMzbWhQVGUzd0hCMlFrOXFtdUR1L2dpdGxhd2ItZGlmZi1zdW1tYXJpemVyQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1377,6 +1649,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZBWlA1YXlxUGRYOWJpeXBBQVpBanRETTFBYnp0RlRtVUZOR1ZxanBuNDFOL2dpdGxhd2ItcmVsZWFzZS1yZXZpZXdAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1458,6 +1747,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3JMY2VhYnhnUXo2d21RQk1EQ3BiUXB5NU1GOUJ3Smk3S3ltYXlvc041Q1JuL2FwbS1pbXBvcnQtZXhhbXBsZUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1539,6 +1845,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25mMUtWZVZXUlBYY0hVRmZMMVAzTkhRY2R6WHkyd0t1YUJqeFg5THI4Vm1kL21jcC1zZXJ2ZXItaW1wb3J0LWV4YW1wbGVAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1620,6 +1943,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25OWFFvVHAxSkJUMk1NcFRyR25CZXJ2R0JDVzR6OGJXZlJIVVJlTjdFUFdQL21hbGljaW91cy1za2lsbC1maXh0dXJlc0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1701,6 +2041,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3NGcm1DdFlHVHFKelVNc2kzaThhQUJnSDdtOTd6ZjRtaGZtaHZmbUY1cEFlL2RldmVsb3Blci1kZWZhdWx0LXBvbGljeUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1782,6 +2139,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2htZEJzV0R6NGdlanV0WnpWM2JIWlVZWGFmMlVpZ05UN1FOOE1Tb3RiSEhOL3N0cmljdC1jaS1wb2xpY3lAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1863,6 +2237,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2tzcWpTTXNiVUFNb3pqaVJnSFhyUmVrc2pnWXFvN1VSbjVvcHQzVXM2a250L25pcG1vZC1hdWRpdC1jaUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -1944,6 +2335,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hTNHVvRFBRWFdNNkJlM3AxbnJ5cGhtUTFHRFFyR1ZxeUh1eXFhU3MyWFd2L3Byb21wdC1pbmplY3Rpb24tc2NhbkAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -2025,6 +2433,23 @@
         "witnessUrls": [
           "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
         ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25lQ1BLZWRmelhhUnpFdEdrRnJuaVV5NWFXcm1oQU5mUDl1d2FqbjNrWFVTL2dpdGh1Yi1pc3N1ZS10cmlhZ2VAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
       }
     },
     {
@@ -2132,7 +2557,24 @@
           "unsupportedFields": [],
           "version": "0.1.0"
         }
-      ]
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
     },
     {
       "artifactPath": "releases/0.1.0/bundle.nipmod",
@@ -2238,7 +2680,24 @@
           "unsupportedFields": [],
           "version": "0.1.0"
         }
-      ]
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
     },
     {
       "artifactPath": "releases/0.1.0/bundle.nipmod",
@@ -2346,7 +2805,24 @@
           "unsupportedFields": [],
           "version": "0.1.0"
         }
-      ]
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FtOFViMXdiQTc5c2lSb3pGMVE3ajFEaml4eEZOQXNIblNTZlBhVDJpQTFDL2RlcGVuZGVuY3ktcmlzay1yZXZpZXdAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
     }
   ],
   "skipped": [
@@ -3471,5 +3947,17 @@
         }
       }
     ]
+  },
+  "quorumPolicy": {
+    "id": "nipmod-quorum-release-v1",
+    "mode": "registry-enforced",
+    "receipts": "https://nipmod.com/quorum/receipts.json",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "signers": "https://nipmod.com/quorum/signers.json",
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-policy.v1"
   }
 }

@@ -24,8 +24,26 @@
     ]
   },
   "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3NGcm1DdFlHVHFKelVNc2kzaThhQUJnSDdtOTd6ZjRtaGZtaHZmbUY1cEFlL2RldmVsb3Blci1kZWZhdWx0LXBvbGljeUAwLjEuMA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy/blob/releases/0.1.0/bundle.nipmod",
+  "lifecycleEvents": [],
   "sourceCommit": "5e4ed66e3a8eb635e66a02df960f22bc27664700",
   "sourceRepo": "https://node.nipmod.com/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy.git",
   "sourceTag": "v0.1.0",

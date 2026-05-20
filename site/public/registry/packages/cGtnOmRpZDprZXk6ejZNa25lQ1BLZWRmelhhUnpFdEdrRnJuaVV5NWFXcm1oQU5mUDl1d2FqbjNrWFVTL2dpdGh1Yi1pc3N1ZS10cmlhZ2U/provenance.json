@@ -24,8 +24,26 @@
     ]
   },
   "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25lQ1BLZWRmelhhUnpFdEdrRnJuaVV5NWFXcm1oQU5mUDl1d2FqbjNrWFVTL2dpdGh1Yi1pc3N1ZS10cmlhZ2VAMC4xLjA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage/blob/releases/0.1.0/bundle.nipmod",
+  "lifecycleEvents": [],
   "sourceCommit": "c454a839ce89a0446dcc0010afd991dc3e4f25b8",
   "sourceRepo": "https://node.nipmod.com/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage.git",
   "sourceTag": "v0.1.0",

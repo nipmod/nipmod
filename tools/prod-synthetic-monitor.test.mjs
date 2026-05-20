@@ -15,7 +15,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 14, total: 14 });
+    expect(result.summary).toEqual({ fail: 0, pass: 15, total: 15 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
@@ -25,6 +25,7 @@ describe("production synthetic monitor", () => {
       "deploy_drift",
       "release_artifacts",
       "registry_verified",
+      "quorum_receipts",
       "advisory_feed_signature",
       "transparency_checkpoint",
       "witness_health",
@@ -277,6 +278,9 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     nodeUrl: "https://node.nipmod.test",
     platforms: "https://nipmod.test/platforms",
     platformConnections: "https://nipmod.test/compatibility/platform-connections.json",
+    quorumPolicy: "https://nipmod.test/quorum/policy.json",
+    quorumReceipts: "https://nipmod.test/quorum/receipts.json",
+    quorumSigners: "https://nipmod.test/quorum/signers.json",
     registry: "https://nipmod.test/registry/packages.json",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
@@ -326,6 +330,11 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
         health: endpoints.nodeHealth,
         url: endpoints.nodeUrl
       },
+      quorum: {
+        policy: endpoints.quorumPolicy,
+        receipts: endpoints.quorumReceipts,
+        signers: endpoints.quorumSigners
+      },
       registry: {
         source: endpoints.nodeUrl,
         url: endpoints.registry
@@ -356,7 +365,7 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
   );
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
-    [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key"),
+    [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key Quorum"),
     [`GET ${endpoints.platforms}`]: textResponse("Connection matrix Under review Candidate"),
     [`GET ${endpoints.platformConnections}`]: jsonResponse({
       connections: [{ id: "aeon" }, { id: "hermes" }],
@@ -368,6 +377,19 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     ),
     [`GET ${endpoints.discovery}`]: jsonResponse(discovery),
     [`GET ${endpoints.registry}`]: jsonResponse(registryFixture(checkpoint, registryPackagePatch)),
+    [`GET ${endpoints.quorumPolicy}`]: jsonResponse({
+      id: "nipmod-quorum-release-v1",
+      threshold: 2,
+      type: "dev.nipmod.quorum-policy.v1"
+    }),
+    [`GET ${endpoints.quorumSigners}`]: jsonResponse({
+      signers: [{ id: "release" }, { id: "security" }],
+      type: "dev.nipmod.quorum-signers.v1"
+    }),
+    [`GET ${endpoints.quorumReceipts}`]: jsonResponse({
+      receipts: [{ package: "pkg:did:key:z6Mkpkg/example", version: "0.1.0" }],
+      type: "dev.nipmod.quorum-receipts.v1"
+    }),
     [`GET ${endpoints.advisories}`]: bytesResponse(advisoryBytes),
     [`GET ${endpoints.advisoriesSignature}`]: jsonResponse(advisorySignature),
     "GET https://nipmod.test/install.sh": bytesResponse(installerBytes),
@@ -412,6 +434,12 @@ function registryFixture(checkpoint, packagePatch = {}) {
     },
     sourceCommit: "1".repeat(40),
     sourceTag: "v0.1.0",
+    quorum: {
+      approvedRoles: ["release", "security"],
+      approvals: 2,
+      status: "passed",
+      threshold: 2
+    },
     trust: {
       evidence: {
         releaseEventSigned: true,

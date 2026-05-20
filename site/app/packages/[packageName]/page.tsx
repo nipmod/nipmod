@@ -98,6 +98,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
         <aside className="package-side" aria-label="Package facts">
           <div className="badge-stack">
             <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+            <span className={`trust-badge quorum-${pkg.quorum?.status ?? "missing"}`}>{quorumStatusText(pkg)}</span>
             <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
           </div>
           <div className="install-decision">
@@ -225,6 +226,8 @@ export default async function PackagePage({ params }: PackagePageProps) {
               { label: "Bundle signature", value: pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing" },
               { label: "Source provenance", value: pkg.trust.evidence.sourceProvenanceVerified ? "verified" : "missing" },
               { label: "Transparency", value: pkg.trust.evidence.transparencyLogVerified ? "verified" : "missing" },
+              { label: "Quorum", value: pkg.quorum ? `${pkg.quorum.status} ${pkg.quorum.approvals}/${pkg.quorum.threshold}` : "missing" },
+              { label: "Approval roles", value: pkg.quorum?.approvedRoles.join(", ") ?? "missing" },
               { label: "Quality", value: `${quality.score}/100 ${quality.label}` }
             ].map((fact) => (
               <div key={fact.label}>
@@ -288,6 +291,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
               { label: "Digest", value: pkg.digest },
               { label: "Source tag", value: pkg.sourceTag ?? "missing" },
               { label: "Source commit", value: pkg.sourceCommit ?? "missing" },
+              { label: "Quorum receipt", value: pkg.quorum?.receiptUrl ?? "missing" },
               { label: "Root", value: pkg.proof?.rootHash ?? "missing" }
             ].map((fact) => (
               <div key={fact.label}>
@@ -324,6 +328,11 @@ function installDecisionItems(pkg: RegistryPackage): string[] {
   return [
     pkg.trust.evidence.bundleSignatureVerified ? "Signed bundle" : "Signature missing",
     pkg.trust.evidence.artifactDigestVerified ? "Digest pinned" : "Digest missing",
+    pkg.quorum?.status === "passed" ? `Quorum ${pkg.quorum.approvals}/${pkg.quorum.threshold}` : "Quorum missing",
     pkg.quarantine?.status === "active" ? "Active advisory block" : "No active advisory block"
   ];
+}
+
+function quorumStatusText(pkg: RegistryPackage): string {
+  return pkg.quorum ? `quorum ${pkg.quorum.approvals}/${pkg.quorum.threshold}` : "quorum missing";
 }

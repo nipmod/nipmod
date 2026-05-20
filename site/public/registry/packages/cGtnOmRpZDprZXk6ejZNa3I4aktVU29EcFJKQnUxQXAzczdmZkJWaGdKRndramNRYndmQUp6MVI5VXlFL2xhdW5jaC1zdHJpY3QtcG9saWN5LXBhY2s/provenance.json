@@ -24,8 +24,26 @@
     ]
   },
   "publisher": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3I4aktVU29EcFJKQnUxQXAzczdmZkJWaGdKRndramNRYndmQUp6MVI5VXlFL2xhdW5jaC1zdHJpY3QtcG9saWN5LXBhY2tAMC4xLjA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack/blob/releases/0.1.0/bundle.nipmod",
+  "lifecycleEvents": [],
   "sourceCommit": "debf802eec9da17a971f84befa75b1b21c4238f9",
   "sourceRepo": "https://node.nipmod.com/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack.git",
   "sourceTag": "v0.1.0",

@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-20T12:05:18.373Z",
+  "id": "nipmod-quorum-release-v1",
+  "meaning": "Verified public Nipmod packages require matching release and security approval signatures for the exact package digest and source tuple.",
+  "mode": "registry-enforced",
+  "receipts": "https://nipmod.com/quorum/receipts.json",
+  "requiredRoles": [
+    "release",
+    "security"
+  ],
+  "scope": "verified public Nipmod registry packages",
+  "signers": "https://nipmod.com/quorum/signers.json",
+  "threshold": 2,
+  "type": "dev.nipmod.quorum-policy.v1"
+}

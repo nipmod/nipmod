@@ -1494,6 +1494,9 @@ async function resolveInspectRegistrySpecifier(specifier: string, registryUrl: s
 function formatTrustReport(report: TrustReport): string {
   const lines = [`nipmod inspect ${formatVerdict(report.verdict)} ${report.canonical}@${report.version}`];
   lines.push(`trust: ${report.trust.level}/${report.trust.score}`);
+  if (report.quorum) {
+    lines.push(`quorum: ${report.quorum.status} ${report.quorum.approvals}/${report.quorum.threshold}`);
+  }
   lines.push(`digest: ${report.integrity}`);
   lines.push(`publisher: ${report.publisher}`);
   lines.push(`permissions: ${report.permissions.summary}`);

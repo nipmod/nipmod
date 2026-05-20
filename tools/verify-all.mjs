@@ -31,6 +31,7 @@ await run(
     "vitest",
     "run",
     "../tools/release-signing.test.mjs",
+    "../tools/quorum-signing.test.mjs",
     "../tools/advisory-signing.test.mjs",
     "../tools/advisory-drill.test.mjs",
     "../tools/witness-server.test.mjs",
@@ -148,8 +149,11 @@ async function verifyProduction() {
     (payload) =>
 	      payload.type === "dev.nipmod.discovery.v1" &&
 	      payload.advisories === "https://nipmod.com/advisories.json" &&
-	      payload.advisoriesSignature === "https://nipmod.com/advisories.json.sig" &&
-	      payload.registry?.url === "https://nipmod.com/registry/packages.json" &&
+      payload.advisoriesSignature === "https://nipmod.com/advisories.json.sig" &&
+      payload.quorum?.policy === "https://nipmod.com/quorum/policy.json" &&
+      payload.quorum?.receipts === "https://nipmod.com/quorum/receipts.json" &&
+      payload.quorum?.signers === "https://nipmod.com/quorum/signers.json" &&
+      payload.registry?.url === "https://nipmod.com/registry/packages.json" &&
 	      payload.install?.scriptSha256 === expectedDigestFromShaFileSync(join(root, "site", "public", "install.sh.sha256")) &&
 	      payload.install?.release?.version === version &&
 	      payload.install?.release?.artifact === `https://nipmod.com/releases/${releaseName}` &&
@@ -294,6 +298,10 @@ function isStrictPublicVerifiedPackage(pkg) {
     pkg.proof.treeSize > 0 &&
     Array.isArray(pkg?.proof?.witnesses) &&
     pkg.proof.witnesses.length > 0 &&
+    pkg?.quorum?.status === "passed" &&
+    pkg.quorum.approvals >= pkg.quorum.threshold &&
+    pkg.quorum.approvedRoles?.includes("release") &&
+    pkg.quorum.approvedRoles?.includes("security") &&
     !isInternalArtifact(pkg)
   );
 }

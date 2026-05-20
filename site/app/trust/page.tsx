@@ -19,6 +19,11 @@ const trustContract = [
     href: "/registry/packages.json"
   },
   {
+    label: "Quorum",
+    text: "Release and security approval receipts bind the exact package digest and source tuple before the public registry marks it quorum passed.",
+    href: "/quorum/receipts.json"
+  },
+  {
     label: "Transparency",
     text: "The append only log and checkpoint pin the current registry state so package evidence can be audited.",
     href: "/transparency/checkpoint.json"
@@ -60,8 +65,8 @@ export default function TrustPage() {
         <p className="eyebrow">Trust</p>
         <h1 id="trust-title">Verify the registry.</h1>
         <p className="lead">
-          Nipmod verifies packages by digest, signature, source tag, transparency log and external witness before they
-          appear as verified.
+          Nipmod verifies packages by digest, signature, source tag, quorum approvals, transparency log and external
+          witness before they appear as verified.
         </p>
         <div className={`status-pill ${summary.ready ? "status-ok" : "status-review"}`}>
           {summary.ready ? "Verified registry" : "Review required"}
@@ -141,6 +146,11 @@ export default function TrustPage() {
             { label: "Log", value: treeHead?.logId ?? "missing", href: discovery.transparency.log },
             { label: "Witness", value: shortDid(witness), href: discovery.witness.statements },
             { label: "Checkpoint", value: treeHead?.rootHash ?? "missing", href: discovery.transparency.checkpoint },
+            {
+              label: "Quorum policy",
+              value: registry.quorumPolicy?.id ?? "missing",
+              href: registry.quorumPolicy?.receipts ?? "/quorum/receipts.json"
+            },
             { label: "Installer", value: installerHash, href: discovery.install.script },
             { label: "Release key", value: releaseKey, href: "/.well-known/nipmod.json", action: "Machine file" },
             {

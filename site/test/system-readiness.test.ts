@@ -19,10 +19,12 @@ describe("system readiness receipt", () => {
     });
     expect(readiness.sharedArchive).toMatchObject({
       packageCount: 28,
+      quorumReceipts: "https://nipmod.com/quorum/receipts.json",
       registry: "https://nipmod.com/registry/packages.json",
-      trustRequirement: "all public packages are verified/100"
+      trustRequirement: "all public packages are verified/100 and quorum passed"
     });
     expect(readiness.meaning).toContain("one shared verified archive");
+    expect(readiness.meaning).toContain("quorum approved package digests");
     expect(readiness.notClaimed).toContain("third-party users have already adopted every host");
     expect(readiness.notClaimed).toContain("Nipmod owns or controls Gitlawb repos");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
@@ -31,7 +33,9 @@ describe("system readiness receipt", () => {
   test("binds system proof into public discovery and llms entrypoints", () => {
     expect(discovery.review.systemReadiness).toBe("https://nipmod.com/compatibility/system-readiness.json");
     expect(discovery.review.platformReadiness).toBe("https://nipmod.com/compatibility/platform-readiness.json");
+    expect(discovery.quorum.receipts).toBe("https://nipmod.com/quorum/receipts.json");
     expect(llms).toContain("System readiness receipt: https://nipmod.com/compatibility/system-readiness.json");
+    expect(llms).toContain("Quorum receipts: https://nipmod.com/quorum/receipts.json");
     expect(readiness.entrypoints).toMatchObject({
       agentPrompts: "https://nipmod.com/agent-prompts.json",
       agentText: "https://nipmod.com/llms.txt",
@@ -48,6 +52,7 @@ describe("system readiness receipt", () => {
     expect(registry.packages).toHaveLength(readiness.sharedArchive.packageCount);
     for (const pkg of registry.packages) {
       expect(pkg.trust).toMatchObject({ level: "verified", score: 100 });
+      expect(pkg.quorum).toMatchObject({ approvals: 2, status: "passed", threshold: 2 });
       expect(pkg.proof).toBeTruthy();
       expect(pkg.digest).toBe(pkg.artifactSha256);
     }

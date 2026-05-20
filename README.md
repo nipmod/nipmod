@@ -21,6 +21,7 @@ nipmod setup agents --include-codex --include-hermes
 - Platform matrix: https://nipmod.com/platforms
 - Codex and Claude Code: https://nipmod.com/agents/codex-claude
 - Registry: https://nipmod.com/registry/packages.json
+- Quorum receipts: https://nipmod.com/quorum/receipts.json
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json
 - Agent instructions: https://nipmod.com/llms.txt
 - GitHub mirror: https://github.com/nipmod/nipmod
@@ -43,6 +44,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 
 - CLI release `1.2.4` with signed installer and signed tarball.
 - Public verified registry sourced from Gitlawb.
+- Quorum approval receipts for verified public package digests.
 - Install, add, update, audit, CI, SBOM and explain commands.
 - Deterministic `.nipmod` bundles signed by Ed25519 `did:key` identities.
 - Lockfiles pinned by `sha256` integrity.
@@ -61,6 +63,7 @@ Agents need more than a repo URL before they run package code. They need to know
 - What exact bytes am I installing?
 - Which Gitlawb source commit produced it?
 - Is there current trust, witness and advisory evidence?
+- Did the exact digest pass release and security quorum approvals?
 - What will change in my workspace before I approve the write?
 
 Nipmod does not replace Gitlawb as the source of code. It verifies, indexes, locks and audits package artifacts so humans and agents can use the same archive with the same proof.

@@ -168,6 +168,12 @@
     "log": "https://nipmod.com/transparency/log.json",
     "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk"
   },
+  "quorum": {
+    "policy": "https://nipmod.com/quorum/policy.json",
+    "receipts": "https://nipmod.com/quorum/receipts.json",
+    "signers": "https://nipmod.com/quorum/signers.json",
+    "meaning": "Verified public Nipmod packages require release and security approval receipts for the exact package digest and source tuple."
+  },
   "review": {
     "packet": "https://nipmod.com/review/packet.json",
     "packetMarkdown": "https://nipmod.com/review/packet.md",

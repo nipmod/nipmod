@@ -44,6 +44,23 @@
     ]
   },
   "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+  "quorum": {
+    "policyId": "nipmod-quorum-release-v1",
+    "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hTNHVvRFBRWFdNNkJlM3AxbnJ5cGhtUTFHRFFyR1ZxeUh1eXFhU3MyWFd2L3Byb21wdC1pbmplY3Rpb24tc2NhbkAwLjEuMA",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-status.v1",
+    "approvedRoles": [
+      "release",
+      "security"
+    ],
+    "approvals": 2,
+    "statement": "2 of 2 quorum approvals match this package digest.",
+    "status": "passed"
+  },
   "releasePath": "releases/0.1.0/release.json",
   "repo": "prompt-injection-scan",
   "resolved": "https://node.nipmod.com/api/v1/repos/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan/blob/releases/0.1.0/bundle.nipmod",
@@ -51,6 +68,9 @@
   "sourceRepo": "https://node.nipmod.com/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan.git",
   "sourceTag": "v0.1.0",
   "stars": 0,
+  "tags": [
+    "latest"
+  ],
   "trust": {
     "evidence": {
       "artifactDigestVerified": true,

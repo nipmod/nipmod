@@ -53,6 +53,7 @@ export interface TrustReport {
   findings: string[];
   installCommand?: string;
   compatibilityReceipts?: CompatibilityReceipt[];
+  quorum?: QuorumStatus;
   deprecation?: {
     active: boolean;
     reason: string;
@@ -100,6 +101,18 @@ export interface CompatibilityReceipt {
   type: "dev.nipmod.compatibility-receipt.v1";
   unsupportedFields: string[];
   version: string;
+}
+
+export interface QuorumStatus {
+  approvedRoles: string[];
+  approvals: number;
+  policyId: string;
+  receiptUrl?: string;
+  requiredRoles: string[];
+  statement?: string;
+  status: "passed" | "missing" | "failed";
+  threshold: number;
+  type: "dev.nipmod.quorum-status.v1";
 }
 
 export interface InspectRegistryPackageOptions {
@@ -199,6 +212,30 @@ const CompatibilityReceiptSchema = z.strictObject({
   version: SemverSchema
 });
 
+const QuorumRoleSchema = z.enum(["release", "security"]);
+
+const QuorumPolicySchema = z.strictObject({
+  id: z.literal("nipmod-quorum-release-v1"),
+  mode: z.enum(["registry-enforced", "advisory"]),
+  receipts: z.string().url().startsWith("https://nipmod.com/quorum/"),
+  requiredRoles: z.array(QuorumRoleSchema).min(2).max(4),
+  signers: z.string().url().startsWith("https://nipmod.com/quorum/"),
+  threshold: z.number().int().min(2).max(4),
+  type: z.literal("dev.nipmod.quorum-policy.v1")
+}).passthrough();
+
+const QuorumStatusSchema = z.strictObject({
+  approvedRoles: z.array(QuorumRoleSchema).max(4),
+  approvals: z.number().int().min(0).max(8),
+  policyId: z.literal("nipmod-quorum-release-v1"),
+  receiptUrl: z.string().url().startsWith("https://nipmod.com/quorum/").optional(),
+  requiredRoles: z.array(QuorumRoleSchema).min(2).max(4),
+  statement: z.string().min(1).max(280).optional(),
+  status: z.enum(["passed", "missing", "failed"]),
+  threshold: z.number().int().min(2).max(4),
+  type: z.literal("dev.nipmod.quorum-status.v1")
+});
+
 const InclusionProofStepSchema = z.strictObject({
   hash: Sha256Schema,
   side: z.enum(["left", "right"])
@@ -262,6 +299,7 @@ const RegistryPackageSchema = z.strictObject({
   permissions: PermissionCountsSchema.optional(),
   proof: RegistryProofSchema.optional(),
   publisher: DidKeySchema,
+  quorum: QuorumStatusSchema.optional(),
   quarantine: QuarantineSchema.optional(),
   resolved: z.string().min(1).optional(),
   sourceCommit: z.string().regex(/^[a-f0-9]{40}$/).optional(),
@@ -289,6 +327,7 @@ const RegistryPackageSchema = z.strictObject({
 const RegistrySchema = z.strictObject({
   formatVersion: z.literal(1),
   packages: z.array(RegistryPackageSchema).max(10_000),
+  quorumPolicy: QuorumPolicySchema.optional(),
   source: z.string().min(1),
   transparencyLog: TransparencyLogSchema.optional()
 }).passthrough();
@@ -336,7 +375,7 @@ export async function inspectRegistryPackage(options: InspectRegistryPackageOpti
   const allowedLogIds = options.allowedLogIds ?? DEFAULT_ALLOWED_LOG_IDS;
   const allowedWitnesses = options.allowedWitnesses ?? DEFAULT_ALLOWED_WITNESSES;
   const transparency = buildTransparencyContext(registry, allowedLogIds, allowedWitnesses);
-  return registryPackageReport(options.specifier, options.registryUrl, pkg, transparency);
+  return registryPackageReport(options.specifier, options.registryUrl, pkg, transparency, registry.quorumPolicy);
 }
 
 export async function inspectBundleFile(options: InspectBundleFileOptions): Promise<TrustReport> {
@@ -402,11 +441,17 @@ function registryPackageReport(
   subject: string,
   registryUrl: string,
   pkg: RegistryPackage,
-  transparency: TransparencyContext
+  transparency: TransparencyContext,
+  quorumPolicy?: z.infer<typeof QuorumPolicySchema>
 ): TrustReport {
   const owner = packageOwner(pkg.canonical);
   const findings: string[] = [];
   const transparencyResult = verifyPackageTransparency(pkg, transparency);
+  const quorumRequired = Boolean(quorumPolicy) || Boolean(pkg.quorum);
+  const quorumPassed =
+    pkg.quorum?.status === "passed" &&
+    pkg.quorum.approvals >= pkg.quorum.threshold &&
+    pkg.quorum.requiredRoles.every((role) => pkg.quorum?.approvedRoles.includes(role));
   const evidence = [
     evidenceFromRegistry("artifact-digest", "Artifact digest", pkg.trust.evidence.artifactDigestVerified),
     evidenceFromRegistry("bundle-signature", "Bundle signature", pkg.trust.evidence.bundleSignatureVerified),
@@ -429,7 +474,19 @@ function registryPackageReport(
       "Witness statement",
       transparencyResult.witnessVerified ? "pass" : "fail",
       transparencyResult.witnessVerified ? transparencyResult.witnesses.join(", ") : "witness statement is invalid"
-    )
+    ),
+    ...(quorumRequired
+      ? [
+          evidenceCheck(
+            "quorum-approval",
+            "Quorum approval",
+            quorumPassed ? "pass" : "fail",
+            quorumPassed
+              ? `${pkg.quorum?.approvals}/${pkg.quorum?.threshold} approvals: ${pkg.quorum?.approvedRoles.join(", ")}`
+              : pkg.quorum?.statement ?? "quorum approval is missing or invalid"
+          )
+        ]
+      : [])
   ];
 
   for (const check of evidence) {
@@ -516,6 +573,19 @@ function registryPackageReport(
   };
   if (pkg.resolved) {
     report.resolved = pkg.resolved;
+  }
+  if (pkg.quorum) {
+    report.quorum = {
+      approvedRoles: pkg.quorum.approvedRoles,
+      approvals: pkg.quorum.approvals,
+      policyId: pkg.quorum.policyId,
+      ...(pkg.quorum.receiptUrl ? { receiptUrl: pkg.quorum.receiptUrl } : {}),
+      requiredRoles: pkg.quorum.requiredRoles,
+      ...(pkg.quorum.statement ? { statement: pkg.quorum.statement } : {}),
+      status: pkg.quorum.status,
+      threshold: pkg.quorum.threshold,
+      type: pkg.quorum.type
+    };
   }
   if (compatibilityReceipts.length > 0) {
     report.compatibilityReceipts = compatibilityReceipts;

@@ -14,8 +14,15 @@ Registry:
 
 - Indexes packages.
 - Scores trust evidence.
+- Attaches quorum approval status for verified public package digests.
 - Shows advisories and quarantine state.
 - Does not own package publishing rights.
+
+Quorum gates:
+
+- Sign release and security approval receipts for the exact package digest and source tuple.
+- Publish the policy, signer set and receipt index under `https://nipmod.com/quorum/`.
+- Fail public readiness when a verified package is missing a passed quorum status.
 
 Transparency log:
 
@@ -42,6 +49,7 @@ A package can be `verified/100` only when these facts pass:
 - Signed release event.
 - Permission manifest.
 - Immutable source ref.
+- Quorum approval status.
 - Transparency proof.
 - Witness proof.
 - Advisory status.

@@ -16,6 +16,9 @@ const DEFAULT_ENDPOINTS = {
   nodeUrl: "https://node.nipmod.com",
   platforms: "https://nipmod.com/platforms",
   platformConnections: "https://nipmod.com/compatibility/platform-connections.json",
+  quorumPolicy: "https://nipmod.com/quorum/policy.json",
+  quorumReceipts: "https://nipmod.com/quorum/receipts.json",
+  quorumSigners: "https://nipmod.com/quorum/signers.json",
   registry: "https://nipmod.com/registry/packages.json",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
@@ -50,7 +53,7 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "trust_page", async () => {
     const text = await fetchText(endpoints.trust, timedFetch);
-    for (const marker of ["Verified registry", "Current public roots", "Release key"]) {
+    for (const marker of ["Verified registry", "Current public roots", "Release key", "Quorum"]) {
       assertIncludes(text, marker, `trust page missing ${marker}`);
     }
     return { url: endpoints.trust };
@@ -87,6 +90,9 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.witness?.health, endpoints.witnessHealth, "discovery witness health URL mismatch");
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
+    assertEqual(state.discovery.quorum?.policy, endpoints.quorumPolicy, "discovery quorum policy URL mismatch");
+    assertEqual(state.discovery.quorum?.receipts, endpoints.quorumReceipts, "discovery quorum receipts URL mismatch");
+    assertEqual(state.discovery.quorum?.signers, endpoints.quorumSigners, "discovery quorum signers URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
     assertEqual(state.discovery.docs?.platforms, endpoints.platforms, "discovery platforms URL mismatch");
     assertEqual(
@@ -151,6 +157,27 @@ export async function runSyntheticMonitor({
       throw new Error(`registry package is not public verified/100: ${badPackage.name ?? badPackage.canonical ?? "unknown"}`);
     }
     return { packages: state.registry.packages.length };
+  });
+
+  await runCheck(checks, "quorum_receipts", async () => {
+    const policy = await fetchJson(endpoints.quorumPolicy, timedFetch);
+    const signers = await fetchJson(endpoints.quorumSigners, timedFetch);
+    const receipts = await fetchJson(endpoints.quorumReceipts, timedFetch);
+    assertEqual(policy.type, "dev.nipmod.quorum-policy.v1", "quorum policy type mismatch");
+    assertEqual(signers.type, "dev.nipmod.quorum-signers.v1", "quorum signer type mismatch");
+    assertEqual(receipts.type, "dev.nipmod.quorum-receipts.v1", "quorum receipt type mismatch");
+    assertEqual(receipts.receipts.length, state.registry.packages.length, "quorum receipt count mismatch");
+    for (const pkg of state.registry.packages) {
+      assertEqual(pkg.quorum?.status, "passed", `quorum status mismatch for ${pkg.name ?? pkg.canonical}`);
+      assertEqual(pkg.quorum?.threshold, 2, `quorum threshold mismatch for ${pkg.name ?? pkg.canonical}`);
+      if (!pkg.quorum?.approvedRoles?.includes("release") || !pkg.quorum?.approvedRoles?.includes("security")) {
+        throw new Error(`quorum roles missing for ${pkg.name ?? pkg.canonical}`);
+      }
+    }
+    return {
+      receipts: receipts.receipts.length,
+      signers: signers.signers.length
+    };
   });
 
   await runCheck(checks, "advisory_feed_signature", async () => {
@@ -441,6 +468,10 @@ function isPublicVerifiedPackage(pkg, config) {
     pkg.proof.treeSize > 0 &&
     Array.isArray(pkg.proof?.witnesses) &&
     pkg.proof.witnesses.includes(config.witnessDid) &&
+    pkg.quorum?.status === "passed" &&
+    pkg.quorum?.approvals >= pkg.quorum?.threshold &&
+    pkg.quorum?.approvedRoles?.includes("release") &&
+    pkg.quorum?.approvedRoles?.includes("security") &&
     pkg.trust?.level === "verified" &&
     pkg.trust?.score === 100 &&
     pkg.trust?.evidence?.releaseEventSigned === true &&

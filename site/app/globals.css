@@ -1614,6 +1614,17 @@ h1 {
   border-color: rgba(143, 255, 193, 0.28);
 }
 
+.quorum-passed {
+  background: rgba(143, 255, 193, 0.13);
+  border-color: rgba(143, 255, 193, 0.28);
+}
+
+.quorum-missing,
+.quorum-failed {
+  background: rgba(255, 217, 138, 0.12);
+  border-color: rgba(255, 217, 138, 0.25);
+}
+
 .quality-good {
   background: rgba(41, 151, 255, 0.14);
   border-color: rgba(41, 151, 255, 0.3);

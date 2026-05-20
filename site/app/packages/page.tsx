@@ -221,6 +221,7 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
 
         <div className="archive-package-status" aria-label={`${pkg.name} status`}>
           <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
+          <span className={`trust-badge quorum-${pkg.quorum?.status ?? "missing"}`}>{quorumLabel(pkg)}</span>
           <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
           <span className="trust-badge source-badge">{sourceLabel}</span>
         </div>
@@ -269,6 +270,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
           <dd>{pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing"}</dd>
         </div>
         <div>
+          <dt>quorum</dt>
+          <dd>{pkg.quorum ? `${pkg.quorum.approvals}/${pkg.quorum.threshold}` : "missing"}</dd>
+        </div>
+        <div>
           <dt>commit</dt>
           <dd>
             <code>{shortHash(pkg.sourceCommit ?? "missing")}</code>
@@ -277,6 +282,10 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
       </dl>
     </article>
   );
+}
+
+function quorumLabel(pkg: RegistryPackage): string {
+  return pkg.quorum ? `quorum ${pkg.quorum.approvals}/${pkg.quorum.threshold}` : "quorum missing";
 }
 
 function FeaturedPackageCard({ pkg }: { pkg: RegistryPackage }) {

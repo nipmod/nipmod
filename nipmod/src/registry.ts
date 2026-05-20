@@ -73,6 +73,20 @@ const CompatibilityReceiptSchema = z.strictObject({
   version: SemverSchema
 });
 
+const QuorumRoleSchema = z.enum(["release", "security"]);
+
+const QuorumStatusSchema = z.strictObject({
+  approvedRoles: z.array(QuorumRoleSchema).max(4),
+  approvals: z.number().int().min(0).max(8),
+  policyId: z.literal("nipmod-quorum-release-v1"),
+  receiptUrl: z.string().url().startsWith("https://nipmod.com/quorum/").optional(),
+  requiredRoles: z.array(QuorumRoleSchema).min(2).max(4),
+  statement: z.string().min(1).max(280).optional(),
+  status: z.enum(["passed", "missing", "failed"]),
+  threshold: z.number().int().min(2).max(4),
+  type: z.literal("dev.nipmod.quorum-status.v1")
+});
+
 const RegistrySearchPackageSchema = z.strictObject({
   canonical: PackageIdSchema,
   compatibilityReceipts: z.array(CompatibilityReceiptSchema).max(16).optional(),
@@ -88,6 +102,7 @@ const RegistrySearchPackageSchema = z.strictObject({
   permissions: PermissionCountsSchema.optional(),
   peerDependencies: DependencyMapSchema.optional(),
   peerDependenciesMeta: z.record(z.string().min(1), z.strictObject({ optional: z.boolean().optional() })).optional(),
+  quorum: QuorumStatusSchema.optional(),
   quarantine: QuarantineSchema.optional(),
   trust: z.strictObject({
     level: z.enum(["verified", "signed", "review", "unknown"]),
@@ -130,6 +145,13 @@ export interface RegistrySearchPackage {
   permissionSummary: string;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean | undefined }>;
+  quorum?: {
+    approvals: number;
+    approvedRoles: string[];
+    receiptUrl?: string;
+    status: "passed" | "missing" | "failed";
+    threshold: number;
+  };
   quarantined: boolean;
   sourceRegistry: string;
   trust: string;
@@ -430,6 +452,17 @@ function toSearchPackage(pkg: RegistryPackageWithSource, nameAmbiguous: boolean)
     permissionSummary: permissionSummary(pkg.permissions),
     ...(pkg.peerDependencies ? { peerDependencies: pkg.peerDependencies } : {}),
     ...(pkg.peerDependenciesMeta ? { peerDependenciesMeta: pkg.peerDependenciesMeta } : {}),
+    ...(pkg.quorum
+      ? {
+          quorum: {
+            approvals: pkg.quorum.approvals,
+            approvedRoles: pkg.quorum.approvedRoles,
+            ...(pkg.quorum.receiptUrl ? { receiptUrl: pkg.quorum.receiptUrl } : {}),
+            status: pkg.quorum.status,
+            threshold: pkg.quorum.threshold
+          }
+        }
+      : {}),
     quarantined: Boolean(quarantine),
     sourceRegistry: pkg.sourceRegistry,
     trust: `${pkg.trust.level}/${pkg.trust.score}`,
@@ -454,9 +487,15 @@ function agentPackageMetadata(pkg: RegistryPackageWithSource): RegistrySearchPac
       "nipmod audit --online",
       "nipmod sbom --json"
     ],
-    trustSummary: `${pkg.trust.level}/${pkg.trust.score} trust, ${permissionSummary(pkg.permissions)}`,
+    trustSummary: [`${pkg.trust.level}/${pkg.trust.score} trust`, quorumSummary(pkg), permissionSummary(pkg.permissions)]
+      .filter(Boolean)
+      .join(", "),
     useCase: packageUseCase(pkg)
   };
+}
+
+function quorumSummary(pkg: RegistryPackageWithSource): string | undefined {
+  return pkg.quorum ? `quorum ${pkg.quorum.status} ${pkg.quorum.approvals}/${pkg.quorum.threshold}` : undefined;
 }
 
 function packageUseCase(pkg: RegistryPackageWithSource): string {

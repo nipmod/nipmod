@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const root = resolve(import.meta.dirname, "..");
 const args = new Set(process.argv.slice(2));
@@ -12,8 +13,12 @@ const includeParallel = args.has("--parallel");
 const cliPath = join(root, "nipmod", "dist", "cli.js");
 const nodeBin = process.execPath;
 const registryPath = join(root, "site", "public", "registry", "packages.json");
+const localRegistryUrl = pathToFileURL(registryPath).href;
 const manifestPath = join(root, "site", "public", ".well-known", "nipmod.json");
 const llmsPath = join(root, "site", "public", "llms.txt");
+const quorumPolicyPath = join(root, "site", "public", "quorum", "policy.json");
+const quorumReceiptsPath = join(root, "site", "public", "quorum", "receipts.json");
+const quorumSignersPath = join(root, "site", "public", "quorum", "signers.json");
 const receiptPath = join(root, "site", "public", "compatibility", "system-readiness.json");
 const encodedProofPackage = "cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
@@ -114,6 +119,7 @@ async function checkStaticSystemReceipt() {
   assertDeepEqual("system_receipt_mcp_tools", receipt.mcpTools, expectedTools);
   assertDeepEqual("system_receipt_cli_commands", receipt.cliCommands, expectedCommands);
   assertText("system_receipt_scope", receipt.meaning, "one shared verified archive");
+  assertText("system_receipt_quorum", receipt.meaning, "quorum approved package digests");
   assertText("system_receipt_install_receipts", receipt.meaning, "install receipts");
   assertText("system_receipt_boundaries", JSON.stringify(receipt.notClaimed), "Nipmod owns or controls Gitlawb repos");
 }
@@ -123,6 +129,7 @@ async function checkArchiveInvariants() {
   state.registry = registry;
   assertEqual("archive_package_count", registry.packages.length, state.receipt.sharedArchive.packageCount);
   assertEqual("archive_source", registry.source, state.receipt.sharedArchive.source);
+  assertEqual("archive_quorum_policy", registry.quorumPolicy?.id, "nipmod-quorum-release-v1");
 
   const keys = new Set();
   for (const pkg of registry.packages) {
@@ -133,10 +140,22 @@ async function checkArchiveInvariants() {
     keys.add(key);
     assertEqual(`archive_trust_${pkg.name}`, `${pkg.trust?.level}/${pkg.trust?.score}`, "verified/100");
     assertEqual(`archive_digest_${pkg.name}`, pkg.digest, pkg.artifactSha256);
+    assertEqual(`archive_quorum_${pkg.name}`, pkg.quorum?.status, "passed");
+    assertEqual(`archive_quorum_threshold_${pkg.name}`, pkg.quorum?.threshold, 2);
+    assertText(`archive_quorum_roles_${pkg.name}`, JSON.stringify(pkg.quorum?.approvedRoles ?? []), "release");
+    assertText(`archive_quorum_roles_security_${pkg.name}`, JSON.stringify(pkg.quorum?.approvedRoles ?? []), "security");
     assertText(`archive_source_repo_${pkg.name}`, pkg.sourceRepo, "https://node.nipmod.com/");
     assertText(`archive_proof_subject_${pkg.name}`, pkg.proof.subject, key);
   }
   pass("archive_unique_package_keys", { packages: keys.size });
+
+  const quorumPolicy = JSON.parse(await readFile(quorumPolicyPath, "utf8"));
+  const quorumSigners = JSON.parse(await readFile(quorumSignersPath, "utf8"));
+  const quorumReceipts = JSON.parse(await readFile(quorumReceiptsPath, "utf8"));
+  assertEqual("quorum_policy_type", quorumPolicy.type, "dev.nipmod.quorum-policy.v1");
+  assertEqual("quorum_signers_type", quorumSigners.type, "dev.nipmod.quorum-signers.v1");
+  assertEqual("quorum_receipts_type", quorumReceipts.type, "dev.nipmod.quorum-receipts.v1");
+  assertEqual("quorum_receipt_count", quorumReceipts.receipts.length, registry.packages.length);
 
   const publicRegistryHash = await sha256(registryPath);
   const appRegistryHash = await sha256(join(root, "site", "app", "registry-data.json"));
@@ -154,8 +173,10 @@ async function checkArchiveInvariants() {
   );
   assertEqual("archive_package_doc_canonical", packageDoc.canonical, proofPackage.replace("@0.1.0", ""));
   assertEqual("archive_version_doc_digest", versionDoc.digest, state.receipt.proofPackage.digest);
+  assertEqual("archive_version_doc_quorum", versionDoc.quorum.status, "passed");
   assertEqual("archive_dependencies_package", dependencies.canonical, proofPackage.replace("@0.1.0", ""));
   assertEqual("archive_provenance_package", provenance.canonical, proofPackage.replace("@0.1.0", ""));
+  assertEqual("archive_provenance_quorum", provenance.quorum.status, "passed");
 }
 
 async function checkDiscoveryBinding() {
@@ -165,11 +186,15 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_registry_url", manifest.registry.url, state.receipt.sharedArchive.registry);
   assertEqual("discovery_system_readiness", manifest.review.systemReadiness, state.receipt.entrypoints.systemReadiness);
   assertEqual("discovery_platform_readiness", manifest.review.platformReadiness, state.receipt.entrypoints.platformReadiness);
+  assertEqual("discovery_quorum_policy", manifest.quorum.policy, "https://nipmod.com/quorum/policy.json");
+  assertEqual("discovery_quorum_receipts", manifest.quorum.receipts, "https://nipmod.com/quorum/receipts.json");
+  assertEqual("discovery_quorum_signers", manifest.quorum.signers, "https://nipmod.com/quorum/signers.json");
   assertEqual("discovery_agent_prompts", manifest.agent.prompts, state.receipt.entrypoints.agentPrompts);
   assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
   assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
+  assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
   assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex --include-hermes");
 }
@@ -180,15 +205,25 @@ async function checkCliSurface() {
     assertText(`cli_command_${command}`, help.stdout, command);
   }
 
-  const search = await run(nodeBin, [cliPath, "search", "gitlawb-repo-reader", "--online", "--json"]);
+  const search = await run(nodeBin, [cliPath, "search", "gitlawb-repo-reader", "--registry", localRegistryUrl, "--json"]);
   assertText("cli_search_archive", search.stdout, "gitlawb-repo-reader");
   assertText("cli_search_trust", search.stdout, "verified/100");
 
-  const inspect = await run(nodeBin, [cliPath, "inspect", proofPackage, "--json"]);
+  const inspect = await run(nodeBin, [cliPath, "inspect", proofPackage, "--registry", localRegistryUrl, "--allow-custom-roots", "--json"]);
   assertText("cli_inspect_verified", inspect.stdout, "readyToInstall");
   assertText("cli_inspect_digest", inspect.stdout, state.receipt.proofPackage.digest);
+  assertText("cli_inspect_quorum", inspect.stdout, "quorum");
 
-  const planOutput = await run(nodeBin, [cliPath, "install", "--plan", proofPackage, "--json"]);
+  const planOutput = await run(nodeBin, [
+    cliPath,
+    "install",
+    "--plan",
+    proofPackage,
+    "--registry",
+    localRegistryUrl,
+    "--allow-custom-roots",
+    "--json"
+  ]);
   const plan = JSON.parse(planOutput.stdout);
   assertEqual("cli_install_plan_ok", plan.ok, true);
   assertText("cli_install_plan", plan.data.message, "install plan ready");
@@ -313,6 +348,9 @@ async function checkLiveSystemEndpoints() {
     ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],
     ["live_status", state.receipt.entrypoints.status, ["Public proof dashboard"]],
     ["live_manifest", state.receipt.entrypoints.machineManifest, [state.receipt.entrypoints.systemReadiness]],
+    ["live_quorum_policy", "https://nipmod.com/quorum/policy.json", ["dev.nipmod.quorum-policy.v1"]],
+    ["live_quorum_receipts", "https://nipmod.com/quorum/receipts.json", ["dev.nipmod.quorum-receipts.v1"]],
+    ["live_quorum_signers", "https://nipmod.com/quorum/signers.json", ["dev.nipmod.quorum-signers.v1"]],
     ["live_system_readiness", state.receipt.entrypoints.systemReadiness, ["dev.nipmod.system-readiness.v1", "parallelAccessProof"]],
     ["live_platform_readiness", state.receipt.entrypoints.platformReadiness, ["dev.nipmod.platform-readiness.v1"]],
     ["live_package_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}.json`, [state.receipt.proofPackage.digest]],
@@ -364,7 +402,7 @@ async function checkParallelArchiveAccess() {
       assertText(
         "parallel_provenance",
         await fetchText(`https://nipmod.com/registry/packages/${encodedProofPackage}/provenance.json`),
-        proofPackage.replace("@0.1.0", "")
+        "quorum"
       ),
     async () => assertText("parallel_cli_search", (await run(nodeBin, [cliPath, "search", "gitlawb-repo-reader", "--online", "--json"])).stdout, "verified/100"),
     async () => assertText("parallel_cli_inspect", (await run(nodeBin, [cliPath, "inspect", proofPackage, "--json"])).stdout, state.receipt.proofPackage.digest),

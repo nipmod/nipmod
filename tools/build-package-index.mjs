@@ -5,6 +5,12 @@ import { access } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import {
+  loadQuorumReceiptIndex,
+  parseQuorumReceiptIndex,
+  quorumPolicySummary,
+  quorumStatusForPackage
+} from "./quorum-signing.mjs";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SITE_REGISTRY_PATH = join(ROOT, "site", "app", "registry-data.json");
@@ -18,6 +24,7 @@ const PUBLIC_TRANSPARENCY_LEAVES_DIR = join(PUBLIC_TRANSPARENCY_DIR, "leaves");
 const PUBLIC_TRANSPARENCY_PROOFS_DIR = join(PUBLIC_TRANSPARENCY_DIR, "proofs");
 const PUBLIC_TRANSPARENCY_WITNESSES_DIR = join(PUBLIC_TRANSPARENCY_DIR, "witnesses");
 const PUBLIC_COMPATIBILITY_RECEIPTS_PATH = join(ROOT, "site", "public", "compatibility", "receipts.json");
+const PUBLIC_QUORUM_RECEIPTS_PATH = join(ROOT, "site", "public", "quorum", "receipts.json");
 const PUBLIC_SITE_DIR = join(ROOT, "site", "public");
 const DEFAULT_LOG_IDENTITY_PATH = join(ROOT, ".nipmod", "transparency-log-identity.json");
 const DEFAULT_WITNESS_IDENTITY_PATH = join(ROOT, ".nipmod", "transparency-witness-identity.json");
@@ -53,6 +60,16 @@ export async function buildRegistryIndex(options = {}) {
       : options.compatibilityReceipts === undefined
       ? await loadCompatibilityReceipts(options.compatibilityReceiptsPath ?? process.env.NIPMOD_COMPATIBILITY_RECEIPTS_PATH)
       : parseCompatibilityReceiptIndex(options.compatibilityReceipts);
+  const quorumReceiptIndex =
+    process.env.NIPMOD_SKIP_QUORUM_RECEIPTS === "1"
+      ? null
+      : options.quorumReceipts === undefined
+      ? await loadQuorumReceiptIndex(options.quorumReceiptsPath ?? process.env.NIPMOD_QUORUM_RECEIPTS_PATH ?? PUBLIC_QUORUM_RECEIPTS_PATH, {
+          optional: true
+        })
+      : options.quorumReceipts === null
+      ? null
+      : parseQuorumReceiptIndex(options.quorumReceipts);
   await assertCompatibilityReceiptExampleHashes(compatibilityReceipts);
 
   if (!Array.isArray(repos)) {
@@ -240,6 +257,7 @@ export async function buildRegistryIndex(options = {}) {
 
   const transparencyLog = await buildTransparencyLog(transparencyCandidates, packages, { ...options, previousIndex });
   attachCompatibilityReceipts(packages, compatibilityReceipts);
+  attachQuorumReceipts(packages, quorumReceiptIndex);
   const index = {
     formatVersion: 1,
     generatedAt: new Date().toISOString(),
@@ -249,6 +267,9 @@ export async function buildRegistryIndex(options = {}) {
   };
   if (transparencyLog) {
     index.transparencyLog = transparencyLog;
+  }
+  if (quorumReceiptIndex) {
+    index.quorumPolicy = quorumPolicySummary(quorumReceiptIndex);
   }
   assertNoMissingPackages(previousIndex, index);
   assertImmutableDigests(previousIndex, index);
@@ -468,6 +489,15 @@ function attachCompatibilityReceipts(packages, receipts) {
     pkg.compatibilityReceipts = [...(pkg.compatibilityReceipts ?? []), receipt].sort((left, right) =>
       left.label.localeCompare(right.label)
     );
+  }
+}
+
+function attachQuorumReceipts(packages, receiptIndex) {
+  if (!receiptIndex) {
+    return;
+  }
+  for (const pkg of packages) {
+    pkg.quorum = quorumStatusForPackage(pkg, receiptIndex);
   }
 }
 
@@ -1554,6 +1584,7 @@ function buildPackageVersionDocument(pkg, encoded, distTags = {}) {
     permissions: pkg.permissions,
     proof: pkg.proof,
     publisher: pkg.publisher,
+    quorum: pkg.quorum ?? null,
     quarantine: pkg.quarantine,
     deprecated: pkg.deprecated,
     releasePath: pkg.releasePath,
@@ -1601,6 +1632,7 @@ function buildProvenanceDocument(pkg) {
     name: pkg.name,
     proof: pkg.proof ?? null,
     publisher: pkg.publisher,
+    quorum: pkg.quorum ?? null,
     releasePath: pkg.releasePath,
     resolved: pkg.resolved,
     lifecycleEvents: pkg.lifecycleEvents ?? [],

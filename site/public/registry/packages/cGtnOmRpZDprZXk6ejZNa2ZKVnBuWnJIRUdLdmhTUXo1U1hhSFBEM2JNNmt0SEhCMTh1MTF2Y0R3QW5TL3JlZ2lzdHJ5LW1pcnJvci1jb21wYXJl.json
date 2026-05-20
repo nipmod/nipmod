@@ -5,6 +5,7 @@
   },
   "formatVersion": 1,
   "generatedAt": "2026-05-16T21:45:49.535Z",
+  "lifecycleEvents": [],
   "name": "registry-mirror-compare",
   "source": "https://node.nipmod.com",
   "type": "dev.nipmod.package-document.v1",
@@ -55,6 +56,23 @@
         ]
       },
       "publisher": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZKVnBuWnJIRUdLdmhTUXo1U1hhSFBEM2JNNmt0SEhCMTh1MTF2Y0R3QW5TL3JlZ2lzdHJ5LW1pcnJvci1jb21wYXJlQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      },
       "releasePath": "releases/0.1.0/release.json",
       "repo": "registry-mirror-compare",
       "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare/blob/releases/0.1.0/bundle.nipmod",
@@ -62,6 +80,9 @@
       "sourceRepo": "https://node.nipmod.com/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare.git",
       "sourceTag": "v0.1.0",
       "stars": 0,
+      "tags": [
+        "latest"
+      ],
       "trust": {
         "evidence": {
           "artifactDigestVerified": true,

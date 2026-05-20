@@ -65,6 +65,28 @@ export interface CompatibilityReceipt {
   version: string;
 }
 
+export interface RegistryQuorumStatus {
+  approvedRoles: Array<"release" | "security">;
+  approvals: number;
+  policyId: "nipmod-quorum-release-v1";
+  receiptUrl?: string;
+  requiredRoles: Array<"release" | "security">;
+  statement?: string;
+  status: "passed" | "missing" | "failed";
+  threshold: number;
+  type: "dev.nipmod.quorum-status.v1";
+}
+
+export interface RegistryQuorumPolicy {
+  id: "nipmod-quorum-release-v1";
+  mode: "registry-enforced" | "advisory";
+  receipts: string;
+  requiredRoles: Array<"release" | "security">;
+  signers: string;
+  threshold: number;
+  type: "dev.nipmod.quorum-policy.v1";
+}
+
 export interface RegistryPackage {
   canonical: string;
   name: string;
@@ -96,6 +118,7 @@ export interface RegistryPackage {
   permissionDetails: RegistryPermissionDetails;
   proof?: RegistryPackageProof;
   compatibilityReceipts?: CompatibilityReceipt[];
+  quorum?: RegistryQuorumStatus;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   deprecated?: {
@@ -141,6 +164,7 @@ export interface RegistryIndex {
   generatedAt: string;
   source: string;
   packages: RegistryPackage[];
+  quorumPolicy?: RegistryQuorumPolicy;
   transparencyLog?: {
     entries: Array<{
       leafHash: string;
@@ -201,10 +225,12 @@ export function homepagePackages(packages: readonly RegistryPackage[]): Registry
 
 export function registryStats(index: RegistryIndex): Array<{ label: string; value: string }> {
   const verified = index.packages.filter((item) => item.trust.level === "verified").length;
+  const quorumPassed = index.packages.filter((item) => item.quorum?.status === "passed").length;
   const publishers = new Set(index.packages.map((item) => item.publisher)).size;
   return [
     { label: "Packages", value: String(index.packages.length) },
     { label: "Verified", value: String(verified) },
+    { label: "Quorum", value: String(quorumPassed) },
     { label: "Publishers", value: String(publishers) }
   ];
 }
@@ -259,6 +285,8 @@ export function registryTrustSummary(index: RegistryIndex): {
   const rootHash = index.transparencyLog?.treeHead.rootHash ?? "";
   const activeQuarantines = index.packages.filter(isActivelyQuarantined).length;
   const activeYanks = index.packages.filter(isActivelyYanked).length;
+  const quorumPassed = index.packages.filter((item) => item.quorum?.status === "passed").length;
+  const quorumRequired = Boolean(index.quorumPolicy);
   const checks = [
     {
       label: "Signed bundles",
@@ -276,6 +304,19 @@ export function registryTrustSummary(index: RegistryIndex): {
       text: "The checkpoint is witnessed outside the registry."
     },
     {
+      label: "Quorum approvals",
+      ok:
+        !quorumRequired ||
+        (index.packages.length > 0 &&
+          index.packages.every(
+            (item) =>
+              item.quorum?.status === "passed" &&
+              item.quorum.approvals >= item.quorum.threshold &&
+              item.quorum.requiredRoles.every((role) => item.quorum?.approvedRoles.includes(role))
+          )),
+      text: "Each verified package digest has release and security approval receipts."
+    },
+    {
       label: "Quiet permissions",
       ok: index.packages.every((item) => hasNoRequestedPermissions(item.permissions)),
       text: "No listed package declares network, secrets, exec or install scripts."
@@ -289,6 +330,7 @@ export function registryTrustSummary(index: RegistryIndex): {
   return {
     cards: [
       { label: "Packages", value: String(index.packages.length) },
+      { label: "Quorum", value: quorumRequired ? `${quorumPassed}/${index.packages.length}` : "not declared" },
       { label: "Witnesses", value: String(witnesses.length) },
       { label: "Root hash", value: rootHash ? `${rootHash.slice(0, 10)}...${rootHash.slice(-8)}` : "missing" },
       { label: "Quarantine", value: String(activeQuarantines) },

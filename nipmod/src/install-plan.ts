@@ -245,6 +245,9 @@ export function isPackageVersionSpecifier(value: string): boolean {
 export function formatInstallPlan(plan: InstallPlan): string {
   const lines = [`nipmod ${plan.action} plan ${plan.readyToInstall ? "ready" : "blocked"} ${plan.package.canonical}@${plan.package.version}`];
   lines.push(`trust: ${plan.trustReport.trust.level}/${plan.trustReport.trust.score}`);
+  if (plan.trustReport.quorum) {
+    lines.push(`quorum: ${plan.trustReport.quorum.status} ${plan.trustReport.quorum.approvals}/${plan.trustReport.quorum.threshold}`);
+  }
   lines.push(`digest: ${plan.integrity}`);
   lines.push(`permissions: ${plan.trustReport.permissions.summary}`);
   lines.push(`lockfile: ${plan.lockfile.reason}`);
