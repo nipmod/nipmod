@@ -29,6 +29,9 @@ nipmod-gitlawb-probe-report.md
 progress.md
 task_plan.md
 *.png
+!site/public/claude-logo.png
+!site/public/codex-logo.png
+!site/public/hermes-logo.png
 
 # Keep only current public release artifact in git.
 # The release builder fails if a new release artifact is still ignored.

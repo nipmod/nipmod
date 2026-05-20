@@ -1,23 +1,25 @@
 :root {
   color-scheme: dark;
-  --background: #050506;
-  --background-soft: #0b0b0d;
-  --surface: rgba(255, 255, 255, 0.065);
-  --surface-strong: rgba(255, 255, 255, 0.105);
+  --background: #0e0e10;
+  --background-soft: #141416;
+  --surface: rgba(255, 255, 255, 0.052);
+  --surface-strong: rgba(255, 255, 255, 0.082);
   --surface-deep: rgba(0, 0, 0, 0.34);
-  --border: rgba(255, 255, 255, 0.14);
-  --border-soft: rgba(255, 255, 255, 0.09);
-  --text: #f7f7f8;
-  --muted: rgba(247, 247, 248, 0.68);
-  --quiet: rgba(247, 247, 248, 0.46);
-  --blue: #2997ff;
-  --blue-soft: rgba(41, 151, 255, 0.2);
-  --green: #8fffc1;
-  --green-soft: rgba(143, 255, 193, 0.16);
-  --yellow: #ffd98a;
-  --focus: #2997ff;
-  --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
-  --radius: 14px;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-soft: rgba(255, 255, 255, 0.075);
+  --text: #ededef;
+  --muted: rgba(237, 237, 239, 0.64);
+  --quiet: rgba(237, 237, 239, 0.42);
+  --accent: #c97a5a;
+  --accent-soft: rgba(201, 122, 90, 0.18);
+  --blue: #8db7ff;
+  --blue-soft: rgba(141, 183, 255, 0.14);
+  --green: #73b07b;
+  --green-soft: rgba(115, 176, 123, 0.15);
+  --yellow: #d7b46a;
+  --focus: #fafafa;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+  --radius: 8px;
 }
 
 * {
@@ -33,9 +35,9 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, #0a0a0c 0%, #050506 34%, #000 100%);
+  background: var(--background);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  font-family: Geist, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "kern";
   margin: 0;
   max-width: 100%;
@@ -84,26 +86,26 @@ summary:focus-visible {
 
 .page-shell {
   display: grid;
-  gap: clamp(14px, 2.4vw, 28px);
+  gap: clamp(18px, 2.6vw, 34px);
   margin: 0 auto;
-  max-width: min(1120px, 100vw);
+  max-width: min(1180px, 100vw);
   min-height: 100svh;
-  padding: 20px 22px 52px;
+  padding: 20px 24px 58px;
   width: 100%;
 }
 
 .topbar {
   align-items: center;
-  backdrop-filter: blur(30px) saturate(180%);
-  background: rgba(15, 16, 19, 0.78);
+  backdrop-filter: blur(26px) saturate(160%);
+  background: rgba(14, 14, 16, 0.84);
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  border-radius: 12px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.055);
   display: flex;
   height: 54px;
   justify-content: space-between;
   margin: 18px auto 0;
-  max-width: min(980px, calc(100vw - 36px));
+  max-width: min(1120px, calc(100vw - 36px));
   padding: 0 8px;
   position: sticky;
   top: 14px;
@@ -117,7 +119,7 @@ summary:focus-visible {
 .nav-more-button,
 .button {
   align-items: center;
-  border-radius: 999px;
+  border-radius: 8px;
   display: inline-flex;
   justify-content: center;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
@@ -136,7 +138,7 @@ summary:focus-visible {
   font-weight: 650;
   gap: 9px;
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0 8px;
 }
 
 .brand:hover,
@@ -150,19 +152,19 @@ summary:focus-visible {
 
 .brand-mark {
   align-items: center;
-  background: #000;
-  border-radius: 10px;
+  background: #2a2a2c;
+  border-radius: 8px;
   display: inline-flex;
-  height: 28px;
+  height: 32px;
   justify-content: center;
   overflow: hidden;
-  width: 28px;
+  width: 32px;
 }
 
 .brand-mark img {
   display: block;
-  height: 28px;
-  width: 28px;
+  height: 32px;
+  width: 32px;
 }
 
 .brand-socials {
@@ -172,12 +174,12 @@ summary:focus-visible {
 }
 
 .brand-icon-button {
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.042);
   border: 1px solid var(--border-soft);
   color: var(--text);
-  height: 34px;
+  height: 36px;
   overflow: hidden;
-  width: 34px;
+  width: 36px;
 }
 
 .brand-icon-button img,
@@ -192,9 +194,9 @@ summary:focus-visible {
 }
 
 .brand-icon-button .brand-gitlawb-icon {
-  border-radius: 7px;
-  height: 24px;
-  width: 24px;
+  border-radius: 8px;
+  height: 27px;
+  width: 27px;
 }
 
 .nav-actions {
@@ -215,13 +217,13 @@ summary:focus-visible {
 }
 
 .nav-install {
-  background: linear-gradient(135deg, rgba(41, 151, 255, 0.28), rgba(143, 255, 193, 0.18));
-  border-color: rgba(143, 255, 193, 0.28);
+  background: var(--accent-soft);
+  border-color: rgba(201, 122, 90, 0.34);
   color: var(--text);
 }
 
 .nav-install:hover {
-  background: linear-gradient(135deg, rgba(41, 151, 255, 0.36), rgba(143, 255, 193, 0.24));
+  background: rgba(201, 122, 90, 0.26);
 }
 
 .nav-secondary {
@@ -243,10 +245,10 @@ summary:focus-visible {
 }
 
 .more-menu-panel {
-  backdrop-filter: blur(30px) saturate(180%);
-  background: rgba(18, 18, 20, 0.96);
+  backdrop-filter: blur(26px) saturate(160%);
+  background: rgba(20, 20, 22, 0.98);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
   display: grid;
   gap: 3px;
@@ -262,7 +264,7 @@ summary:focus-visible {
 
 .more-menu-panel a {
   align-items: center;
-  border-radius: 12px;
+  border-radius: 7px;
   color: var(--text);
   display: flex;
   font-size: 14px;
@@ -292,9 +294,9 @@ summary:focus-visible {
   display: grid;
   gap: clamp(24px, 5vw, 56px);
   grid-template-columns: minmax(0, 1fr) minmax(310px, 0.78fr);
-  min-height: min(640px, calc(100svh - 90px));
+  min-height: min(455px, calc(100svh - 110px));
   min-width: 0;
-  padding: clamp(46px, 8vw, 88px) 0 clamp(22px, 4vw, 46px);
+  padding: clamp(42px, 5.8vw, 64px) 0 clamp(18px, 3.4vw, 34px);
   width: 100%;
 }
 
@@ -316,21 +318,22 @@ summary:focus-visible {
 
 h1 {
   color: var(--text);
-  font-size: clamp(42px, 6.4vw, 76px);
-  font-weight: 660;
+  font-family: Fraunces, "Instrument Serif", Georgia, serif;
+  font-size: clamp(40px, 5.8vw, 74px);
+  font-weight: 430;
   letter-spacing: 0;
-  line-height: 1.02;
+  line-height: 0.98;
   margin: 0;
-  max-width: 720px;
+  max-width: 620px;
   overflow-wrap: break-word;
 }
 
 .lead {
   color: var(--muted);
-  font-size: clamp(16px, 1.6vw, 20px);
+  font-size: clamp(16px, 1.55vw, 19px);
   line-height: 1.5;
   margin: 18px 0 0;
-  max-width: 620px;
+  max-width: 520px;
 }
 
 .permission-row span,
@@ -354,7 +357,7 @@ h1 {
   font-weight: 650;
   gap: 8px;
   min-height: 40px;
-  min-width: 104px;
+  min-width: 0;
   padding: 0 14px;
 }
 
@@ -373,14 +376,14 @@ h1 {
 }
 
 .button-primary {
-  background: linear-gradient(135deg, rgba(41, 151, 255, 0.32), rgba(143, 255, 193, 0.16));
-  border-color: rgba(143, 255, 193, 0.32);
+  background: var(--accent-soft);
+  border-color: rgba(201, 122, 90, 0.36);
   color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 34px rgba(41, 151, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 30px rgba(201, 122, 90, 0.08);
 }
 
 .button-primary:hover {
-  background: linear-gradient(135deg, rgba(41, 151, 255, 0.42), rgba(143, 255, 193, 0.22));
+  background: rgba(201, 122, 90, 0.26);
 }
 
 .button-ghost {
@@ -417,11 +420,11 @@ h1 {
 .host-card,
 .check-list,
 .pin-list {
-  backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(145%);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.055);
 }
 
 .terminal-panel {
@@ -461,9 +464,9 @@ h1 {
 .terminal-panel pre,
 .install-command,
 .host-config {
-  background: rgba(0, 0, 0, 0.36);
+  background: rgba(0, 0, 0, 0.38);
   border: 1px solid var(--border-soft);
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 0;
   min-width: 0;
   overflow: auto;
@@ -482,10 +485,10 @@ h1 {
 
 .copy-command {
   appearance: none;
-  backdrop-filter: blur(18px) saturate(170%);
-  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(150%);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 7px;
   color: var(--text);
   cursor: pointer;
   font: inherit;
@@ -527,7 +530,7 @@ h1 {
 }
 
 .command-block-compact .install-command {
-  border-radius: 10px;
+  border-radius: 7px;
   padding: 9px 10px;
 }
 
@@ -665,7 +668,7 @@ h1 {
 .live-section {
   display: grid;
   gap: 16px;
-  padding: clamp(28px, 4vw, 54px) 0;
+  padding: clamp(18px, 3.4vw, 42px) 0;
   width: 100%;
 }
 
@@ -678,8 +681,9 @@ h1 {
 
 .live-head h2 {
   color: var(--text);
-  font-size: clamp(32px, 4vw, 52px);
-  font-weight: 650;
+  font-family: Fraunces, "Instrument Serif", Georgia, serif;
+  font-size: clamp(30px, 3.7vw, 48px);
+  font-weight: 430;
   letter-spacing: 0;
   line-height: 1.04;
   margin: 0;
@@ -730,7 +734,7 @@ h1 {
 .live-stat-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .live-stat {
@@ -740,8 +744,9 @@ h1 {
 .live-stat span {
   color: var(--text);
   display: block;
-  font-size: clamp(30px, 4vw, 42px);
-  font-weight: 660;
+  font-family: Fraunces, "Instrument Serif", Georgia, serif;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 430;
   letter-spacing: 0;
 }
 
@@ -759,7 +764,7 @@ h1 {
 .start-section {
   display: grid;
   gap: 18px;
-  padding: clamp(30px, 5vw, 62px) 0;
+  padding: clamp(24px, 4.6vw, 54px) 0;
   width: 100%;
 }
 
@@ -813,8 +818,8 @@ h1 {
 .faq-card h3,
 .start-card h3 {
   color: var(--text);
-  font-size: 20px;
-  font-weight: 660;
+  font-size: 18px;
+  font-weight: 650;
   letter-spacing: 0;
   line-height: 1.18;
   margin: 0;
@@ -862,7 +867,7 @@ h1 {
 }
 
 .fact-row {
-  backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(145%);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -877,7 +882,7 @@ h1 {
 .fact-row a {
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
+  border-radius: 7px;
   color: var(--text);
   display: grid;
   font-size: 14px;
@@ -915,7 +920,7 @@ h1 {
 .host-section {
   display: grid;
   gap: 18px;
-  padding: clamp(26px, 5vw, 56px) 0;
+  padding: clamp(22px, 4.6vw, 52px) 0;
   width: 100%;
 }
 
@@ -931,8 +936,9 @@ h1 {
 .proof-section h2,
 .trust-section h2 {
   color: var(--text);
+  font-family: Fraunces, "Instrument Serif", Georgia, serif;
   font-size: clamp(26px, 3.3vw, 40px);
-  font-weight: 650;
+  font-weight: 430;
   letter-spacing: 0;
   line-height: 1.08;
   margin: 0;
@@ -948,24 +954,24 @@ h1 {
 .platform-logo-rail {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
 }
 
 .platform-logo-rail-wide {
-  grid-template-columns: repeat(9, minmax(88px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
 }
 
 .platform-logo-tile {
   align-items: center;
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid var(--border-soft);
-  border-radius: 14px;
+  border-radius: 8px;
   color: inherit;
   display: grid;
   gap: 10px;
   justify-items: center;
-  min-height: 116px;
-  padding: 14px 10px;
+  min-height: 108px;
+  padding: 13px 10px;
   text-align: center;
   text-decoration: none;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
@@ -1001,7 +1007,7 @@ h1 {
   align-items: center;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border-radius: 8px;
   display: inline-flex;
   height: 48px;
   justify-content: center;
@@ -1060,7 +1066,7 @@ h1 {
 }
 
 .platform-card {
-  backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(145%);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1087,8 +1093,8 @@ h1 {
 
 .platform-title-row .platform-mark {
   flex: 0 0 auto;
-  height: 42px;
-  width: 42px;
+  height: 44px;
+  width: 44px;
 }
 
 .platform-title-row .platform-mark img {
@@ -1108,8 +1114,8 @@ h1 {
 
 .platform-card h3 {
   color: var(--text);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 650;
   letter-spacing: 0;
   line-height: 1.08;
   margin: 0;
@@ -1222,10 +1228,10 @@ h1 {
 
 .search-form {
   align-items: center;
-  backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(145%);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 8px;
   display: flex;
   gap: 8px;
   padding: 7px;
@@ -1270,10 +1276,10 @@ h1 {
 }
 
 .activation-panel {
-  backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(145%);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 8px;
   display: grid;
   gap: 16px;
   padding: 18px;
@@ -1315,7 +1321,7 @@ h1 {
 .package-grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .package-archive-hero {
@@ -1366,7 +1372,7 @@ h1 {
 .archive-summary-strip {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 8px;
   display: grid;
   gap: 1px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1382,8 +1388,9 @@ h1 {
 .archive-summary-item span {
   color: var(--text);
   display: block;
-  font-size: 26px;
-  font-weight: 720;
+  font-family: Fraunces, "Instrument Serif", Georgia, serif;
+  font-size: 30px;
+  font-weight: 430;
   letter-spacing: 0;
 }
 
@@ -1413,7 +1420,7 @@ h1 {
 
 .archive-list {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -1468,10 +1475,10 @@ h1 {
 
 .archive-package-row {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-rows: auto 1fr auto;
   min-width: 0;
-  min-height: 312px;
+  min-height: 288px;
   padding: 16px;
   transition: background 180ms ease, transform 180ms ease;
 }
@@ -1502,7 +1509,7 @@ h1 {
 .archive-package-kicker span {
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--quiet);
   font-size: 11px;
   font-weight: 760;
@@ -1512,8 +1519,8 @@ h1 {
 
 .archive-package-main h3 {
   color: var(--text);
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 650;
   letter-spacing: 0;
   line-height: 1.16;
   margin: 0;
@@ -1564,7 +1571,7 @@ h1 {
   align-items: flex-start;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-soft);
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   gap: 8px;
   min-width: 0;
@@ -1613,7 +1620,7 @@ h1 {
 .archive-proof-row div {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid var(--border-soft);
-  border-radius: 10px;
+  border-radius: 7px;
   color: var(--text);
   display: grid;
   font-size: 11px;
@@ -1650,7 +1657,7 @@ h1 {
 
 .package-card {
   display: grid;
-  gap: 16px;
+  gap: 13px;
   min-width: 0;
   padding: 18px;
   transition: background 180ms ease, transform 180ms ease;
@@ -1678,8 +1685,8 @@ h1 {
 
 .package-card h3 {
   color: var(--text);
-  font-size: 22px;
-  font-weight: 660;
+  font-size: 19px;
+  font-weight: 650;
   letter-spacing: 0;
   line-height: 1.14;
   margin: 0;
@@ -1852,7 +1859,7 @@ h1 {
 .outreach-kit > a {
   align-items: center;
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--text);
   display: inline-flex;
   font-size: 13px;
@@ -1879,7 +1886,7 @@ h1 {
 .package-meta div {
   background: var(--surface-deep);
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
+  border-radius: 8px;
   min-width: 0;
   padding: 12px;
 }
@@ -1919,10 +1926,10 @@ h1 {
 }
 
 .package-tabs {
-  backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(140%);
   background: rgba(5, 5, 6, 0.74);
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 7px;
   position: sticky;
   top: 84px;
@@ -1944,7 +1951,7 @@ h1 {
 .package-links span {
   align-items: center;
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 7px;
   color: var(--muted);
   display: inline-flex;
   font-size: 12px;
@@ -2006,7 +2013,7 @@ h1 {
   display: grid;
   gap: 14px;
   max-width: 780px;
-  padding: clamp(34px, 7vw, 70px) 0 10px;
+  padding: clamp(30px, 6vw, 58px) 0 8px;
 }
 
 .quickstart-hero h1,
@@ -2015,7 +2022,7 @@ h1 {
 .trust-hero h1,
 .mcp-hero h1,
 .proof-hero h1 {
-  font-size: clamp(34px, 4.4vw, 56px);
+  font-size: clamp(34px, 4.6vw, 60px);
 }
 
 .quickstart-grid {
@@ -2152,7 +2159,7 @@ h1 {
   appearance: none;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid var(--border-soft);
-  border-radius: 16px;
+  border-radius: 8px;
   color: var(--text);
   font: inherit;
   min-height: 50px;
@@ -2214,7 +2221,7 @@ h1 {
 }
 
 .package-hero h1 {
-  font-size: clamp(44px, 7vw, 88px);
+  font-size: clamp(42px, 6.8vw, 82px);
 }
 
 .package-side {
@@ -2227,7 +2234,7 @@ h1 {
 .install-decision {
   background: rgba(143, 255, 193, 0.08);
   border: 1px solid rgba(143, 255, 193, 0.2);
-  border-radius: 14px;
+  border-radius: 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
@@ -2282,7 +2289,7 @@ h1 {
 .progress-track {
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid var(--border-soft);
-  border-radius: 999px;
+  border-radius: 8px;
   height: 10px;
   overflow: hidden;
   width: 100%;

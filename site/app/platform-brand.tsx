@@ -5,11 +5,11 @@ type PlatformMarkProps = {
 
 const IMAGE_MARKS: Record<string, { className?: string; src: string }> = {
   bankr: { src: "/bankr-logo.svg" },
-  "claude-code": { src: "https://cdn.simpleicons.org/claude/D97757" },
+  "claude-code": { src: "/claude-logo.png" },
   cursor: { src: "https://cdn.simpleicons.org/cursor/FFFFFF" },
   github: { className: "platform-mark-github", src: "/github-logo.svg" },
   gitlawb: { src: "/gitlawb-logo.png" },
-  hermes: { src: "https://hermes-agent.nousresearch.com/docs/img/logo.png" },
+  hermes: { src: "/hermes-logo.png" },
   mcp: { src: "https://cdn.simpleicons.org/modelcontextprotocol/FFFFFF" },
   opencode: { className: "platform-mark-opencode", src: "https://opencode.ai/_build/assets/preview-opencode-logo-light-B5i-Y4z2.png" }
 };
@@ -20,6 +20,14 @@ const TEXT_MARKS: Record<string, string> = {
 };
 
 export function PlatformMark({ id, name }: PlatformMarkProps) {
+  if (id === "codex") {
+    return (
+      <span className="platform-mark" aria-hidden="true">
+        <img alt="" src="/codex-logo.png" />
+      </span>
+    );
+  }
+
   const image = IMAGE_MARKS[id];
 
   if (image) {
