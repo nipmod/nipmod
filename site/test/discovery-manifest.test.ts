@@ -15,7 +15,7 @@ const releaseKey = JSON.parse(readFileSync(join(root, "tools", "release-signing-
 const advisoryKey = JSON.parse(readFileSync(join(root, "tools", "advisory-signing-public-key.json"), "utf8"));
 const version = JSON.parse(readFileSync(join(root, "nipmod", "package.json"), "utf8")).version;
 const agentDemoPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
-const shortInstallerCommand = "curl -fsSL https://nipmod.com/i | bash";
+const shortInstallerCommand = "curl https://nipmod.com/i|bash";
 const verifyInstallerCommand =
   "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh";
 

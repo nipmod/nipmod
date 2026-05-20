@@ -69,6 +69,14 @@ const nextConfig: NextConfig = {
       }
     ];
   },
+  async rewrites() {
+    return [
+      {
+        destination: "/install.sh",
+        source: "/i"
+      }
+    ];
+  },
   reactStrictMode: true,
   turbopack: {
     root: projectRoot

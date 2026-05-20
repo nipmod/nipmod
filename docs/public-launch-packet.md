@@ -11,7 +11,7 @@ Nipmod does not decide who can publish to Gitlawb and does not delete Gitlawb co
 ## Public demo
 
 ```bash
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 nipmod doctor --online
 nipmod search gitlawb
 mkdir -p nipmod-demo && cd nipmod-demo

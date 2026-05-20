@@ -133,7 +133,7 @@ export const homeContent = {
     {
       label: "Install CLI",
       text: "Paste one command.",
-      command: "curl -fsSL https://nipmod.com/i | bash"
+      command: "curl https://nipmod.com/i|bash"
     },
     {
       label: "Verify",

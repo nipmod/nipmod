@@ -151,8 +151,8 @@ describe("telegram bot message formatting", () => {
 
   test("formats commands as code and escapes unsafe HTML", () => {
     assert.equal(
-      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSL https://nipmod.com/i | bash\nnipmod setup agents --include-codex --include-hermes\n\nThen tell the agent\nRead <unsafe>"),
-      "<b>Install Nipmod</b>\n\n<code>curl -fsSL https://nipmod.com/i | bash</code>\n<code>nipmod setup agents --include-codex --include-hermes</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
+      formatTelegramMessageHtml("Install Nipmod\ncurl https://nipmod.com/i|bash\nnipmod setup agents --include-codex --include-hermes\n\nThen tell the agent\nRead <unsafe>"),
+      "<b>Install Nipmod</b>\n\n<code>curl https://nipmod.com/i|bash</code>\n<code>nipmod setup agents --include-codex --include-hermes</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
     );
   });
 });
@@ -350,7 +350,7 @@ describe("telegram bot knowledge base", () => {
     });
 
     assert.match(reply.text, /Install Nipmod/);
-    assert.match(reply.text, /curl -fsSL https:\/\/nipmod\.com\/i \| bash/);
+    assert.match(reply.text, /curl https:\/\/nipmod\.com\/i\|bash/);
   });
 
   test("answers Hermes setup questions directly", async () => {

@@ -127,7 +127,7 @@ export default function QuickstartPage() {
         <div className="proof-panel">
           <p className="panel-copy">Use the short installer for normal setup. Use the checksum path when reviewing security.</p>
           <pre className="install-command">
-            <code>{"curl -fsSL https://nipmod.com/i | bash"}</code>
+            <code>{"curl https://nipmod.com/i|bash"}</code>
           </pre>
         </div>
       </section>

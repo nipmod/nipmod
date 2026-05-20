@@ -42,7 +42,7 @@ const PROTOCOL_VERSION = "2025-11-25";
 const SERVER_VERSION = "1.0.0";
 const REMOTE_ENDPOINT = "https://nipmod.com/api/mcp";
 const LOCAL_SERVER_COMMAND = "nipmod mcp serve";
-const LOCAL_INSTALL_COMMAND = "curl -fsSL https://nipmod.com/i | bash";
+const LOCAL_INSTALL_COMMAND = "curl https://nipmod.com/i|bash";
 const REMOTE_TOOL_NAMES = [
   "nipmod.search",
   "nipmod.view",

@@ -13,7 +13,7 @@ This is the public first run path. It is designed for a clean macOS or Linux wor
 ## Install
 
 ```sh
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 nipmod setup agents --include-codex --include-hermes
 ```
 

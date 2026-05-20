@@ -240,7 +240,7 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Open Terminal" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Install Nipmod once" })).toBeVisible();
   await expect(
-    page.getByLabel("First setup command").getByText("curl -fsSL https://nipmod.com/i | bash")
+    page.getByLabel("First setup command").getByText("curl https://nipmod.com/i|bash")
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
   await expect(page.getByText("nipmod setup agents --include-codex --include-hermes")).toBeVisible();

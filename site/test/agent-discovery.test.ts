@@ -40,7 +40,7 @@ describe("agent discovery text", () => {
 
   test("lists the commands an agent needs for the full lifecycle", () => {
     for (const command of [
-      "curl -fsSL https://nipmod.com/i | bash",
+      "curl https://nipmod.com/i|bash",
       "nipmod setup codex",
       "nipmod setup claude",
       "nipmod setup opencode",

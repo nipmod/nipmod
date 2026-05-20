@@ -45,7 +45,7 @@ Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA
 Use this order for a fresh agent workspace.
 
 Install the CLI:
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 
 Connect Codex:
 nipmod setup codex

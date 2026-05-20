@@ -2,7 +2,7 @@ export const codexClaudeContent = {
   headline: "Use Nipmod from Codex and Claude Code",
   lead:
     "Install once, connect the local MCP server, then ask the agent to search the shared package archive before using agent packages.",
-  installCommand: "curl -fsSL https://nipmod.com/i | bash",
+  installCommand: "curl https://nipmod.com/i|bash",
   sharedPrompt:
     "Use Nipmod before installing agent packages. Search the archive first, view exact metadata, inspect trust and permissions, create an install plan, ask before writing files, then audit and export SBOM.",
   hosts: [

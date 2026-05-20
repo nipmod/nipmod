@@ -19,7 +19,7 @@ const tracks = [
     title: "First install loop",
     text: "Install, run doctor, search, inspect, install into a workspace and audit a verified package.",
     command:
-      "curl -fsSL https://nipmod.com/i | bash\nnipmod doctor --online\nnipmod search gitlawb --online\nmkdir -p nipmod-demo && cd nipmod-demo\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0\nnipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0\nnipmod install\nnipmod outdated\nnipmod audit --online"
+      "curl https://nipmod.com/i|bash\nnipmod doctor --online\nnipmod search gitlawb --online\nmkdir -p nipmod-demo && cd nipmod-demo\nnipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0\nnipmod install pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0\nnipmod install\nnipmod outdated\nnipmod audit --online"
   },
   {
     label: "Verify",

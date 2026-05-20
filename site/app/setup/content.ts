@@ -2,7 +2,7 @@ export const setupContent = {
   headline: "Connect your agent",
   lead:
     "Install Nipmod, connect your agent and ask it to search the archive before package installs.",
-  installCommand: "curl -fsSL https://nipmod.com/i | bash",
+  installCommand: "curl https://nipmod.com/i|bash",
   checkCommand: "nipmod doctor --online",
   allAgentsCommand: "nipmod setup agents --include-codex --include-hermes",
   agentPrompt:

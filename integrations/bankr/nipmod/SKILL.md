@@ -42,7 +42,7 @@ curl -fsSL https://nipmod.com/.well-known/nipmod.json
 2. Install or update the CLI.
 
 ```bash
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 ```
 
 3. Check the host.

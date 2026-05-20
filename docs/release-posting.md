@@ -61,7 +61,7 @@ Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 ```text
 For agents:
 
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 nipmod search gitlawb --online
 nipmod inspect <package>
 nipmod install <package>

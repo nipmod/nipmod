@@ -48,7 +48,7 @@ nipmod search gitlawb --online
 If `nipmod` is missing:
 
 ```bash
-curl -fsSL https://nipmod.com/i | bash
+curl https://nipmod.com/i|bash
 ```
 
 ## Agent package use
