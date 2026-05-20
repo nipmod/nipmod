@@ -46,16 +46,6 @@ export default function SetupPage() {
         </aside>
       </section>
 
-      <section className="setup-path" aria-label="Nipmod setup path">
-        {setupContent.steps.map((step, index) => (
-          <article className="quickstart-card setup-step-card" key={step.label}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <h2>{step.label}</h2>
-            <p>{step.text}</p>
-          </article>
-        ))}
-      </section>
-
       <section className="trust-section setup-section" id="install" aria-labelledby="install-once-title">
         <div>
           <p className="eyebrow">Step 1</p>
@@ -67,6 +57,16 @@ export default function SetupPage() {
           <CommandBlock command={setupContent.checkCommand} label="Copy Nipmod check command" />
           <CommandBlock command={setupContent.allAgentsCommand} label="Copy all agents setup command" />
         </div>
+      </section>
+
+      <section className="setup-path" aria-label="Nipmod setup path">
+        {setupContent.steps.map((step, index) => (
+          <article className="quickstart-card setup-step-card" key={step.label}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <h2>{step.label}</h2>
+            <p>{step.text}</p>
+          </article>
+        ))}
       </section>
 
       <section className="host-section setup-section" id="agent" aria-labelledby="agent-setup-title">
