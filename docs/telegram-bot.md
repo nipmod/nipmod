@@ -13,6 +13,9 @@ NIPMOD_TELEGRAM_BOT_USERNAME=nipmodbot
 NIPMOD_TELEGRAM_GROUP_ONLY=1
 NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1
 NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1
+NIPMOD_TELEGRAM_AI_ENABLED=1
+NIPMOD_TELEGRAM_AI_MODEL=gpt-4o-mini
+NIPMOD_TELEGRAM_AI_API_KEY=<openai-or-compatible-key>
 ```
 
 `.env.local` is ignored by git and skipped by the secret scan.
@@ -65,6 +68,13 @@ The bot answers plain text when the message directly mentions `@nipmodbot`, star
 Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
 If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
 Non question group chatter is ignored.
+
+## AI layer
+
+The local knowledge base answers exact public facts first.
+When `NIPMOD_TELEGRAM_AI_API_KEY` or `OPENAI_API_KEY` is present, broad questions fall through to an OpenAI compatible chat completions endpoint.
+The AI system prompt is restricted to Nipmod, official links, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, install, packages, registry, safety and status.
+If the question is outside scope, the AI must use the same short fallback.
 
 ## Voice
 

@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import {
+  buildAiSystemPrompt,
   createTelegramBotReply,
   isChatAllowed,
   isQuestionLike,
   isRelevantGroupQuestion,
   matchesAny,
   parseTelegramCommand,
+  renderAiReply,
+  renderPlainTextReply,
+  sanitizeAiReply,
   searchRegistryPackages,
   shouldAnswerGroupText,
   shouldReplyToPlainText
@@ -297,6 +301,75 @@ describe("telegram bot knowledge base", () => {
   });
 });
 
+describe("telegram bot AI fallback", () => {
+  test("uses AI fallback for broad questions when a key is configured", async () => {
+    const calls = [];
+    const reply = await createTelegramBotReply(groupUpdate("kannst du das grob einordnen?"), {
+      allowedChatId: "-100123",
+      aiApiKey: "sk-test",
+      aiBaseUrl: "https://ai.example/v1/",
+      aiModel: "test-model",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      fetchFn: async (url, init) => {
+        calls.push({ body: JSON.parse(init.body), url });
+        return jsonResponse({
+          choices: [
+            {
+              message: {
+                content: "Nipmod is the package layer for agents.\nUse /links for official links."
+              }
+            }
+          ]
+        });
+      },
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "https://ai.example/v1/chat/completions");
+    assert.equal(calls[0].body.model, "test-model");
+    assert.match(calls[0].body.messages[0].content, /Official links:/);
+    assert.match(reply.text, /package layer for agents/);
+  });
+
+  test("keeps exact local answers ahead of AI fallback", async () => {
+    const reply = await renderPlainTextReply("githb link bitte", {
+      aiApiKey: "sk-test",
+      fetchFn: async () => {
+        throw new Error("AI should not be called");
+      },
+      packages
+    });
+
+    assert.match(reply, /GitHub is the public mirror/);
+  });
+
+  test("falls back cleanly when AI is unavailable", async () => {
+    const reply = await renderPlainTextReply("kannst du das grob einordnen?", {
+      aiApiKey: "sk-test",
+      fetchFn: async () => new Response("down", { status: 503 }),
+      packages
+    });
+
+    assert.match(reply, /I cannot answer that cleanly/);
+  });
+
+  test("sanitizes AI dash bullets", () => {
+    assert.equal(sanitizeAiReply("- Website https://nipmod.com\n- GitHub https://github.com/nipmod/nipmod"), "Website https://nipmod.com\nGitHub https://github.com/nipmod/nipmod");
+  });
+
+  test("AI prompt contains hard boundaries and official links", () => {
+    const prompt = buildAiSystemPrompt(packages);
+    assert.match(prompt, /Do not give trading advice/);
+    assert.match(prompt, /Website: https:\/\/nipmod\.com/);
+    assert.match(prompt, /GitHub: https:\/\/github\.com\/nipmod\/nipmod/);
+    assert.match(prompt, /Live archive package count: 2/);
+  });
+});
+
 function groupUpdate(text, id = "-100123") {
   return {
     message: {
@@ -309,4 +382,13 @@ function groupUpdate(text, id = "-100123") {
     },
     update_id: 1
   };
+}
+
+function jsonResponse(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    headers: {
+      "content-type": "application/json"
+    },
+    status
+  });
 }

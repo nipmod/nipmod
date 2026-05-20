@@ -11,6 +11,10 @@ const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_BOT_USERNAME = "nipmodbot";
 const DEFAULT_POLL_TIMEOUT_SECONDS = 45;
 const DEFAULT_ANSWER_GROUP_QUESTIONS = true;
+const DEFAULT_AI_BASE_URL = "https://api.openai.com/v1";
+const DEFAULT_AI_MODEL = "gpt-4o-mini";
+const AI_TIMEOUT_MS = 12000;
+const AI_REPLY_MAX_CHARS = 1200;
 const OFFICIAL_LINKS = [
   ["Website", "https://nipmod.com"],
   ["Packages", "https://nipmod.com/packages"],
@@ -357,6 +361,15 @@ export async function renderPlainTextReply(text, options = {}) {
   const cleaned = String(text ?? "")
     .replace(new RegExp(`@${normalizeBotUsername(options.username)}`, "gi"), "")
     .trim();
+  const knownReply = await renderKnownPlainTextReply(cleaned, options);
+  if (knownReply) {
+    return knownReply;
+  }
+  return (await renderAiReply(cleaned, options)) ?? conciseFallbackText();
+}
+
+export async function renderKnownPlainTextReply(text, options = {}) {
+  const cleaned = String(text ?? "").trim();
   const lower = cleaned.toLowerCase();
 
   if (matchesAny(lower, GITHUB_TERMS) || matchesAny(lower, ["mirror"])) {
@@ -395,7 +408,7 @@ export async function renderPlainTextReply(text, options = {}) {
   if (matchesAny(lower, LINK_TERMS)) {
     return linksText();
   }
-  return conciseFallbackText();
+  return null;
 }
 
 export async function getRegistryPackages({ packages = null, registryUrl = DEFAULT_REGISTRY_URL, fetchFn = fetch } = {}) {
@@ -420,6 +433,113 @@ async function getRegistryPackagesForReply(options) {
   } catch {
     return null;
   }
+}
+
+export async function renderAiReply(text, options = {}) {
+  const ai = resolveAiOptions(options);
+  if (!ai.enabled || !ai.apiKey) {
+    return null;
+  }
+
+  const packages = await getRegistryPackagesForReply(options);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ai.timeoutMs);
+  try {
+    const response = await ai.fetchFn(`${ai.baseUrl}/chat/completions`, {
+      body: JSON.stringify({
+        max_tokens: 240,
+        messages: [
+          {
+            content: buildAiSystemPrompt(packages),
+            role: "system"
+          },
+          {
+            content: String(text ?? "").slice(0, 1200),
+            role: "user"
+          }
+        ],
+        model: ai.model,
+        temperature: 0.2
+      }),
+      headers: {
+        authorization: `Bearer ${ai.apiKey}`,
+        "content-type": "application/json"
+      },
+      method: "POST",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const body = await response.json().catch(() => null);
+    const content = body?.choices?.[0]?.message?.content;
+    return sanitizeAiReply(content);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export function resolveAiOptions(options = {}) {
+  const apiKey = options.aiApiKey || options.openaiApiKey || null;
+  return {
+    apiKey,
+    baseUrl: trimTrailingSlash(options.aiBaseUrl || DEFAULT_AI_BASE_URL),
+    enabled: options.aiEnabled !== false && Boolean(apiKey),
+    fetchFn: options.aiFetchFn || options.fetchFn || fetch,
+    model: options.aiModel || DEFAULT_AI_MODEL,
+    timeoutMs: options.aiTimeoutMs || AI_TIMEOUT_MS
+  };
+}
+
+export function buildAiSystemPrompt(packages = null) {
+  const packageSummary = Array.isArray(packages)
+    ? `Live archive package count: ${packages.length}. Known package names: ${packages
+        .slice(0, 18)
+        .map((pkg) => pkg.name)
+        .join(", ")}.`
+    : "Live archive package count is unavailable right now.";
+  const links = OFFICIAL_LINKS.map(([label, url]) => `${label}: ${url}`).join("\n");
+  return [
+    "You are @nipmodbot in the Nipmod Telegram group.",
+    "Answer as a precise project agent, not as a generic assistant.",
+    "Use the user's language when obvious, otherwise use concise English.",
+    "Keep answers under 6 short lines.",
+    "No hype, no filler, no invented roadmap, no fake certainty.",
+    "Do not use markdown dash bullets.",
+    "Never ask for private keys, seed phrases, wallet secrets or API keys in Telegram.",
+    "Do not give trading advice, token price predictions or financial recommendations.",
+    "You may answer only about Nipmod, its official links, Gitlawb source, GitHub mirror, Bankr integration, Codex, Claude Code, MCP, install, packages, registry, safety and status.",
+    "If the question is outside scope or you are not sure, answer exactly:",
+    conciseFallbackText(),
+    "",
+    "Facts:",
+    FACTS.archive,
+    FACTS.gitlawb,
+    FACTS.github,
+    FACTS.bankr,
+    FACTS.mcp,
+    FACTS.safety,
+    packageSummary,
+    "",
+    "Official links:",
+    links
+  ].join("\n");
+}
+
+export function sanitizeAiReply(value) {
+  const text = String(value ?? "").trim();
+  if (!text) {
+    return null;
+  }
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[-*]\s+/, "").trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .slice(0, AI_REPLY_MAX_CHARS)
+    .trim();
 }
 
 export function searchRegistryPackages(query, packages, limit = 5) {
@@ -501,6 +621,10 @@ export class TelegramClient {
 
 export async function runTelegramBot({
   allowedChatId = null,
+  aiApiKey = null,
+  aiBaseUrl = DEFAULT_AI_BASE_URL,
+  aiEnabled = false,
+  aiModel = DEFAULT_AI_MODEL,
   bindFirstGroup = true,
   fetchFn = fetch,
   groupOnly = true,
@@ -529,7 +653,7 @@ export async function runTelegramBot({
   log(
     `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; chat=${
       activeState.allowedChatId ?? "waiting-for-/start"
-    }; answerGroupQuestions=${answerGroupQuestions}`
+    }; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? aiModel : "off"}`
   );
 
   while (!signal?.aborted) {
@@ -542,6 +666,10 @@ export async function runTelegramBot({
         activeState.offset = update.update_id + 1;
         const reply = await createTelegramBotReply(update, {
           allowedChatId: activeState.allowedChatId,
+          aiApiKey,
+          aiBaseUrl,
+          aiEnabled,
+          aiModel,
           bindFirstGroup,
           fetchFn,
           groupOnly,
@@ -568,7 +696,7 @@ export async function runTelegramBot({
         await writeBotState(statePath, activeState);
       }
     } catch (error) {
-      log(`[nipmod-telegram-bot] ${redactToken(error?.message ?? error, token)}`);
+      log(`[nipmod-telegram-bot] ${redactSecrets(error?.message ?? error, [token, aiApiKey])}`);
       await sleep(2500);
     }
   }
@@ -896,8 +1024,16 @@ function unquoteEnvValue(value) {
   return value;
 }
 
-function redactToken(value, token) {
-  return String(value).split(token).join("[redacted-token]");
+function trimTrailingSlash(value) {
+  return String(value ?? "").replace(/\/+$/, "");
+}
+
+function redactSecrets(value, secrets) {
+  let text = String(value);
+  for (const secret of secrets.filter(Boolean)) {
+    text = text.split(secret).join("[redacted-secret]");
+  }
+  return text;
 }
 
 function sleep(ms) {
@@ -918,7 +1054,10 @@ async function main() {
         "  NIPMOD_TELEGRAM_ALLOWED_CHAT_ID=<group chat id>",
         "  NIPMOD_TELEGRAM_GROUP_ONLY=1",
         "  NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1",
-        "  NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1"
+        "  NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1",
+        "  NIPMOD_TELEGRAM_AI_ENABLED=1",
+        "  NIPMOD_TELEGRAM_AI_MODEL=gpt-4o-mini",
+        "  NIPMOD_TELEGRAM_AI_API_KEY=<openai-or-compatible-key>"
       ].join("\n") + "\n"
     );
     return;
@@ -929,9 +1068,14 @@ async function main() {
     ...process.env
   };
   const token = env.TELEGRAM_BOT_TOKEN || env.NIPMOD_TELEGRAM_BOT_TOKEN;
+  const aiApiKey = env.NIPMOD_TELEGRAM_AI_API_KEY || env.OPENAI_API_KEY || null;
   await runTelegramBot({
     allowedChatId: env.NIPMOD_TELEGRAM_ALLOWED_CHAT_ID || null,
     answerGroupQuestions: env.NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS !== "0",
+    aiApiKey,
+    aiBaseUrl: env.NIPMOD_TELEGRAM_AI_BASE_URL || DEFAULT_AI_BASE_URL,
+    aiEnabled: env.NIPMOD_TELEGRAM_AI_ENABLED !== "0" && Boolean(aiApiKey),
+    aiModel: env.NIPMOD_TELEGRAM_AI_MODEL || DEFAULT_AI_MODEL,
     bindFirstGroup: env.NIPMOD_TELEGRAM_BIND_FIRST_GROUP !== "0",
     groupOnly: env.NIPMOD_TELEGRAM_GROUP_ONLY !== "0",
     registryUrl: env.NIPMOD_REGISTRY_URL || DEFAULT_REGISTRY_URL,
