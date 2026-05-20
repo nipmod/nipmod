@@ -131,16 +131,21 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Platform status" })).toBeVisible();
   const platformRoadmap = page.getByLabel("Nipmod platform roadmap");
   await expect(platformRoadmap.getByRole("heading", { name: "Gitlawb" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Live", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByText("Live", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByRole("heading", { name: "GitHub" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { exact: true, name: "MCP" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
-  await expect(platformRoadmap.getByText("PR open", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByText("Under review", { exact: true })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Agent hosts" })).toBeVisible();
-  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode can use Nipmod through MCP")).toBeVisible();
-  await expect(platformRoadmap.getByText("controlled install")).toBeVisible();
+  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toBeVisible();
+  await expect(platformRoadmap.getByText("Candidate", { exact: true })).toBeVisible();
+  await expect(platformRoadmap.getByText("host smoke checks pass")).toBeVisible();
+  await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
   await expect(platformRoadmap.getByRole("link", { name: "Setup agent" })).toHaveAttribute("href", "/setup");
+  await expect(platformRoadmap.getByRole("link", { name: "View matrix" })).toHaveAttribute("href", "/platforms");
 
   await expect(page.getByRole("heading", { name: "Publish your repo as a package." })).toBeVisible();
   await expect(page.getByText("The source owner runs the package flow. Nipmod verifies the claim and never takes ownership.")).toBeVisible();
