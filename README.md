@@ -43,7 +43,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 
 ## What Works Now
 
-- CLI release `1.2.4` with signed installer and signed tarball.
+- CLI release `1.2.5` with signed installer and signed tarball.
 - Public verified registry sourced from Gitlawb.
 - Quorum approval receipts for verified public package digests.
 - Install, add, update, audit, CI, SBOM and explain commands.
@@ -55,7 +55,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 - Local MCP server for agents with read-first tools and controlled install.
 - Hosted read-only MCP endpoint for registry search, view, inspect, install plans and demo flows without workspace writes.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
-- Codex, Claude Code, OpenCode, Hermes and Bankr agent entrypoints.
+- Codex, Claude Code, Cursor, OpenCode, Hermes and Bankr agent entrypoints.
 
 ## Why It Exists
 
@@ -116,6 +116,7 @@ Nipmod exposes one local MCP server for agent hosts and one hosted read-only end
 ```bash
 nipmod setup codex
 nipmod setup claude
+nipmod setup cursor
 nipmod setup opencode
 nipmod setup hermes
 ```

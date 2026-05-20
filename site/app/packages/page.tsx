@@ -174,7 +174,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           <p>Published package source today is Gitlawb. New indexed sources will appear here.</p>
         </article>
         <article className="archive-overview-card">
-          <span>Codex + Claude Code + OpenCode + Hermes</span>
+          <span>Codex + Claude Code + Cursor + OpenCode + Hermes</span>
           <h2>Agent access</h2>
           <p>Connect once, then agents can search and inspect the same archive.</p>
         </article>

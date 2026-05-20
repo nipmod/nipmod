@@ -90,6 +90,7 @@ describe("home content", () => {
       "MCP:MCP ready",
       "Codex:MCP ready",
       "Claude Code:MCP ready",
+      "Cursor:MCP ready",
       "OpenCode:MCP ready",
       "Hermes:MCP ready"
     ]);

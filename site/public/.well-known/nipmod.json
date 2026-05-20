@@ -18,6 +18,7 @@
     "packages": "https://nipmod.com/packages",
     "createPackage": "https://nipmod.com/package",
     "mcp": "https://nipmod.com/mcp",
+    "cursor": "https://nipmod.com/setup",
     "hermes": "https://nipmod.com/setup",
     "audit": "https://nipmod.com/audit",
     "trust": "https://nipmod.com/trust",
@@ -37,6 +38,7 @@
       "setupAgents",
       "setupCodexMcp",
       "setupClaudeMcp",
+      "setupCursorMcp",
       "setupOpenCodeMcp",
       "setupHermesMcp",
       "verifyInstaller",
@@ -61,6 +63,7 @@
       "setupAgents": "nipmod setup agents",
       "setupCodexMcp": "nipmod setup codex",
       "setupClaudeMcp": "nipmod setup claude",
+      "setupCursorMcp": "nipmod setup cursor",
       "setupOpenCodeMcp": "nipmod setup opencode",
       "setupHermesMcp": "nipmod setup hermes",
       "verifyInstaller": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
@@ -210,16 +213,16 @@
     "shortCommand": "curl https://nipmod.com/i|bash",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.2.4",
-      "artifact": "https://nipmod.com/releases/nipmod-1.2.4.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.2.4.tgz.sig",
+      "version": "1.2.5",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.5.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.5.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEAtTumyHEstKhOe5W5FNo4nOzhxzBLGq+I7AIN9oUCELQ=",
         "spkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
       },
-      "artifactSha256": "cdf2597f81e8d351e94a9ce09327758d34e6033e32d8237f244ac377c6fe904d"
+      "artifactSha256": "536e85c09a44fabedbdb3151815a2a11131d5a081145e80cef2e2a2a33c3aad1"
     },
-    "scriptSha256": "ccc8109a7b626cc9f8d9efd32f20fa7d991c6fe88a45872689f28bb662acd67d"
+    "scriptSha256": "a7f165b9d0f7d38a0ea040ad45e35df02a89b87cf9ea510fdfa19a9898dd97d2"
   }
 }

@@ -14,6 +14,7 @@ describe("agent prompt pack", () => {
     expect(prompts.setup).toMatchObject({
       claudeCode: "nipmod setup claude",
       codex: "nipmod setup codex",
+      cursor: "nipmod setup cursor",
       hermes: "nipmod setup hermes",
       opencode: "nipmod setup opencode",
       projectAgents: "nipmod setup agents"

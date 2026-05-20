@@ -53,7 +53,7 @@ describe("nipmod CLI", () => {
     expect(short.stdout).toBe(`${NIPMOD_VERSION}\n`);
   }, 15_000);
 
-  test("sets up Claude Code and OpenCode project MCP config", async () => {
+  test("sets up Claude Code, OpenCode, Cursor and Hermes MCP config", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-agent-setup-"));
     const hermesConfig = join(workspace, ".hermes", "config.yaml");
 
@@ -62,6 +62,10 @@ describe("nipmod CLI", () => {
       data: { changed: boolean; files: Array<{ path: string }>; host: string; prompt: string };
     };
     const opencode = JSON.parse((await execaNode(["src/cli.ts", "setup", "opencode", "--dir", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { changed: boolean; files: Array<{ path: string }>; host: string };
+    };
+    const cursor = JSON.parse((await execaNode(["src/cli.ts", "setup", "cursor", "--dir", workspace, "--json"])).stdout) as {
       ok: true;
       data: { changed: boolean; files: Array<{ path: string }>; host: string };
     };
@@ -79,14 +83,27 @@ describe("nipmod CLI", () => {
     expect(opencode.ok).toBe(true);
     expect(opencode.data.host).toBe("opencode");
     expect(opencode.data.changed).toBe(true);
+    expect(cursor.ok).toBe(true);
+    expect(cursor.data.host).toBe("cursor");
+    expect(cursor.data.changed).toBe(true);
     expect(hermes.ok).toBe(true);
     expect(hermes.data.host).toBe("hermes");
     expect(hermes.data.changed).toBe(true);
 
     await expect(readFile(join(workspace, ".mcp.json"), "utf8")).resolves.toContain('"nipmod"');
     await expect(readFile(join(workspace, "opencode.json"), "utf8")).resolves.toContain('"nipmod"');
+    await expect(readFile(join(workspace, ".cursor", "mcp.json"), "utf8")).resolves.toContain('"nipmod"');
+    await expect(readFile(join(workspace, ".cursor", "mcp.json"), "utf8")).resolves.toContain('"args": [');
     await expect(readFile(hermesConfig, "utf8")).resolves.toContain('command: "nipmod"');
     await expect(readFile(hermesConfig, "utf8")).resolves.toContain('args: ["mcp", "serve"]');
+
+    const existingCursorConfig = join(workspace, ".cursor-existing", "mcp.json");
+    await mkdir(join(workspace, ".cursor-existing"), { recursive: true });
+    await writeFile(existingCursorConfig, '{ "mcpServers": { "other": { "command": "other" } } }\n');
+    await execaNode(["src/cli.ts", "setup", "cursor", "--cursor-config", existingCursorConfig, "--json"]);
+    const mergedCursor = await readFile(existingCursorConfig, "utf8");
+    expect(mergedCursor).toContain('"other"');
+    expect(mergedCursor).toContain('"nipmod"');
 
     const existingHermesDir = join(workspace, ".hermes-existing");
     const existingHermesConfig = join(existingHermesDir, "config.yaml");
@@ -112,6 +129,7 @@ describe("nipmod CLI", () => {
     expect(result.data.commands).toContain("nipmod setup claude");
     await expect(readFile(join(workspace, ".mcp.json"), "utf8")).rejects.toThrow(/ENOENT/);
     await expect(readFile(join(workspace, "opencode.json"), "utf8")).rejects.toThrow(/ENOENT/);
+    await expect(readFile(join(workspace, ".cursor", "mcp.json"), "utf8")).rejects.toThrow(/ENOENT/);
   }, 15_000);
 
   test("initializes, packs, verifies, and installs a local package", async () => {

@@ -1202,9 +1202,11 @@ async function setupCommand(args: string[]): Promise<CliResult> {
     case "agents":
     case "claude":
     case "codex":
+    case "cursor":
     case "hermes":
     case "opencode": {
       const codexBin = optionalFlagValue(rest, "--codex-bin");
+      const cursorConfigPath = optionalFlagValue(rest, "--cursor-config");
       const hermesConfigPath = optionalFlagValue(rest, "--hermes-config");
       const setupOptions: Parameters<typeof setupAgentHost>[1] = {
         dryRun: hasFlag(rest, "--dry-run"),
@@ -1214,6 +1216,9 @@ async function setupCommand(args: string[]): Promise<CliResult> {
       };
       if (codexBin) {
         setupOptions.codexBin = codexBin;
+      }
+      if (cursorConfigPath) {
+        setupOptions.cursorConfigPath = cursorConfigPath;
       }
       if (hermesConfigPath) {
         setupOptions.hermesConfigPath = hermesConfigPath;

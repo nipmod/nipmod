@@ -94,7 +94,7 @@ export default function DemoPage() {
         <div className="section-head">
           <p className="eyebrow">Path</p>
           <h2 id="demo-path-title">Run it from any workspace</h2>
-          <p>Every step has a CLI form and the same flow is exposed through MCP for Codex, Claude Code, OpenCode and Hermes.</p>
+          <p>Every step has a CLI form and the same flow is exposed through MCP for Codex, Claude Code, Cursor, OpenCode and Hermes.</p>
         </div>
         <div className="quickstart-grid">
           {demoSteps.map((step) => (

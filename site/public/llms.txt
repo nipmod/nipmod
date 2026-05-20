@@ -53,6 +53,9 @@ nipmod setup codex
 Connect Claude Code:
 nipmod setup claude
 
+Connect Cursor:
+nipmod setup cursor
+
 Connect OpenCode:
 nipmod setup opencode
 

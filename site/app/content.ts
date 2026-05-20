@@ -81,6 +81,14 @@ export const homeContent = {
         cta: "Setup Claude Code"
       },
       {
+        name: "Cursor",
+        status: "MCP ready",
+        label: "agent IDE",
+        text: "Cursor can load the project MCP config and connect to the local Nipmod MCP server.",
+        href: "/setup",
+        cta: "Setup Cursor"
+      },
+      {
         name: "OpenCode",
         status: "MCP ready",
         label: "agent host",
@@ -123,7 +131,7 @@ export const homeContent = {
   startCards: [
     {
       title: "Setup Nipmod",
-      text: "Connect Codex, Claude Code, OpenCode or Hermes.",
+      text: "Connect Codex, Claude Code, Cursor, OpenCode or Hermes.",
       href: "/setup"
     },
     {
@@ -253,7 +261,7 @@ export const homeContent = {
     },
     {
       label: "Agent setup",
-      text: "Codex, Claude Code, OpenCode and Hermes can use the read only MCP server path."
+      text: "Codex, Claude Code, Cursor, OpenCode and Hermes can use the read only MCP server path."
     }
   ],
   founderOutreach: {

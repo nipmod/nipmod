@@ -131,6 +131,10 @@ describe("system readiness receipt", () => {
       codex: {
         setup: "nipmod setup codex"
       },
+      cursor: {
+        setup: "nipmod setup cursor",
+        config: ".cursor/mcp.json"
+      },
       openCode: {
         setup: "nipmod setup opencode",
         config: "opencode.json"
@@ -145,6 +149,7 @@ describe("system readiness receipt", () => {
       "bankr",
       "claude-code",
       "codex",
+      "cursor",
       "github",
       "gitlawb",
       "hermes",

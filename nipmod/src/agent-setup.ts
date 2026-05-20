@@ -3,10 +3,11 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-export type AgentHost = "agents" | "claude" | "codex" | "hermes" | "opencode";
+export type AgentHost = "agents" | "claude" | "codex" | "cursor" | "hermes" | "opencode";
 
 export interface AgentSetupOptions {
   codexBin?: string;
+  cursorConfigPath?: string;
   dryRun?: boolean;
   hermesConfigPath?: string;
   includeHermes?: boolean;
@@ -37,6 +38,7 @@ export const AGENT_HANDOFF_PROMPT =
 
 const CODEX_SETUP_COMMAND = "codex mcp add nipmod -- nipmod mcp serve";
 const CLAUDE_SETUP_COMMAND = "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve";
+const CURSOR_SETUP_COMMAND = "nipmod setup cursor";
 const HERMES_SETUP_COMMAND = "nipmod setup hermes";
 const OPENCODE_SETUP_COMMAND = "nipmod setup opencode";
 const HERMES_NIPMOD_SERVER_BLOCK = [
@@ -55,6 +57,8 @@ export async function setupAgentHost(host: AgentHost, options: AgentSetupOptions
   switch (host) {
     case "codex":
       return setupCodex(options);
+    case "cursor":
+      return setupCursor(options);
     case "claude":
       return setupClaude(options);
     case "hermes":
@@ -64,6 +68,24 @@ export async function setupAgentHost(host: AgentHost, options: AgentSetupOptions
     case "agents":
       return setupAgents(options);
   }
+}
+
+async function setupCursor(options: AgentSetupOptions): Promise<AgentSetupResult> {
+  const path = options.cursorConfigPath ?? join(options.projectDir, ".cursor", "mcp.json");
+  const next = withCursorNipmodServer(await readJsonObject(path));
+  const file = options.dryRun ? { changed: true, path } : await writeJsonIfChanged(path, next);
+
+  return baseResult("cursor", {
+    changed: file.changed,
+    commands: [CURSOR_SETUP_COMMAND],
+    dryRun: Boolean(options.dryRun),
+    files: [file],
+    notes: options.dryRun
+      ? ["Dry run only. The project .cursor/mcp.json file was not written."]
+      : ["Cursor project MCP config includes Nipmod."],
+    ready: true,
+    verifyCommands: ["open Cursor Settings > MCP", "confirm nipmod is listed under project tools"]
+  });
 }
 
 async function setupHermes(options: AgentSetupOptions): Promise<AgentSetupResult> {
@@ -149,7 +171,7 @@ async function setupOpenCode(options: AgentSetupOptions): Promise<AgentSetupResu
 }
 
 async function setupAgents(options: AgentSetupOptions): Promise<AgentSetupResult> {
-  const results = [await setupClaude(options), await setupOpenCode(options)];
+  const results = [await setupClaude(options), await setupOpenCode(options), await setupCursor(options)];
   if (options.includeCodex) {
     results.push(await setupCodex(options));
   }
@@ -162,15 +184,16 @@ async function setupAgents(options: AgentSetupOptions): Promise<AgentSetupResult
     commands: [
       "nipmod setup claude",
       "nipmod setup opencode",
+      CURSOR_SETUP_COMMAND,
       ...(options.includeHermes ? [HERMES_SETUP_COMMAND] : ["nipmod setup hermes"]),
-      ...(options.includeCodex ? [CODEX_SETUP_COMMAND] : [CODEX_SETUP_COMMAND])
+      ...(options.includeCodex ? ["nipmod setup codex"] : ["nipmod setup codex"])
     ],
     dryRun: Boolean(options.dryRun),
     files: results.flatMap((result) => result.files),
     notes: [
       options.includeHermes
-        ? "Claude Code, OpenCode and Hermes local MCP configs are covered."
-        : "Claude Code and OpenCode local project configs are covered.",
+        ? "Claude Code, OpenCode, Cursor and Hermes MCP configs are covered."
+        : "Claude Code, OpenCode and Cursor local project configs are covered.",
       options.includeCodex ? "Codex setup was executed through the Codex CLI." : "Run the Codex command when you want global Codex registration.",
       options.includeHermes ? "Hermes config was included." : "Run the Hermes command when you want Hermes registration."
     ],
@@ -201,6 +224,21 @@ function withClaudeNipmodServer(value: Record<string, unknown>): Record<string, 
       ...mcpServers,
       nipmod: {
         type: "stdio",
+        command: "nipmod",
+        args: ["mcp", "serve"],
+        env: {}
+      }
+    }
+  };
+}
+
+function withCursorNipmodServer(value: Record<string, unknown>): Record<string, unknown> {
+  const mcpServers = objectValue(value.mcpServers);
+  return {
+    ...value,
+    mcpServers: {
+      ...mcpServers,
+      nipmod: {
         command: "nipmod",
         args: ["mcp", "serve"],
         env: {}
@@ -255,6 +293,7 @@ async function writeJsonIfChanged(path: string, value: unknown): Promise<AgentSe
     return { changed: false, path };
   }
 
+  await mkdir(dirname(path), { recursive: true, mode: 0o700 });
   await writeFile(path, next, { mode: 0o600 });
   return { changed: true, path };
 }

@@ -18,7 +18,7 @@ Current truthful platform language:
 - Gitlawb: first canonical source network.
 - GitHub: public mirror, review, CI and developer access.
 - MCP: live local stdio server plus hosted read-only endpoint.
-- Codex, Claude Code, OpenCode, Hermes: MCP ready through local setup.
+- Codex, Claude Code, Cursor, OpenCode, Hermes: MCP ready through local setup.
 - Bankr: prepared and under review, not native accepted.
 - Aeon: candidate only, pending owner approval.
 

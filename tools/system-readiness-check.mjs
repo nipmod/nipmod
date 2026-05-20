@@ -204,6 +204,7 @@ async function checkDiscoveryBinding() {
   assertDeepEqual("discovery_remote_mcp_tools", manifest.mcp.remoteTools, expectedRemoteMcpTools);
   assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
+  assertEqual("discovery_setup_cursor", manifest.agent.commands.setupCursorMcp, "nipmod setup cursor");
   assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");

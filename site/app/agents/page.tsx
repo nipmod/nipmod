@@ -16,6 +16,11 @@ const commands = [
     command: "nipmod setup claude"
   },
   {
+    label: "Setup Cursor",
+    text: "Write the project scoped Cursor MCP config.",
+    command: "nipmod setup cursor"
+  },
+  {
     label: "Setup Hermes",
     text: "Add Nipmod to Hermes under mcp_servers.",
     command: "nipmod setup hermes"

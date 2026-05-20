@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T17:27:37.000Z",
+  "generatedAt": "2026-05-20T21:16:56.181Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, local host MCP contracts, hosted read-only MCP, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -102,6 +102,28 @@
         "nipmod setup claude writes a project scoped .mcp.json",
         "project .mcp.json contains nipmod stdio config",
         "claude mcp list reports nipmod connected when nipmod is on PATH"
+      ]
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "productReadiness": 100,
+      "connectionStatus": "MCP ready",
+      "status": "ready",
+      "claim": "Cursor can load the project .cursor/mcp.json and connect to Nipmod.",
+      "connectionKit": "integrations/platform-connections/cursor",
+      "setupCommand": "nipmod setup cursor",
+      "config": ".cursor/mcp.json",
+      "verifyCommand": "Open Cursor Settings > MCP",
+      "checks": [
+        "Cursor documents project MCP setup through .cursor/mcp.json",
+        "nipmod setup cursor writes a project scoped .cursor/mcp.json",
+        "project .cursor/mcp.json contains nipmod stdio command and preserves other MCP servers"
+      ],
+      "evidence": [
+        "https://docs.cursor.com/en/context/mcp",
+        "https://nipmod.com/setup",
+        "https://nipmod.com/mcp"
       ]
     },
     {

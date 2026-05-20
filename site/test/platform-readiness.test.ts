@@ -9,6 +9,7 @@ const connections = JSON.parse(readFileSync(join(siteRoot, "public", "compatibil
 const discovery = JSON.parse(readFileSync(join(siteRoot, "public", ".well-known", "nipmod.json"), "utf8"));
 const llms = readFileSync(join(siteRoot, "public", "llms.txt"), "utf8");
 const claudeConfig = JSON.parse(readFileSync(join(root, ".mcp.json"), "utf8"));
+const cursorConfig = JSON.parse(readFileSync(join(root, ".cursor", "mcp.json"), "utf8"));
 const opencodeConfig = JSON.parse(readFileSync(join(root, "opencode.json"), "utf8"));
 
 describe("platform readiness receipt", () => {
@@ -23,6 +24,7 @@ describe("platform readiness receipt", () => {
       "mcp",
       "codex",
       "claude-code",
+      "cursor",
       "opencode",
       "hermes",
       "bankr",
@@ -46,6 +48,7 @@ describe("platform readiness receipt", () => {
       "mcp",
       "codex",
       "claude-code",
+      "cursor",
       "opencode",
       "hermes",
       "bankr",
@@ -67,7 +70,7 @@ describe("platform readiness receipt", () => {
     });
   });
 
-  test("ships project configs for Claude Code and OpenCode", () => {
+  test("ships project configs for Claude Code, Cursor and OpenCode", () => {
     expect(claudeConfig).toEqual({
       mcpServers: {
         nipmod: {
@@ -75,6 +78,15 @@ describe("platform readiness receipt", () => {
           command: "nipmod",
           env: {},
           type: "stdio"
+        }
+      }
+    });
+    expect(cursorConfig).toEqual({
+      mcpServers: {
+        nipmod: {
+          args: ["mcp", "serve"],
+          command: "nipmod",
+          env: {}
         }
       }
     });

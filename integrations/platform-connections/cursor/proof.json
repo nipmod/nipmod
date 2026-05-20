@@ -1,0 +1,26 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "cursor",
+  "name": "Cursor",
+  "status": "MCP ready",
+  "proofLevel": "Project MCP config generation",
+  "setupCommand": "nipmod setup cursor",
+  "config": ".cursor/mcp.json",
+  "smokeCommand": "node tools/platform-readiness-check.mjs",
+  "checks": [
+    "nipmod setup cursor writes .cursor/mcp.json",
+    "existing Cursor MCP servers are preserved",
+    "project .cursor/mcp.json contains command nipmod and args mcp serve"
+  ],
+  "evidence": [
+    "https://docs.cursor.com/en/context/mcp",
+    "https://nipmod.com/setup",
+    "https://nipmod.com/mcp"
+  ],
+  "notClaimed": [
+    "Cursor has accepted Nipmod into a native marketplace",
+    "Cursor has publicly endorsed Nipmod",
+    "third-party Cursor users have adopted Nipmod"
+  ]
+}

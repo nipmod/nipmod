@@ -76,7 +76,7 @@ test("packages page exposes one central human archive", async ({ page, request }
   await expect(page.getByRole("heading", { name: "Agent package archive." })).toBeVisible();
   await expect(page.getByText("Search packages, check trust")).toBeVisible();
   await expect(page.getByText("Published package source today is Gitlawb.")).toBeVisible();
-  await expect(page.getByText("Codex + Claude Code + OpenCode + Hermes")).toBeVisible();
+  await expect(page.getByText("Codex + Claude Code + Cursor + OpenCode + Hermes")).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Nipmod registry machine file" })).toHaveAttribute(
     "href",
     "/registry/packages.json",
@@ -124,9 +124,10 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByRole("heading", { exact: true, name: "MCP" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Codex" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Claude Code" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Cursor" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "OpenCode" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Hermes" })).toBeVisible();
-  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(4);
+  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(5);
   await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toHaveCount(0);
   await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toHaveCount(0);
   await expect(platformRoadmap.getByText("Under review", { exact: true })).toHaveCount(0);
@@ -136,7 +137,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toHaveCount(0);
   await expect(page.getByText("Only live and MCP ready paths are shown here.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "Review path" })).toHaveCount(0);
-  await expect(platformRoadmap.getByRole("link", { name: "Open path" })).toHaveCount(7);
+  await expect(platformRoadmap.getByRole("link", { name: "Open path" })).toHaveCount(8);
 
   await expect(page.getByRole("heading", { name: "Publish your repo as a package." })).toBeVisible();
   await expect(page.getByText("The source owner runs the package flow. Nipmod verifies the claim and never takes ownership.")).toBeVisible();
@@ -192,6 +193,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   const body = await manifest.json();
   expect(body.docs.setup).toBe("https://nipmod.com/setup");
   expect(body.agent.commands.setupCodexMcp).toBe("nipmod setup codex");
+  expect(body.agent.commands.setupCursorMcp).toBe("nipmod setup cursor");
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
   expect(body.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
@@ -246,6 +248,7 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
   await expect(page.getByText("nipmod setup agents")).toBeVisible();
   await expect(page.getByText("nipmod setup codex")).toBeVisible();
   await expect(page.getByText("nipmod setup claude")).toBeVisible();
+  await expect(page.getByText("nipmod setup cursor")).toBeVisible();
   await expect(page.getByText("nipmod setup opencode")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Tell the agent" })).toBeVisible();
   await expect(page.getByText("Search the Nipmod archive first")).toBeVisible();

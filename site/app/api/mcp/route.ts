@@ -133,7 +133,7 @@ const REMOTE_TOOLS: ToolDefinition[] = [
     inputSchema: {
       additionalProperties: false,
       properties: {
-        host: { enum: ["Remote MCP", "Codex", "Claude Code", "OpenCode", "Hermes", "Generic"], type: "string" },
+        host: { enum: ["Remote MCP", "Codex", "Claude Code", "Cursor", "OpenCode", "Hermes", "Generic"], type: "string" },
         package: { type: "string" }
       },
       type: "object"

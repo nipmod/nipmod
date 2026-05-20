@@ -1,9 +1,9 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-20T17:27:37.000Z",
+  "generatedAt": "2026-05-20T21:16:56.181Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Cursor MCP-ready path, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
@@ -61,6 +61,12 @@
       "setup": "nipmod setup claude",
       "config": ".mcp.json",
       "access": "MCP stdio",
+      "status": "MCP ready"
+    },
+    "cursor": {
+      "setup": "nipmod setup cursor",
+      "config": ".cursor/mcp.json",
+      "access": "MCP stdio through Cursor project MCP config",
       "status": "MCP ready"
     },
     "openCode": {
@@ -191,7 +197,7 @@
     "install writes only after confirmInstall is write-lockfile",
     "install writes a local receipt under .nipmod/receipts",
     "hosted read-only MCP exposes no workspace-write, local-file or publish tools",
-    "setup claude and setup opencode write only local project config files",
+    "setup claude, setup cursor and setup opencode write only local project config files",
     "install plan does not mutate the workspace",
     "publish_plan through MCP never signs locally and never writes remotely",
     "Bankr proof forbids wallet, trading, signing and remote writes"

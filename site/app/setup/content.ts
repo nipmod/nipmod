@@ -18,7 +18,7 @@ export const setupContent = {
     },
     {
       label: "Connect agent",
-      text: "Pick Codex, Claude Code, OpenCode or Hermes and paste the matching setup command."
+      text: "Pick Codex, Claude Code, Cursor, OpenCode or Hermes and paste the matching setup command."
     },
     {
       label: "Paste prompt",
@@ -39,6 +39,13 @@ export const setupContent = {
       command: "nipmod setup claude",
       verify: "claude mcp list",
       text: "Writes the project .mcp.json file and preserves other MCP servers."
+    },
+    {
+      name: "Cursor",
+      label: "Project scoped MCP",
+      command: "nipmod setup cursor",
+      verify: "Cursor Settings > MCP",
+      text: "Writes .cursor/mcp.json and preserves other Cursor MCP servers."
     },
     {
       name: "OpenCode",

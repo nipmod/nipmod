@@ -132,6 +132,30 @@ Equivalent `.mcp.json`:
 
 Claude Code asks for approval before using project scoped MCP servers. Verify with `/mcp` or `claude mcp get nipmod`.
 
+## Cursor
+
+Project scoped command:
+
+```bash
+nipmod setup cursor
+```
+
+Equivalent `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "nipmod": {
+      "command": "nipmod",
+      "args": ["mcp", "serve"],
+      "env": {}
+    }
+  }
+}
+```
+
+Verify in Cursor Settings, then MCP. This is an MCP-ready Cursor path. Do not call it official Cursor support unless Cursor acknowledges it.
+
 ## OpenCode
 
 Add to `opencode.json`:
@@ -189,7 +213,7 @@ node tools/platform-readiness-check.mjs --live --host-smoke
 node tools/system-readiness-check.mjs --live --parallel
 ```
 
-This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
 
 ## Agent Demo
 
@@ -209,5 +233,6 @@ Host syntax references:
 
 - Codex MCP docs: https://developers.openai.com/learn/docs-mcp
 - Claude Code MCP docs: https://code.claude.com/docs/en/mcp
+- Cursor MCP docs: https://docs.cursor.com/en/context/mcp
 - OpenCode MCP docs: https://opencode.ai/docs/mcp-servers
 - Hermes MCP docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp

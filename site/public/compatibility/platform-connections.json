@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T17:27:37.000Z",
+  "generatedAt": "2026-05-20T21:16:56.181Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -22,13 +22,13 @@
     }
   ],
   "hostSmoke": {
-    "checkedAt": "2026-05-20T15:38:07.715Z",
+    "checkedAt": "2026-05-20T21:16:56.181Z",
     "command": "node tools/platform-readiness-check.mjs --host-smoke",
     "summary": {
-      "pass": 18,
+      "pass": 19,
       "fail": 0,
       "skip": 0,
-      "total": 18
+      "total": 19
     }
   },
   "connections": [
@@ -125,6 +125,26 @@
       "evidence": [
         "https://nipmod.com/setup",
         "https://nipmod.com/agents/codex-claude",
+        "https://nipmod.com/compatibility/platform-readiness.json"
+      ]
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "status": "MCP ready",
+      "category": "agent IDE",
+      "scope": "Cursor can load the project .cursor/mcp.json and connect to the local Nipmod MCP server.",
+      "proofLevel": "Nipmod setup cursor writes a project MCP config that follows Cursor's documented mcp.json shape.",
+      "url": "https://nipmod.com/setup",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/cursor",
+      "setupCommand": "nipmod setup cursor",
+      "smokeCommand": "node tools/platform-readiness-check.mjs",
+      "externalApprovalRequired": false,
+      "externalDependency": "No native marketplace claim is made. The current path is local project MCP setup.",
+      "evidence": [
+        "https://nipmod.com/setup",
+        "https://nipmod.com/mcp",
+        "https://docs.cursor.com/en/context/mcp",
         "https://nipmod.com/compatibility/platform-readiness.json"
       ]
     },

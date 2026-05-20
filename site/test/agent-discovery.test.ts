@@ -43,6 +43,7 @@ describe("agent discovery text", () => {
       "curl https://nipmod.com/i|bash",
       "nipmod setup codex",
       "nipmod setup claude",
+      "nipmod setup cursor",
       "nipmod setup opencode",
       "nipmod setup hermes",
       "nipmod setup agents",

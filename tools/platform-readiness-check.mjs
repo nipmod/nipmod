@@ -102,6 +102,17 @@ async function checkStaticConfigs() {
     }
   });
 
+  const cursor = JSON.parse(await readFile(join(root, ".cursor", "mcp.json"), "utf8"));
+  assertDeepEqual("cursor_project_mcp_config", cursor, {
+    mcpServers: {
+      nipmod: {
+        args: ["mcp", "serve"],
+        command: "nipmod",
+        env: {}
+      }
+    }
+  });
+
   const receipt = JSON.parse(await readFile(join(root, "site", "public", "compatibility", "platform-readiness.json"), "utf8"));
   pass("platform_readiness_receipt", {
     platforms: receipt.platforms.map((platform) => platform.id),
@@ -174,7 +185,7 @@ async function checkSourceMirrors() {
 async function checkLiveEndpoints() {
   const endpoints = [
     ["setup_page", "https://nipmod.com/setup", ["Connect your agent", "nipmod setup codex"]],
-    ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "nipmod setup claude", "nipmod setup opencode"]],
+    ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "nipmod setup claude", "nipmod setup cursor", "nipmod setup opencode"]],
     ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
     ["status_page", "https://nipmod.com/status", ["Public proof dashboard", "System readiness"]],
     ["platform_page", "https://nipmod.com/platforms", ["Connection matrix", "Only usable paths are shown", "Visible paths"]],
@@ -191,7 +202,7 @@ async function checkLiveEndpoints() {
     [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
-      ["dev.nipmod.platform-connections.v1", "claude-code", "hermes", "aeon"]
+      ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "aeon"]
     ],
     [
       "bankr_skill",
@@ -206,7 +217,7 @@ async function checkLiveEndpoints() {
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
-      ["dev.nipmod.platform-readiness.v1", "claude-code", "opencode", "hermes", "aeon"]
+      ["dev.nipmod.platform-readiness.v1", "claude-code", "cursor", "opencode", "hermes", "aeon"]
     ]
   ];
 

@@ -3,15 +3,17 @@ import { mcpContent } from "../app/mcp/content";
 
 describe("MCP host content", () => {
   test("documents the expected host setup commands", () => {
-    expect(mcpContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode", "Hermes"]);
+    expect(mcpContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "Cursor", "OpenCode", "Hermes"]);
     expect(mcpContent.hosts[0].command).toBe("nipmod setup codex");
     expect(mcpContent.hosts[0].verify).toBe("codex mcp list");
     expect(mcpContent.hosts[1].command).toBe("nipmod setup claude");
-    expect(mcpContent.hosts[2].command).toBe("nipmod setup opencode");
-    expect(mcpContent.hosts[3].command).toBe("nipmod setup hermes");
+    expect(mcpContent.hosts[2].command).toBe("nipmod setup cursor");
+    expect(mcpContent.hosts[3].command).toBe("nipmod setup opencode");
+    expect(mcpContent.hosts[4].command).toBe("nipmod setup hermes");
     expect(mcpContent.hosts[1].config).toContain('"type": "stdio"');
-    expect(mcpContent.hosts[2].config).toContain('"command": ["nipmod", "mcp", "serve"]');
-    expect(mcpContent.hosts[3].config).toContain("mcp_servers:");
+    expect(mcpContent.hosts[2].config).toContain('"command": "nipmod"');
+    expect(mcpContent.hosts[3].config).toContain('"command": ["nipmod", "mcp", "serve"]');
+    expect(mcpContent.hosts[4].config).toContain("mcp_servers:");
     expect(mcpContent.hosts.every((host) => host.prompt.includes("Nipmod") || host.prompt.includes("nipmod"))).toBe(true);
   });
 

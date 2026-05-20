@@ -54,6 +54,7 @@ Expected result:
 ```sh
 nipmod setup codex
 nipmod setup claude
+nipmod setup cursor
 nipmod setup opencode
 nipmod setup hermes
 ```
@@ -62,6 +63,7 @@ Expected result:
 
 - Codex is registered through its MCP CLI.
 - Claude Code receives a project `.mcp.json`.
+- Cursor receives a project `.cursor/mcp.json`.
 - OpenCode receives a project `opencode.json`.
 - Hermes receives a `~/.hermes/config.yaml` MCP server entry.
 - Existing host config entries are preserved.

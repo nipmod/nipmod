@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/setup"
   },
-  description: "Set up Nipmod for Codex, Claude Code, OpenCode and Hermes.",
+  description: "Set up Nipmod for Codex, Claude Code, Cursor, OpenCode and Hermes.",
   openGraph: {
     description: "Install Nipmod once, connect your agent and use the package archive from agent chat.",
     title: "Nipmod setup",

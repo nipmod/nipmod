@@ -368,6 +368,22 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /not official Hermes partner support/);
   });
 
+  test("answers Cursor setup questions directly", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot cursor setup"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Cursor Setup/);
+    assert.match(reply.text, /nipmod setup cursor/);
+    assert.match(reply.text, /not official Cursor partner support/);
+  });
+
+
   test("answers tagged general questions instead of silently ignoring them", async () => {
     const reply = await createTelegramBotReply(groupUpdate("@nipmodbot what time is it?"), {
       allowedChatId: "-100123",
@@ -413,6 +429,7 @@ describe("telegram bot knowledge base", () => {
       ["githb link bitte", /GitHub is the public mirror/],
       ["banr coin?", /Bankr coin https:\/\/bankr\.bot\/launches/],
       ["cluade code setup?", /Claude Code Setup/],
+      ["cursor setup?", /Cursor Setup/],
       ["geht das mit coedx?", /Codex Setup/],
       ["wi instalier ich das", /Install Nipmod/],
       ["linsk bitte", /Official Nipmod links/]

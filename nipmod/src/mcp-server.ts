@@ -132,7 +132,7 @@ const UpdatePlanArgumentsSchema = TrustPinsSchema.extend({
 });
 
 const DemoArgumentsSchema = z.strictObject({
-  host: z.enum(["Codex", "Claude Code", "OpenCode", "Hermes", "Generic"]).optional(),
+  host: z.enum(["Codex", "Claude Code", "Cursor", "OpenCode", "Hermes", "Generic"]).optional(),
   package: z.string().min(1).optional()
 });
 
@@ -515,12 +515,17 @@ function demoTool(raw: unknown): JsonValue {
   });
 }
 
-function hostSetup(host: "Codex" | "Claude Code" | "Generic" | "Hermes" | "OpenCode"): JsonValue {
+function hostSetup(host: "Codex" | "Claude Code" | "Cursor" | "Generic" | "Hermes" | "OpenCode"): JsonValue {
   switch (host) {
     case "Codex":
       return {
         command: "nipmod setup codex",
         verify: "codex mcp list"
+      };
+    case "Cursor":
+      return {
+        command: "nipmod setup cursor",
+        verify: "open Cursor Settings > MCP and confirm nipmod is listed"
       };
     case "Claude Code":
       return {
@@ -1032,7 +1037,7 @@ const MCP_TOOLS: ToolDefinition[] = [
     inputSchema: {
       additionalProperties: false,
       properties: {
-        host: { enum: ["Codex", "Claude Code", "OpenCode", "Hermes", "Generic"], type: "string" },
+        host: { enum: ["Codex", "Claude Code", "Cursor", "OpenCode", "Hermes", "Generic"], type: "string" },
         package: { type: "string" }
       },
       type: "object"

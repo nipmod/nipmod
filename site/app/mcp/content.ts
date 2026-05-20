@@ -130,6 +130,22 @@ args = ["mcp", "serve"]`,
       prompt: "Use the nipmod MCP server. Search, view, inspect and plan before installing any agent package."
     },
     {
+      name: "Cursor",
+      command: "nipmod setup cursor",
+      configName: ".cursor/mcp.json",
+      config: `{
+  "mcpServers": {
+    "nipmod": {
+      "command": "nipmod",
+      "args": ["mcp", "serve"],
+      "env": {}
+    }
+  }
+}`,
+      verify: "Cursor Settings > MCP",
+      prompt: "Use the nipmod MCP server in Cursor. Search, view, inspect and plan before installing any agent package."
+    },
+    {
       name: "OpenCode",
       command: "nipmod setup opencode",
       configName: "opencode.json",
@@ -186,6 +202,10 @@ args = ["mcp", "serve"]`,
     {
       label: "Claude Code MCP docs",
       href: "https://code.claude.com/docs/en/mcp"
+    },
+    {
+      label: "Cursor MCP docs",
+      href: "https://docs.cursor.com/en/context/mcp"
     },
     {
       label: "OpenCode MCP docs",

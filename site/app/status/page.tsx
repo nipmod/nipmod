@@ -115,7 +115,7 @@ export default function StatusPage() {
             <span className="check-dot check-ok" aria-hidden="true" />
             <div>
               <h3>Platform readiness</h3>
-              <p>Codex, Claude Code, OpenCode, Hermes MCP path, Bankr workflow proof and source mirror readiness.</p>
+              <p>Codex, Claude Code, Cursor, OpenCode, Hermes MCP path, Bankr workflow proof and source mirror readiness.</p>
               <a className="data-link" href="/compatibility/platform-readiness.json">
                 Open JSON receipt
               </a>

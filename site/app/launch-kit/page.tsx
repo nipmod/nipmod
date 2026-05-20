@@ -5,7 +5,7 @@ const posts = [
   {
     label: "Agent runtime setup",
     text:
-      "Nipmod now has setup paths for Codex, Claude Code, OpenCode and Hermes.\n\nJust tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.\n\nhttps://nipmod.com/setup"
+      "Nipmod now has setup paths for Codex, Claude Code, Cursor, OpenCode and Hermes.\n\nJust tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.\n\nhttps://nipmod.com/setup"
   },
   {
     label: "Proof reply",
