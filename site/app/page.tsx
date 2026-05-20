@@ -37,44 +37,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <p className="product-line">Built on Gitlawb</p>
           <h1 id="hero-title">{homeContent.headline}</h1>
           <p className="lead">{homeContent.lead}</p>
-          <div className="actions" aria-label="Actions">
-            <a className="button button-primary" href={homeContent.links.install}>
-              {homeContent.primaryAction}
-            </a>
-            <a className="button button-ghost" href="/packages">
-              Browse packages
-            </a>
-            <a
-              className="button button-ghost button-with-icon"
-              href={homeContent.links.telegram}
-              aria-label="Open Nipmod Telegram group in a new tab"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <img alt="" height="18" src="/telegram-logo.svg" width="18" />
-              <span>Telegram</span>
-            </a>
-            <a
-              className="button button-ghost button-with-icon"
-              href={homeContent.links.github}
-              aria-label="Open Nipmod GitHub repository in a new tab"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <img alt="" height="18" src="/github-logo.svg" width="18" />
-              <span>GitHub</span>
-            </a>
-            <a
-              className="button button-ghost button-with-icon"
-              href={homeContent.links.bankrCoin}
-              aria-label="Open Nipmod Bankr coin in a new tab"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <img alt="" height="18" src="/bankr-logo.svg" width="18" />
-              <span>Bankr coin</span>
-            </a>
-          </div>
         </div>
 
         <div className="terminal-panel" id="flow" aria-label="Terminal flow">
