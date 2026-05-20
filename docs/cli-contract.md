@@ -14,9 +14,7 @@ P0 commands:
 - `nipmod pack`
 - `nipmod verify`
 - `nipmod publish --dry-run`
-- `nipmod package scan`
 - `nipmod package doctor <gitlawb-repo>`
-- `nipmod package <gitlawb-repo>`
 - `nipmod package pr <gitlawb-repo>`
 - `nipmod claim <gitlawb-repo>`
 - `nipmod claim verify <gitlawb-repo>`
@@ -99,7 +97,7 @@ type. It does not fetch network data.
 `nipmod claim verify <gitlawb-repo>` fetches `.nipmod/package-claim.json` from the configured Gitlawb node and only
 returns success when the proof signature, owner DID, repo name, repo URL and package id all match the target repo.
 `nipmod claim index` scans public Gitlawb repos, verifies their claim proofs and writes a machine-readable index when
-`--out` is provided. Missing proofs are candidates, not claims.
+`--out` is provided. Missing proofs are unverified entries, not ownership claims.
 
 ## Exit codes
 

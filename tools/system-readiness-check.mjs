@@ -28,7 +28,6 @@ const expectedTools = [
   "nipmod.publish_plan",
   "nipmod.claim_verify",
   "nipmod.claim_index",
-  "nipmod.package_patch",
   "nipmod.verify",
   "nipmod.audit",
   "nipmod.sbom",
@@ -271,23 +270,6 @@ async function checkWriteBoundaries() {
     await rm(workspace, { recursive: true, force: true });
   }
 
-  const draftDir = await mkdtemp(join(tmpdir(), "nipmod-system-draft-"));
-  try {
-    const draft = await run(nodeBin, [
-      cliPath,
-      "package",
-      "pr",
-      "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
-      "--dir",
-      draftDir,
-      "--json"
-    ]);
-    assertText("package_pr_remote_write_boundary", draft.stdout, "remote writes: none");
-    assertDeepEqual("package_pr_local_files", (await listFiles(draftDir)).sort(), ["README.nipmod.md", "nipmod.json"]);
-  } finally {
-    await rm(draftDir, { recursive: true, force: true });
-  }
-
   const installRoot = await mkdtemp(join(tmpdir(), "nipmod-system-receipt-"));
   try {
     const pkgDir = join(installRoot, "pkg");
@@ -341,9 +323,7 @@ async function checkLiveSystemEndpoints() {
     ["live_dependencies_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/dependencies.json`, ["dependencies"]],
     ["live_provenance_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/provenance.json`, ["sourceCommit"]],
     ["live_bankr_skill", state.receipt.agentHosts.bankr.skill, ["name: nipmod"]],
-    ["live_bankr_proof", state.receipt.agentHosts.bankr.proof, ["dev.nipmod.bankr.agent-proof.v1"]],
-    ["live_scout_health", "https://nipmod.com/scout/health", ["dev.nipmod.scout-health.v1"]],
-    ["live_scout_candidates", "https://nipmod.com/scout/candidates", ["dev.nipmod.scout-candidates.v1"]]
+    ["live_bankr_proof", state.receipt.agentHosts.bankr.proof, ["dev.nipmod.bankr.agent-proof.v1"]]
   ];
 
   for (const [name, url, expected] of endpoints) {
@@ -405,7 +385,6 @@ async function checkParallelArchiveAccess() {
       ),
     async () => assertText("parallel_bankr_skill", await fetchText(state.receipt.agentHosts.bankr.skill), "name: nipmod"),
     async () => assertText("parallel_bankr_proof", await fetchText(state.receipt.agentHosts.bankr.proof), proofPackage),
-    async () => assertText("parallel_scout_health", await fetchText("https://nipmod.com/scout/health"), "dev.nipmod.scout-health.v1"),
     async () => assertText("parallel_llms", await fetchText(state.receipt.entrypoints.agentText), state.receipt.sharedArchive.registry),
     async () => assertText("parallel_manifest", await fetchText(state.receipt.entrypoints.machineManifest), state.receipt.sharedArchive.registry)
   ];

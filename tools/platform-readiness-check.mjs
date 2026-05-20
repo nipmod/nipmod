@@ -21,7 +21,6 @@ const expectedTools = [
   "nipmod.publish_plan",
   "nipmod.claim_verify",
   "nipmod.claim_index",
-  "nipmod.package_patch",
   "nipmod.verify",
   "nipmod.audit",
   "nipmod.sbom",
@@ -159,7 +158,7 @@ async function checkLiveEndpoints() {
     [
       "bankr_agent_proof",
       "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-      ["dev.nipmod.bankr.agent-proof.v1", "prepare-repo-draft"]
+      ["dev.nipmod.bankr.agent-proof.v1", "plan-install"]
     ],
     [
       "platform_readiness_live",
@@ -195,24 +194,6 @@ async function checkBankrProofPath() {
     "packageCount"
   ]);
 
-  const draftDir = await mkdtemp(join(tmpdir(), "nipmod-bankr-platform-proof-"));
-  try {
-    await assertCommandContains(
-      "bankr_repo_draft",
-      [
-        cliPath,
-        "package",
-        "pr",
-        "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
-        "--dir",
-        draftDir,
-        "--json"
-      ],
-      ["remote writes: none", "README.nipmod.md", "nipmod.json"]
-    );
-  } finally {
-    await rm(draftDir, { recursive: true, force: true });
-  }
 }
 
 async function checkCodex() {

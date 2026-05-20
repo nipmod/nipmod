@@ -44,7 +44,6 @@ describe("nipmod discovery manifest", () => {
       "node",
       "registry",
       "review",
-      "scout",
       "transparency",
       "trustPage",
       "type",
@@ -90,23 +89,9 @@ describe("nipmod discovery manifest", () => {
       "trust"
     ]);
     expect(Object.keys(manifest.claims).sort()).toEqual([
-      "candidatePage",
       "index",
       "indexCommand",
       "verifyCommand"
-    ]);
-    expect(Object.keys(manifest.scout).sort()).toEqual([
-      "candidates",
-      "draft",
-      "draftParam",
-      "drafts",
-      "health",
-      "intervalMs",
-      "last",
-      "notifications",
-      "patch",
-      "patchParam",
-      "sourceNodes"
     ]);
     expect(Object.keys(manifest.agent).sort()).toEqual(["commands", "llms", "prompts", "runbook", "workflow"]);
     expect(Object.keys(manifest.bankr).sort()).toEqual(["app", "coin", "freeServices", "proof", "skill"]);
@@ -132,7 +117,6 @@ describe("nipmod discovery manifest", () => {
       "installPlan",
       "mcpControlledInstall",
       "mcpDemo",
-      "packagePr",
       "publishDryRun",
       "sbom",
       "search",
@@ -288,19 +272,6 @@ describe("nipmod discovery manifest", () => {
       proofTranscript: "https://nipmod.com/proof/transcript.json",
       systemReadiness: "https://nipmod.com/compatibility/system-readiness.json"
     });
-    expect(manifest.scout).toEqual({
-      candidates: "https://nipmod.com/scout/candidates",
-      draft: "https://nipmod.com/scout/draft",
-      draftParam: "repo",
-      drafts: "https://nipmod.com/scout/drafts",
-      health: "https://nipmod.com/scout/health",
-      intervalMs: 300000,
-      last: "https://nipmod.com/scout/last",
-      notifications: "https://nipmod.com/scout/notifications",
-      patch: "https://nipmod.com/scout/patch",
-      patchParam: "repo",
-      sourceNodes: ["https://node.nipmod.com", "https://node.gitlawb.com", "https://node2.gitlawb.com"]
-    });
   });
 
   test("publishes a complete agent runbook from the machine manifest", () => {
@@ -345,8 +316,7 @@ describe("nipmod discovery manifest", () => {
       "sbom",
       "publishDryRun",
       "claimVerify",
-      "claimIndex",
-      "packagePr"
+      "claimIndex"
     ]);
     expect(manifest.agent.commands).toEqual({
       addPackage: `nipmod add ${agentDemoPackage} --online`,
@@ -362,7 +332,6 @@ describe("nipmod discovery manifest", () => {
       mcpDemo:
         "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.demo\",\"arguments\":{\"host\":\"Codex\",\"package\":\"gitlawb-repo-reader\"}}}",
       installPackage: `nipmod install ${agentDemoPackage}`,
-      packagePr: "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json",
       publishDryRun: "nipmod publish . --dry-run --json",
       sbom: "nipmod sbom --json",
       search: "nipmod search gitlawb --online",
@@ -390,7 +359,6 @@ describe("nipmod discovery manifest", () => {
         "nipmod.publish_plan",
         "nipmod.claim_verify",
         "nipmod.claim_index",
-        "nipmod.package_patch",
         "nipmod.verify",
         "nipmod.audit",
         "nipmod.sbom",
@@ -416,7 +384,6 @@ describe("nipmod discovery manifest", () => {
         "node.gitlawb.com",
         "node.nipmod.com",
         "node2.gitlawb.com",
-        "nipmod-scout.fly.dev",
         "nipmod-witness.fly.dev"
       ]).toContain(url.hostname);
     }

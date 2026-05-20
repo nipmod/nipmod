@@ -43,8 +43,6 @@ await run(
     "../tools/restore-drill.test.mjs",
     "../tools/prod-alert-runner.test.mjs",
     "../tools/monitor-server.test.mjs",
-    "../tools/scout-agent.test.mjs",
-    "../tools/scout-server.test.mjs",
     "../tools/prod-load-smoke.test.mjs",
     "../tools/node-edge-resilience-smoke.test.mjs",
     "../tools/first-party-packages.test.mjs",
@@ -134,12 +132,6 @@ async function verifyProduction() {
   await assertJson("https://node.nipmod.com/health", (payload) => payload.status === "ok", "node health failed");
   await assertUnauthenticatedReceivePackBlocked();
   await assertJson("https://nipmod-witness.fly.dev/health", (payload) => payload.ok === true, "witness health failed");
-  await assertJson("https://nipmod.com/scout/health", (payload) => payload.ok === true && payload.runs > 0, "scout health failed");
-  await assertJson(
-    "https://nipmod.com/scout/candidates",
-    (payload) => payload.type === "dev.nipmod.scout-candidates.v1" && Array.isArray(payload.candidates),
-    "scout candidates failed"
-  );
   await run(process.execPath, ["tools/platform-readiness-check.mjs", "--live"], { timeoutMs: 120_000 });
   await run(process.execPath, ["tools/system-readiness-check.mjs", "--live", "--parallel"], { timeoutMs: 180_000 });
   await assertJson(
@@ -157,8 +149,6 @@ async function verifyProduction() {
 	      payload.advisories === "https://nipmod.com/advisories.json" &&
 	      payload.advisoriesSignature === "https://nipmod.com/advisories.json.sig" &&
 	      payload.registry?.url === "https://nipmod.com/registry/packages.json" &&
-	      payload.scout?.health === "https://nipmod.com/scout/health" &&
-	      payload.scout?.candidates === "https://nipmod.com/scout/candidates" &&
 	      payload.install?.scriptSha256 === expectedDigestFromShaFileSync(join(root, "site", "public", "install.sh.sha256")) &&
 	      payload.install?.release?.version === version &&
 	      payload.install?.release?.artifact === `https://nipmod.com/releases/${releaseName}` &&

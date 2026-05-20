@@ -51,7 +51,6 @@ describe("nipmod MCP server", () => {
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
-      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",
@@ -73,10 +72,9 @@ describe("nipmod MCP server", () => {
 	      "nipmod.install": false,
 	      "nipmod.update_plan": true,
 	      "nipmod.demo": true,
-	      "nipmod.publish_plan": true,
+      "nipmod.publish_plan": true,
       "nipmod.claim_verify": true,
       "nipmod.claim_index": true,
-      "nipmod.package_patch": true,
       "nipmod.verify": true,
       "nipmod.audit": true,
       "nipmod.sbom": true,
@@ -185,32 +183,6 @@ describe("nipmod MCP server", () => {
           status: "verified"
         }
       ]
-    });
-  });
-
-  test("creates a package patch through tools/call without remote writes", async () => {
-    const identity = generateIdentity();
-    const server = createNipmodMcpServer();
-    await initialize(server);
-
-    const result = await server.handleRequest({
-      id: 23,
-      jsonrpc: "2.0",
-      method: "tools/call",
-      params: {
-        arguments: {
-          repo: `gitlawb://${identity.did}/repo-reader`,
-          version: "0.1.0"
-        },
-        name: "nipmod.package_patch"
-      }
-    });
-
-    expect(result.error).toBeUndefined();
-    expect(result.result.structuredContent).toMatchObject({
-      package: `pkg:${identity.did}/repo-reader`,
-      remoteWrites: false,
-      repo: `gitlawb://${identity.did}/repo-reader`
     });
   });
 
@@ -901,7 +873,6 @@ describe("nipmod MCP server", () => {
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
-      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",

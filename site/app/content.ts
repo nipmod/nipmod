@@ -23,7 +23,7 @@ export const homeContent = {
   usage: [
     {
       label: "Search",
-      text: "Find agent packages and package candidates without a Nipmod account."
+      text: "Find verified agent packages without a Nipmod account."
     },
     {
       label: "Verify",
@@ -67,9 +67,9 @@ export const homeContent = {
         name: "Gitlawb",
         status: "Live",
         label: "source network",
-        text: "Nipmod source, package drafts and DID ownership checks already run on Gitlawb repos.",
-        href: "/candidates",
-        cta: "View candidates"
+        text: "Nipmod source, package publishing and DID ownership checks already run on Gitlawb repos.",
+        href: "/package",
+        cta: "Create package"
       },
       {
         name: "Bankr",
@@ -90,20 +90,20 @@ export const homeContent = {
     ]
   },
   claimFlow: {
-    headline: "Found your repo? Claim the package.",
-    lead: "Nipmod can prepare a package path, but the repo owner keeps control.",
+    headline: "Publish your repo as a package.",
+    lead: "The source owner runs the package flow. Nipmod verifies the claim and never takes ownership.",
     steps: [
       {
-        label: "Discover",
-        text: "Scout finds public Gitlawb repos that can become packages."
+        label: "Prepare",
+        text: "Start from your own Gitlawb repo and run the package preflight locally."
       },
       {
-        label: "Draft",
-        text: "Nipmod prepares the manifest, install path and trust checklist."
+        label: "Verify",
+        text: "Check manifest, source, permissions, evidence and DID ownership."
       },
       {
-        label: "Claim",
-        text: "The repo owner signs the claim with the Gitlawb DID."
+        label: "Publish",
+        text: "The repo owner signs and publishes only after the dry run is clean."
       },
       {
         label: "Use",
@@ -119,7 +119,7 @@ export const homeContent = {
     },
     {
       question: "Can humans use it?",
-      answer: "Yes. Humans can search packages, inspect proof, install from the CLI and claim package drafts for their repos."
+      answer: "Yes. Humans can search packages, inspect proof, install from the CLI and publish their own Gitlawb packages."
     },
     {
       question: "Can agents use it directly?",
@@ -136,7 +136,7 @@ export const homeContent = {
     },
     {
       question: "What can I do now?",
-      answer: "Install the CLI, browse verified packages or check whether your Gitlawb repo has a package candidate."
+      answer: "Install the CLI, browse verified packages or prepare your own Gitlawb repo for publishing."
     }
   ],
   startCards: [
@@ -270,7 +270,7 @@ export const homeContent = {
     },
     {
       label: "Demo flow",
-      text: "A Gitlawb repo can be drafted, checked, verified and installed from one terminal path."
+      text: "A repo owner can prepare, check, verify and dry run a package from one terminal path."
     },
     {
       label: "Public proof",
@@ -310,7 +310,7 @@ export const homeContent = {
     },
     {
       label: "Publish dry run",
-      text: "Create a Gitlawb package draft and registry candidate without mutating Gitlawb.",
+      text: "Create local package files and a registry candidate without mutating Gitlawb.",
       command:
         "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir .\nnipmod publish . --dry-run --json"
     }
@@ -458,29 +458,29 @@ export const homeContent = {
     }
   ],
   repoToPackage: {
-    headline: "Turn a Gitlawb repo into an agent package",
-    lead: "Paste a public Gitlawb repo. Get a package draft, manifest, trust checklist and publish preflight.",
-    inputLabel: "Gitlawb repo",
-    inputPlaceholder: "gitlawb://did:key:z6Mk.../repo",
-    outputTitle: "Draft output",
-    outputCommand: "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
+    headline: "Publish your Gitlawb repo as an agent package",
+    lead: "Use this flow for a repo you own or maintain. It gives you local checks, owner verification and a publish dry run.",
+    inputLabel: "Your Gitlawb repo",
+    inputPlaceholder: "gitlawb://did:key:z6Mk.../your-repo",
+    outputTitle: "Package output",
+    outputCommand: "nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json\nnipmod publish your-repo-pr --dry-run --json",
     steps: [
       {
-        label: "Paste",
-        text: "Humans and agents start with a public Gitlawb repo URL or DID path."
+        label: "Choose",
+        text: "Start with a Gitlawb repo you control."
       },
       {
-        label: "Draft",
-        text: "Nipmod creates a package manifest, permissions checklist, owner claim check and publish dry run."
+        label: "Check",
+        text: "Run local package checks, permissions review, owner claim check and publish dry run."
       },
       {
-        label: "Claim",
-        text: "The repo owner signs the package with the repo DID before it can become verified."
+        label: "Publish",
+        text: "Sign and publish only when the evidence is clean."
       }
     ],
     claim: {
-      label: "No account required",
-      text: "Gitlawb uses DID signature ownership. Unclaimed drafts stay clearly marked as drafts."
+      label: "Owner controlled",
+      text: "Gitlawb uses DID signature ownership. Nipmod does not claim repos for other people."
     }
   }
 } as const;

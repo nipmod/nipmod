@@ -15,7 +15,7 @@ const posts = [
   {
     label: "Package author",
     text:
-      "Got a Gitlawb repo you want agents to reuse?\n\nPaste it here and Nipmod creates the draft path, claim check and publish dry run:\nhttps://nipmod.com/package"
+      "Got a Gitlawb repo you own and want agents to reuse?\n\nUse the self service package path. It gives you local files, owner claim checks and a publish dry run:\nhttps://nipmod.com/package"
   }
 ];
 
@@ -63,7 +63,7 @@ export default function LaunchKitPage() {
       <section className="registry-section" aria-labelledby="posts-title">
         <div className="section-head">
           <p className="eyebrow">Copy</p>
-          <h2 id="posts-title">Post drafts</h2>
+          <h2 id="posts-title">Post copy</h2>
           <p>Keep public claims tied to what the receipts prove. Do not claim partner approval unless the partner says it.</p>
         </div>
         <div className="quickstart-grid">

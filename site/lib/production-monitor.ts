@@ -12,7 +12,6 @@ export interface MonitorEndpointConfig {
   home: string;
   nodeHealth: string;
   registry: string;
-  scoutHealth: string;
   trust: string;
   witnessHealth: string;
 }
@@ -60,7 +59,6 @@ const DEFAULT_ENDPOINTS: MonitorEndpointConfig = {
   home: "https://nipmod.com",
   nodeHealth: "https://node.nipmod.com/health",
   registry: "https://nipmod.com/registry/packages.json",
-  scoutHealth: "https://nipmod.com/scout/health",
   trust: "https://nipmod.com/trust",
   witnessHealth: "https://nipmod-witness.fly.dev/health"
 };
@@ -138,13 +136,6 @@ export async function runProductionMonitor({
     assertEqual(payload.ok, true, "witness health is not ok");
     assertEqual(payload.lastError, null, "witness has lastError");
     return { url: endpoints.witnessHealth };
-  });
-
-  await runCheck(checks, "scout_health", async () => {
-    const payload = await fetchJson(endpoints.scoutHealth, timedFetch);
-    assertRecord(payload, "scout health");
-    assertEqual(payload.ok, true, "scout health is not ok");
-    return { url: endpoints.scoutHealth };
   });
 
   const failedChecks = checks.filter((check) => check.status !== "pass");

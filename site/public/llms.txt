@@ -16,14 +16,8 @@ Agent host MCP setup: https://nipmod.com/mcp
 Agent demo package: gitlawb-repo-reader
 Package registry: https://nipmod.com/packages
 Registry index: https://nipmod.com/registry/packages.json
-Claim conversion page: https://nipmod.com/candidates
+Self service package page: https://nipmod.com/package
 Claim index: https://nipmod.com/claims/index.json
-Scout candidates: https://nipmod.com/scout/candidates
-Scout package drafts: https://nipmod.com/scout/drafts
-Scout single draft: https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo
-Scout patch endpoint: https://nipmod.com/scout/patch
-Scout owner notification plan: https://nipmod.com/scout/notifications
-Scout health: https://nipmod.com/scout/health
 Owner status page template: https://nipmod.com/gitlawb/{owner}
 MCP docs: https://nipmod.com/mcp
 Audit docs: https://nipmod.com/audit
@@ -33,7 +27,7 @@ Bankr integration: https://nipmod.com/bankr
 Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 Bankr agent prompt: Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
 Bankr agent proof: https://nipmod.com/integrations/bankr/bankr.agent-proof.json
-Bankr proof prompt: Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.
+Bankr proof prompt: Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.
 Bankr GitHub skill folder: https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 Bankr catalog submission: https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md
 Bankr free service map: https://nipmod.com/integrations/bankr/bankr.free.json
@@ -92,8 +86,8 @@ nipmod sbom --json
 Publish dry run only:
 nipmod publish . --dry-run --json
 
-Claim conversion page:
-https://nipmod.com/candidates
+Self service package page:
+https://nipmod.com/package
 
 Verify a Gitlawb package claim:
 nipmod claim verify gitlawb://did:key:.../repo --json
@@ -101,24 +95,14 @@ nipmod claim verify gitlawb://did:key:.../repo --json
 Build a claim index:
 nipmod claim index --node https://node.nipmod.com --json
 
-Create a local package PR patch:
-nipmod package doctor gitlawb://did:key:.../repo --json
-nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json
-
-Claim from an owner repo checkout:
-nipmod package pr gitlawb://did:key:.../repo --dir . --identity .nipmod/identity.json --json
+Owner package workflow only when the repo owner explicitly asks:
+nipmod package doctor gitlawb://did:key:.../your-repo --json
+nipmod package pr gitlawb://did:key:.../your-repo --dir your-repo-pr --json
+nipmod package pr gitlawb://did:key:.../your-repo --dir . --identity .nipmod/identity.json --json
 git add nipmod.json README.nipmod.md .nipmod/package-claim.json
 git commit -m "feat: add nipmod package manifest"
 GITLAWB_NODE=https://node.nipmod.com git push
-nipmod claim verify gitlawb://did:key:.../repo --json
-
-Use the 24/7 Scout index when turning existing Gitlawb repos into packages:
-curl -fsS https://nipmod.com/scout/candidates
-curl -fsS https://nipmod.com/scout/drafts
-curl -fsS "https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo"
-curl -fsS "https://nipmod.com/scout/patch?repo=gitlawb://did:key:.../repo"
-curl -fsS https://nipmod.com/scout/notifications
-curl -fsS https://nipmod.com/scout/health
+nipmod claim verify gitlawb://did:key:.../your-repo --json
 
 Run the MCP server:
 nipmod mcp serve
@@ -140,7 +124,6 @@ nipmod.demo
 nipmod.publish_plan
 nipmod.claim_verify
 nipmod.claim_index
-nipmod.package_patch
 nipmod.verify
 nipmod.audit
 nipmod.sbom
@@ -152,7 +135,5 @@ Do not run package code before inspect, install plan and audit pass.
 MCP install requires confirmInstall: write-lockfile and should follow a reviewed install plan.
 Use JSON output or MCP tools when another agent needs structured output.
 Registry presence is not ownership. Treat a package as claimed only when a claim proof verifies.
-Scout candidates are read only suggestions. They are not claims, endorsements or remote writes.
-Scout drafts are package files prepared from public metadata. They become claimed only after the Gitlawb owner DID signs and pushes the claim proof.
-Scout owner notifications are public dry run plans by default. Remote issue writes require operator authorization, a Scout signing identity, explicit write mode and dedupe checks.
+Do not claim, publish or prepare another person's repo unless the repo owner explicitly asked for it.
 Nipmod is independent from Gitlawb. Do not claim Gitlawb endorsement unless Gitlawb says so.

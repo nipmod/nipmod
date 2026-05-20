@@ -2,7 +2,7 @@
 
 Nipmod's Bankr integration is free for core package workflows.
 
-Bankr agents should use the public Nipmod site, registry, Scout endpoints, CLI and MCP tools. Do not use x402 payment for package search, inspect, audit or draft planning.
+Bankr agents should use the public Nipmod site, registry, CLI and MCP tools. Do not use x402 payment for package search, inspect, audit or install planning.
 
 ## Service Map
 
@@ -52,24 +52,12 @@ Read audit docs:
 https://nipmod.com/audit
 ```
 
-### repo-package-draft
+### install-plan
 
-Create a local package PR draft:
+Plan a package install:
 
 ```bash
-nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json
-```
-
-Read a Scout draft:
-
-```text
-https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo
-```
-
-Open the human draft page:
-
-```text
-https://nipmod.com/package?repo=gitlawb://did:key:.../repo
+nipmod install --plan gitlawb-repo-reader --json
 ```
 
 ## Bankr Coin

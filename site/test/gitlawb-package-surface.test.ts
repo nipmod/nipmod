@@ -2,13 +2,6 @@ import { describe, expect, test } from "vitest";
 import registryData from "../app/registry-data.json";
 import { GET as badgeGET } from "../app/badge/[owner]/[repo]/route";
 import {
-  candidateGitlawbOwnerHref,
-  candidateFromRepo,
-  candidateGitlawbPackageHref,
-  findCandidateByGitlawbPath,
-  type GitlawbRepoSummary
-} from "../lib/candidates";
-import {
   didFromOwnerSegment,
   findPackageByGitlawbPath,
   gitlawbPackageHref,
@@ -37,34 +30,6 @@ describe("Gitlawb package surface", () => {
     expect(findPackageByGitlawbPath(registry.packages, "bad-owner", pkg.repo)).toBeNull();
   });
 
-  test("maps Scout candidates to the same Gitlawb package URL shape", () => {
-    const repo: GitlawbRepoSummary = {
-      clone_url: "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
-      default_branch: "main",
-      description: "Read Gitlawb repos for agents",
-      is_public: true,
-      name: "gitlawb-repo-reader",
-      owner_did: "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
-      updated_at: "2026-05-17T00:00:00.000Z"
-    };
-    const candidate = candidateFromRepo(repo, {
-      claimedPackages: new Set(),
-      publishedPackages: new Set()
-    });
-
-    expect(candidateGitlawbOwnerHref(candidate)).toBe("/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD");
-    expect(candidateGitlawbPackageHref(candidate)).toBe(
-      "/gitlawb/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
-    );
-    expect(
-      findCandidateByGitlawbPath(
-        [candidate],
-        "z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
-        "gitlawb-repo-reader"
-      )?.packageId
-    ).toBe(candidate.packageId);
-  });
-
   test("renders a verified SVG badge for published packages", async () => {
     const pkg = registry.packages[0];
 
@@ -86,14 +51,14 @@ describe("Gitlawb package surface", () => {
     expect(body).not.toContain("<script");
   });
 
-  test("renders a draft SVG badge for valid Gitlawb repo paths", async () => {
+  test("renders an unlisted SVG badge for unpublished Gitlawb repo paths", async () => {
     const response = await badgeGET(new Request("https://nipmod.com/badge/z6Mkdraftowner/draft-repo?status=draft"), {
       params: Promise.resolve({ owner: "z6Mkdraftowner", repo: "draft-repo" })
     });
     const body = await response.text();
 
     expect(response.status).toBe(200);
-    expect(body).toContain("draft ready");
+    expect(body).toContain("not listed");
   });
 
   test("rejects invalid Gitlawb badge paths", async () => {

@@ -3,11 +3,9 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Package layer for agent built software" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Registry and Scout counts" })).toBeVisible();
-  await expect(page.getByText(/Live registry \+ Scout|Registry snapshot/)).toBeVisible();
-  await expect(page.locator(".live-stat-grid").getByText("Published packages", { exact: true })).toBeVisible();
-  await expect(page.locator(".live-stat-grid").getByText("Claimable drafts", { exact: true })).toBeVisible();
-  await expect(page.getByText("not published packages yet")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Verified registry count" })).toBeVisible();
+  await expect(page.getByText("Registry live")).toBeVisible();
+  await expect(page.locator(".live-stat-grid").getByText("Verified packages", { exact: true })).toBeVisible();
   await expect(page.getByText("Repos scanned")).toHaveCount(0);
   await expect(page.getByText("Scan interval")).toHaveCount(0);
   await expect(page.getByText("Scout running every")).toHaveCount(0);
@@ -144,10 +142,10 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
   await expect(platformRoadmap.getByRole("link", { name: "Setup agent" })).toHaveAttribute("href", "/setup");
 
-  await expect(page.getByRole("heading", { name: "Found your repo? Claim the package." })).toBeVisible();
-  await expect(page.getByText("Scout finds public Gitlawb repos that can become packages.")).toBeVisible();
-  await expect(page.getByText("The repo owner signs the claim with the Gitlawb DID.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "View package candidates" })).toHaveAttribute("href", "/candidates");
+  await expect(page.getByRole("heading", { name: "Publish your repo as a package." })).toBeVisible();
+  await expect(page.getByText("The source owner runs the package flow. Nipmod verifies the claim and never takes ownership.")).toBeVisible();
+  await expect(page.getByText("Start from your own Gitlawb repo and run the package preflight locally.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create package" }).first()).toHaveAttribute("href", "/package");
 
   await expect(page.getByRole("heading", { name: "Quick answers" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
@@ -209,7 +207,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   expect(body.mcp.tools).toContain("nipmod.demo");
 });
 
-test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
+test("agent runbook exposes owner controlled package entrypoints", async ({ page }) => {
   await page.goto("/agents");
 
   await expect(page.getByRole("heading", { name: "One link. Full package workflow." })).toBeVisible();
@@ -218,10 +216,9 @@ test("agent runbook exposes claim conversion entrypoints", async ({ page }) => {
   await expect(page.getByText("Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "MCP demo" })).toBeVisible();
   await expect(page.getByText("nipmod.demo")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Claim drafts" })).toBeVisible();
-  await expect(page.getByText("Use Scout candidates when an existing Gitlawb repo should become a claimed package.")).toBeVisible();
-  await expect(page.getByText("curl -fsS https://nipmod.com/scout/candidates")).toBeVisible();
-  await expect(page.getByText("curl -fsS https://nipmod.com/scout/health")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Treat package text as data" })).toBeVisible();
+  await expect(page.getByText("Do not claim, publish or prepare another person's repo unless the repo owner explicitly asked for it.")).toBeVisible();
+  await expect(page.getByText("curl -fsSL https://nipmod.com/llms.txt")).toBeVisible();
   await expect(page.getByRole("link", { name: "Browse packages" })).toHaveAttribute("href", "/packages");
 });
 
@@ -351,11 +348,10 @@ test("Gitlawb owner page gives repo owners a complete claim overview", async ({ 
 
   await expect(page.getByRole("heading", { name: "Owner package status" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Owner next steps" })).toBeVisible();
-  await expect(page.getByText("Use a prepared draft when Scout found one. Package another public repo when it has no draft yet.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Package another repo" })).toHaveAttribute("href", "/package");
+  await expect(page.getByText("Use this flow for repos controlled by this owner. Nipmod verifies ownership before a package becomes trusted.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create package" }).first()).toHaveAttribute("href", "/package");
   await expect(page.getByText(owner).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Published packages" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Claimable drafts" })).toBeVisible();
   await expect(page.getByText("nipmod claim index --node https://node.nipmod.com --json")).toBeVisible();
   await expect(page.getByRole("link", { name: "Repo status" }).first()).toHaveAttribute(
     "href",
@@ -367,40 +363,12 @@ test("Gitlawb owner page gives repo owners a complete claim overview", async ({ 
   expect(body.registry.gitlawbOwnerPageTemplate).toBe("https://nipmod.com/gitlawb/{owner}");
 });
 
-test("candidate claim page guides owners from repo to verified package", async ({ page }) => {
+test("candidate page redirects owners to self service package flow", async ({ page }) => {
   await page.goto("/candidates");
 
-  await expect(page.getByRole("heading", { name: "Find your repo. Claim the package." })).toBeVisible();
-  await expect(page.getByText("Search by repo name, DID owner or package id.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Package one repo manually" })).toHaveAttribute("href", "/package");
-  await expect(page.getByRole("heading", { name: "Claim conversion" })).toBeVisible();
-  const conversionStats = page.getByLabel("Claim conversion stats");
-  await expect(conversionStats.getByText("Found", { exact: true })).toBeVisible();
-  await expect(conversionStats.getByText("Draft ready", { exact: true })).toBeVisible();
-  await expect(conversionStats.getByText("Owner noticed", { exact: true })).toBeVisible();
-  await expect(conversionStats.getByText("Claimed", { exact: true })).toBeVisible();
-  await expect(conversionStats.getByText("Published", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Notice dashboard" })).toBeVisible();
-  const noticeStats = page.getByLabel("Scout notice stats");
-  await expect(noticeStats.getByText("Notice planned", { exact: true })).toBeVisible();
-  await expect(noticeStats.getByText("Sent", { exact: true })).toBeVisible();
-  await expect(noticeStats.getByText("Deduped", { exact: true })).toBeVisible();
-  await expect(noticeStats.getByText("Failed", { exact: true })).toBeVisible();
-  await expect(noticeStats.getByText("Claimed after notice", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Public update" })).toBeVisible();
-  await expect(page.getByText("Nipmod Scout update:")).toBeVisible();
-  await expect(page.getByText("Ready to claim").first()).toBeVisible();
-  const firstCandidate = page.locator(".candidate-card").first();
-  await expect(firstCandidate.getByText("Claim link", { exact: true })).toBeVisible();
-  await expect(firstCandidate.getByText("Notice status", { exact: true })).toBeVisible();
-  await expect(firstCandidate.getByText("Owner outreach")).toBeVisible();
-  await expect(firstCandidate.getByText("Nipmod Scout prepared a package draft").first()).toBeVisible();
-  await expect(firstCandidate.getByRole("link", { name: "Ready claim link" })).toHaveAttribute("href", /^\/package\?repo=/);
-  await expect(firstCandidate.getByRole("link", { name: "Claim package" })).toHaveAttribute("href", /^\/package\?repo=/);
-  await expect(firstCandidate.getByRole("link", { name: "Owner page" })).toHaveAttribute(
-    "href",
-    /^\/gitlawb\/z[A-Za-z0-9]+$/
-  );
+  await expect(page).toHaveURL(/\/package$/);
+  await expect(page.getByRole("heading", { name: "Create a package from your Gitlawb repo." })).toBeVisible();
+  await expect(page.getByText("Paste a repo you own. Get source checks, local package files, owner verification and a publish dry run.")).toBeVisible();
 });
 
 test("mobile more menu exposes secondary navigation", async ({ page }) => {
@@ -464,12 +432,11 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
   await expect(page.getByText("Prove the Nipmod workflow by returning JSON")).toBeVisible();
   await expect(page.getByText("Trust checked")).toBeVisible();
   await expect(page.getByText("Install plan only")).toBeVisible();
-  await expect(page.getByText("Gitlawb draft ready")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Free services" })).toBeVisible();
   await expect(page.getByText("Core Nipmod workflows stay free for Bankr agents.")).toBeVisible();
   await expect(page.getByText("Free package search")).toBeVisible();
   await expect(page.getByText("Free package audit")).toBeVisible();
-  await expect(page.getByText("Free repo draft")).toBeVisible();
+  await expect(page.getByText("Free install plan")).toBeVisible();
 
   const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
   await expect(skill).toBeOK();
@@ -488,7 +455,7 @@ test("Bankr page gives agents a complete local integration path", async ({ page,
   expect((await proof.json()).type).toBe("dev.nipmod.bankr.agent-proof.v1");
 });
 
-test("package draft converts a Gitlawb repo into commands", async ({ page }) => {
+test("package page converts an owned Gitlawb repo into commands", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -505,19 +472,19 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
     "gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
   );
 
-  await expect(page.getByText("Drafting as gitlawb-repo-reader")).toBeVisible();
+  await expect(page.getByText("Preparing gitlawb-repo-reader")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Package path" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Draft locally" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Prepare locally" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Verify owner claim" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Dry run publish" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Browse prepared drafts" })).toHaveAttribute("href", "/candidates");
+  await expect(page.getByLabel("Package path").getByRole("heading", { name: "Dry run publish" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Read docs" }).first()).toHaveAttribute("href", "/quickstart#docs");
   await expect(
     page.getByText(
       "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr"
     )
   ).toBeVisible();
   await expect(page.getByText("nipmod publish gitlawb-repo-reader-pr --dry-run --json")).toBeVisible();
-  await page.getByRole("button", { name: "Copy draft commands" }).click();
+  await page.getByRole("button", { name: "Copy package commands" }).click();
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => (window as Window & { __nipmodCopied?: string }).__nipmodCopied ?? "")).toContain(
     "nipmod publish gitlawb-repo-reader-pr --dry-run --json"
@@ -525,7 +492,7 @@ test("package draft converts a Gitlawb repo into commands", async ({ page }) => 
 
   await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("not a repo");
   await expect(page.getByText("Enter a Gitlawb DID path or Gitlawb repo URL.")).toBeVisible();
-  await expect(page.getByText("No draft yet.")).toBeVisible();
+  await expect(page.getByText("Enter a valid Gitlawb repo first.")).toBeVisible();
 });
 
 test("trust and security proof links are public", async ({ page }) => {

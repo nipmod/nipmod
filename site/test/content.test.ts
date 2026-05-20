@@ -95,7 +95,7 @@ describe("home content", () => {
       "Agent hosts:MCP ready"
     ]);
     expect(homeContent.platformRoadmap.items[2]?.text).toContain("controlled install");
-    expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Discover", "Draft", "Claim", "Use"]);
+    expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Prepare", "Verify", "Publish", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
     expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Run demo", "Read status"]);
   });
@@ -167,12 +167,12 @@ describe("home content", () => {
   });
 
   test("defines the Gitlawb repo to package flow without claiming ownership", () => {
-    expect(homeContent.repoToPackage.headline).toBe("Turn a Gitlawb repo into an agent package");
-    expect(homeContent.repoToPackage.steps.map((step) => step.label)).toEqual(["Paste", "Draft", "Claim"]);
-    expect(homeContent.repoToPackage.claim.text).toContain("DID signature");
+    expect(homeContent.repoToPackage.headline).toBe("Publish your Gitlawb repo as an agent package");
+    expect(homeContent.repoToPackage.steps.map((step) => step.label)).toEqual(["Choose", "Check", "Publish"]);
+    expect(homeContent.repoToPackage.claim.text).toContain("Nipmod does not claim repos");
     expect(homeContent.repoToPackage.claim.text).not.toContain("login");
-    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr");
-    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package doctor gitlawb://did:key:z6Mk.../repo --json");
-    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod claim verify gitlawb://did:key:z6Mk.../repo --json");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json");
+    expect(homeContent.repoToPackage.outputCommand).toContain("nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json");
   });
 });

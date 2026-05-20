@@ -46,9 +46,8 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 - Deterministic `.nipmod` bundles signed by Ed25519 `did:key` identities.
 - Lockfiles pinned by `sha256` integrity.
 - Gitlawb publish and install against `https://node.nipmod.com`.
-- Package Claim for proving that a Gitlawb repo owner accepts a Nipmod package identity.
-- Package PR generator for turning an existing Gitlawb repo into a local package patch without remote writes.
-- Scout Agent that scans public Gitlawb repos and exposes package-ready candidates plus claim-safe package drafts.
+- Owner Package Claim for proving that a Gitlawb repo owner accepts a Nipmod package identity.
+- Self service package flow for repo owners to prepare local package files, verify DID ownership and run publish dry runs.
 - MCP server for agents with read-first tools and controlled install.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
 - Codex, Claude Code, OpenCode and Bankr agent entrypoints.
@@ -130,17 +129,17 @@ nipmod manifest validate --dir . --json
 nipmod publish . --dry-run --json
 ```
 
-## Turn A Gitlawb Repo Into A Package Patch
+## Publish Your Gitlawb Repo
 
 ```bash
-curl -fsS "https://nipmod.com/scout/draft?repo=gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader"
-nipmod package doctor gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
-nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir gitlawb-repo-reader-pr
-nipmod claim gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir . --identity .nipmod/identity.json
-nipmod claim verify gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --json
+nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json
+nipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr
+nipmod claim gitlawb://did:key:z6Mk.../your-repo --dir . --identity .nipmod/identity.json
+nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
+nipmod publish your-repo-pr --dry-run --json
 ```
 
-Scout drafts and `package pr` write local files only. The Gitlawb repo owner reviews the patch, signs the claim with the matching DID identity and pushes it through Gitlawb.
+Use this flow only for repos you own or maintain. `package pr` writes local files only. The Gitlawb repo owner reviews the files, signs the claim with the matching DID identity and pushes it through Gitlawb.
 
 ## Repository Map
 
@@ -170,8 +169,7 @@ node tools/supply-chain-check.mjs
 - Runbook: `RUNBOOK.md`
 - Quickstart: `docs/quickstart.md`
 - Publishing: `docs/publish.md`
-- Package Claim: `docs/package-claim.md`
-- Scout Agent: `docs/scout-agent.md`
+- Owner Package Claim: `docs/package-claim.md`
 - Telegram bot: `docs/telegram-bot.md`
 - MCP hosts: `docs/mcp-hosts.md`
 - Trust model: `docs/trust-model.md`

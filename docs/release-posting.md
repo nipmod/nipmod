@@ -32,10 +32,10 @@ Claimed means the Gitlawb owner DID signed and pushed proof.
 ```text
 Nipmod v1.1.0 ships Package Claim.
 
-Turn a public Gitlawb repo into an installable agent package:
+Turn your Gitlawb repo into an installable agent package:
 
-nipmod package scan
 nipmod package doctor gitlawb://did:key:.../repo
+nipmod package pr gitlawb://did:key:.../repo --dir repo-pr
 nipmod claim gitlawb://did:key:.../repo
 
 Gitlawb repos are source.

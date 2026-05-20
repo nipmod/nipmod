@@ -23,26 +23,8 @@
   },
   "claims": {
     "index": "https://nipmod.com/claims/index.json",
-    "candidatePage": "https://nipmod.com/candidates",
     "verifyCommand": "nipmod claim verify gitlawb://did:key:.../repo --json",
     "indexCommand": "nipmod claim index --node https://node.nipmod.com --json"
-  },
-  "scout": {
-    "health": "https://nipmod.com/scout/health",
-    "last": "https://nipmod.com/scout/last",
-    "candidates": "https://nipmod.com/scout/candidates",
-    "drafts": "https://nipmod.com/scout/drafts",
-    "draft": "https://nipmod.com/scout/draft",
-    "draftParam": "repo",
-    "notifications": "https://nipmod.com/scout/notifications",
-    "patch": "https://nipmod.com/scout/patch",
-    "patchParam": "repo",
-    "sourceNodes": [
-      "https://node.nipmod.com",
-      "https://node.gitlawb.com",
-      "https://node2.gitlawb.com"
-    ],
-    "intervalMs": 300000
   },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",
@@ -69,8 +51,7 @@
       "sbom",
       "publishDryRun",
       "claimVerify",
-      "claimIndex",
-      "packagePr"
+      "claimIndex"
     ],
     "commands": {
       "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
@@ -93,8 +74,7 @@
       "sbom": "nipmod sbom --json",
       "publishDryRun": "nipmod publish . --dry-run --json",
       "claimVerify": "nipmod claim verify gitlawb://did:key:.../repo --json",
-      "claimIndex": "nipmod claim index --node https://node.nipmod.com --json",
-      "packagePr": "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json"
+      "claimIndex": "nipmod claim index --node https://node.nipmod.com --json"
     }
   },
   "bankr": {
@@ -113,7 +93,7 @@
       "services": [
         "package-search",
         "package-audit",
-        "repo-package-draft"
+        "install-plan"
       ],
       "status": "free; no Nipmod payment required"
     },
@@ -124,8 +104,7 @@
         "read-skill",
         "find-package",
         "check-trust",
-        "plan-install",
-        "prepare-repo-draft"
+        "plan-install"
       ]
     }
   },
@@ -145,7 +124,6 @@
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
-      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",

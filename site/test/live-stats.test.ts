@@ -1,47 +1,9 @@
 import { describe, expect, test } from "vitest";
-import {
-  fallbackLiveStats,
-  loadLiveStats,
-  liveStatsFromScoutHealth,
-  type ScoutHealthPayload
-} from "../lib/live-stats";
+import { fallbackLiveStats, loadLiveStats } from "../lib/live-stats";
 import type { RegistryIndex } from "../lib/registry";
 
 describe("live stats", () => {
-  test("builds homepage stats from scout health", () => {
-    const payload: ScoutHealthPayload = {
-      intervalMs: 300_000,
-      lastRunAt: "2026-05-18T02:16:42.579Z",
-      ok: true,
-      stale: false,
-      summary: {
-        claimed: 0,
-        drafts: 4,
-        patchable: 32,
-        published: 28,
-        scanned: 32,
-        unclaimedDrafts: 4
-      }
-    };
-
-    expect(liveStatsFromScoutHealth(payload)).toEqual({
-      generatedAt: "2026-05-18T02:16:42.579Z",
-      healthy: true,
-      source: "live",
-      status: "Live registry + Scout",
-      tiles: [
-        { label: "Published packages", value: "28" },
-        { label: "Claimable drafts", value: "4" }
-      ]
-    });
-  });
-
-  test("rejects malformed scout health payloads", () => {
-    expect(liveStatsFromScoutHealth({ ok: true })).toBeNull();
-    expect(liveStatsFromScoutHealth({ ok: true, summary: { scanned: 1 } })).toBeNull();
-  });
-
-  test("falls back to registry snapshot when live scout is unavailable", () => {
+  test("builds homepage stats from the verified registry", () => {
     const registry = {
       packages: [
         { canonical: "pkg:did:key:z6MkA/one" },
@@ -51,26 +13,20 @@ describe("live stats", () => {
 
     expect(fallbackLiveStats(registry)).toEqual({
       generatedAt: null,
-      healthy: false,
+      healthy: true,
       source: "registry",
-      status: "Registry snapshot",
-      tiles: [
-        { label: "Published packages", value: "2" },
-        { label: "Claimable drafts", value: "0" }
-      ]
+      status: "Registry live",
+      tiles: [{ label: "Verified packages", value: "2" }]
     });
   });
 
-  test("uses registry fallback when the scout request fails", async () => {
+  test("loadLiveStats uses the committed registry only", async () => {
     const registry = {
       packages: [{ canonical: "pkg:did:key:z6MkA/one" }]
     } as RegistryIndex;
-    const stats = await loadLiveStats({
-      fetchFn: () => Promise.reject(new Error("offline")) as Promise<Response>,
-      registry
-    });
+    const stats = await loadLiveStats({ registry });
 
     expect(stats.source).toBe("registry");
-    expect(stats.tiles[0]).toEqual({ label: "Published packages", value: "1" });
+    expect(stats.tiles).toEqual([{ label: "Verified packages", value: "1" }]);
   });
 });

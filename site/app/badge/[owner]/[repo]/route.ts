@@ -10,15 +10,14 @@ type BadgeRouteContext = {
 
 const registry = registryData as RegistryIndex;
 
-export async function GET(request: Request, context: BadgeRouteContext): Promise<Response> {
+export async function GET(_request: Request, context: BadgeRouteContext): Promise<Response> {
   const { owner, repo } = await context.params;
   if (!isOwnerSegment(owner) || !isRepoName(repo)) {
     return new Response("not found", { status: 404 });
   }
 
   const packageRecord = findPackageByGitlawbPath(registry.packages, owner, repo);
-  const requestedStatus = new URL(request.url).searchParams.get("status");
-  const status = packageRecord ? "verified" : requestedStatus === "draft" ? "draft ready" : "package";
+  const status = packageRecord ? "verified" : "not listed";
   const svg = renderBadge("Nipmod", status);
 
   return new Response(svg, {

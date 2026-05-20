@@ -6,7 +6,6 @@ const endpoints: MonitorEndpointConfig = {
   home: "https://nipmod.test",
   nodeHealth: "https://node.nipmod.test/health",
   registry: "https://nipmod.test/registry/packages.json",
-  scoutHealth: "https://nipmod.test/scout/health",
   trust: "https://nipmod.test/trust",
   witnessHealth: "https://witness.nipmod.test/health"
 };
@@ -166,8 +165,6 @@ function fixture(url: string): unknown {
       return { status: "ok" };
     case endpoints.witnessHealth:
       return { lastError: null, ok: true };
-    case endpoints.scoutHealth:
-      return { ok: true };
     default:
       throw new Error(`unexpected fixture url: ${url}`);
   }

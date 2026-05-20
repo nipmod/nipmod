@@ -3,12 +3,6 @@ import { notFound } from "next/navigation";
 import registryData from "../../../registry-data.json";
 import { CommandBlock } from "../../../command-block";
 import {
-  candidateFromScout,
-  fetchScoutCandidates,
-  findCandidateByGitlawbPath,
-  type PackageCandidate
-} from "../../../../lib/candidates";
-import {
   findPackageByGitlawbPath,
   gitlawbOwnerHref,
   ownerSegmentFromDid,
@@ -64,16 +58,14 @@ export default async function GitlawbPackagePage({ params }: GitlawbPackagePageP
   }
 
   const pkg = findPackageByGitlawbPath(registry.packages, owner, repo);
-  const candidate = pkg ? null : await loadCandidate(owner, repo);
 
-  if (!pkg && !candidate) {
+  if (!pkg) {
     notFound();
   }
 
   return (
     <main className="page-shell" id="main">
-      {pkg ? <PublishedPackageSurface pkg={pkg} owner={owner} repo={repo} /> : null}
-      {!pkg && candidate ? <CandidatePackageSurface candidate={candidate} owner={owner} repo={repo} /> : null}
+      <PublishedPackageSurface pkg={pkg} owner={owner} repo={repo} />
     </main>
   );
 }
@@ -162,106 +154,6 @@ function PublishedPackageSurface({ owner, pkg, repo }: { owner: string; pkg: Reg
   );
 }
 
-function CandidatePackageSurface({ candidate, owner, repo }: { candidate: PackageCandidate; owner: string; repo: string }) {
-  const badgeUrl = `https://nipmod.com/badge/${owner}/${repo}?status=draft`;
-  const claimHref = `/package?repo=${encodeURIComponent(candidate.source)}`;
-
-  return (
-    <>
-      <section className="package-hero" aria-labelledby="gitlawb-candidate-title">
-        <div>
-          <p className="eyebrow">Package draft</p>
-          <h1 id="gitlawb-candidate-title">{candidate.repoName}</h1>
-          <p className="lead">{candidate.description}</p>
-          <div className="actions">
-            <a className="button button-primary" href={claimHref}>
-              Claim
-            </a>
-            {candidate.draftEndpoint ? (
-              <a
-                className="button button-ghost"
-                href={candidate.draftEndpoint}
-                aria-label={`Open ${candidate.repoName} draft JSON in a new tab`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Draft
-              </a>
-            ) : null}
-            <a
-              className="button button-ghost"
-              href={candidate.gitlawbHref}
-              aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Gitlawb
-            </a>
-            <a className="button button-ghost" href={`/gitlawb/${owner}`}>
-              Owner
-            </a>
-          </div>
-        </div>
-        <aside className="package-side" aria-label="Gitlawb draft facts">
-          <div className="badge-stack">
-            <span className={`trust-badge candidate-${candidate.status}`}>{candidate.status}</span>
-            <span className="trust-badge trust-signed">{candidate.readinessScore}/100</span>
-          </div>
-          <dl className="proof-facts">
-            <div>
-              <dt>Status</dt>
-              <dd>{candidate.status}</dd>
-            </div>
-            <div>
-              <dt>Package</dt>
-              <dd>{candidate.packageId}</dd>
-            </div>
-            <div>
-              <dt>Owner</dt>
-              <dd>{owner}</dd>
-            </div>
-          </dl>
-        </aside>
-      </section>
-
-      <section className="trust-section" aria-labelledby="repo-claim-title">
-        <div>
-          <p className="eyebrow">Claim</p>
-          <h2 id="repo-claim-title">Owner verified package path</h2>
-        </div>
-        <div className="check-list">
-          <article className="check-row evidence-row">
-            <span className="check-dot check-ok" aria-hidden="true" />
-            <div>
-              <h3>Create package draft</h3>
-              <CommandBlock command={candidate.draftCommand} label="Copy draft command" />
-            </div>
-          </article>
-          <article className="check-row evidence-row">
-            <span className="check-dot check-ok" aria-hidden="true" />
-            <div>
-              <h3>Verify ownership</h3>
-              <CommandBlock command={candidate.claimVerifyCommand} label="Copy claim verification command" />
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <RepoMachineLinks
-        badgeMarkdown={`![Nipmod draft](${badgeUrl})`}
-        badgeUrl={badgeUrl}
-        links={[
-          { href: claimHref, label: "Claim page" },
-          { href: `/gitlawb/${owner}`, label: "Owner page" },
-          ...(candidate.draftEndpoint ? [{ href: candidate.draftEndpoint, label: "Draft JSON" }] : []),
-          { href: "/candidates", label: "Candidates" },
-          { href: "/.well-known/nipmod.json", label: "Discovery" }
-        ]}
-      />
-    </>
-  );
-}
-
 function RepoMachineLinks({
   badgeMarkdown,
   badgeUrl,
@@ -290,16 +182,6 @@ function RepoMachineLinks({
       </div>
     </section>
   );
-}
-
-async function loadCandidate(owner: string, repo: string): Promise<PackageCandidate | null> {
-  try {
-    const scoutCandidates = await fetchScoutCandidates({ scoutUrl: "https://nipmod.com/scout" });
-    const candidates = scoutCandidates.map(candidateFromScout);
-    return findCandidateByGitlawbPath(candidates, owner, repo);
-  } catch {
-    return null;
-  }
 }
 
 function packageDocumentHref(canonical: string): string {

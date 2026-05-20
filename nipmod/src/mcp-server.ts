@@ -13,7 +13,6 @@ import { digestFromIntegrity } from "./integrity.js";
 import { defaultPolicy, parsePolicyProfile, type NipmodPolicy } from "./policy.js";
 import {
   buildPackageClaimIndex,
-  createAssistedPackagePatch,
   fetchGitlawbPackageClaimVerification
 } from "./package-claim.js";
 import { DEFAULT_REGISTRY_URL, searchRegistry, viewRegistryPackages, type RegistrySearchPackage } from "./registry.js";
@@ -153,15 +152,6 @@ const ClaimIndexArgumentsSchema = z.strictObject({
   nodeUrl: z.string().optional()
 });
 
-const PackagePatchArgumentsSchema = z.strictObject({
-  nodeUrl: z.string().optional(),
-  repo: z.string().min(1),
-  type: z
-    .enum(["skill", "mcp-server", "tool-bundle", "agent-profile", "workflow-pack", "eval-pack", "policy-pack", "adapter"])
-    .optional(),
-  version: z.string().optional()
-});
-
 const VerifyArgumentsSchema = z.strictObject({
   integrity: z.string(),
   path: z.string().min(1)
@@ -277,8 +267,6 @@ async function callTool(params: unknown, fetchImpl: typeof fetch): Promise<JsonV
       return toolResult(await claimVerifyTool(parsed.arguments ?? {}, fetchImpl));
     case "nipmod.claim_index":
       return toolResult(await claimIndexTool(parsed.arguments ?? {}, fetchImpl));
-    case "nipmod.package_patch":
-      return toolResult(await packagePatchTool(parsed.arguments ?? {}));
     case "nipmod.verify":
       return toolResult(await verifyTool(parsed.arguments ?? {}));
     case "nipmod.audit":
@@ -587,27 +575,6 @@ async function claimIndexTool(raw: unknown, fetchImpl: typeof fetch): Promise<Js
       fetchImpl,
       limit: args.limit ?? 20,
       nodeUrl: args.nodeUrl ?? DEFAULT_GITLAWB_NODE
-    })
-  );
-}
-
-async function packagePatchTool(raw: unknown): Promise<JsonValue> {
-  const args = PackagePatchArgumentsSchema.parse(raw);
-  const repo = parseMcpGitlawbRepo(args.repo);
-  const nodeUrl = args.nodeUrl ?? DEFAULT_GITLAWB_NODE;
-  return toJsonValue(
-    createAssistedPackagePatch({
-      repo: {
-        cloneUrl: `${nodeUrl.replace(/\/$/, "")}/${repo.ownerSegment}/${repo.repoName}.git`,
-        defaultBranch: "main",
-        description: "",
-        isPublic: true,
-        name: repo.repoName,
-        ownerDid: repo.ownerDid,
-        updatedAt: new Date(0).toISOString()
-      },
-      ...(args.type ? { type: args.type } : {}),
-      ...(args.version ? { version: args.version } : {})
     })
   );
 }
@@ -1122,29 +1089,6 @@ const MCP_TOOLS: ToolDefinition[] = [
     },
     name: "nipmod.claim_index",
     title: "Build Nipmod claim index"
-  },
-  {
-    annotations: {
-      ...COMMON_READONLY_ANNOTATIONS,
-      openWorldHint: false
-    },
-    description: "Return PR-ready package patch files for a Gitlawb repo without opening remote issues or pull requests.",
-    inputSchema: {
-      additionalProperties: false,
-      properties: {
-        nodeUrl: { type: "string" },
-        repo: { type: "string" },
-        type: {
-          enum: ["skill", "mcp-server", "tool-bundle", "agent-profile", "workflow-pack", "eval-pack", "policy-pack", "adapter"],
-          type: "string"
-        },
-        version: { type: "string" }
-      },
-      required: ["repo"],
-      type: "object"
-    },
-    name: "nipmod.package_patch",
-    title: "Create Nipmod package patch"
   },
   {
     annotations: {

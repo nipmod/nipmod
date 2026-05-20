@@ -73,7 +73,7 @@ nipmod sbom --json
 Use this when a Bankr agent needs to show the complete Nipmod path without changing a workspace.
 
 ```text
-Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.
+Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.
 ```
 
 The proof manifest is:
@@ -88,19 +88,7 @@ It uses the live `gitlawb-repo-reader` package and checks:
 nipmod search gitlawb-repo-reader --online --json
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
 nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
-nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir /tmp/nipmod-bankr-proof-draft --json
 ```
-
-## Repo to package
-
-Use this when a Bankr agent sees a public Gitlawb repo that should become a package.
-
-```bash
-nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json
-nipmod publish repo-package-pr --dry-run --json
-```
-
-The source owner must sign and push the claim proof from their own DID before the package is treated as claimed.
 
 ## Bankr profile
 
@@ -120,7 +108,7 @@ Updates should be concise and factual:
 ```bash
 bankr agent profile add-update \
   --title "Bankr skill ready" \
-  --content "Bankr agents can install the Nipmod skill and use free package search, inspect, audit and draft workflows."
+  --content "Bankr agents can install the Nipmod skill and use free package search, inspect, audit and install planning."
 ```
 
 Profile creation and public listing require Bankr authentication and Bankr review.

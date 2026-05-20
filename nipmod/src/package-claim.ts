@@ -46,12 +46,6 @@ export interface PackageCandidateReport {
   suggestedType: string;
 }
 
-export interface FetchGitlawbPackageCandidatesResult {
-  candidates: PackageCandidateReport[];
-  nodeUrl: string;
-  total: number;
-}
-
 export interface PackageClaimProof {
   createdAt: string;
   ownerDid: string;
@@ -145,34 +139,6 @@ const PackageClaimProofSchema = z.strictObject({
   }),
   type: z.literal("dev.nipmod.package-claim.v1")
 });
-
-export async function fetchGitlawbPackageCandidates(options: {
-  fetchImpl?: typeof fetch;
-  limit?: number;
-  nodeUrl: string;
-}): Promise<FetchGitlawbPackageCandidatesResult> {
-  const nodeUrl = normalizeNodeUrl(options.nodeUrl);
-  const response = await (options.fetchImpl ?? fetch)(`${nodeUrl}/api/v1/repos`);
-  if (!response.ok) {
-    throw new Error(`Gitlawb repo scan failed: HTTP ${response.status}`);
-  }
-  const repos = GitlawbRepoListSchema.parse(await response.json())
-    .filter((repo) => repo.is_public)
-    .slice(0, Math.min(options.limit ?? PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit, PACKAGE_CLAIM_AUTOMATION_POLICY.maxScanLimit));
-
-  const candidates = repos.map((repo) =>
-    analyzePackageCandidate({
-      readme: repo.description,
-      repo: repoInputFromApi(repo)
-    })
-  );
-
-  return {
-    candidates,
-    nodeUrl,
-    total: candidates.length
-  };
-}
 
 export async function fetchGitlawbPackageClaimVerification(options: {
   fetchImpl?: typeof fetch;

@@ -56,11 +56,9 @@ import {
   createPackageClaimProof,
   fetchGitlawbPackageClaimVerification,
   fetchGitlawbPackageCandidate,
-  fetchGitlawbPackageCandidates,
   formatPackageCandidateReport,
   formatPackageClaimVerification,
-  writePackageClaimProof,
-  type PackageCandidateReport
+  writePackageClaimProof
 } from "./package-claim.js";
 import {
   DEFAULT_REGISTRY_URL,
@@ -352,82 +350,13 @@ async function packageCommand(args: string[]): Promise<CliResult> {
     return packageDoctorCommand(args.slice(1));
   }
   if (subcommand === "scan") {
-    return packageScanCommand(args.slice(1));
+    throw new Error("nipmod package scan has been retired. Use nipmod package doctor or nipmod package pr for repos you own.");
   }
   if (subcommand === "pr") {
     return packagePrCommand(args.slice(1));
   }
 
-  const input = firstPositional(args);
-  const repo = parseGitlawbRepoInput(input);
-  const dir = optionalFlagValue(args, "--dir") ?? repo.repoName;
-  const version = optionalFlagValue(args, "--version") ?? "0.1.0";
-  const packageType = packageDraftType(optionalFlagValue(args, "--type") ?? "tool-bundle");
-  const manifest: Manifest = {
-    formatVersion: 1,
-    name: repo.repoName,
-    canonical: `pkg:${repo.ownerDid}/${repo.repoName}`,
-    version,
-    type: packageType,
-    description: `${repo.repoName} package draft from Gitlawb source`,
-    license: "NOASSERTION",
-    exports: {
-      ".": {
-        source: "./README.md"
-      }
-    },
-    files: ["README.md", "nipmod.json"],
-    permissions: {
-      filesystem: [],
-      network: [],
-      mcpTools: [],
-      env: [],
-      secrets: [],
-      exec: {
-        allowed: false
-      },
-      postinstall: {
-        allowed: false
-      }
-    },
-    publish: {
-      signingKey: repo.ownerDid,
-      provenance: repo.source
-    }
-  };
-  const validated = validateManifest(manifest);
-
-  await mkdir(dir, { recursive: true });
-  await writeFile(
-    join(dir, "README.md"),
-    [
-      `# ${repo.repoName}`,
-      "",
-      `Gitlawb source: ${repo.source}`,
-      "",
-      "This is an unsigned Nipmod package draft. The repo owner must claim it with the matching DID identity before publish.",
-      ""
-    ].join("\n")
-  );
-  await writeFile(join(dir, "nipmod.json"), `${JSON.stringify(validated, null, 2)}\n`);
-
-  const claimCommand = `nipmod publish ${dir} --dry-run`;
-  return {
-    ok: true,
-    data: {
-      message: `created package draft ${validated.canonical}`,
-      claimCommand,
-      draft: {
-        canonical: validated.canonical,
-        dir,
-        manifestPath: join(dir, "nipmod.json"),
-        repo: repo.repoName,
-        source: repo.source,
-        version: validated.version
-      },
-      nextCommands: [`nipmod manifest validate --dir ${dir}`, claimCommand]
-    }
-  };
+  throw new Error("usage: nipmod package doctor <gitlawb-repo> or nipmod package pr <gitlawb-repo>");
 }
 
 async function packagePrCommand(args: string[]): Promise<CliResult> {
@@ -497,20 +426,6 @@ async function packageDoctorCommand(args: string[]): Promise<CliResult> {
     data: {
       message: formatPackageCandidateReport(report),
       report
-    }
-  };
-}
-
-async function packageScanCommand(args: string[]): Promise<CliResult> {
-  const nodeUrl = configuredNodeUrl(args);
-  const limit = searchLimit(args);
-  const result = await fetchGitlawbPackageCandidates({ limit, nodeUrl });
-
-  return {
-    ok: true,
-    data: {
-      message: formatPackageScan(result.candidates),
-      ...result
     }
   };
 }
@@ -2320,28 +2235,6 @@ function formatAgentSetup(result: AgentSetupResult): string {
   lines.push("", "Tell your agent:", `  ${result.prompt}`);
   for (const note of result.notes) {
     lines.push("", note);
-  }
-  return lines.join("\n");
-}
-
-function formatPackageScan(candidates: PackageCandidateReport[]): string {
-  const ready = candidates.filter((candidate) => candidate.status === "ready").length;
-  const almost = candidates.filter((candidate) => candidate.status === "almost").length;
-  const needsWork = candidates.filter((candidate) => candidate.status === "needs-work").length;
-  const lines = [
-    `nipmod package scan: ${candidates.length} candidate${candidates.length === 1 ? "" : "s"}`,
-    `ready ${ready} almost ${almost} needs-work ${needsWork}`,
-    ""
-  ];
-  for (const candidate of candidates.slice(0, 20)) {
-    lines.push(
-      `${padCell(candidate.status.toUpperCase(), 10)} ${padCell(String(candidate.readinessScore), 3)}/100 ${candidate.repo.name}`,
-      `  ${candidate.source}`,
-      `  ${candidate.commands.claim}`
-    );
-  }
-  if (candidates.length > 20) {
-    lines.push(`... ${candidates.length - 20} more`);
   }
   return lines.join("\n");
 }

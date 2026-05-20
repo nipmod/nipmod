@@ -6,7 +6,7 @@
   "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
   "proof": {
     "agentWorkflow": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-    "demoPrompt": "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft."
+    "demoPrompt": "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace."
   },
   "services": {
     "package-search": {
@@ -21,11 +21,10 @@
       "commands": ["nipmod install --plan <package> --json", "nipmod audit --online"],
       "docs": "https://nipmod.com/audit"
     },
-    "repo-package-draft": {
-      "description": "Prepare a package draft path for a public Gitlawb repo without payment.",
-      "primary": "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json",
-      "api": "https://nipmod.com/scout/draft?repo=gitlawb://did:key:.../repo",
-      "human": "https://nipmod.com/package?repo=gitlawb://did:key:.../repo"
+    "install-plan": {
+      "description": "Prepare a package install plan without payment or workspace mutation.",
+      "primary": "nipmod install --plan <package> --json",
+      "docs": "https://nipmod.com/setup"
     }
   }
 }

@@ -921,59 +921,6 @@ describe("nipmod CLI", () => {
     expect(result.stdout).not.toContain("privateKey");
   });
 
-  test("creates a Gitlawb repo package draft without requiring a private key", async () => {
-    const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-package-draft-"));
-    const owner = generateIdentity().did;
-    const repo = "claimable-agent";
-    const outDir = join(workspace, "draft");
-    const result = await execaNode([
-      "src/cli.ts",
-      "package",
-      `https://gitlawb.com/${owner.slice(owner.lastIndexOf(":") + 1)}/${repo}`,
-      "--dir",
-      outDir,
-      "--json"
-    ]);
-    const parsed = JSON.parse(result.stdout) as {
-      ok: true;
-      data: {
-        claimCommand: string;
-        draft: {
-          canonical: string;
-          manifestPath: string;
-          repo: string;
-          source: string;
-        };
-      };
-    };
-
-    expect(parsed.ok).toBe(true);
-    expect(parsed.data.draft).toMatchObject({
-      canonical: `pkg:${owner}/${repo}`,
-      manifestPath: join(outDir, "nipmod.json"),
-      repo,
-      source: `gitlawb://${owner}/${repo}`
-    });
-    expect(parsed.data.claimCommand).toBe(`nipmod publish ${outDir} --dry-run`);
-    expect(result.stdout).not.toContain("privateKey");
-
-    const manifest = JSON.parse(await readFile(join(outDir, "nipmod.json"), "utf8"));
-    expect(manifest).toMatchObject({
-      canonical: `pkg:${owner}/${repo}`,
-      name: repo,
-      publish: {
-        provenance: `gitlawb://${owner}/${repo}`,
-        signingKey: owner
-      },
-      type: "tool-bundle",
-      version: "0.1.0"
-    });
-    expect(manifest.files).toEqual(["README.md", "nipmod.json"]);
-
-    const validated = await execaNode(["src/cli.ts", "manifest", "validate", "--dir", outDir, "--json"]);
-    expect(JSON.parse(validated.stdout).ok).toBe(true);
-  });
-
   test("doctors a Gitlawb repo package candidate from local files", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-package-doctor-"));
     const owner = generateIdentity().did;
@@ -1012,64 +959,6 @@ describe("nipmod CLI", () => {
     expect(parsed.data.report.missing.map((item) => item.id)).toContain("manifest");
     expect(parsed.data.report.commands.claim).toBe(`nipmod claim gitlawb://${owner}/${repo}`);
     expect(result.stdout).not.toContain("privateKey");
-  }, 15_000);
-
-  test("scans Gitlawb node repos as package candidates", async () => {
-    const owner = generateIdentity().did;
-    const server = createServer((request, response) => {
-      if (request.url !== "/api/v1/repos") {
-        response.writeHead(404);
-        response.end("not found");
-        return;
-      }
-      response.writeHead(200, { "content-type": "application/json" });
-      response.end(
-        JSON.stringify([
-          {
-            clone_url: "http://127.0.0.1/repo-reader.git",
-            default_branch: "main",
-            description: "Read Gitlawb repos for agents",
-            is_public: true,
-            name: "repo-reader",
-            owner_did: owner,
-            updated_at: "2026-05-17T00:00:00.000Z"
-          }
-        ])
-      );
-    });
-    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-    const address = server.address();
-    if (!address || typeof address === "string") {
-      throw new Error("test server did not bind to a TCP port");
-    }
-
-    try {
-      const result = await execaNode([
-        "src/cli.ts",
-        "package",
-        "scan",
-        "--node",
-        `http://127.0.0.1:${address.port}`,
-        "--limit",
-        "5",
-        "--json"
-      ]);
-      const parsed = JSON.parse(result.stdout) as {
-        ok: true;
-        data: { candidates: Array<{ source: string; status: string }>; total: number };
-      };
-
-      expect(parsed.ok).toBe(true);
-      expect(parsed.data.total).toBe(1);
-      expect(parsed.data.candidates[0]).toMatchObject({
-        source: `gitlawb://${owner}/repo-reader`,
-        status: "almost"
-      });
-    } finally {
-      await new Promise<void>((resolve, reject) => {
-        server.close((error) => (error ? reject(error) : resolve()));
-      });
-    }
   }, 15_000);
 
   test("builds a verified package claim index from a Gitlawb node", async () => {

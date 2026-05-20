@@ -50,7 +50,7 @@ Add Nipmod skill for package trust and install planning
 ```text
 Adds the Nipmod skill for Bankr agents.
 
-Nipmod lets agents discover packages, inspect trust metadata, plan installs before workspace mutation and prepare Gitlawb-sourced package drafts.
+Nipmod lets agents discover packages, inspect trust metadata and plan installs before workspace mutation.
 
 Included:
 - SKILL.md with Bankr-compatible frontmatter
@@ -75,7 +75,6 @@ Agent workflow proof:
 - find gitlawb-repo-reader
 - inspect trust, provenance and permissions
 - return an install plan without installing
-- prepare a Gitlawb package draft without remote writes
 
 Validation:
 - public skill URL returns 200
@@ -102,7 +101,7 @@ Install the nipmod skill from https://github.com/nipmod/nipmod/tree/main/integra
 For a complete proof run:
 
 ```text
-Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.
+Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.
 ```
 
 ## Runtime Smoke Test

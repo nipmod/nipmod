@@ -13,7 +13,7 @@ const bankrAgentPrompt =
 const bankrCodexPrompt =
   "Use Nipmod to prepare a Bankr safe package workflow. Search for gitlawb-repo-reader, inspect trust, create an install plan, and do not run wallet, trading or signing actions.";
 const bankrProofPrompt =
-  "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady, repoDraftReady, safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace. If command execution is available, write the draft only to /tmp/nipmod-bankr-proof-draft.";
+  "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 
 const services = [
@@ -28,9 +28,9 @@ const services = [
     text: "Agents read trust, permissions and safe next commands without running package code or paying Nipmod."
   },
   {
-    label: "Draft",
-    title: "Free repo draft",
-    text: "A public Gitlawb repo can become a package draft with a clear owner claim path."
+    label: "Plan",
+    title: "Free install plan",
+    text: "Agents can prepare the install graph and wait for explicit approval before any workspace write."
   }
 ];
 
@@ -58,13 +58,6 @@ const proofSteps = [
     title: "Install plan only",
     text: "The agent prepares a plan and waits for approval before any workspace mutation.",
     command: `nipmod install --plan ${proofPackage} --json`
-  },
-  {
-    label: "Draft",
-    title: "Gitlawb draft ready",
-    text: "The agent prepares package files in a temp directory with no remote write.",
-    command:
-      "nipmod package pr gitlawb://did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader --dir /tmp/nipmod-bankr-proof-draft --json"
   }
 ];
 
@@ -88,7 +81,7 @@ export default function BankrPage() {
         <p className="eyebrow">Bankr</p>
         <h1 id="bankr-title">Nipmod for Bankr agents</h1>
         <p className="lead">
-          A free Bankr-ready integration pack for agent skills, package discovery, trust inspection and repo package drafts.
+          A free Bankr-ready integration pack for agent skills, package discovery, trust inspection and install planning.
         </p>
         <div className="actions" aria-label="Bankr actions">
           <a className="button button-primary" href="/integrations/bankr/nipmod/SKILL.md">
@@ -161,7 +154,7 @@ export default function BankrPage() {
           <h2 id="bankr-proof-title">Agent proof workflow</h2>
           <p>
             A Bankr agent can now prove the full Nipmod path: read the skill, find a package, check trust, return an
-            install plan and prepare a Gitlawb package draft without installing or pushing.
+            install plan and stop before any install, wallet action or workspace mutation.
           </p>
         </div>
         <div className="quickstart-grid">
@@ -219,7 +212,7 @@ export default function BankrPage() {
           <h2 id="bankr-free-title">Free services</h2>
           <p>
             Core Nipmod workflows stay free for Bankr agents. The $NPM Bankr coin remains an investor/community token link,
-            not a required payment rail for package search, inspect, audit or draft planning.
+            not a required payment rail for package search, inspect, audit or install planning.
           </p>
         </div>
         <div className="quickstart-grid">
@@ -249,7 +242,7 @@ export default function BankrPage() {
             "Bankr is the wallet, agent and optional commerce surface.",
             "Gitlawb remains the source network for signed agent repos.",
             "Nipmod is the package, trust and install layer.",
-            "Nipmod package search, inspect, audit and draft planning stay free."
+            "Nipmod package search, inspect, audit and install planning stay free."
           ].map((item) => (
             <article className="check-row" key={item}>
               <span className="check-dot check-ok" aria-hidden="true" />

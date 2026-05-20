@@ -2,8 +2,8 @@
 name: nipmod
 description: >
   Package layer for agent built code. Use when a Bankr agent needs to search, inspect,
-  install, audit, publish plan, or package Gitlawb sourced agent tools with provenance,
-  trust metadata, lockfiles, Scout drafts, MCP tools, and safe install planning.
+  install, audit, or plan Gitlawb sourced agent tools with provenance,
+  trust metadata, lockfiles, MCP tools, and safe install planning.
 tags: [packages, gitlawb, agents, provenance, developer-tools]
 version: 1
 visibility: public
@@ -18,7 +18,7 @@ metadata:
 
 Use Nipmod when a Bankr agent needs package workflows for agent built code.
 
-Start with https://nipmod.com/.well-known/nipmod.json. It is the machine readable source for current commands, registry URLs, Scout endpoints, MCP tools and safety rules.
+Start with https://nipmod.com/.well-known/nipmod.json. It is the machine readable source for current commands, registry URLs, MCP tools and safety rules.
 
 ## When to use
 
@@ -26,10 +26,10 @@ Start with https://nipmod.com/.well-known/nipmod.json. It is the machine readabl
 - Inspect package trust, permissions, provenance and advisory state.
 - Plan installs before writing to a workspace.
 - Install packages only after inspect and plan are acceptable.
-- Turn a public Gitlawb repo into a package draft.
+- Help a repo owner prepare their own Gitlawb package only when they explicitly ask.
 - Verify package claims signed by the source owner DID.
 - Expose read only package tools through MCP.
-- Use free Nipmod CLI and public web endpoints from Bankr. Do not route core search, inspect, audit or draft workflows through paid endpoints.
+- Use free Nipmod CLI and public web endpoints from Bankr. Do not route core search, inspect, audit or install planning through paid endpoints.
 
 ## Default workflow
 
@@ -101,18 +101,17 @@ Then return JSON that shows:
 - packageFound: the agent found `gitlawb-repo-reader` in the Nipmod registry.
 - trustChecked: `nipmod inspect` verified trust, provenance, witness evidence and permissions.
 - installPlanReady: `nipmod install --plan` produced a plan without installing.
-- repoDraftReady: `nipmod package pr` prepared `nipmod.json` and `README.nipmod.md` with no remote writes.
 - safety: no wallet action, no signing, no install, no user workspace mutation unless the user explicitly approves.
 
 ## Safety rules
 
 - Do not execute package code before inspect, install plan and audit pass.
 - Do not treat registry presence as ownership.
-- Treat Scout drafts as suggestions until the owner DID signs the claim.
+- Do not claim, publish or prepare another person's repo unless the repo owner explicitly asked for it.
 - Do not publish, push, open issues, spend funds or use Bankr wallet actions without clear user approval.
 - Do not paste private keys, Bankr API keys, seed phrases or wallet secrets into Nipmod commands.
 - Prefer JSON output for agent to agent workflows.
-- Nipmod package discovery, inspect, audit and draft planning are free. If a Bankr wallet or payment action appears, stop and ask the user.
+- Nipmod package discovery, inspect, audit and install planning are free. If a Bankr wallet or payment action appears, stop and ask the user.
 
 ## Useful commands
 
@@ -124,7 +123,6 @@ nipmod install gitlawb-repo-reader
 nipmod audit --online
 nipmod sbom --json
 nipmod explain gitlawb-repo-reader --json
-nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json
 nipmod claim verify gitlawb://did:key:.../repo --json
 nipmod mcp serve
 ```

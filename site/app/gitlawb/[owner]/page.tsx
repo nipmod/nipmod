@@ -4,17 +4,6 @@ import registryData from "../../registry-data.json";
 import { CommandBlock } from "../../command-block";
 import { OwnerClaimFlow } from "../../owner-claim-flow";
 import {
-  candidateGitlawbPackageHref,
-  candidateFromScout,
-  candidateNoticeLabel,
-  candidatesByGitlawbOwner,
-  emptyCandidateNoticeState,
-  fetchScoutCandidates,
-  fetchScoutNoticeState,
-  type CandidateNoticeState,
-  type PackageCandidate
-} from "../../../lib/candidates";
-import {
   gitlawbPackageHref,
   packagesByGitlawbOwner,
   safeSourceRepoHref,
@@ -57,16 +46,10 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
   }
 
   const packages = packagesByGitlawbOwner(registry.packages, owner);
-  const candidates = await loadOwnerCandidates(owner);
-  const notices = await loadNoticeState();
 
-  if (packages.length === 0 && candidates.length === 0) {
+  if (packages.length === 0) {
     notFound();
   }
-
-  const claimable = candidates.filter((candidate) => candidate.status !== "published");
-  const publishedPackageIds = new Set(packages.map((pkg) => pkg.canonical));
-  const claimableOnly = claimable.filter((candidate) => !publishedPackageIds.has(candidate.packageId));
 
   return (
     <main className="page-shell" id="main">
@@ -79,11 +62,8 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
             <a className="button button-primary" href="#published">
               Published
             </a>
-            <a className="button button-ghost" href="#drafts">
-              Claim drafts
-            </a>
-            <a className="button button-ghost" href="/candidates">
-              All candidates
+            <a className="button button-ghost" href="/package">
+              Create package
             </a>
           </div>
         </div>
@@ -92,10 +72,6 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
             <div>
               <dt>Published</dt>
               <dd>{packages.length}</dd>
-            </div>
-            <div>
-              <dt>Claimable</dt>
-              <dd>{claimableOnly.length}</dd>
             </div>
             <div>
               <dt>DID</dt>
@@ -107,11 +83,10 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
 
       <OwnerClaimFlow
         actions={[
-          { href: "/package", label: "Package another repo", variant: "primary" },
-          { href: "/candidates", label: "All candidates" }
+          { href: "/package", label: "Create package", variant: "primary" }
         ]}
         eyebrow="Owner path"
-        lead="Use a prepared draft when Scout found one. Package another public repo when it has no draft yet."
+        lead="Use this flow for repos controlled by this owner. Nipmod verifies ownership before a package becomes trusted."
         title="Owner next steps"
       />
 
@@ -138,8 +113,8 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
           <article className="check-row evidence-row">
             <span className="check-dot check-ok" aria-hidden="true" />
             <div>
-              <h3>Create one package draft</h3>
-              <CommandBlock command={`nipmod package pr gitlawb://did:key:${owner}/repo --dir repo-pr --json`} label="Copy package draft command" />
+              <h3>Create package files locally</h3>
+              <CommandBlock command={`nipmod package pr gitlawb://did:key:${owner}/your-repo --dir your-repo-pr --json`} label="Copy package command" />
             </div>
           </article>
         </div>
@@ -158,24 +133,6 @@ export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps
           ) : (
             <div className="empty-state">
               <p>No published packages for this owner yet.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="registry-section" id="drafts" aria-labelledby="drafts-title">
-        <div className="registry-head">
-          <div>
-            <p className="eyebrow">Drafts</p>
-            <h2 id="drafts-title">Claimable drafts</h2>
-          </div>
-        </div>
-        <div className="package-grid">
-          {claimableOnly.length > 0 ? (
-            claimableOnly.map((candidate) => <OwnerCandidateCard candidate={candidate} key={candidate.packageId} notices={notices} />)
-          ) : (
-            <div className="empty-state">
-              <p>No claimable drafts for this owner right now.</p>
             </div>
           )}
         </div>
@@ -232,90 +189,6 @@ function OwnerPackageCard({ pkg }: { pkg: RegistryPackage }) {
       </div>
     </article>
   );
-}
-
-function OwnerCandidateCard({ candidate, notices }: { candidate: PackageCandidate; notices: CandidateNoticeState }) {
-  const claimHref = `/package?repo=${encodeURIComponent(candidate.source)}`;
-
-  return (
-    <article className="package-card candidate-card">
-      <div className="package-card-top">
-        <div>
-          <h3>
-            <a href={claimHref}>{candidate.repoName}</a>
-          </h3>
-          <p>{candidate.description}</p>
-        </div>
-        <span className={`trust-badge candidate-${candidate.status}`}>{candidate.status}</span>
-      </div>
-      <dl className="package-meta">
-        <div>
-          <dt>Ready</dt>
-          <dd>{candidate.readinessScore}/100</dd>
-        </div>
-        <div>
-          <dt>Package</dt>
-          <dd>{candidate.packageId}</dd>
-        </div>
-        <div>
-          <dt>Updated</dt>
-          <dd>{candidate.updatedAt.slice(0, 10)}</dd>
-        </div>
-        <div>
-          <dt>Notice status</dt>
-          <dd>{candidateNoticeLabel(candidate, notices)}</dd>
-        </div>
-        <div>
-          <dt>Claim link</dt>
-          <dd>
-            <a href={claimHref}>ready</a>
-          </dd>
-        </div>
-      </dl>
-      <pre className="install-command">
-        <code>{candidate.draftCommand}</code>
-      </pre>
-      <div className="package-links">
-        <a href={claimHref}>Claim</a>
-        <a href={candidateGitlawbPackageHref(candidate)}>Repo status</a>
-        {candidate.draftEndpoint ? (
-          <a
-            href={candidate.draftEndpoint}
-            aria-label={`Open ${candidate.repoName} draft JSON in a new tab`}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Draft JSON
-          </a>
-        ) : null}
-        <a
-          href={candidate.gitlawbHref}
-          aria-label={`Open ${candidate.repoName} on Gitlawb in a new tab`}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Gitlawb
-        </a>
-      </div>
-    </article>
-  );
-}
-
-async function loadOwnerCandidates(owner: string): Promise<PackageCandidate[]> {
-  try {
-    const scoutCandidates = await fetchScoutCandidates({ scoutUrl: "https://nipmod.com/scout" });
-    return candidatesByGitlawbOwner(scoutCandidates.map(candidateFromScout), owner);
-  } catch {
-    return [];
-  }
-}
-
-async function loadNoticeState(): Promise<CandidateNoticeState> {
-  try {
-    return await fetchScoutNoticeState({ scoutUrl: "https://nipmod.com/scout" });
-  } catch {
-    return emptyCandidateNoticeState();
-  }
 }
 
 function isOwnerSegment(value: string): boolean {

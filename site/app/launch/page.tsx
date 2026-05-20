@@ -31,7 +31,7 @@ const tracks = [
   {
     label: "Publish",
     title: "Self service package candidate",
-    text: "Create a Gitlawb package draft and produce the registry candidate before any public index decision.",
+    text: "Prepare a package from a repo you own and produce the registry candidate before any public index decision.",
     command:
       "nipmod init --name gitlawb-demo-package --dir gitlawb-demo-package\ncd gitlawb-demo-package\nnipmod manifest validate --dir .\nnipmod publish . --dry-run --json"
   },
@@ -221,7 +221,7 @@ export default function LaunchPage() {
         <div className="check-list">
           {[
             "100 unique external install loops",
-            "10 external publish dry run candidates",
+            "10 external owner publish dry runs",
             "3 external packages passing verified registry review",
             "1 signed independent review packet",
             "redacted external evidence ledger"

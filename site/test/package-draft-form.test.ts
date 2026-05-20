@@ -14,7 +14,7 @@ describe("package draft form", () => {
     const draft = draftFromRepo("not a repo");
 
     expect(draft.status).toBe("invalid");
-    expect(draft.commands).toBe("No draft yet.");
+    expect(draft.commands).toBe("Enter a valid Gitlawb repo first.");
     expect(isValidGitlawbRepo("https://example.com/z6Mkabc/repo")).toBe(false);
   });
 

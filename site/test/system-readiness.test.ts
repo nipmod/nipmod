@@ -95,7 +95,6 @@ describe("system readiness receipt", () => {
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
-      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",

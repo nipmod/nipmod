@@ -23,7 +23,7 @@ export const mcpContent = {
     },
     {
       label: "Claim proof",
-      text: "claim_verify checks Gitlawb owner proof. package_patch returns files only and never opens remote PRs."
+      text: "claim_verify checks Gitlawb owner proof. Agents should not claim or publish repos without explicit owner instruction."
     },
     {
       label: "Proof first",
@@ -45,7 +45,6 @@ export const mcpContent = {
     { name: "nipmod.publish_plan", safety: "gated dry run" },
     { name: "nipmod.claim_verify", safety: "read only" },
     { name: "nipmod.claim_index", safety: "read only" },
-    { name: "nipmod.package_patch", safety: "read only" },
     { name: "nipmod.verify", safety: "read only" },
     { name: "nipmod.audit", safety: "read only" },
     { name: "nipmod.sbom", safety: "read only" },

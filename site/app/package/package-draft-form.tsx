@@ -18,7 +18,7 @@ export function PackageDraftForm({ initialRepo = "", inputLabel, inputPlaceholde
     <section className="package-draft" aria-labelledby="draft-generator-title">
       <div className="draft-input">
         <h2 className="sr-only" id="draft-generator-title">
-          Package draft generator
+          Package command generator
         </h2>
         <label htmlFor="repo-input">{inputLabel}</label>
         <input
@@ -38,9 +38,9 @@ export function PackageDraftForm({ initialRepo = "", inputLabel, inputPlaceholde
         </p>
       </div>
       <div className="proof-panel">
-        <h2 id="draft-title">Draft output</h2>
-        <CommandBlock command={draft.commands} label="Copy draft commands" />
-        <p className="panel-copy">Dry run shows the package candidate before any public write.</p>
+        <h2 id="draft-title">Package output</h2>
+        <CommandBlock command={draft.commands} label="Copy package commands" />
+        <p className="panel-copy">Dry run shows the package review object before any public write.</p>
       </div>
     </section>
   );
@@ -51,15 +51,15 @@ export function draftFromRepo(input: string) {
   if (trimmed.length === 0) {
     return {
       commands:
-        "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../repo --json\nnipmod publish repo-pr --dry-run --json",
-      helper: "Paste a public Gitlawb repo to generate exact commands.",
+        "nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json\nnipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr\nnipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json\nnipmod publish your-repo-pr --dry-run --json",
+      helper: "Paste a Gitlawb repo you own to generate exact local commands.",
       status: "empty" as const
     };
   }
 
   if (!isValidGitlawbRepo(trimmed)) {
     return {
-      commands: "No draft yet.",
+      commands: "Enter a valid Gitlawb repo first.",
       helper: "Enter a Gitlawb DID path or Gitlawb repo URL.",
       status: "invalid" as const
     };
@@ -71,7 +71,7 @@ export function draftFromRepo(input: string) {
 
   return {
     commands: `nipmod package doctor ${quotedInput} --json\nnipmod package pr ${quotedInput} --dir ${quotedDir}\nnipmod claim verify ${quotedInput} --json\nnipmod publish ${quotedDir} --dry-run --json`,
-    helper: `Drafting as ${repoName}. Owner verification still requires the repo DID signature.`,
+    helper: `Preparing ${repoName}. Owner verification still requires the repo DID signature.`,
     status: "valid" as const
   };
 }

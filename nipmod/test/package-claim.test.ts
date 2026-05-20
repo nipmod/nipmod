@@ -9,7 +9,6 @@ import {
   createAssistedPackagePatch,
   createPackageClaimProof,
   fetchGitlawbPackageClaimVerification,
-  fetchGitlawbPackageCandidates,
   formatPackageCandidateReport,
   verifyPackageClaimProof,
   verifyPackageClaimProofForRepo
@@ -106,42 +105,6 @@ describe("package claim", () => {
     expect(report.readinessScore).toBe(100);
     expect(report.missing).toHaveLength(0);
     expect(report.signals.map((item) => item.id)).toContain("permissions");
-  });
-
-  test("fetches Gitlawb repo candidates from a node list endpoint", async () => {
-    const owner = generateIdentity().did;
-    const requests: string[] = [];
-    const fetchImpl = async (url: string | URL | Request) => {
-      requests.push(String(url));
-      return new Response(
-        JSON.stringify([
-          {
-            clone_url: "https://node.example/z6Owner/repo-reader.git",
-            default_branch: "main",
-            description: "Read Gitlawb repos for agents",
-            is_public: true,
-            name: "repo-reader",
-            owner_did: owner,
-            updated_at: "2026-05-17T00:00:00.000Z"
-          }
-        ]),
-        { headers: { "content-type": "application/json" }, status: 200 }
-      );
-    };
-
-    const result = await fetchGitlawbPackageCandidates({
-      fetchImpl,
-      nodeUrl: "https://node.example",
-      limit: 10
-    });
-
-    expect(requests).toEqual(["https://node.example/api/v1/repos"]);
-    expect(result.candidates).toHaveLength(1);
-    expect(result.candidates[0]).toMatchObject({
-      package: `pkg:${owner}/repo-reader`,
-      source: `gitlawb://${owner}/repo-reader`,
-      status: "almost"
-    });
   });
 
   test("creates and verifies a DID-bound package claim proof", async () => {

@@ -16,7 +16,6 @@
     "MCP server lists all expected tools",
     "read-only and controlled-write tools are separated",
     "proof package can be found, inspected and install-planned",
-    "repo package draft path has no remote write",
     "no secrets or payment requirement are needed for core package workflows"
   ],
   "platforms": [
@@ -34,16 +33,16 @@
       "name": "Gitlawb",
       "productReadiness": 100,
       "status": "ready",
-      "claim": "Gitlawb source flow, package claims, Scout draft and package archive paths are live.",
+      "claim": "Gitlawb source flow, package claims and package archive paths are live.",
       "evidence": [
         "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
-        "https://nipmod.com/candidates",
+        "https://nipmod.com/package",
         "https://nipmod.com/claims/index.json"
       ],
       "checks": [
         "git ls-remote gitlawb refs/heads/main matches the released commit",
         "nipmod claim index --node https://node.nipmod.com --json",
-        "nipmod package pr gitlawb://did:key:.../repo --dir repo-package-pr --json"
+        "nipmod publish . --dry-run --json"
       ]
     },
     {
@@ -106,7 +105,6 @@
       "checks": [
         "skill can be read from the public site",
         "proof package can be searched, inspected and install-planned",
-        "Gitlawb repo package draft is generated locally with remoteWrites false",
         "core package workflows do not require x402 or Nipmod payment"
       ],
       "externalDependency": "Native Bankr catalog acceptance is external and not claimed by this receipt."

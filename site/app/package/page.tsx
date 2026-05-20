@@ -14,35 +14,35 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/package"
   },
-  description: "Create a Nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
+  description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
   openGraph: {
-    description: "Create a Nipmod package draft from a public Gitlawb repo and claim it with a DID signature.",
-    title: "Package a Gitlawb repo",
+    description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
+    title: "Create a Gitlawb package",
     url: "https://nipmod.com/package"
   },
-  title: "Package a Gitlawb repo"
+  title: "Create a Gitlawb package"
 };
 
 const publishPath = [
   {
     label: "Check source",
     text: "Run the repo doctor first. It catches missing manifest, missing release evidence and source shape issues before a public claim.",
-    command: "nipmod package doctor gitlawb://did:key:z6Mk.../repo --json"
+    command: "nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json"
   },
   {
-    label: "Create draft",
+    label: "Create local files",
     text: "Generate package files locally. The command writes a review folder, not a remote listing.",
-    command: "nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr --json"
+    command: "nipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr --json"
   },
   {
     label: "Verify owner",
     text: "The source owner proves control with the Gitlawb DID. Nipmod does not treat a random submitted repo as owned.",
-    command: "nipmod claim verify gitlawb://did:key:z6Mk.../repo --json"
+    command: "nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json"
   },
   {
     label: "Dry run publish",
     text: "Preview the registry candidate, trust evidence and install surface before anything becomes public.",
-    command: "nipmod publish repo-pr --dry-run --json"
+    command: "nipmod publish your-repo-pr --dry-run --json"
   }
 ] as const;
 
@@ -65,8 +65,8 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="package-title">
         <p className="eyebrow">Create</p>
-        <h1 id="package-title">Package a Gitlawb repo.</h1>
-        <p className="lead">Paste a repo. Get package doctor, draft files, claim check and a safe publish dry run.</p>
+        <h1 id="package-title">Create a package from your Gitlawb repo.</h1>
+        <p className="lead">Paste a repo you own. Get source checks, local package files, owner verification and a publish dry run.</p>
         <div className="actions" aria-label="Package actions">
           <a className="button button-primary" href="/quickstart#install">
             Install
@@ -79,11 +79,11 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
 
       <OwnerClaimFlow
         actions={[
-          { href: "/candidates", label: "Browse prepared drafts", variant: "primary" },
+          { href: "/quickstart#docs", label: "Read docs", variant: "primary" },
           { href: "/agents", label: "Agent docs" }
         ]}
         eyebrow="Package path"
-        lead="Use this path when you already know the Gitlawb repo. If Scout found it first, start from the prepared draft."
+        lead="Use this path when you own or maintain the Gitlawb repo. Nipmod does not claim repos for other people."
         title="Package path"
       />
 
@@ -138,11 +138,11 @@ export default async function PackagePage({ searchParams }: PackagePageProps) {
         </div>
         <div className="proof-panel">
           <p className="panel-copy">
-            A draft is safe for any public Gitlawb repo. A verified publish needs the matching DID identity, helper,
+            Local package files are safe to generate for repos you own. A verified publish needs the matching DID identity, helper,
             manifest and registry candidate.
           </p>
           <pre className="install-command">
-            <code>{"nipmod package doctor gitlawb://did:key:z6Mk.../repo --json\nnipmod manifest validate --dir repo --json\nnipmod publish repo --dry-run --json"}</code>
+            <code>{"nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json\nnipmod manifest validate --dir your-repo --json\nnipmod publish your-repo --dry-run --json"}</code>
           </pre>
         </div>
       </section>

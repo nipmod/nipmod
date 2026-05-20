@@ -13,8 +13,8 @@ type OwnerClaimFlowProps = {
 
 const ownerClaimSteps = [
   {
-    label: "Draft locally",
-    text: "Create the package files from the public Gitlawb repo without remote writes."
+    label: "Prepare locally",
+    text: "Create the package files from your Gitlawb repo without remote writes."
   },
   {
     label: "Verify owner claim",

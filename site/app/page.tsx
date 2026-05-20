@@ -110,18 +110,15 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="live-head">
           <div>
             <p className="eyebrow">Registry</p>
-            <h2 id="live-title">Registry and Scout counts</h2>
-            <p className="live-copy">
-              Published packages are verified registry entries. Claimable drafts are unclaimed Gitlawb repos Scout found,
-              not published packages yet.
-            </p>
+            <h2 id="live-title">Verified registry count</h2>
+            <p className="live-copy">Published packages are verified registry entries with source, signature and trust evidence.</p>
           </div>
           <p className={`live-status ${liveStats.healthy ? "live-ok" : "live-warn"}`}>
             <span aria-hidden="true" />
             {liveStats.status}
           </p>
         </div>
-        <div className="live-stat-grid" aria-label="Live Nipmod registry and Scout stats">
+        <div className="live-stat-grid" aria-label="Live Nipmod registry stats">
           {liveStats.tiles.map((item) => (
             <div className="live-stat" key={item.label}>
               <span>{item.value}</span>
@@ -208,11 +205,8 @@ export default async function Home({ searchParams }: HomeProps) {
           ))}
         </div>
         <div className="section-actions">
-          <a className="button button-primary" href="/candidates">
-            View package candidates
-          </a>
-          <a className="button button-ghost" href="/package">
-            Create package draft
+          <a className="button button-primary" href="/package">
+            Create package
           </a>
         </div>
       </section>
@@ -302,12 +296,12 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="proof-section" aria-labelledby="package-title">
         <div>
           <p className="eyebrow">Create</p>
-          <h2 id="package-title">Package a Gitlawb repo.</h2>
+          <h2 id="package-title">Package your Gitlawb repo.</h2>
         </div>
         <div className="proof-panel">
-          <p className="panel-copy">Paste a repo and dry run the publish path.</p>
+          <p className="panel-copy">Use this only for a repo you own or maintain.</p>
           <pre className="install-command">
-            <code>{"nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr\nnipmod publish repo-pr --dry-run --json"}</code>
+            <code>{"nipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr\nnipmod publish your-repo-pr --dry-run --json"}</code>
           </pre>
           <a className="button button-primary" href="/package">
             Create package

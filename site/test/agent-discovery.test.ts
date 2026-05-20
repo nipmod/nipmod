@@ -22,11 +22,10 @@ describe("agent discovery text", () => {
     );
     expect(llmsText).toContain("Agent host MCP setup: https://nipmod.com/mcp");
     expect(llmsText).toContain("Agent demo package: gitlawb-repo-reader");
-    expect(llmsText).toContain("Claim conversion page: https://nipmod.com/candidates");
+    expect(llmsText).toContain("Self service package page: https://nipmod.com/package");
     expect(llmsText).toContain("MCP docs: https://nipmod.com/mcp");
     expect(llmsText).toContain("Audit docs: https://nipmod.com/audit");
     expect(llmsText).toContain("Registry index: https://nipmod.com/registry/packages.json");
-    expect(llmsText).toContain("Scout health: https://nipmod.com/scout/health");
     expect(llmsText).toContain("Owner status page template: https://nipmod.com/gitlawb/{owner}");
     expect(llmsText).toContain("Bankr integration: https://nipmod.com/bankr");
     expect(llmsText).toContain(
@@ -63,10 +62,9 @@ describe("agent discovery text", () => {
       "nipmod audit --online",
       "nipmod sbom --json",
       "nipmod publish . --dry-run --json",
-      "Claim conversion page:",
-      "https://nipmod.com/candidates",
-      "nipmod package doctor gitlawb://did:key:.../repo --json",
-      "curl -fsS https://nipmod.com/scout/health",
+      "Self service package page:",
+      "https://nipmod.com/package",
+      "nipmod package doctor gitlawb://did:key:.../your-repo --json",
       "nipmod mcp serve"
     ]) {
       expect(llmsText).toContain(command);

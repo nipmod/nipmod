@@ -73,7 +73,7 @@ Adoption readiness reaches 100% when the public path, demo workspace, first user
 Real adoption is different. It reaches external proof only after:
 
 - 100 unique external users or agents complete the first user loop
-- 10 external package authors produce publish dry run candidates
+- 10 external package authors produce owner controlled publish dry runs
 - 3 external packages pass full review and enter the public registry
 - 1 independent reviewer signs `docs/independent-review.md`
 

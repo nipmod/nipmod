@@ -27,7 +27,6 @@ describe("MCP host content", () => {
       "nipmod.publish_plan",
       "nipmod.claim_verify",
       "nipmod.claim_index",
-      "nipmod.package_patch",
       "nipmod.verify",
       "nipmod.audit",
       "nipmod.sbom",
@@ -38,7 +37,6 @@ describe("MCP host content", () => {
     expect(text).toContain("write-lockfile");
     expect(text).toContain("nipmod.demo");
     expect(text).toContain("claim_verify");
-    expect(text).toContain("package_patch");
 	    expect(text.toLowerCase()).toContain("controlled install");
 	    expect(text).toContain("without local signing");
 	    expect(text).toContain("Custom transparency or advisory roots require an opt in flag");

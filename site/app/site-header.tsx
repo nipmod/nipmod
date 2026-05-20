@@ -89,7 +89,6 @@ export function SiteHeader() {
             <a href="/status">Status</a>
             <a href="/examples">Examples</a>
             <a href="/audit">Audit</a>
-            <a href="/candidates">Package Claim</a>
             <a href="/package">Create</a>
             <a href="/launch">Launch</a>
             <a href="/launch-kit">Launch kit</a>

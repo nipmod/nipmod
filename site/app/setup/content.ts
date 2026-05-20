@@ -51,7 +51,7 @@ export const setupContent = {
   capabilities: [
     {
       label: "Find packages",
-      text: "Your agent can search the public Nipmod registry and Scout package drafts."
+      text: "Your agent can search the public Nipmod registry."
     },
     {
       label: "Inspect trust",

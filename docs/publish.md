@@ -50,7 +50,7 @@ Gitlawb repo names currently allow lowercase letters, numbers, hyphens and under
 
 Use `nipmod package pr gitlawb://did:key:z6Mk.../repo --dir repo-pr` when turning an existing Gitlawb repo into a PR-ready package patch. The patch is local only. Publishing requires the matching repo owner DID identity. Use `nipmod claim verify gitlawb://did:key:z6Mk.../repo --json` after the claim proof is pushed, then `nipmod publish . --dry-run --json` inside a signed package workspace before any public write.
 
-The older local draft path still exists for experiments, but public onboarding should prefer `package pr`.
+Public onboarding should use `package pr` only for repos the operator owns or maintains.
 
 ## Manifest rules
 

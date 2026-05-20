@@ -15,7 +15,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 17, total: 17 });
+    expect(result.summary).toEqual({ fail: 0, pass: 13, total: 13 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
@@ -29,10 +29,6 @@ describe("production synthetic monitor", () => {
       "witness_health",
       "witness_run_auth",
       "node_health",
-      "scout_health",
-      "scout_candidates",
-      "scout_drafts",
-      "scout_notifications",
       "receive_pack_auth"
     ]);
   });
@@ -279,10 +275,6 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
     registry: "https://nipmod.test/registry/packages.json",
-    scoutCandidates: "https://scout.nipmod.test/candidates",
-    scoutDrafts: "https://scout.nipmod.test/drafts",
-    scoutHealth: "https://scout.nipmod.test/health",
-    scoutNotifications: "https://scout.nipmod.test/notifications",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
     trust: "https://nipmod.test/trust",
@@ -331,18 +323,6 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
       registry: {
         source: endpoints.nodeUrl,
         url: endpoints.registry
-      },
-      scout: {
-        candidates: endpoints.scoutCandidates,
-        draft: "https://scout.nipmod.test/draft",
-        draftParam: "repo",
-        drafts: endpoints.scoutDrafts,
-        health: endpoints.scoutHealth,
-        intervalMs: 300000,
-        last: "https://scout.nipmod.test/last",
-        notifications: endpoints.scoutNotifications,
-        patch: "https://scout.nipmod.test/patch",
-        patchParam: "repo"
       },
       review: {
         evidenceLedger: "https://nipmod.test/review/evidence-ledger.json",
@@ -394,83 +374,6 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     }),
     [`POST ${endpoints.witnessRun}`]: jsonResponse({ error: "missing run authorization" }, 401),
     [`GET ${endpoints.nodeHealth}`]: jsonResponse({ status: "ok" }),
-    [`GET ${endpoints.scoutHealth}`]: jsonResponse({
-      ok: true,
-      lastError: null,
-      lastRunAt: "2026-05-16T12:41:00.000Z",
-      runs: 4,
-      summary: {
-        claimed: 1,
-        drafts: 2,
-        patchable: 3,
-        scanned: 3,
-        unclaimedDrafts: 1
-      }
-    }),
-    [`GET ${endpoints.scoutCandidates}`]: jsonResponse({
-      candidates: [
-        {
-          package: "pkg:did:key:z6Mkpkg/example",
-          source: "gitlawb://did:key:z6Mkpkg/example"
-        }
-      ],
-      type: "dev.nipmod.scout-candidates.v1"
-    }),
-    [`GET ${endpoints.scoutDrafts}`]: jsonResponse({
-      drafts: [
-        {
-          claim: {
-            command: "nipmod claim gitlawb://did:key:z6Mkpkg/example --dir . --identity .nipmod/identity.json",
-            required: true,
-            verifyCommand: "nipmod claim verify gitlawb://did:key:z6Mkpkg/example --json"
-          },
-          manifest: {
-            canonical: "pkg:did:key:z6Mkpkg/example",
-            name: "example",
-            permissions: []
-          },
-          remoteWrites: false,
-          source: "gitlawb://did:key:z6Mkpkg/example",
-          type: "dev.nipmod.package-draft.v1"
-        }
-      ],
-      formatVersion: 1,
-      generatedAt: "2026-05-16T12:41:00.000Z",
-      ok: true,
-      summary: {
-        claimed: 1,
-        drafts: 1,
-        unclaimedDrafts: 1
-      },
-      type: "dev.nipmod.scout-drafts.v1"
-    }),
-    [`GET ${endpoints.scoutNotifications}`]: jsonResponse({
-      dryRun: true,
-      formatVersion: 1,
-      generatedAt: "2026-05-16T12:41:00.000Z",
-      notifications: [
-        {
-          channel: "gitlawb-issue",
-          dedupeKey: "nipmod-scout:cGtnOmRpZDprZXk6ejZNa3BrZy9leGFtcGxl:package-claim",
-          package: "pkg:did:key:z6Mkpkg/example",
-          remoteWrites: false,
-          source: "gitlawb://did:key:z6Mkpkg/example",
-          status: "planned"
-        }
-      ],
-      ready: true,
-      remoteWrites: false,
-      summary: {
-        blocked: 0,
-        deduped: 0,
-        eligible: 1,
-        optedOut: 0,
-        planned: 1,
-        rateLimited: 0,
-        skipped: 0
-      },
-      type: "dev.nipmod.scout-owner-notifications.v1"
-    }),
     "POST https://node.nipmod.test/z6MknipmodUnauthProbe/receive-pack-abuse/git-receive-pack": jsonResponse(
       { error: "missing Signature-Input or Signature headers" },
       401,

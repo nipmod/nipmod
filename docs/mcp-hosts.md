@@ -14,7 +14,6 @@ Default tools:
 - `nipmod.publish_plan`
 - `nipmod.claim_verify`
 - `nipmod.claim_index`
-- `nipmod.package_patch`
 - `nipmod.verify`
 - `nipmod.audit`
 - `nipmod.sbom`
@@ -22,7 +21,7 @@ Default tools:
 
 Safety model:
 
-- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `update_plan`, `demo`, `claim_verify`, `claim_index`, `package_patch`, `verify`, `audit`, `sbom` and `explain`.
+- Read-only tools: `search`, `view`, `inspect`, `install_plan`, `update_plan`, `demo`, `claim_verify`, `claim_index`, `verify`, `audit`, `sbom` and `explain`.
 - Controlled workspace write: `install` writes only when `confirmInstall` is `write-lockfile`. Pin `expectedCanonical`, `expectedVersion` or `expectedIntegrity` when replaying a reviewed plan.
 - Gated dry run: `publish_plan`; it previews package metadata without local signing and without remote writes.
 - Not exposed through MCP: mutating `publish`, `add`, `pack`, `init`, `policy init` or `setup-cloudflare`.
@@ -103,7 +102,7 @@ nipmod setup opencode
 printf '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0.0"}}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n' | nipmod mcp serve
 ```
 
-The response must list the fifteen tools above. Host approval UI should show one controlled workspace write tool, read-only tools and the gated `nipmod.publish_plan` dry run.
+The response must list the fourteen tools above. Host approval UI should show one controlled workspace write tool, read-only tools and the gated `nipmod.publish_plan` dry run.
 
 ## Platform Readiness
 

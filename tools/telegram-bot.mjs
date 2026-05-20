@@ -47,9 +47,7 @@ const OFFICIAL_LINKS = [
   ["MCP", "https://nipmod.com/mcp"],
   ["Status", "https://nipmod.com/status"],
   ["System readiness", "https://nipmod.com/compatibility/system-readiness.json"],
-  ["Platform readiness", "https://nipmod.com/compatibility/platform-readiness.json"],
-  ["Scout candidates", "https://nipmod.com/scout/candidates"],
-  ["Scout drafts", "https://nipmod.com/scout/drafts"]
+  ["Platform readiness", "https://nipmod.com/compatibility/platform-readiness.json"]
 ];
 
 const FACTS = {
