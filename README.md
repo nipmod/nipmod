@@ -10,7 +10,7 @@ Agents can search a shared package archive, inspect trust evidence, plan install
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents
+nipmod setup agents --include-codex
 ```
 
 ## Public Links
@@ -73,7 +73,7 @@ The CLI is not published to npm. Install uses the signed release installer from 
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents
+nipmod setup agents --include-codex
 ```
 
 Manual checksum verification:

@@ -151,8 +151,8 @@ describe("telegram bot message formatting", () => {
 
   test("formats commands as code and escapes unsafe HTML", () => {
     assert.equal(
-      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents\n\nThen tell the agent\nRead <unsafe>"),
-      "<b>Install Nipmod</b>\n\n<code>curl -fsSLO https://nipmod.com/install.sh &amp;&amp; bash install.sh</code>\n<code>nipmod setup agents</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
+      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex\n\nThen tell the agent\nRead <unsafe>"),
+      "<b>Install Nipmod</b>\n\n<code>curl -fsSLO https://nipmod.com/install.sh &amp;&amp; bash install.sh</code>\n<code>nipmod setup agents --include-codex</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
     );
   });
 });

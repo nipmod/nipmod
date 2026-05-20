@@ -6,7 +6,7 @@ export const mcpContent = {
   oneCommand: {
     title: "One local command",
     text: "Install the CLI once, run a host setup command, then tell the agent to use Nipmod before installing agent packages.",
-    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents"
+    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex"
   },
   safety: [
     {

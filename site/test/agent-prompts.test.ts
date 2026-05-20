@@ -15,7 +15,7 @@ describe("agent prompt pack", () => {
       claudeCode: "nipmod setup claude",
       codex: "nipmod setup codex",
       opencode: "nipmod setup opencode",
-      projectAgents: "nipmod setup agents"
+      projectAgents: "nipmod setup agents --include-codex"
     });
     expect(prompts.prompts.default).toContain("ask before writing files");
     expect(prompts.prompts.bankr).toContain("Do not trade");

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { installCommand, safeSourceRepoHref, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
+import { CommandBlock } from "../command-block";
+import { safeSourceRepoHref, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
 import { packageQuality } from "../../lib/package-quality";
 import { packageBrowseData, packageEvidenceHref, packagePageHref } from "./content";
 
@@ -38,11 +39,8 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
     <main className="page-shell" id="main">
       <section className="quickstart-hero package-archive-hero" aria-labelledby="packages-title">
         <p className="eyebrow">Package archive</p>
-        <h1 id="packages-title">Verified packages for agents.</h1>
-        <p className="lead">
-          Search one clean registry. See what a package does, where it came from, whether it is verified and how an
-          agent can install it.
-        </p>
+        <h1 id="packages-title">Agent package archive.</h1>
+        <p className="lead">Search packages, check trust, then plan install before anything writes.</p>
         <div className="actions" aria-label="Archive actions">
           <a className="button button-primary" href="#archive">
             Search archive
@@ -56,45 +54,6 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           <a className="data-link" href="/registry/packages.json" aria-label="Open Nipmod registry machine file">
             Registry JSON
           </a>
-        </div>
-      </section>
-
-      <section className="archive-overview" aria-label="Nipmod archive coverage">
-        <article className="archive-overview-card">
-          <span>{registry.packages.length}</span>
-          <h2>Verified packages</h2>
-          <p>Generated from the live Nipmod registry.</p>
-        </article>
-        <article className="archive-overview-card">
-          <span>{featured.length}</span>
-          <h2>Featured start set</h2>
-          <p>Packages that show the core archive use cases first.</p>
-        </article>
-        <article className="archive-overview-card">
-          <span>{sourceOptions.map((item) => `${item.label} ${item.count}`).join(" / ")}</span>
-          <h2>Current source</h2>
-          <p>Published package source today is Gitlawb. New indexed sources will appear here.</p>
-        </article>
-        <article className="archive-overview-card">
-          <span>Codex + Claude Code</span>
-          <h2>Agent-ready</h2>
-          <p>Connect once, then agents can search and inspect the same archive.</p>
-        </article>
-      </section>
-
-      <section className="featured-section" aria-labelledby="featured-packages-title">
-        <div className="section-head">
-          <p className="eyebrow">Featured</p>
-          <h2 id="featured-packages-title">Start with these packages.</h2>
-          <p>
-            This set shows the archive working across source reading, package safety, MCP access, onboarding, evidence
-            and CI. The full archive stays searchable below.
-          </p>
-        </div>
-        <div className="featured-package-grid">
-          {featured.map((pkg) => (
-            <FeaturedPackageCard key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
-          ))}
         </div>
       </section>
 
@@ -197,6 +156,42 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
           )}
         </div>
       </section>
+
+      <section className="archive-overview" aria-label="Nipmod archive coverage">
+        <article className="archive-overview-card">
+          <span>{registry.packages.length}</span>
+          <h2>Verified packages</h2>
+          <p>Generated from the live Nipmod registry.</p>
+        </article>
+        <article className="archive-overview-card">
+          <span>{featured.length}</span>
+          <h2>Featured start set</h2>
+          <p>Packages that show core archive use cases first.</p>
+        </article>
+        <article className="archive-overview-card">
+          <span>{sourceOptions.map((item) => `${item.label} ${item.count}`).join(" / ")}</span>
+          <h2>Source today</h2>
+          <p>Published package source today is Gitlawb. New indexed sources will appear here.</p>
+        </article>
+        <article className="archive-overview-card">
+          <span>Codex + Claude Code + OpenCode</span>
+          <h2>Agent access</h2>
+          <p>Connect once, then agents can search and inspect the same archive.</p>
+        </article>
+      </section>
+
+      <section className="featured-section" aria-labelledby="featured-packages-title">
+        <div className="section-head">
+          <p className="eyebrow">Featured</p>
+          <h2 id="featured-packages-title">Useful starting points.</h2>
+          <p>Source reading, package safety, MCP access, onboarding, evidence and CI examples.</p>
+        </div>
+        <div className="featured-package-grid">
+          {featured.map((pkg) => (
+            <FeaturedPackageCard key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
@@ -206,6 +201,8 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
   const quality = packageQuality(pkg);
   const sourceLabel = packageSourceLabel(pkg);
   const isLatest = pkg.distTags?.latest === pkg.version;
+  const spec = `${pkg.canonical}@${pkg.version}`;
+  const planCommand = `nipmod install --plan ${spec}`;
 
   return (
     <article className="archive-package-row">
@@ -231,13 +228,13 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
 
       <div className="archive-package-bottom">
         <div className="archive-install">
-          <span>Install</span>
-          <code>{installCommand(pkg)}</code>
+          <span>Plan first</span>
+          <CommandBlock command={planCommand} label={`Copy ${pkg.name} install plan command`} variant="compact" />
         </div>
 
         <nav className="archive-actions" aria-label={`${pkg.name} links`}>
           <a className="button button-primary button-small" href={packagePageHref(pkg)}>
-            Details
+            View package
           </a>
           <a className="button button-ghost button-small" href={packageEvidenceHref(pkg)}>
             Proof
@@ -256,24 +253,28 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
         </nav>
       </div>
 
-      <div className="archive-proof-row" aria-label={`${pkg.name} proof summary`}>
-        <span>
-          <strong>source</strong>
-          {sourceLabel}
-        </span>
-        <span>
-          <strong>digest</strong>
-          <code>{shortHash(pkg.digest)}</code>
-        </span>
-        <span>
-          <strong>signature</strong>
-          {pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing"}
-        </span>
-        <span>
-          <strong>commit</strong>
-          <code>{shortHash(pkg.sourceCommit ?? "missing")}</code>
-        </span>
-      </div>
+      <dl className="archive-proof-row" aria-label={`${pkg.name} proof summary`}>
+        <div>
+          <dt>source</dt>
+          <dd>{sourceLabel}</dd>
+        </div>
+        <div>
+          <dt>digest</dt>
+          <dd>
+            <code>{shortHash(pkg.digest)}</code>
+          </dd>
+        </div>
+        <div>
+          <dt>signature</dt>
+          <dd>{pkg.trust.evidence.bundleSignatureVerified ? "verified" : "missing"}</dd>
+        </div>
+        <div>
+          <dt>commit</dt>
+          <dd>
+            <code>{shortHash(pkg.sourceCommit ?? "missing")}</code>
+          </dd>
+        </div>
+      </dl>
     </article>
   );
 }
@@ -281,6 +282,7 @@ function PackageBrowseCard({ pkg }: { pkg: RegistryPackage }) {
 function FeaturedPackageCard({ pkg }: { pkg: RegistryPackage }) {
   const quality = packageQuality(pkg);
   const purpose = featuredPurpose(pkg);
+  const spec = `${pkg.canonical}@${pkg.version}`;
 
   return (
     <article className="featured-package-card">
@@ -296,8 +298,8 @@ function FeaturedPackageCard({ pkg }: { pkg: RegistryPackage }) {
         <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
       </div>
       <div className="archive-install">
-        <span>Use</span>
-        <code>{installCommand(pkg)}</code>
+        <span>Plan first</span>
+        <CommandBlock command={`nipmod install --plan ${spec}`} label={`Copy ${pkg.name} install plan command`} variant="compact" />
       </div>
     </article>
   );

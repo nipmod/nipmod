@@ -109,7 +109,7 @@ When authenticated in Bankr, Nipmod can maintain a public Agent Profile. This is
 ```bash
 bankr agent profile create \
   --name "Nipmod" \
-  --description "Package layer for agent built software." \
+  --description "Package layer for agents." \
   --token 0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3 \
   --image "https://nipmod.com/nipmod-logo.png" \
   --website "https://nipmod.com"

@@ -51,7 +51,7 @@ Connect OpenCode:
 nipmod setup opencode
 
 Connect project agents:
-nipmod setup agents
+nipmod setup agents --include-codex
 
 Manual verification path:
 curl -fLO https://nipmod.com/install.sh

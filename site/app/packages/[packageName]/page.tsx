@@ -4,7 +4,8 @@ import { CommandBlock } from "../../command-block";
 import {
   installCommand,
   permissionHighlights,
-  safeSourceRepoHref
+  safeSourceRepoHref,
+  type RegistryPackage
 } from "../../../lib/registry";
 import { auditSummaryForPackage, packageQuality } from "../../../lib/package-quality";
 import {
@@ -59,6 +60,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
   const sourceRepoHref = safeSourceRepoHref(pkg.sourceRepo);
   const quality = packageQuality(pkg);
   const audit = auditSummaryForPackage(pkg);
+  const decisionItems = installDecisionItems(pkg);
 
   return (
     <main className="page-shell" id="main">
@@ -68,8 +70,11 @@ export default async function PackagePage({ params }: PackagePageProps) {
           <h1 id="package-title">{pkg.name}</h1>
           <p className="lead">{pkg.description}</p>
           <div className="actions">
-            <a className="button button-primary" href="#install">
-              Install
+            <a className="button button-primary" href="#trust">
+              Inspect trust
+            </a>
+            <a className="button button-ghost" href="#install">
+              Plan install
             </a>
             <a className="button button-ghost" href={packageEvidenceHref(pkg)}>
               Evidence
@@ -95,6 +100,12 @@ export default async function PackagePage({ params }: PackagePageProps) {
             <span className={`trust-badge trust-${pkg.trust.level}`}>{pkg.trust.level}</span>
             <span className={`trust-badge quality-${quality.label.toLowerCase()}`}>{quality.score}/100</span>
           </div>
+          <div className="install-decision">
+            <strong>Ready to review</strong>
+            {decisionItems.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
           <dl className="proof-facts">
             <div>
               <dt>Version</dt>
@@ -113,17 +124,17 @@ export default async function PackagePage({ params }: PackagePageProps) {
       </section>
 
       <nav className="package-tabs" aria-label="Package sections">
-        {["readme", "install", "versions", "dependencies", "trust", "audit", "advisories", "provenance", "agent-use"].map((item) => (
+        {["overview", "install", "versions", "dependencies", "trust", "audit", "advisories", "provenance", "agent-use"].map((item) => (
           <a href={`#${item}`} key={item}>
             {item.replace("-", " ")}
           </a>
         ))}
       </nav>
 
-      <section className="trust-section" id="readme" aria-labelledby="readme-title">
+      <section className="trust-section" id="overview" aria-labelledby="overview-title">
         <div>
-          <p className="eyebrow">Readme</p>
-          <h2 id="readme-title">What this package gives an agent</h2>
+          <p className="eyebrow">Overview</p>
+          <h2 id="overview-title">What this package gives an agent</h2>
         </div>
         <div className="proof-panel">
           <p className="panel-copy">{pkg.description}</p>
@@ -137,7 +148,7 @@ export default async function PackagePage({ params }: PackagePageProps) {
       <section className="trust-section" id="install" aria-labelledby="install-title">
         <div>
           <p className="eyebrow">Install</p>
-          <h2 id="install-title">Choose the safest command for the job</h2>
+          <h2 id="install-title">Inspect first, plan next</h2>
         </div>
         <div className="check-list">
           {packageInstallVariants(pkg).map((variant) => (
@@ -307,4 +318,12 @@ export default async function PackagePage({ params }: PackagePageProps) {
       </section>
     </main>
   );
+}
+
+function installDecisionItems(pkg: RegistryPackage): string[] {
+  return [
+    pkg.trust.evidence.bundleSignatureVerified ? "Signed bundle" : "Signature missing",
+    pkg.trust.evidence.artifactDigestVerified ? "Digest pinned" : "Digest missing",
+    pkg.quarantine?.status === "active" ? "Active advisory block" : "No active advisory block"
+  ];
 }

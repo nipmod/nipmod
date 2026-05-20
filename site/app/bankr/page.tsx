@@ -190,7 +190,7 @@ export default function BankrPage() {
 
       <section className="registry-section" aria-labelledby="bankr-agent-host-title">
         <div className="section-head">
-          <p className="eyebrow">Agent hosts</p>
+          <p className="eyebrow">Agent runtimes</p>
           <h2 id="bankr-agent-host-title">Use Bankr proof from Codex or Claude Code</h2>
           <p>
             Bankr remains a workflow proof path. Codex and Claude Code can read the same Bankr skill files and the same

@@ -144,7 +144,7 @@ Current deployable monitor target:
 - authenticated probe route: `https://nipmod.com/api/monitor?probe=1`
 - external GitHub Actions runner: `.github/workflows/prod-monitor.yml`
 
-Set `CRON_SECRET` in Vercel. Vercel sends it as `Authorization: Bearer <CRON_SECRET>` for cron invocations, and the route fails closed with `401` or `503` without it. The cron route sends only redacted destination ids and never returns webhook tokens. It checks homepage, Trust, discovery, registry, node, witness and Scout health.
+Set `CRON_SECRET` in Vercel. Vercel sends it as `Authorization: Bearer <CRON_SECRET>` for cron invocations, and the route fails closed with `401` or `503` without it. The cron route sends only redacted destination ids and never returns webhook tokens. It checks homepage, Trust, discovery, registry, node and witness health.
 
 The GitHub Actions workflow runs outside the Vercel/Fly runtime on a 15 minute schedule. It executes the full production alert runner plus the node edge resilience smoke. Add `NIPMOD_ALERT_*` repository secrets to make GitHub deliver alerts to external destinations when a production check fails.
 

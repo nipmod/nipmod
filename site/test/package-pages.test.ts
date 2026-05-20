@@ -75,7 +75,7 @@ describe("package pages", () => {
     if (!pkg) {
       return;
     }
-    expect(packageInstallVariants(pkg).map((item) => item.label)).toEqual(["Install", "Inspect first", "Plan only"]);
+    expect(packageInstallVariants(pkg).map((item) => item.label)).toEqual(["Inspect trust", "Plan install", "Install after review"]);
     expect(packageInstallVariants(pkg)[0]?.command).toContain(pkg.canonical);
     expect(packageVersions(pkg)[0]?.version).toBe(pkg.version);
     expect(packageDependencyText(pkg)).toContain("dependency");

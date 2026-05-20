@@ -13,6 +13,6 @@
     "codex": "nipmod setup codex",
     "claudeCode": "nipmod setup claude",
     "opencode": "nipmod setup opencode",
-    "projectAgents": "nipmod setup agents"
+    "projectAgents": "nipmod setup agents --include-codex"
   }
 }

@@ -39,7 +39,13 @@ export function PackageDraftForm({ initialRepo = "", inputLabel, inputPlaceholde
       </div>
       <div className="proof-panel">
         <h2 id="draft-title">Package output</h2>
-        <CommandBlock command={draft.commands} label="Copy package commands" />
+        {invalid ? (
+          <p className="invalid-command" role="status">
+            Enter a valid Gitlawb repo before copying commands.
+          </p>
+        ) : (
+          <CommandBlock command={draft.commands} label="Copy package commands" />
+        )}
         <p className="panel-copy">Dry run shows the package review object before any public write.</p>
       </div>
     </section>

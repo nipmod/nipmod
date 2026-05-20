@@ -1701,6 +1701,10 @@ function formatSearch(result: RegistrySearchResult, options: { details: boolean 
       lines.push(`    deprecated: ${pkg.deprecationReason}`);
     }
     if (pkg.install) {
+      const planCommand = installPlanCommand(pkg.install);
+      if (planCommand) {
+        lines.push(`    plan: ${planCommand}`);
+      }
       lines.push(`    install: ${pkg.install}`);
       if (pkg.nameAmbiguous && pkg.canonicalInstall) {
         lines.push(`    security: ${pkg.canonicalInstall}`);
@@ -2217,7 +2221,8 @@ function formatAgentSetup(result: AgentSetupResult): string {
   const lines = [`nipmod setup ${result.host} ${result.ready ? "ready" : "blocked"}`];
   if (result.files.length > 0) {
     for (const file of result.files) {
-      lines.push(`${file.changed ? "updated" : "kept"} ${file.path}`);
+      const action = result.dryRun ? (file.changed ? "would update" : "would keep") : file.changed ? "updated" : "kept";
+      lines.push(`${action} ${file.path}`);
     }
   }
   if (result.commands.length > 0) {
@@ -2237,6 +2242,14 @@ function formatAgentSetup(result: AgentSetupResult): string {
     lines.push("", note);
   }
   return lines.join("\n");
+}
+
+function installPlanCommand(command: string): string | null {
+  const prefix = "nipmod install ";
+  if (!command.startsWith(prefix)) {
+    return null;
+  }
+  return `${prefix}--plan ${command.slice(prefix.length)}`;
 }
 
 function doctorCheckLabel(check: DoctorGitlawbResult["checks"][number]): string {

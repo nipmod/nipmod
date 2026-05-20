@@ -14,6 +14,7 @@ export interface AgentSetupOptions {
 export interface AgentSetupResult {
   changed: boolean;
   commands: string[];
+  dryRun: boolean;
   files: AgentSetupFile[];
   host: AgentHost;
   notes: string[];
@@ -55,6 +56,7 @@ async function setupCodex(options: AgentSetupOptions): Promise<AgentSetupResult>
       return baseResult("codex", {
         changed: false,
         commands: [CODEX_SETUP_COMMAND],
+        dryRun: Boolean(options.dryRun),
         files: [],
         notes: [`Codex setup command failed: ${result.message}`],
         ready: false,
@@ -66,6 +68,7 @@ async function setupCodex(options: AgentSetupOptions): Promise<AgentSetupResult>
   return baseResult("codex", {
     changed: !options.dryRun,
     commands: [CODEX_SETUP_COMMAND],
+    dryRun: Boolean(options.dryRun),
     files: [],
     notes: options.dryRun ? ["Dry run only. No Codex config was changed."] : ["Codex MCP server registered."],
     ready: true,
@@ -81,6 +84,7 @@ async function setupClaude(options: AgentSetupOptions): Promise<AgentSetupResult
   return baseResult("claude", {
     changed: file.changed,
     commands: [CLAUDE_SETUP_COMMAND],
+    dryRun: Boolean(options.dryRun),
     files: [file],
     notes: options.dryRun
       ? ["Dry run only. The project .mcp.json file was not written."]
@@ -98,6 +102,7 @@ async function setupOpenCode(options: AgentSetupOptions): Promise<AgentSetupResu
   return baseResult("opencode", {
     changed: file.changed,
     commands: [OPENCODE_SETUP_COMMAND],
+    dryRun: Boolean(options.dryRun),
     files: [file],
     notes: options.dryRun
       ? ["Dry run only. The project opencode.json file was not written."]
@@ -120,6 +125,7 @@ async function setupAgents(options: AgentSetupOptions): Promise<AgentSetupResult
       "nipmod setup opencode",
       ...(options.includeCodex ? [CODEX_SETUP_COMMAND] : [CODEX_SETUP_COMMAND])
     ],
+    dryRun: Boolean(options.dryRun),
     files: results.flatMap((result) => result.files),
     notes: [
       "Claude Code and OpenCode local project configs are covered.",
@@ -132,13 +138,15 @@ async function setupAgents(options: AgentSetupOptions): Promise<AgentSetupResult
 
 function baseResult(
   host: AgentHost,
-  input: Omit<AgentSetupResult, "host" | "prompt" | "type">
+  input: Omit<AgentSetupResult, "dryRun" | "host" | "prompt" | "type"> & { dryRun?: boolean }
 ): AgentSetupResult {
+  const { dryRun = false, ...rest } = input;
   return {
     type: "dev.nipmod.agent-setup.v1",
     host,
     prompt: AGENT_HANDOFF_PROMPT,
-    ...input
+    ...rest,
+    dryRun: Boolean(dryRun)
   };
 }
 

@@ -10,7 +10,7 @@
     },
     {
       "status": "MCP ready",
-      "meaning": "The host can use the local Nipmod MCP server and host smoke checks pass."
+      "meaning": "The host can use the local Nipmod MCP server and runtime checks pass."
     },
     {
       "status": "Under review",

@@ -1,34 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CommandBlockProps = {
   command: string;
   label?: string;
+  variant?: "default" | "compact";
 };
 
-export function CommandBlock({ command, label = "Copy command" }: CommandBlockProps) {
+export function CommandBlock({ command, label = "Copy command", variant = "default" }: CommandBlockProps) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const resetTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimer.current !== null) {
+        window.clearTimeout(resetTimer.current);
+      }
+    };
+  }, []);
 
   async function copyCommand() {
+    let copied = false;
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(command);
-      } else {
-        fallbackCopy(command);
+        copied = true;
       }
-      setStatus("copied");
     } catch {
+      copied = false;
+    }
+
+    if (!copied) {
+      try {
+        fallbackCopy(command);
+        copied = true;
+      } catch {
+        copied = false;
+      }
+    }
+
+    if (copied) {
+      setStatus("copied");
+    } else {
       setStatus("failed");
     }
-    window.setTimeout(() => setStatus("idle"), 1600);
+    if (resetTimer.current !== null) {
+      window.clearTimeout(resetTimer.current);
+    }
+    resetTimer.current = window.setTimeout(() => setStatus("idle"), 1600);
   }
 
   const buttonText = status === "copied" ? "Copied" : status === "failed" ? "Failed" : "Copy";
   const statusText = status === "copied" ? "Copied" : status === "failed" ? "Copy failed" : "";
 
   return (
-    <div className="command-block">
+    <div className={`command-block command-block-${variant}`} data-status={status}>
       <pre className="install-command">
         <code>{command}</code>
       </pre>

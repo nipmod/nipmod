@@ -1425,7 +1425,7 @@ function installText() {
   return [
     "Install Nipmod",
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-    "nipmod setup agents",
+    "nipmod setup agents --include-codex",
     "",
     "Then tell the agent",
     "Read https://nipmod.com/llms.txt and use Nipmod for package search, inspection and controlled install."

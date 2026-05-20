@@ -175,7 +175,7 @@ async function verifyProduction() {
   await assertText(
     "https://nipmod.com",
     (text) =>
-      text.includes("Nipmod makes agent code installable") &&
+      text.includes("Search, inspect and install verified agent packages") &&
       text.includes("https://x.com/Nipmod") &&
       text.includes("https://github.com/nipmod/nipmod"),
     "homepage product surface missing"

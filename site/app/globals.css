@@ -35,13 +35,18 @@ html {
 body {
   background: linear-gradient(180deg, #0a0a0c 0%, #050506 34%, #000 100%);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "kern";
   margin: 0;
   max-width: 100%;
   min-height: 100%;
   overflow-x: hidden;
   text-rendering: geometricPrecision;
   width: 100%;
+}
+
+.page-shell > section {
+  animation: surface-enter 520ms ease both;
 }
 
 a {
@@ -364,7 +369,7 @@ h1 {
 }
 
 .button:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.985);
 }
 
 .button-primary {
@@ -490,12 +495,50 @@ h1 {
   position: absolute;
   right: 10px;
   top: 10px;
-  transition: background 160ms ease, transform 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .copy-command:hover {
   background: rgba(255, 255, 255, 0.14);
   transform: translateY(-1px);
+}
+
+.command-block[data-status="copied"] .install-command {
+  border-color: rgba(143, 255, 193, 0.36);
+  box-shadow: inset 0 1px 0 rgba(143, 255, 193, 0.1), 0 0 0 1px rgba(143, 255, 193, 0.05);
+}
+
+.command-block[data-status="copied"] .copy-command {
+  background: rgba(143, 255, 193, 0.16);
+  border-color: rgba(143, 255, 193, 0.34);
+}
+
+.command-block[data-status="failed"] .copy-command {
+  background: rgba(255, 217, 138, 0.14);
+  border-color: rgba(255, 217, 138, 0.34);
+}
+
+.command-block-compact {
+  align-items: stretch;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.command-block-compact .install-command {
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+
+.command-block-compact .copy-command {
+  min-height: 30px;
+  padding: 0 10px;
+  position: static;
+}
+
+.command-block-compact .install-command code {
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .copy-status {
@@ -551,6 +594,17 @@ h1 {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -1380,7 +1434,7 @@ h1 {
 }
 
 .archive-install {
-  align-items: center;
+  align-items: flex-start;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-soft);
   border-radius: 12px;
@@ -1391,20 +1445,18 @@ h1 {
   padding: 9px 10px;
 }
 
-.archive-install span {
+.archive-install > span {
   color: var(--quiet);
   flex: 0 0 auto;
   font-size: 12px;
   font-weight: 760;
+  padding-top: 9px;
 }
 
-.archive-install code {
-  color: var(--text);
-  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.archive-install .command-block {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .archive-actions {
@@ -1427,10 +1479,11 @@ h1 {
   display: grid;
   gap: 7px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
   padding-top: 10px;
 }
 
-.archive-proof-row span {
+.archive-proof-row div {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid var(--border-soft);
   border-radius: 10px;
@@ -1442,11 +1495,16 @@ h1 {
   padding: 8px;
 }
 
-.archive-proof-row strong {
+.archive-proof-row dt {
   color: var(--quiet);
   font-size: 11px;
   font-weight: 760;
   text-transform: uppercase;
+}
+
+.archive-proof-row dd {
+  margin: 0;
+  min-width: 0;
 }
 
 .archive-proof-row code {
@@ -1722,6 +1780,17 @@ h1 {
   gap: 8px;
 }
 
+.package-tabs {
+  backdrop-filter: blur(24px) saturate(170%);
+  background: rgba(5, 5, 6, 0.74);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 7px;
+  position: sticky;
+  top: 84px;
+  z-index: 7;
+}
+
 .permission-row span {
   background: rgba(255, 255, 255, 0.055);
   color: var(--muted);
@@ -1766,6 +1835,17 @@ h1 {
   font-size: 13px;
   line-height: 1.45;
   margin: 0;
+}
+
+.invalid-command {
+  background: rgba(255, 217, 138, 0.1);
+  border: 1px solid rgba(255, 217, 138, 0.28);
+  border-radius: 14px;
+  color: var(--yellow);
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 14px;
 }
 
 .empty-state {
@@ -1960,6 +2040,35 @@ h1 {
   gap: 14px;
   min-width: 0;
   padding: 18px;
+}
+
+.install-decision {
+  background: rgba(143, 255, 193, 0.08);
+  border: 1px solid rgba(143, 255, 193, 0.2);
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 12px;
+}
+
+.install-decision strong,
+.install-decision span {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 760;
+  line-height: 1;
+  padding: 8px 9px;
+}
+
+.install-decision strong {
+  background: rgba(143, 255, 193, 0.14);
+  color: var(--text);
+}
+
+.install-decision span {
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--muted);
 }
 
 .proof-facts,
@@ -2255,8 +2364,8 @@ h1 {
   }
 
   .brand-icon-button {
-    height: 26px;
-    width: 26px;
+    height: 30px;
+    width: 30px;
   }
 
   .brand-icon-button img,

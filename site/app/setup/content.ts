@@ -1,10 +1,10 @@
 export const setupContent = {
-  headline: "Use Nipmod in your agent",
+  headline: "Connect your agent",
   lead:
-    "Install once, connect your agent once, then tell Codex, Claude Code or OpenCode to search the Nipmod archive before installing agent packages.",
+    "Install Nipmod, connect your agent and ask it to search the archive before package installs.",
   installCommand: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
   checkCommand: "nipmod doctor --online",
-  allAgentsCommand: "nipmod setup agents",
+  allAgentsCommand: "nipmod setup agents --include-codex",
   agentPrompt:
     "Use Nipmod before installing agent packages. Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Search the Nipmod archive first, view exact metadata, inspect trust, create an install plan, ask before writing files, then audit and export SBOM.",
   steps: [

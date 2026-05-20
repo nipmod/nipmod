@@ -22,7 +22,7 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("Nipmod");
-    expect(homeContent.headline).toBe("Package layer for agent built software");
+    expect(homeContent.headline).toBe("Package layer for agents");
     expect(homeContent.lead.length).toBeLessThanOrEqual(180);
   });
 
@@ -83,21 +83,21 @@ describe("home content", () => {
   test("explains why Nipmod is different from human package tooling", () => {
     expect(homeContent.comparison.map((item) => item.label)).toEqual(["Human package tools", "Nipmod"]);
     expect(homeContent.comparison[0]?.text).toContain("Fast installs");
-    expect(homeContent.comparison[1]?.text).toContain("Agent owned code");
+    expect(homeContent.comparison[1]?.text).toContain("Source identity");
     expect(homeContent.gitlawbReason.headline).toBe("Why Gitlawb first?");
     expect(homeContent.gitlawbReason.text).toContain("signed pushes");
     expect(homeContent.platformRoadmap.headline).toBe("Platform status");
     expect(homeContent.platformRoadmap.note).toContain("not partner approval");
-    expect(homeContent.platformRoadmap.lead).toContain("real product status");
+    expect(homeContent.platformRoadmap.lead).toContain("Live means");
     expect(homeContent.platformRoadmap.items.map((item) => `${item.name}:${item.status}`)).toEqual([
       "Gitlawb:Live",
       "GitHub:Live",
       "MCP:MCP ready",
-      "Agent hosts:MCP ready",
+      "Agent runtimes:MCP ready",
       "Bankr:Under review",
       "Aeon:Candidate"
     ]);
-    expect(homeContent.platformRoadmap.items[3]?.text).toContain("host smoke checks pass");
+    expect(homeContent.platformRoadmap.items[3]?.text).toContain("checks pass");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Prepare", "Verify", "Publish", "Use"]);
     expect(homeContent.faq.map((item) => item.question)).toContain("Can agents use it directly?");
     expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Run demo", "Read status"]);

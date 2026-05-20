@@ -1,7 +1,7 @@
 export const homeContent = {
   brand: "Nipmod",
-  headline: "Package layer for agent built software",
-  lead: "Nipmod makes agent code installable, verifiable and reusable. It starts with Gitlawb source and gives humans and agents a clean package workflow.",
+  headline: "Package layer for agents",
+  lead: "Search, inspect and install verified agent packages from one shared archive.",
   links: {
     bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     docs: "/quickstart#docs",
@@ -23,34 +23,34 @@ export const homeContent = {
   usage: [
     {
       label: "Search",
-      text: "Find verified agent packages without a Nipmod account."
+      text: "Find packages from the public archive without a Nipmod account."
     },
     {
       label: "Verify",
-      text: "Check identity, source, claims, signatures and audit evidence before install."
+      text: "Check source, signatures, permissions and trust evidence before install."
     },
     {
       label: "Install",
-      text: "Pin exact package bytes in a workspace lockfile for humans and agents."
+      text: "Plan first, then pin exact package bytes in a workspace lockfile."
     }
   ],
   comparison: [
     {
       label: "Human package tools",
-      title: "Developer workflows",
-      text: "Fast installs, familiar package names and public distribution for human maintained projects.",
-      points: ["package names and versions", "developer first", "human publisher accounts"]
+      title: "Packages for people",
+      text: "Fast installs, familiar names, versions and public distribution for normal developer work.",
+      points: ["names and versions", "developer accounts", "manual review"]
     },
     {
       label: "Nipmod",
-      title: "Agent package layer",
-      text: "Agent owned code, signed source history, package claims, audit data and safe agent installs.",
-      points: ["source identity", "DID ownership claims", "agent readable trust metadata"]
+      title: "Packages for agents",
+      text: "Source identity, signed evidence, package claims and install receipts agents can read.",
+      points: ["source identity", "DID claims", "agent readable trust data"]
     }
   ],
   gitlawbReason: {
     headline: "Why Gitlawb first?",
-    text: "Gitlawb already gives agents source identity, signed pushes and public provenance. Nipmod adds the installable package layer on top.",
+    text: "Gitlawb gives source identity, signed pushes and public provenance. Nipmod adds the installable package layer on top.",
     facts: [
       "source history stays on Gitlawb",
       "package truth is verified from signed evidence",
@@ -60,7 +60,7 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Each connection shows the real product status: live where Nipmod controls the path, MCP ready where agents can connect locally, and under review when an outside repo must accept it.",
+      "Live means Nipmod controls the path. MCP ready means agents can connect locally. Under review means native acceptance is external.",
     note: "Statuses describe Nipmod integration work, not partner approval. The full proof matrix is public.",
     items: [
       {
@@ -88,10 +88,10 @@ export const homeContent = {
         cta: "View MCP"
       },
       {
-        name: "Agent hosts",
+        name: "Agent runtimes",
         status: "MCP ready",
         label: "Codex, Claude Code, OpenCode",
-        text: "Codex, Claude Code and OpenCode host smoke checks pass against the same local Nipmod MCP server.",
+        text: "Codex, Claude Code and OpenCode checks pass against the same local Nipmod MCP server.",
         href: "/setup",
         cta: "Setup agent"
       },
@@ -99,7 +99,7 @@ export const homeContent = {
         name: "Bankr",
         status: "Under review",
         label: "agent skill",
-        text: "The Bankr skill, proof files and safe agent workflow are ready. Native Bankr acceptance is still external.",
+        text: "The Bankr skill, proof files and agent workflow are ready. Native Bankr acceptance is still external.",
         href: "/bankr",
         cta: "View Bankr path"
       },
@@ -107,7 +107,7 @@ export const homeContent = {
         name: "Aeon",
         status: "Candidate",
         label: "external skill library",
-        text: "Aeon is a strong candidate for a future external skill collection, pending owner review.",
+        text: "Aeon is a candidate external skill collection, pending owner review.",
         href: "/platforms",
         cta: "View matrix"
       }
@@ -147,7 +147,7 @@ export const homeContent = {
     },
     {
       question: "Can agents use it directly?",
-      answer: "Yes. Install once, connect the MCP server, then tell the agent to use Nipmod before package installs."
+      answer: "Yes. Install the CLI, connect MCP, then tell the agent to use Nipmod before package installs."
     },
     {
       question: "Who owns packages?",
@@ -166,7 +166,7 @@ export const homeContent = {
   startCards: [
     {
       title: "Setup Nipmod",
-      text: "Connect Codex, Claude Code or OpenCode to the package archive.",
+      text: "Connect Codex, Claude Code or OpenCode.",
       href: "/setup"
     },
     {

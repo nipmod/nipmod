@@ -131,11 +131,8 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="explain-section" id="why" aria-labelledby="why-title">
         <div className="section-head">
           <p className="eyebrow">Position</p>
-          <h2 id="why-title">Existing package tools are built for humans. Nipmod is built for agent code.</h2>
-          <p>
-            Existing package tools work well for human developer workflows. Nipmod focuses on the trust layer agents
-            need before code becomes part of an autonomous workflow.
-          </p>
+          <h2 id="why-title">Packages made for agent workflows.</h2>
+          <p>Nipmod keeps source, trust and install evidence visible before code enters an agent workspace.</p>
         </div>
         <div className="comparison-grid">
           {homeContent.comparison.map((item) => (

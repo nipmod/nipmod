@@ -3,7 +3,7 @@ import { setupContent } from "../app/setup/content";
 
 describe("setup content", () => {
   test("keeps the agent setup path simple and complete", () => {
-    expect(setupContent.headline).toBe("Use Nipmod in your agent");
+    expect(setupContent.headline).toBe("Connect your agent");
     expect(setupContent.lead.length).toBeLessThanOrEqual(180);
     expect(setupContent.steps.map((step) => step.label)).toEqual([
       "Open Terminal",
@@ -16,7 +16,7 @@ describe("setup content", () => {
   test("publishes copyable setup commands for major agent hosts", () => {
     expect(setupContent.installCommand).toBe("curl -fsSLO https://nipmod.com/install.sh && bash install.sh");
     expect(setupContent.checkCommand).toBe("nipmod doctor --online");
-    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents");
+    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents --include-codex");
     expect(setupContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode"]);
     expect(setupContent.hosts[0]?.command).toBe("nipmod setup codex");
     expect(setupContent.hosts[1]?.command).toBe("nipmod setup claude");

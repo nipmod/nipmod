@@ -44,7 +44,7 @@ describe("agent discovery text", () => {
       "nipmod setup codex",
       "nipmod setup claude",
       "nipmod setup opencode",
-      "nipmod setup agents",
+      "nipmod setup agents --include-codex",
       "Manual verification path:",
       "curl -fLO https://nipmod.com/install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",

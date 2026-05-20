@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Package layer for agent built software" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Package layer for agents" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Verified registry count" })).toBeVisible();
   await expect(page.getByText("Registry live")).toBeVisible();
   await expect(page.locator(".live-stat-grid").getByText("Verified packages", { exact: true })).toBeVisible();
@@ -81,10 +81,10 @@ test("packages page exposes one central human archive", async ({ page, request }
 
   await page.goto("/packages");
 
-  await expect(page.getByRole("heading", { name: "Verified packages for agents." })).toBeVisible();
-  await expect(page.getByText("Search one clean registry.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Agent package archive." })).toBeVisible();
+  await expect(page.getByText("Search packages, check trust")).toBeVisible();
   await expect(page.getByText("Published package source today is Gitlawb.")).toBeVisible();
-  await expect(page.getByText("Codex + Claude Code")).toBeVisible();
+  await expect(page.getByText("Codex + Claude Code + OpenCode")).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Nipmod registry machine file" })).toHaveAttribute(
     "href",
     "/registry/packages.json",
@@ -92,8 +92,8 @@ test("packages page exposes one central human archive", async ({ page, request }
 
   await expect(page.locator(".archive-package-row")).toHaveCount(registry.packages.length);
   await expect(page.locator(".archive-package-row").first()).toContainText("Gitlawb");
-  await expect(page.locator(".archive-package-row").first()).toContainText("Install");
-  await expect(page.locator(".archive-package-row").first().getByRole("link", { name: "Details" })).toHaveAttribute(
+  await expect(page.locator(".archive-package-row").first()).toContainText("Plan first");
+  await expect(page.locator(".archive-package-row").first().getByRole("link", { name: "View package" })).toHaveAttribute(
     "href",
     /^\/packages\/z[A-Za-z0-9]+-[a-z0-9][a-z0-9._-]*$/,
   );
@@ -112,21 +112,21 @@ test("homepage answers post traffic questions", async ({ page }) => {
 
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    "Package layer for agent built software."
+    "Package layer for agents."
   );
   await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
     "content",
-    "Nipmod makes agent code installable, verifiable and reusable."
+    "Search, inspect and install verified agent packages."
   );
-  await expect(page.getByText("Nipmod makes agent code installable, verifiable and reusable.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Existing package tools are built for humans. Nipmod is built for agent code." })).toBeVisible();
+  await expect(page.getByText("Search, inspect and install verified agent packages from one shared archive.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Packages made for agent workflows." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Human package tools" })).toBeVisible();
   await expect(page.getByRole("heading", { exact: true, name: "Nipmod" })).toBeVisible();
-  await expect(page.getByText("Fast installs, familiar package names and public distribution for human maintained projects.")).toBeVisible();
-  await expect(page.getByText("Agent owned code, signed source history, package claims, audit data and safe agent installs.")).toBeVisible();
+  await expect(page.getByText("Fast installs, familiar names, versions and public distribution for normal developer work.")).toBeVisible();
+  await expect(page.getByText("Source identity, signed evidence, package claims and install receipts agents can read.")).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Why Gitlawb first?" })).toBeVisible();
-  await expect(page.getByText("Gitlawb already gives agents source identity, signed pushes and public provenance.")).toBeVisible();
+  await expect(page.getByText("Gitlawb gives source identity, signed pushes and public provenance.")).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Platform status" })).toBeVisible();
   const platformRoadmap = page.getByLabel("Nipmod platform roadmap");
@@ -136,11 +136,11 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByRole("heading", { exact: true, name: "MCP" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
   await expect(platformRoadmap.getByText("Under review", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByRole("heading", { name: "Agent hosts" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Agent runtimes" })).toBeVisible();
   await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(2);
   await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toBeVisible();
   await expect(platformRoadmap.getByText("Candidate", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByText("host smoke checks pass")).toBeVisible();
+  await expect(platformRoadmap.getByText("checks pass against the same local Nipmod MCP server")).toBeVisible();
   await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
@@ -156,7 +156,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
   await expect(page.getByText("Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Install once, connect the MCP server, then tell the agent to use Nipmod before package installs.")).toBeVisible();
+  await expect(page.getByText("Yes. Install the CLI, connect MCP, then tell the agent to use Nipmod before package installs.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
   await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
 
@@ -187,7 +187,7 @@ test("docs and setup navigation have distinct, correct destinations", async ({ p
   await page.getByRole("navigation", { name: "Site" }).locator(".nav-install").click();
   await expect(page).toHaveURL(/\/setup$/);
   await expect(page.locator("#install")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Use Nipmod in your agent" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Connect your agent" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Install Nipmod once" })).toBeVisible();
 });
 
@@ -241,15 +241,15 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
   });
   await page.goto("/setup");
 
-  await expect(page.getByRole("heading", { name: "Use Nipmod in your agent" })).toBeVisible();
-  await expect(page.getByText("Install once, connect your agent once")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Connect your agent" })).toBeVisible();
+  await expect(page.getByText("Install Nipmod, connect your agent")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Open Terminal" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Install Nipmod once" })).toBeVisible();
   await expect(
     page.getByLabel("First setup command").getByText("curl -fsSLO https://nipmod.com/install.sh && bash install.sh")
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
-  await expect(page.getByText("nipmod setup agents")).toBeVisible();
+  await expect(page.getByText("nipmod setup agents --include-codex")).toBeVisible();
   await expect(page.getByText("nipmod setup codex")).toBeVisible();
   await expect(page.getByText("nipmod setup claude")).toBeVisible();
   await expect(page.getByText("nipmod setup opencode")).toBeVisible();
@@ -497,7 +497,7 @@ test("package page converts an owned Gitlawb repo into commands", async ({ page 
 
   await page.getByRole("textbox", { name: "Gitlawb repo" }).fill("not a repo");
   await expect(page.getByText("Enter a Gitlawb DID path or Gitlawb repo URL.")).toBeVisible();
-  await expect(page.getByText("Enter a valid Gitlawb repo first.")).toBeVisible();
+  await expect(page.getByText("Enter a valid Gitlawb repo before copying commands.")).toBeVisible();
 });
 
 test("trust and security proof links are public", async ({ page }) => {

@@ -170,7 +170,7 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
-  assertText("llms_setup_agents", llms, "nipmod setup agents");
+  assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex");
 }
 
 async function checkCliSurface() {
@@ -306,7 +306,7 @@ async function checkLiveSystemEndpoints() {
   assertEqual("live_registry_matches_local_archive", liveRegistryHash, localRegistryHash);
 
   const endpoints = [
-    ["live_setup", state.receipt.entrypoints.humanSetup, ["Use Nipmod in your agent"]],
+    ["live_setup", state.receipt.entrypoints.humanSetup, ["Connect your agent"]],
     ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
     ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1", "nipmod setup codex"]],
     ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],

@@ -56,7 +56,7 @@
     ],
     "commands": {
       "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-      "setupAgents": "nipmod setup agents",
+      "setupAgents": "nipmod setup agents --include-codex",
       "setupCodexMcp": "nipmod setup codex",
       "setupClaudeMcp": "nipmod setup claude",
       "setupOpenCodeMcp": "nipmod setup opencode",
