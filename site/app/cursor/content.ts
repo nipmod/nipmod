@@ -59,6 +59,14 @@ export const cursorContent = {
       href: "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/cursor"
     },
     {
+      label: "Cursor plugin",
+      href: "https://github.com/nipmod/nipmod/tree/main/plugins/nipmod"
+    },
+    {
+      label: "Marketplace manifest",
+      href: "https://github.com/nipmod/nipmod/blob/main/.cursor-plugin/marketplace.json"
+    },
+    {
       label: "Proof JSON",
       href: "/compatibility/platform-connections.json"
     },
