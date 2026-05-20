@@ -3,12 +3,98 @@
     {
       "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
       "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "readinessScore": 100,
+      "reasons": [],
+      "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "repoName": "nipmod",
+      "status": "verified"
+    },
+    {
+      "ownerDid": "did:key:z6MkspzYyTaS5vrdwPktJmHrDfi1crUqAfsAmK6gJUL9xMig",
+      "package": "pkg:did:key:z6MkspzYyTaS5vrdwPktJmHrDfi1crUqAfsAmK6gJUL9xMig/forge-polymarket-pulse",
       "readinessScore": 50,
       "reasons": [
         "claim proof missing"
       ],
-      "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
-      "repoName": "nipmod",
+      "repo": "gitlawb://did:key:z6MkspzYyTaS5vrdwPktJmHrDfi1crUqAfsAmK6gJUL9xMig/forge-polymarket-pulse",
+      "repoName": "forge-polymarket-pulse",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L",
+      "package": "pkg:did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-polymarket-pulse",
+      "readinessScore": 36,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-polymarket-pulse",
+      "repoName": "forge-polymarket-pulse",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkounYndQfw3dCNXNaEudu4mPgHW3wbUzn6HVc1LLDL59h",
+      "package": "pkg:did:key:z6MkounYndQfw3dCNXNaEudu4mPgHW3wbUzn6HVc1LLDL59h/forge-market-analyst",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkounYndQfw3dCNXNaEudu4mPgHW3wbUzn6HVc1LLDL59h/forge-market-analyst",
+      "repoName": "forge-market-analyst",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L",
+      "package": "pkg:did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-market-analyst",
+      "readinessScore": 36,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-market-analyst",
+      "repoName": "forge-market-analyst",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkwcmJhQGBnY3rrdVkwRMTBmykCDuUtJsvv7jvhGbwnW4y",
+      "package": "pkg:did:key:z6MkwcmJhQGBnY3rrdVkwRMTBmykCDuUtJsvv7jvhGbwnW4y/forge-pricepulse",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkwcmJhQGBnY3rrdVkwRMTBmykCDuUtJsvv7jvhGbwnW4y/forge-pricepulse",
+      "repoName": "forge-pricepulse",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L",
+      "package": "pkg:did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-pricepulse",
+      "readinessScore": 36,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkponXE5GxqH52GpbjfmDnsuHxcrEZqbj8nw5JuBzbsS8L/forge-pricepulse",
+      "repoName": "forge-pricepulse",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkiTYbR2mFNGGJge4vqAu71BYXX8RqSpr1UJgZM2JFtvmD",
+      "package": "pkg:did:key:z6MkiTYbR2mFNGGJge4vqAu71BYXX8RqSpr1UJgZM2JFtvmD/forge-pricepulse",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkiTYbR2mFNGGJge4vqAu71BYXX8RqSpr1UJgZM2JFtvmD/forge-pricepulse",
+      "repoName": "forge-pricepulse",
+      "status": "missing"
+    },
+    {
+      "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+      "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/codex-smoke-20260518225319",
+      "readinessScore": 50,
+      "reasons": [
+        "claim proof missing"
+      ],
+      "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/codex-smoke-20260518225319",
+      "repoName": "codex-smoke-20260518225319",
       "status": "missing"
     },
     {
@@ -365,7 +451,7 @@
     }
   ],
   "formatVersion": 1,
-  "generatedAt": "2026-05-17T20:27:35.517Z",
+  "generatedAt": "2026-05-20T10:08:31.901Z",
   "invalidClaims": [],
   "nodeUrl": "https://node.nipmod.com",
   "policy": {
@@ -375,6 +461,30 @@
     "maxVerifyConcurrency": 1,
     "remoteWritesRequireHumanAction": true
   },
-  "total": 33,
-  "verifiedClaims": []
+  "total": 41,
+  "verifiedClaims": [
+    {
+      "claimed": true,
+      "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+      "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "proof": {
+        "createdAt": "2026-05-20T10:06:30.182Z",
+        "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+        "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+        "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+        "repoName": "nipmod",
+        "signature": {
+          "algorithm": "Ed25519",
+          "keyId": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+          "signatureBase64": "cwcL/9XEwZWxXxWfWmBuuWHI/mJK9r9ucvYJIEGf3dd1P81NE/rl0zZUv7szbsNPygFQ8GzVyCNdLK65K1ONBA=="
+        },
+        "type": "dev.nipmod.package-claim.v1"
+      },
+      "proofPath": ".nipmod/package-claim.json",
+      "reasons": [],
+      "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+      "repoName": "nipmod",
+      "status": "verified"
+    }
+  ]
 }
