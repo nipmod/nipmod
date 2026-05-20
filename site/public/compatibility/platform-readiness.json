@@ -37,7 +37,7 @@
       "productReadiness": 100,
       "connectionStatus": "Live",
       "status": "ready",
-      "claim": "Gitlawb source flow, package claims and package archive paths are live.",
+      "claim": "Gitlawb source flow, package claim verification workflow and package archive paths are live.",
       "connectionKit": "integrations/platform-connections/gitlawb",
       "evidence": [
         "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
@@ -46,7 +46,7 @@
       ],
       "checks": [
         "git ls-remote gitlawb refs/heads/main matches the released commit",
-        "nipmod claim index --node https://node.nipmod.com --json",
+        "nipmod claim index --node https://node.nipmod.com --json reports verified, invalid and missing owner claims without treating missing proofs as verified",
         "nipmod publish . --dry-run --json"
       ]
     },
@@ -162,6 +162,7 @@
   ],
   "notClaimed": [
     "third-party users have already adopted every host",
+    "every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Aeon has approved or published a Nipmod skill collection",

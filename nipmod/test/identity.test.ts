@@ -1,5 +1,9 @@
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { generateIdentity, publicKeyPemFromDidKey, signBytes, verifyBytes } from "../src/identity.js";
+import { generateIdentity, readIdentityPath, publicKeyPemFromDidKey, signBytes, verifyBytes } from "../src/identity.js";
 
 describe("did:key identity", () => {
   test("generates an Ed25519 did:key and verifies signatures", () => {
@@ -19,5 +23,22 @@ describe("did:key identity", () => {
     const publicKeyPem = publicKeyPemFromDidKey(identity.did);
 
     expect(verifyBytes(publicKeyPem, message, signature)).toBe(true);
+  });
+
+  test("reads a Gitlawb identity directory without exposing private material", async () => {
+    const identity = generateIdentity();
+    const dir = join(tmpdir(), `nipmod-gitlawb-identity-${randomUUID()}`);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, "identity.pem"), identity.privateKeyPem, { mode: 0o600 });
+    await writeFile(
+      join(dir, "ucan.json"),
+      `${JSON.stringify({ did: identity.did, node: "https://node.nipmod.com" }, null, 2)}\n`
+    );
+
+    const loaded = await readIdentityPath(dir);
+
+    expect(loaded.did).toBe(identity.did);
+    expect(loaded.publicKeyPem).toBe(identity.publicKeyPem);
+    expect(loaded.privateKeyPem).toBe(identity.privateKeyPem);
   });
 });

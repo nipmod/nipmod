@@ -1,0 +1,13 @@
+{
+  "createdAt": "2026-05-20T10:06:30.182Z",
+  "ownerDid": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+  "package": "pkg:did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+  "repo": "gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod",
+  "repoName": "nipmod",
+  "type": "dev.nipmod.package-claim.v1",
+  "signature": {
+    "algorithm": "Ed25519",
+    "keyId": "did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
+    "signatureBase64": "cwcL/9XEwZWxXxWfWmBuuWHI/mJK9r9ucvYJIEGf3dd1P81NE/rl0zZUv7szbsNPygFQ8GzVyCNdLK65K1ONBA=="
+  }
+}

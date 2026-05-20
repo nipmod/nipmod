@@ -10,7 +10,8 @@ target/
 
 # Local service state and generated helpers
 .gitlawb-bin/
-.nipmod/
+.nipmod/*
+!.nipmod/package-claim.json
 .playwright-mcp/
 gitlawb-node/
 probe-work/

@@ -37,8 +37,8 @@
       "name": "Gitlawb",
       "status": "Live",
       "category": "source network",
-      "scope": "First canonical source anchor for signed source history, package claims and package publishing.",
-      "proofLevel": "Pushed, synced and checked against the current released commit.",
+      "scope": "First canonical source anchor for signed source history, owner claim verification and package publishing.",
+      "proofLevel": "Pushed, synced and checked against the current released commit. Owner Package Claims are verified separately and missing proofs are reported without being counted as verified.",
       "url": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/gitlawb",
       "setupCommand": "nipmod setup gitlawb",
@@ -186,6 +186,7 @@
   ],
   "notClaimed": [
     "Native marketplace approval for every platform",
+    "Every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr accepted the skill into the Bankr skills repo",
     "Aeon approved or published a Nipmod skill collection",
     "Third party platforms endorse Nipmod",

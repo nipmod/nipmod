@@ -33,6 +33,7 @@ describe("platform readiness receipt", () => {
       "MCP ready"
     );
     expect(readiness.meaning).toContain("does not claim third-party adoption");
+    expect(readiness.notClaimed).toContain("every Gitlawb package has a verified Owner Package Claim proof");
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
     expect(readiness.notClaimed).toContain("Aeon has approved or published a Nipmod skill collection");
@@ -95,6 +96,18 @@ describe("platform readiness receipt", () => {
     expect(bankr.checks).toContain("real Bankr Agent API smoke is available with BANKR_API_KEY");
     expect(bankr.checks).toContain("core package workflows do not require x402 or Nipmod payment");
     expect(JSON.stringify(bankr)).not.toMatch(/paymentScheme|walletTransfer|trade|swap/i);
+  });
+
+  test("keeps Gitlawb readiness honest about owner claim proofs", () => {
+    const gitlawb = readiness.platforms.find((platform: { id: string }) => platform.id === "gitlawb");
+    const gitlawbConnection = connections.connections.find((connection: { id: string }) => connection.id === "gitlawb");
+
+    expect(gitlawb.productReadiness).toBe(100);
+    expect(gitlawb.connectionStatus).toBe("Live");
+    expect(gitlawb.claim).toContain("claim verification workflow");
+    expect(gitlawb.checks.join("\n")).toContain("without treating missing proofs as verified");
+    expect(gitlawbConnection.proofLevel).toContain("missing proofs are reported");
+    expect(JSON.stringify({ gitlawb, gitlawbConnection })).not.toContain("all owner claims are verified");
   });
 
   test("keeps Aeon candidate scoped to owner review", () => {

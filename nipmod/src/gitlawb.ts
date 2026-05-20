@@ -7,7 +7,7 @@ import { delimiter, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BUNDLE_MEDIA_TYPE, packProject } from "./bundle.js";
 import { readResponseBytes, readResponseText } from "./http.js";
-import { type Identity, signBytes } from "./identity.js";
+import { readIdentityPath, type Identity, signBytes } from "./identity.js";
 import { signLifecycleEvent } from "./lifecycle.js";
 import { type LifecycleAction, type LifecycleEvent, type ReleaseEvent, type SignedLifecycleEvent } from "./protocol.js";
 import { signReleaseEvent } from "./release.js";
@@ -1074,16 +1074,7 @@ function requireMatch(value: string | undefined, label: string): string {
 
 async function readLocalIdentity(projectDir: string, path?: string): Promise<Identity> {
   const identityPath = path ?? join(projectDir, ".nipmod", "identity.json");
-  const identity = JSON.parse(await readFile(identityPath, "utf8")) as Partial<Identity>;
-  if (!identity.did || !identity.privateKeyPem || !identity.publicKeyPem) {
-    throw new Error("local identity is incomplete");
-  }
-
-  return {
-    did: identity.did,
-    privateKeyPem: identity.privateKeyPem,
-    publicKeyPem: identity.publicKeyPem
-  };
+  return readIdentityPath(identityPath);
 }
 
 async function readOptionalBytes(path: string): Promise<Buffer | null> {

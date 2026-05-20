@@ -18,7 +18,7 @@ import {
   type PublishGitlawbLifecycleEventResult,
   type PublishGitlawbPackageOptions
 } from "./gitlawb.js";
-import { generateIdentity, type Identity } from "./identity.js";
+import { generateIdentity, readIdentityPath, type Identity } from "./identity.js";
 import { digestFromIntegrity } from "./integrity.js";
 import { signLifecycleEvent } from "./lifecycle.js";
 import {
@@ -2482,16 +2482,7 @@ function filenameSafePackageName(name: string): string {
 
 async function readLocalIdentity(projectDir: string, path?: string): Promise<Identity> {
   const identityPath = path ?? join(projectDir, ".nipmod", "identity.json");
-  const identity = JSON.parse(await readFile(identityPath, "utf8")) as Partial<Identity>;
-  if (!identity.did || !identity.privateKeyPem || !identity.publicKeyPem) {
-    throw new Error("local identity is incomplete");
-  }
-
-  return {
-    did: identity.did,
-    privateKeyPem: identity.privateKeyPem,
-    publicKeyPem: identity.publicKeyPem
-  };
+  return readIdentityPath(identityPath);
 }
 
 function parseFileSpecifier(spec: string): string {

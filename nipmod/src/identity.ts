@@ -5,6 +5,8 @@ import {
   sign as signMessage,
   verify as verifyMessage
 } from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
+import { join } from "node:path";
 import { base58 } from "@scure/base";
 
 export interface Identity {
@@ -21,6 +23,30 @@ export function generateIdentity(): Identity {
   const privateKeyPem = privateKey.export({ format: "pem", type: "pkcs8" }).toString();
   const publicKeyPem = publicKey.export({ format: "pem", type: "spki" }).toString();
 
+  return {
+    did: publicKeyToDidKey(publicKey.export({ format: "der", type: "spki" })),
+    privateKeyPem,
+    publicKeyPem
+  };
+}
+
+export async function readIdentityPath(path: string): Promise<Identity> {
+  const pathStat = await stat(path);
+  if (pathStat.isDirectory()) {
+    return readGitlawbIdentityDirectory(path);
+  }
+
+  const text = await readFile(path, "utf8");
+  if (text.includes("BEGIN PRIVATE KEY")) {
+    return identityFromPrivateKeyPem(text);
+  }
+
+  return parseIdentityJson(text);
+}
+
+export function identityFromPrivateKeyPem(privateKeyPem: string): Identity {
+  const publicKey = createPublicKey(createPrivateKey(privateKeyPem));
+  const publicKeyPem = publicKey.export({ format: "pem", type: "spki" }).toString();
   return {
     did: publicKeyToDidKey(publicKey.export({ format: "der", type: "spki" })),
     privateKeyPem,
@@ -54,4 +80,31 @@ function publicKeyToDidKey(spkiDer: Uint8Array): string {
   const rawPublicKey = Buffer.from(spkiDer).subarray(-32);
   const ed25519Multicodec = Buffer.concat([ED25519_MULTICODEC, rawPublicKey]);
   return `did:key:z${base58.encode(ed25519Multicodec)}`;
+}
+
+async function readGitlawbIdentityDirectory(path: string): Promise<Identity> {
+  const identity = identityFromPrivateKeyPem(await readFile(join(path, "identity.pem"), "utf8"));
+  const ucanText = await readFile(join(path, "ucan.json"), "utf8").catch(() => null);
+  if (!ucanText) {
+    return identity;
+  }
+
+  const ucan = JSON.parse(ucanText) as { did?: unknown };
+  if (typeof ucan.did === "string" && ucan.did !== identity.did) {
+    throw new Error("Gitlawb identity.pem does not match ucan.json DID");
+  }
+  return identity;
+}
+
+function parseIdentityJson(text: string): Identity {
+  const identity = JSON.parse(text) as Partial<Identity>;
+  if (!identity.did || !identity.privateKeyPem || !identity.publicKeyPem) {
+    throw new Error("local identity is incomplete");
+  }
+
+  return {
+    did: identity.did,
+    privateKeyPem: identity.privateKeyPem,
+    publicKeyPem: identity.publicKeyPem
+  };
 }
