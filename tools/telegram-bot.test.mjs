@@ -371,7 +371,8 @@ describe("telegram bot knowledge base", () => {
       username: "nipmodbot"
     });
 
-    assert.match(reply.text, /Nipmod is the shared package archive for agents/);
+    assert.match(reply.text, /package layer agents can use/);
+    assert.match(reply.text, /Gitlawb provenance/);
   });
 
   test("routes typo heavy questions to the right answers", async () => {
@@ -735,6 +736,12 @@ describe("telegram bot AI fallback", () => {
     assert.match(prompt, /Always answer in English/);
     assert.match(prompt, /still answer in English/);
     assert.match(prompt, /calm, sharp community moderator/);
+    assert.match(prompt, /Do not recite the Facts section verbatim/);
+    assert.match(prompt, /Do not start broad answers/);
+    assert.match(prompt, /one-sentence-per-fact/);
+    assert.match(prompt, /natural community language/);
+    assert.match(prompt, /Do not append \/links/);
+    assert.match(prompt, /package layer agents can trust/);
     assert.match(prompt, /Answer normal community questions/);
     assert.match(prompt, /harmless small talk/);
     assert.match(prompt, /do not ask for more context/);

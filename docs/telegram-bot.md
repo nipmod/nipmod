@@ -106,4 +106,5 @@ Admins are resolved from Telegram group admins or `NIPMOD_TELEGRAM_ADMIN_USER_ID
 The bot always replies in English, even when the question is written in German or typo heavy shorthand.
 It answers like a calm community moderator, not a FAQ template.
 It stays short and factual, avoids filler language, avoids dash separated list copy and points to official links instead of guessing.
+For broad product questions, it should explain from the knowledge base in natural language instead of reciting fixed fact lines.
 Outgoing Telegram messages are rendered with safe HTML: short headings are bold, command lines are code formatted and sections get breathing room.

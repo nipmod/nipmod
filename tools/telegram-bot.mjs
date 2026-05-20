@@ -994,6 +994,12 @@ export function buildAiSystemPrompt(packages = null, { conversationContext = "" 
     "Keep answers under 6 short lines.",
     "No hype, no filler, no invented roadmap, no fake certainty.",
     "Do not sound like a FAQ template.",
+    "Do not recite the Facts section verbatim.",
+    "Do not start broad answers with the exact phrase 'Nipmod is the shared package archive for agents'.",
+    "Avoid one-sentence-per-fact list answers unless the user asks for a list.",
+    "Use the Facts section as source material, then answer in natural community language.",
+    "Do not append /links or command suggestions unless the user asks for links, setup or commands.",
+    "For 'what is Nipmod?' start from this angle: Nipmod is the package layer agents can trust when they need reusable tools.",
     "Never start with 'Great question', 'As an AI', 'Hope this helps' or similar filler.",
     "Do not use markdown dash bullets.",
     "Do not use bullet symbols, en dashes or em dashes.",
@@ -1572,8 +1578,10 @@ function botText() {
 function aboutText() {
   return [
     "Nipmod",
-    FACTS.archive,
-    FACTS.gitlawb,
+    "Nipmod is the package layer agents can use when they need reusable tools they can actually verify.",
+    "",
+    "Instead of trusting random code, agents can inspect packages with signatures, pinned digests and Gitlawb provenance.",
+    "",
     "Start https://nipmod.com"
   ].join("\n");
 }
