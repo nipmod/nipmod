@@ -232,6 +232,31 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
   });
 
+  test("answers specific social and coin questions concisely", async () => {
+    const xReply = await createTelegramBotReply(groupUpdate("your x link"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+    assert.equal(xReply.text, "X\nhttps://x.com/Nipmod");
+
+    const coinReply = await createTelegramBotReply(groupUpdate("whats your coin"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+    assert.equal(
+      coinReply.text,
+      "Coin\nBankr coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+    );
+  });
+
   test("answers a plain install question without a mention", async () => {
     const reply = await createTelegramBotReply(groupUpdate("how do I install this?"), {
       allowedChatId: "-100123",
@@ -289,7 +314,7 @@ describe("telegram bot knowledge base", () => {
   test("routes typo heavy questions to the right answers", async () => {
     const cases = [
       ["githb link bitte", /GitHub is the public mirror/],
-      ["banr coin?", /Bankr has a Nipmod page and skill/],
+      ["banr coin?", /Bankr coin https:\/\/bankr\.bot\/launches/],
       ["cluade code setup?", /Claude Code Setup/],
       ["geht das mit coedx?", /Codex Setup/],
       ["wi instalier ich das", /Install Nipmod/],

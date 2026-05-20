@@ -149,6 +149,7 @@ const NIPMOD_CONTEXT_TERMS = [
 ];
 
 const LINK_TERMS = ["link", "links", "linsk", "url", "official", "offiziell"];
+const X_TERMS = ["twitter", "x"];
 const GITHUB_TERMS = ["github", "git hub", "githb", "gihtub"];
 const GITLAWB_TERMS = ["gitlawb", "git lab", "gitlab", "gitlb", "gitlwab"];
 const SECURITY_TERMS = [
@@ -432,6 +433,7 @@ export function hasNipmodContext(text) {
   return matchesAny(normalized, [
     ...NIPMOD_CONTEXT_TERMS,
     ...LINK_TERMS,
+    ...X_TERMS,
     ...GITHUB_TERMS,
     ...GITLAWB_TERMS,
     ...SECURITY_TERMS,
@@ -687,6 +689,12 @@ export async function renderKnownPlainTextReply(text, options = {}) {
   const cleaned = String(text ?? "").trim();
   const lower = cleaned.toLowerCase();
 
+  if (isSpecificXRequest(lower)) {
+    return xText();
+  }
+  if (isSpecificCoinRequest(lower)) {
+    return coinText();
+  }
   if (matchesAny(lower, GITHUB_TERMS) || matchesAny(lower, ["mirror"])) {
     return githubText();
   }
@@ -1318,6 +1326,20 @@ function linksText() {
   return ["Official Nipmod links", ...OFFICIAL_LINKS.map(([label, url]) => `${label} ${url}`)].join("\n");
 }
 
+function xText() {
+  return [
+    "X",
+    "https://x.com/Nipmod"
+  ].join("\n");
+}
+
+function coinText() {
+  return [
+    "Coin",
+    "Bankr coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  ].join("\n");
+}
+
 function githubText() {
   return [
     "GitHub",
@@ -1413,6 +1435,22 @@ function packageSearchScore(pkg, terms) {
 
 function mentionsAny(text, terms) {
   return terms.some((term) => text.includes(term));
+}
+
+function isSpecificXRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, X_TERMS) && !containsSafetyTerm(normalized, ["x402"]);
+}
+
+function isSpecificCoinRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, ["coin", "token"]) && !containsSafetyTerm(normalized, ["bankr"]);
 }
 
 function containsSafetyTerm(normalizedText, terms) {
