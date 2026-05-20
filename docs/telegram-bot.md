@@ -86,6 +86,8 @@ If the AI request fails, the local knowledge base answers as a fallback.
 OpenAI compatible chat completions are still supported through `NIPMOD_TELEGRAM_AI_PROVIDER=openai`.
 The AI system prompt keeps Nipmod context for project questions while allowing harmless general community questions.
 If the answer needs live data the bot does not have, it says that briefly instead of guessing.
+The bot keeps a short in-memory context per group topic for follow-up questions such as `why?` or `what about Bankr?`.
+This context is not written to disk, is cleared on restart and skips unsafe text such as secrets or prompt extraction attempts.
 
 ## Safety controls
 
@@ -102,5 +104,6 @@ Admins are resolved from Telegram group admins or `NIPMOD_TELEGRAM_ADMIN_USER_ID
 ## Voice
 
 The bot always replies in English, even when the question is written in German or typo heavy shorthand.
-It answers short and factual, avoids filler language, avoids dash separated list copy and points to official links instead of guessing.
+It answers like a calm community moderator, not a FAQ template.
+It stays short and factual, avoids filler language, avoids dash separated list copy and points to official links instead of guessing.
 Outgoing Telegram messages are rendered with safe HTML: short headings are bold, command lines are code formatted and sections get breathing room.
