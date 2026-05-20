@@ -24,11 +24,12 @@ type HomeProps = {
 
 const registry = registryData as RegistryIndex;
 const platformPathLabel: Record<string, string> = {
-  Candidate: "Review needed",
   Live: "Live",
-  "MCP ready": "MCP",
-  "Under review": "Review"
+  "MCP ready": "MCP"
 };
+const homepagePlatformConnections = platformConnections.connections.filter(
+  (connection) => connection.status === "Live" || connection.status === "MCP ready"
+);
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = searchParams ? await searchParams : {};
@@ -105,7 +106,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <p>{homeContent.platformRoadmap.lead}</p>
         </div>
         <div className="platform-logo-rail" aria-label="Current Nipmod platform paths">
-          {platformConnections.connections.map((connection) => (
+          {homepagePlatformConnections.map((connection) => (
             <a className="platform-logo-tile" href={connection.url} key={connection.id}>
               <PlatformMark id={connection.id} name={connection.name} />
               <span className="platform-logo-copy">
@@ -116,7 +117,7 @@ export default async function Home({ searchParams }: HomeProps) {
           ))}
         </div>
         <div className="platform-grid" aria-label="Nipmod platform roadmap">
-          {platformConnections.connections.map((connection) => (
+          {homepagePlatformConnections.map((connection) => (
             <article className="platform-card" key={connection.id}>
               <div className="platform-top">
                 <div className="platform-title-row">
@@ -129,7 +130,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 <span className={`platform-status ${platformStatusClass(connection.status)}`}>{connection.status}</span>
               </div>
               <p>{connection.scope}</p>
-              <a href={connection.url}>{connection.externalApprovalRequired ? "Review path" : "Open path"}</a>
+              <a href={connection.url}>Open path</a>
             </article>
           ))}
         </div>

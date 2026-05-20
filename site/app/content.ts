@@ -37,8 +37,8 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Live means Nipmod controls the path. MCP ready means agents can connect locally. Under review means native acceptance is external.",
-    note: "Statuses describe Nipmod integration work, not partner approval. The full proof matrix is public.",
+      "Live means Nipmod controls the path. MCP ready means agents can connect locally.",
+    note: "Only live and MCP ready paths are shown here. The full proof matrix stays public.",
     items: [
       {
         name: "Gitlawb",
@@ -65,28 +65,28 @@ export const homeContent = {
         cta: "View MCP"
       },
       {
-        name: "Agent runtimes",
+        name: "Codex",
         status: "MCP ready",
-        label: "Codex, Claude Code, OpenCode; Hermes candidate",
-        text: "Codex, Claude Code and OpenCode checks pass. Hermes now has a prepared MCP setup path pending runtime smoke.",
+        label: "agent host",
+        text: "Codex can register Nipmod as a local stdio MCP server through the Nipmod setup command.",
         href: "/setup",
-        cta: "Setup agent"
+        cta: "Setup Codex"
       },
       {
-        name: "Bankr",
-        status: "Under review",
-        label: "agent skill",
-        text: "The Bankr skill, proof files and agent workflow are ready. Native Bankr acceptance is still external.",
-        href: "/bankr",
-        cta: "View Bankr path"
+        name: "Claude Code",
+        status: "MCP ready",
+        label: "agent host",
+        text: "Claude Code can load the project MCP config and connect to the local Nipmod MCP server.",
+        href: "/setup",
+        cta: "Setup Claude Code"
       },
       {
-        name: "Aeon",
-        status: "Candidate",
-        label: "external skill library",
-        text: "Aeon is a candidate external skill collection, pending owner review.",
-        href: "/platforms",
-        cta: "View matrix"
+        name: "OpenCode",
+        status: "MCP ready",
+        label: "agent host",
+        text: "OpenCode can load the project config and connect to the local Nipmod MCP server.",
+        href: "/setup",
+        cta: "Setup OpenCode"
       }
     ]
   },

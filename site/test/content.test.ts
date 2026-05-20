@@ -82,17 +82,17 @@ describe("home content", () => {
 
   test("states platform boundaries and package flow", () => {
     expect(homeContent.platformRoadmap.headline).toBe("Platform status");
-    expect(homeContent.platformRoadmap.note).toContain("not partner approval");
+    expect(homeContent.platformRoadmap.note).toContain("Only live and MCP ready");
     expect(homeContent.platformRoadmap.lead).toContain("Live means");
     expect(homeContent.platformRoadmap.items.map((item) => `${item.name}:${item.status}`)).toEqual([
       "Gitlawb:Live",
       "GitHub:Live",
       "MCP:MCP ready",
-      "Agent runtimes:MCP ready",
-      "Bankr:Under review",
-      "Aeon:Candidate"
+      "Codex:MCP ready",
+      "Claude Code:MCP ready",
+      "OpenCode:MCP ready"
     ]);
-    expect(homeContent.platformRoadmap.items[3]?.text).toContain("checks pass");
+    expect(homeContent.platformRoadmap.items[3]?.text).toContain("Codex can register");
     expect(homeContent.claimFlow.steps.map((step) => step.label)).toEqual(["Prepare", "Verify", "Publish", "Use"]);
     expect(homeContent.startCards.map((card) => card.title)).toEqual(["Setup Nipmod", "Run demo", "Read status"]);
   });

@@ -125,16 +125,17 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByRole("heading", { name: "Codex" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Claude Code" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "OpenCode" })).toBeVisible();
-  await expect(platformRoadmap.getByRole("heading", { name: "Hermes" })).toBeVisible();
-  await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Under review", { exact: true })).toBeVisible();
   await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(3);
-  await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Candidate", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByRole("heading", { name: "Hermes" })).toHaveCount(0);
+  await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toHaveCount(0);
+  await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toHaveCount(0);
+  await expect(platformRoadmap.getByText("Under review", { exact: true })).toHaveCount(0);
+  await expect(platformRoadmap.getByText("Candidate", { exact: true })).toHaveCount(0);
+  await expect(platformRoadmap.getByText("Review needed", { exact: true })).toHaveCount(0);
   await expect(platformRoadmap.getByText("Codex can register Nipmod as a local stdio MCP server")).toBeVisible();
   await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toHaveCount(0);
-  await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
-  await expect(platformRoadmap.getByRole("link", { name: "Review path" })).toHaveCount(3);
+  await expect(page.getByText("Only live and MCP ready paths are shown here.")).toBeVisible();
+  await expect(platformRoadmap.getByRole("link", { name: "Review path" })).toHaveCount(0);
   await expect(platformRoadmap.getByRole("link", { name: "Open path" })).toHaveCount(6);
 
   await expect(page.getByRole("heading", { name: "Publish your repo as a package." })).toBeVisible();
