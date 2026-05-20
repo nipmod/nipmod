@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T21:16:56.181Z",
+  "generatedAt": "2026-05-20T21:33:53.805Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -22,13 +22,13 @@
     }
   ],
   "hostSmoke": {
-    "checkedAt": "2026-05-20T21:16:56.181Z",
+      "checkedAt": "2026-05-20T21:33:53.805Z",
     "command": "node tools/platform-readiness-check.mjs --host-smoke",
     "summary": {
-      "pass": 19,
+      "pass": 22,
       "fail": 0,
       "skip": 0,
-      "total": 19
+      "total": 22
     }
   },
   "connections": [
@@ -133,18 +133,20 @@
       "name": "Cursor",
       "status": "MCP ready",
       "category": "agent IDE",
-      "scope": "Cursor can load the project .cursor/mcp.json and connect to the local Nipmod MCP server.",
-      "proofLevel": "Nipmod setup cursor writes a project MCP config that follows Cursor's documented mcp.json shape.",
-      "url": "https://nipmod.com/setup",
+      "scope": "Cursor can load Nipmod through project .cursor/mcp.json or the Add to Cursor MCP deeplink.",
+      "proofLevel": "Nipmod setup cursor writes a project MCP config and the public Cursor page publishes a matching MCP install deeplink.",
+      "url": "https://nipmod.com/cursor",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/cursor",
       "setupCommand": "nipmod setup cursor",
       "smokeCommand": "node tools/platform-readiness-check.mjs",
       "externalApprovalRequired": false,
-      "externalDependency": "No native marketplace claim is made. The current path is local project MCP setup.",
+      "externalDependency": "No native marketplace claim is made. The current path is local MCP setup; Cursor review is required before official marketplace wording.",
       "evidence": [
-        "https://nipmod.com/setup",
+        "https://nipmod.com/cursor",
         "https://nipmod.com/mcp",
         "https://docs.cursor.com/en/context/mcp",
+        "https://docs.cursor.com/deeplinks",
+        "https://nipmod.com/integrations/cursor/mcp.json",
         "https://nipmod.com/compatibility/platform-readiness.json"
       ]
     },

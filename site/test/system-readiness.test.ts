@@ -39,6 +39,7 @@ describe("system readiness receipt", () => {
     expect(readiness.entrypoints).toMatchObject({
       agentPrompts: "https://nipmod.com/agent-prompts.json",
       agentText: "https://nipmod.com/llms.txt",
+      cursor: "https://nipmod.com/cursor",
       demo: "https://nipmod.com/demo",
       machineManifest: "https://nipmod.com/.well-known/nipmod.json",
       platformReadiness: "https://nipmod.com/compatibility/platform-readiness.json",
@@ -133,7 +134,8 @@ describe("system readiness receipt", () => {
       },
       cursor: {
         setup: "nipmod setup cursor",
-        config: ".cursor/mcp.json"
+        config: ".cursor/mcp.json",
+        addToCursor: expect.stringContaining("cursor://anysphere.cursor-deeplink/mcp/install")
       },
       openCode: {
         setup: "nipmod setup opencode",

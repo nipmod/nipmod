@@ -205,6 +205,7 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
   assertEqual("discovery_setup_cursor", manifest.agent.commands.setupCursorMcp, "nipmod setup cursor");
+  assertText("discovery_setup_cursor_oneclick", manifest.agent.commands.setupCursorOneClick, "cursor://anysphere.cursor-deeplink/mcp/install");
   assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
@@ -395,8 +396,10 @@ async function checkLiveSystemEndpoints() {
 
   const endpoints = [
     ["live_setup", state.receipt.entrypoints.humanSetup, ["Connect your agent"]],
+    ["live_cursor", state.receipt.entrypoints.cursor, ["Use Nipmod in Cursor", "Add to Cursor", "nipmod setup cursor"]],
     ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
     ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1", "nipmod setup codex"]],
+    ["live_cursor_public_config", "https://nipmod.com/integrations/cursor/mcp.json", ["mcpServers", "nipmod", "\"command\": \"nipmod\""]],
     ["live_remote_mcp", state.receipt.entrypoints.remoteMcp, ["dev.nipmod.remote-mcp.v1", "remote-read-only"]],
     ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],
     ["live_status", state.receipt.entrypoints.status, ["Public proof dashboard"]],
@@ -503,6 +506,8 @@ async function checkParallelArchiveAccess() {
       ),
     async () => assertText("parallel_bankr_skill", await fetchText(state.receipt.agentHosts.bankr.skill), "name: nipmod"),
     async () => assertText("parallel_bankr_proof", await fetchText(state.receipt.agentHosts.bankr.proof), proofPackage),
+    async () => assertText("parallel_cursor_page", await fetchText(state.receipt.entrypoints.cursor), "Use Nipmod in Cursor"),
+    async () => assertText("parallel_cursor_config", await fetchText("https://nipmod.com/integrations/cursor/mcp.json"), "mcpServers"),
     async () => assertText("parallel_llms", await fetchText(state.receipt.entrypoints.agentText), state.receipt.sharedArchive.registry),
     async () => assertText("parallel_manifest", await fetchText(state.receipt.entrypoints.machineManifest), state.receipt.sharedArchive.registry)
   ];

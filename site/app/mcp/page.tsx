@@ -123,7 +123,7 @@ export default function McpPage() {
         <div className="registry-head">
           <div>
             <p className="eyebrow">Hosts</p>
-            <h2 id="hosts-title">One local server. Four agent tools.</h2>
+            <h2 id="hosts-title">One local server. Five agent tools.</h2>
           </div>
         </div>
 

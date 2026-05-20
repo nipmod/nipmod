@@ -102,6 +102,19 @@ describe("platform readiness receipt", () => {
     });
   });
 
+  test("keeps Cursor ready without claiming marketplace listing", () => {
+    const cursor = readiness.platforms.find((platform: { id: string }) => platform.id === "cursor");
+    const cursorConnection = connections.connections.find((connection: { id: string }) => connection.id === "cursor");
+
+    expect(cursor.connectionStatus).toBe("MCP ready");
+    expect(cursor.claim).toContain("Add to Cursor deeplink");
+    expect(cursor.evidence).toContain("https://nipmod.com/cursor");
+    expect(cursor.evidence).toContain("https://docs.cursor.com/deeplinks");
+    expect(cursorConnection.url).toBe("https://nipmod.com/cursor");
+    expect(cursorConnection.externalApprovalRequired).toBe(false);
+    expect(cursorConnection.externalDependency).toContain("Cursor review is required before official marketplace wording");
+  });
+
   test("keeps Hermes MCP ready scoped away from official wording", () => {
     const hermes = readiness.platforms.find((platform: { id: string }) => platform.id === "hermes");
     const hermesConnection = connections.connections.find((connection: { id: string }) => connection.id === "hermes");

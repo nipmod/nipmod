@@ -18,6 +18,7 @@ nipmod setup agents
 - Website: https://nipmod.com
 - Packages: https://nipmod.com/packages
 - Setup: https://nipmod.com/setup
+- Cursor: https://nipmod.com/cursor
 - Platform matrix: https://nipmod.com/platforms
 - Codex and Claude Code: https://nipmod.com/agents/codex-claude
 - Registry: https://nipmod.com/registry/packages.json
@@ -119,6 +120,12 @@ nipmod setup claude
 nipmod setup cursor
 nipmod setup opencode
 nipmod setup hermes
+```
+
+Cursor also has a public setup page with an Add to Cursor MCP button:
+
+```text
+https://nipmod.com/cursor
 ```
 
 Tell the agent:

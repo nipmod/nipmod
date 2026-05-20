@@ -63,7 +63,7 @@ Expected result:
 
 - Codex is registered through its MCP CLI.
 - Claude Code receives a project `.mcp.json`.
-- Cursor receives a project `.cursor/mcp.json`.
+- Cursor receives a project `.cursor/mcp.json`. The public Cursor page also exposes an Add to Cursor button at `https://nipmod.com/cursor`.
 - OpenCode receives a project `opencode.json`.
 - Hermes receives a `~/.hermes/config.yaml` MCP server entry.
 - Existing host config entries are preserved.

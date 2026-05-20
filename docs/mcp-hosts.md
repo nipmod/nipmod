@@ -134,10 +134,22 @@ Claude Code asks for approval before using project scoped MCP servers. Verify wi
 
 ## Cursor
 
+Public setup page:
+
+```text
+https://nipmod.com/cursor
+```
+
 Project scoped command:
 
 ```bash
 nipmod setup cursor
+```
+
+One click install:
+
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=eyJjb21tYW5kIjoibmlwbW9kIiwiYXJncyI6WyJtY3AiLCJzZXJ2ZSJdLCJlbnYiOnt9fQ%3D%3D
 ```
 
 Equivalent `.cursor/mcp.json`:
@@ -154,7 +166,14 @@ Equivalent `.cursor/mcp.json`:
 }
 ```
 
-Verify in Cursor Settings, then MCP. This is an MCP-ready Cursor path. Do not call it official Cursor support unless Cursor acknowledges it.
+Verify in Cursor Settings, then MCP, or run:
+
+```bash
+cursor-agent mcp list
+cursor-agent mcp list-tools nipmod
+```
+
+This is an MCP-ready Cursor path. Do not call it official Cursor support unless Cursor acknowledges it or lists Nipmod.
 
 ## OpenCode
 
@@ -213,7 +232,7 @@ node tools/platform-readiness-check.mjs --live --host-smoke
 node tools/system-readiness-check.mjs --live --parallel
 ```
 
-This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, Cursor deeplink metadata, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
 
 ## Agent Demo
 
@@ -234,5 +253,6 @@ Host syntax references:
 - Codex MCP docs: https://developers.openai.com/learn/docs-mcp
 - Claude Code MCP docs: https://code.claude.com/docs/en/mcp
 - Cursor MCP docs: https://docs.cursor.com/en/context/mcp
+- Cursor MCP deeplinks: https://docs.cursor.com/deeplinks
 - OpenCode MCP docs: https://opencode.ai/docs/mcp-servers
 - Hermes MCP docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp

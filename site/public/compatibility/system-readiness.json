@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-20T21:16:56.181Z",
+  "generatedAt": "2026-05-20T21:33:25.012Z",
   "scope": "Shared agent package archive and access system.",
   "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Cursor MCP-ready path, Hermes MCP-ready path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
@@ -19,6 +19,7 @@
   },
   "entrypoints": {
     "humanSetup": "https://nipmod.com/setup",
+    "cursor": "https://nipmod.com/cursor",
     "agentText": "https://nipmod.com/llms.txt",
     "agentPrompts": "https://nipmod.com/agent-prompts.json",
     "remoteMcp": "https://nipmod.com/api/mcp",
@@ -66,7 +67,8 @@
     "cursor": {
       "setup": "nipmod setup cursor",
       "config": ".cursor/mcp.json",
-      "access": "MCP stdio through Cursor project MCP config",
+      "access": "MCP stdio through Cursor project MCP config or Add to Cursor deeplink",
+      "addToCursor": "cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=eyJjb21tYW5kIjoibmlwbW9kIiwiYXJncyI6WyJtY3AiLCJzZXJ2ZSJdLCJlbnYiOnt9fQ%3D%3D",
       "status": "MCP ready"
     },
     "openCode": {
@@ -189,6 +191,8 @@
       "Hosted MCP install_plan",
       "Bankr skill",
       "Bankr agent proof",
+      "Cursor setup page",
+      "Cursor public MCP config",
       "llms.txt",
       ".well-known/nipmod.json"
     ]

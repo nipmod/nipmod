@@ -1999,6 +1999,7 @@ h1 {
 
 .quickstart-hero,
 .setup-hero,
+.cursor-hero,
 .trust-hero,
 .mcp-hero,
 .proof-hero {
@@ -2010,6 +2011,7 @@ h1 {
 
 .quickstart-hero h1,
 .setup-hero h1,
+.cursor-hero h1,
 .trust-hero h1,
 .mcp-hero h1,
 .proof-hero h1 {
@@ -2036,18 +2038,52 @@ h1 {
   padding-bottom: 4px;
 }
 
-.setup-hero-copy {
+.cursor-hero {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  max-width: none;
+  padding-bottom: 4px;
+}
+
+.setup-hero-copy,
+.cursor-hero-copy {
   display: grid;
   gap: 12px;
   max-width: 760px;
 }
 
-.setup-hero h1 {
+.setup-hero h1,
+.cursor-hero h1 {
   font-size: clamp(32px, 4.2vw, 54px);
 }
 
-.setup-hero-panel {
+.setup-hero-panel,
+.cursor-status-panel {
   align-self: end;
+}
+
+.cursor-kicker {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  font-weight: 760;
+  gap: 10px;
+  text-transform: uppercase;
+}
+
+.cursor-kicker .platform-mark,
+.button-with-icon .platform-mark {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  height: 28px;
+  width: 28px;
+}
+
+.cursor-kicker .platform-mark img,
+.button-with-icon .platform-mark img {
+  height: 18px;
+  max-width: 20px;
 }
 
 .setup-path {
@@ -2387,6 +2423,7 @@ h1 {
 
   .hero,
   .setup-hero,
+  .cursor-hero,
   .usage-strip,
   .agent-workflow-grid,
   .live-stat-grid,

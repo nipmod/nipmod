@@ -194,6 +194,7 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   expect(body.docs.setup).toBe("https://nipmod.com/setup");
   expect(body.agent.commands.setupCodexMcp).toBe("nipmod setup codex");
   expect(body.agent.commands.setupCursorMcp).toBe("nipmod setup cursor");
+  expect(body.agent.commands.setupCursorOneClick).toContain("cursor://anysphere.cursor-deeplink/mcp/install");
   expect(body.agent.commands.search).toBe("nipmod search gitlawb --online");
   expect(body.mcp.serverCommand).toBe("nipmod mcp serve");
   expect(body.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
@@ -206,6 +207,32 @@ test("homepage exposes machine readable agent discovery", async ({ page, request
   ]);
   expect(body.mcp.tools).toContain("nipmod.install");
   expect(body.mcp.tools).toContain("nipmod.demo");
+});
+
+test("cursor page exposes one click and manual MCP setup", async ({ page, request }) => {
+  await page.goto("/cursor");
+
+  await expect(page.getByRole("heading", { name: "Use Nipmod in Cursor" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Add to Cursor/ })).toHaveAttribute(
+    "href",
+    /^cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install\?name=nipmod&config=/
+  );
+  await expect(page.getByText("nipmod setup cursor")).toBeVisible();
+  await expect(page.getByText("cursor-agent mcp list")).toBeVisible();
+  await expect(page.getByText("\"command\": \"nipmod\"")).toBeVisible();
+  await expect(page.getByText("Do not say Nipmod is officially on Cursor")).toBeVisible();
+
+  const config = await request.get("/integrations/cursor/mcp.json");
+  await expect(config).toBeOK();
+  await expect(config.json()).resolves.toEqual({
+    mcpServers: {
+      nipmod: {
+        args: ["mcp", "serve"],
+        command: "nipmod",
+        env: {}
+      }
+    }
+  });
 });
 
 test("agent runbook exposes owner controlled package entrypoints", async ({ page }) => {

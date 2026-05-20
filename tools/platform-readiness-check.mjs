@@ -29,6 +29,8 @@ const expectedTools = [
   "nipmod.explain"
 ];
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
+const cursorInstallLink =
+  "cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=eyJjb21tYW5kIjoibmlwbW9kIiwiYXJncyI6WyJtY3AiLCJzZXJ2ZSJdLCJlbnYiOnt9fQ%3D%3D";
 
 const checks = [];
 
@@ -112,6 +114,15 @@ async function checkStaticConfigs() {
       }
     }
   });
+  const cursorPublicConfig = JSON.parse(await readFile(join(root, "site", "public", "integrations", "cursor", "mcp.json"), "utf8"));
+  assertDeepEqual("cursor_public_mcp_config", cursorPublicConfig, cursor);
+  const cursorUrl = new URL(cursorInstallLink);
+  assertEqual("cursor_deeplink_name", cursorUrl.searchParams.get("name"), "nipmod");
+  assertDeepEqual(
+    "cursor_deeplink_config",
+    JSON.parse(Buffer.from(cursorUrl.searchParams.get("config") ?? "", "base64").toString("utf8")),
+    cursor.mcpServers.nipmod
+  );
 
   const receipt = JSON.parse(await readFile(join(root, "site", "public", "compatibility", "platform-readiness.json"), "utf8"));
   pass("platform_readiness_receipt", {
@@ -185,6 +196,16 @@ async function checkSourceMirrors() {
 async function checkLiveEndpoints() {
   const endpoints = [
     ["setup_page", "https://nipmod.com/setup", ["Connect your agent", "nipmod setup codex"]],
+    [
+      "cursor_page",
+      "https://nipmod.com/cursor",
+      ["Use Nipmod in Cursor", "Add to Cursor", "nipmod setup cursor", "Do not say Nipmod is officially on Cursor"]
+    ],
+    [
+      "cursor_public_config",
+      "https://nipmod.com/integrations/cursor/mcp.json",
+      ["mcpServers", "nipmod", "\"command\": \"nipmod\""]
+    ],
     ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "nipmod setup claude", "nipmod setup cursor", "nipmod setup opencode"]],
     ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
     ["status_page", "https://nipmod.com/status", ["Public proof dashboard", "System readiness"]],

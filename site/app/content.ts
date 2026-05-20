@@ -85,7 +85,7 @@ export const homeContent = {
         status: "MCP ready",
         label: "agent IDE",
         text: "Cursor can load the project MCP config and connect to the local Nipmod MCP server.",
-        href: "/setup",
+        href: "/cursor",
         cta: "Setup Cursor"
       },
       {

@@ -21,6 +21,7 @@ describe("agent discovery text", () => {
       "Generic agent prompt: Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Use Nipmod for package discovery, trust inspection, install planning and controlled install before mutating the workspace."
     );
     expect(llmsText).toContain("Agent host MCP setup: https://nipmod.com/mcp");
+    expect(llmsText).toContain("Cursor setup page: https://nipmod.com/cursor");
     expect(llmsText).toContain("Agent demo package: gitlawb-repo-reader");
     expect(llmsText).toContain("Self service package page: https://nipmod.com/package");
     expect(llmsText).toContain("MCP docs: https://nipmod.com/mcp");
@@ -44,6 +45,7 @@ describe("agent discovery text", () => {
       "nipmod setup codex",
       "nipmod setup claude",
       "nipmod setup cursor",
+      "cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=",
       "nipmod setup opencode",
       "nipmod setup hermes",
       "nipmod setup agents",

@@ -36,6 +36,9 @@ export default function SetupPage() {
             <a className="button button-ghost" href="/agents/codex-claude">
               Codex and Claude
             </a>
+            <a className="button button-ghost" href="/cursor">
+              Cursor
+            </a>
           </div>
         </div>
         <aside className="quickstart-card setup-hero-panel" aria-label="First setup command">

@@ -4,19 +4,27 @@
   "id": "cursor",
   "name": "Cursor",
   "status": "MCP ready",
-  "proofLevel": "Project MCP config generation",
+  "proofLevel": "Project MCP config generation plus Cursor deeplink package",
   "setupCommand": "nipmod setup cursor",
   "config": ".cursor/mcp.json",
+  "publicPage": "https://nipmod.com/cursor",
+  "publicConfig": "https://nipmod.com/integrations/cursor/mcp.json",
+  "addToCursor": "cursor://anysphere.cursor-deeplink/mcp/install?name=nipmod&config=eyJjb21tYW5kIjoibmlwbW9kIiwiYXJncyI6WyJtY3AiLCJzZXJ2ZSJdLCJlbnYiOnt9fQ%3D%3D",
   "smokeCommand": "node tools/platform-readiness-check.mjs",
   "checks": [
     "nipmod setup cursor writes .cursor/mcp.json",
     "existing Cursor MCP servers are preserved",
-    "project .cursor/mcp.json contains command nipmod and args mcp serve"
+    "project .cursor/mcp.json contains command nipmod and args mcp serve",
+    "Add to Cursor deeplink encodes the same local stdio MCP server",
+    "public Cursor page states the marketplace boundary"
   ],
   "evidence": [
     "https://docs.cursor.com/en/context/mcp",
+    "https://docs.cursor.com/deeplinks",
+    "https://nipmod.com/cursor",
     "https://nipmod.com/setup",
-    "https://nipmod.com/mcp"
+    "https://nipmod.com/mcp",
+    "https://nipmod.com/integrations/cursor/mcp.json"
   ],
   "notClaimed": [
     "Cursor has accepted Nipmod into a native marketplace",

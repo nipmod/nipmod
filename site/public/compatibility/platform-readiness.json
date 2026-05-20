@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T21:16:56.181Z",
+  "generatedAt": "2026-05-20T21:33:53.805Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, local host MCP contracts, hosted read-only MCP, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -110,20 +110,25 @@
       "productReadiness": 100,
       "connectionStatus": "MCP ready",
       "status": "ready",
-      "claim": "Cursor can load the project .cursor/mcp.json and connect to Nipmod.",
+      "claim": "Cursor can connect to Nipmod through project MCP config or the Add to Cursor deeplink.",
       "connectionKit": "integrations/platform-connections/cursor",
       "setupCommand": "nipmod setup cursor",
       "config": ".cursor/mcp.json",
-      "verifyCommand": "Open Cursor Settings > MCP",
+      "verifyCommand": "Open Cursor Settings > MCP or run cursor-agent mcp list",
       "checks": [
         "Cursor documents project MCP setup through .cursor/mcp.json",
+        "Cursor documents MCP install deeplinks",
         "nipmod setup cursor writes a project scoped .cursor/mcp.json",
-        "project .cursor/mcp.json contains nipmod stdio command and preserves other MCP servers"
+        "project .cursor/mcp.json contains nipmod stdio command and preserves other MCP servers",
+        "https://nipmod.com/cursor publishes the Add to Cursor deeplink and official claim boundary"
       ],
       "evidence": [
         "https://docs.cursor.com/en/context/mcp",
+        "https://docs.cursor.com/deeplinks",
+        "https://nipmod.com/cursor",
         "https://nipmod.com/setup",
-        "https://nipmod.com/mcp"
+        "https://nipmod.com/mcp",
+        "https://nipmod.com/integrations/cursor/mcp.json"
       ]
     },
     {
