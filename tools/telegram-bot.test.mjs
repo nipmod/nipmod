@@ -6,6 +6,7 @@ import {
   classifyIncomingText,
   createTelegramBotReply,
   filterOutgoingReply,
+  formatTelegramMessageHtml,
   getTelegramMessageText,
   getTelegramMessageType,
   getTelegramUpdateMessage,
@@ -128,6 +129,22 @@ describe("telegram bot message metadata", () => {
 
     assert.equal(getTelegramUpdateMessage(editedUpdate), editedUpdate.edited_message);
     assert.equal(safeTelegramMessageLogMeta(editedUpdate), "update=23 chat=-100123 user=7 type=text hasText=true textLength=13 thread=12");
+  });
+});
+
+describe("telegram bot message formatting", () => {
+  test("formats Telegram replies with safe HTML and readable spacing", () => {
+    assert.equal(
+      formatTelegramMessageHtml("Nipmod\nNipmod is the shared package archive for agents."),
+      "<b>Nipmod</b>\n\nNipmod is the shared package archive for agents."
+    );
+  });
+
+  test("formats commands as code and escapes unsafe HTML", () => {
+    assert.equal(
+      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents\n\nThen tell the agent\nRead <unsafe>"),
+      "<b>Install Nipmod</b>\n\n<code>curl -fsSLO https://nipmod.com/install.sh &amp;&amp; bash install.sh</code>\n<code>nipmod setup agents</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
+    );
   });
 });
 

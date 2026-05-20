@@ -960,6 +960,37 @@ export function sanitizeAiReply(value) {
     .trim();
 }
 
+export function formatTelegramMessageHtml(value) {
+  const lines = String(value ?? "")
+    .trim()
+    .split(/\r?\n/);
+  const formatted = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const previousLine = lines[index - 1] ?? "";
+    const escaped = escapeTelegramHtml(line);
+    const isHeading = isTelegramHeadingLine(line, { index, previousLine });
+    if (isHeading && formatted.length > 0 && formatted.at(-1) !== "") {
+      formatted.push("");
+    }
+    if (isHeading) {
+      formatted.push(`<b>${escaped}</b>`);
+      if ((lines[index + 1] ?? "") && lines[index + 1].trim()) {
+        formatted.push("");
+      }
+      continue;
+    }
+    if (isTelegramCodeLine(line)) {
+      formatted.push(`<code>${escaped}</code>`);
+      continue;
+    }
+    formatted.push(escaped);
+  }
+
+  return formatted.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 export function searchRegistryPackages(query, packages, limit = 5) {
   const terms = String(query ?? "")
     .toLowerCase()
@@ -1078,7 +1109,8 @@ export class TelegramClient {
       chat_id: chatId,
       disable_web_page_preview: true,
       ...(messageThreadId === undefined ? {} : { message_thread_id: messageThreadId }),
-      text
+      parse_mode: "HTML",
+      text: formatTelegramMessageHtml(text)
     });
   }
 }
@@ -1474,6 +1506,41 @@ function packageSearchScore(pkg, terms) {
     }
   }
   return score;
+}
+
+function isTelegramHeadingLine(line, { index, previousLine } = {}) {
+  const trimmed = String(line ?? "").trim();
+  if (!trimmed) {
+    return false;
+  }
+  if (trimmed.length > 64 || trimmed.includes("http://") || trimmed.includes("https://")) {
+    return false;
+  }
+  if (isTelegramCodeLine(trimmed)) {
+    return false;
+  }
+  if (/^\d+\.\s/.test(trimmed)) {
+    return false;
+  }
+  if (/[.!?]$/.test(trimmed)) {
+    return false;
+  }
+  if (index === 0) {
+    return true;
+  }
+  return String(previousLine ?? "").trim() === "";
+}
+
+function isTelegramCodeLine(line) {
+  const trimmed = String(line ?? "").trim();
+  return /^(?:\/[A-Za-z0-9_]|curl\b|git\b|node\b|npm\b|pnpm\b|yarn\b|bun\b|nipmod\b)/.test(trimmed);
+}
+
+function escapeTelegramHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
 function mentionsAny(text, terms) {
