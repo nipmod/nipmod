@@ -537,6 +537,8 @@ describe("telegram bot AI fallback", () => {
 
   test("AI prompt contains hard boundaries and official links", () => {
     const prompt = buildAiSystemPrompt(packages);
+    assert.match(prompt, /Always answer in English/);
+    assert.match(prompt, /still answer in English/);
     assert.match(prompt, /Do not give trading advice/);
     assert.match(prompt, /Website: https:\/\/nipmod\.com/);
     assert.match(prompt, /GitHub: https:\/\/github\.com\/nipmod\/nipmod/);

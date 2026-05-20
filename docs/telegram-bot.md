@@ -98,4 +98,5 @@ Admins are resolved from Telegram group admins or `NIPMOD_TELEGRAM_ADMIN_USER_ID
 
 ## Voice
 
-The bot answers short and factual. It avoids filler language, avoids dash separated list copy and points to official links instead of guessing.
+The bot always replies in English, even when the question is written in German or typo heavy shorthand.
+It answers short and factual, avoids filler language, avoids dash separated list copy and points to official links instead of guessing.
