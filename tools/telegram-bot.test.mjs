@@ -5,6 +5,7 @@ import {
   isChatAllowed,
   isQuestionLike,
   isRelevantGroupQuestion,
+  matchesAny,
   parseTelegramCommand,
   searchRegistryPackages,
   shouldAnswerGroupText,
@@ -62,6 +63,15 @@ describe("telegram bot command parsing", () => {
     assert.equal(shouldReplyToPlainText("der bot reagiert nicht auf meine fragen", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("warum reagiert der bot nicht?", "nipmodbot"), true);
     assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), true);
+  });
+
+  test("understands typos and casual wording", () => {
+    assert.equal(matchesAny("githb link bitte", ["github"]), true);
+    assert.equal(matchesAny("banr coin?", ["bankr"]), true);
+    assert.equal(matchesAny("cluade code setup?", ["claude"]), true);
+    assert.equal(matchesAny("geht das mit coedx?", ["codex", "coedx"]), true);
+    assert.equal(shouldReplyToPlainText("wi instalier ich das", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("linsk bitte", "nipmodbot"), true);
   });
 });
 
@@ -207,6 +217,30 @@ describe("telegram bot knowledge base", () => {
     });
 
     assert.match(reply.text, /I answer normal group questions/);
+  });
+
+  test("routes typo heavy questions to the right answers", async () => {
+    const cases = [
+      ["githb link bitte", /GitHub is the public mirror/],
+      ["banr coin?", /Bankr has a Nipmod page and skill/],
+      ["cluade code setup?", /Claude Code Setup/],
+      ["geht das mit coedx?", /Codex Setup/],
+      ["wi instalier ich das", /Install Nipmod/],
+      ["linsk bitte", /Official Nipmod links/]
+    ];
+
+    for (const [text, expected] of cases) {
+      const reply = await createTelegramBotReply(groupUpdate(text), {
+        allowedChatId: "-100123",
+        answerGroupQuestions: true,
+        bindFirstGroup: true,
+        groupOnly: true,
+        packages,
+        username: "nipmodbot"
+      });
+
+      assert.match(reply.text, expected);
+    }
   });
 
   test("answers API key questions as security questions", async () => {

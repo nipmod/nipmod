@@ -52,25 +52,50 @@ const FACTS = {
 
 const QUESTION_MARKERS = [
   "?",
-  "answer ",
-  "can ",
-  "does ",
-  "how ",
-  "is ",
-  "question ",
-  "what ",
-  "where ",
-  "why ",
+  "answer",
+  "can",
+  "does",
+  "geht",
+  "how",
+  "is",
+  "ist",
+  "kann",
+  "koennen",
+  "konnen",
+  "macht",
+  "muss",
+  "question",
+  "soll",
+  "was",
+  "what",
+  "where",
+  "why",
+  "wi",
+  "wie",
+  "wo",
+  "womit",
   "antwort",
   "frage",
   "fragen",
-  "wie ",
-  "ist ",
-  "kann ",
-  "was ",
-  "wo ",
-  "warum ",
-  "wieso "
+  "warum",
+  "wieso"
+];
+
+const REQUEST_MARKERS = [
+  "bitte",
+  "brauch",
+  "brauche",
+  "gib",
+  "give",
+  "need",
+  "please",
+  "sag",
+  "say",
+  "schick",
+  "send",
+  "show",
+  "tell",
+  "zeig"
 ];
 
 const NIPMOD_CONTEXT_TERMS = [
@@ -110,6 +135,34 @@ const NIPMOD_CONTEXT_TERMS = [
   "token",
   "x402"
 ];
+
+const LINK_TERMS = ["link", "links", "linsk", "url", "official", "offiziell"];
+const GITHUB_TERMS = ["github", "git hub", "githb", "gihtub"];
+const GITLAWB_TERMS = ["gitlawb", "git lab", "gitlab", "gitlb", "gitlwab"];
+const SECURITY_TERMS = [
+  "api key",
+  "api token",
+  "bot token",
+  "key",
+  "keys",
+  "private key",
+  "safe",
+  "safety",
+  "secret",
+  "security",
+  "seed",
+  "seed phrase",
+  "sicher",
+  "wallet secret"
+];
+const BANKR_TERMS = ["bankr", "bankrcoin", "banr", "bnkr", "coin", "investor", "token", "tokenomics", "x402"];
+const BOT_TERMS = ["answer", "antwort", "bot", "frage", "fragen", "question", "questions", "reagiert"];
+const MCP_TERMS = ["mcp", "tool", "tools"];
+const CODEX_TERMS = ["codex", "coedx", "cdoex"];
+const CLAUDE_TERMS = ["claude", "claude code", "cluade", "cloude"];
+const INSTALL_TERMS = ["einrichten", "install", "installieren", "instalieren", "instaliere", "instalier", "setup"];
+const PACKAGE_TERMS = ["archive", "archiv", "package", "packages", "paket", "registry"];
+const ABOUT_TERMS = ["how does", "nipmod", "was ist", "was kann", "what can", "what is", "wie funktioniert"];
 
 export function isLikelyTelegramBotToken(value) {
   return /^[0-9]+:[A-Za-z0-9_-]{20,}$/.test(String(value ?? ""));
@@ -189,7 +242,7 @@ export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { 
 
 export function shouldAnswerGroupText(text) {
   const normalized = String(text ?? "").trim().toLowerCase();
-  return isQuestionLike(normalized) || mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
+  return isQuestionLike(normalized) || isRequestLike(normalized) || matchesAny(normalized, NIPMOD_CONTEXT_TERMS);
 }
 
 export function isRelevantGroupQuestion(text) {
@@ -197,7 +250,7 @@ export function isRelevantGroupQuestion(text) {
   if (!normalized) {
     return false;
   }
-  return isQuestionLike(normalized) && mentionsAny(normalized, NIPMOD_CONTEXT_TERMS);
+  return isQuestionLike(normalized) && matchesAny(normalized, NIPMOD_CONTEXT_TERMS);
 }
 
 export function isQuestionLike(text) {
@@ -205,7 +258,15 @@ export function isQuestionLike(text) {
   if (!normalized) {
     return false;
   }
-  return QUESTION_MARKERS.some((marker) => normalized.includes(marker));
+  return matchesAny(normalized, QUESTION_MARKERS);
+}
+
+export function isRequestLike(text) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  return matchesAny(normalized, REQUEST_MARKERS) && matchesAny(normalized, NIPMOD_CONTEXT_TERMS);
 }
 
 export async function createTelegramBotReply(update, options = {}) {
@@ -298,41 +359,41 @@ export async function renderPlainTextReply(text, options = {}) {
     .trim();
   const lower = cleaned.toLowerCase();
 
-  if (mentionsAny(lower, ["link", "url", "links", "official", "offiziell"])) {
-    return linksText();
-  }
-  if (mentionsAny(lower, ["github", "mirror"])) {
+  if (matchesAny(lower, GITHUB_TERMS) || matchesAny(lower, ["mirror"])) {
     return githubText();
   }
-  if (mentionsAny(lower, ["gitlawb", "canonical", "source", "quelle"])) {
+  if (matchesAny(lower, GITLAWB_TERMS) || matchesAny(lower, ["canonical", "quelle", "source"])) {
     return gitlawbText();
   }
-  if (mentionsAny(lower, ["safe", "safety", "security", "secret", "key", "sicher"])) {
+  if (matchesAny(lower, SECURITY_TERMS)) {
     return securityText();
   }
-  if (mentionsAny(lower, ["answer", "antwort", "bot", "frage", "fragen", "question", "questions", "reagiert"])) {
+  if (matchesAny(lower, BOT_TERMS)) {
     return botText();
   }
-  if (mentionsAny(lower, ["bankr", "bankrcoin", "coin", "investor", "x402"])) {
+  if (matchesAny(lower, BANKR_TERMS)) {
     return bankrText();
   }
-  if (mentionsAny(lower, ["mcp", "tool"])) {
+  if (matchesAny(lower, MCP_TERMS)) {
     return mcpText();
   }
-  if (mentionsAny(lower, ["codex"])) {
-    return codexText();
-  }
-  if (mentionsAny(lower, ["claude"])) {
+  if (matchesAny(lower, CLAUDE_TERMS)) {
     return claudeText();
   }
-  if (mentionsAny(lower, ["install", "setup", "einrichten"])) {
+  if (matchesAny(lower, CODEX_TERMS)) {
+    return codexText();
+  }
+  if (matchesAny(lower, INSTALL_TERMS)) {
     return installText();
   }
-  if (mentionsAny(lower, ["package", "packages", "archive", "archiv", "registry", "paket"])) {
+  if (matchesAny(lower, PACKAGE_TERMS)) {
     return packagesText(await getRegistryPackagesForReply(options));
   }
-  if (mentionsAny(lower, ["how does", "was ist", "was kann", "what can", "what is", "wie funktioniert", "nipmod"])) {
+  if (matchesAny(lower, ABOUT_TERMS)) {
     return aboutText();
+  }
+  if (matchesAny(lower, LINK_TERMS)) {
+    return linksText();
   }
   return conciseFallbackText();
 }
@@ -745,6 +806,84 @@ function packageSearchScore(pkg, terms) {
 
 function mentionsAny(text, terms) {
   return terms.some((term) => text.includes(term));
+}
+
+export function matchesAny(text, terms) {
+  const normalizedText = normalizeTextForMatching(text);
+  if (!normalizedText) {
+    return false;
+  }
+  const tokens = normalizedText.split(/\s+/).filter(Boolean);
+  return terms.some((term) => {
+    const normalizedTerm = normalizeTextForMatching(term);
+    if (!normalizedTerm) {
+      return false;
+    }
+    if (normalizedText.includes(normalizedTerm)) {
+      return true;
+    }
+    const termTokens = normalizedTerm.split(/\s+/).filter(Boolean);
+    if (termTokens.length > 1) {
+      return false;
+    }
+    return tokens.some((token) => tokenMatches(token, normalizedTerm));
+  });
+}
+
+export function normalizeTextForMatching(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replaceAll("ä", "ae")
+    .replaceAll("ö", "oe")
+    .replaceAll("ü", "ue")
+    .replaceAll("ß", "ss")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function tokenMatches(token, term) {
+  if (token === term) {
+    return true;
+  }
+  if (term === "codex" && token === "code") {
+    return false;
+  }
+  if (term.length <= 3) {
+    return false;
+  }
+  if (term.length >= 5 && token.length >= 5 && (token.includes(term) || term.includes(token))) {
+    return true;
+  }
+  const allowedDistance = term.length <= 5 ? 1 : term.length <= 7 ? 2 : 3;
+  return levenshteinDistanceAtMost(token, term, allowedDistance) <= allowedDistance;
+}
+
+function levenshteinDistanceAtMost(left, right, maxDistance) {
+  if (Math.abs(left.length - right.length) > maxDistance) {
+    return maxDistance + 1;
+  }
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    const current = [leftIndex];
+    let rowMin = current[0];
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const cost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      const value = Math.min(
+        previous[rightIndex] + 1,
+        current[rightIndex - 1] + 1,
+        previous[rightIndex - 1] + cost
+      );
+      current[rightIndex] = value;
+      rowMin = Math.min(rowMin, value);
+    }
+    if (rowMin > maxDistance) {
+      return maxDistance + 1;
+    }
+    previous = current;
+  }
+  return previous[right.length];
 }
 
 function unquoteEnvValue(value) {

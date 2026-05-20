@@ -61,7 +61,9 @@ With privacy enabled, Telegram only sends commands, mentions and selected bot ev
 /status
 ```
 
-The bot answers plain text when the message directly mentions `@nipmodbot`, starts with `nipmod`, mentions a Nipmod related topic, or looks like a normal question.
+The bot answers plain text when the message directly mentions `@nipmodbot`, starts with `nipmod`, mentions a Nipmod related topic, looks like a normal question, or asks for a link/action.
+Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
+If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
 Non question group chatter is ignored.
 
 ## Voice
