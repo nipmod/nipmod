@@ -973,6 +973,16 @@ h1 {
   border-color: rgba(255, 217, 138, 0.25);
 }
 
+.platform-status-mcp {
+  background: rgba(41, 151, 255, 0.14);
+  border-color: rgba(41, 151, 255, 0.3);
+}
+
+.platform-status-candidate {
+  background: rgba(190, 159, 255, 0.14);
+  border-color: rgba(190, 159, 255, 0.3);
+}
+
 .platform-status-planned {
   background: rgba(41, 151, 255, 0.14);
   border-color: rgba(41, 151, 255, 0.3);
@@ -984,6 +994,40 @@ h1 {
   line-height: 1.45;
   margin: 0;
   max-width: 760px;
+}
+
+.platform-proof-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.platform-detail-list {
+  display: grid;
+  gap: 8px;
+}
+
+.platform-detail-list div {
+  border-top: 1px solid var(--border-soft);
+  display: grid;
+  gap: 4px;
+  padding-top: 10px;
+}
+
+.platform-detail-list dt {
+  color: var(--quiet);
+  font-size: 12px;
+  font-weight: 760;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.platform-detail-list dd {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .compact-section-head h2 {
@@ -2070,6 +2114,7 @@ h1 {
   .live-stat-grid,
   .comparison-grid,
   .platform-grid,
+  .platform-proof-grid,
   .claim-flow,
   .owner-flow,
   .faq-grid,

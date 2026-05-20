@@ -15,10 +15,11 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 13, total: 13 });
+    expect(result.summary).toEqual({ fail: 0, pass: 14, total: 14 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
+      "platform_connections",
       "security_disclosure",
       "discovery_manifest",
       "deploy_drift",
@@ -274,6 +275,8 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     home: "https://nipmod.test",
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
+    platforms: "https://nipmod.test/platforms",
+    platformConnections: "https://nipmod.test/compatibility/platform-connections.json",
     registry: "https://nipmod.test/registry/packages.json",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
@@ -300,6 +303,9 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
       advisoriesSignature: endpoints.advisoriesSignature,
       formatVersion: 1,
       homepage: endpoints.home,
+      docs: {
+        platforms: endpoints.platforms
+      },
       install: {
         release: {
           artifact: `https://nipmod.test/releases/${expected.releaseName}`,
@@ -330,6 +336,7 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
         launch: "https://nipmod.test/launch",
         packet: "https://nipmod.test/review/packet.json",
         packetMarkdown: "https://nipmod.test/review/packet.md",
+        platformConnections: endpoints.platformConnections,
         proofTranscript: "https://nipmod.test/proof/transcript.json"
       },
       transparency: {
@@ -350,6 +357,11 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
     [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key"),
+    [`GET ${endpoints.platforms}`]: textResponse("Connection matrix Under review Candidate"),
+    [`GET ${endpoints.platformConnections}`]: jsonResponse({
+      connections: [{ id: "aeon" }],
+      type: "dev.nipmod.platform-connections.v1"
+    }),
     [`GET ${endpoints.security}`]: textResponse("Report with proof No central deletion"),
     [`GET ${endpoints.securityTxt}`]: textResponse(
       `Contact: https://nipmod.test/security\nCanonical: ${endpoints.securityTxt}\nPolicy: ${endpoints.security}`

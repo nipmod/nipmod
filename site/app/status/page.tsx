@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import platformConnections from "../../public/compatibility/platform-connections.json";
 import platformReadiness from "../../public/compatibility/platform-readiness.json";
 import systemReadiness from "../../public/compatibility/system-readiness.json";
 import registryData from "../registry-data.json";
@@ -9,14 +10,13 @@ const registry = registryData as RegistryIndex;
 type Readiness = {
   cliCommands?: string[];
   mcpTools?: string[];
-  platforms?: Array<{ id: string; productReadiness: number }>;
+  platforms?: Array<{ id: string; name: string; productReadiness: number }>;
   sharedArchive?: { packageCount: number };
 };
 
 const system = systemReadiness as Readiness;
 const platform = platformReadiness as Readiness;
-
-const platformNames = ["GitHub", "Gitlawb", "Codex", "Claude Code", "OpenCode", "Bankr workflows"];
+const connections = platformConnections.connections;
 
 export const metadata: Metadata = {
   alternates: {
@@ -43,6 +43,9 @@ export default function StatusPage() {
         <div className="actions" aria-label="Status actions">
           <a className="button button-primary" href="/proof">
             Run proof
+          </a>
+          <a className="button button-ghost" href="/platforms">
+            Platforms
           </a>
           <a className="button button-ghost" href="/demo">
             Demo
@@ -75,16 +78,17 @@ export default function StatusPage() {
           <p>These are Nipmod integration and workflow checks. They are not partner endorsement claims.</p>
         </div>
         <div className="platform-grid">
-          {platformNames.map((name) => (
-            <article className="platform-card" key={name}>
+          {connections.map((connection) => (
+            <article className="platform-card" key={connection.id}>
               <div className="platform-top">
                 <div>
-                  <p className="platform-label">ready path</p>
-                  <h3>{name}</h3>
+                  <p className="platform-label">{connection.category}</p>
+                  <h3>{connection.name}</h3>
                 </div>
-                <span className="platform-status platform-status-live">checked</span>
+                <span className={`platform-status ${platformStatusClass(connection.status)}`}>{connection.status}</span>
               </div>
-              <p>Uses the same package archive, proof documents or MCP server path where supported.</p>
+              <p>{connection.scope}</p>
+              <a href={connection.url}>Open proof</a>
             </article>
           ))}
         </div>
@@ -131,4 +135,24 @@ export default function StatusPage() {
       </section>
     </main>
   );
+}
+
+function platformStatusClass(status: string): string {
+  if (status === "Live") {
+    return "platform-status-live";
+  }
+
+  if (status === "Under review") {
+    return "platform-status-review";
+  }
+
+  if (status === "MCP ready") {
+    return "platform-status-mcp";
+  }
+
+  if (status === "Candidate") {
+    return "platform-status-candidate";
+  }
+
+  return "platform-status-planned";
 }

@@ -1,0 +1,13 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "bankr",
+  "name": "Bankr",
+  "status": "Under review",
+  "proofLevel": "Prepared skill and local proof path",
+  "publicPath": "https://nipmod.com/bankr",
+  "setupCommand": "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+  "smokeCommand": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+  "externalApprovalRequired": true,
+  "externalDependency": "Bankr review or merge is required before native Bankr support can be claimed."
+}

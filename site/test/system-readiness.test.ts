@@ -123,11 +123,13 @@ describe("system readiness receipt", () => {
       }
     });
     expect(platformReadiness.platforms.map((platform: { id: string }) => platform.id).sort()).toEqual([
+      "aeon",
       "bankr",
       "claude-code",
       "codex",
       "github",
       "gitlawb",
+      "mcp",
       "opencode"
     ]);
     expect(readiness.parallelAccessProof.checkedBy).toBe("node tools/system-readiness-check.mjs --live --parallel");

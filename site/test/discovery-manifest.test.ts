@@ -83,6 +83,7 @@ describe("nipmod discovery manifest", () => {
       "launchKit",
       "mcp",
       "packages",
+      "platforms",
       "security",
       "setup",
       "status",
@@ -138,6 +139,7 @@ describe("nipmod discovery manifest", () => {
       "launch",
       "packet",
       "packetMarkdown",
+      "platformConnections",
       "platformReadiness",
       "proofTranscript",
       "systemReadiness"
@@ -268,6 +270,7 @@ describe("nipmod discovery manifest", () => {
       launch: "https://nipmod.com/launch",
       packet: "https://nipmod.com/review/packet.json",
       packetMarkdown: "https://nipmod.com/review/packet.md",
+      platformConnections: "https://nipmod.com/compatibility/platform-connections.json",
       platformReadiness: "https://nipmod.com/compatibility/platform-readiness.json",
       proofTranscript: "https://nipmod.com/proof/transcript.json",
       systemReadiness: "https://nipmod.com/compatibility/system-readiness.json"
@@ -287,6 +290,7 @@ describe("nipmod discovery manifest", () => {
       launchKit: "https://nipmod.com/launch-kit",
       mcp: "https://nipmod.com/mcp",
       packages: "https://nipmod.com/packages",
+      platforms: "https://nipmod.com/platforms",
       security: "https://nipmod.com/security",
       setup: "https://nipmod.com/setup",
       status: "https://nipmod.com/status",

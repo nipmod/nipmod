@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "mcp",
+  "name": "MCP",
+  "status": "Live",
+  "proofLevel": "MCP tool list readiness",
+  "publicPath": "https://nipmod.com/mcp",
+  "setupCommand": "nipmod mcp serve",
+  "smokeCommand": "node tools/platform-readiness-check.mjs",
+  "externalApprovalRequired": false
+}

@@ -1,9 +1,9 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-20T02:55:00.000Z",
+  "generatedAt": "2026-05-20T03:36:00.000Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, claim flows, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
@@ -21,6 +21,7 @@
     "machineManifest": "https://nipmod.com/.well-known/nipmod.json",
     "demo": "https://nipmod.com/demo",
     "status": "https://nipmod.com/status",
+    "platformConnections": "https://nipmod.com/compatibility/platform-connections.json",
     "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
     "systemReadiness": "https://nipmod.com/compatibility/system-readiness.json"
   },
@@ -30,25 +31,39 @@
     "gitlawbNode": "https://node.nipmod.com"
   },
   "agentHosts": {
+    "mcp": {
+      "setup": "nipmod mcp serve",
+      "access": "MCP stdio",
+      "status": "Live"
+    },
     "codex": {
       "setup": "nipmod setup codex",
-      "access": "MCP stdio"
+      "access": "MCP stdio",
+      "status": "MCP ready"
     },
     "claudeCode": {
       "setup": "nipmod setup claude",
       "config": ".mcp.json",
-      "access": "MCP stdio"
+      "access": "MCP stdio",
+      "status": "MCP ready"
     },
     "openCode": {
       "setup": "nipmod setup opencode",
       "config": "opencode.json",
-      "access": "MCP local"
+      "access": "MCP local",
+      "status": "MCP ready"
     },
     "bankr": {
       "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
       "proof": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
       "runtimeSmoke": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
-      "access": "skill plus public archive and CLI commands"
+      "access": "skill plus public archive and CLI commands",
+      "status": "Under review"
+    },
+    "aeon": {
+      "candidate": "https://github.com/aaronjmars/aeon",
+      "access": "candidate external skill collection",
+      "status": "Candidate"
     }
   },
   "cliCommands": [

@@ -18,6 +18,7 @@ nipmod setup agents
 - Website: https://nipmod.com
 - Packages: https://nipmod.com/packages
 - Setup: https://nipmod.com/setup
+- Platform matrix: https://nipmod.com/platforms
 - Codex and Claude Code: https://nipmod.com/agents/codex-claude
 - Registry: https://nipmod.com/registry/packages.json
 - Agent discovery: https://nipmod.com/.well-known/nipmod.json

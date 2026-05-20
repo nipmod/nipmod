@@ -14,6 +14,8 @@ const DEFAULT_ENDPOINTS = {
   home: "https://nipmod.com",
   nodeHealth: "https://node.nipmod.com/health",
   nodeUrl: "https://node.nipmod.com",
+  platforms: "https://nipmod.com/platforms",
+  platformConnections: "https://nipmod.com/compatibility/platform-connections.json",
   registry: "https://nipmod.com/registry/packages.json",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
@@ -54,6 +56,16 @@ export async function runSyntheticMonitor({
     return { url: endpoints.trust };
   });
 
+  await runCheck(checks, "platform_connections", async () => {
+    const page = await fetchText(endpoints.platforms, timedFetch);
+    assertIncludes(page, "Connection matrix", "platform page missing matrix title");
+    assertIncludes(page, "Under review", "platform page missing review status");
+    const matrix = await fetchJson(endpoints.platformConnections, timedFetch);
+    assertEqual(matrix.type, "dev.nipmod.platform-connections.v1", "platform connection type mismatch");
+    assertIncludes(JSON.stringify(matrix), "aeon", "platform matrix missing Aeon candidate");
+    return { matrix: endpoints.platformConnections, page: endpoints.platforms };
+  });
+
   await runCheck(checks, "security_disclosure", async () => {
     const page = await fetchText(endpoints.security, timedFetch);
     assertIncludes(page, "Report with proof", "security page missing disclosure marker");
@@ -75,6 +87,12 @@ export async function runSyntheticMonitor({
     assertEqual(state.discovery.advisories, endpoints.advisories, "discovery advisory URL mismatch");
     assertEqual(state.discovery.advisoriesSignature, endpoints.advisoriesSignature, "discovery advisory signature URL mismatch");
     assertEqual(state.discovery.transparency?.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
+    assertEqual(state.discovery.docs?.platforms, endpoints.platforms, "discovery platforms URL mismatch");
+    assertEqual(
+      state.discovery.review?.platformConnections,
+      endpoints.platformConnections,
+      "discovery platform connections URL mismatch"
+    );
     assertEqual(state.discovery.review?.packet, `${endpoints.home}/review/packet.json`, "discovery review packet URL mismatch");
     assertEqual(
       state.discovery.review?.evidenceManifest,

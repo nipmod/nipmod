@@ -151,10 +151,16 @@ async function checkLiveEndpoints() {
     ["llms_entrypoint", "https://nipmod.com/llms.txt", ["Connect Codex:", "nipmod setup claude", "nipmod setup opencode"]],
     ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
     ["status_page", "https://nipmod.com/status", ["Public proof dashboard", "System readiness"]],
+    ["platform_page", "https://nipmod.com/platforms", ["Connection matrix", "Under review", "Candidate"]],
     [
       "discovery_manifest",
       "https://nipmod.com/.well-known/nipmod.json",
-      ["https://nipmod.com/setup", "setupCodexMcp", "platformReadiness"]
+      ["https://nipmod.com/setup", "setupCodexMcp", "platformReadiness", "platformConnections"]
+    ],
+    [
+      "platform_connections_live",
+      "https://nipmod.com/compatibility/platform-connections.json",
+      ["dev.nipmod.platform-connections.v1", "claude-code", "aeon"]
     ],
     [
       "bankr_skill",
@@ -169,7 +175,7 @@ async function checkLiveEndpoints() {
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
-      ["dev.nipmod.platform-readiness.v1", "claude-code", "opencode"]
+      ["dev.nipmod.platform-readiness.v1", "claude-code", "opencode", "aeon"]
     ]
   ];
 

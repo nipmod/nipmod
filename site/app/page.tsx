@@ -317,8 +317,16 @@ function platformStatusClass(status: string): string {
     return "platform-status-live";
   }
 
-  if (status === "PR open") {
+  if (status === "Under review") {
     return "platform-status-review";
+  }
+
+  if (status === "MCP ready") {
+    return "platform-status-mcp";
+  }
+
+  if (status === "Candidate") {
+    return "platform-status-candidate";
   }
 
   return "platform-status-planned";

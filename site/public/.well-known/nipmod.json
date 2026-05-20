@@ -12,6 +12,7 @@
     "agents": "https://nipmod.com/agents",
     "demo": "https://nipmod.com/demo",
     "status": "https://nipmod.com/status",
+    "platforms": "https://nipmod.com/platforms",
     "examples": "https://nipmod.com/examples",
     "launchKit": "https://nipmod.com/launch-kit",
     "packages": "https://nipmod.com/packages",
@@ -171,6 +172,7 @@
     "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json",
     "proofTranscript": "https://nipmod.com/proof/transcript.json",
     "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
+    "platformConnections": "https://nipmod.com/compatibility/platform-connections.json",
     "systemReadiness": "https://nipmod.com/compatibility/system-readiness.json",
     "launch": "https://nipmod.com/launch"
   },

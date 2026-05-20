@@ -60,8 +60,8 @@ export const homeContent = {
   platformRoadmap: {
     headline: "Platform status",
     lead:
-      "Gitlawb is live. Bankr is under review. Agent hosts are now MCP ready through one local server, one command setup and controlled install.",
-    note: "Statuses describe Nipmod integration work, not partner approval.",
+      "Each connection shows the real product status: live where Nipmod controls the path, MCP ready where agents can connect locally, and under review when an outside repo must accept it.",
+    note: "Statuses describe Nipmod integration work, not partner approval. The full proof matrix is public.",
     items: [
       {
         name: "Gitlawb",
@@ -72,20 +72,44 @@ export const homeContent = {
         cta: "Create package"
       },
       {
-        name: "Bankr",
-        status: "PR open",
-        label: "agent skill",
-        text: "The Bankr skill and agent workflow are ready for review. Agents can read, inspect and plan without wallet actions.",
-        href: "/bankr",
-        cta: "View Bankr path"
+        name: "GitHub",
+        status: "Live",
+        label: "public review",
+        text: "The public repo, CI, docs and connection kits are inspectable from GitHub.",
+        href: "https://github.com/nipmod/nipmod",
+        cta: "Open GitHub"
+      },
+      {
+        name: "MCP",
+        status: "MCP ready",
+        label: "agent runtime",
+        text: "One local MCP server exposes search, inspect, install planning, audit and SBOM tools.",
+        href: "/mcp",
+        cta: "View MCP"
       },
       {
         name: "Agent hosts",
         status: "MCP ready",
         label: "Codex, Claude Code, OpenCode",
-        text: "Codex, Claude Code and OpenCode can use Nipmod through MCP for package discovery, trust inspection, install planning and controlled install.",
+        text: "Codex, Claude Code and OpenCode host smoke checks pass against the same local Nipmod MCP server.",
         href: "/setup",
         cta: "Setup agent"
+      },
+      {
+        name: "Bankr",
+        status: "Under review",
+        label: "agent skill",
+        text: "The Bankr skill, proof files and safe agent workflow are ready. Native Bankr acceptance is still external.",
+        href: "/bankr",
+        cta: "View Bankr path"
+      },
+      {
+        name: "Aeon",
+        status: "Candidate",
+        label: "external skill library",
+        text: "Aeon is a strong candidate for a future external skill collection, pending owner review.",
+        href: "/platforms",
+        cta: "View matrix"
       }
     ]
   },

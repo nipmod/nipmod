@@ -96,7 +96,7 @@ export function SiteHeader() {
             <a href="/security">Security</a>
             <a href="/mcp">MCP</a>
             <a href="/bankr">Bankr agents</a>
-            <a href="/#platforms">Platforms</a>
+            <a href="/platforms">Platforms</a>
             <a
               href={homeContent.links.gitlawbProfile}
               aria-label="Open Nipmod Gitlawb profile in a new tab"

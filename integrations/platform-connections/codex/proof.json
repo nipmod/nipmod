@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "codex",
+  "name": "Codex",
+  "status": "MCP ready",
+  "proofLevel": "Host smoke via Codex MCP registration",
+  "publicPath": "https://nipmod.com/agents/codex-claude",
+  "setupCommand": "nipmod setup codex",
+  "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+  "externalApprovalRequired": false
+}

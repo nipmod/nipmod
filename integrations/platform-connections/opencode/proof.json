@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "opencode",
+  "name": "OpenCode",
+  "status": "MCP ready",
+  "proofLevel": "Host smoke via OpenCode MCP list",
+  "publicPath": "https://nipmod.com/setup",
+  "setupCommand": "nipmod setup opencode",
+  "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+  "externalApprovalRequired": false
+}

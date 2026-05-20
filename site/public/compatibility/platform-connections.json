@@ -1,0 +1,194 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.platform-connections.v1",
+  "generatedAt": "2026-05-20T03:36:00.000Z",
+  "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
+  "statusLegend": [
+    {
+      "status": "Live",
+      "meaning": "Nipmod controls the path and the smoke or sync proof is passing."
+    },
+    {
+      "status": "MCP ready",
+      "meaning": "The host can use the local Nipmod MCP server and host smoke checks pass."
+    },
+    {
+      "status": "Under review",
+      "meaning": "Nipmod prepared the integration, but a third party must review or accept it before native support can be claimed."
+    },
+    {
+      "status": "Candidate",
+      "meaning": "The platform or project fits the package archive model, but owner review has not happened yet."
+    }
+  ],
+  "hostSmoke": {
+    "checkedAt": "2026-05-20T03:44:46.771Z",
+    "command": "node tools/platform-readiness-check.mjs --host-smoke --live",
+    "summary": {
+      "pass": 36,
+      "fail": 0,
+      "skip": 0,
+      "total": 36
+    }
+  },
+  "connections": [
+    {
+      "id": "gitlawb",
+      "name": "Gitlawb",
+      "status": "Live",
+      "category": "source network",
+      "scope": "First canonical source anchor for signed source history, package claims and package publishing.",
+      "proofLevel": "Pushed, synced and checked against the current released commit.",
+      "url": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/gitlawb",
+      "setupCommand": "nipmod setup gitlawb",
+      "smokeCommand": "git ls-remote https://node.nipmod.com/z6Mkwbud/nipmod.git refs/heads/main",
+      "externalApprovalRequired": false,
+      "externalDependency": "No external approval is required for the current Nipmod owned Gitlawb path.",
+      "evidence": [
+        "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+        "https://node.nipmod.com/z6Mkwbud/nipmod.git",
+        "https://nipmod.com/package"
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "status": "Live",
+      "category": "public review",
+      "scope": "Public mirror, CI surface, docs, connection kits and developer review path.",
+      "proofLevel": "Main branch matches the released commit and the repo is public.",
+      "url": "https://github.com/nipmod/nipmod",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/github",
+      "setupCommand": null,
+      "smokeCommand": "git ls-remote https://github.com/nipmod/nipmod.git refs/heads/main",
+      "externalApprovalRequired": false,
+      "externalDependency": "No external approval is required for the current Nipmod owned GitHub repo.",
+      "evidence": [
+        "https://github.com/nipmod/nipmod",
+        "https://github.com/nipmod/nipmod/actions",
+        "https://nipmod.com/compatibility/platform-readiness.json"
+      ]
+    },
+    {
+      "id": "mcp",
+      "name": "MCP",
+      "status": "Live",
+      "category": "agent protocol",
+      "scope": "Local stdio server exposing search, view, inspect, install plan, controlled install, audit, SBOM and proof tools.",
+      "proofLevel": "The MCP tool list is checked by platform and system readiness tests.",
+      "url": "https://nipmod.com/mcp",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/mcp",
+      "setupCommand": "nipmod mcp serve",
+      "smokeCommand": "node tools/platform-readiness-check.mjs",
+      "externalApprovalRequired": false,
+      "externalDependency": "No marketplace approval is required to run the local stdio MCP server.",
+      "evidence": [
+        "https://nipmod.com/mcp",
+        "https://nipmod.com/.well-known/nipmod.json",
+        "https://nipmod.com/llms.txt"
+      ]
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "status": "MCP ready",
+      "category": "agent host",
+      "scope": "Codex can register Nipmod as a local stdio MCP server through the Nipmod setup command.",
+      "proofLevel": "Host smoke passes through codex mcp get in the platform readiness check.",
+      "url": "https://nipmod.com/agents/codex-claude",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/codex",
+      "setupCommand": "nipmod setup codex",
+      "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+      "externalApprovalRequired": false,
+      "externalDependency": "No native marketplace claim is made. The current path is local MCP setup.",
+      "evidence": [
+        "https://nipmod.com/setup",
+        "https://nipmod.com/agents/codex-claude",
+        "https://nipmod.com/compatibility/platform-readiness.json"
+      ]
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "status": "MCP ready",
+      "category": "agent host",
+      "scope": "Claude Code can load the project .mcp.json and connect to the local Nipmod MCP server.",
+      "proofLevel": "Host smoke passes through claude mcp list using the committed .mcp.json.",
+      "url": "https://nipmod.com/agents/codex-claude",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/claude-code",
+      "setupCommand": "nipmod setup claude",
+      "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+      "externalApprovalRequired": false,
+      "externalDependency": "No native marketplace claim is made. The current path is local MCP setup.",
+      "evidence": [
+        "https://nipmod.com/setup",
+        "https://nipmod.com/agents/codex-claude",
+        "https://nipmod.com/compatibility/platform-readiness.json"
+      ]
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "status": "MCP ready",
+      "category": "agent host",
+      "scope": "OpenCode can load opencode.json and connect to the local Nipmod MCP server.",
+      "proofLevel": "Host smoke passes through opencode mcp list using the committed opencode.json.",
+      "url": "https://nipmod.com/setup",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/opencode",
+      "setupCommand": "nipmod setup opencode",
+      "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+      "externalApprovalRequired": false,
+      "externalDependency": "No native marketplace claim is made. The current path is local MCP setup.",
+      "evidence": [
+        "https://nipmod.com/setup",
+        "https://nipmod.com/mcp",
+        "https://nipmod.com/compatibility/platform-readiness.json"
+      ]
+    },
+    {
+      "id": "bankr",
+      "name": "Bankr",
+      "status": "Under review",
+      "category": "agent skill",
+      "scope": "Bankr compatible skill, free service map and agent proof workflow are prepared without wallet actions.",
+      "proofLevel": "Local proof commands pass. Native Bankr catalog acceptance and authenticated Agent API smoke are external.",
+      "url": "https://nipmod.com/bankr",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/bankr",
+      "setupCommand": "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+      "smokeCommand": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+      "externalApprovalRequired": true,
+      "externalDependency": "Bankr must review or merge the skill before native Bankr support can be claimed.",
+      "evidence": [
+        "https://nipmod.com/bankr",
+        "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
+        "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
+        "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md"
+      ]
+    },
+    {
+      "id": "aeon",
+      "name": "Aeon",
+      "status": "Candidate",
+      "category": "external skill library",
+      "scope": "Aeon has a large public skill system that fits a future Nipmod external skill collection.",
+      "proofLevel": "Candidate only. No Aeon owner approval or published Nipmod package collection is claimed.",
+      "url": "https://github.com/aaronjmars/aeon",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/aeon",
+      "setupCommand": null,
+      "smokeCommand": "Review candidate repo and prepare owner approved skill collection metadata",
+      "externalApprovalRequired": true,
+      "externalDependency": "Aeon owner review is required before publishing Aeon skills through Nipmod.",
+      "evidence": [
+        "https://github.com/aaronjmars/aeon"
+      ]
+    }
+  ],
+  "notClaimed": [
+    "Native marketplace approval for every platform",
+    "Bankr accepted the skill into the Bankr skills repo",
+    "Aeon approved or published a Nipmod skill collection",
+    "Third party platforms endorse Nipmod",
+    "MCP ready means native platform partnership"
+  ]
+}

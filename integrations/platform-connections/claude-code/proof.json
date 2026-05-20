@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "claude-code",
+  "name": "Claude Code",
+  "status": "MCP ready",
+  "proofLevel": "Host smoke via Claude Code MCP list",
+  "publicPath": "https://nipmod.com/agents/codex-claude",
+  "setupCommand": "nipmod setup claude",
+  "smokeCommand": "node tools/platform-readiness-check.mjs --host-smoke",
+  "externalApprovalRequired": false
+}

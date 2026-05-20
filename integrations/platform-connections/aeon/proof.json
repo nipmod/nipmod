@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "aeon",
+  "name": "Aeon",
+  "status": "Candidate",
+  "proofLevel": "Candidate only",
+  "publicPath": "https://github.com/aaronjmars/aeon",
+  "smokeCommand": "Review candidate repo and prepare owner approved skill collection metadata",
+  "externalApprovalRequired": true,
+  "externalDependency": "Aeon owner review is required before publishing Aeon skills through Nipmod."
+}
