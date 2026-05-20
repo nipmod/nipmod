@@ -13,6 +13,7 @@ NIPMOD_TELEGRAM_BOT_USERNAME=nipmodbot
 NIPMOD_TELEGRAM_GROUP_ONLY=1
 NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1
 NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1
+NIPMOD_TELEGRAM_LOG_UPDATES=1
 NIPMOD_TELEGRAM_ADMIN_USER_IDS=<optional-comma-separated-admin-user-ids>
 NIPMOD_TELEGRAM_DISABLED=0
 NIPMOD_TELEGRAM_AI_ENABLED=1
@@ -70,10 +71,10 @@ With privacy enabled, Telegram only sends commands, mentions and selected bot ev
 /resume
 ```
 
-The bot answers plain text when the message directly mentions `@nipmodbot`, starts with `nipmod`, mentions a Nipmod related topic, looks like a normal question, or asks for a link/action.
+The bot receives group messages but answers plain text only when the message directly mentions `@nipmodbot`, starts with `nipmod`, or looks like a Nipmod related question or request.
 Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
 If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
-Non question group chatter is ignored.
+General group chatter and unrelated questions are ignored.
 
 ## AI layer
 
@@ -89,6 +90,8 @@ Incoming messages are checked before local routing or AI.
 The bot blocks posted secrets, prompt extraction attempts, seed phrase requests, wallet secret handling, token price calls and buy or sell recommendations.
 AI replies are checked again before sending.
 The bot rate limits users by Telegram user id and stores only timestamps, never message text.
+Runtime logs include update id, chat id, user id, message type, text presence, text length and topic id.
+Runtime logs do not include the actual message text.
 `/pause`, `/resume`, `/kill`, `/disable`, `/enable` and `/botstatus` are admin controls.
 Admins are resolved from Telegram group admins or `NIPMOD_TELEGRAM_ADMIN_USER_IDS`.
 `NIPMOD_TELEGRAM_DISABLED=1` starts the bot paused.
