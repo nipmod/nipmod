@@ -67,21 +67,12 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
-      <section className="usage-strip" aria-label="Where Nipmod is used">
-        {homeContent.usage.map((item) => (
-          <article className="usage-item" key={item.label}>
-            <h2>{item.label}</h2>
-            <p>{item.text}</p>
-          </article>
-        ))}
-      </section>
-
       <section className="live-section" id="live" aria-labelledby="live-title">
         <div className="live-head">
           <div>
-            <p className="eyebrow">Registry</p>
-            <h2 id="live-title">Verified registry count</h2>
-            <p className="live-copy">Published packages are verified registry entries with source, signature and trust evidence.</p>
+            <p className="eyebrow">Live archive</p>
+            <h2 id="live-title">Live package count</h2>
+            <p className="live-copy">Current package count from the public Nipmod archive.</p>
           </div>
           <p className={`live-status ${liveStats.healthy ? "live-ok" : "live-warn"}`}>
             <span aria-hidden="true" />
@@ -98,39 +89,13 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
       </section>
 
-      <section className="explain-section" id="why" aria-labelledby="why-title">
-        <div className="section-head">
-          <p className="eyebrow">Position</p>
-          <h2 id="why-title">Packages made for agent workflows.</h2>
-          <p>Nipmod keeps source, trust and install evidence visible before code enters an agent workspace.</p>
-        </div>
-        <div className="comparison-grid">
-          {homeContent.comparison.map((item) => (
-            <article className="comparison-card" key={item.label}>
-              <h3>{item.label}</h3>
-              <p className="comparison-title">{item.title}</p>
-              <p>{item.text}</p>
-              <ul>
-                {item.points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="gitlawb-section" id="gitlawb" aria-labelledby="gitlawb-title">
-        <div className="section-head">
-          <p className="eyebrow">Source</p>
-          <h2 id="gitlawb-title">{homeContent.gitlawbReason.headline}</h2>
-          <p>{homeContent.gitlawbReason.text}</p>
-        </div>
-        <div className="fact-row" aria-label="Gitlawb reasons">
-          {homeContent.gitlawbReason.facts.map((fact) => (
-            <span key={fact}>{fact}</span>
-          ))}
-        </div>
+      <section className="usage-strip" aria-label="Where Nipmod is used">
+        {homeContent.usage.map((item) => (
+          <article className="usage-item" key={item.label}>
+            <h2>{item.label}</h2>
+            <p>{item.text}</p>
+          </article>
+        ))}
       </section>
 
       <section className="platform-section" id="platforms" aria-labelledby="platforms-title">
@@ -189,21 +154,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <a className="button button-primary" href="/package">
             Create package
           </a>
-        </div>
-      </section>
-
-      <section className="faq-section" id="faq" aria-labelledby="faq-title">
-        <div className="section-head">
-          <p className="eyebrow">Answers</p>
-          <h2 id="faq-title">Quick answers</h2>
-        </div>
-        <div className="faq-grid">
-          {homeContent.faq.map((item) => (
-            <article className="faq-card" key={item.question}>
-              <h3>{item.question}</h3>
-              <p>{item.answer}</p>
-            </article>
-          ))}
         </div>
       </section>
 

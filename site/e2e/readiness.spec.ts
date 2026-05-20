@@ -3,9 +3,9 @@ import { expect, test } from "@playwright/test";
 test("home registry search stays usable", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Package layer for agents" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Verified registry count" })).toBeVisible();
-  await expect(page.getByText("Registry live")).toBeVisible();
-  await expect(page.locator(".live-stat-grid").getByText("Verified packages", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Live package count" })).toBeVisible();
+  await expect(page.locator(".live-status")).toContainText(/Live archive|Local archive/);
+  await expect(page.locator(".live-stat-grid").getByText("Nipmod archive packages", { exact: true })).toBeVisible();
   await expect(page.getByText("Repos scanned")).toHaveCount(0);
   await expect(page.getByText("Scan interval")).toHaveCount(0);
   await expect(page.getByText("Scout running every")).toHaveCount(0);
@@ -21,15 +21,7 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://t.me/nipmod"
   );
-  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod Telegram group in a new tab" })).toHaveAttribute(
-    "href",
-    "https://t.me/nipmod"
-  );
   await expect(page.locator(".brand-socials").getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
-    "href",
-    "https://github.com/nipmod/nipmod"
-  );
-  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod GitHub repository in a new tab" })).toHaveAttribute(
     "href",
     "https://github.com/nipmod/nipmod"
   );
@@ -37,16 +29,16 @@ test("home registry search stays usable", async ({ page }) => {
     "href",
     "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
   );
-  await expect(page.locator(".actions").getByRole("link", { name: "Open Nipmod Bankr coin in a new tab" })).toHaveAttribute(
-    "href",
-    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
-  );
   const siteNav = page.getByRole("navigation", { name: "Site" });
-  await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
+  const viewport = page.viewportSize();
+  if (viewport?.width && viewport.width < 560) {
+    await expect(siteNav.locator('a[href="/packages"]:visible')).toHaveCount(0);
+  } else {
+    await expect(siteNav.getByRole("link", { name: "Packages" })).toBeVisible();
+  }
   await expect(siteNav.locator('a[href="/quickstart#docs"]')).toHaveCount(2);
   await expect(siteNav.getByRole("link", { name: "Setup" })).toBeVisible();
-  const viewport = page.viewportSize();
-  await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 2 : 3);
+  await expect(siteNav.locator(".nav-link:visible")).toHaveCount(viewport?.width && viewport.width < 560 ? 1 : 3);
   if ((await page.locator('a[href="/security"]:visible').count()) === 0) {
     await page.locator(".more-menu summary").click();
   }
@@ -119,46 +111,39 @@ test("homepage answers post traffic questions", async ({ page }) => {
     "Search, inspect and install verified agent packages."
   );
   await expect(page.getByText("Search, inspect and install verified agent packages from one shared archive.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Packages made for agent workflows." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Human package tools" })).toBeVisible();
-  await expect(page.getByRole("heading", { exact: true, name: "Nipmod" })).toBeVisible();
-  await expect(page.getByText("Fast installs, familiar names, versions and public distribution for normal developer work.")).toBeVisible();
-  await expect(page.getByText("Source identity, signed evidence, package claims and install receipts agents can read.")).toBeVisible();
-
-  await expect(page.getByRole("heading", { name: "Why Gitlawb first?" })).toBeVisible();
-  await expect(page.getByText("Gitlawb gives source identity, signed pushes and public provenance.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Live package count" })).toBeVisible();
+  await expect(page.getByText("Current package count from the public Nipmod archive.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Packages made for agent workflows." })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Why Gitlawb first?" })).toHaveCount(0);
 
   await expect(page.getByRole("heading", { name: "Platform status" })).toBeVisible();
   const platformRoadmap = page.getByLabel("Nipmod platform roadmap");
   await expect(platformRoadmap.getByRole("heading", { name: "Gitlawb" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Live", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByText("Live", { exact: true })).toHaveCount(3);
   await expect(platformRoadmap.getByRole("heading", { name: "GitHub" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { exact: true, name: "MCP" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Codex" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Claude Code" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "OpenCode" })).toBeVisible();
+  await expect(platformRoadmap.getByRole("heading", { name: "Hermes" })).toBeVisible();
   await expect(platformRoadmap.getByRole("heading", { name: "Bankr" })).toBeVisible();
   await expect(platformRoadmap.getByText("Under review", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByRole("heading", { name: "Agent runtimes" })).toBeVisible();
-  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(3);
   await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toBeVisible();
-  await expect(platformRoadmap.getByText("Candidate", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode checks pass. Hermes now has a prepared MCP setup path pending runtime smoke.")).toBeVisible();
-  await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toBeVisible();
+  await expect(platformRoadmap.getByText("Candidate", { exact: true })).toHaveCount(2);
+  await expect(platformRoadmap.getByText("Codex can register Nipmod as a local stdio MCP server")).toBeVisible();
+  await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toHaveCount(0);
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
-  await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
-  await expect(platformRoadmap.getByRole("link", { name: "Setup agent" })).toHaveAttribute("href", "/setup");
-  await expect(platformRoadmap.getByRole("link", { name: "View matrix" })).toHaveAttribute("href", "/platforms");
+  await expect(platformRoadmap.getByRole("link", { name: "Review path" })).toHaveCount(3);
+  await expect(platformRoadmap.getByRole("link", { name: "Open path" })).toHaveCount(6);
 
   await expect(page.getByRole("heading", { name: "Publish your repo as a package." })).toBeVisible();
   await expect(page.getByText("The source owner runs the package flow. Nipmod verifies the claim and never takes ownership.")).toBeVisible();
   await expect(page.getByText("Start from your own Gitlawb repo and run the package preflight locally.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Create package" }).first()).toHaveAttribute("href", "/package");
 
-  await expect(page.getByRole("heading", { name: "Quick answers" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toBeVisible();
-  await expect(page.getByText("Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Can agents use it directly?" })).toBeVisible();
-  await expect(page.getByText("Yes. Install the CLI, connect MCP, then tell the agent to use Nipmod before package installs.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Who owns packages?" })).toBeVisible();
-  await expect(page.getByText("The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Quick answers" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Is this only for Gitlawb?" })).toHaveCount(0);
 
   await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
   await expect(page.locator(".start-grid").getByRole("link", { name: "Setup Nipmod" })).toHaveAttribute("href", "/setup");

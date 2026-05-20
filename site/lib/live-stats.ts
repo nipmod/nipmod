@@ -1,7 +1,7 @@
 import type { RegistryIndex } from "./registry";
 
 export interface LiveStatTile {
-  label: "Verified packages";
+  label: "Nipmod archive packages";
   value: string;
 }
 
@@ -14,11 +14,34 @@ export interface LiveStats {
 }
 
 export async function loadLiveStats({
-  registry
+  registry,
+  registryUrl = process.env.NIPMOD_LIVE_REGISTRY_URL ?? "https://nipmod.com/registry/packages.json"
 }: {
   registry: RegistryIndex;
+  registryUrl?: string;
 }): Promise<LiveStats> {
-  return fallbackLiveStats(registry);
+  try {
+    const response = await fetch(registryUrl, { cache: "no-store" });
+
+    if (!response.ok) {
+      return fallbackLiveStats(registry);
+    }
+
+    const liveRegistry = (await response.json()) as Pick<RegistryIndex, "generatedAt" | "packages">;
+    if (!Array.isArray(liveRegistry.packages)) {
+      return fallbackLiveStats(registry);
+    }
+
+    return {
+      generatedAt: typeof liveRegistry.generatedAt === "string" ? liveRegistry.generatedAt : null,
+      healthy: true,
+      source: "live",
+      status: "Live archive",
+      tiles: [{ label: "Nipmod archive packages", value: String(liveRegistry.packages.length) }]
+    };
+  } catch {
+    return fallbackLiveStats(registry);
+  }
 }
 
 export function fallbackLiveStats(registry: RegistryIndex): LiveStats {
@@ -27,7 +50,7 @@ export function fallbackLiveStats(registry: RegistryIndex): LiveStats {
     generatedAt: null,
     healthy: true,
     source: "registry",
-    status: "Registry live",
-    tiles: [{ label: "Verified packages", value: String(packageCount) }]
+    status: "Local archive",
+    tiles: [{ label: "Nipmod archive packages", value: String(packageCount) }]
   };
 }

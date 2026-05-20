@@ -34,29 +34,6 @@ export const homeContent = {
       text: "Plan first, then pin exact package bytes in a workspace lockfile."
     }
   ],
-  comparison: [
-    {
-      label: "Human package tools",
-      title: "Packages for people",
-      text: "Fast installs, familiar names, versions and public distribution for normal developer work.",
-      points: ["names and versions", "developer accounts", "manual review"]
-    },
-    {
-      label: "Nipmod",
-      title: "Packages for agents",
-      text: "Source identity, signed evidence, package claims and install receipts agents can read.",
-      points: ["source identity", "DID claims", "agent readable trust data"]
-    }
-  ],
-  gitlawbReason: {
-    headline: "Why Gitlawb first?",
-    text: "Gitlawb gives source identity, signed pushes and public provenance. Nipmod adds the installable package layer on top.",
-    facts: [
-      "source history stays on Gitlawb",
-      "package truth is verified from signed evidence",
-      "the same model can cover more agent code platforms over time"
-    ]
-  },
   platformRoadmap: {
     headline: "Platform status",
     lead:
@@ -135,34 +112,6 @@ export const homeContent = {
       }
     ]
   },
-  faq: [
-    {
-      question: "Is this only for Gitlawb?",
-      answer:
-        "Gitlawb is the first canonical source network. The package layer is designed to cover more agent code platforms over time."
-    },
-    {
-      question: "Can humans use it?",
-      answer: "Yes. Humans can search packages, inspect proof, install from the CLI and publish their own Gitlawb packages."
-    },
-    {
-      question: "Can agents use it directly?",
-      answer: "Yes. Install the CLI, connect MCP, then tell the agent to use Nipmod before package installs."
-    },
-    {
-      question: "Who owns packages?",
-      answer: "The source owner does. Nipmod verifies claims and ranks trust. It does not take ownership of Gitlawb repos."
-    },
-    {
-      question: "Can Nipmod delete Gitlawb packages?",
-      answer:
-        "No. Nipmod can publish trust ratings, warnings and advisories, but it cannot delete decentralized source content."
-    },
-    {
-      question: "What can I do now?",
-      answer: "Install the CLI, browse verified packages or prepare your own Gitlawb repo for publishing."
-    }
-  ],
   startCards: [
     {
       title: "Setup Nipmod",
