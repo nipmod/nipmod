@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   },
   description: "Package layer for agents.",
   icons: {
-    apple: [{ sizes: "1254x1254", type: "image/png", url: "/nipmod-logo.png" }],
-    icon: [{ sizes: "1254x1254", type: "image/png", url: "/nipmod-logo.png" }]
+    apple: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }],
+    icon: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
     description: "Search, inspect and install verified agent packages.",
-    images: [{ height: 1254, type: "image/png", url: "/nipmod-logo.png", width: 1254 }],
+    images: [{ height: 1248, type: "image/png", url: "/nipmod-logo.png", width: 1248 }],
     siteName: "Nipmod",
     title: "Nipmod",
     type: "website",
