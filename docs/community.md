@@ -38,7 +38,7 @@ Website: https://nipmod.com
 
 X: https://x.com/Nipmod
 
-Telegram: https://t.me/+05Kux7Iyah9jZjAy
+Telegram: https://t.me/nipmod
 
 Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 

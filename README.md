@@ -26,7 +26,7 @@ nipmod setup agents
 - GitHub mirror: https://github.com/nipmod/nipmod
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - X: https://x.com/Nipmod
-- Telegram: https://t.me/+05Kux7Iyah9jZjAy
+- Telegram: https://t.me/nipmod
 - Bankr integration: https://nipmod.com/bankr
 - Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 - Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3

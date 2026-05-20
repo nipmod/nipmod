@@ -5,7 +5,7 @@ Use the public channels below for Nipmod questions and ecosystem feedback.
 - Website: https://nipmod.com
 - Packages: https://nipmod.com/packages
 - Docs: https://nipmod.com/quickstart
-- Telegram: https://t.me/+05Kux7Iyah9jZjAy
+- Telegram: https://t.me/nipmod
 - X: https://x.com/Nipmod
 
 Do not post private keys, API keys, access tokens, wallet secrets or active vulnerability details in public issues or chat.

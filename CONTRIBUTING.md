@@ -36,7 +36,7 @@ node tools/supply-chain-check.mjs
 
 ## Community
 
-Use https://t.me/+05Kux7Iyah9jZjAy for public community discussion. Keep active vulnerability details out of public chats and use `SECURITY.md` for security reports.
+Use https://t.me/nipmod for public community discussion. Keep active vulnerability details out of public chats and use `SECURITY.md` for security reports.
 
 ## Security reports
 

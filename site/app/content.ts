@@ -9,7 +9,7 @@ export const homeContent = {
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     install: "/setup",
-    telegram: "https://t.me/+05Kux7Iyah9jZjAy",
+    telegram: "https://t.me/nipmod",
     x: "https://x.com/Nipmod"
   },
   primaryAction: "Setup Nipmod",

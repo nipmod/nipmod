@@ -34,7 +34,7 @@ const OFFICIAL_LINKS = [
   ["Registry", "https://nipmod.com/registry/packages.json"],
   ["GitHub", "https://github.com/nipmod/nipmod"],
   ["Gitlawb", "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"],
-  ["Telegram", "https://t.me/+05Kux7Iyah9jZjAy"],
+  ["Telegram", "https://t.me/nipmod"],
   ["X", "https://x.com/Nipmod"],
   ["Install script", "https://nipmod.com/install.sh"],
   ["Bankr coin", "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"],

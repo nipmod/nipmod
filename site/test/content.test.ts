@@ -31,7 +31,7 @@ describe("home content", () => {
   });
 
   test("links to the public Telegram group", () => {
-    expect(homeContent.links.telegram).toBe("https://t.me/+05Kux7Iyah9jZjAy");
+    expect(homeContent.links.telegram).toBe("https://t.me/nipmod");
   });
 
   test("links to the Bankr coin", () => {

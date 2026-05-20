@@ -29,7 +29,7 @@ for (const file of requiredFiles) {
 const readme = read("README.md");
 check("readme:canonical-gitlawb", () => readme.includes("Canonical source: gitlawb://did:key:"));
 check("readme:github-mirror", () => readme.includes("GitHub mirror: https://github.com/nipmod/nipmod"));
-check("readme:telegram", () => readme.includes("Telegram: https://t.me/+05Kux7Iyah9jZjAy"));
+check("readme:telegram", () => readme.includes("Telegram: https://t.me/nipmod"));
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 
 const trademarks = read("TRADEMARKS.md");

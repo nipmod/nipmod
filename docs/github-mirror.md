@@ -30,7 +30,7 @@ https://github.com/nipmod/nipmod
 Community:
 
 ```text
-https://t.me/+05Kux7Iyah9jZjAy
+https://t.me/nipmod
 ```
 
 Do not treat GitHub as the authority for package ownership, DID identity, signed Gitlawb pushes or Nipmod registry provenance.
