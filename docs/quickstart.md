@@ -14,7 +14,7 @@ This is the public first run path. It is designed for a clean macOS or Linux wor
 
 ```sh
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents --include-codex
+nipmod setup agents --include-codex --include-hermes
 ```
 
 Manual verification:
@@ -55,6 +55,7 @@ Expected result:
 nipmod setup codex
 nipmod setup claude
 nipmod setup opencode
+nipmod setup hermes
 ```
 
 Expected result:
@@ -62,6 +63,7 @@ Expected result:
 - Codex is registered through its MCP CLI.
 - Claude Code receives a project `.mcp.json`.
 - OpenCode receives a project `opencode.json`.
+- Hermes receives a `~/.hermes/config.yaml` MCP server entry.
 - Existing host config entries are preserved.
 
 ## Set up publish

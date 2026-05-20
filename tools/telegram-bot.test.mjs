@@ -151,8 +151,8 @@ describe("telegram bot message formatting", () => {
 
   test("formats commands as code and escapes unsafe HTML", () => {
     assert.equal(
-      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex\n\nThen tell the agent\nRead <unsafe>"),
-      "<b>Install Nipmod</b>\n\n<code>curl -fsSLO https://nipmod.com/install.sh &amp;&amp; bash install.sh</code>\n<code>nipmod setup agents --include-codex</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
+      formatTelegramMessageHtml("Install Nipmod\ncurl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex --include-hermes\n\nThen tell the agent\nRead <unsafe>"),
+      "<b>Install Nipmod</b>\n\n<code>curl -fsSLO https://nipmod.com/install.sh &amp;&amp; bash install.sh</code>\n<code>nipmod setup agents --include-codex --include-hermes</code>\n\n<b>Then tell the agent</b>\n\nRead &lt;unsafe&gt;"
     );
   });
 });
@@ -351,6 +351,21 @@ describe("telegram bot knowledge base", () => {
 
     assert.match(reply.text, /Install Nipmod/);
     assert.match(reply.text, /curl -fsSLO https:\/\/nipmod\.com\/install\.sh/);
+  });
+
+  test("answers Hermes setup questions directly", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot hermes setup"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.match(reply.text, /Hermes Setup/);
+    assert.match(reply.text, /nipmod setup hermes/);
+    assert.match(reply.text, /not official Hermes partner support/);
   });
 
   test("answers tagged general questions instead of silently ignoring them", async () => {

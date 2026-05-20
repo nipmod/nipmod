@@ -15,7 +15,7 @@ Use this only for claims backed by live product paths.
 ## Short post
 
 ```text
-Nipmod now works with Codex and Claude Code.
+Nipmod now has setup paths for Codex, Claude Code, OpenCode and Hermes.
 
 Just tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.
 
@@ -29,11 +29,14 @@ curl -fsSLO https://nipmod.com/install.sh && bash install.sh
 
 nipmod setup codex
 nipmod setup claude
+nipmod setup opencode
+nipmod setup hermes
 ```
 
 ## Boundaries
 
 - Do not claim partner endorsement unless the partner says it.
 - Say Bankr workflow or proof path, not native Bankr marketplace approval.
+- Say Hermes setup path until a real Hermes runtime smoke has passed.
 - Say shared archive and agent package layer, not global adoption.
 - Link receipts when someone asks for proof.

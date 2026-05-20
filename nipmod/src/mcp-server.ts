@@ -132,7 +132,7 @@ const UpdatePlanArgumentsSchema = TrustPinsSchema.extend({
 });
 
 const DemoArgumentsSchema = z.strictObject({
-  host: z.enum(["Codex", "Claude Code", "OpenCode", "Generic"]).optional(),
+  host: z.enum(["Codex", "Claude Code", "OpenCode", "Hermes", "Generic"]).optional(),
   package: z.string().min(1).optional()
 });
 
@@ -515,7 +515,7 @@ function demoTool(raw: unknown): JsonValue {
   });
 }
 
-function hostSetup(host: "Codex" | "Claude Code" | "Generic" | "OpenCode"): JsonValue {
+function hostSetup(host: "Codex" | "Claude Code" | "Generic" | "Hermes" | "OpenCode"): JsonValue {
   switch (host) {
     case "Codex":
       return {
@@ -531,6 +531,11 @@ function hostSetup(host: "Codex" | "Claude Code" | "Generic" | "OpenCode"): Json
       return {
         command: "nipmod setup opencode",
         verify: "opencode mcp list"
+      };
+    case "Hermes":
+      return {
+        command: "nipmod setup hermes",
+        verify: "hermes chat, then /reload-mcp and list Nipmod tools"
       };
     case "Generic":
       return {
@@ -1027,7 +1032,7 @@ const MCP_TOOLS: ToolDefinition[] = [
     inputSchema: {
       additionalProperties: false,
       properties: {
-        host: { enum: ["Codex", "Claude Code", "OpenCode", "Generic"], type: "string" },
+        host: { enum: ["Codex", "Claude Code", "OpenCode", "Hermes", "Generic"], type: "string" },
         package: { type: "string" }
       },
       type: "object"

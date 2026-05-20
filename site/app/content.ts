@@ -90,8 +90,8 @@ export const homeContent = {
       {
         name: "Agent runtimes",
         status: "MCP ready",
-        label: "Codex, Claude Code, OpenCode",
-        text: "Codex, Claude Code and OpenCode checks pass against the same local Nipmod MCP server.",
+        label: "Codex, Claude Code, OpenCode; Hermes candidate",
+        text: "Codex, Claude Code and OpenCode checks pass. Hermes now has a prepared MCP setup path pending runtime smoke.",
         href: "/setup",
         cta: "Setup agent"
       },
@@ -166,7 +166,7 @@ export const homeContent = {
   startCards: [
     {
       title: "Setup Nipmod",
-      text: "Connect Codex, Claude Code or OpenCode.",
+      text: "Connect Codex, Claude Code, OpenCode or Hermes.",
       href: "/setup"
     },
     {
@@ -302,7 +302,7 @@ export const homeContent = {
     },
     {
       label: "Agent setup",
-      text: "Codex, Claude Code and OpenCode can use the read only MCP server."
+      text: "Codex, Claude Code, OpenCode and Hermes can use the read only MCP server path."
     }
   ],
   founderOutreach: {

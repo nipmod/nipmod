@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T03:36:00.000Z",
+  "generatedAt": "2026-05-20T11:02:06.565Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -119,6 +119,24 @@
       ]
     },
     {
+      "id": "hermes",
+      "name": "Hermes",
+      "productReadiness": 55,
+      "connectionStatus": "Candidate",
+      "status": "setup-path-ready",
+      "claim": "Hermes has a prepared Nipmod MCP setup path through ~/.hermes/config.yaml, pending real Hermes runtime smoke.",
+      "connectionKit": "integrations/platform-connections/hermes",
+      "setupCommand": "nipmod setup hermes",
+      "config": "~/.hermes/config.yaml",
+      "verifyCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+      "checks": [
+        "nipmod setup hermes writes mcp_servers.nipmod without replacing unrelated config",
+        "Nipmod MCP server exposes the expected tool list",
+        "real Hermes runtime smoke is pending because Hermes is not installed in the current workspace"
+      ],
+      "externalDependency": "Hermes runtime installation, auth if required and upstream acknowledgement are external before native or official wording is valid."
+    },
+    {
       "id": "bankr",
       "name": "Bankr",
       "productReadiness": 80,
@@ -166,6 +184,7 @@
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Aeon has approved or published a Nipmod skill collection",
+    "Hermes runtime smoke has passed without a local Hermes install and auth",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

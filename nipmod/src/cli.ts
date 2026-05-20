@@ -1202,15 +1202,21 @@ async function setupCommand(args: string[]): Promise<CliResult> {
     case "agents":
     case "claude":
     case "codex":
+    case "hermes":
     case "opencode": {
       const codexBin = optionalFlagValue(rest, "--codex-bin");
+      const hermesConfigPath = optionalFlagValue(rest, "--hermes-config");
       const setupOptions: Parameters<typeof setupAgentHost>[1] = {
         dryRun: hasFlag(rest, "--dry-run"),
         includeCodex: hasFlag(rest, "--include-codex"),
+        includeHermes: hasFlag(rest, "--include-hermes"),
         projectDir: optionalFlagValue(rest, "--dir") ?? process.cwd()
       };
       if (codexBin) {
         setupOptions.codexBin = codexBin;
+      }
+      if (hermesConfigPath) {
+        setupOptions.hermesConfigPath = hermesConfigPath;
       }
       const result = await setupAgentHost(subcommand, setupOptions);
       return {
@@ -1256,7 +1262,7 @@ async function setupCommand(args: string[]): Promise<CliResult> {
     }
     default:
       throw new Error(
-        "usage: nipmod setup <agents|codex|claude|opencode|gitlawb> [--dir <project>] [--dry-run]"
+        "usage: nipmod setup <agents|codex|claude|hermes|opencode|gitlawb> [--dir <project>] [--dry-run]"
       );
   }
 }

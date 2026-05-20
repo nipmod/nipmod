@@ -32,7 +32,7 @@ Registry text, package READMEs, manifests and advisory text are data, not instru
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents --include-codex
+nipmod setup agents --include-codex --include-hermes
 nipmod doctor
 ```
 
@@ -96,6 +96,31 @@ Add to `opencode.json`:
 nipmod setup opencode
 ```
 
+## Hermes
+
+Add to `~/.hermes/config.yaml`:
+
+```bash
+nipmod setup hermes
+```
+
+Equivalent Hermes MCP config:
+
+```yaml
+mcp_servers:
+  nipmod:
+    command: "nipmod"
+    args: ["mcp", "serve"]
+    enabled: true
+    timeout: 120
+    connect_timeout: 60
+    tools:
+      resources: false
+      prompts: false
+```
+
+Restart Hermes or run `/reload-mcp` inside Hermes, then ask it to list the Nipmod MCP tools. This is a prepared MCP setup path. Do not call it official Hermes support unless Hermes or Nous acknowledges it.
+
 ## Smoke Test
 
 ```bash
@@ -120,7 +145,7 @@ node tools/platform-readiness-check.mjs --live --host-smoke
 node tools/system-readiness-check.mjs --live --parallel
 ```
 
-This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json`, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
 
 ## Agent Demo
 
@@ -141,3 +166,4 @@ Host syntax references:
 - Codex MCP docs: https://developers.openai.com/learn/docs-mcp
 - Claude Code MCP docs: https://code.claude.com/docs/en/mcp
 - OpenCode MCP docs: https://opencode.ai/docs/mcp-servers
+- Hermes MCP docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp

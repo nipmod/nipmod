@@ -176,6 +176,7 @@ const BOT_TERMS = ["answer", "antwort", "bot", "frage", "fragen", "question", "q
 const MCP_TERMS = ["mcp", "tool", "tools"];
 const CODEX_TERMS = ["codex", "coedx", "cdoex"];
 const CLAUDE_TERMS = ["claude", "claude code", "cluade", "cloude"];
+const HERMES_TERMS = ["hermes", "hermes agent", "nous"];
 const INSTALL_TERMS = ["einrichten", "install", "installieren", "instalieren", "instaliere", "instalier", "setup"];
 const PACKAGE_TERMS = ["archive", "archiv", "package", "packages", "paket", "registry"];
 const ABOUT_TERMS = ["how does", "nipmod", "was ist", "was kann", "what can", "what is", "wie funktioniert"];
@@ -526,6 +527,7 @@ export function hasNipmodContext(text) {
     ...MCP_TERMS,
     ...CODEX_TERMS,
     ...CLAUDE_TERMS,
+    ...HERMES_TERMS,
     ...INSTALL_TERMS,
     ...PACKAGE_TERMS
   ]);
@@ -704,6 +706,8 @@ export async function renderCommandReply(command, options = {}) {
       return codexText();
     case "claude":
       return claudeText();
+    case "hermes":
+      return hermesText();
     case "github":
       return githubText();
     case "gitlawb":
@@ -842,6 +846,9 @@ export async function renderKnownPlainTextReply(text, options = {}) {
   }
   if (matchesAny(lower, CLAUDE_TERMS)) {
     return claudeText();
+  }
+  if (matchesAny(lower, HERMES_TERMS)) {
+    return hermesText();
   }
   if (matchesAny(lower, CODEX_TERMS)) {
     return codexText();
@@ -1408,6 +1415,7 @@ function helpText() {
     "/install@nipmodbot shows install",
     "/codex@nipmodbot shows Codex setup",
     "/claude@nipmodbot shows Claude Code setup",
+    "/hermes@nipmodbot shows Hermes setup",
     "/bankr@nipmodbot shows Bankr links",
     "/github@nipmodbot shows GitHub mirror",
     "/gitlawb@nipmodbot shows source network",
@@ -1425,7 +1433,7 @@ function installText() {
   return [
     "Install Nipmod",
     "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
-    "nipmod setup agents --include-codex",
+    "nipmod setup agents --include-codex --include-hermes",
     "",
     "Then tell the agent",
     "Read https://nipmod.com/llms.txt and use Nipmod for package search, inspection and controlled install."
@@ -1451,6 +1459,20 @@ function claudeText() {
     "",
     "Then tell Claude Code",
     "Read https://nipmod.com/llms.txt and use Nipmod before installing agent packages."
+  ].join("\n");
+}
+
+function hermesText() {
+  return [
+    "Hermes Setup",
+    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "nipmod setup hermes",
+    "",
+    "Then tell Hermes",
+    "Read https://nipmod.com/llms.txt and use Nipmod before installing agent packages.",
+    "",
+    "Note",
+    "This is the prepared MCP setup path, not official Hermes partner support."
   ].join("\n");
 }
 
@@ -1728,6 +1750,7 @@ function isSpecificOfficialLinksRequest(text) {
     ...BANKR_TERMS,
     ...CODEX_TERMS,
     ...CLAUDE_TERMS,
+    ...HERMES_TERMS,
     ...MCP_TERMS
   ]);
 }
@@ -1756,6 +1779,7 @@ function isSpecificInstallRequest(text) {
   return containsSafetyTerm(normalized, INSTALL_TERMS) && !containsSafetyTerm(normalized, [
     ...CODEX_TERMS,
     ...CLAUDE_TERMS,
+    ...HERMES_TERMS,
     ...MCP_TERMS
   ]);
 }

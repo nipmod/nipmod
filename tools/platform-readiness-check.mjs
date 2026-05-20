@@ -33,6 +33,7 @@ const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4f
 const checks = [];
 
 await checkStaticConfigs();
+await checkHermesConfigGeneration();
 await checkMcpStdio();
 
 if (includeLive) {
@@ -107,6 +108,21 @@ async function checkStaticConfigs() {
   });
 }
 
+async function checkHermesConfigGeneration() {
+  const tempHome = await mkdtemp(join(tmpdir(), "nipmod-hermes-home-"));
+  const hermesConfig = join(tempHome, ".hermes", "config.yaml");
+  try {
+    await run(nodeBinPath, [cliPath, "setup", "hermes", "--hermes-config", hermesConfig, "--json"]);
+    const config = await readFile(hermesConfig, "utf8");
+    assertText("hermes_mcp_config", config, "mcp_servers:");
+    assertText("hermes_mcp_config", config, "nipmod:");
+    assertText("hermes_mcp_config", config, 'command: "nipmod"');
+    assertText("hermes_mcp_config", config, 'args: ["mcp", "serve"]');
+  } finally {
+    await rm(tempHome, { recursive: true, force: true });
+  }
+}
+
 async function checkMcpStdio() {
   await chmod(cliPath, 0o755).catch(() => {});
   const input = [
@@ -160,7 +176,7 @@ async function checkLiveEndpoints() {
     [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
-      ["dev.nipmod.platform-connections.v1", "claude-code", "aeon"]
+      ["dev.nipmod.platform-connections.v1", "claude-code", "hermes", "aeon"]
     ],
     [
       "bankr_skill",
@@ -175,7 +191,7 @@ async function checkLiveEndpoints() {
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
-      ["dev.nipmod.platform-readiness.v1", "claude-code", "opencode", "aeon"]
+      ["dev.nipmod.platform-readiness.v1", "claude-code", "opencode", "hermes", "aeon"]
     ]
   ];
 

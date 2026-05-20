@@ -3,9 +3,9 @@ import { CommandBlock } from "../command-block";
 
 const posts = [
   {
-    label: "Codex and Claude Code",
+    label: "Agent runtime setup",
     text:
-      "Nipmod now works with Codex and Claude Code.\n\nJust tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.\n\nhttps://nipmod.com/setup"
+      "Nipmod now has setup paths for Codex, Claude Code, OpenCode and Hermes.\n\nJust tell your agent to use Nipmod, and it can read the same package archive, proofs and install plans from its own workspace.\n\nhttps://nipmod.com/setup"
   },
   {
     label: "Proof reply",

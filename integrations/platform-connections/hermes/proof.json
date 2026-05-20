@@ -1,0 +1,13 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "hermes",
+  "name": "Hermes",
+  "status": "Candidate",
+  "proofLevel": "Prepared MCP setup path",
+  "publicPath": "https://nipmod.com/setup",
+  "setupCommand": "nipmod setup hermes",
+  "smokeCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+  "externalApprovalRequired": true,
+  "externalDependency": "A real Hermes runtime smoke and upstream acknowledgement are required before stronger Hermes support wording is used."
+}

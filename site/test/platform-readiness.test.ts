@@ -24,10 +24,12 @@ describe("platform readiness receipt", () => {
       "codex",
       "claude-code",
       "opencode",
+      "hermes",
       "bankr",
       "aeon"
     ]);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(55);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(20);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
@@ -37,6 +39,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
     expect(readiness.notClaimed).toContain("Aeon has approved or published a Nipmod skill collection");
+    expect(readiness.notClaimed).toContain("Hermes runtime smoke has passed without a local Hermes install and auth");
     expect(connections.type).toBe("dev.nipmod.platform-connections.v1");
     expect(connections.connections.map((connection: { id: string }) => connection.id)).toEqual([
       "gitlawb",
@@ -45,6 +48,7 @@ describe("platform readiness receipt", () => {
       "codex",
       "claude-code",
       "opencode",
+      "hermes",
       "bankr",
       "aeon"
     ]);
@@ -83,6 +87,16 @@ describe("platform readiness receipt", () => {
         }
       }
     });
+  });
+
+  test("keeps Hermes candidate scoped to runtime smoke", () => {
+    const hermes = readiness.platforms.find((platform: { id: string }) => platform.id === "hermes");
+    const hermesConnection = connections.connections.find((connection: { id: string }) => connection.id === "hermes");
+
+    expect(hermes.connectionStatus).toBe("Candidate");
+    expect(hermes.claim).toContain("pending real Hermes runtime smoke");
+    expect(hermesConnection.externalApprovalRequired).toBe(true);
+    expect(hermesConnection.proofLevel).toContain("runtime smoke is still pending");
   });
 
   test("keeps Bankr readiness scoped to safe package workflows", () => {

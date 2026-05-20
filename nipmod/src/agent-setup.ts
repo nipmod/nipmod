@@ -1,12 +1,15 @@
 import { spawn } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 
-export type AgentHost = "agents" | "claude" | "codex" | "opencode";
+export type AgentHost = "agents" | "claude" | "codex" | "hermes" | "opencode";
 
 export interface AgentSetupOptions {
   codexBin?: string;
   dryRun?: boolean;
+  hermesConfigPath?: string;
+  includeHermes?: boolean;
   includeCodex?: boolean;
   projectDir: string;
 }
@@ -34,7 +37,19 @@ export const AGENT_HANDOFF_PROMPT =
 
 const CODEX_SETUP_COMMAND = "codex mcp add nipmod -- nipmod mcp serve";
 const CLAUDE_SETUP_COMMAND = "claude mcp add --transport stdio --scope project nipmod -- nipmod mcp serve";
+const HERMES_SETUP_COMMAND = "nipmod setup hermes";
 const OPENCODE_SETUP_COMMAND = "nipmod setup opencode";
+const HERMES_NIPMOD_SERVER_BLOCK = [
+  "  nipmod:",
+  '    command: "nipmod"',
+  '    args: ["mcp", "serve"]',
+  "    enabled: true",
+  "    timeout: 120",
+  "    connect_timeout: 60",
+  "    tools:",
+  "      resources: false",
+  "      prompts: false"
+].join("\n");
 
 export async function setupAgentHost(host: AgentHost, options: AgentSetupOptions): Promise<AgentSetupResult> {
   switch (host) {
@@ -42,11 +57,32 @@ export async function setupAgentHost(host: AgentHost, options: AgentSetupOptions
       return setupCodex(options);
     case "claude":
       return setupClaude(options);
+    case "hermes":
+      return setupHermes(options);
     case "opencode":
       return setupOpenCode(options);
     case "agents":
       return setupAgents(options);
   }
+}
+
+async function setupHermes(options: AgentSetupOptions): Promise<AgentSetupResult> {
+  const path = options.hermesConfigPath ?? join(homedir(), ".hermes", "config.yaml");
+  const previous = await readTextFile(path);
+  const next = upsertHermesNipmodServer(previous ?? "");
+  const file = options.dryRun ? { changed: previous !== next, path } : await writeTextIfChanged(path, next);
+
+  return baseResult("hermes", {
+    changed: file.changed,
+    commands: [HERMES_SETUP_COMMAND],
+    dryRun: Boolean(options.dryRun),
+    files: [file],
+    notes: options.dryRun
+      ? ["Dry run only. The Hermes config file was not written."]
+      : ["Hermes MCP config includes Nipmod. Restart Hermes or run /reload-mcp inside Hermes."],
+    ready: true,
+    verifyCommands: ["hermes chat", "/reload-mcp inside Hermes", "ask Hermes to list Nipmod MCP tools"]
+  });
 }
 
 async function setupCodex(options: AgentSetupOptions): Promise<AgentSetupResult> {
@@ -117,22 +153,29 @@ async function setupAgents(options: AgentSetupOptions): Promise<AgentSetupResult
   if (options.includeCodex) {
     results.push(await setupCodex(options));
   }
+  if (options.includeHermes) {
+    results.push(await setupHermes(options));
+  }
 
   return baseResult("agents", {
     changed: results.some((result) => result.changed),
     commands: [
       "nipmod setup claude",
       "nipmod setup opencode",
+      ...(options.includeHermes ? [HERMES_SETUP_COMMAND] : ["nipmod setup hermes"]),
       ...(options.includeCodex ? [CODEX_SETUP_COMMAND] : [CODEX_SETUP_COMMAND])
     ],
     dryRun: Boolean(options.dryRun),
     files: results.flatMap((result) => result.files),
     notes: [
-      "Claude Code and OpenCode local project configs are covered.",
-      options.includeCodex ? "Codex setup was executed through the Codex CLI." : "Run the Codex command when you want global Codex registration."
+      options.includeHermes
+        ? "Claude Code, OpenCode and Hermes local MCP configs are covered."
+        : "Claude Code and OpenCode local project configs are covered.",
+      options.includeCodex ? "Codex setup was executed through the Codex CLI." : "Run the Codex command when you want global Codex registration.",
+      options.includeHermes ? "Hermes config was included." : "Run the Hermes command when you want Hermes registration."
     ],
     ready: results.every((result) => result.ready),
-    verifyCommands: [...new Set(results.flatMap((result) => result.verifyCommands).concat("codex mcp list"))]
+    verifyCommands: [...new Set(results.flatMap((result) => result.verifyCommands).concat("codex mcp list", "hermes chat"))]
   });
 }
 
@@ -214,6 +257,85 @@ async function writeJsonIfChanged(path: string, value: unknown): Promise<AgentSe
 
   await writeFile(path, next, { mode: 0o600 });
   return { changed: true, path };
+}
+
+async function readTextFile(path: string): Promise<string | null> {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function writeTextIfChanged(path: string, next: string): Promise<AgentSetupFile> {
+  const previous = await readTextFile(path);
+  if (previous === next) {
+    return { changed: false, path };
+  }
+
+  await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+  await writeFile(path, next, { mode: 0o600 });
+  return { changed: true, path };
+}
+
+function upsertHermesNipmodServer(text: string): string {
+  const normalized = text.replace(/\r\n/g, "\n");
+  const withoutTrailingBlank = normalized.replace(/\n*$/, "");
+  if (withoutTrailingBlank.length === 0) {
+    return `mcp_servers:\n${HERMES_NIPMOD_SERVER_BLOCK}\n`;
+  }
+
+  const lines = withoutTrailingBlank.split("\n");
+  const mcpStart = lines.findIndex((line) => /^mcp_servers:\s*(?:#.*)?$/.test(line));
+  if (mcpStart === -1) {
+    return `${withoutTrailingBlank}\n\nmcp_servers:\n${HERMES_NIPMOD_SERVER_BLOCK}\n`;
+  }
+
+  const mcpEnd = findNextTopLevelSection(lines, mcpStart + 1);
+  const nipmodStart = findIndentedMapEntry(lines, mcpStart + 1, mcpEnd, "nipmod");
+  if (nipmodStart === -1) {
+    const before = lines.slice(0, mcpEnd);
+    const after = lines.slice(mcpEnd);
+    return [...before, ...HERMES_NIPMOD_SERVER_BLOCK.split("\n"), ...after].join("\n") + "\n";
+  }
+
+  const nipmodEnd = findNextIndentedMapEntry(lines, nipmodStart + 1, mcpEnd);
+  return [
+    ...lines.slice(0, nipmodStart),
+    ...HERMES_NIPMOD_SERVER_BLOCK.split("\n"),
+    ...lines.slice(nipmodEnd)
+  ].join("\n") + "\n";
+}
+
+function findNextTopLevelSection(lines: string[], start: number): number {
+  for (let index = start; index < lines.length; index += 1) {
+    if (/^[A-Za-z0-9_-]+:\s*/.test(lines[index] ?? "")) {
+      return index;
+    }
+  }
+  return lines.length;
+}
+
+function findIndentedMapEntry(lines: string[], start: number, end: number, key: string): number {
+  const pattern = new RegExp(`^  ${key}:\\s*(?:#.*)?$`);
+  for (let index = start; index < end; index += 1) {
+    if (pattern.test(lines[index] ?? "")) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function findNextIndentedMapEntry(lines: string[], start: number, end: number): number {
+  for (let index = start; index < end; index += 1) {
+    if (/^  [A-Za-z0-9_-]+:\s*/.test(lines[index] ?? "")) {
+      return index;
+    }
+  }
+  return end;
 }
 
 function objectValue(value: unknown): Record<string, unknown> {

@@ -16,6 +16,11 @@ const commands = [
     command: "nipmod setup claude"
   },
   {
+    label: "Setup Hermes",
+    text: "Add Nipmod to Hermes under mcp_servers.",
+    command: "nipmod setup hermes"
+  },
+  {
     label: "Read manifest",
     text: "Start with the machine file. It points to docs, registry, MCP and safety rules.",
     command: "curl -fsSL https://nipmod.com/.well-known/nipmod.json"

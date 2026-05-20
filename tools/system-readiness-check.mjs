@@ -168,9 +168,10 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_agent_prompts", manifest.agent.prompts, state.receipt.entrypoints.agentPrompts);
   assertEqual("discovery_setup_codex", manifest.agent.commands.setupCodexMcp, "nipmod setup codex");
   assertEqual("discovery_setup_claude", manifest.agent.commands.setupClaudeMcp, "nipmod setup claude");
+  assertEqual("discovery_setup_hermes", manifest.agent.commands.setupHermesMcp, "nipmod setup hermes");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);
-  assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex");
+  assertText("llms_setup_agents", llms, "nipmod setup agents --include-codex --include-hermes");
 }
 
 async function checkCliSurface() {

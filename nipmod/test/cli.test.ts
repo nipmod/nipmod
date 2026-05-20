@@ -55,12 +55,19 @@ describe("nipmod CLI", () => {
 
   test("sets up Claude Code and OpenCode project MCP config", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-cli-agent-setup-"));
+    const hermesConfig = join(workspace, ".hermes", "config.yaml");
 
     const claude = JSON.parse((await execaNode(["src/cli.ts", "setup", "claude", "--dir", workspace, "--json"])).stdout) as {
       ok: true;
       data: { changed: boolean; files: Array<{ path: string }>; host: string; prompt: string };
     };
     const opencode = JSON.parse((await execaNode(["src/cli.ts", "setup", "opencode", "--dir", workspace, "--json"])).stdout) as {
+      ok: true;
+      data: { changed: boolean; files: Array<{ path: string }>; host: string };
+    };
+    const hermes = JSON.parse(
+      (await execaNode(["src/cli.ts", "setup", "hermes", "--hermes-config", hermesConfig, "--json"])).stdout
+    ) as {
       ok: true;
       data: { changed: boolean; files: Array<{ path: string }>; host: string };
     };
@@ -72,9 +79,24 @@ describe("nipmod CLI", () => {
     expect(opencode.ok).toBe(true);
     expect(opencode.data.host).toBe("opencode");
     expect(opencode.data.changed).toBe(true);
+    expect(hermes.ok).toBe(true);
+    expect(hermes.data.host).toBe("hermes");
+    expect(hermes.data.changed).toBe(true);
 
     await expect(readFile(join(workspace, ".mcp.json"), "utf8")).resolves.toContain('"nipmod"');
     await expect(readFile(join(workspace, "opencode.json"), "utf8")).resolves.toContain('"nipmod"');
+    await expect(readFile(hermesConfig, "utf8")).resolves.toContain('command: "nipmod"');
+    await expect(readFile(hermesConfig, "utf8")).resolves.toContain('args: ["mcp", "serve"]');
+
+    const existingHermesDir = join(workspace, ".hermes-existing");
+    const existingHermesConfig = join(existingHermesDir, "config.yaml");
+    await mkdir(existingHermesDir, { recursive: true });
+    await writeFile(existingHermesConfig, 'theme: dark\nmcp_servers:\n  other:\n    command: "other"\n');
+    await execaNode(["src/cli.ts", "setup", "hermes", "--hermes-config", existingHermesConfig, "--json"]);
+    const mergedHermes = await readFile(existingHermesConfig, "utf8");
+    expect(mergedHermes).toContain("theme: dark");
+    expect(mergedHermes).toContain("other:");
+    expect(mergedHermes).toContain("nipmod:");
   }, 15_000);
 
   test("dry run agent setup does not write project files", async () => {

@@ -84,7 +84,7 @@ test("packages page exposes one central human archive", async ({ page, request }
   await expect(page.getByRole("heading", { name: "Agent package archive." })).toBeVisible();
   await expect(page.getByText("Search packages, check trust")).toBeVisible();
   await expect(page.getByText("Published package source today is Gitlawb.")).toBeVisible();
-  await expect(page.getByText("Codex + Claude Code + OpenCode")).toBeVisible();
+  await expect(page.getByText("Codex + Claude Code + OpenCode + Hermes")).toBeVisible();
   await expect(page.getByRole("link", { name: "Open Nipmod registry machine file" })).toHaveAttribute(
     "href",
     "/registry/packages.json",
@@ -140,7 +140,7 @@ test("homepage answers post traffic questions", async ({ page }) => {
   await expect(platformRoadmap.getByText("MCP ready", { exact: true })).toHaveCount(2);
   await expect(platformRoadmap.getByRole("heading", { name: "Aeon" })).toBeVisible();
   await expect(platformRoadmap.getByText("Candidate", { exact: true })).toBeVisible();
-  await expect(platformRoadmap.getByText("checks pass against the same local Nipmod MCP server")).toBeVisible();
+  await expect(platformRoadmap.getByText("Codex, Claude Code and OpenCode checks pass. Hermes now has a prepared MCP setup path pending runtime smoke.")).toBeVisible();
   await expect(platformRoadmap.getByText("Native Bankr acceptance is still external.")).toBeVisible();
   await expect(page.getByText("Statuses describe Nipmod integration work, not partner approval.")).toBeVisible();
   await expect(platformRoadmap.getByRole("link", { name: "View Bankr path" })).toHaveAttribute("href", "/bankr");
@@ -249,7 +249,7 @@ test("setup page gives non technical agent onboarding", async ({ page }) => {
     page.getByLabel("First setup command").getByText("curl -fsSLO https://nipmod.com/install.sh && bash install.sh")
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Choose your agent" })).toBeVisible();
-  await expect(page.getByText("nipmod setup agents --include-codex")).toBeVisible();
+  await expect(page.getByText("nipmod setup agents --include-codex --include-hermes")).toBeVisible();
   await expect(page.getByText("nipmod setup codex")).toBeVisible();
   await expect(page.getByText("nipmod setup claude")).toBeVisible();
   await expect(page.getByText("nipmod setup opencode")).toBeVisible();

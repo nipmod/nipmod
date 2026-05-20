@@ -17,6 +17,7 @@ export interface Identity {
 
 const ED25519_MULTICODEC = Buffer.from([0xed, 0x01]);
 const ED25519_SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
+const PEM_PRIVATE_KEY_HEADER = ["-----BEGIN", "PRIVATE KEY-----"].join(" ");
 
 export function generateIdentity(): Identity {
   const { privateKey, publicKey } = generateKeyPairSync("ed25519");
@@ -37,7 +38,11 @@ export async function readIdentityPath(path: string): Promise<Identity> {
   }
 
   const text = await readFile(path, "utf8");
-  if (text.includes("BEGIN PRIVATE KEY")) {
+  if (text.trimStart().startsWith("{")) {
+    return parseIdentityJson(text);
+  }
+
+  if (text.trimStart().startsWith(PEM_PRIVATE_KEY_HEADER)) {
     return identityFromPrivateKeyPem(text);
   }
 

@@ -6,7 +6,7 @@ export const mcpContent = {
   oneCommand: {
     title: "One local command",
     text: "Install the CLI once, run a host setup command, then tell the agent to use Nipmod before installing agent packages.",
-    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex"
+    command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh\nnipmod setup agents --include-codex --include-hermes"
   },
   safety: [
     {
@@ -128,6 +128,23 @@ args = ["mcp", "serve"]`,
 }`,
       verify: "opencode mcp list",
       prompt: "use nipmod to search packages, inspect trust and install only after a plan is ready"
+    },
+    {
+      name: "Hermes",
+      command: "nipmod setup hermes",
+      configName: "~/.hermes/config.yaml",
+      config: `mcp_servers:
+  nipmod:
+    command: "nipmod"
+    args: ["mcp", "serve"]
+    enabled: true
+    timeout: 120
+    connect_timeout: 60
+    tools:
+      resources: false
+      prompts: false`,
+      verify: "hermes chat, then /reload-mcp",
+      prompt: "use Nipmod to search packages, inspect trust and prepare an install plan before any package write"
     }
   ],
   demo: {
@@ -156,6 +173,10 @@ args = ["mcp", "serve"]`,
     {
       label: "OpenCode MCP docs",
       href: "https://opencode.ai/docs/mcp-servers"
+    },
+    {
+      label: "Hermes MCP docs",
+      href: "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp"
     }
   ]
 } as const;

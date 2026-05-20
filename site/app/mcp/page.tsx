@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/mcp"
   },
-  description: "Connect Nipmod to Codex, Claude Code and OpenCode.",
+  description: "Connect Nipmod to Codex, Claude Code, OpenCode and Hermes.",
   openGraph: {
     description: "Use Nipmod as a local MCP server for package search, exact metadata, inspect, plans, verify and audit.",
     title: "Nipmod MCP",

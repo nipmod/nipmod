@@ -50,8 +50,11 @@ nipmod setup claude
 Connect OpenCode:
 nipmod setup opencode
 
+Connect Hermes:
+nipmod setup hermes
+
 Connect project agents:
-nipmod setup agents --include-codex
+nipmod setup agents --include-codex --include-hermes
 
 Manual verification path:
 curl -fLO https://nipmod.com/install.sh

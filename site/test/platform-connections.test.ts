@@ -25,6 +25,7 @@ describe("platform connection matrix", () => {
       "codex:MCP ready",
       "claude-code:MCP ready",
       "opencode:MCP ready",
+      "hermes:Candidate",
       "bankr:Under review",
       "aeon:Candidate"
     ]);
@@ -54,10 +55,13 @@ describe("platform connection matrix", () => {
   test("keeps external review paths explicitly scoped", () => {
     const bankr = connections.connections.find((connection: { id: string }) => connection.id === "bankr");
     const aeon = connections.connections.find((connection: { id: string }) => connection.id === "aeon");
+    const hermes = connections.connections.find((connection: { id: string }) => connection.id === "hermes");
 
     expect(bankr.externalApprovalRequired).toBe(true);
     expect(bankr.externalDependency).toContain("Bankr must review");
     expect(aeon.externalApprovalRequired).toBe(true);
     expect(aeon.externalDependency).toContain("Aeon owner review");
+    expect(hermes.externalApprovalRequired).toBe(true);
+    expect(hermes.externalDependency).toContain("runtime smoke");
   });
 });

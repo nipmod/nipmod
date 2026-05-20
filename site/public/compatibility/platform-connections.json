@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T03:36:00.000Z",
+  "generatedAt": "2026-05-20T11:02:06.565Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -147,6 +147,25 @@
       ]
     },
     {
+      "id": "hermes",
+      "name": "Hermes",
+      "status": "Candidate",
+      "category": "agent runtime",
+      "scope": "Hermes Agent can load MCP servers through config.yaml. Nipmod now has a prepared local MCP setup path for that runtime.",
+      "proofLevel": "Nipmod setup hermes writes the mcp_servers.nipmod config and the local Nipmod MCP server is checked independently. A real Hermes runtime smoke is still pending.",
+      "url": "https://nipmod.com/setup",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/hermes",
+      "setupCommand": "nipmod setup hermes",
+      "smokeCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+      "externalApprovalRequired": true,
+      "externalDependency": "A real Hermes runtime smoke and upstream acknowledgement are required before stronger Hermes support wording is used.",
+      "evidence": [
+        "https://nipmod.com/setup",
+        "https://nipmod.com/mcp",
+        "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp"
+      ]
+    },
+    {
       "id": "bankr",
       "name": "Bankr",
       "status": "Under review",
@@ -189,6 +208,7 @@
     "Every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr accepted the skill into the Bankr skills repo",
     "Aeon approved or published a Nipmod skill collection",
+    "Hermes runtime smoke has passed without a local Hermes install and auth",
     "Third party platforms endorse Nipmod",
     "MCP ready means native platform partnership"
   ]

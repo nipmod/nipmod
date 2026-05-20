@@ -359,7 +359,7 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
     [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key"),
     [`GET ${endpoints.platforms}`]: textResponse("Connection matrix Under review Candidate"),
     [`GET ${endpoints.platformConnections}`]: jsonResponse({
-      connections: [{ id: "aeon" }],
+      connections: [{ id: "aeon" }, { id: "hermes" }],
       type: "dev.nipmod.platform-connections.v1"
     }),
     [`GET ${endpoints.security}`]: textResponse("Report with proof No central deletion"),

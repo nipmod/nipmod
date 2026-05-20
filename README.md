@@ -10,7 +10,7 @@ Agents can search a shared package archive, inspect trust evidence, plan install
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents --include-codex
+nipmod setup agents --include-codex --include-hermes
 ```
 
 ## Public Links
@@ -51,7 +51,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 - Self service package flow for repo owners to prepare local package files, verify DID ownership and run publish dry runs.
 - MCP server for agents with read-first tools and controlled install.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
-- Codex, Claude Code, OpenCode and Bankr agent entrypoints.
+- Codex, Claude Code, OpenCode, Hermes and Bankr agent entrypoints.
 
 ## Why It Exists
 
@@ -73,7 +73,7 @@ The CLI is not published to npm. Install uses the signed release installer from 
 
 ```bash
 curl -fsSLO https://nipmod.com/install.sh && bash install.sh
-nipmod setup agents --include-codex
+nipmod setup agents --include-codex --include-hermes
 ```
 
 Manual checksum verification:
@@ -104,13 +104,15 @@ nipmod audit --online
 nipmod ci --online
 ```
 
-## Codex And Claude Code
+## Agent Hosts
 
 Nipmod exposes one local MCP server for agent hosts.
 
 ```bash
 nipmod setup codex
 nipmod setup claude
+nipmod setup opencode
+nipmod setup hermes
 ```
 
 Tell the agent:

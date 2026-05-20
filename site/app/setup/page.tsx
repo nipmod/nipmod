@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/setup"
   },
-  description: "Set up Nipmod for Codex, Claude Code and OpenCode.",
+  description: "Set up Nipmod for Codex, Claude Code, OpenCode and Hermes.",
   openGraph: {
     description: "Install Nipmod once, connect your agent and use the package archive from agent chat.",
     title: "Nipmod setup",
@@ -41,7 +41,7 @@ export default function SetupPage() {
         <aside className="quickstart-card setup-hero-panel" aria-label="First setup command">
           <span>01</span>
           <h2>Copy into Terminal</h2>
-          <p>This is the only command needed before connecting Codex, Claude Code or OpenCode.</p>
+          <p>This is the only command needed before connecting Codex, Claude Code, OpenCode or Hermes.</p>
           <CommandBlock command={setupContent.installCommand} label="Copy first Nipmod install command" />
         </aside>
       </section>

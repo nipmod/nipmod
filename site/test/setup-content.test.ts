@@ -16,11 +16,12 @@ describe("setup content", () => {
   test("publishes copyable setup commands for major agent hosts", () => {
     expect(setupContent.installCommand).toBe("curl -fsSLO https://nipmod.com/install.sh && bash install.sh");
     expect(setupContent.checkCommand).toBe("nipmod doctor --online");
-    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents --include-codex");
-    expect(setupContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode"]);
+    expect(setupContent.allAgentsCommand).toBe("nipmod setup agents --include-codex --include-hermes");
+    expect(setupContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code", "OpenCode", "Hermes"]);
     expect(setupContent.hosts[0]?.command).toBe("nipmod setup codex");
     expect(setupContent.hosts[1]?.command).toBe("nipmod setup claude");
     expect(setupContent.hosts[2]?.command).toBe("nipmod setup opencode");
+    expect(setupContent.hosts[3]?.command).toBe("nipmod setup hermes");
     expect(setupContent.agentPrompt).toContain("Search the Nipmod archive first");
     expect(setupContent.agentPrompt).toContain("ask before writing files");
   });

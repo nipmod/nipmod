@@ -1,9 +1,9 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-20T03:36:00.000Z",
+  "generatedAt": "2026-05-20T11:02:08.006Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod system surface: one shared verified archive, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
+  "meaning": "This proves the current Nipmod system surface: one shared verified archive, public machine discovery, CLI access, MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Hermes setup path, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 28,
@@ -52,6 +52,12 @@
       "config": "opencode.json",
       "access": "MCP local",
       "status": "MCP ready"
+    },
+    "hermes": {
+      "setup": "nipmod setup hermes",
+      "config": "~/.hermes/config.yaml",
+      "access": "MCP stdio through Hermes mcp_servers",
+      "status": "Candidate"
     },
     "bankr": {
       "skill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
@@ -154,6 +160,7 @@
     "third-party users have already adopted every host",
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
+    "Hermes runtime smoke has passed without a local Hermes install and auth",
     "Nipmod owns or controls Gitlawb repos",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]

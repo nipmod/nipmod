@@ -120,6 +120,10 @@ describe("system readiness receipt", () => {
       openCode: {
         setup: "nipmod setup opencode",
         config: "opencode.json"
+      },
+      hermes: {
+        setup: "nipmod setup hermes",
+        config: "~/.hermes/config.yaml"
       }
     });
     expect(platformReadiness.platforms.map((platform: { id: string }) => platform.id).sort()).toEqual([
@@ -129,6 +133,7 @@ describe("system readiness receipt", () => {
       "codex",
       "github",
       "gitlawb",
+      "hermes",
       "mcp",
       "opencode"
     ]);

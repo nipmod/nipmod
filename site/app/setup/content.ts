@@ -4,7 +4,7 @@ export const setupContent = {
     "Install Nipmod, connect your agent and ask it to search the archive before package installs.",
   installCommand: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
   checkCommand: "nipmod doctor --online",
-  allAgentsCommand: "nipmod setup agents --include-codex",
+  allAgentsCommand: "nipmod setup agents --include-codex --include-hermes",
   agentPrompt:
     "Use Nipmod before installing agent packages. Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json. Search the Nipmod archive first, view exact metadata, inspect trust, create an install plan, ask before writing files, then audit and export SBOM.",
   steps: [
@@ -18,7 +18,7 @@ export const setupContent = {
     },
     {
       label: "Connect agent",
-      text: "Pick Codex, Claude Code or OpenCode and paste the matching setup command."
+      text: "Pick Codex, Claude Code, OpenCode or Hermes and paste the matching setup command."
     },
     {
       label: "Paste prompt",
@@ -46,6 +46,13 @@ export const setupContent = {
       command: "nipmod setup opencode",
       verify: "opencode mcp list",
       text: "Writes opencode.json with the local Nipmod MCP server."
+    },
+    {
+      name: "Hermes",
+      label: "Global Hermes MCP config",
+      command: "nipmod setup hermes",
+      verify: "hermes chat, then /reload-mcp",
+      text: "Adds Nipmod under mcp_servers in ~/.hermes/config.yaml."
     }
   ],
   capabilities: [

@@ -25,6 +25,20 @@ describe("did:key identity", () => {
     expect(verifyBytes(publicKeyPem, message, signature)).toBe(true);
   });
 
+  test("reads local identity JSON before treating private key text as raw PEM", async () => {
+    const identity = generateIdentity();
+    const dir = join(tmpdir(), `nipmod-json-identity-${randomUUID()}`);
+    await mkdir(dir, { recursive: true });
+    const path = join(dir, "identity.json");
+    await writeFile(path, `${JSON.stringify(identity, null, 2)}\n`, { mode: 0o600 });
+
+    const loaded = await readIdentityPath(path);
+
+    expect(loaded.did).toBe(identity.did);
+    expect(loaded.publicKeyPem).toBe(identity.publicKeyPem);
+    expect(loaded.privateKeyPem).toBe(identity.privateKeyPem);
+  });
+
   test("reads a Gitlawb identity directory without exposing private material", async () => {
     const identity = generateIdentity();
     const dir = join(tmpdir(), `nipmod-gitlawb-identity-${randomUUID()}`);
