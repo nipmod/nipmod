@@ -37,6 +37,6 @@ nipmod setup hermes
 
 - Do not claim partner endorsement unless the partner says it.
 - Say Bankr workflow or proof path, not native Bankr marketplace approval.
-- Say Hermes setup path until a real Hermes runtime smoke has passed.
+- Say Hermes MCP ready, not official Hermes integration, until NousResearch acknowledges it.
 - Say shared archive and agent package layer, not global adoption.
 - Link receipts when someone asks for proof.

@@ -1,12 +1,12 @@
 # Hermes Connection Kit
 
-Status: Candidate
+Status: MCP ready
 
-Hermes Agent can load MCP servers through `~/.hermes/config.yaml`. Nipmod has a prepared local MCP setup path for Hermes, but the real Hermes runtime smoke is not complete in this workspace because Hermes is not installed here.
+Hermes Agent can load MCP servers through `~/.hermes/config.yaml`. Nipmod has a local MCP setup path for Hermes, and an isolated Hermes v0.14.0 runtime smoke confirmed that Hermes can discover all 14 Nipmod MCP tools through `hermes mcp test nipmod`.
 
 Use this wording:
 
-> Hermes has a prepared Nipmod MCP setup path.
+> Hermes users can connect Nipmod through MCP.
 
 Do not claim:
 
@@ -40,10 +40,10 @@ mcp_servers:
 Smoke:
 
 ```sh
-hermes chat
+hermes mcp test nipmod
 ```
 
-Then run `/reload-mcp` inside Hermes and ask Hermes to list the Nipmod MCP tools.
+For an already running Hermes chat session, run `/reload-mcp` after changing config.
 
 Agent instruction:
 
@@ -51,4 +51,4 @@ Use the configured `nipmod` MCP server for package search, trust inspection and 
 
 Submission note:
 
-No native Hermes partnership is claimed. A real Hermes runtime smoke and upstream acknowledgement are required before stronger Hermes wording is valid.
+No native Hermes partnership is claimed. NousResearch acknowledgement is required before native, official or partner wording is valid.

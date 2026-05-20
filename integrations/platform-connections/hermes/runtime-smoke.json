@@ -1,0 +1,38 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.hermes-runtime-smoke.v1",
+  "checkedAt": "2026-05-20T14:00:29.000Z",
+  "hermesVersion": "Hermes Agent v0.14.0 (2026.5.16)",
+  "hermesProject": "temporary hermes-agent checkout under /tmp",
+  "hermesHome": "temporary HERMES_HOME under /tmp",
+  "isolation": "Temporary HERMES_HOME with a temporary PATH wrapper for the local Nipmod CLI build. No provider key, LLM call, wallet action or user Hermes config was required.",
+  "setupCommand": "node nipmod/dist/cli.js setup hermes --hermes-config \"$HERMES_HOME/config.yaml\" --json",
+  "testCommand": "hermes mcp test nipmod",
+  "result": {
+    "connected": true,
+    "transport": "stdio",
+    "server": "nipmod",
+    "toolsDiscovered": 14,
+    "tools": [
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.install",
+      "nipmod.update_plan",
+      "nipmod.demo",
+      "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.verify",
+      "nipmod.audit",
+      "nipmod.sbom",
+      "nipmod.explain"
+    ]
+  },
+  "notClaimed": [
+    "NousResearch has not acknowledged, accepted or endorsed Nipmod",
+    "This does not prove a native Hermes preset or marketplace listing",
+    "This does not prove third-party Hermes user adoption"
+  ]
+}

@@ -25,7 +25,7 @@ describe("platform connection matrix", () => {
       "codex:MCP ready",
       "claude-code:MCP ready",
       "opencode:MCP ready",
-      "hermes:Candidate",
+      "hermes:MCP ready",
       "bankr:Under review",
       "aeon:Candidate"
     ]);
@@ -62,6 +62,6 @@ describe("platform connection matrix", () => {
     expect(aeon.externalApprovalRequired).toBe(true);
     expect(aeon.externalDependency).toContain("Aeon owner review");
     expect(hermes.externalApprovalRequired).toBe(true);
-    expect(hermes.externalDependency).toContain("runtime smoke");
+    expect(hermes.externalDependency).toContain("NousResearch acknowledgement");
   });
 });

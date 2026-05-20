@@ -3,11 +3,12 @@
   "type": "dev.nipmod.connection-proof.v1",
   "id": "hermes",
   "name": "Hermes",
-  "status": "Candidate",
-  "proofLevel": "Prepared MCP setup path",
+  "status": "MCP ready",
+  "proofLevel": "Runtime MCP smoke passed",
   "publicPath": "https://nipmod.com/setup",
   "setupCommand": "nipmod setup hermes",
-  "smokeCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+  "smokeCommand": "hermes mcp test nipmod",
+  "runtimeSmoke": "integrations/platform-connections/hermes/runtime-smoke.json",
   "externalApprovalRequired": true,
-  "externalDependency": "A real Hermes runtime smoke and upstream acknowledgement are required before stronger Hermes support wording is used."
+  "externalDependency": "NousResearch acknowledgement is required before native, official or partner wording is valid."
 }

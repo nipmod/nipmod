@@ -34,6 +34,7 @@ const checks = [];
 
 await checkStaticConfigs();
 await checkHermesConfigGeneration();
+await checkHermesRuntimeSmokeArtifact();
 await checkMcpStdio();
 
 if (includeLive) {
@@ -121,6 +122,15 @@ async function checkHermesConfigGeneration() {
   } finally {
     await rm(tempHome, { recursive: true, force: true });
   }
+}
+
+async function checkHermesRuntimeSmokeArtifact() {
+  const smoke = JSON.parse(await readFile(join(root, "integrations", "platform-connections", "hermes", "runtime-smoke.json"), "utf8"));
+  assertEqual("hermes_runtime_smoke_type", smoke.type, "dev.nipmod.hermes-runtime-smoke.v1");
+  assertEqual("hermes_runtime_smoke_connected", smoke.result.connected, true);
+  assertEqual("hermes_runtime_smoke_tool_count", smoke.result.toolsDiscovered, expectedTools.length);
+  assertDeepEqual("hermes_runtime_smoke_tools", smoke.result.tools, expectedTools);
+  assertText("hermes_runtime_smoke_boundary", JSON.stringify(smoke.notClaimed), "NousResearch has not acknowledged");
 }
 
 async function checkMcpStdio() {
@@ -347,6 +357,14 @@ async function findCodex() {
 
 function assertDeepEqual(name, actual, expected) {
   if (stableJson(actual) !== stableJson(expected)) {
+    fail(name, { actual, expected });
+    return;
+  }
+  pass(name);
+}
+
+function assertEqual(name, actual, expected) {
+  if (actual !== expected) {
     fail(name, { actual, expected });
     return;
   }

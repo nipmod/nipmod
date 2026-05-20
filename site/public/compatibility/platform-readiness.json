@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T13:16:37.242Z",
+  "generatedAt": "2026-05-20T15:38:07.715Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, host MCP contracts, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -121,20 +121,21 @@
     {
       "id": "hermes",
       "name": "Hermes",
-      "productReadiness": 55,
-      "connectionStatus": "Candidate",
-      "status": "setup-path-ready",
-      "claim": "Hermes has a prepared Nipmod MCP setup path through ~/.hermes/config.yaml, pending real Hermes runtime smoke.",
+      "productReadiness": 75,
+      "connectionStatus": "MCP ready",
+      "status": "runtime-smoke-passed",
+      "claim": "Hermes can load Nipmod as a local stdio MCP server through ~/.hermes/config.yaml.",
       "connectionKit": "integrations/platform-connections/hermes",
       "setupCommand": "nipmod setup hermes",
       "config": "~/.hermes/config.yaml",
-      "verifyCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+      "verifyCommand": "hermes mcp test nipmod",
       "checks": [
         "nipmod setup hermes writes mcp_servers.nipmod without replacing unrelated config",
         "Nipmod MCP server exposes the expected tool list",
-        "real Hermes runtime smoke is pending because Hermes is not installed in the current workspace"
+        "isolated Hermes v0.14.0 runtime smoke discovered all 14 Nipmod MCP tools with hermes mcp test nipmod"
       ],
-      "externalDependency": "Hermes runtime installation, auth if required and upstream acknowledgement are external before native or official wording is valid."
+      "runtimeSmoke": "integrations/platform-connections/hermes/runtime-smoke.json",
+      "externalDependency": "NousResearch acknowledgement is external before native, official or partner wording is valid."
     },
     {
       "id": "bankr",
@@ -184,7 +185,6 @@
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Aeon has approved or published a Nipmod skill collection",
-    "Hermes runtime smoke has passed without a local Hermes install and auth",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T13:16:37.242Z",
+  "generatedAt": "2026-05-20T15:38:07.715Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -22,13 +22,13 @@
     }
   ],
   "hostSmoke": {
-    "checkedAt": "2026-05-20T13:16:37.242Z",
-    "command": "node tools/platform-readiness-check.mjs --host-smoke --live",
+    "checkedAt": "2026-05-20T15:38:07.715Z",
+    "command": "node tools/platform-readiness-check.mjs --host-smoke",
     "summary": {
-      "pass": 50,
+      "pass": 18,
       "fail": 0,
       "skip": 0,
-      "total": 50
+      "total": 18
     }
   },
   "connections": [
@@ -149,19 +149,20 @@
     {
       "id": "hermes",
       "name": "Hermes",
-      "status": "Candidate",
+      "status": "MCP ready",
       "category": "agent runtime",
-      "scope": "Hermes Agent can load MCP servers through config.yaml. Nipmod now has a prepared local MCP setup path for that runtime.",
-      "proofLevel": "Nipmod setup hermes writes the mcp_servers.nipmod config and the local Nipmod MCP server is checked independently. A real Hermes runtime smoke is still pending.",
+      "scope": "Hermes Agent can load Nipmod as a local stdio MCP server through ~/.hermes/config.yaml.",
+      "proofLevel": "Nipmod setup hermes writes mcp_servers.nipmod and an isolated Hermes v0.14.0 runtime smoke discovered all 14 Nipmod MCP tools through hermes mcp test nipmod.",
       "url": "https://nipmod.com/setup",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/hermes",
       "setupCommand": "nipmod setup hermes",
-      "smokeCommand": "hermes chat, then /reload-mcp and ask Hermes to list Nipmod MCP tools",
+      "smokeCommand": "hermes mcp test nipmod",
       "externalApprovalRequired": true,
-      "externalDependency": "A real Hermes runtime smoke and upstream acknowledgement are required before stronger Hermes support wording is used.",
+      "externalDependency": "NousResearch acknowledgement is required before native, official or partner wording is valid.",
       "evidence": [
         "https://nipmod.com/setup",
         "https://nipmod.com/mcp",
+        "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/hermes/runtime-smoke.json",
         "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp"
       ]
     },
@@ -208,7 +209,6 @@
     "Every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr accepted the skill into the Bankr skills repo",
     "Aeon approved or published a Nipmod skill collection",
-    "Hermes runtime smoke has passed without a local Hermes install and auth",
     "Third party platforms endorse Nipmod",
     "MCP ready means native platform partnership"
   ]

@@ -119,7 +119,7 @@ mcp_servers:
       prompts: false
 ```
 
-Restart Hermes or run `/reload-mcp` inside Hermes, then ask it to list the Nipmod MCP tools. This is a prepared MCP setup path. Do not call it official Hermes support unless Hermes or Nous acknowledges it.
+Verify with `hermes mcp test nipmod`. For an already running Hermes chat session, run `/reload-mcp` after changing config. This is an MCP-ready Hermes path. Do not call it official Hermes support unless Hermes or Nous acknowledges it.
 
 ## Smoke Test
 
