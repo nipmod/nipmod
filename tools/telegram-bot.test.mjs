@@ -13,6 +13,7 @@ import {
   getTelegramMessageType,
   getTelegramUpdateMessage,
   hasNipmodContext,
+  isBotMentioned,
   isChatAllowed,
   isGeneralRequestLike,
   isOnboardingQuestion,
@@ -60,13 +61,15 @@ describe("telegram bot command parsing", () => {
     assert.equal(parseTelegramCommand("/search@otherbot gitlawb", "nipmodbot"), null);
   });
 
-  test("answers only direct mentions or explicit nipmod text", () => {
+  test("answers only direct mentions in mention-only mode", () => {
     assert.equal(shouldReplyToPlainText("hello everyone", "nipmodbot"), false);
     assert.equal(shouldReplyToPlainText("@nipmodbot how do I install?", "nipmodbot"), true);
-    assert.equal(shouldReplyToPlainText("nipmod install help", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("nipmod install help", "nipmodbot"), false);
+    assert.equal(isBotMentioned("@nipmodbot how do I install?", "nipmodbot"), true);
+    assert.equal(isBotMentioned("@nipmodbot2 how do I install?", "nipmodbot"), false);
   });
 
-  test("answers relevant group questions without requiring a mention", () => {
+  test("keeps broad routing helpers available when mention-only is disabled", () => {
     assert.equal(isRelevantGroupQuestion("how do I install this?"), true);
     assert.equal(isRelevantGroupQuestion("does this work with Codex?"), true);
     assert.equal(isRelevantGroupQuestion("where are the GitHub links?"), true);
@@ -77,14 +80,15 @@ describe("telegram bot command parsing", () => {
     assert.equal(shouldAnswerGroupText("tell me a joke"), true);
     assert.equal(shouldAnswerGroupText("github link bitte"), true);
     assert.equal(shouldAnswerGroupText("hello everyone"), false);
-    assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot"), false);
+    assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot", { mentionOnly: false }), true);
     assert.equal(shouldReplyToPlainText("does this work with Codex?", "nipmodbot", { answerGroupQuestions: false }), false);
   });
 
-  test("answers bot support messages without a mention", () => {
-    assert.equal(shouldReplyToPlainText("der bot reagiert nicht auf meine fragen", "nipmodbot"), true);
-    assert.equal(shouldReplyToPlainText("warum reagiert der bot nicht?", "nipmodbot"), true);
-    assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), true);
+  test("requires a mention for bot support messages", () => {
+    assert.equal(shouldReplyToPlainText("der bot reagiert nicht auf meine fragen", "nipmodbot"), false);
+    assert.equal(shouldReplyToPlainText("warum reagiert der bot nicht?", "nipmodbot"), false);
+    assert.equal(shouldReplyToPlainText("was kann das?", "nipmodbot"), false);
     assert.equal(shouldReplyToPlainText("@nipmodbot was kann das?", "nipmodbot"), true);
   });
 
@@ -93,8 +97,9 @@ describe("telegram bot command parsing", () => {
     assert.equal(matchesAny("banr coin?", ["bankr"]), true);
     assert.equal(matchesAny("cluade code setup?", ["claude"]), true);
     assert.equal(matchesAny("geht das mit coedx?", ["codex", "coedx"]), true);
-    assert.equal(shouldReplyToPlainText("wi instalier ich das", "nipmodbot"), true);
-    assert.equal(shouldReplyToPlainText("linsk bitte", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("wi instalier ich das", "nipmodbot"), false);
+    assert.equal(shouldReplyToPlainText("@nipmodbot wi instalier ich das", "nipmodbot"), true);
+    assert.equal(shouldReplyToPlainText("linsk bitte", "nipmodbot", { mentionOnly: false }), true);
     assert.equal(hasNipmodContext("was kann das?"), false);
     assert.equal(isOnboardingQuestion("was kann das?"), true);
     assert.equal(hasNipmodContext("was kann nipmod?"), true);
@@ -236,6 +241,19 @@ describe("telegram bot group binding", () => {
     assert.equal(reply.reason, "chat-not-allowed");
   });
 
+  test("ignores unaddressed group commands in mention-only mode", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("/links"), {
+      allowedChatId: "-100123",
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.equal(reply.ignored, true);
+    assert.equal(reply.reason, "command-not-addressed");
+  });
+
   test("allows the bound group", () => {
     assert.equal(isChatAllowed({ id: "-100123", type: "supergroup" }, { allowedChatId: "-100123" }), true);
   });
@@ -250,7 +268,7 @@ describe("telegram bot package search", () => {
   });
 
   test("renders search results from the registry fixture", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("/search gitlawb"), {
+    const reply = await createTelegramBotReply(groupUpdate("/search@nipmodbot gitlawb"), {
       allowedChatId: "-100123",
       bindFirstGroup: true,
       groupOnly: true,
@@ -265,7 +283,7 @@ describe("telegram bot package search", () => {
 
 describe("telegram bot knowledge base", () => {
   test("lists all important public links without dash list separators", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("/links"), {
+    const reply = await createTelegramBotReply(groupUpdate("/links@nipmodbot"), {
       allowedChatId: "-100123",
       bindFirstGroup: true,
       groupOnly: true,
@@ -297,7 +315,7 @@ describe("telegram bot knowledge base", () => {
   });
 
   test("answers specific social and coin questions concisely", async () => {
-    const xReply = await createTelegramBotReply(groupUpdate("your x link"), {
+    const xReply = await createTelegramBotReply(groupUpdate("@nipmodbot your x link"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -307,7 +325,7 @@ describe("telegram bot knowledge base", () => {
     });
     assert.equal(xReply.text, "X\nhttps://x.com/Nipmod");
 
-    const coinReply = await createTelegramBotReply(groupUpdate("whats your coin"), {
+    const coinReply = await createTelegramBotReply(groupUpdate("@nipmodbot whats your coin"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -321,8 +339,8 @@ describe("telegram bot knowledge base", () => {
     );
   });
 
-  test("answers a plain install question without a mention", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("how do I install this?"), {
+  test("answers a tagged install question", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot how do I install this?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -335,8 +353,8 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /curl -fsSLO https:\/\/nipmod\.com\/install\.sh/);
   });
 
-  test("answers general questions instead of silently ignoring them", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("what time is it?"), {
+  test("answers tagged general questions instead of silently ignoring them", async () => {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot what time is it?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -349,7 +367,7 @@ describe("telegram bot knowledge base", () => {
   });
 
   test("answers bot support questions directly", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("der bot reagiert nicht auf meine fragen"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot der bot reagiert nicht auf meine fragen"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -358,11 +376,11 @@ describe("telegram bot knowledge base", () => {
       username: "nipmodbot"
     });
 
-    assert.match(reply.text, /I answer normal group questions/);
+    assert.match(reply.text, /I answer only when someone tags @nipmodbot/);
   });
 
   test("answers short onboarding questions in the Nipmod group", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("was kann das?"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot was kann das?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       bindFirstGroup: true,
@@ -386,7 +404,7 @@ describe("telegram bot knowledge base", () => {
     ];
 
     for (const [text, expected] of cases) {
-      const reply = await createTelegramBotReply(groupUpdate(text), {
+      const reply = await createTelegramBotReply(groupUpdate(`@nipmodbot ${text}`), {
         allowedChatId: "-100123",
         answerGroupQuestions: true,
         bindFirstGroup: true,
@@ -413,7 +431,7 @@ describe("telegram bot knowledge base", () => {
   });
 
   test("returns a clean registry failure answer", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("/search gitlawb"), {
+    const reply = await createTelegramBotReply(groupUpdate("/search@nipmodbot gitlawb"), {
       allowedChatId: "-100123",
       bindFirstGroup: true,
       fetchFn: async () => new Response("down", { status: 503 }),
@@ -439,7 +457,7 @@ describe("telegram bot knowledge base", () => {
   });
 
   test("help text has no dash list separators", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("/help"), {
+    const reply = await createTelegramBotReply(groupUpdate("/help@nipmodbot"), {
       allowedChatId: "-100123",
       bindFirstGroup: true,
       groupOnly: true,
@@ -448,14 +466,14 @@ describe("telegram bot knowledge base", () => {
     });
 
     assert.match(reply.text, /Nipmod commands/);
-    assert.match(reply.text, /\/links shows official links/);
+    assert.match(reply.text, /\/links@nipmodbot shows official links/);
     assert.doesNotMatch(reply.text, / - /);
   });
 });
 
 describe("telegram bot safety controls", () => {
   test("blocks posted secrets before they reach AI", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("sk-ant-thisisarealookingsecret000000000000"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot sk-ant-thisisarealookingsecret000000000000"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       groupOnly: true,
@@ -473,7 +491,7 @@ describe("telegram bot safety controls", () => {
   });
 
   test("blocks trading and price advice", async () => {
-    const reply = await createTelegramBotReply(groupUpdate("should I buy the token?"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot should I buy the token?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
       groupOnly: true,
@@ -485,7 +503,7 @@ describe("telegram bot safety controls", () => {
     assert.match(reply.text, /cannot give trading advice/);
   });
 
-  test("blocks unrelated trading chatter instead of giving advice", async () => {
+  test("ignores unrelated untagged trading chatter in mention-only mode", async () => {
     const reply = await createTelegramBotReply(groupUpdate("should I buy eth?"), {
       allowedChatId: "-100123",
       answerGroupQuestions: true,
@@ -494,8 +512,8 @@ describe("telegram bot safety controls", () => {
       username: "nipmodbot"
     });
 
-    assert.equal(reply.safetyEvent, "trading");
-    assert.match(reply.text, /cannot give trading advice/);
+    assert.equal(reply.ignored, true);
+    assert.equal(reply.reason, "plain-text-not-addressed");
   });
 
   test("filters unsafe outgoing replies", () => {
@@ -513,14 +531,14 @@ describe("telegram bot safety controls", () => {
   });
 
   test("admin pause and resume require admin rights", async () => {
-    const denied = await createTelegramBotReply(groupUpdate("/pause", "-100123", "55"), {
+    const denied = await createTelegramBotReply(groupUpdate("/pause@nipmodbot", "-100123", "55"), {
       allowedChatId: "-100123",
       groupOnly: true,
       username: "nipmodbot"
     });
     assert.equal(denied.adminAction, "unauthorized");
 
-    const pause = await createTelegramBotReply(groupUpdate("/pause", "-100123", "55"), {
+    const pause = await createTelegramBotReply(groupUpdate("/pause@nipmodbot", "-100123", "55"), {
       adminUserIds: ["55"],
       allowedChatId: "-100123",
       groupOnly: true,
@@ -541,7 +559,7 @@ describe("telegram bot safety controls", () => {
     });
     assert.equal(ignored.reason, "bot-disabled");
 
-    const resume = await createTelegramBotReply(groupUpdate("/resume", "-100123", "55"), {
+    const resume = await createTelegramBotReply(groupUpdate("/resume@nipmodbot", "-100123", "55"), {
       adminUserIds: ["55"],
       allowedChatId: "-100123",
       disabled: true,
@@ -568,7 +586,7 @@ describe("telegram bot AI fallback", () => {
           choices: [
             {
               message: {
-                content: "Nipmod is the package layer for agents.\nUse /links for official links."
+                content: "Nipmod is the package layer for agents.\nUse /links@nipmodbot for official links."
               }
             }
           ]
@@ -582,6 +600,7 @@ describe("telegram bot AI fallback", () => {
     assert.equal(calls.length, 1);
     assert.equal(calls[0].url, "https://ai.example/v1/chat/completions");
     assert.equal(calls[0].body.model, "test-model");
+    assert.equal(calls[0].body.max_tokens, 420);
     assert.match(calls[0].body.messages[0].content, /Official links:/);
     assert.match(reply.text, /package layer for agents/);
   });
@@ -605,7 +624,7 @@ describe("telegram bot AI fallback", () => {
         return jsonResponse({
           content: [
             {
-              text: "Nipmod is the package layer for agents.\nUse /links for official links.",
+              text: "Nipmod is the package layer for agents.\nUse /links@nipmodbot for official links.",
               type: "text"
             }
           ],
@@ -622,6 +641,7 @@ describe("telegram bot AI fallback", () => {
     assert.equal(calls[0].headers["anthropic-version"], "2023-06-01");
     assert.equal(calls[0].headers["x-api-key"], "sk-ant-test");
     assert.equal(calls[0].body.model, "claude-sonnet-4-5");
+    assert.equal(calls[0].body.max_tokens, 420);
     assert.match(calls[0].body.system, /Official links:/);
     assert.equal(calls[0].body.messages[0].role, "user");
     assert.match(reply.text, /package layer for agents/);
@@ -629,7 +649,7 @@ describe("telegram bot AI fallback", () => {
 
   test("passes recent conversation context to AI prompts", async () => {
     const calls = [];
-    const reply = await createTelegramBotReply(groupUpdate("why?"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot why?"), {
       allowedChatId: "-100123",
       aiApiKey: "sk-ant-test",
       aiBaseUrl: "https://api.anthropic.test/v1/",
@@ -663,7 +683,7 @@ describe("telegram bot AI fallback", () => {
 
   test("uses AI before broad local knowledge replies", async () => {
     const calls = [];
-    const reply = await createTelegramBotReply(groupUpdate("what is nipmod?"), {
+    const reply = await createTelegramBotReply(groupUpdate("@nipmodbot what is nipmod?"), {
       allowedChatId: "-100123",
       aiApiKey: "sk-ant-test",
       aiBaseUrl: "https://api.anthropic.test/v1/",
@@ -736,6 +756,9 @@ describe("telegram bot AI fallback", () => {
     assert.match(prompt, /Always answer in English/);
     assert.match(prompt, /still answer in English/);
     assert.match(prompt, /calm, sharp community moderator/);
+    assert.match(prompt, /high-signal answer/);
+    assert.match(prompt, /complex strategy, product, moderation or ecosystem questions/);
+    assert.match(prompt, /what is planned and what is not proven yet/);
     assert.match(prompt, /Do not recite the Facts section verbatim/);
     assert.match(prompt, /Do not start broad answers/);
     assert.match(prompt, /one-sentence-per-fact/);

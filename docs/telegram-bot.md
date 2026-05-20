@@ -13,6 +13,7 @@ NIPMOD_TELEGRAM_BOT_USERNAME=nipmodbot
 NIPMOD_TELEGRAM_GROUP_ONLY=1
 NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1
 NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1
+NIPMOD_TELEGRAM_MENTION_ONLY=1
 NIPMOD_TELEGRAM_LOG_UPDATES=1
 NIPMOD_TELEGRAM_ADMIN_USER_IDS=<optional-comma-separated-admin-user-ids>
 NIPMOD_TELEGRAM_DISABLED=0
@@ -39,7 +40,7 @@ Add `@nipmodbot` to the Telegram group and send:
 The first group that sends `/start@nipmodbot` is saved in `.nipmod/telegram-bot-state.json`.
 After that the bot ignores private chats and other groups unless `NIPMOD_TELEGRAM_ALLOWED_CHAT_ID` is explicitly changed.
 
-To let the bot see normal group questions without `@nipmodbot`, disable Telegram privacy mode in BotFather:
+Disable Telegram privacy mode in BotFather so the bot can keep short in-memory context while staying silent unless tagged:
 
 ```text
 /setprivacy
@@ -48,34 +49,34 @@ Disable
 ```
 
 With privacy enabled, Telegram only sends commands, mentions and selected bot events to the bot.
+With `NIPMOD_TELEGRAM_MENTION_ONLY=1`, the bot still answers only when `@nipmodbot` is tagged or a command is explicitly addressed to `@nipmodbot`.
 
 ## Commands
 
 ```text
-/help
-/links
-/search <term>
-/packages
-/install
-/codex
-/claude
-/github
-/gitlawb
-/bankr
-/mcp
-/security
-/submit
-/status
-/botstatus
-/pause
-/resume
+/help@nipmodbot
+/links@nipmodbot
+/search@nipmodbot <term>
+/packages@nipmodbot
+/install@nipmodbot
+/codex@nipmodbot
+/claude@nipmodbot
+/github@nipmodbot
+/gitlawb@nipmodbot
+/bankr@nipmodbot
+/mcp@nipmodbot
+/security@nipmodbot
+/submit@nipmodbot
+/status@nipmodbot
+/botstatus@nipmodbot
+/pause@nipmodbot
+/resume@nipmodbot
 ```
 
 The bot receives group messages, edited group messages and caption text.
-It answers normal questions in the group, direct mentions, messages that start with `nipmod`, and Nipmod related requests.
+It answers only direct mentions such as `@nipmodbot what is Nipmod?` and commands addressed to `@nipmodbot`.
 Question routing is typo tolerant for common words such as GitHub, Gitlawb, Bankr, Codex, Claude Code, install and links.
-If the bot cannot answer cleanly, it says so and points to `/help` and `/links`.
-General non question chatter is ignored.
+Untagged group chatter, questions and commands are ignored.
 In topic based groups the bot replies in the same topic.
 
 ## AI layer
@@ -84,7 +85,8 @@ Commands, exact link requests, coin requests and security questions are handled 
 When `NIPMOD_TELEGRAM_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` is present and `NIPMOD_TELEGRAM_AI_PROVIDER=anthropic`, normal Nipmod questions go to Anthropic's Messages API with the local knowledge base injected into the system prompt.
 If the AI request fails, the local knowledge base answers as a fallback.
 OpenAI compatible chat completions are still supported through `NIPMOD_TELEGRAM_AI_PROVIDER=openai`.
-The AI system prompt keeps Nipmod context for project questions while allowing harmless general community questions.
+The AI system prompt is tuned for higher-signal moderator answers because a tag means the user intentionally called the bot.
+It keeps Nipmod context for project questions while allowing harmless general community questions.
 If the answer needs live data the bot does not have, it says that briefly instead of guessing.
 The bot keeps a short in-memory context per group topic for follow-up questions such as `why?` or `what about Bankr?`.
 This context is not written to disk, is cleared on restart and skips unsafe text such as secrets or prompt extraction attempts.

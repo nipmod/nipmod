@@ -11,6 +11,7 @@ const DEFAULT_REGISTRY_URL = "https://nipmod.com/registry/packages.json";
 const DEFAULT_BOT_USERNAME = "nipmodbot";
 const DEFAULT_POLL_TIMEOUT_SECONDS = 45;
 const DEFAULT_ANSWER_GROUP_QUESTIONS = true;
+const DEFAULT_MENTION_ONLY = true;
 const DEFAULT_AI_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_AI_MODEL = "gpt-4o-mini";
 const DEFAULT_AI_PROVIDER = "openai";
@@ -18,6 +19,7 @@ const DEFAULT_ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
 const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5";
 const ANTHROPIC_VERSION = "2023-06-01";
 const AI_TIMEOUT_MS = 12000;
+const AI_MAX_TOKENS = 420;
 const AI_REPLY_MAX_CHARS = 1200;
 const DEFAULT_CONTEXT_MAX_MESSAGES = 10;
 const DEFAULT_CONTEXT_TTL_MS = 30 * 60 * 1000;
@@ -460,8 +462,21 @@ export function sanitizeConversationContextText(text) {
   return compact.slice(0, CONTEXT_TEXT_MAX_CHARS);
 }
 
-export function shouldReplyToPlainText(text, username = DEFAULT_BOT_USERNAME, { answerGroupQuestions = true } = {}) {
+export function isBotMentioned(text, username = DEFAULT_BOT_USERNAME) {
   const normalized = String(text ?? "").trim().toLowerCase();
+  const botMention = escapeRegExp(`@${normalizeBotUsername(username)}`);
+  return new RegExp(`${botMention}(?![a-z0-9_])`).test(normalized);
+}
+
+export function shouldReplyToPlainText(
+  text,
+  username = DEFAULT_BOT_USERNAME,
+  { answerGroupQuestions = true, mentionOnly = DEFAULT_MENTION_ONLY } = {}
+) {
+  const normalized = String(text ?? "").trim().toLowerCase();
+  if (mentionOnly) {
+    return isBotMentioned(normalized, username);
+  }
   const normalizedForMatching = normalizeTextForMatching(normalized);
   const botMention = `@${normalizeBotUsername(username)}`;
   return (
@@ -619,12 +634,14 @@ export async function createTelegramBotReply(update, options = {}) {
   const bindFirstGroup = options.bindFirstGroup !== false;
   const allowedChatId = options.allowedChatId ?? null;
   const answerGroupQuestions = options.answerGroupQuestions ?? DEFAULT_ANSWER_GROUP_QUESTIONS;
+  const mentionOnly = options.mentionOnly ?? DEFAULT_MENTION_ONLY;
   const disabled = Boolean(options.disabled);
   const adminUserIds = normalizeIdSet(options.adminUserIds ?? []);
   const isAdmin = Boolean(options.isAdmin || adminUserIds.has(String(message.from?.id ?? "")));
+  const commandAddressed = command && (!mentionOnly || command.mentionedBot || !isGroupChat(message.chat));
 
   if (!allowedChatId && bindFirstGroup) {
-    if (!isGroupChat(message.chat) || command?.name !== "start") {
+    if (!isGroupChat(message.chat) || command?.name !== "start" || !commandAddressed) {
       return { ignored: true, reason: "waiting-for-group-start" };
     }
     return {
@@ -641,6 +658,10 @@ export async function createTelegramBotReply(update, options = {}) {
     return { ignored: true, reason: "chat-not-allowed" };
   }
 
+  if (command && !commandAddressed) {
+    return { ignored: true, reason: "command-not-addressed" };
+  }
+
   if (command && ADMIN_COMMANDS.has(command.name)) {
     return renderAdminCommandReply(command, { disabled, isAdmin });
   }
@@ -651,12 +672,13 @@ export async function createTelegramBotReply(update, options = {}) {
 
   const shouldAnswerPlainText = command
     ? true
-    : shouldReplyToPlainText(text, username, { answerGroupQuestions });
+    : shouldReplyToPlainText(text, username, { answerGroupQuestions, mentionOnly });
+  if (!command && !shouldAnswerPlainText) {
+    return { ignored: true, reason: "plain-text-not-addressed" };
+  }
+
   const inputSafety = classifyIncomingText(text);
   if (!inputSafety.ok) {
-    if (!command && !shouldAnswerPlainText && inputSafety.reason !== "secret-value") {
-      return { ignored: true, reason: "plain-text-not-addressed" };
-    }
     return {
       safetyEvent: inputSafety.reason,
       text: inputSafety.text
@@ -665,10 +687,6 @@ export async function createTelegramBotReply(update, options = {}) {
 
   if (command) {
     return safeReply(await renderCommandReply(command, options));
-  }
-
-  if (!shouldAnswerPlainText) {
-    return { ignored: true, reason: "plain-text-not-addressed" };
   }
 
   return safeReply(await renderPlainTextReply(text, options));
@@ -724,7 +742,7 @@ export function renderAdminCommandReply(command, { disabled = false, isAdmin = f
     case "disable":
       return {
         adminAction: "pause",
-        text: "Bot paused. Admins can use /resume to enable replies again."
+        text: "Bot paused. Admins can use /resume@nipmodbot to enable replies again."
       };
     case "resume":
     case "enable":
@@ -896,7 +914,7 @@ export async function renderAiReply(text, options = {}) {
 async function callOpenAiChatCompletionsApi({ ai, conversationContext = "", packages, signal, text }) {
   const response = await ai.fetchFn(`${ai.baseUrl}/chat/completions`, {
     body: JSON.stringify({
-      max_tokens: 240,
+      max_tokens: AI_MAX_TOKENS,
       messages: [
         {
           content: buildAiSystemPrompt(packages, { conversationContext }),
@@ -927,7 +945,7 @@ async function callOpenAiChatCompletionsApi({ ai, conversationContext = "", pack
 async function callAnthropicMessagesApi({ ai, conversationContext = "", packages, signal, text }) {
   const response = await ai.fetchFn(`${ai.baseUrl}/messages`, {
     body: JSON.stringify({
-      max_tokens: 240,
+      max_tokens: AI_MAX_TOKENS,
       messages: [
         {
           content: String(text ?? "").slice(0, 1200),
@@ -991,7 +1009,11 @@ export function buildAiSystemPrompt(packages = null, { conversationContext = "" 
     "Answer as a precise project agent, not as a generic assistant.",
     "Always answer in English.",
     "If the user writes in German or another language, understand the request but still answer in English.",
-    "Keep answers under 6 short lines.",
+    "The user tagged you on purpose, so give a high-signal answer instead of a shallow FAQ reply.",
+    "Keep simple answers under 6 short lines.",
+    "For complex strategy, product, moderation or ecosystem questions, use up to 10 short lines.",
+    "For complex answers, prefer this shape: direct answer, current truth, why it matters, next concrete move.",
+    "Clearly separate what is live now, what is planned and what is not proven yet.",
     "No hype, no filler, no invented roadmap, no fake certainty.",
     "Do not sound like a FAQ template.",
     "Do not recite the Facts section verbatim.",
@@ -1220,6 +1242,7 @@ export async function runTelegramBot({
   groupOnly = true,
   log = console.log,
   logUpdates = true,
+  mentionOnly = DEFAULT_MENTION_ONLY,
   pollTimeout = DEFAULT_POLL_TIMEOUT_SECONDS,
   rateLimitMax = DEFAULT_RATE_LIMIT_MAX,
   rateLimitWindowMs = DEFAULT_RATE_LIMIT_WINDOW_MS,
@@ -1250,7 +1273,7 @@ export async function runTelegramBot({
   log(
     `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; disabled=${activeState.disabled}; chat=${
       activeState.allowedChatId ?? "waiting-for-/start"
-    }; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? `${aiProvider}:${aiModel}` : "off"}`
+    }; mentionOnly=${mentionOnly}; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? `${aiProvider}:${aiModel}` : "off"}`
   );
 
   while (!signal?.aborted) {
@@ -1297,6 +1320,7 @@ export async function runTelegramBot({
           fetchFn,
           groupOnly,
           isAdmin,
+          mentionOnly,
           answerGroupQuestions,
           now: new Date().toISOString(),
           packages: null,
@@ -1374,28 +1398,28 @@ function startText({ newlyBound }) {
   const prefix = newlyBound
     ? "Nipmod is bound to this group. Private chats and other groups are ignored."
     : "Nipmod is active in this group.";
-  return `${prefix}\n\n/help shows commands. /links shows official links.`;
+  return `${prefix}\n\nTag @nipmodbot to ask a question.\n/help@nipmodbot shows commands. /links@nipmodbot shows official links.`;
 }
 
 function helpText() {
   return [
     "Nipmod commands",
-    "/search <term> finds packages",
-    "/packages shows archive and count",
-    "/links shows official links",
-    "/install shows install",
-    "/codex shows Codex setup",
-    "/claude shows Claude Code setup",
-    "/bankr shows Bankr links",
-    "/github shows GitHub mirror",
-    "/gitlawb shows source network",
-    "/mcp shows agent tools",
-    "/security shows safety rules",
-    "/submit shows package flow",
-    "/status shows live checks",
-    "/botstatus shows bot control state",
-    "/pause pauses replies for admins",
-    "/resume resumes replies for admins"
+    "/search@nipmodbot <term> finds packages",
+    "/packages@nipmodbot shows archive and count",
+    "/links@nipmodbot shows official links",
+    "/install@nipmodbot shows install",
+    "/codex@nipmodbot shows Codex setup",
+    "/claude@nipmodbot shows Claude Code setup",
+    "/bankr@nipmodbot shows Bankr links",
+    "/github@nipmodbot shows GitHub mirror",
+    "/gitlawb@nipmodbot shows source network",
+    "/mcp@nipmodbot shows agent tools",
+    "/security@nipmodbot shows safety rules",
+    "/submit@nipmodbot shows package flow",
+    "/status@nipmodbot shows live checks",
+    "/botstatus@nipmodbot shows bot control state",
+    "/pause@nipmodbot pauses replies for admins",
+    "/resume@nipmodbot resumes replies for admins"
   ].join("\n");
 }
 
@@ -1447,7 +1471,7 @@ function packagesText(packages) {
     "Packages https://nipmod.com/packages",
     "Registry https://nipmod.com/registry/packages.json",
     "",
-    "Search with /search <term>"
+    "Search with /search@nipmodbot <term>"
   ].join("\n");
 }
 
@@ -1462,10 +1486,10 @@ function searchText(query, packages) {
   }
   const results = searchRegistryPackages(query, packages, 5);
   if (!String(query ?? "").trim()) {
-    return "Format\n/search <term>\n\nExample\n/search gitlawb";
+    return "Format\n/search@nipmodbot <term>\n\nExample\n/search@nipmodbot gitlawb";
   }
   if (results.length === 0) {
-    return `No match for "${query}".\n/packages shows the archive.\nhttps://nipmod.com/packages`;
+    return `No match for "${query}".\n/packages@nipmodbot shows the archive.\nhttps://nipmod.com/packages`;
   }
   const lines = [`Matches for "${query}"`];
   for (const pkg of results) {
@@ -1569,9 +1593,10 @@ function securityText() {
 function botText() {
   return [
     "Bot",
-    "I answer normal group questions when Telegram privacy is disabled.",
+    "I answer only when someone tags @nipmodbot or uses a command addressed to @nipmodbot.",
+    "Unmentioned group chatter is ignored.",
     "I know Nipmod links, install, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, packages, registry and security.",
-    "Use /links for official links."
+    "Use /links@nipmodbot for official links."
   ].join("\n");
 }
 
@@ -1589,8 +1614,8 @@ function aboutText() {
 function conciseFallbackText() {
   return [
     "I cannot answer that cleanly.",
-    "/help shows commands.",
-    "/links shows official links."
+    "/help@nipmodbot shows commands.",
+    "/links@nipmodbot shows official links."
   ].join("\n");
 }
 
@@ -1892,6 +1917,7 @@ async function main() {
         "  NIPMOD_TELEGRAM_GROUP_ONLY=1",
         "  NIPMOD_TELEGRAM_BIND_FIRST_GROUP=1",
         "  NIPMOD_TELEGRAM_ANSWER_GROUP_QUESTIONS=1",
+        "  NIPMOD_TELEGRAM_MENTION_ONLY=1",
         "  NIPMOD_TELEGRAM_LOG_UPDATES=1",
         "  NIPMOD_TELEGRAM_AI_ENABLED=1",
         "  NIPMOD_TELEGRAM_AI_PROVIDER=anthropic",
@@ -1923,6 +1949,7 @@ async function main() {
     bindFirstGroup: env.NIPMOD_TELEGRAM_BIND_FIRST_GROUP !== "0",
     disabled: env.NIPMOD_TELEGRAM_DISABLED === "1",
     groupOnly: env.NIPMOD_TELEGRAM_GROUP_ONLY !== "0",
+    mentionOnly: env.NIPMOD_TELEGRAM_MENTION_ONLY !== "0",
     logUpdates: env.NIPMOD_TELEGRAM_LOG_UPDATES !== "0",
     registryUrl: env.NIPMOD_REGISTRY_URL || DEFAULT_REGISTRY_URL,
     statePath: env.NIPMOD_TELEGRAM_STATE_PATH || DEFAULT_STATE_PATH,
