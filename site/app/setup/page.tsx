@@ -40,8 +40,8 @@ export default function SetupPage() {
         </div>
         <aside className="quickstart-card setup-hero-panel" aria-label="First setup command">
           <span>01</span>
-          <h2>Copy into Terminal</h2>
-          <p>This is the only command needed before connecting Codex, Claude Code, OpenCode or Hermes.</p>
+          <h2>Install</h2>
+          <p>Paste in Terminal.</p>
           <CommandBlock command={setupContent.installCommand} label="Copy first Nipmod install command" />
         </aside>
       </section>
@@ -50,7 +50,7 @@ export default function SetupPage() {
         <div>
           <p className="eyebrow">Step 1</p>
           <h2 id="install-once-title">Install Nipmod once</h2>
-          <p>Paste this in Terminal. After it finishes, run the check command below it.</p>
+          <p>Paste, run, done.</p>
         </div>
         <div className="setup-command-stack">
           <CommandBlock command={setupContent.installCommand} label="Copy Nipmod install command" />

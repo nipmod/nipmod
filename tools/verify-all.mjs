@@ -186,7 +186,7 @@ async function verifyProduction() {
   );
   await assertText(
     "https://nipmod.com/quickstart",
-    (text) => text.includes("curl -fsSLO https://nipmod.com/install.sh") && text.includes("bash install.sh"),
+    (text) => text.includes("curl -fsSL https://nipmod.com/i | bash"),
     "quickstart install flow missing"
   );
   await assertText(

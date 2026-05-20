@@ -9,7 +9,7 @@ Nipmod is the verifiable package layer for agent code.
 Agents can search a shared package archive, inspect trust evidence, plan installs, ask before writing files and audit the result. The first source network is Gitlawb. GitHub is the public mirror for review, CI and developer access.
 
 ```bash
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 nipmod setup agents --include-codex --include-hermes
 ```
 
@@ -77,7 +77,7 @@ Requirements: Node.js 22 or newer, npm, Git, curl and tar.
 The CLI is not published to npm. Install uses the signed release installer from `nipmod.com`. The installer also sets up or normalizes Gitlawb publish support through `nipmod setup gitlawb`.
 
 ```bash
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 nipmod setup agents --include-codex --include-hermes
 ```
 

@@ -25,7 +25,7 @@ https://nipmod.com/setup
 ## Setup reply
 
 ```text
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 
 nipmod setup codex
 nipmod setup claude

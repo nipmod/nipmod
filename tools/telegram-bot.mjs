@@ -1432,7 +1432,7 @@ function helpText() {
 function installText() {
   return [
     "Install Nipmod",
-    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "curl -fsSL https://nipmod.com/i | bash",
     "nipmod setup agents --include-codex --include-hermes",
     "",
     "Then tell the agent",
@@ -1443,7 +1443,7 @@ function installText() {
 function codexText() {
   return [
     "Codex Setup",
-    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "curl -fsSL https://nipmod.com/i | bash",
     "nipmod setup codex",
     "",
     "Then tell Codex",
@@ -1454,7 +1454,7 @@ function codexText() {
 function claudeText() {
   return [
     "Claude Code Setup",
-    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "curl -fsSL https://nipmod.com/i | bash",
     "nipmod setup claude",
     "",
     "Then tell Claude Code",
@@ -1465,7 +1465,7 @@ function claudeText() {
 function hermesText() {
   return [
     "Hermes Setup",
-    "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "curl -fsSL https://nipmod.com/i | bash",
     "nipmod setup hermes",
     "",
     "Then tell Hermes",

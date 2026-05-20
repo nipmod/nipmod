@@ -11,7 +11,7 @@ Show that Nipmod is not a centralized upload gate. Gitlawb stores the repo. Nipm
 This path is for someone with no Nipmod account and no private credentials. It proves install, discovery, verification, lockfile mutation and audit against public registry data.
 
 ```bash
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 nipmod doctor --online
 nipmod search gitlawb
 mkdir -p nipmod-demo && cd nipmod-demo

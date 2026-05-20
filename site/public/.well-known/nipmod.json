@@ -57,7 +57,7 @@
       "claimIndex"
     ],
     "commands": {
-      "install": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+      "install": "curl -fsSL https://nipmod.com/i | bash",
       "setupAgents": "nipmod setup agents --include-codex --include-hermes",
       "setupCodexMcp": "nipmod setup codex",
       "setupClaudeMcp": "nipmod setup claude",
@@ -207,7 +207,7 @@
   },
   "install": {
     "script": "https://nipmod.com/install.sh",
-    "shortCommand": "curl -fsSLO https://nipmod.com/install.sh && bash install.sh",
+    "shortCommand": "curl -fsSL https://nipmod.com/i | bash",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
       "version": "1.2.4",

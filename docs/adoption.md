@@ -7,7 +7,7 @@ Nipmod adoption is measured by real setup, inspect, package install, restore, au
 Ask each user to run:
 
 ```bash
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 nipmod doctor --online
 nipmod search gitlawb
 nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0

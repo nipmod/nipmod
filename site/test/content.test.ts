@@ -121,7 +121,7 @@ describe("home content", () => {
       "Publish"
     ]);
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install CLI")?.command).toBe(
-      "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
+      "curl -fsSL https://nipmod.com/i | bash"
     );
     expect(homeContent.quickstartSteps.find((step) => step.label === "Verify")?.command).toContain("install.sh.sha256");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");

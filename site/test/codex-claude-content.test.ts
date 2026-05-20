@@ -4,7 +4,7 @@ import { codexClaudeContent } from "../app/agents/codex-claude/content";
 describe("Codex and Claude Code content", () => {
   test("documents the shared setup path", () => {
     expect(codexClaudeContent.headline).toBe("Use Nipmod from Codex and Claude Code");
-    expect(codexClaudeContent.installCommand).toBe("curl -fsSLO https://nipmod.com/install.sh && bash install.sh");
+    expect(codexClaudeContent.installCommand).toBe("curl -fsSL https://nipmod.com/i | bash");
     expect(codexClaudeContent.hosts.map((host) => host.name)).toEqual(["Codex", "Claude Code"]);
     expect(codexClaudeContent.hosts[0]?.setup).toBe("nipmod setup codex");
     expect(codexClaudeContent.hosts[1]?.setup).toBe("nipmod setup claude");

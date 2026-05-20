@@ -75,7 +75,7 @@ curl -fsS https://nipmod.com/api/mcp \
 ## Install
 
 ```bash
-curl -fsSLO https://nipmod.com/install.sh && bash install.sh
+curl -fsSL https://nipmod.com/i | bash
 nipmod setup agents --include-codex --include-hermes
 nipmod doctor
 ```

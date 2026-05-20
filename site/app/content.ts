@@ -132,8 +132,8 @@ export const homeContent = {
   quickstartSteps: [
     {
       label: "Install CLI",
-      text: "Run the short installer. It installs Nipmod and sets up Gitlawb publish support when the helper is missing.",
-      command: "curl -fsSLO https://nipmod.com/install.sh && bash install.sh"
+      text: "Paste one command.",
+      command: "curl -fsSL https://nipmod.com/i | bash"
     },
     {
       label: "Verify",
