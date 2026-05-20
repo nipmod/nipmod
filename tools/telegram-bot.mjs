@@ -678,11 +678,43 @@ export async function renderPlainTextReply(text, options = {}) {
   const cleaned = String(text ?? "")
     .replace(new RegExp(`@${normalizeBotUsername(options.username)}`, "gi"), "")
     .trim();
-  const knownReply = await renderKnownPlainTextReply(cleaned, options);
-  if (knownReply) {
-    return knownReply;
+  const immediateReply = await renderImmediatePlainTextReply(cleaned, options);
+  if (immediateReply) {
+    return immediateReply;
   }
-  return (await renderAiReply(cleaned, options)) ?? conciseFallbackText();
+  const aiReply = await renderAiReply(cleaned, options);
+  if (aiReply) {
+    return aiReply;
+  }
+  return (await renderKnownPlainTextReply(cleaned, options)) ?? conciseFallbackText();
+}
+
+export async function renderImmediatePlainTextReply(text, options = {}) {
+  const cleaned = String(text ?? "").trim();
+  const lower = cleaned.toLowerCase();
+
+  if (isSpecificXRequest(lower)) {
+    return xText();
+  }
+  if (isSpecificCoinRequest(lower)) {
+    return coinText();
+  }
+  if (matchesAny(lower, SECURITY_TERMS)) {
+    return securityText();
+  }
+  if (isSpecificOfficialLinksRequest(lower)) {
+    return linksText();
+  }
+  if (isSpecificGithubRequest(lower)) {
+    return githubText();
+  }
+  if (isSpecificGitlawbRequest(lower)) {
+    return gitlawbText();
+  }
+  if (isSpecificInstallRequest(lower)) {
+    return installText();
+  }
+  return null;
 }
 
 export async function renderKnownPlainTextReply(text, options = {}) {
@@ -1451,6 +1483,50 @@ function isSpecificCoinRequest(text) {
     return false;
   }
   return containsSafetyTerm(normalized, ["coin", "token"]) && !containsSafetyTerm(normalized, ["bankr"]);
+}
+
+function isSpecificOfficialLinksRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, LINK_TERMS) && !containsSafetyTerm(normalized, [
+    ...X_TERMS,
+    ...GITHUB_TERMS,
+    ...GITLAWB_TERMS,
+    ...BANKR_TERMS,
+    ...CODEX_TERMS,
+    ...CLAUDE_TERMS,
+    ...MCP_TERMS
+  ]);
+}
+
+function isSpecificGithubRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, GITHUB_TERMS) && containsSafetyTerm(normalized, LINK_TERMS);
+}
+
+function isSpecificGitlawbRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, GITLAWB_TERMS) && containsSafetyTerm(normalized, LINK_TERMS);
+}
+
+function isSpecificInstallRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, INSTALL_TERMS) && !containsSafetyTerm(normalized, [
+    ...CODEX_TERMS,
+    ...CLAUDE_TERMS,
+    ...MCP_TERMS
+  ]);
 }
 
 function containsSafetyTerm(normalizedText, terms) {

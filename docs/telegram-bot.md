@@ -80,8 +80,9 @@ In topic based groups the bot replies in the same topic.
 
 ## AI layer
 
-The local knowledge base answers exact public facts first.
-When `NIPMOD_TELEGRAM_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` is present and `NIPMOD_TELEGRAM_AI_PROVIDER=anthropic`, broad questions fall through to Anthropic's Messages API.
+Commands, exact link requests, coin requests and security questions are handled locally for precision.
+When `NIPMOD_TELEGRAM_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY` is present and `NIPMOD_TELEGRAM_AI_PROVIDER=anthropic`, normal Nipmod questions go to Anthropic's Messages API with the local knowledge base injected into the system prompt.
+If the AI request fails, the local knowledge base answers as a fallback.
 OpenAI compatible chat completions are still supported through `NIPMOD_TELEGRAM_AI_PROVIDER=openai`.
 The AI system prompt is restricted to Nipmod, official links, Gitlawb, GitHub, Bankr, Codex, Claude Code, MCP, install, packages, registry, safety and status.
 If the question is outside scope, the AI must use the same short fallback.

@@ -563,6 +563,38 @@ describe("telegram bot AI fallback", () => {
     assert.match(reply.text, /package layer for agents/);
   });
 
+  test("uses AI before broad local knowledge replies", async () => {
+    const calls = [];
+    const reply = await createTelegramBotReply(groupUpdate("what is nipmod?"), {
+      allowedChatId: "-100123",
+      aiApiKey: "sk-ant-test",
+      aiBaseUrl: "https://api.anthropic.test/v1/",
+      aiModel: "claude-sonnet-4-5",
+      aiProvider: "anthropic",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      fetchFn: async (url, init) => {
+        calls.push({ body: JSON.parse(init.body), url });
+        return jsonResponse({
+          content: [
+            {
+              text: "Nipmod is an agent package archive with Gitlawb provenance.",
+              type: "text"
+            }
+          ],
+          type: "message"
+        });
+      },
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "https://api.anthropic.test/v1/messages");
+    assert.match(reply.text, /agent package archive/);
+  });
+
   test("keeps exact local answers ahead of AI fallback", async () => {
     const reply = await renderPlainTextReply("githb link bitte", {
       aiApiKey: "sk-test",
