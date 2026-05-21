@@ -105,8 +105,7 @@ export function SetupView() {
             color: tokens.ink
           }}
         >
-          Pick an agent.{" "}
-          <em style={{ fontStyle: "italic" }}>Three commands.</em>
+          Pick your agent.
         </h1>
       </section>
 
