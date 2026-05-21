@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatedTerminal, type TerminalStep } from "../editorial-terminal";
 
@@ -94,6 +95,22 @@ export function SetupView() {
       }}
     >
       <section style={{ paddingBottom: 24, borderBottom: `1px solid ${tokens.border}` }}>
+        <Link
+          href="/agents"
+          style={{
+            alignItems: "center",
+            color: tokens.muted,
+            display: "inline-flex",
+            fontFamily: tokens.mono,
+            fontSize: 12,
+            gap: 8,
+            letterSpacing: "0.02em",
+            marginBottom: 18,
+            textDecoration: "none"
+          }}
+        >
+          Back to agents
+        </Link>
         <h1
           style={{
             fontFamily: tokens.serif,

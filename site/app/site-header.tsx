@@ -10,7 +10,6 @@ const navItems = [
   { href: "/", label: "Home", match: (path: string) => path === "/" },
   { href: "/packages", label: "Packages", match: (path: string) => path.startsWith("/packages") },
   { href: "/agents", label: "Agents", match: (path: string) => path.startsWith("/agents") },
-  { href: "/setup", label: "Setup", match: (path: string) => path.startsWith("/setup") },
   { href: "/trust", label: "Trust", match: (path: string) => path.startsWith("/trust") }
 ];
 
