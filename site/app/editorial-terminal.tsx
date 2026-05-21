@@ -67,13 +67,13 @@ const defaultScript: TerminalStep[] = [
 export function AnimatedTerminal({ height = 520, script = defaultScript, title = "~ -- nipmod -- 80x24" }: AnimatedTerminalProps) {
   const stableScript = useMemo(() => script, [script]);
   const [lines, setLines] = useState<TerminalLine[]>([]);
-  const [typing, setTyping] = useState("");
+  const [activeLine, setActiveLine] = useState<TerminalLine | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollFrame = useRef<number | null>(null);
 
   useEffect(() => {
     setLines([]);
-    setTyping("");
+    setActiveLine(null);
   }, [stableScript]);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         scrollFrame.current = null;
       }
     };
-  }, [lines, typing]);
+  }, [lines, activeLine]);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,19 +108,27 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         window.setTimeout(resolve, ms);
       });
 
-    const typeCommand = async (commandLine: string) => {
-      const duration = Math.max(360, Math.min(820, commandLine.length * 16));
+    const typeTerminalLine = async (line: TerminalLine, mode: "command" | "output") => {
+      const text = line.text ?? "";
+      if (text.length === 0) {
+        return;
+      }
+
+      const duration =
+        mode === "command"
+          ? Math.max(380, Math.min(860, text.length * 16))
+          : Math.max(160, Math.min(560, text.length * 7));
       const start = window.performance.now();
       let renderedChars = -1;
 
       while (!cancelled) {
         const elapsed = window.performance.now() - start;
         const progress = Math.min(1, elapsed / duration);
-        const nextChars = Math.min(commandLine.length, Math.ceil(progress * commandLine.length));
+        const nextChars = Math.min(text.length, Math.ceil(progress * text.length));
 
         if (nextChars !== renderedChars) {
           renderedChars = nextChars;
-          setTyping(commandLine.slice(0, nextChars));
+          setActiveLine({ ...line, text: text.slice(0, nextChars) });
         }
 
         if (progress >= 1) {
@@ -133,7 +141,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
 
     const run = async () => {
       setLines([]);
-      setTyping("");
+      setActiveLine(null);
 
       for (const step of stableScript) {
         if (cancelled) {
@@ -142,14 +150,14 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
 
         const prompt = step.prompt ?? "~ $";
         const commandLine = `${prompt} ${step.command}`;
-        await typeCommand(commandLine);
+        await typeTerminalLine({ kind: "input", text: commandLine }, "command");
 
         if (cancelled) {
           return;
         }
 
         setLines((current) => [...current, { kind: "input", text: commandLine }]);
-        setTyping("");
+        setActiveLine(null);
         await wait(90);
 
         for (const line of step.output) {
@@ -157,9 +165,18 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
             return;
           }
 
-          await wait(Math.min(line.pause ?? 58, 260));
+          await wait(Math.min(line.pause ?? 72, 240));
+          if (line.kind === "blank") {
+            setLines((current) => [...current, line]);
+            await wait(90);
+            continue;
+          }
+
+          await typeTerminalLine(line, "output");
           if (!cancelled) {
             setLines((current) => [...current, line]);
+            setActiveLine(null);
+            await wait(28);
           }
         }
 
@@ -188,9 +205,9 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         {lines.map((line, index) => (
           <TerminalCode key={`${line.kind}-${line.text ?? ""}-${index}`} line={line} />
         ))}
-        {typing ? (
-          <code className="terminal-input terminal-typing">
-            {typing}
+        {activeLine ? (
+          <code className={`terminal-${activeLine.kind ?? "default"} terminal-typing`}>
+            {activeLine.text}
             <span className="terminal-caret" aria-hidden="true" />
           </code>
         ) : null}
