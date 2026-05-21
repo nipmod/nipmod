@@ -69,6 +69,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
   const stableScript = useMemo(() => script, [script]);
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [typing, setTyping] = useState("");
+  const [activeOutputLine, setActiveOutputLine] = useState<TerminalLine | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<"typing" | "output" | "done">("typing");
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -79,6 +80,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
     timersRef.current = [];
     setLines([]);
     setTyping("");
+    setActiveOutputLine(null);
     setStepIndex(0);
     setPhase("typing");
   }, [stableScript]);
@@ -87,7 +89,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [lines, typing]);
+  }, [activeOutputLine, lines, typing]);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +108,50 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         fn();
       }, ms);
       timersRef.current.push(id);
+    };
+
+    const outputDelayFor = (line: TerminalLine, nextIndex: number) => {
+      const text = line.text ?? "";
+      const char = text[nextIndex - 1] ?? "";
+      const nextChar = text[nextIndex] ?? "";
+      const base = line.kind === "muted" || line.kind === "header" ? 5 : 7;
+      const punctuationPause = /[.:]/.test(char) ? 26 : 0;
+      const columnPause = char === " " && nextChar !== " " ? 4 : 0;
+
+      return base + punctuationPause + columnPause + Math.random() * 10;
+    };
+
+    const streamOutputLine = (line: TerminalLine, done: () => void) => {
+      const text = line.text ?? "";
+
+      if (!text || line.kind === "blank" || line.kind === "logo") {
+        setActiveOutputLine(null);
+        setLines((current) => [...current, line]);
+        schedule(Math.min(line.pause ?? 180, 620), done);
+        return;
+      }
+
+      let nextIndex = 0;
+      setActiveOutputLine({ ...line, text: "" });
+
+      const typeOutputNext = () => {
+        if (cancelled) {
+          return;
+        }
+
+        if (nextIndex >= text.length) {
+          setLines((current) => [...current, { ...line, text }]);
+          setActiveOutputLine(null);
+          schedule(Math.min(line.pause ?? 150, 620), done);
+          return;
+        }
+
+        nextIndex += 1;
+        setActiveOutputLine({ ...line, text: text.slice(0, nextIndex) });
+        schedule(outputDelayFor(line, nextIndex), typeOutputNext);
+      };
+
+      schedule(24, typeOutputNext);
     };
 
     const streamOutput = (output: TerminalLine[], outputIndex: number) => {
@@ -132,11 +178,11 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         setPhase("done");
         return;
       }
-      setLines((current) => [...current, line]);
-      schedule(Math.min(line.pause ?? 180, 620), () => streamOutput(output, outputIndex + 1));
+      streamOutputLine(line, () => streamOutput(output, outputIndex + 1));
     };
 
     setTyping("");
+    setActiveOutputLine(null);
     setPhase("typing");
 
     const command = step.command;
@@ -155,6 +201,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
           ]);
           setTyping("");
           setPhase("output");
+          setActiveOutputLine(null);
           streamOutput(step.output, 0);
         });
         return;
@@ -192,6 +239,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         {lines.map((line, index) => (
           <TerminalCode key={`${line.kind}-${line.text ?? ""}-${index}`} line={line} />
         ))}
+        {activeOutputLine ? <TerminalCode line={activeOutputLine} active /> : null}
         {phase === "typing" ? (
           <code className="terminal-typing">
             <span className="terminal-prompt">{currentPrompt}</span>
@@ -212,7 +260,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
   );
 }
 
-function TerminalCode({ line }: { line: TerminalLine }) {
+function TerminalCode({ active = false, line }: { active?: boolean; line: TerminalLine }) {
   if (line.kind === "blank") {
     return <code className="terminal-blank" aria-hidden="true" />;
   }
@@ -232,5 +280,10 @@ function TerminalCode({ line }: { line: TerminalLine }) {
       </code>
     );
   }
-  return <code className={`terminal-${line.kind ?? "default"}`}>{line.text}</code>;
+  return (
+    <code className={`terminal-${line.kind ?? "default"}`}>
+      {line.text}
+      {active ? <span className="terminal-output-caret" aria-hidden="true" /> : null}
+    </code>
+  );
 }

@@ -3334,6 +3334,16 @@ body {
   width: 7px;
 }
 
+.terminal-output-caret {
+  background: currentColor;
+  display: inline-block;
+  height: 1em;
+  margin-left: 2px;
+  opacity: 0.72;
+  transform: translateY(2px);
+  width: 6px;
+}
+
 @keyframes terminal-caret {
   0%, 48% {
     opacity: 1;
