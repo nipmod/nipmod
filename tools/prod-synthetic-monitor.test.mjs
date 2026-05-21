@@ -370,7 +370,7 @@ function createFixture({ checkpointPatch = {}, discoveryPatch = {}, registryPack
   );
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
-    [`GET ${endpoints.trust}`]: textResponse("Verified registry Current public roots Release key Quorum"),
+    [`GET ${endpoints.trust}`]: textResponse("What makes a package Five anchors Source Digest Witness"),
     [`GET ${endpoints.platforms}`]: textResponse("Platform connections Only usable paths are shown"),
     [`GET ${endpoints.platformConnections}`]: jsonResponse({
       connections: [{ id: "aeon" }, { id: "openhuman" }, { id: "hermes" }],

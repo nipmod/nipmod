@@ -54,7 +54,7 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "trust_page", async () => {
     const text = await fetchText(endpoints.trust, timedFetch);
-    for (const marker of ["Verified registry", "Current public roots", "Release key", "Quorum"]) {
+    for (const marker of ["What makes a package", "Five anchors", "Source", "Digest", "Witness"]) {
       assertIncludes(text, marker, `trust page missing ${marker}`);
     }
     return { url: endpoints.trust };
