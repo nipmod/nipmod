@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 const tokens = {
@@ -117,9 +116,11 @@ function AgentCard({ agent }: { agent: { id: string; name: string; logo?: string
         aria-hidden="true"
       >
         {agent.logo ? (
-          <Image
+          <img
             alt=""
+            decoding="async"
             height={30}
+            loading="eager"
             src={agent.logo}
             style={{
               display: "block",
