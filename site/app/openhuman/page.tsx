@@ -125,11 +125,6 @@ export default function OpenHumanPage() {
             </div>
           </article>
         </div>
-        <div className="package-links">
-          <a href="/integrations/openhuman/proof.json">Proof JSON</a>
-          <a className="data-link" href="/compatibility/platform-connections.json">Connection matrix</a>
-          <a href="/api/mcp">Hosted MCP</a>
-        </div>
       </section>
     </main>
   );

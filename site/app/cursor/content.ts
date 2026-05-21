@@ -67,16 +67,8 @@ export const cursorContent = {
       href: "https://github.com/nipmod/nipmod/blob/main/.cursor-plugin/marketplace.json"
     },
     {
-      label: "Proof JSON",
-      href: "/compatibility/platform-connections.json"
-    },
-    {
       label: "MCP docs",
       href: "/mcp"
-    },
-    {
-      label: "Public config",
-      href: "/integrations/cursor/mcp.json"
     }
   ],
   accuratePost:

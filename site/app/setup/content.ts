@@ -65,7 +65,7 @@ export const setupContent = {
   capabilities: [
     {
       label: "Read without install",
-      text: "Hosted MCP at https://nipmod.com/api/mcp lets agents search, inspect and plan from the public archive."
+      text: "Agents can search, inspect and plan from the public archive before any local install."
     },
     {
       label: "Find packages",

@@ -62,7 +62,7 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "platform_connections", async () => {
     const page = await fetchText(endpoints.platforms, timedFetch);
-    assertIncludes(page, "Connection matrix", "platform page missing matrix title");
+    assertIncludes(page, "Platform connections", "platform page missing connections title");
     assertIncludes(page, "Only usable paths are shown", "platform page missing usable status scope");
     const matrix = await fetchJson(endpoints.platformConnections, timedFetch);
     assertEqual(matrix.type, "dev.nipmod.platform-connections.v1", "platform connection type mismatch");

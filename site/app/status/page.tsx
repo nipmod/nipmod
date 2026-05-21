@@ -97,8 +97,8 @@ export default function StatusPage() {
       <section className="proof-section" aria-labelledby="receipts-title">
         <div>
           <p className="eyebrow">Receipts</p>
-          <h2 id="receipts-title">Machine readable proof</h2>
-          <p>Agents can read these directly before trusting claims from a post.</p>
+          <h2 id="receipts-title">Readiness checks</h2>
+          <p>Public checks are kept behind the product so the website stays readable for humans.</p>
         </div>
         <div className="check-list">
           <article className="check-row">
@@ -106,9 +106,6 @@ export default function StatusPage() {
             <div>
               <h3>System readiness</h3>
               <p>Archive, CLI, MCP, one-command setup, install receipts, source sync and parallel access proof.</p>
-              <a className="data-link" href="/compatibility/system-readiness.json">
-                Open JSON receipt
-              </a>
             </div>
           </article>
           <article className="check-row">
@@ -116,9 +113,6 @@ export default function StatusPage() {
             <div>
               <h3>Platform readiness</h3>
               <p>Codex, Claude Code, Cursor, OpenCode, Hermes MCP path, Bankr workflow proof and source mirror readiness.</p>
-              <a className="data-link" href="/compatibility/platform-readiness.json">
-                Open JSON receipt
-              </a>
             </div>
           </article>
           <article className="check-row">
@@ -126,9 +120,6 @@ export default function StatusPage() {
             <div>
               <h3>Registry archive</h3>
               <p>Public packages, source metadata, transparency and package documents come from the same archive.</p>
-              <a className="data-link" href="/registry/packages.json">
-                Open registry JSON
-              </a>
             </div>
           </article>
         </div>

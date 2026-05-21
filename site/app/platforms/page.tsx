@@ -31,7 +31,7 @@ export default function PlatformsPage() {
     <main className="page-shell" id="main">
       <section className="quickstart-hero" aria-labelledby="platforms-title">
         <p className="eyebrow">Platforms</p>
-        <h1 id="platforms-title">Connection matrix</h1>
+        <h1 id="platforms-title">Platform connections</h1>
         <p className="lead">
           This page shows the paths people can use now: Nipmod controlled paths and MCP ready agent hosts.
         </p>
@@ -68,12 +68,6 @@ export default function PlatformsPage() {
           <p className="eyebrow">Status labels</p>
           <h2 id="legend-title">Only usable paths are shown.</h2>
           <p>Future paths stay in the public machine file until they are ready for users.</p>
-          <a className="data-link" href="/compatibility/platform-connections.json">
-            Open connection matrix JSON
-          </a>
-          <a className="data-link" href="/compatibility/platform-readiness.json">
-            Open readiness receipt JSON
-          </a>
         </div>
         <div className="platform-grid">
           {visibleLegend.map((item) => (
@@ -113,7 +107,7 @@ export default function PlatformsPage() {
             <ConnectionCard connection={connection} key={connection.id} />
           ))}
         </div>
-        <p className="platform-note">The full JSON keeps future paths for audit without promoting them in the product UI.</p>
+        <p className="platform-note">Future paths stay out of the product UI until they are ready for users.</p>
       </section>
     </main>
   );

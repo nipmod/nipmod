@@ -156,12 +156,6 @@ export default function AeonPage() {
             </div>
           </article>
         </div>
-        <div className="package-links">
-          <a href="/integrations/aeon/proof.json">Proof JSON</a>
-          <a href="/integrations/aeon/AEON_SUBMISSION.md">Review packet</a>
-          <a href="https://github.com/aaronjmars/aeon/pull/199" rel="noreferrer" target="_blank">Aeon PR</a>
-          <a className="data-link" href="/compatibility/platform-connections.json">Connection matrix</a>
-        </div>
       </section>
     </main>
   );

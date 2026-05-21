@@ -68,7 +68,7 @@ export default function McpPage() {
             </pre>
           </article>
         </div>
-        <div className="package-links" aria-label="Hosted MCP read-only tools">
+        <div className="package-links" aria-label="Read-only MCP tools">
           {mcpContent.remote.tools.map((tool) => (
             <span className="pill" key={tool}>
               {tool}

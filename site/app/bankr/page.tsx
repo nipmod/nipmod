@@ -4,8 +4,6 @@ import { homeContent } from "../content";
 
 const skillInstall = "https://nipmod.com/integrations/bankr/nipmod/SKILL.md";
 const githubSkillFolder = "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod";
-const freeServiceMap = "https://nipmod.com/integrations/bankr/bankr.free.json";
-const agentProof = "https://nipmod.com/integrations/bankr/bankr.agent-proof.json";
 const catalogSubmission = "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md";
 const bankrSkillDocs = "https://docs.bankr.bot/skills/in-bankr/skill-format/";
 const bankrAgentPrompt =
@@ -13,7 +11,7 @@ const bankrAgentPrompt =
 const bankrCodexPrompt =
   "Use Nipmod to prepare a Bankr safe package workflow. Search for gitlawb-repo-reader, inspect trust, create an install plan, and do not run wallet, trading or signing actions.";
 const bankrProofPrompt =
-  "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.";
+  "Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read the Nipmod Bankr skill, find gitlawb-repo-reader, check trust, prepare an install plan and return a short safety summary. Do not install packages or mutate the user's workspace.";
 const bankrRuntimeSmoke = "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 
@@ -88,12 +86,6 @@ export default function BankrPage() {
           <a className="button button-primary" href="/integrations/bankr/nipmod/SKILL.md">
             Open Bankr skill file
           </a>
-          <a className="button button-ghost" href="/integrations/bankr/bankr.free.json">
-            Open free service map
-          </a>
-          <a className="button button-ghost" href="/integrations/bankr/bankr.agent-proof.json">
-            Open agent proof
-          </a>
           <a
             className="button button-ghost"
             href={homeContent.links.bankrCoin}
@@ -162,14 +154,8 @@ export default function BankrPage() {
           <article className="quickstart-card">
             <span>Prompt</span>
             <h2>Run with a Bankr agent</h2>
-            <p>The prompt blocks wallet actions and asks for machine-readable proof output.</p>
+            <p>The prompt blocks wallet actions and asks for a short structured safety summary.</p>
             <CommandBlock command={bankrProofPrompt} label="Copy Bankr proof prompt" />
-          </article>
-          <article className="quickstart-card">
-            <span>Manifest</span>
-            <h2>Agent proof JSON</h2>
-            <p>The manifest pins the package, expected trust result and safe workflow commands.</p>
-            <CommandBlock command={agentProof} label="Copy agent proof manifest" />
           </article>
           <article className="quickstart-card">
             <span>Runtime</span>
@@ -230,12 +216,6 @@ export default function BankrPage() {
               <p>{service.text}</p>
             </article>
           ))}
-          <article className="quickstart-card">
-            <span>Map</span>
-            <h2>Free service map</h2>
-            <p>Agents can read the machine map without authentication or payment.</p>
-            <CommandBlock command={freeServiceMap} label="Copy free service map" />
-          </article>
         </div>
       </section>
 
