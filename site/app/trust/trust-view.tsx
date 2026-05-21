@@ -22,42 +22,57 @@ const steps: Array<{
   t: string;
   sub: string;
   icon: ReactNode;
-  body: string;
+  body: string[];
 }> = [
   {
     id: "source",
     t: "Source",
     sub: "gitlawb://repos/...",
     icon: <Glyph d="M2 3h12v10H2z" />,
-    body: "Every package points back to a verifiable Gitlawb commit. No code lives only in the registry."
+    body: [
+      "A Nipmod package starts with a source reference, not with an anonymous upload. The package record keeps the owner, repository, commit and release context visible so an agent can trace what it is about to use before anything is installed.",
+      "The registry is therefore not treated as the only source of truth. It indexes and verifies package evidence while preserving the original source trail, which makes mirrors, republished bundles and renamed packages easier to reason about."
+    ]
   },
   {
     id: "publisher",
     t: "Publisher",
     sub: "did:key:z6Mkq...",
     icon: <Glyph d="M3 7v6h10V7M5 7V5a3 3 0 016 0v2" />,
-    body: "Releases are signed with a DID key. Ownership is a signature, not a username."
+    body: [
+      "Publisher identity is bound to a cryptographic DID key. A package is not trusted just because a username, display name or profile link looks familiar; the release claim has to be signed by the expected publishing identity.",
+      "This gives agents a machine-readable way to separate ownership from appearance. If attribution, source identity or release authority cannot be verified, the package can be downgraded, flagged or held for review instead of being treated as ready."
+    ]
   },
   {
     id: "digest",
     t: "Digest",
     sub: "sha256:7c2a9f...",
     icon: <Glyph d="M8 2 14 5 8 8 2 5z M2 8l6 3 6-3 M2 11l6 3 6-3" />,
-    body: "Every release pins exact bytes. The lockfile refuses anything that does not match."
+    body: [
+      "Every release is pinned to the exact bytes of the artifact through a SHA-256 digest. The name and version help humans find the package, but the digest is what lets an agent verify that the downloaded file is the same artifact that was reviewed.",
+      "Install plans carry that expected digest forward. If the artifact changes, the check fails instead of silently accepting different code under the same name. This is the core guardrail against swapped bundles, mutable releases and accidental drift."
+    ]
   },
   {
     id: "witness",
     t: "Witness",
     sub: "2 of 3 threshold",
     icon: <Glyph d="M2 10v4h2v-4M6 7v7h2V7M10 4v10h2V4" />,
-    body: "Independent runners co sign the digest. A threshold is required before publish."
+    body: [
+      "Witnesses add an external check around the release record. Instead of relying on a single registry process, independent verification runners can observe the package evidence and co-sign the checkpoint for the same source and digest.",
+      "The threshold matters because it reduces single-point trust. A package only reaches the stronger state when enough witnesses agree on the same evidence, making unauthorized rewrites, partial failures and private registry mistakes easier to detect."
+    ]
   },
   {
     id: "audit",
     t: "Audit",
     sub: "transparency log",
     icon: <Glyph d="M8 2l5 2v4.2c0 2.8-2.2 5-5 6-2.8-1-5-3.2-5-6V4z" />,
-    body: "Advisories, witness checkpoints and quarantine are read live before any install runs."
+    body: [
+      "Trust is checked again at use time. Advisories, quarantine status, witness checkpoints, permission claims and release receipts are part of the install decision, not just static text on a package page.",
+      "That keeps the workflow responsive when risk changes after publication. If a package is yanked, warned, quarantined or no longer matches its expected evidence, agents can stop before writing files or running code in the workspace."
+    ]
   }
 ];
 
@@ -239,18 +254,25 @@ export function TrustView() {
             {activeStep.t}.
           </h2>
         </div>
-        <p
+        <div
           style={{
             fontFamily: tokens.serif,
-            fontSize: 22,
+            fontSize: "clamp(18px, 2vw, 20px)",
             color: tokens.text,
             margin: 0,
-            lineHeight: 1.4,
-            maxWidth: 640
+            lineHeight: 1.5,
+            maxWidth: 700,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16
           }}
         >
-          {activeStep.body}
-        </p>
+          {activeStep.body.map((paragraph) => (
+            <p key={paragraph} style={{ margin: 0 }}>
+              {paragraph}
+            </p>
+          ))}
+        </div>
       </section>
     </main>
   );
