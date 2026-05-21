@@ -1,0 +1,12 @@
+# Keep GitHub language stats focused on source code, not generated public artifacts.
+site/public/releases/** linguist-generated=true
+site/public/registry/** linguist-generated=true
+site/public/compatibility/** linguist-generated=true
+site/public/review/** linguist-generated=true
+site/public/*.html linguist-generated=true
+
+# Package fixture documentation is product content, but should not dominate language stats.
+packages/first-party/**/README.md linguist-documentation=true
+packages/first-party/**/SKILL.md linguist-documentation=true
+packages/first-party/**/SMOKE.md linguist-documentation=true
+packages/first-party/**/EXAMPLE.md linguist-documentation=true

@@ -4,63 +4,60 @@
 [![Production monitor](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml/badge.svg)](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-white.svg)](LICENSE)
 
-Nipmod is one package API for agents.
+One package API for agents.
 
-Agents ask once. Nipmod searches package sources, normalizes the result, adds trust context and returns a safe install plan before anything enters a workspace.
+Nipmod lets an agent search package sources, inspect trust signals, and request a safe install plan before code enters a workspace. Public beta access is free and rate limited.
 
 ```bash
-curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'
+curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 ```
+
+## What It Does
+
+- Searches package sources through one API surface.
+- Normalizes package records across npm, PyPI, GitHub, Hugging Face, and MCP sources.
+- Returns source links, license data, package metadata, and trust signals.
+- Produces install plans agents can show before running workspace writes.
+- Saves useful confirmed records into the Nipmod archive for later reuse.
+
+Hosted API calls never read or write the caller workspace. Local CLI and MCP tools are only needed when a workflow explicitly needs controlled workspace writes.
 
 ## Status
 
 | Surface | Status |
 | --- | --- |
-| Hosted package API | Live public beta with rate limits |
-| Source resolver | Live for npm, PyPI, GitHub, Hugging Face and MCP |
-| Package intelligence archive | Resolver safe mode until durable archive env vars are configured |
-| Verified Nipmod archive | Empty after seed reset; new entries must pass verification gates |
+| Hosted package API | Live public beta, rate limited |
+| Source resolver | Live for npm, PyPI, GitHub, Hugging Face, and MCP |
+| Package intelligence archive | Durable production archive enabled |
+| Verified Nipmod archive | Empty by design after seed reset; new entries pass verification gates |
 | CLI and installer | Live, release `1.2.5` |
 | Local MCP server | Live for controlled workspace installs |
 | Hosted MCP endpoint | Live, read-only |
-
-## Links
-
-| Area | Link |
-| --- | --- |
-| Website | https://nipmod.com |
-| API access | https://nipmod.com/api-access |
-| Sources | https://nipmod.com/sources |
-| Archive | https://nipmod.com/packages |
-| Registry | https://nipmod.com/registry/packages.json |
-| Agent instructions | https://nipmod.com/llms.txt |
-| Machine discovery | https://nipmod.com/.well-known/nipmod.json |
-| GitHub | https://github.com/nipmod/nipmod |
-| GitHub mirror | https://github.com/nipmod/nipmod |
-| Gitlawb source | https://gitlawb.com/node/repos/z6Mkwbud/nipmod |
-| X | https://x.com/Nipmod |
-| Telegram | https://t.me/nipmod |
-
-Canonical source: `gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod`
 
 ## API
 
 Public beta access does not require an API key.
 
 ```bash
-curl 'https://nipmod.com/api/search?q=telegram%20bot&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
-curl 'https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=node-telegram-bot-api'
-curl 'https://nipmod.com/api/archive/prepare?source=npm&name=node-telegram-bot-api'
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
-Hosted API calls never read or write a caller workspace. They return package records, trust signals and install plans. Local CLI or MCP setup is only needed when a user wants controlled workspace writes.
+Core endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/search` | Search supported package sources. |
+| `GET /api/inspect` | Inspect one exact package record. |
+| `GET /api/install-plan` | Return a safe install plan for an agent to review. |
+| `GET /api/archive/prepare` | Prepare a durable archive record after useful discovery. |
+| `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
 
 ## Install
 
-The CLI is optional for API use. Install it only when a workflow needs local package writes, audits, SBOM output or publish preparation.
-
-Requirements: Node.js 22 or newer, npm, Git, curl and tar.
+The CLI is optional for API use. Install it only when a workflow needs local package writes, audits, SBOM output, or publish preparation.
 
 ```bash
 curl https://nipmod.com/i|bash
@@ -74,6 +71,8 @@ curl -fLO https://nipmod.com/install.sh.sha256
 shasum -a 256 -c install.sh.sha256
 bash install.sh
 ```
+
+Requirements: Node.js 22 or newer, npm, Git, curl, and tar.
 
 ## Local Workspace Flow
 
@@ -103,7 +102,7 @@ Local MCP server:
 nipmod mcp serve
 ```
 
-The hosted endpoint exposes search, resolve, inspect, view, install plan and demo tools. It does not expose workspace writes, local file reads, audit, SBOM, claim or publish tools.
+The hosted endpoint exposes search, resolve, inspect, view, install plan, and demo tools. It does not expose workspace writes, local file reads, audit, SBOM, claim, or publish tools.
 
 ## Publish
 
@@ -127,11 +126,11 @@ nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
 
 ## Repository Map
 
-- `nipmod/` - TypeScript CLI, package installer, registry client, resolver and MCP server.
-- `site/` - Next.js website, API routes, registry surfaces and public machine files.
+- `nipmod/` - TypeScript CLI, package installer, registry client, resolver, and MCP server.
+- `site/` - Next.js website, API routes, registry surfaces, and public machine files.
 - `packages/first-party/` - First-party package fixtures used for verified archive gates.
-- `docs/` - Operator docs, trust model, package publishing and architecture notes.
-- `tools/` - Release, readiness, registry, monitor and security tooling.
+- `docs/` - Operator docs, trust model, package publishing, and architecture notes.
+- `tools/` - Release, readiness, registry, monitor, and security tooling.
 
 ## Verify
 
@@ -146,5 +145,19 @@ pnpm --dir site security:secrets
 node tools/open-source-readiness-check.mjs
 node tools/supply-chain-check.mjs
 ```
+
+## Links
+
+| Area | Link |
+| --- | --- |
+| Website | https://nipmod.com |
+| API access | https://nipmod.com/api-access |
+| Sources | https://nipmod.com/sources |
+| Archive | https://nipmod.com/packages |
+| Registry | https://nipmod.com/registry/packages.json |
+| Agent instructions | https://nipmod.com/llms.txt |
+| Machine discovery | https://nipmod.com/.well-known/nipmod.json |
+| X | https://x.com/Nipmod |
+| Telegram | https://t.me/nipmod |
 
 License: `MIT`. Security: `SECURITY.md`. Trademark and affiliation notice: `TRADEMARKS.md`.
