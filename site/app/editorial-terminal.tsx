@@ -6,8 +6,8 @@ import { NipmodMark } from "./editorial-mark";
 export type TerminalLine = {
   kind?: "default" | "muted" | "ok" | "warn" | "header" | "blank" | "logo" | "input";
   text?: string;
-  prompt?: string;
   pause?: number;
+  prompt?: string;
 };
 
 export type TerminalStep = {
@@ -26,30 +26,33 @@ const defaultScript: TerminalStep[] = [
   {
     command: "curl https://nipmod.com/i|bash",
     output: [
-      { kind: "default", text: "Installing nipmod 1.2.5", pause: 320 },
-      { kind: "default", text: "Package:   https://nipmod.com/releases/nipmod-1.2.5.tgz", pause: 70 },
-      { kind: "default", text: "Signature: https://nipmod.com/releases/nipmod-1.2.5.tgz.sig", pause: 70 },
-      { kind: "default", text: "Prefix:    ~/.nipmod", pause: 70 },
-      { kind: "default", text: "Binary:    ~/.local/bin/nipmod", pause: 240 },
+      { kind: "default", text: "Installing nipmod 1.2.5", pause: 380 },
+      { kind: "default", text: "  Package:   https://nipmod.com/releases/nipmod-1.2.5.tgz", pause: 60 },
+      { kind: "default", text: "  Signature: https://nipmod.com/releases/nipmod-1.2.5.tgz.sig", pause: 60 },
+      { kind: "default", text: "  Prefix:    ~/.nipmod", pause: 60 },
+      { kind: "default", text: "  Binary:    ~/.local/bin/nipmod", pause: 360 },
       { kind: "blank" },
-      { kind: "muted", text: "up to date, audited 2 packages in 579ms", pause: 170 },
-      { kind: "muted", text: "found 0 vulnerabilities", pause: 180 },
-      { kind: "default", text: "Setting up Gitlawb publish helper", pause: 200 },
-      { kind: "muted", text: "git-remote-gitlawb already installed at ~/.local/bin/git-remote-gitlawb", pause: 220 },
-      { kind: "ok", text: "Installed nipmod", pause: 220 },
-      { kind: "muted", text: "Next:", pause: 70 },
-      { kind: "muted", text: "  nipmod doctor --online", pause: 70 },
-      { kind: "muted", text: "  nipmod search gitlawb --online", pause: 900 }
+      { kind: "muted", text: "up to date, audited 2 packages in 579ms", pause: 260 },
+      { kind: "muted", text: "found 0 vulnerabilities", pause: 280 },
+      { kind: "blank" },
+      { kind: "default", text: "Setting up Gitlawb publish helper", pause: 240 },
+      { kind: "muted", text: "git-remote-gitlawb already installed at ~/.local/bin/git-remote-gitlawb", pause: 360 },
+      { kind: "blank" },
+      { kind: "ok", text: "Installed nipmod", pause: 180 },
+      { kind: "muted", text: "Next:", pause: 80 },
+      { kind: "muted", text: "  nipmod doctor --online", pause: 60 },
+      { kind: "muted", text: "  nipmod search gitlawb --online", pause: 980 }
     ]
   },
   {
     command: "nipmod search gitlawb --online",
     output: [
       { kind: "header", text: "NAME                       VERSION   TRUST     PUBLISHER", pause: 50 },
-      { kind: "default", text: "gitlawb-repo-reader        0.1.0     verified  did:key:z6Mkq...", pause: 40 },
-      { kind: "default", text: "prompt-injection-scan      0.1.0     verified  did:key:z6Mkf...", pause: 40 },
+      { kind: "default", text: "gitlawb-repo-reader        0.1.0     verified  did:key:z6Mkq...", pause: 34 },
+      { kind: "default", text: "prompt-injection-scan      0.1.0     verified  did:key:z6Mkf...", pause: 34 },
       { kind: "default", text: "agent-permission-review    0.1.0     verified  did:key:z6Mkn...", pause: 90 },
-      { kind: "muted", text: "3 results in 142ms", pause: 900 }
+      { kind: "blank" },
+      { kind: "muted", text: "3 results in 142ms", pause: 760 }
     ]
   },
   {
@@ -60,16 +63,34 @@ const defaultScript: TerminalStep[] = [
       { kind: "default", text: "Source       gitlawb://repos/z6Mkq.../gitlawb-repo-reader", pause: 50 },
       { kind: "default", text: "Digest       sha256:7c2a9f...e801", pause: 50 },
       { kind: "default", text: "Signature    valid", pause: 50 },
-      { kind: "default", text: "Witness      2 of 3 threshold met", pause: 700 }
+      { kind: "default", text: "Witness      2 of 3 threshold met", pause: 720 }
+    ]
+  },
+  {
+    command: "nipmod install gitlawb-repo-reader",
+    output: [
+      { kind: "muted", text: "Resolving dependency graph...", pause: 420 },
+      { kind: "default", text: "  + gitlawb-repo-reader      0.1.0", pause: 80 },
+      { kind: "default", text: "  + verified-source-fetch    0.1.6", pause: 180 },
+      { kind: "blank" },
+      { kind: "warn", text: "? Approve install [Y/n] y", pause: 620 },
+      { kind: "default", text: "  verifying digests          ok", pause: 280 },
+      { kind: "default", text: "  writing lockfile           ok", pause: 220 },
+      { kind: "blank" },
+      { kind: "logo", pause: 180 },
+      { kind: "ok", text: "installed 2 packages in 832ms", pause: 1200 }
     ]
   }
 ];
 
-export function AnimatedTerminal({ height = 520, script = defaultScript, title = "~ -- nipmod -- 80x24" }: AnimatedTerminalProps) {
+export function AnimatedTerminal({
+  height = 520,
+  script = defaultScript,
+  title = "~ -- nipmod -- 80x24"
+}: AnimatedTerminalProps) {
   const stableScript = useMemo(() => script, [script]);
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [typing, setTyping] = useState("");
-  const [activeOutputLine, setActiveOutputLine] = useState<TerminalLine | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<"typing" | "output" | "done">("typing");
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -80,7 +101,6 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
     timersRef.current = [];
     setLines([]);
     setTyping("");
-    setActiveOutputLine(null);
     setStepIndex(0);
     setPhase("typing");
   }, [stableScript]);
@@ -89,7 +109,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [activeOutputLine, lines, typing]);
+  }, [lines, typing]);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,56 +122,11 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
 
     const schedule = (ms: number, fn: () => void) => {
       const id = window.setTimeout(() => {
-        if (cancelled) {
-          return;
+        if (!cancelled) {
+          fn();
         }
-        fn();
       }, ms);
       timersRef.current.push(id);
-    };
-
-    const outputDelayFor = (line: TerminalLine, nextIndex: number) => {
-      const text = line.text ?? "";
-      const char = text[nextIndex - 1] ?? "";
-      const nextChar = text[nextIndex] ?? "";
-      const base = line.kind === "muted" || line.kind === "header" ? 5 : 7;
-      const punctuationPause = /[.:]/.test(char) ? 26 : 0;
-      const columnPause = char === " " && nextChar !== " " ? 4 : 0;
-
-      return base + punctuationPause + columnPause + Math.random() * 10;
-    };
-
-    const streamOutputLine = (line: TerminalLine, done: () => void) => {
-      const text = line.text ?? "";
-
-      if (!text || line.kind === "blank" || line.kind === "logo") {
-        setActiveOutputLine(null);
-        setLines((current) => [...current, line]);
-        schedule(Math.min(line.pause ?? 180, 620), done);
-        return;
-      }
-
-      let nextIndex = 0;
-      setActiveOutputLine({ ...line, text: "" });
-
-      const typeOutputNext = () => {
-        if (cancelled) {
-          return;
-        }
-
-        if (nextIndex >= text.length) {
-          setLines((current) => [...current, { ...line, text }]);
-          setActiveOutputLine(null);
-          schedule(Math.min(line.pause ?? 150, 620), done);
-          return;
-        }
-
-        nextIndex += 1;
-        setActiveOutputLine({ ...line, text: text.slice(0, nextIndex) });
-        schedule(outputDelayFor(line, nextIndex), typeOutputNext);
-      };
-
-      schedule(24, typeOutputNext);
     };
 
     const streamOutput = (output: TerminalLine[], outputIndex: number) => {
@@ -160,7 +135,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
       }
 
       if (outputIndex >= output.length) {
-        schedule(900, () => {
+        schedule(980, () => {
           if (cancelled) {
             return;
           }
@@ -178,11 +153,11 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         setPhase("done");
         return;
       }
-      streamOutputLine(line, () => streamOutput(output, outputIndex + 1));
+      setLines((current) => [...current, line]);
+      schedule(line.pause ?? 220, () => streamOutput(output, outputIndex + 1));
     };
 
     setTyping("");
-    setActiveOutputLine(null);
     setPhase("typing");
 
     const command = step.command;
@@ -194,27 +169,26 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
       }
 
       if (commandIndex > command.length) {
-        schedule(260, () => {
+        schedule(340, () => {
           setLines((current) => [
             ...current,
             { kind: "input", text: command, prompt: step.prompt ?? "~ $" }
           ]);
           setTyping("");
           setPhase("output");
-          setActiveOutputLine(null);
           streamOutput(step.output, 0);
         });
         return;
       }
 
       setTyping(command.slice(0, commandIndex));
-      const previousChar = command[commandIndex - 1];
+      const previousChar = command[commandIndex - 1] ?? "";
       commandIndex += 1;
-      const delay = 16 + Math.random() * 38 + (previousChar === " " ? 28 : 0);
+      const delay = 18 + Math.random() * 44 + (previousChar === " " ? 34 : 0);
       schedule(delay, typeNext);
     };
 
-    schedule(220, typeNext);
+    schedule(260, typeNext);
 
     return () => {
       cancelled = true;
@@ -235,11 +209,10 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
         </span>
         <span>{title}</span>
       </div>
-      <div className="landing-terminal animated-terminal" ref={scrollRef}>
+      <div className="animated-terminal" ref={scrollRef}>
         {lines.map((line, index) => (
-          <TerminalCode key={`${line.kind}-${line.text ?? ""}-${index}`} line={line} />
+          <TerminalLineView key={`${line.kind}-${line.text ?? ""}-${index}`} line={line} />
         ))}
-        {activeOutputLine ? <TerminalCode line={activeOutputLine} active /> : null}
         {phase === "typing" ? (
           <code className="terminal-typing">
             <span className="terminal-prompt">{currentPrompt}</span>
@@ -260,7 +233,7 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
   );
 }
 
-function TerminalCode({ active = false, line }: { active?: boolean; line: TerminalLine }) {
+function TerminalLineView({ line }: { line: TerminalLine }) {
   if (line.kind === "blank") {
     return <code className="terminal-blank" aria-hidden="true" />;
   }
@@ -268,7 +241,7 @@ function TerminalCode({ active = false, line }: { active?: boolean; line: Termin
     return (
       <code className="terminal-logo">
         <NipmodMark size={22} />
-        <span>verified package archive for agents</span>
+        <span>nipmod - agent package layer</span>
       </code>
     );
   }
@@ -280,10 +253,5 @@ function TerminalCode({ active = false, line }: { active?: boolean; line: Termin
       </code>
     );
   }
-  return (
-    <code className={`terminal-${line.kind ?? "default"}`}>
-      {line.text}
-      {active ? <span className="terminal-output-caret" aria-hidden="true" /> : null}
-    </code>
-  );
+  return <code className={`terminal-${line.kind ?? "default"}`}>{line.text}</code>;
 }
