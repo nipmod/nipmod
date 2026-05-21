@@ -8,7 +8,7 @@ export const homeContent = {
     github: "https://github.com/nipmod/nipmod",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",
     gitlawbSource: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
-    install: "/setup",
+    install: "/agents",
     telegram: "https://t.me/nipmod",
     x: "https://x.com/Nipmod"
   },
