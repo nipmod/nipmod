@@ -229,7 +229,7 @@ async function checkLiveEndpoints() {
     [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
-      ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "/nipmod", "aeon"]
+      ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "/nipmod", "aeon", "openhuman"]
     ],
     [
       "hermes_skill",
@@ -254,7 +254,7 @@ async function checkLiveEndpoints() {
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
-      ["dev.nipmod.platform-readiness.v1", "claude-code", "cursor", "opencode", "hermes", "/nipmod", "aeon"]
+      ["dev.nipmod.platform-readiness.v1", "claude-code", "cursor", "opencode", "hermes", "/nipmod", "aeon", "openhuman"]
     ]
   ];
 

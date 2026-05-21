@@ -21,6 +21,7 @@ Current truthful platform language:
 - Codex, Claude Code, Cursor, OpenCode, Hermes: MCP ready through local setup.
 - Bankr: prepared and under review, not native accepted.
 - Aeon: candidate only, pending owner approval.
+- OpenHuman: candidate only, pending Tiny Humans owner approval.
 
 Do not claim official partnerships, native marketplace acceptance, user adoption or financial outcomes unless a checked source in the repo already proves it.
 

@@ -28,7 +28,8 @@ describe("platform connection matrix", () => {
       "opencode:MCP ready",
       "hermes:MCP ready",
       "bankr:Under review",
-      "aeon:Candidate"
+      "aeon:Candidate",
+      "openhuman:Candidate"
     ]);
     expect(connections.notClaimed).toContain("MCP ready means native platform partnership");
   });
@@ -56,6 +57,7 @@ describe("platform connection matrix", () => {
   test("keeps external review paths explicitly scoped", () => {
     const bankr = connections.connections.find((connection: { id: string }) => connection.id === "bankr");
     const aeon = connections.connections.find((connection: { id: string }) => connection.id === "aeon");
+    const openhuman = connections.connections.find((connection: { id: string }) => connection.id === "openhuman");
     const cursor = connections.connections.find((connection: { id: string }) => connection.id === "cursor");
     const hermes = connections.connections.find((connection: { id: string }) => connection.id === "hermes");
 
@@ -63,6 +65,8 @@ describe("platform connection matrix", () => {
     expect(bankr.externalDependency).toContain("Bankr must review");
     expect(aeon.externalApprovalRequired).toBe(true);
     expect(aeon.externalDependency).toContain("Aeon owner review");
+    expect(openhuman.externalApprovalRequired).toBe(true);
+    expect(openhuman.externalDependency).toContain("Tiny Humans owner review");
     expect(cursor.externalApprovalRequired).toBe(false);
     expect(cursor.externalDependency).toContain("No native marketplace claim");
     expect(hermes.externalApprovalRequired).toBe(true);

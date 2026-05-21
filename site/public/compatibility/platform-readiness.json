@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-20T21:33:53.805Z",
+  "generatedAt": "2026-05-21T00:20:28.000Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, local host MCP contracts, hosted read-only MCP, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -211,6 +211,25 @@
         "no owner approval or package publication is claimed"
       ],
       "externalDependency": "Aeon owner review and consent are required before any Aeon skill collection is published through Nipmod."
+    },
+    {
+      "id": "openhuman",
+      "name": "OpenHuman",
+      "productReadiness": 20,
+      "connectionStatus": "Candidate",
+      "status": "candidate",
+      "claim": "OpenHuman is a strong agent-harness candidate for a future Nipmod connection, pending Tiny Humans owner review.",
+      "connectionKit": "integrations/platform-connections/openhuman",
+      "evidence": [
+        "https://github.com/tinyhumansai/openhuman",
+        "https://tinyhumans.ai/openhuman"
+      ],
+      "checks": [
+        "candidate repo is public",
+        "repo exposes agent-facing surfaces such as .agents, .claude and .codex",
+        "no owner approval, native support or package publication is claimed"
+      ],
+      "externalDependency": "Tiny Humans owner review and consent are required before any official OpenHuman support or OpenHuman-owned package listing is claimed."
     }
   ],
   "notClaimed": [
@@ -219,6 +238,7 @@
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Aeon has approved or published a Nipmod skill collection",
+    "OpenHuman has approved, endorsed or published a Nipmod connection",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

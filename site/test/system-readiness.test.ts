@@ -159,7 +159,8 @@ describe("system readiness receipt", () => {
       "gitlawb",
       "hermes",
       "mcp",
-      "opencode"
+      "opencode",
+      "openhuman"
     ]);
     expect(readiness.parallelAccessProof.checkedBy).toBe("node tools/system-readiness-check.mjs --live --parallel");
     expect(readiness.parallelAccessProof.surfaces).toContain("Hosted MCP search");

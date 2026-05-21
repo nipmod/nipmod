@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.connection-proof.v1",
+  "id": "openhuman",
+  "name": "OpenHuman",
+  "status": "Candidate",
+  "proofLevel": "Candidate only",
+  "publicPath": "https://github.com/tinyhumansai/openhuman",
+  "smokeCommand": "Review OpenHuman docs and prepare owner approved MCP, CLI or skill setup path",
+  "externalApprovalRequired": true,
+  "externalDependency": "Tiny Humans owner review is required before claiming official OpenHuman support or publishing OpenHuman-owned packages through Nipmod."
+}

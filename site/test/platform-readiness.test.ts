@@ -28,11 +28,13 @@ describe("platform readiness receipt", () => {
       "opencode",
       "hermes",
       "bankr",
-      "aeon"
+      "aeon",
+      "openhuman"
     ]);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(20);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(20);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
     );
@@ -41,6 +43,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
     expect(readiness.notClaimed).toContain("Aeon has approved or published a Nipmod skill collection");
+    expect(readiness.notClaimed).toContain("OpenHuman has approved, endorsed or published a Nipmod connection");
     expect(connections.type).toBe("dev.nipmod.platform-connections.v1");
     expect(connections.connections.map((connection: { id: string }) => connection.id)).toEqual([
       "gitlawb",
@@ -52,7 +55,8 @@ describe("platform readiness receipt", () => {
       "opencode",
       "hermes",
       "bankr",
-      "aeon"
+      "aeon",
+      "openhuman"
     ]);
   });
 
@@ -175,5 +179,16 @@ describe("platform readiness receipt", () => {
     expect(aeon.externalDependency).toContain("owner review");
     expect(aeonConnection.externalApprovalRequired).toBe(true);
     expect(aeonConnection.proofLevel).toContain("Candidate only");
+  });
+
+  test("keeps OpenHuman candidate scoped to owner review", () => {
+    const openhuman = readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman");
+    const openhumanConnection = connections.connections.find((connection: { id: string }) => connection.id === "openhuman");
+
+    expect(openhuman.connectionStatus).toBe("Candidate");
+    expect(openhuman.claim).toContain("agent-harness candidate");
+    expect(openhuman.externalDependency).toContain("Tiny Humans owner review");
+    expect(openhumanConnection.externalApprovalRequired).toBe(true);
+    expect(openhumanConnection.proofLevel).toContain("Candidate only");
   });
 });

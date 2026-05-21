@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
-  "generatedAt": "2026-05-20T21:33:53.805Z",
+  "generatedAt": "2026-05-21T00:20:28.000Z",
   "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
   "statusLegend": [
     {
@@ -22,7 +22,7 @@
     }
   ],
   "hostSmoke": {
-      "checkedAt": "2026-05-20T21:33:53.805Z",
+      "checkedAt": "2026-05-21T00:20:28.000Z",
     "command": "node tools/platform-readiness-check.mjs --host-smoke",
     "summary": {
       "pass": 22,
@@ -227,6 +227,24 @@
       "evidence": [
         "https://github.com/aaronjmars/aeon"
       ]
+    },
+    {
+      "id": "openhuman",
+      "name": "OpenHuman",
+      "status": "Candidate",
+      "category": "agent harness",
+      "scope": "OpenHuman is a public personal-agent harness that could use Nipmod as a shared package discovery and trust layer.",
+      "proofLevel": "Candidate only. No Tiny Humans owner approval, native support or published Nipmod package collection is claimed.",
+      "url": "https://github.com/tinyhumansai/openhuman",
+      "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/openhuman",
+      "setupCommand": null,
+      "smokeCommand": "Review OpenHuman docs and prepare owner approved MCP, CLI or skill setup path",
+      "externalApprovalRequired": true,
+      "externalDependency": "Tiny Humans owner review is required before claiming official OpenHuman support or publishing OpenHuman-owned packages through Nipmod.",
+      "evidence": [
+        "https://github.com/tinyhumansai/openhuman",
+        "https://tinyhumans.ai/openhuman"
+      ]
     }
   ],
   "notClaimed": [
@@ -234,6 +252,7 @@
     "Every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr accepted the skill into the Bankr skills repo",
     "Aeon approved or published a Nipmod skill collection",
+    "OpenHuman approved, endorsed or published a Nipmod connection",
     "Third party platforms endorse Nipmod",
     "MCP ready means native platform partnership"
   ]

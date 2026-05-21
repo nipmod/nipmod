@@ -16,7 +16,8 @@ const IMAGE_MARKS: Record<string, { className?: string; src: string }> = {
 
 const TEXT_MARKS: Record<string, string> = {
   aeon: "ae",
-  codex: "Cx"
+  codex: "Cx",
+  openhuman: "oh"
 };
 
 export function PlatformMark({ id, name }: PlatformMarkProps) {

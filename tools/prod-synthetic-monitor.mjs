@@ -67,6 +67,7 @@ export async function runSyntheticMonitor({
     const matrix = await fetchJson(endpoints.platformConnections, timedFetch);
     assertEqual(matrix.type, "dev.nipmod.platform-connections.v1", "platform connection type mismatch");
     assertIncludes(JSON.stringify(matrix), "aeon", "platform matrix missing Aeon candidate");
+    assertIncludes(JSON.stringify(matrix), "openhuman", "platform matrix missing OpenHuman candidate");
     assertIncludes(JSON.stringify(matrix), "hermes", "platform matrix missing Hermes candidate");
     return { matrix: endpoints.platformConnections, page: endpoints.platforms };
   });
