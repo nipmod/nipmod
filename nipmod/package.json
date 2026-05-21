@@ -1,0 +1,28 @@
+{
+  "name": "nipmod",
+  "version": "1.2.5",
+  "private": true,
+  "packageManager": "pnpm@10.30.0",
+  "type": "module",
+  "bin": {
+    "nipmod": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "security:deps": "pnpm audit --audit-level high",
+    "test": "vitest run --testTimeout 20000",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "cli": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@scure/base": "^2.2.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "esbuild": "^0.28.0",
+    "tsx": "^4.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.0.15"
+  }
+}

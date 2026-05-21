@@ -1,0 +1,79 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T14:52:43.236Z",
+  "receipts": [
+    {
+      "exampleUrl": "https://nipmod.com/compatibility/examples/apm-package.json",
+      "externalFormat": "apm-package",
+      "externalInputSha256": "8ca75cd43e96ca15a622e36f463e8f7449e1ebd21a6bf453238286df8ad8bdbc",
+      "id": "receipt.apm.repo-readme-audit",
+      "label": "APM package",
+      "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "packageDigest": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "preservedFields": [
+        "name",
+        "version",
+        "description",
+        "entrypoint",
+        "permissions"
+      ],
+      "provenanceLoss": [],
+      "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.apm.repo-readme-audit",
+      "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+      "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "sourceTag": "v0.1.0",
+      "type": "dev.nipmod.compatibility-receipt.v1",
+      "unsupportedFields": [],
+      "version": "0.1.0"
+    },
+    {
+      "exampleUrl": "https://nipmod.com/compatibility/examples/mcp-server.json",
+      "externalFormat": "mcp-server-json",
+      "externalInputSha256": "5e57556dc2c229e4449a5d8572f6d27a0026ba3cb937b7457eb562995a161376",
+      "id": "receipt.mcp.gitlawb-repo-reader",
+      "label": "MCP import",
+      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "packageDigest": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+      "preservedFields": [
+        "mcpServers",
+        "command",
+        "args",
+        "env"
+      ],
+      "provenanceLoss": [],
+      "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.mcp.gitlawb-repo-reader",
+      "sourceCommit": "05d9b83f9ab2b6f8e1475eb7cd9a3f8fa8236c73",
+      "sourceRepo": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+      "sourceTag": "v0.1.0",
+      "type": "dev.nipmod.compatibility-receipt.v1",
+      "unsupportedFields": [],
+      "version": "0.1.0"
+    },
+    {
+      "exampleUrl": "https://nipmod.com/compatibility/examples/git-source-provenance.json",
+      "externalFormat": "git-source-provenance",
+      "externalInputSha256": "38985e3efd3a4feb63425ea774061a8e0bbdfd61248dd67552a00533e2cc7692",
+      "id": "receipt.git.dependency-risk-review",
+      "label": "Git source",
+      "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "packageDigest": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+      "preservedFields": [
+        "package",
+        "version",
+        "artifact.sha256",
+        "source.repo",
+        "source.commit",
+        "source.tag"
+      ],
+      "provenanceLoss": [],
+      "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.git.dependency-risk-review",
+      "sourceCommit": "d763aee9761f18708d9b82cba65d92a056695862",
+      "sourceRepo": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+      "sourceTag": "v0.1.0",
+      "type": "dev.nipmod.compatibility-receipt.v1",
+      "unsupportedFields": [],
+      "version": "0.1.0"
+    }
+  ],
+  "type": "dev.nipmod.compatibility-receipts.v1"
+}

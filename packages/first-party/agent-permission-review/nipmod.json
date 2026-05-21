@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "agent-permission-review",
+  "canonical": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Review agent package permissions for least privilege before install or publish.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+    "provenance": "local"
+  }
+}

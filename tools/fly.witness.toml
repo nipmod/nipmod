@@ -1,0 +1,34 @@
+app = "nipmod-witness"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile.witness"
+
+[env]
+  PORT = "8080"
+  NIPMOD_REGISTRY_URL = "https://nipmod.com"
+  NIPMOD_WITNESS_REQUEST_SOURCE = "https://nipmod.com/transparency/witness-request.json"
+  NIPMOD_WITNESS_LOG_SOURCE = "https://nipmod.com/transparency/log.json"
+  NIPMOD_WITNESS_STATE_PATH = "/data/witness-worker-state.json"
+  NIPMOD_WITNESS_STATEMENTS_PATH = "/data/witness-statements.json"
+  NIPMOD_WITNESS_IDENTITY_PATH = "/data/transparency-witness-identity.json"
+  NIPMOD_WITNESS_INTERVAL_MS = "300000"
+  NIPMOD_WITNESS_ALLOWED_LOG_IDS = "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk"
+
+[[mounts]]
+  source = "witness_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/health"

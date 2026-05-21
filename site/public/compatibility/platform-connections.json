@@ -1,0 +1,130 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.platform-connections.v1",
+  "generatedAt": "2026-05-21T20:20:25.892Z",
+  "meaning": "Public source and access matrix for Nipmod API-first package discovery. These are Nipmod-controlled or public source paths, not native third-party integrations.",
+  "statusLegend": [
+    {
+      "status": "Live",
+      "meaning": "The path is usable now through Nipmod controlled code or public source APIs."
+    },
+    {
+      "status": "Safe mode",
+      "meaning": "The path is usable for dry runs or reads, while durable writes require server-side configuration."
+    }
+  ],
+  "connections": [
+    {
+      "id": "api",
+      "name": "Nipmod API",
+      "status": "Live",
+      "category": "hosted API",
+      "scope": "One hosted API for search, inspect, install plan and archive preparation across supported package sources.",
+      "proofLevel": "API routes are covered by site tests, production monitor checks and live rate-limit headers.",
+      "url": "https://nipmod.com/api-access",
+      "setupCommand": null,
+      "smokeCommand": "curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'",
+      "externalApprovalRequired": false,
+      "externalDependency": "No native platform approval is required to use the hosted API.",
+      "evidence": [
+        "https://nipmod.com/api/search",
+        "https://nipmod.com/api/inspect",
+        "https://nipmod.com/api/install-plan",
+        "https://nipmod.com/api/archive/prepare"
+      ]
+    },
+    {
+      "id": "sources",
+      "name": "Package Sources",
+      "status": "Live",
+      "category": "source resolver",
+      "scope": "Resolver coverage for npm, PyPI, GitHub, Hugging Face models, Hugging Face datasets and MCP server listings.",
+      "proofLevel": "External resolver tests and live synthetic checks validate search, inspect and install-plan responses.",
+      "url": "https://nipmod.com/sources",
+      "setupCommand": null,
+      "smokeCommand": "curl 'https://nipmod.com/api/search?q=agent&sources=npm,pypi,github,huggingface-model,mcp&limit=5'",
+      "externalApprovalRequired": false,
+      "externalDependency": "Nipmod reads public source metadata and keeps original owner attribution.",
+      "evidence": [
+        "https://nipmod.com/sources",
+        "https://nipmod.com/.well-known/nipmod.json"
+      ]
+    },
+    {
+      "id": "archive",
+      "name": "Nipmod Archive",
+      "status": "Safe mode",
+      "category": "package intelligence",
+      "scope": "Confirmed package records keep source context, trust checks and receipts. Durable writes require archive store env vars.",
+      "proofLevel": "Archive prepare, search, confirm dry-run and status endpoints are tested. Public verified archive is empty after seed reset.",
+      "url": "https://nipmod.com/packages",
+      "setupCommand": null,
+      "smokeCommand": "curl 'https://nipmod.com/api/archive/status'",
+      "externalApprovalRequired": false,
+      "externalDependency": "Durable writes require Nipmod server-side configuration, not third-party approval.",
+      "evidence": [
+        "https://nipmod.com/packages",
+        "https://nipmod.com/api/archive/status",
+        "https://nipmod.com/registry/packages.json"
+      ]
+    },
+    {
+      "id": "mcp",
+      "name": "MCP",
+      "status": "Live",
+      "category": "agent protocol",
+      "scope": "Hosted read-only MCP and local stdio MCP for controlled workspace installs.",
+      "proofLevel": "Hosted MCP exposes only safe read tools. Local MCP exposes controlled write tools behind approval.",
+      "url": "https://nipmod.com/mcp",
+      "setupCommand": "nipmod mcp serve",
+      "smokeCommand": "node tools/system-readiness-check.mjs",
+      "externalApprovalRequired": false,
+      "externalDependency": "No marketplace approval is required for standard MCP usage.",
+      "evidence": [
+        "https://nipmod.com/api/mcp",
+        "https://nipmod.com/mcp",
+        "https://nipmod.com/llms.txt"
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "status": "Live",
+      "category": "public source",
+      "scope": "Public source mirror, CI surface and developer review path for Nipmod itself.",
+      "proofLevel": "Main branch, CI and release artifacts are public.",
+      "url": "https://github.com/nipmod/nipmod",
+      "setupCommand": null,
+      "smokeCommand": "git ls-remote https://github.com/nipmod/nipmod.git refs/heads/main",
+      "externalApprovalRequired": false,
+      "externalDependency": "No external approval is required for the Nipmod owned GitHub repo.",
+      "evidence": [
+        "https://github.com/nipmod/nipmod",
+        "https://github.com/nipmod/nipmod/actions"
+      ]
+    },
+    {
+      "id": "gitlawb",
+      "name": "Gitlawb",
+      "status": "Live",
+      "category": "canonical source",
+      "scope": "Canonical source anchor for Nipmod-owned package publish and claim workflows.",
+      "proofLevel": "Gitlawb remote sync and Owner Package Claim verification are checked separately.",
+      "url": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+      "setupCommand": "nipmod setup gitlawb",
+      "smokeCommand": "git ls-remote https://node.nipmod.com/z6Mkwbud/nipmod.git refs/heads/main",
+      "externalApprovalRequired": false,
+      "externalDependency": "No external approval is required for the current Nipmod owned Gitlawb source path.",
+      "evidence": [
+        "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+        "https://node.nipmod.com/z6Mkwbud/nipmod.git"
+      ]
+    }
+  ],
+  "notClaimed": [
+    "Native platform marketplace approval is not required for API use",
+    "Nipmod does not own external npm, PyPI, GitHub, Hugging Face or MCP packages",
+    "The empty verified archive does not mean every external source package is verified by Nipmod",
+    "Durable archive writes are enabled only after server-side archive env vars are configured"
+  ]
+}

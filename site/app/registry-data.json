@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-21T11:26:28.265Z",
+  "packages": [],
+  "skipped": [
+    {
+      "reason": "Seed archive cleared; public packages must be republished through the verified flow.",
+      "repo": "seed-archive"
+    }
+  ],
+  "source": "https://node.nipmod.com"
+}

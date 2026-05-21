@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "mcp-tool-risk-review",
+  "canonical": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Review MCP server tools and manifests before agents expose them to package workflows.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+    "provenance": "local"
+  }
+}

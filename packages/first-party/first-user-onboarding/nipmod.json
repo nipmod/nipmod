@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "first-user-onboarding",
+  "canonical": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+  "version": "0.1.0",
+  "type": "workflow-pack",
+  "description": "Guide a new user through install, inspect, add, audit and publish dry run.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+    "provenance": "local"
+  }
+}

@@ -1,0 +1,25 @@
+app = "nipmod-monitor"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile.monitor"
+
+[env]
+  PORT = "8080"
+  NIPMOD_MONITOR_INTERVAL_MS = "60000"
+  NIPMOD_ALERT_PRIMARY_WEBHOOK_URL = "https://nipmod.com/api/alerts/primary"
+  NIPMOD_ALERT_SECONDARY_WEBHOOK_URL = "https://nipmod.com/api/alerts/secondary"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/health"

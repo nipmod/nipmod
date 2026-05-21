@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a package, agent workflow or registry improvement.
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What should become easier, safer or more useful?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should Nipmod do?
+    validations:
+      required: true
+  - type: textarea
+    id: agent-flow
+    attributes:
+      label: Agent workflow
+      description: How should an agent use this without unsafe assumptions?

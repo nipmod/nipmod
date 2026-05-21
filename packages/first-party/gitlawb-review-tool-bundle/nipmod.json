@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "gitlawb-review-tool-bundle",
+  "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+  "version": "0.1.0",
+  "type": "tool-bundle",
+  "description": "Bundle Gitlawb repo review, diff summary and release review guidance.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "SMOKE.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+    "provenance": "local"
+  }
+}

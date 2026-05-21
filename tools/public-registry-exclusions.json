@@ -1,0 +1,175 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-21T11:26:28.265Z",
+  "reason": "Seed packages were removed from the public archive. They remain fixtures until republished through the public verification flow.",
+  "packages": [
+    {
+      "canonical": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "key": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0",
+      "name": "gitlawb-release-review",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+      "key": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief@0.1.0",
+      "name": "package-evidence-brief",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+      "key": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare@0.1.0",
+      "name": "registry-mirror-compare",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "key": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit@0.1.0",
+      "name": "repo-readme-audit",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "key": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter@0.1.0",
+      "name": "release-notes-drafter",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "key": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy@0.1.0",
+      "name": "strict-ci-policy",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "key": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding@0.1.0",
+      "name": "first-user-onboarding",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "key": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan@0.1.0",
+      "name": "prompt-injection-scan",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "key": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci@0.1.0",
+      "name": "nipmod-audit-ci",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+      "key": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist@0.1.0",
+      "name": "package-onboarding-checklist",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "key": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage@0.1.0",
+      "name": "github-issue-triage",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "key": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example@0.1.0",
+      "name": "mcp-server-import-example",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "key": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle@0.1.0",
+      "name": "gitlawb-review-tool-bundle",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "key": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures@0.1.0",
+      "name": "malicious-skill-fixtures",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+      "key": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack@0.1.0",
+      "name": "package-safety-eval-pack",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+      "key": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner@0.1.0",
+      "name": "package-migration-planner",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "key": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review@0.1.0",
+      "name": "agent-permission-review",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+      "key": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server@0.1.0",
+      "name": "readonly-registry-mcp-server",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "key": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+      "name": "gitlawb-repo-reader",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+      "key": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer@0.1.0",
+      "name": "gitlawb-diff-summarizer",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "key": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review@0.1.0",
+      "name": "dependency-risk-review",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+      "key": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack@0.1.0",
+      "name": "launch-strict-policy-pack",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+      "key": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage@0.1.0",
+      "name": "security-advisory-triage",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "key": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example@0.1.0",
+      "name": "apm-import-example",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "key": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy@0.1.0",
+      "name": "developer-default-policy",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+      "key": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet@0.1.0",
+      "name": "external-review-packet",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+      "key": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check@0.1.0",
+      "name": "agent-runtime-compat-check",
+      "version": "0.1.0"
+    },
+    {
+      "canonical": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "key": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review@0.1.0",
+      "name": "mcp-tool-risk-review",
+      "version": "0.1.0"
+    }
+  ]
+}
