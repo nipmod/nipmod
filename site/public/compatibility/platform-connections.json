@@ -214,17 +214,22 @@
     {
       "id": "aeon",
       "name": "Aeon",
-      "status": "Candidate",
+      "status": "Under review",
       "category": "external skill library",
-      "scope": "Aeon has a large public skill system that fits a future Nipmod external skill collection.",
-      "proofLevel": "Candidate only. No Aeon owner approval or published Nipmod package collection is claimed.",
-      "url": "https://github.com/aaronjmars/aeon",
+      "scope": "Aeon has a review-ready two-way packet: a first Aeon skill collection draft inside Nipmod and a Nipmod skill for Aeon agents.",
+      "proofLevel": "Review packet prepared after Aeon owner agreed to draft both directions. Exact collection, naming and native workflow still require Aeon owner review before official support or live Aeon package publication is claimed.",
+      "url": "https://nipmod.com/aeon",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/aeon",
-      "setupCommand": null,
-      "smokeCommand": "Review candidate repo and prepare owner approved skill collection metadata",
+      "setupCommand": "./add-skill nipmod/nipmod nipmod",
+      "smokeCommand": "Aeon agent: use the nipmod skill to search gitlawb-repo-reader, inspect trust and return an install plan only",
       "externalApprovalRequired": true,
-      "externalDependency": "Aeon owner review is required before publishing Aeon skills through Nipmod.",
+      "externalDependency": "Aeon owner review is required before claiming official Aeon support or publishing Aeon skills through Nipmod.",
       "evidence": [
+        "https://nipmod.com/aeon",
+        "https://nipmod.com/integrations/aeon/aeon.collection.json",
+        "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
+        "https://nipmod.com/integrations/aeon/proof.json",
+        "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
         "https://github.com/aaronjmars/aeon"
       ]
     },
@@ -255,7 +260,7 @@
     "Native marketplace approval for every platform",
     "Every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr accepted the skill into the Bankr skills repo",
-    "Aeon approved or published a Nipmod skill collection",
+    "Aeon approved this exact collection or published official Nipmod support",
     "OpenHuman approved, endorsed or published a Nipmod connection",
     "Third party platforms endorse Nipmod",
     "MCP ready means native platform partnership"

@@ -242,6 +242,21 @@ async function checkLiveEndpoints() {
       ["review packet", "Not official", "mcp_list_servers"]
     ],
     [
+      "aeon_page",
+      "https://nipmod.com/aeon",
+      ["Nipmod for Aeon review", "Under review", "First 10 Aeon skills"]
+    ],
+    [
+      "aeon_collection",
+      "https://nipmod.com/integrations/aeon/aeon.collection.json",
+      ["dev.nipmod.aeon.collection-draft.v1", "repo-scanner", "product-hunt-launch", "owner-review"]
+    ],
+    [
+      "aeon_review_packet",
+      "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
+      ["Aeon x Nipmod review packet", "Direction 1", "./add-skill nipmod/nipmod nipmod"]
+    ],
+    [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
       ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "/nipmod", "aeon", "openhuman"]

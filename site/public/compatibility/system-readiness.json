@@ -96,8 +96,12 @@
     },
     "aeon": {
       "candidate": "https://github.com/aaronjmars/aeon",
-      "access": "candidate external skill collection",
-      "status": "Candidate"
+      "reviewPage": "https://nipmod.com/aeon",
+      "collectionDraft": "https://nipmod.com/integrations/aeon/aeon.collection.json",
+      "reviewPacket": "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
+      "skill": "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+      "access": "review-ready two-way package and skill bridge",
+      "status": "Under review"
     },
     "openHuman": {
       "candidate": "https://nipmod.com/openhuman",

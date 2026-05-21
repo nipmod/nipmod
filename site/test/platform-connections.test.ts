@@ -28,7 +28,7 @@ describe("platform connection matrix", () => {
       "opencode:MCP ready",
       "hermes:MCP ready",
       "bankr:Under review",
-      "aeon:Candidate",
+      "aeon:Under review",
       "openhuman:Candidate"
     ]);
     expect(connections.notClaimed).toContain("MCP ready means native platform partnership");

@@ -1,0 +1,211 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.aeon.collection-draft.v1",
+  "status": "owner-review",
+  "sourceRepo": "https://github.com/aaronjmars/aeon",
+  "sourceManifest": "https://github.com/aaronjmars/aeon/blob/main/skills.json",
+  "sourceGeneratedAt": "2026-05-19T00:00:00Z",
+  "sourceTotalSkills": 121,
+  "selectedCount": 10,
+  "ownerReviewRequired": true,
+  "attribution": "Aeon by aaronjmars",
+  "reviewNote": "Draft collection prepared after Aeon owner agreed to review both directions: Aeon skills inside Nipmod and a Nipmod skill for Aeon.",
+  "notClaimed": [
+    "Aeon has approved this exact collection",
+    "Aeon skills are live Nipmod packages",
+    "Aeon officially supports Nipmod",
+    "Nipmod owns or republishes Aeon source code"
+  ],
+  "skills": [
+    {
+      "slug": "repo-scanner",
+      "name": "Repo Scanner",
+      "category": "dev",
+      "schedule": "0 15 * * 0",
+      "updated": "2026-04-20",
+      "sourceSha": "74ed4b2",
+      "sourcePath": "skills/repo-scanner/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/repo-scanner/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon repo-scanner",
+      "description": "Catalog GitHub repos into a prioritized fleet report with concrete, coded opportunities that downstream skills consume directly.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "pr-review",
+      "name": "PR Review",
+      "category": "dev",
+      "schedule": "0 9 * * *",
+      "updated": "2026-04-20",
+      "sourceSha": "b8b3551",
+      "sourcePath": "skills/pr-review/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/pr-review/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon pr-review",
+      "description": "Auto-review open PRs with severity-tagged findings, inline comments and a one-line verdict.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "code-health",
+      "name": "Code Health",
+      "category": "dev",
+      "schedule": "0 16 * * *",
+      "updated": "2026-04-06",
+      "sourceSha": "2372300",
+      "sourcePath": "skills/code-health/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/code-health/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon code-health",
+      "description": "Weekly report on TODOs, dead code and test coverage gaps.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "security-digest",
+      "name": "Security Digest",
+      "category": "research",
+      "schedule": "0 14 * * *",
+      "updated": "2026-04-20",
+      "sourceSha": "cc0a62f",
+      "sourcePath": "skills/security-digest/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/security-digest/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon security-digest",
+      "description": "Lead with confirmed exploitation, enrich with EPSS, filter advisories to a tracked stack and output one action per item.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "competitor-launch-radar",
+      "name": "competitor-launch-radar",
+      "category": "research",
+      "schedule": "0 10 * * 1",
+      "updated": "2026-05-18",
+      "sourceSha": "pending",
+      "sourcePath": "skills/competitor-launch-radar/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/competitor-launch-radar/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon competitor-launch-radar",
+      "description": "Weekly scan of Product Hunt RSS and HN Algolia for new AI agent framework launches outside the tracked cohort.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "product-hunt-launch",
+      "name": "product-hunt-launch",
+      "category": "social",
+      "schedule": "workflow_dispatch",
+      "updated": "2026-05-15",
+      "sourceSha": "0000000",
+      "sourcePath": "skills/product-hunt-launch/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/product-hunt-launch/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon product-hunt-launch",
+      "description": "Draft a Product Hunt launch asset package from live repo state for operator review and submission.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "fork-first-run-alert",
+      "name": "fork-first-run-alert",
+      "category": "dev",
+      "schedule": "30 20 * * *",
+      "updated": "2026-05-17",
+      "sourceSha": "pending",
+      "sourcePath": "skills/fork-first-run-alert/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/fork-first-run-alert/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon fork-first-run-alert",
+      "description": "Daily alert the first time a fork completes a workflow run.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "fork-skill-gap",
+      "name": "fork-skill-gap",
+      "category": "dev",
+      "schedule": "0 21 * * 0",
+      "updated": "2026-05-16",
+      "sourceSha": "pending",
+      "sourcePath": "skills/fork-skill-gap/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/fork-skill-gap/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon fork-skill-gap",
+      "description": "Weekly cross-fork skill adoption digest with per-fork gaps against upstream skills.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "skill-security-scan",
+      "name": "Skill Security Scan",
+      "category": "dev",
+      "schedule": "0 16 * * 1",
+      "updated": "2026-04-20",
+      "sourceSha": "7569894",
+      "sourcePath": "skills/skill-security-scan/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/skill-security-scan/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon skill-security-scan",
+      "description": "Audit skills, workflows and companion scripts for injection, exfiltration, traversal and prompt override risks.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    },
+    {
+      "slug": "github-monitor",
+      "name": "GitHub Monitor",
+      "category": "dev",
+      "schedule": "0 9 * * *",
+      "updated": "2026-04-20",
+      "sourceSha": "680fea6",
+      "sourcePath": "skills/github-monitor/SKILL.md",
+      "sourceUrl": "https://github.com/aaronjmars/aeon/blob/main/skills/github-monitor/SKILL.md",
+      "installCommand": "./add-skill aaronjmars/aeon github-monitor",
+      "description": "Watch repos for stale PRs, new issues and new releases with tiered urgency and concrete next actions.",
+      "packageStatus": "draft-not-published",
+      "attribution": "Aeon by aaronjmars",
+      "trustPlan": {
+        "source": "GitHub source link",
+        "publishGate": "Aeon owner review",
+        "futureEvidence": ["source digest", "versioned metadata", "agent readable install plan"]
+      }
+    }
+  ]
+}

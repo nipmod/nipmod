@@ -33,7 +33,7 @@ describe("platform readiness receipt", () => {
     ]);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(20);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(55);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(35);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
@@ -42,7 +42,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.notClaimed).toContain("every Gitlawb package has a verified Owner Package Claim proof");
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
-    expect(readiness.notClaimed).toContain("Aeon has approved or published a Nipmod skill collection");
+    expect(readiness.notClaimed).toContain("Aeon has approved this exact collection or published official Nipmod support");
     expect(readiness.notClaimed).toContain("OpenHuman has approved, endorsed or published a Nipmod connection");
     expect(connections.type).toBe("dev.nipmod.platform-connections.v1");
     expect(connections.connections.map((connection: { id: string }) => connection.id)).toEqual([
@@ -171,14 +171,21 @@ describe("platform readiness receipt", () => {
     expect(JSON.stringify({ gitlawb, gitlawbConnection })).not.toContain("all owner claims are verified");
   });
 
-  test("keeps Aeon candidate scoped to owner review", () => {
+  test("keeps Aeon review packet scoped to owner review", () => {
     const aeon = readiness.platforms.find((platform: { id: string }) => platform.id === "aeon");
     const aeonConnection = connections.connections.find((connection: { id: string }) => connection.id === "aeon");
 
-    expect(aeon.connectionStatus).toBe("Candidate");
+    expect(aeon.connectionStatus).toBe("Under review");
+    expect(aeon.status).toBe("two-way-review-packet-ready");
+    expect(aeon.claim).toContain("review-ready two-way packet");
+    expect(aeon.setupCommand).toBe("./add-skill nipmod/nipmod nipmod");
+    expect(aeon.evidence).toContain("https://nipmod.com/aeon");
+    expect(aeon.evidence).toContain("https://nipmod.com/integrations/aeon/aeon.collection.json");
+    expect(aeon.evidence).toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
     expect(aeon.externalDependency).toContain("owner review");
     expect(aeonConnection.externalApprovalRequired).toBe(true);
-    expect(aeonConnection.proofLevel).toContain("Candidate only");
+    expect(aeonConnection.proofLevel).toContain("Review packet prepared");
+    expect(aeonConnection.proofLevel).toContain("official support");
   });
 
   test("keeps OpenHuman candidate scoped to owner review", () => {

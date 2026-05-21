@@ -198,19 +198,29 @@
     {
       "id": "aeon",
       "name": "Aeon",
-      "productReadiness": 20,
-      "connectionStatus": "Candidate",
-      "status": "candidate",
-      "claim": "Aeon is a strong external skill library candidate for a future Nipmod collection, pending owner review.",
+      "productReadiness": 55,
+      "connectionStatus": "Under review",
+      "status": "two-way-review-packet-ready",
+      "claim": "Aeon has a review-ready two-way packet for a first Aeon collection inside Nipmod and a Nipmod skill for Aeon agents, pending owner review of the exact scope.",
       "connectionKit": "integrations/platform-connections/aeon",
+      "setupCommand": "./add-skill nipmod/nipmod nipmod",
+      "verifyCommand": "Aeon agent: use the nipmod skill to search gitlawb-repo-reader, inspect trust and return an install plan only",
       "evidence": [
+        "https://nipmod.com/aeon",
+        "https://nipmod.com/integrations/aeon/aeon.collection.json",
+        "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
+        "https://nipmod.com/integrations/aeon/proof.json",
+        "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
         "https://github.com/aaronjmars/aeon"
       ],
       "checks": [
-        "candidate repo is public",
-        "no owner approval or package publication is claimed"
+        "source repo is public",
+        "owner agreed to review the two-way direction",
+        "first 10 skill collection draft exists with source links and attribution",
+        "Aeon-compatible Nipmod skill exists in the Nipmod repo",
+        "no official support or package publication is claimed before owner review"
       ],
-      "externalDependency": "Aeon owner review and consent are required before any Aeon skill collection is published through Nipmod."
+      "externalDependency": "Aeon owner review and consent are required before any official Aeon support or live Aeon skill collection is claimed."
     },
     {
       "id": "openhuman",
@@ -245,7 +255,7 @@
     "every Gitlawb package has a verified Owner Package Claim proof",
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
-    "Aeon has approved or published a Nipmod skill collection",
+    "Aeon has approved this exact collection or published official Nipmod support",
     "OpenHuman has approved, endorsed or published a Nipmod connection",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]

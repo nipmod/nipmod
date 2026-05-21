@@ -1,25 +1,38 @@
 # Aeon Connection Kit
 
-Status: Candidate
+Status: Under review
 
-Aeon is a strong candidate because it already has a large public skill system. Nipmod could act as an additional package archive layer for Aeon skills if the owner wants that.
+Aeon has a review-ready two-way Nipmod packet:
+
+1. a small Aeon collection draft inside Nipmod
+2. a Nipmod skill/workflow that Aeon agents can review before using packages
+
+The owner agreed to review the direction. Exact naming, collection scope and native Aeon workflow still need owner review before anything is called official.
 
 Use this wording:
 
-> Aeon is a candidate for a future Nipmod external skill collection, pending owner review.
+> Aeon and Nipmod are drafting a two-way package and skill bridge for review.
 
 Do not claim:
 
-> Aeon skills are already published through Nipmod.
+> Aeon skills are live Nipmod packages.
 
-Public path:
+> Aeon officially supports Nipmod.
 
-https://github.com/aaronjmars/aeon
+Public paths:
+
+https://nipmod.com/aeon
+
+https://nipmod.com/integrations/aeon/aeon.collection.json
+
+https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md
+
+https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md
 
 Smoke:
 
 ```sh
-Review candidate repo and prepare owner approved skill collection metadata
+Aeon agent: use the nipmod skill to search gitlawb-repo-reader, inspect trust and return an install plan only
 ```
 
 Agent instruction:
@@ -28,4 +41,4 @@ Do not package or republish Aeon skills without owner review. Prepare metadata a
 
 Submission note:
 
-Ask the Aeon owner to review naming, package structure and whether they want Aeon skills indexed through Nipmod.
+Ask the Aeon owner to confirm the first collection, naming, attribution and whether Aeon wants the Nipmod skill merged, linked or documented.
