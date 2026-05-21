@@ -397,7 +397,7 @@ async function checkLiveSystemEndpoints() {
   assertEqual("live_registry_matches_local_archive", liveRegistryHash, localRegistryHash);
 
   const endpoints = [
-    ["live_setup", state.receipt.entrypoints.humanSetup, ["Connect your agent"]],
+    ["live_setup", state.receipt.entrypoints.humanSetup, ["Set up Nipmod for Codex"]],
     ["live_cursor", state.receipt.entrypoints.cursor, ["Use Nipmod in Cursor", "Add to Cursor", "nipmod setup cursor"]],
     ["live_llms", state.receipt.entrypoints.agentText, [state.receipt.entrypoints.systemReadiness]],
     ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1", "nipmod setup codex"]],

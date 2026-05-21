@@ -271,7 +271,7 @@ async function checkLiveEndpoints() {
       "https://nipmod.com/integrations/hermes/skill-bundles/nipmod.yaml",
       ["name: nipmod", "skills:", "- nipmod"]
     ],
-    ["bankr_review_page", "https://nipmod.com/bankr", ["Bankr review track", "not a ready Nipmod agent host yet"]],
+    ["bankr_review_page", "https://nipmod.com/bankr", ["Bankr review track", "not listed as a ready Nipmod agent host yet"]],
     [
       "platform_readiness_live",
       "https://nipmod.com/compatibility/platform-readiness.json",
