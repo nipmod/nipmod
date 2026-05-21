@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 
 const tokens = {
@@ -24,6 +24,36 @@ const agents = [
 ];
 
 export function AgentsView() {
+  const [logosReady, setLogosReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all(
+      agents.map(
+        (agent) =>
+          new Promise<void>((resolve) => {
+            const image = new Image();
+            image.onload = () => resolve();
+            image.onerror = () => resolve();
+            image.src = agent.logo;
+
+            if (image.complete) {
+              resolve();
+            }
+          })
+      )
+    ).then(() => {
+      if (!cancelled) {
+        setLogosReady(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main
       style={{
@@ -72,14 +102,14 @@ export function AgentsView() {
         }}
       >
         {agents.map((a) => (
-          <AgentCard key={a.id} agent={a} />
+          <AgentCard key={a.id} agent={a} logosReady={logosReady} />
         ))}
       </section>
     </main>
   );
 }
 
-function AgentCard({ agent }: { agent: { id: string; name: string; logo?: string } }) {
+function AgentCard({ agent, logosReady }: { agent: { id: string; name: string; logo: string }; logosReady: boolean }) {
   const [hover, setHover] = useState(false);
   const style: CSSProperties = {
     background: hover ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
@@ -127,6 +157,8 @@ function AgentCard({ agent }: { agent: { id: string; name: string; logo?: string
               display: "block",
               height: "30px",
               objectFit: "contain",
+              opacity: logosReady ? 1 : 0,
+              transition: "opacity 120ms ease",
               width: "30px"
             }}
             width={30}
