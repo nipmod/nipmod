@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 const tokens = {
@@ -16,11 +17,11 @@ const tokens = {
 };
 
 const agents = [
-  { id: "codex", name: "Codex" },
-  { id: "claude", name: "Claude Code" },
+  { id: "codex", name: "Codex", logo: "/agents/codex.png" },
+  { id: "claude", name: "Claude Code", logo: "/agents/claude.png" },
   { id: "cursor", name: "Cursor" },
-  { id: "opencode", name: "OpenCode" },
-  { id: "hermes", name: "Hermes" }
+  { id: "opencode", name: "OpenCode", logo: "/agents/opencode.png" },
+  { id: "hermes", name: "Hermes", logo: "/agents/hermes.png" }
 ];
 
 export function AgentsView() {
@@ -79,7 +80,7 @@ export function AgentsView() {
   );
 }
 
-function AgentCard({ agent }: { agent: { id: string; name: string } }) {
+function AgentCard({ agent }: { agent: { id: string; name: string; logo?: string } }) {
   const [hover, setHover] = useState(false);
   const style: CSSProperties = {
     background: hover ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
@@ -103,6 +104,33 @@ function AgentCard({ agent }: { agent: { id: string; name: string } }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
+      <span
+        style={{
+          alignItems: "center",
+          display: "inline-flex",
+          flex: "0 0 34px",
+          height: 34,
+          justifyContent: "center",
+          opacity: agent.logo ? 1 : 0.28,
+          width: 34
+        }}
+        aria-hidden="true"
+      >
+        {agent.logo ? (
+          <Image
+            alt=""
+            height={30}
+            src={agent.logo}
+            style={{
+              display: "block",
+              height: "30px",
+              objectFit: "contain",
+              width: "30px"
+            }}
+            width={30}
+          />
+        ) : null}
+      </span>
       <span
         style={{
           fontFamily: tokens.serif,
