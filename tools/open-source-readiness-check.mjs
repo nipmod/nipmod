@@ -6,16 +6,20 @@ import { join, resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 
 const requiredFiles = [
+  ".gitattributes",
   "README.md",
   "LICENSE",
   "SECURITY.md",
   "CONTRIBUTING.md",
   "CODE_OF_CONDUCT.md",
   "TRADEMARKS.md",
+  "SUPPORT.md",
+  "docs/README.md",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/dependabot.yml",
   ".github/PULL_REQUEST_TEMPLATE.md",
+  ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml"
 ];
@@ -27,10 +31,19 @@ for (const file of requiredFiles) {
 }
 
 const readme = read("README.md");
-check("readme:canonical-gitlawb", () => readme.includes("Canonical source: `gitlawb://did:key:"));
-check("readme:github-mirror", () => readme.includes("| GitHub mirror | https://github.com/nipmod/nipmod |"));
+check("readme:positioning", () => readme.includes("One package API for agents."));
+check("readme:hosted-api", () => readme.includes("Public beta access does not require an API key."));
+check("readme:api-search-example", () => readme.includes("https://nipmod.com/api/search?q=http%20client"));
+check("readme:no-telegram-example", () => !readme.includes("telegram%20bot") && !readme.includes("node-telegram-bot-api"));
+check("readme:no-stale-safe-mode", () => !readme.includes("durable archive env vars") && !readme.includes("Resolver safe mode"));
+check("readme:no-duplicate-github-mirror", () => !readme.includes("GitHub mirror"));
 check("readme:telegram", () => readme.includes("| Telegram | https://t.me/nipmod |"));
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
+check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
+
+const gitattributes = read(".gitattributes");
+check("linguist:public-html-generated", () => gitattributes.includes("site/public/*.html linguist-generated=true"));
+check("linguist:release-artifacts-generated", () => gitattributes.includes("site/public/releases/** linguist-generated=true"));
 
 const trademarks = read("TRADEMARKS.md");
 check("trademarks:no-affiliation", () => trademarks.includes("not affiliated with, endorsed by or sponsored by"));
@@ -44,6 +57,12 @@ const forbiddenTracked = tracked
     /(^|\/)(\.env|\.env\.|.*private-key.*|.*token.*|.*identity.*\.json|.*\.pem$|\.nipmod\/|\.playwright-mcp\/)/i.test(file)
   );
 check("git:no-tracked-secrets-or-local-state", () => forbiddenTracked.length === 0, { forbiddenTracked });
+
+const forbiddenGenerated = tracked
+  .split("\n")
+  .filter(Boolean)
+  .filter((file) => /(^|\/)(node_modules|\.next|\.vercel)\//.test(file) || file === "site/public/claude-original.html");
+check("git:no-tracked-build-output", () => forbiddenGenerated.length === 0, { forbiddenGenerated });
 
 const result = {
   checkedAt: new Date().toISOString(),
