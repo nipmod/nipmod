@@ -2143,9 +2143,6 @@ h1 {
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   padding: 7px;
-  position: sticky;
-  top: 84px;
-  z-index: 7;
 }
 
 .permission-row span {
