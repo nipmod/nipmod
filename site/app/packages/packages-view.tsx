@@ -92,7 +92,7 @@ export function PackagesView() {
         }}
       >
         <div>
-          <LiveCounter base={total} />
+          <RegistryCount value={total} />
           <div
             style={{
               display: "flex",
@@ -113,7 +113,7 @@ export function PackagesView() {
               <span style={{ color: tokens.accent, marginRight: 6 }}>{"\u25CF"}</span>
               {candidate.toLocaleString()} candidate
             </span>
-            <span>last published 12 min ago</span>
+            <span>registry updated {formatRegistryDate(registry.generatedAt)}</span>
           </div>
         </div>
         <div ref={filterRef} style={{ position: "relative", display: "flex", gap: 28, fontSize: 14 }}>
@@ -279,21 +279,7 @@ function PackageRow({ pkg, index }: { pkg: RegistryPackage; index: number }) {
   );
 }
 
-function LiveCounter({ base }: { base: number }) {
-  const [val, setVal] = useState(base);
-  useEffect(() => {
-    let mounted = true;
-    const tick = () => {
-      if (!mounted) return;
-      if (Math.random() < 0.6) setVal((v) => v + 1);
-      window.setTimeout(tick, 3000 + Math.random() * 5000);
-    };
-    const t = window.setTimeout(tick, 2200 + Math.random() * 1800);
-    return () => {
-      mounted = false;
-      window.clearTimeout(t);
-    };
-  }, []);
+function RegistryCount({ value }: { value: number }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "baseline", gap: 18 }}>
       <span
@@ -307,7 +293,7 @@ function LiveCounter({ base }: { base: number }) {
           fontVariantNumeric: "tabular-nums"
         }}
       >
-        {val.toLocaleString()}
+        {value.toLocaleString()}
       </span>
       <span
         style={{
@@ -322,4 +308,18 @@ function LiveCounter({ base }: { base: number }) {
       </span>
     </span>
   );
+}
+
+function formatRegistryDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+    year: "numeric"
+  }).format(date);
 }
