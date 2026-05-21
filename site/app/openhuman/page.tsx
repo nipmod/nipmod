@@ -11,6 +11,10 @@ export const metadata: Metadata = {
     title: "Nipmod for OpenHuman review",
     url: "https://nipmod.com/openhuman"
   },
+  robots: {
+    follow: false,
+    index: false
+  },
   title: "Nipmod for OpenHuman review"
 };
 

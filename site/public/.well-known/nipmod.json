@@ -5,7 +5,6 @@
   "homepage": "https://nipmod.com",
   "trustPage": "https://nipmod.com/trust",
   "docs": {
-    "bankr": "https://nipmod.com/bankr",
     "docs": "https://nipmod.com/quickstart#docs",
     "install": "https://nipmod.com/quickstart#install",
     "setup": "https://nipmod.com/setup",
@@ -88,38 +87,6 @@
       "publishDryRun": "nipmod publish . --dry-run --json",
       "claimVerify": "nipmod claim verify gitlawb://did:key:.../repo --json",
       "claimIndex": "nipmod claim index --node https://node.nipmod.com --json"
-    }
-  },
-  "bankr": {
-    "app": "https://nipmod.com/bankr",
-    "coin": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
-    "skill": {
-      "agentProof": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-      "catalogSubmission": "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md",
-      "catalogStatus": "ready for Bankr skill catalog review",
-      "githubFolder": "https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod",
-      "publicSkill": "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
-      "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
-    },
-    "freeServices": {
-      "map": "https://nipmod.com/integrations/bankr/bankr.free.json",
-      "services": [
-        "package-search",
-        "package-audit",
-        "install-plan"
-      ],
-      "status": "free; no Nipmod payment required"
-    },
-    "proof": {
-      "agentWorkflow": "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-      "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
-      "runtimeSmoke": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
-      "expectedSteps": [
-        "read-skill",
-        "find-package",
-        "check-trust",
-        "plan-install"
-      ]
     }
   },
   "mcp": {

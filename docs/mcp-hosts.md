@@ -253,7 +253,7 @@ node tools/platform-readiness-check.mjs --live --host-smoke
 node tools/system-readiness-check.mjs --live --parallel
 ```
 
-This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, Cursor deeplink metadata, OpenCode `opencode.json`, Hermes config generation, Bankr agent-proof commands, shared archive invariants and parallel read access. It proves product readiness for the current integration scope; it does not claim third-party adoption or native marketplace acceptance.
+This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, Cursor deeplink metadata, OpenCode `opencode.json`, Hermes config generation, shared archive invariants and parallel read access. It proves product readiness for the current ready-host scope; it does not claim third-party adoption, native marketplace acceptance or review-track support.
 
 ## Agent Demo
 

@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /integrations/bankr/
+Disallow: /integrations/aeon/
+Disallow: /integrations/openhuman/
+Allow: /

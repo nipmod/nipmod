@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     title: "Nipmod for Aeon review",
     url: "https://nipmod.com/aeon"
   },
+  robots: {
+    follow: false,
+    index: false
+  },
   title: "Nipmod for Aeon review"
 };
 

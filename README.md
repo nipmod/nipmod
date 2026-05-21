@@ -30,8 +30,6 @@ nipmod setup agents
 - Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - X: https://x.com/Nipmod
 - Telegram: https://t.me/nipmod
-- Bankr integration: https://nipmod.com/bankr
-- Bankr skill: https://nipmod.com/integrations/bankr/nipmod/SKILL.md
 - Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
 
 Canonical source: gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
@@ -56,7 +54,7 @@ Trademark and affiliation notice: `TRADEMARKS.md`
 - Local MCP server for agents with read-first tools and controlled install.
 - Hosted read-only MCP endpoint for registry search, view, inspect, install plans and demo flows without workspace writes.
 - Public transparency log, witness statements, advisory feed, security policy and review packet.
-- Codex, Claude Code, Cursor, OpenCode, Hermes and Bankr agent entrypoints.
+- Codex, Claude Code, Cursor, OpenCode and Hermes agent entrypoints.
 
 ## Why It Exists
 
@@ -193,7 +191,7 @@ Use this flow only for repos you own or maintain. `package pr` writes local file
 - `nipmod/` - TypeScript CLI, package installer, registry client, MCP server and tests.
 - `site/` - Next.js website, registry surfaces, trust pages, setup docs and public machine files.
 - `packages/first-party/` - First-party Nipmod packages published into the public archive.
-- `integrations/` - Platform integration material, including Bankr.
+- `integrations/` - Platform connection kits and review-only integration packets.
 - `docs/` - Operator docs, trust model, package publishing and platform readiness.
 - `tools/` - Release, readiness, registry, monitor and security tooling.
 

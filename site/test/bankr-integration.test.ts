@@ -188,48 +188,27 @@ describe("Bankr integration", () => {
     expect(existsSync(join(siteRoot, "public", "integrations", "bankr", "bankr.x402.npm-asset.example.json"))).toBe(false);
   });
 
-  test("exposes Bankr integration through machine discovery", () => {
+  test("does not expose the Bankr review packet through machine discovery", () => {
     const manifest = JSON.parse(read(manifestPath));
 
-    expect(manifest.docs.bankr).toBe("https://nipmod.com/bankr");
-    expect(manifest.bankr).toEqual({
-      app: "https://nipmod.com/bankr",
-      coin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
-      freeServices: {
-        map: publicFreeMapUrl,
-        services: ["package-search", "package-audit", "install-plan"],
-        status: "free; no Nipmod payment required"
-      },
-      proof: {
-        agentWorkflow: publicAgentProofUrl,
-        expectedSteps: ["read-skill", "find-package", "check-trust", "plan-install"],
-        package: proofPackage,
-        runtimeSmoke: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth"
-      },
-      skill: {
-        agentProof: publicAgentProofUrl,
-        catalogSubmission: publicCatalogSubmissionUrl,
-        catalogStatus: "ready for Bankr skill catalog review",
-        githubFolder: githubSkillFolder,
-        publicSkill: publicSkillUrl,
-        source: "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"
-      }
-    });
+    expect(manifest.docs.bankr).toBeUndefined();
+    expect(manifest.bankr).toBeUndefined();
+    expect(JSON.stringify(manifest)).not.toContain(publicSkillUrl);
+    expect(JSON.stringify(manifest)).not.toContain(publicAgentProofUrl);
   });
 
-  test("adds free Bankr instructions to the plain agent entrypoint", () => {
+  test("keeps Bankr review links out of the plain agent entrypoint", () => {
     const llms = read(llmsPath);
 
-    expect(llms).toContain("Bankr integration: https://nipmod.com/bankr");
-    expect(llms).toContain(`Bankr skill: ${publicSkillUrl}`);
-    expect(llms).toContain(`Bankr agent prompt: Read ${publicSkillUrl} and use Nipmod before installing agent packages.`);
-    expect(llms).toContain(`Bankr agent proof: ${publicAgentProofUrl}`);
-    expect(llms).toContain(`Read ${publicSkillUrl} and ${publicAgentProofUrl}`);
-    expect(llms).toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
-    expect(llms).toContain(`Bankr catalog submission: ${publicCatalogSubmissionUrl}`);
-    expect(llms).toContain(`Bankr free service map: ${publicFreeMapUrl}`);
-    expect(llms).toContain("Bankr runtime smoke: BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
-    expect(llms).toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
+    expect(llms).toContain("Review-only integrations are not setup paths");
+    expect(llms).not.toContain("Bankr integration: https://nipmod.com/bankr");
+    expect(llms).not.toContain(`Bankr skill: ${publicSkillUrl}`);
+    expect(llms).not.toContain(`Bankr agent proof: ${publicAgentProofUrl}`);
+    expect(llms).not.toContain(`Bankr GitHub skill folder: ${githubSkillFolder}`);
+    expect(llms).not.toContain(`Bankr catalog submission: ${publicCatalogSubmissionUrl}`);
+    expect(llms).not.toContain(`Bankr free service map: ${publicFreeMapUrl}`);
+    expect(llms).not.toContain("Bankr runtime smoke: BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
+    expect(llms).not.toContain("Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3");
     expect(llms).not.toContain("Bankr x402 config");
   });
 });

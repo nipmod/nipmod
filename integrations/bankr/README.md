@@ -1,6 +1,8 @@
 # Nipmod for Bankr
 
-This folder contains the local Bankr integration pack for Nipmod.
+This folder contains the local Bankr review pack for Nipmod.
+
+Status: under review. Do not present this as a ready Bankr user setup path until Bankr reviews or accepts it.
 
 It is intentionally split into two pieces:
 
@@ -9,27 +11,27 @@ It is intentionally split into two pieces:
 - `bankr.agent-proof.json` is a runnable proof path for skill read, package discovery, trust check and install planning.
 - `CATALOG_SUBMISSION.md` is the Bankr skill catalog PR packet.
 
-## Use with a Bankr agent
+## Reviewer use only
 
-Tell the agent:
+For a reviewer-only local proof, use:
 
 ```text
-Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
+Read integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.
 ```
 
 For a complete proof run:
 
 ```text
-Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and https://nipmod.com/integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.
+Do not trade, transfer, sign, deploy, launch, swap, buy, sell, or spend anything. Read integrations/bankr/nipmod/SKILL.md and integrations/bankr/bankr.agent-proof.json. Prove the Nipmod workflow by returning JSON with: skillRead, packageFound, trustChecked, installPlanReady and safety. Use the proof package and commands from the proof JSON. Do not install packages or mutate the user's workspace.
 ```
 
-For GitHub review or catalog installation, point the agent at:
+For GitHub review, the prepared folder is:
 
 ```text
 https://github.com/nipmod/nipmod/tree/main/integrations/bankr/nipmod
 ```
 
-For Bankr's public skill catalog, use the PR packet in `CATALOG_SUBMISSION.md`. It includes the target folder, README row, PR body and runtime smoke command.
+For Bankr's public skill catalog, use the PR packet in `CATALOG_SUBMISSION.md`. It includes the target folder, README row, PR body and runtime smoke command. This is not a public user install flow until accepted by Bankr.
 
 ## Local validation
 
@@ -48,9 +50,9 @@ BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
 
 Without `BANKR_API_KEY`, the smoke reports that Bankr auth is required and exits without calling Bankr.
 
-## Bankr path
+## Bankr review path
 
-Install or point a Bankr agent at the skill folder/file. Package search, inspect, audit and install planning stay free:
+For review, package search, inspect, audit and install planning stay free:
 
 ```bash
 nipmod search gitlawb --online

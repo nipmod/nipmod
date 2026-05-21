@@ -16,7 +16,9 @@ type Readiness = {
 
 const system = systemReadiness as Readiness;
 const platform = platformReadiness as Readiness;
-const connections = platformConnections.connections;
+const connections = platformConnections.connections.filter(
+  (connection) => connection.status === "Live" || connection.status === "MCP ready"
+);
 
 export const metadata: Metadata = {
   alternates: {
@@ -75,7 +77,7 @@ export default function StatusPage() {
         <div className="section-head">
           <p className="eyebrow">Platforms</p>
           <h2 id="platform-proof-title">Connected proof paths</h2>
-          <p>These are Nipmod integration and workflow checks. They are not partner endorsement claims.</p>
+          <p>Only ready paths are shown here. Review-only tracks stay out of the user-facing status grid.</p>
         </div>
         <div className="platform-grid">
           {connections.map((connection) => (
@@ -112,7 +114,7 @@ export default function StatusPage() {
             <span className="check-dot check-ok" aria-hidden="true" />
             <div>
               <h3>Platform readiness</h3>
-              <p>Codex, Claude Code, Cursor, OpenCode, Hermes MCP path, Bankr workflow proof and source mirror readiness.</p>
+              <p>Codex, Claude Code, Cursor, OpenCode, Hermes MCP path and source mirror readiness.</p>
             </div>
           </article>
           <article className="check-row">

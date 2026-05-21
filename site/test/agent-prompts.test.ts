@@ -22,7 +22,7 @@ describe("agent prompt pack", () => {
       projectAgents: "nipmod setup agents"
     });
     expect(prompts.prompts.default).toContain("ask before writing files");
-    expect(prompts.prompts.bankr).toContain("Do not trade");
+    expect(prompts.prompts.bankr).toBeUndefined();
     expect(JSON.stringify(prompts)).not.toMatch(/private key|token|ignore previous instructions/i);
   });
 });

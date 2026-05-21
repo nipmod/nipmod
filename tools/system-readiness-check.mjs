@@ -419,8 +419,7 @@ async function checkLiveSystemEndpoints() {
     ],
     ["live_dependencies_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/dependencies.json`, ["dependencies"]],
     ["live_provenance_doc", `https://nipmod.com/registry/packages/${encodedProofPackage}/provenance.json`, ["sourceCommit"]],
-    ["live_bankr_skill", state.receipt.agentHosts.bankr.skill, ["name: nipmod"]],
-    ["live_bankr_proof", state.receipt.agentHosts.bankr.proof, ["dev.nipmod.bankr.agent-proof.v1"]]
+    ["live_platform_connections", state.receipt.entrypoints.platformConnections, ["dev.nipmod.platform-connections.v1"]]
   ];
 
   for (const [name, url, expected] of endpoints) {
@@ -506,8 +505,6 @@ async function checkParallelArchiveAccess() {
         ),
         "remote-read-only"
       ),
-    async () => assertText("parallel_bankr_skill", await fetchText(state.receipt.agentHosts.bankr.skill), "name: nipmod"),
-    async () => assertText("parallel_bankr_proof", await fetchText(state.receipt.agentHosts.bankr.proof), proofPackage),
     async () => assertText("parallel_cursor_page", await fetchText(state.receipt.entrypoints.cursor), "Use Nipmod in Cursor"),
     async () => assertText("parallel_cursor_config", await fetchText("https://nipmod.com/integrations/cursor/mcp.json"), "mcpServers"),
     async () => assertText("parallel_llms", await fetchText(state.receipt.entrypoints.agentText), state.receipt.sharedArchive.registry),

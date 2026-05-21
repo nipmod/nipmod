@@ -309,8 +309,8 @@ describe("telegram bot knowledge base", () => {
       username: "nipmodbot"
     });
 
-    assert.match(reply.text, /Bankr has a Nipmod page and skill/);
-    assert.match(reply.text, /https:\/\/nipmod\.com\/bankr/);
+    assert.match(reply.text, /Bankr is a review track/);
+    assert.doesNotMatch(reply.text, /integrations\/bankr\/nipmod\/SKILL\.md/);
     assert.match(reply.text, /https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
   });
 

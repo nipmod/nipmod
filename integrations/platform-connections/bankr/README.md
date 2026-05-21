@@ -2,11 +2,11 @@
 
 Status: Under review
 
-Bankr has a prepared Nipmod skill, free service map, catalog submission packet and agent proof workflow.
+Bankr has review material prepared, but it is not a ready public user path.
 
 Use this wording:
 
-> We prepared a Nipmod skill for Bankr agents and would like Bankr to review it.
+> Bankr is a prepared review track for a future Nipmod agent workflow.
 
 Do not claim:
 
@@ -16,20 +16,16 @@ Public path:
 
 https://nipmod.com/bankr
 
-Skill:
-
-https://nipmod.com/integrations/bankr/nipmod/SKILL.md
-
-Smoke:
+Reviewer smoke:
 
 ```sh
 BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth
 ```
 
-Agent instruction:
+Reviewer instruction:
 
-Read the Bankr skill and proof JSON. Return package search, trust check and install plan evidence. Do not trade, transfer, sign, swap, buy, sell or spend anything.
+Review the local Bankr packet and return package search, trust check and install plan evidence. Do not trade, transfer, sign, swap, buy, sell or spend anything.
 
 Submission note:
 
-Bankr must review or merge the skill before native Bankr support can be claimed.
+Bankr must review or merge the packet before native Bankr support can be claimed. Do not expose it as a public setup path before that.

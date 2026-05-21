@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
   "generatedAt": "2026-05-21T09:23:39.000Z",
-  "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate require outside owner action before stronger claims are valid.",
+  "meaning": "Public connection matrix for Nipmod platform paths. Live means Nipmod controls and has verified the path. MCP ready means a host can connect to the local Nipmod MCP server. Under review and Candidate are review tracks, not user setup paths.",
   "statusLegend": [
     {
       "status": "Live",
@@ -22,7 +22,7 @@
     }
   ],
   "hostSmoke": {
-      "checkedAt": "2026-05-21T09:23:39.000Z",
+    "checkedAt": "2026-05-21T09:23:39.000Z",
     "command": "node tools/platform-readiness-check.mjs --host-smoke",
     "summary": {
       "pass": 22,
@@ -196,19 +196,17 @@
       "name": "Bankr",
       "status": "Under review",
       "category": "agent skill",
-      "scope": "Bankr compatible skill, free service map and agent proof workflow are prepared without wallet actions.",
-      "proofLevel": "Local proof commands pass. Native Bankr catalog acceptance and authenticated Agent API smoke are external.",
+      "scope": "Bankr review material is prepared, but no native Bankr user setup path is exposed until Bankr accepts it.",
+      "proofLevel": "Review-only. No native Bankr support or public Bankr skill install is claimed.",
       "url": "https://nipmod.com/bankr",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/bankr",
-      "setupCommand": "Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
-      "smokeCommand": "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
+      "setupCommand": null,
+      "smokeCommand": "Review only; native Bankr execution requires Bankr approval and authenticated API access.",
       "externalApprovalRequired": true,
-      "externalDependency": "Bankr must review or merge the skill before native Bankr support can be claimed.",
+      "externalDependency": "Bankr must review or accept the packet before native Bankr support can be claimed.",
       "evidence": [
         "https://nipmod.com/bankr",
-        "https://nipmod.com/integrations/bankr/nipmod/SKILL.md",
-        "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-        "https://nipmod.com/integrations/bankr/CATALOG_SUBMISSION.md"
+        "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/bankr"
       ]
     },
     {
@@ -220,16 +218,14 @@
       "proofLevel": "Review packet prepared after Aeon owner agreed to draft both directions. Exact collection, naming and native workflow still require Aeon owner review before official support or live Aeon package publication is claimed.",
       "url": "https://nipmod.com/aeon",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/aeon",
-      "setupCommand": "./add-skill nipmod/nipmod nipmod",
-      "smokeCommand": "Aeon agent: use the nipmod skill to search gitlawb-repo-reader, inspect trust and return an install plan only",
+      "setupCommand": null,
+      "smokeCommand": "Review only; Aeon owner approval is required before user setup is published.",
       "externalApprovalRequired": true,
       "externalDependency": "Aeon owner review is required before claiming official Aeon support or publishing Aeon skills through Nipmod.",
       "evidence": [
         "https://nipmod.com/aeon",
         "https://nipmod.com/integrations/aeon/aeon.collection.json",
         "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
-        "https://nipmod.com/integrations/aeon/proof.json",
-        "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
         "https://github.com/aaronjmars/aeon/pull/199",
         "https://github.com/aaronjmars/aeon"
       ]
@@ -239,12 +235,12 @@
       "name": "OpenHuman",
       "status": "Under review",
       "category": "agent harness",
-      "scope": "OpenHuman is a public personal-agent harness with a SKILL.md install path, an open Nipmod docs PR and a draft native Nipmod skill branch.",
-      "proofLevel": "Under review. OpenHuman docs PR is open, the SKILL.md install path is documented and a draft native skill exists in the Nipmod fork because the upstream skills repo is archived. No Tiny Humans owner approval, native support or published OpenHuman package collection is claimed.",
+      "scope": "OpenHuman has an open docs PR and draft review material. It is not a published user setup path.",
+      "proofLevel": "Under review. No Tiny Humans owner approval, native support or published OpenHuman package collection is claimed.",
       "url": "https://nipmod.com/openhuman",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/openhuman",
-      "setupCommand": "Install https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md through OpenHuman's skill installer",
-      "smokeCommand": "OpenHuman agent: use Nipmod to search gitlawb-repo-reader, inspect trust and return an install plan only.",
+      "setupCommand": null,
+      "smokeCommand": "Review only; Tiny Humans owner approval is required before user setup is published.",
       "externalApprovalRequired": true,
       "externalDependency": "Tiny Humans owner review is required before claiming official OpenHuman support or publishing OpenHuman-owned packages through Nipmod.",
       "evidence": [
@@ -252,17 +248,14 @@
         "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
         "https://github.com/tinyhumansai/openhuman/pull/2432",
         "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill",
-        "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
-        "https://github.com/tinyhumansai/openhuman",
-        "https://github.com/tinyhumansai/openhuman-skills",
-        "https://tinyhumans.ai/openhuman"
+        "https://github.com/tinyhumansai/openhuman"
       ]
     }
   ],
   "notClaimed": [
     "Native marketplace approval for every platform",
     "Every Gitlawb package has a verified Owner Package Claim proof",
-    "Bankr accepted the skill into the Bankr skills repo",
+    "Bankr accepted a Nipmod packet into a native Bankr surface",
     "Aeon approved this exact collection or published official Nipmod support",
     "OpenHuman approved, endorsed, merged or published a Nipmod connection",
     "Third party platforms endorse Nipmod",

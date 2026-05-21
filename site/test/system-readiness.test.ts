@@ -120,11 +120,6 @@ describe("system readiness receipt", () => {
 
   test("connects every platform to the same archive story", () => {
     expect(readiness.agentHosts).toMatchObject({
-      bankr: {
-        proof: "https://nipmod.com/integrations/bankr/bankr.agent-proof.json",
-        runtimeSmoke: "BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth",
-        skill: "https://nipmod.com/integrations/bankr/nipmod/SKILL.md"
-      },
       claudeCode: {
         setup: "nipmod setup claude",
         config: ".mcp.json"
@@ -149,6 +144,9 @@ describe("system readiness receipt", () => {
         bundleCommand: "/nipmod"
       }
     });
+    expect(readiness.agentHosts.bankr).toBeUndefined();
+    expect(readiness.agentHosts.aeon).toBeUndefined();
+    expect(readiness.agentHosts.openHuman).toBeUndefined();
     expect(platformReadiness.platforms.map((platform: { id: string }) => platform.id).sort()).toEqual([
       "aeon",
       "bankr",

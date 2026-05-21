@@ -366,57 +366,19 @@ test("mobile header exposes compact primary navigation", async ({ page }) => {
   await expect(page.locator(".brand-socials")).toBeHidden();
 });
 
-test("Bankr page gives agents a complete local integration path", async ({ page, request }) => {
+test("Bankr page is scoped as review only", async ({ page }) => {
   await page.goto("/bankr");
 
-  await expect(page.getByRole("heading", { name: "Nipmod for Bankr agents" })).toBeVisible();
-  await expect(page.getByText("A free Bankr-ready integration pack for agent skills")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Bankr skill file" })).toHaveAttribute(
+  await expect(page.getByRole("heading", { name: "Bankr review track" })).toBeVisible();
+  await expect(page.getByText("Bankr is not listed as a ready Nipmod agent host yet.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Bankr coin" })).toHaveAttribute(
     "href",
-    "/integrations/bankr/nipmod/SKILL.md"
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
   );
-  await expect(page.getByRole("link", { name: "Open free service map" })).toHaveAttribute(
-    "href",
-    "/integrations/bankr/bankr.free.json"
-  );
-  await expect(page.getByRole("link", { name: "Open agent proof" })).toHaveAttribute(
-    "href",
-    "/integrations/bankr/bankr.agent-proof.json"
-  );
-  await expect(page.getByRole("heading", { name: "Install the skill" })).toBeVisible();
-  await expect(page.getByText("The skill follows the Bankr")).toBeVisible();
-  await expect(page.getByText("Tell your agent")).toBeVisible();
-  await expect(
-    page.getByText("Read https://nipmod.com/integrations/bankr/nipmod/SKILL.md and use Nipmod before installing agent packages.", {
-      exact: true
-    })
-  ).toBeVisible();
-  await expect(page.getByText("Catalog packet")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Agent proof workflow" })).toBeVisible();
-  await expect(page.getByText("Prove the Nipmod workflow by returning JSON")).toBeVisible();
-  await expect(page.getByText("Trust checked")).toBeVisible();
-  await expect(page.getByText("Install plan only")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Free services" })).toBeVisible();
-  await expect(page.getByText("Core Nipmod workflows stay free for Bankr agents.")).toBeVisible();
-  await expect(page.getByText("Free package search")).toBeVisible();
-  await expect(page.getByText("Free package audit")).toBeVisible();
-  await expect(page.getByText("Free install plan")).toBeVisible();
-
-  const skill = await request.get("/integrations/bankr/nipmod/SKILL.md");
-  await expect(skill).toBeOK();
-  await expect(skill.text()).resolves.toContain("name: nipmod");
-
-  const submission = await request.get("/integrations/bankr/CATALOG_SUBMISSION.md");
-  await expect(submission).toBeOK();
-  await expect(submission.text()).resolves.toContain("Bankr Skill Catalog Submission");
-
-  const config = await request.get("/integrations/bankr/bankr.free.json");
-  await expect(config).toBeOK();
-  expect((await config.json()).pricing).toBe("free");
-
-  const proof = await request.get("/integrations/bankr/bankr.agent-proof.json");
-  await expect(proof).toBeOK();
-  expect((await proof.json()).type).toBe("dev.nipmod.bankr.agent-proof.v1");
+  await expect(page.getByRole("heading", { name: "Not a ready user path" })).toBeVisible();
+  await expect(page.getByText("Bankr has not accepted a native Nipmod skill or catalog entry.")).toBeVisible();
+  await expect(page.getByText("Bankr is not an official, native or ready Nipmod host")).toBeVisible();
+  await expect(page.getByText("integrations/bankr/nipmod/SKILL.md")).toHaveCount(0);
 });
 
 test("package page converts an owned Gitlawb repo into commands", async ({ page }) => {

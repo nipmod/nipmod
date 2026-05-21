@@ -31,7 +31,7 @@ describe("platform readiness receipt", () => {
       "aeon",
       "openhuman"
     ]);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(30);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(55);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(50);
@@ -40,7 +40,7 @@ describe("platform readiness receipt", () => {
     );
     expect(readiness.meaning).toContain("does not claim third-party adoption");
     expect(readiness.notClaimed).toContain("every Gitlawb package has a verified Owner Package Claim proof");
-    expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
+    expect(readiness.notClaimed).toContain("Bankr has accepted Nipmod into a native Bankr surface");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
     expect(readiness.notClaimed).toContain("Aeon has approved this exact collection or published official Nipmod support");
     expect(readiness.notClaimed).toContain("OpenHuman has approved, endorsed, merged or published a Nipmod connection");
@@ -146,16 +146,17 @@ describe("platform readiness receipt", () => {
     expect(mcpConnection.proofLevel).toContain("hosted read-only tool subset");
   });
 
-  test("keeps Bankr readiness scoped to safe package workflows", () => {
+  test("keeps Bankr readiness scoped as review only", () => {
     const bankr = readiness.platforms.find((platform: { id: string }) => platform.id === "bankr");
 
-    expect(bankr.status).toBe("agent-proof-ready");
+    expect(bankr.status).toBe("review-packet-prepared");
     expect(bankr.connectionStatus).toBe("Under review");
-    expect(bankr.claim).toContain("without wallet actions");
+    expect(bankr.claim).toContain("not ready or claimed");
     expect(bankr.externalDependency).toContain("not claimed");
-    expect(bankr.runtimeSmoke).toBe("BANKR_API_KEY=bk_... node tools/bankr-agent-smoke.mjs --require-auth");
-    expect(bankr.checks).toContain("real Bankr Agent API smoke is available with BANKR_API_KEY");
-    expect(bankr.checks).toContain("core package workflows do not require x402 or Nipmod payment");
+    expect(bankr.runtimeSmoke).toBeUndefined();
+    expect(bankr.checks).toContain("review page states Bankr is not a ready user path");
+    expect(bankr.checks).toContain("native Bankr support requires Bankr review before public setup is exposed");
+    expect(bankr.evidence).not.toContain("https://nipmod.com/integrations/bankr/nipmod/SKILL.md");
     expect(JSON.stringify(bankr)).not.toMatch(/paymentScheme|walletTransfer|trade|swap/i);
   });
 
@@ -178,10 +179,10 @@ describe("platform readiness receipt", () => {
     expect(aeon.connectionStatus).toBe("Under review");
     expect(aeon.status).toBe("two-way-review-packet-ready");
     expect(aeon.claim).toContain("review-ready two-way packet");
-    expect(aeon.setupCommand).toBe("./add-skill nipmod/nipmod nipmod");
+    expect(aeon.setupCommand).toBeNull();
     expect(aeon.evidence).toContain("https://nipmod.com/aeon");
     expect(aeon.evidence).toContain("https://nipmod.com/integrations/aeon/aeon.collection.json");
-    expect(aeon.evidence).toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
+    expect(aeon.evidence).not.toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
     expect(aeon.evidence).toContain("https://github.com/aaronjmars/aeon/pull/199");
     expect(aeon.externalDependency).toContain("owner review");
     expect(aeonConnection.externalApprovalRequired).toBe(true);
@@ -196,15 +197,14 @@ describe("platform readiness receipt", () => {
     expect(openhuman.connectionStatus).toBe("Under review");
     expect(openhuman.status).toBe("docs-pr-open-skill-branch-ready");
     expect(openhuman.claim).toContain("docs PR open");
-    expect(openhuman.setupCommand).toContain("SKILL.md");
+    expect(openhuman.setupCommand).toBeNull();
     expect(openhuman.evidence).toContain("https://nipmod.com/openhuman");
     expect(openhuman.evidence).toContain("https://github.com/tinyhumansai/openhuman/pull/2432");
     expect(openhuman.evidence).toContain("https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill");
-    expect(openhuman.evidence).toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
+    expect(openhuman.evidence).not.toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
     expect(openhuman.externalDependency).toContain("Tiny Humans owner review");
     expect(openhumanConnection.externalApprovalRequired).toBe(true);
     expect(openhumanConnection.proofLevel).toContain("Under review");
-    expect(openhumanConnection.proofLevel).toContain("docs PR is open");
-    expect(openhumanConnection.proofLevel).toContain("upstream skills repo is archived");
+    expect(openhumanConnection.proofLevel).toContain("No Tiny Humans owner approval");
   });
 });
