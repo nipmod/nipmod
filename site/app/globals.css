@@ -3053,7 +3053,7 @@ body {
 .brand-socials {
   align-items: center;
   display: flex;
-  gap: 4px;
+  gap: 6px;
   justify-self: end;
 }
 
@@ -3062,9 +3062,9 @@ body {
   border: 0;
   border-radius: 4px;
   color: var(--editorial-muted);
-  height: 32px;
-  opacity: 0.55;
-  width: 32px;
+  height: 34px;
+  opacity: 0.82;
+  width: 34px;
   transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), background 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -3072,9 +3072,9 @@ body {
 .brand-icon-button svg {
   display: block;
   filter: brightness(0) invert(1);
-  height: 16px;
+  height: 18px;
   opacity: 1;
-  width: 16px;
+  width: 18px;
 }
 
 .brand-icon-button:hover {
@@ -3830,7 +3830,7 @@ body {
 
 @media (max-width: 980px) {
   .topbar {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     height: auto;
     min-height: 78px;
     padding: 0 22px;
@@ -3841,12 +3841,13 @@ body {
   }
 
   .brand-socials {
-    display: none;
+    display: flex;
+    gap: 4px;
   }
 
   .nav-actions {
     gap: 18px;
-    justify-content: end;
+    justify-content: center;
   }
 
   .nav-link {
@@ -3897,6 +3898,10 @@ body {
 @media (max-width: 560px) {
   .topbar {
     padding: 0 16px;
+  }
+
+  .brand-socials {
+    display: none;
   }
 
   .nav-actions {
