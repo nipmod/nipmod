@@ -3282,6 +3282,18 @@ body {
 }
 
 .terminal-input,
+.terminal-typing {
+  align-items: baseline;
+  display: flex !important;
+  gap: 10px;
+}
+
+.terminal-prompt {
+  color: rgba(212, 212, 214, 0.42);
+  flex: 0 0 auto;
+}
+
+.terminal-input,
 .terminal-command,
 .terminal-default {
   color: #d4d4d6;
