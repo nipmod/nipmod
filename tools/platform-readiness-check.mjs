@@ -201,7 +201,7 @@ async function checkSourceMirrors() {
 
 async function checkLiveEndpoints() {
   const endpoints = [
-    ["setup_page", "https://nipmod.com/setup", ["Connect your agent", "nipmod setup codex"]],
+    ["setup_page", "https://nipmod.com/setup", ["Setup Nipmod", "Install Nipmod once"]],
     [
       "cursor_page",
       "https://nipmod.com/cursor",
