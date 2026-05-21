@@ -59,13 +59,6 @@ const agents: AgentConnection[] = [
     logo: "/agents/hermes.png",
     name: "Hermes",
     note: "Skills and MCP setup"
-  },
-  {
-    href: "/openhuman",
-    id: "openhuman",
-    logo: "/agents/openhuman.svg",
-    name: "OpenHuman",
-    note: "Skill install review"
   }
 ];
 

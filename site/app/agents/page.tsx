@@ -4,9 +4,9 @@ import { AgentsView } from "./agents-view";
 
 export const metadata: Metadata = {
   alternates: { canonical: "https://nipmod.com/agents" },
-  description: "Pick an agent host. One archive, every agent.",
+  description: "Pick a ready Nipmod agent host.",
   openGraph: {
-    description: "Pick an agent host. One archive, every agent.",
+    description: "Pick a ready Nipmod agent host.",
     title: "Nipmod agents",
     url: "https://nipmod.com/agents"
   },
