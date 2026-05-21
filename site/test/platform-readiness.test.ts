@@ -182,6 +182,7 @@ describe("platform readiness receipt", () => {
     expect(aeon.evidence).toContain("https://nipmod.com/aeon");
     expect(aeon.evidence).toContain("https://nipmod.com/integrations/aeon/aeon.collection.json");
     expect(aeon.evidence).toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
+    expect(aeon.evidence).toContain("https://github.com/aaronjmars/aeon/pull/199");
     expect(aeon.externalDependency).toContain("owner review");
     expect(aeonConnection.externalApprovalRequired).toBe(true);
     expect(aeonConnection.proofLevel).toContain("Review packet prepared");

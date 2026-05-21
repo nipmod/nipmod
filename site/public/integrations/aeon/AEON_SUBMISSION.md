@@ -53,6 +53,10 @@ Expected Aeon install path after review:
 ./add-skill nipmod/nipmod nipmod
 ```
 
+Aeon review PR:
+
+https://github.com/aaronjmars/aeon/pull/199
+
 ## Review asks
 
 Please review:

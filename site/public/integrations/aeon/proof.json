@@ -10,6 +10,7 @@
   "collectionDraft": "https://nipmod.com/integrations/aeon/aeon.collection.json",
   "reviewPacket": "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
   "aeonSkill": "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+  "aeonReviewPr": "https://github.com/aaronjmars/aeon/pull/199",
   "setupCommand": "./add-skill nipmod/nipmod nipmod",
   "smokeCommand": "Aeon agent: use the nipmod skill to search gitlawb-repo-reader, inspect trust and return an install plan only",
   "externalApprovalRequired": true,

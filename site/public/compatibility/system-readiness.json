@@ -100,6 +100,7 @@
       "collectionDraft": "https://nipmod.com/integrations/aeon/aeon.collection.json",
       "reviewPacket": "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
       "skill": "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+      "reviewPr": "https://github.com/aaronjmars/aeon/pull/199",
       "access": "review-ready two-way package and skill bridge",
       "status": "Under review"
     },

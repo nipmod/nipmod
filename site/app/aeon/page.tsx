@@ -46,6 +46,9 @@ export default function AeonPage() {
             <a className="button button-ghost" href="https://github.com/aaronjmars/aeon" rel="noreferrer" target="_blank">
               Aeon repo
             </a>
+            <a className="button button-ghost" href="https://github.com/aaronjmars/aeon/pull/199" rel="noreferrer" target="_blank">
+              Review PR
+            </a>
           </div>
         </div>
         <aside className="quickstart-card cursor-status-panel" aria-label="Aeon status">
@@ -156,6 +159,7 @@ export default function AeonPage() {
         <div className="package-links">
           <a href="/integrations/aeon/proof.json">Proof JSON</a>
           <a href="/integrations/aeon/AEON_SUBMISSION.md">Review packet</a>
+          <a href="https://github.com/aaronjmars/aeon/pull/199" rel="noreferrer" target="_blank">Aeon PR</a>
           <a className="data-link" href="/compatibility/platform-connections.json">Connection matrix</a>
         </div>
       </section>

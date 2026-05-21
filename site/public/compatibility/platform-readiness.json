@@ -211,6 +211,7 @@
         "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
         "https://nipmod.com/integrations/aeon/proof.json",
         "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+        "https://github.com/aaronjmars/aeon/pull/199",
         "https://github.com/aaronjmars/aeon"
       ],
       "checks": [
@@ -218,6 +219,7 @@
         "owner agreed to review the two-way direction",
         "first 10 skill collection draft exists with source links and attribution",
         "Aeon-compatible Nipmod skill exists in the Nipmod repo",
+        "draft PR opened for Aeon owner review",
         "no official support or package publication is claimed before owner review"
       ],
       "externalDependency": "Aeon owner review and consent are required before any official Aeon support or live Aeon skill collection is claimed."

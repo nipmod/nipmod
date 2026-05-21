@@ -55,12 +55,14 @@ describe("Aeon review packet", () => {
   test("keeps public wording scoped away from official support claims", () => {
     expect(packet).toContain("Nothing here claims official Aeon support");
     expect(packet).toContain("./add-skill nipmod/nipmod nipmod");
+    expect(packet).toContain("https://github.com/aaronjmars/aeon/pull/199");
     expect(packet).toContain("Aeon and Nipmod are drafting a two-way package and skill bridge for review.");
 
     const aeon = readiness.platforms.find((platform: { id: string }) => platform.id === "aeon");
     const aeonConnection = connections.connections.find((connection: { id: string }) => connection.id === "aeon");
 
     expect(proof.status).toBe("Under review");
+    expect(proof.aeonReviewPr).toBe("https://github.com/aaronjmars/aeon/pull/199");
     expect(proof.notClaimed).toContain("Aeon officially supports Nipmod");
     expect(aeon.connectionStatus).toBe("Under review");
     expect(aeonConnection.externalApprovalRequired).toBe(true);

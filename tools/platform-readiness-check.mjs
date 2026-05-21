@@ -254,7 +254,7 @@ async function checkLiveEndpoints() {
     [
       "aeon_review_packet",
       "https://nipmod.com/integrations/aeon/AEON_SUBMISSION.md",
-      ["Aeon x Nipmod review packet", "Direction 1", "./add-skill nipmod/nipmod nipmod"]
+      ["Aeon x Nipmod review packet", "Direction 1", "./add-skill nipmod/nipmod nipmod", "https://github.com/aaronjmars/aeon/pull/199"]
     ],
     [
       "platform_connections_live",
