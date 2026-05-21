@@ -65,7 +65,7 @@ const agents: AgentConnection[] = [
     id: "openhuman",
     logo: "/agents/openhuman.svg",
     name: "OpenHuman",
-    note: "Read-only MCP review path"
+    note: "Skill install review"
   }
 ];
 

@@ -29,7 +29,7 @@ describe("platform connection matrix", () => {
       "hermes:MCP ready",
       "bankr:Under review",
       "aeon:Under review",
-      "openhuman:Candidate"
+      "openhuman:Under review"
     ]);
     expect(connections.notClaimed).toContain("MCP ready means native platform partnership");
   });

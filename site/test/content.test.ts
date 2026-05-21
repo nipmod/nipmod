@@ -98,7 +98,7 @@ describe("home content", () => {
 
   test("links to the human setup flow", () => {
     expect(homeContent.primaryAction).toBe("Setup Nipmod");
-    expect(homeContent.links.install).toBe("/setup");
+    expect(homeContent.links.install).toBe("/agents");
   });
 
   test("exposes a complete first run path", () => {

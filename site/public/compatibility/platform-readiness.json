@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
-  "generatedAt": "2026-05-21T00:20:28.000Z",
+  "generatedAt": "2026-05-21T09:23:39.000Z",
   "meaning": "Product readiness receipt. This proves public setup paths, source mirrors, local host MCP contracts, hosted read-only MCP, connection kits and Bankr agent-proof assets. It does not claim third-party adoption or marketplace acceptance.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
@@ -227,17 +227,19 @@
     {
       "id": "openhuman",
       "name": "OpenHuman",
-      "productReadiness": 35,
-      "connectionStatus": "Candidate",
-      "status": "review-packet-ready",
-      "claim": "OpenHuman has a review-ready remote MCP connection packet for Nipmod hosted read-only package tools, pending Tiny Humans owner review.",
+      "productReadiness": 50,
+      "connectionStatus": "Under review",
+      "status": "docs-pr-open-skill-branch-ready",
+      "claim": "OpenHuman has a Nipmod docs PR open, a documented SKILL.md install path and a draft native skill branch prepared for Tiny Humans review.",
       "connectionKit": "integrations/platform-connections/openhuman",
-      "setupCommand": "Configure OpenHuman mcp_client.servers with https://nipmod.com/api/mcp",
-      "verifyCommand": "OpenHuman agent: mcp_list_servers -> mcp_list_tools(server=nipmod) -> mcp_call_tool(server=nipmod, tool=nipmod.search)",
+      "setupCommand": "Install https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md through OpenHuman's skill installer",
+      "verifyCommand": "OpenHuman agent: use Nipmod to search gitlawb-repo-reader, inspect trust and return an install plan only.",
       "evidence": [
         "https://nipmod.com/openhuman",
-        "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
         "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
+        "https://github.com/tinyhumansai/openhuman/pull/2432",
+        "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill",
+        "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
         "https://github.com/tinyhumansai/openhuman",
         "https://github.com/tinyhumansai/openhuman-skills",
         "https://tinyhumans.ai/openhuman"
@@ -245,8 +247,10 @@
       "checks": [
         "candidate repo is public",
         "repo exposes agent-facing surfaces such as .agents, .claude and .codex",
-        "repo exposes generic MCP bridge tools and mcp_client.servers config",
-        "Nipmod review packet maps that remote MCP client path to hosted read-only MCP",
+        "repo supports GitHub blob SKILL.md URL normalization for single-file skill installs",
+        "OpenHuman docs PR is open for maintainer review",
+        "draft native OpenHuman skill exists in the Nipmod fork because openhuman-skills is archived",
+        "Nipmod hosted read-only MCP endpoint is available for compatible MCP clients",
         "no owner approval, native support or package publication is claimed"
       ],
       "externalDependency": "Tiny Humans owner review and consent are required before any official OpenHuman support or OpenHuman-owned package listing is claimed."
@@ -258,7 +262,7 @@
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
     "Aeon has approved this exact collection or published official Nipmod support",
-    "OpenHuman has approved, endorsed or published a Nipmod connection",
+    "OpenHuman has approved, endorsed, merged or published a Nipmod connection",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

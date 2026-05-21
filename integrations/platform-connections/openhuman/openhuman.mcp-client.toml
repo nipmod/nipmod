@@ -1,3 +1,5 @@
+# Draft optional MCP config for compatible OpenHuman builds.
+# This is not official OpenHuman support until Tiny Humans reviews it.
 [mcp_client]
 enabled = true
 

@@ -229,17 +229,17 @@ async function checkLiveEndpoints() {
     [
       "openhuman_page",
       "https://nipmod.com/openhuman",
-      ["Nipmod for OpenHuman review", "Not official until Tiny Humans reviews or accepts it", "mcp_client.servers"]
+      ["Nipmod for OpenHuman review", "Under review", "https://github.com/tinyhumansai/openhuman/pull/2432"]
     ],
     [
       "openhuman_public_config",
       "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
-      ["[mcp_client]", "https://nipmod.com/api/mcp", "nipmod.install_plan"]
+      ["Draft optional MCP config", "https://nipmod.com/api/mcp", "nipmod.install_plan"]
     ],
     [
       "openhuman_review_packet",
       "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
-      ["review packet", "Not official", "mcp_list_servers"]
+      ["under review", "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill", "upstream skills repo is archived"]
     ],
     [
       "aeon_page",

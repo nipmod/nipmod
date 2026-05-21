@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "type": "dev.nipmod.system-readiness.v1",
-  "generatedAt": "2026-05-21T00:20:28.000Z",
+  "generatedAt": "2026-05-21T09:23:39.000Z",
   "scope": "Shared agent package archive and access system.",
   "meaning": "This proves the current Nipmod system surface: one shared verified archive, quorum approved package digests, public machine discovery, CLI access, local MCP access, hosted read-only MCP access, one-command agent host setup, install receipts, GitHub/Gitlawb source sync, connection matrix, claim flows, Cursor MCP-ready path, Hermes MCP-ready path with /nipmod skill bundle, Bankr agent-proof workflows and parallel read access. It proves product readiness for the current system scope; it does not claim third-party adoption or native marketplace acceptance.",
   "sharedArchive": {
@@ -106,10 +106,12 @@
     },
     "openHuman": {
       "candidate": "https://nipmod.com/openhuman",
-      "config": "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
       "reviewPacket": "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
-      "access": "candidate remote MCP review packet for hosted read-only package tools",
-      "status": "Candidate"
+      "reviewPr": "https://github.com/tinyhumansai/openhuman/pull/2432",
+      "nativeSkillBranch": "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill",
+      "skill": "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+      "access": "docs PR plus SKILL.md install path and draft native OpenHuman skill branch",
+      "status": "Under review"
     }
   },
   "cliCommands": [
@@ -226,7 +228,7 @@
     "third-party users have already adopted every host",
     "Bankr has accepted the skill into a native marketplace",
     "Bankr Agent API smoke has run unless BANKR_API_KEY is provided",
-    "OpenHuman has approved, endorsed or published a Nipmod connection",
+    "OpenHuman has approved, endorsed, merged or published a Nipmod connection",
     "Nipmod owns or controls Gitlawb repos",
     "hosted read-only MCP can mutate a user's workspace",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"

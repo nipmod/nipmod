@@ -3,23 +3,28 @@
   "type": "dev.nipmod.connection-proof.v1",
   "id": "openhuman",
   "name": "OpenHuman",
-  "status": "Candidate",
-  "proofLevel": "Candidate only. Review packet prepared for OpenHuman remote MCP client to Nipmod hosted read-only MCP.",
+  "status": "Under review",
+  "proofLevel": "Under review. OpenHuman docs PR is open, the SKILL.md path is documented, and a draft native OpenHuman skill branch exists in the Nipmod fork because the upstream skills repo is archived.",
   "publicPath": "https://github.com/tinyhumansai/openhuman",
   "reviewPage": "https://nipmod.com/openhuman",
+  "reviewPr": "https://github.com/tinyhumansai/openhuman/pull/2432",
+  "skillInstructions": "https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md",
+  "nativeSkillBranch": "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill",
   "reviewPacket": "integrations/platform-connections/openhuman/OPENHUMAN_SUBMISSION.md",
-  "configExample": "integrations/platform-connections/openhuman/openhuman.mcp-client.toml",
-  "smokeCommand": "OpenHuman agent: mcp_list_servers -> mcp_list_tools(server=nipmod) -> mcp_call_tool(server=nipmod, tool=nipmod.search)",
+  "mcpEndpoint": "https://nipmod.com/api/mcp",
+  "smokeCommand": "OpenHuman agent: use Nipmod to search gitlawb-repo-reader, inspect trust and return an install plan only.",
   "detectedCapabilities": [
-    "OpenHuman exposes generic MCP bridge tools",
-    "OpenHuman config supports named remote MCP servers through mcp_client.servers",
-    "Nipmod hosted MCP exposes search, view, inspect, install_plan and demo as a read-only package path"
+    "OpenHuman installs public GitHub SKILL.md files",
+    "OpenHuman rewrites GitHub blob URLs to raw Markdown before installation",
+    "Nipmod exposes a hosted read-only MCP endpoint for compatible MCP clients",
+    "Draft native OpenHuman skill implements read-only Nipmod package tools in the Nipmod fork"
   ],
   "externalApprovalRequired": true,
   "externalDependency": "Tiny Humans owner review is required before claiming official OpenHuman support or publishing OpenHuman-owned packages through Nipmod.",
   "notClaimed": [
     "OpenHuman has approved, endorsed or merged Nipmod",
     "OpenHuman-owned skills are published through Nipmod",
-    "OpenHuman native support is live"
+    "OpenHuman native support is live",
+    "The draft OpenHuman native skill is merged upstream"
   ]
 }

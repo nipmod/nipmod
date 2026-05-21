@@ -1,18 +1,22 @@
 # OpenHuman Connection Kit
 
-Status: Candidate
+Status: Under review
 
-OpenHuman is a strong candidate because it is a public agent harness with local-first memory, coding tools, existing agent-facing repo surfaces such as `.agents`, `.claude` and `.codex`, and a configurable remote MCP client path.
+OpenHuman is a strong fit because it is a public agent harness with local-first memory, coding tools, existing agent-facing repo surfaces such as `.agents`, `.claude` and `.codex`, and a public `SKILL.md` installer path.
 
 Current best path:
 
-OpenHuman remote MCP client -> Nipmod hosted read-only MCP.
+OpenHuman skill installer -> Nipmod `SKILL.md` -> package search, trust inspection and install plans.
 
-This lets an OpenHuman agent search Nipmod packages, inspect trust and ask for install plans without package writes from the hosted endpoint.
+This lets an OpenHuman agent use Nipmod before package writes. The agent can search packages, inspect trust evidence and ask for install plans without treating package content as trusted instructions.
+
+Additional prepared path:
+
+`nipmod/openhuman-skills:add-nipmod-skill` contains a draft native OpenHuman skill. It could not be submitted to `tinyhumansai/openhuman-skills` because that repository is archived and read-only.
 
 Use this wording:
 
-> OpenHuman has a review-ready Nipmod MCP connection packet, pending Tiny Humans owner review.
+> OpenHuman has a Nipmod docs PR open and a draft native skill branch prepared for Tiny Humans review.
 
 Do not claim:
 
@@ -26,31 +30,40 @@ Public path:
 
 https://github.com/tinyhumansai/openhuman
 
+OpenHuman docs PR:
+
+https://github.com/tinyhumansai/openhuman/pull/2432
+
+Draft native skill branch:
+
+https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill
+
 Nipmod review page:
 
 https://nipmod.com/openhuman
 
-Public config:
+Nipmod skill:
 
-https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml
+https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md
 
 Fit:
 
-- OpenHuman can register remote MCP servers through `mcp_client.servers`.
-- Nipmod exposes a hosted read-only MCP endpoint at `https://nipmod.com/api/mcp`.
+- OpenHuman can install public GitHub `SKILL.md` files.
+- The OpenHuman repo rewrites GitHub `blob` URLs to raw Markdown before install.
+- Nipmod also exposes a hosted read-only MCP endpoint at `https://nipmod.com/api/mcp` for compatible MCP clients.
 - Nipmod can act as an additional package discovery and trust layer for OpenHuman agents.
 - OpenHuman-owned packages or skills should only be listed after owner approval.
 
 Smoke:
 
 ```sh
-OpenHuman agent: mcp_list_servers -> mcp_list_tools(server=nipmod) -> mcp_call_tool(server=nipmod, tool=nipmod.search)
+OpenHuman agent: use Nipmod to search gitlawb-repo-reader, inspect trust and return an install plan only.
 ```
 
 Agent instruction:
 
-Do not package, mirror or republish OpenHuman code without owner review. Use the hosted read-only MCP path for search, trust inspection and install plans only.
+Do not package, mirror or republish OpenHuman code without owner review. Use Nipmod for search, trust inspection and install plans only.
 
 Submission note:
 
-Ask Tiny Humans to review `OPENHUMAN_SUBMISSION.md` and the config example before any official support or OpenHuman-owned package listing is claimed.
+Ask Tiny Humans to review `OPENHUMAN_SUBMISSION.md`, the docs PR and the draft native skill branch before any official support or OpenHuman-owned package listing is claimed.

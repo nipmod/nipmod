@@ -1,44 +1,51 @@
 # Nipmod for OpenHuman review
 
-Status: review packet. Not official until Tiny Humans reviews or accepts it.
+Status: under review. Not official until Tiny Humans reviews or accepts it.
 
-OpenHuman can register named remote MCP servers through `mcp_client.servers`.
+What is ready:
 
-Nipmod exposes hosted read-only MCP at:
+- OpenHuman docs PR: https://github.com/tinyhumansai/openhuman/pull/2432
+- Nipmod skill instructions: https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md
+- Draft native OpenHuman skill branch: https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill
+- Hosted read-only MCP endpoint for compatible MCP clients: https://nipmod.com/api/mcp
 
-```text
-https://nipmod.com/api/mcp
-```
+The current OpenHuman-owned path is the `SKILL.md` install route. OpenHuman's repo includes URL normalization for GitHub `blob` links to raw Markdown, so a user can install the Nipmod skill instructions from the public GitHub file and then ask OpenHuman to search packages, inspect trust evidence and return an install plan.
 
-Config:
+The draft native skill in `nipmod/openhuman-skills` adds read-only tools for:
 
-```toml
-[mcp_client]
-enabled = true
+- Nipmod status
+- package search
+- package view
+- package trust inspection
+- install-plan generation
+- demo flow
 
-[[mcp_client.servers]]
-name = "nipmod"
-endpoint = "https://nipmod.com/api/mcp"
-description = "Nipmod shared package archive for agents. Search packages, inspect trust and create install plans before workspace writes."
-enabled = true
-allowed_tools = [
-  "nipmod.search",
-  "nipmod.view",
-  "nipmod.inspect",
-  "nipmod.install_plan",
-  "nipmod.demo"
-]
-timeout_secs = 30
-```
+That skill branch could not be submitted upstream because `tinyhumansai/openhuman-skills` is archived and read-only.
 
-Review smoke:
+## Safe review prompt
+
+Ask an OpenHuman agent:
 
 ```text
-Use the registered nipmod MCP server. Run mcp_list_servers, mcp_list_tools for nipmod, then use mcp_call_tool to search for gitlawb-repo-reader, inspect trust and return an install plan. Do not install packages or write files.
+Use Nipmod to search for gitlawb-repo-reader, inspect its trust record and return an install plan. Do not install packages or write files.
 ```
+
+## Claim boundary
 
 Accurate public line:
 
-> OpenHuman has a review-ready Nipmod MCP connection packet.
+> OpenHuman has a Nipmod docs PR open and a draft native skill branch prepared for Tiny Humans review.
 
-Do not claim official OpenHuman support, OpenHuman endorsement, or OpenHuman-owned packages until Tiny Humans reviews or accepts the connection.
+Do not claim:
+
+> OpenHuman officially supports Nipmod.
+
+Do not claim:
+
+> OpenHuman skills are already published through Nipmod.
+
+Do not claim:
+
+> The OpenHuman native skill is merged upstream.
+
+Owner approval is required before any official OpenHuman support or OpenHuman-owned package collection is claimed.

@@ -34,7 +34,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(55);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(35);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(50);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
     );
@@ -43,7 +43,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.notClaimed).toContain("Bankr has accepted the skill into a native marketplace");
     expect(readiness.notClaimed).toContain("Bankr Agent API smoke has run unless BANKR_API_KEY is provided");
     expect(readiness.notClaimed).toContain("Aeon has approved this exact collection or published official Nipmod support");
-    expect(readiness.notClaimed).toContain("OpenHuman has approved, endorsed or published a Nipmod connection");
+    expect(readiness.notClaimed).toContain("OpenHuman has approved, endorsed, merged or published a Nipmod connection");
     expect(connections.type).toBe("dev.nipmod.platform-connections.v1");
     expect(connections.connections.map((connection: { id: string }) => connection.id)).toEqual([
       "gitlawb",
@@ -189,19 +189,22 @@ describe("platform readiness receipt", () => {
     expect(aeonConnection.proofLevel).toContain("official support");
   });
 
-  test("keeps OpenHuman candidate scoped to owner review", () => {
+  test("keeps OpenHuman review path scoped to owner review", () => {
     const openhuman = readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman");
     const openhumanConnection = connections.connections.find((connection: { id: string }) => connection.id === "openhuman");
 
-    expect(openhuman.connectionStatus).toBe("Candidate");
-    expect(openhuman.status).toBe("review-packet-ready");
-    expect(openhuman.claim).toContain("review-ready remote MCP connection packet");
-    expect(openhuman.setupCommand).toContain("mcp_client.servers");
+    expect(openhuman.connectionStatus).toBe("Under review");
+    expect(openhuman.status).toBe("docs-pr-open-skill-branch-ready");
+    expect(openhuman.claim).toContain("docs PR open");
+    expect(openhuman.setupCommand).toContain("SKILL.md");
     expect(openhuman.evidence).toContain("https://nipmod.com/openhuman");
-    expect(openhuman.evidence).toContain("https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml");
+    expect(openhuman.evidence).toContain("https://github.com/tinyhumansai/openhuman/pull/2432");
+    expect(openhuman.evidence).toContain("https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill");
+    expect(openhuman.evidence).toContain("https://github.com/nipmod/nipmod/blob/main/skills/nipmod/SKILL.md");
     expect(openhuman.externalDependency).toContain("Tiny Humans owner review");
     expect(openhumanConnection.externalApprovalRequired).toBe(true);
-    expect(openhumanConnection.proofLevel).toContain("Candidate only");
-    expect(openhumanConnection.proofLevel).toContain("hosted read-only MCP");
+    expect(openhumanConnection.proofLevel).toContain("Under review");
+    expect(openhumanConnection.proofLevel).toContain("docs PR is open");
+    expect(openhumanConnection.proofLevel).toContain("upstream skills repo is archived");
   });
 });
