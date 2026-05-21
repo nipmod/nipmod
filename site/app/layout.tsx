@@ -20,7 +20,10 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://nipmod.com"
   },
-  title: "Nipmod",
+  title: {
+    default: "Nipmod",
+    template: "Nipmod"
+  },
   twitter: {
     card: "summary",
     creator: "@Nipmod",
