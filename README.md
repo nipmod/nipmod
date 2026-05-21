@@ -6,39 +6,45 @@
 
 Nipmod is the verifiable package layer for agent code.
 
-Agents can search a shared package archive, inspect trust evidence, plan installs, ask before writing files and audit the result. The first source network is Gitlawb. GitHub is the public mirror for review, CI and developer access.
+Agents can search a shared package archive, inspect trust evidence, plan installs, ask before writing files and audit the result. Gitlawb is the first source network. GitHub is the public mirror for review, CI and developer access.
 
 ```bash
 curl https://nipmod.com/i|bash
 nipmod setup agents
 ```
 
-## Public Links
+## Current Status
 
-- Website: https://nipmod.com
-- Packages: https://nipmod.com/packages
-- Setup: https://nipmod.com/setup
-- Cursor: https://nipmod.com/cursor
-- Platform matrix: https://nipmod.com/platforms
-- Codex and Claude Code: https://nipmod.com/agents/codex-claude
-- Registry: https://nipmod.com/registry/packages.json
-- Quorum receipts: https://nipmod.com/quorum/receipts.json
-- Agent discovery: https://nipmod.com/.well-known/nipmod.json
-- Agent instructions: https://nipmod.com/llms.txt
-- Hosted read-only MCP: https://nipmod.com/api/mcp
-- GitHub mirror: https://github.com/nipmod/nipmod
-- Gitlawb source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
-- X: https://x.com/Nipmod
-- Telegram: https://t.me/nipmod
-- Bankr coin: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
+| Surface | Status |
+| --- | --- |
+| CLI and installer | Live, release `1.2.5` |
+| Public package archive | Live, sourced from Gitlawb |
+| Local MCP server | Live for controlled agent installs |
+| Hosted MCP endpoint | Live, read-only |
+| Codex, Claude Code, Cursor, OpenCode, Hermes | Ready setup paths |
+| Bankr, Aeon, OpenHuman | Review tracks only until accepted by the external owner |
 
-Canonical source: gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod
+## Official Links
 
-License: `MIT`
+| Area | Link |
+| --- | --- |
+| Website | https://nipmod.com |
+| Packages | https://nipmod.com/packages |
+| Setup | https://nipmod.com/setup |
+| Platform matrix | https://nipmod.com/platforms |
+| Registry | https://nipmod.com/registry/packages.json |
+| Agent instructions | https://nipmod.com/llms.txt |
+| Agent discovery | https://nipmod.com/.well-known/nipmod.json |
+| Hosted read-only MCP | https://nipmod.com/api/mcp |
+| GitHub mirror | https://github.com/nipmod/nipmod |
+| Gitlawb source | https://gitlawb.com/node/repos/z6Mkwbud/nipmod |
+| X | https://x.com/Nipmod |
+| Telegram | https://t.me/nipmod |
+| Bankr coin | https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3 |
 
-Security: `SECURITY.md`
+Canonical source: `gitlawb://did:key:z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R/nipmod`
 
-Trademark and affiliation notice: `TRADEMARKS.md`
+License: `MIT`. Security policy: `SECURITY.md`. Trademark and affiliation notice: `TRADEMARKS.md`.
 
 ## What Works Now
 

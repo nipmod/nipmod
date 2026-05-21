@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.2.5 - 2026-05-21
+
+### Added
+
+- Ready host documentation for Codex, Claude Code, Cursor, OpenCode and Hermes.
+- Cleaner public install path using `curl https://nipmod.com/i|bash`.
+- Review-only boundaries for Bankr, Aeon and OpenHuman so unfinished external integrations are not presented as ready user paths.
+- Live readiness checks for public setup, discovery, platform status and system health.
+
+### Verified
+
+- GitHub CI and production monitor pass on `main`.
+- Live platform readiness passes.
+- Live system readiness passes.
+- GitHub and Gitlawb mirrors are synced.
+
+### Security
+
+- Public agent discovery no longer links review-only Bankr skill material.
+- Review packets remain separated from ready host setup paths.
+
 ## 1.2.4 - 2026-05-20
 
 ### Added
