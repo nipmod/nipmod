@@ -18,7 +18,7 @@ const tokens = {
 const agents = [
   { id: "codex", name: "Codex", logo: "/agents/codex.png" },
   { id: "claude", name: "Claude Code", logo: "/agents/claude.png" },
-  { id: "cursor", name: "Cursor" },
+  { id: "cursor", name: "Cursor", logo: "/agents/cursor.png" },
   { id: "opencode", name: "OpenCode", logo: "/agents/opencode.png" },
   { id: "hermes", name: "Hermes", logo: "/agents/hermes.png" }
 ];

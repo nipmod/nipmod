@@ -6,7 +6,7 @@ type PlatformMarkProps = {
 const IMAGE_MARKS: Record<string, { className?: string; src: string }> = {
   bankr: { src: "/bankr-logo.svg" },
   "claude-code": { src: "/claude-logo.png" },
-  cursor: { src: "https://cdn.simpleicons.org/cursor/FFFFFF" },
+  cursor: { src: "/agents/cursor.png" },
   github: { className: "platform-mark-github", src: "/github-logo.svg" },
   gitlawb: { src: "/gitlawb-logo.png" },
   hermes: { src: "/hermes-logo.png" },

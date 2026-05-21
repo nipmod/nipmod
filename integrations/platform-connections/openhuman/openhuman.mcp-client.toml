@@ -1,0 +1,16 @@
+[mcp_client]
+enabled = true
+
+[[mcp_client.servers]]
+name = "nipmod"
+endpoint = "https://nipmod.com/api/mcp"
+description = "Nipmod shared package archive for agents. Search packages, inspect trust and create install plans before workspace writes."
+enabled = true
+allowed_tools = [
+  "nipmod.search",
+  "nipmod.view",
+  "nipmod.inspect",
+  "nipmod.install_plan",
+  "nipmod.demo"
+]
+timeout_secs = 30

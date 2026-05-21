@@ -100,8 +100,10 @@
       "status": "Candidate"
     },
     "openHuman": {
-      "candidate": "https://github.com/tinyhumansai/openhuman",
-      "access": "candidate agent harness connection",
+      "candidate": "https://nipmod.com/openhuman",
+      "config": "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
+      "reviewPacket": "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
+      "access": "candidate remote MCP review packet for hosted read-only package tools",
       "status": "Candidate"
     }
   },

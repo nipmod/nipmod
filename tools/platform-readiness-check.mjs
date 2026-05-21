@@ -227,6 +227,21 @@ async function checkLiveEndpoints() {
       ["dev.nipmod.remote-mcp.v1", "remote-read-only", "nipmod.install_plan"]
     ],
     [
+      "openhuman_page",
+      "https://nipmod.com/openhuman",
+      ["Nipmod for OpenHuman review", "Not official until Tiny Humans reviews or accepts it", "mcp_client.servers"]
+    ],
+    [
+      "openhuman_public_config",
+      "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
+      ["[mcp_client]", "https://nipmod.com/api/mcp", "nipmod.install_plan"]
+    ],
+    [
+      "openhuman_review_packet",
+      "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
+      ["review packet", "Not official", "mcp_list_servers"]
+    ],
+    [
       "platform_connections_live",
       "https://nipmod.com/compatibility/platform-connections.json",
       ["dev.nipmod.platform-connections.v1", "claude-code", "cursor", "hermes", "/nipmod", "aeon", "openhuman"]

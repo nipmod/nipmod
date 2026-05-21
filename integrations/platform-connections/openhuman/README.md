@@ -2,11 +2,17 @@
 
 Status: Candidate
 
-OpenHuman is a strong candidate because it is a public agent harness with local-first memory, coding tools and existing agent-facing repo surfaces such as `.agents`, `.claude` and `.codex`.
+OpenHuman is a strong candidate because it is a public agent harness with local-first memory, coding tools, existing agent-facing repo surfaces such as `.agents`, `.claude` and `.codex`, and a configurable remote MCP client path.
+
+Current best path:
+
+OpenHuman remote MCP client -> Nipmod hosted read-only MCP.
+
+This lets an OpenHuman agent search Nipmod packages, inspect trust and ask for install plans without package writes from the hosted endpoint.
 
 Use this wording:
 
-> OpenHuman is a candidate for a future Nipmod agent-harness connection, pending Tiny Humans owner review.
+> OpenHuman has a review-ready Nipmod MCP connection packet, pending Tiny Humans owner review.
 
 Do not claim:
 
@@ -20,22 +26,31 @@ Public path:
 
 https://github.com/tinyhumansai/openhuman
 
+Nipmod review page:
+
+https://nipmod.com/openhuman
+
+Public config:
+
+https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml
+
 Fit:
 
-- OpenHuman could use Nipmod as a package discovery and trust layer for agent-installable packages.
-- Nipmod could expose OpenHuman-specific setup instructions if OpenHuman supports a stable local tool, MCP or skill path.
+- OpenHuman can register remote MCP servers through `mcp_client.servers`.
+- Nipmod exposes a hosted read-only MCP endpoint at `https://nipmod.com/api/mcp`.
+- Nipmod can act as an additional package discovery and trust layer for OpenHuman agents.
 - OpenHuman-owned packages or skills should only be listed after owner approval.
 
 Smoke:
 
 ```sh
-Review OpenHuman docs and prepare owner approved MCP, CLI or skill setup path
+OpenHuman agent: mcp_list_servers -> mcp_list_tools(server=nipmod) -> mcp_call_tool(server=nipmod, tool=nipmod.search)
 ```
 
 Agent instruction:
 
-Do not package, mirror or republish OpenHuman code without owner review. Prepare metadata, setup notes and integration structure only for review.
+Do not package, mirror or republish OpenHuman code without owner review. Use the hosted read-only MCP path for search, trust inspection and install plans only.
 
 Submission note:
 
-Ask Tiny Humans whether OpenHuman should connect to Nipmod through local MCP, CLI install flow or an OpenHuman-native package/skill format.
+Ask Tiny Humans to review `OPENHUMAN_SUBMISSION.md` and the config example before any official support or OpenHuman-owned package listing is claimed.

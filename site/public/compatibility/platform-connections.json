@@ -233,16 +233,20 @@
       "name": "OpenHuman",
       "status": "Candidate",
       "category": "agent harness",
-      "scope": "OpenHuman is a public personal-agent harness that could use Nipmod as a shared package discovery and trust layer.",
-      "proofLevel": "Candidate only. No Tiny Humans owner approval, native support or published Nipmod package collection is claimed.",
-      "url": "https://github.com/tinyhumansai/openhuman",
+      "scope": "OpenHuman is a public personal-agent harness with a remote MCP client path that can review Nipmod hosted read-only MCP.",
+      "proofLevel": "Candidate only. Review packet prepared for OpenHuman remote MCP client to Nipmod hosted read-only MCP. No Tiny Humans owner approval, native support or published Nipmod package collection is claimed.",
+      "url": "https://nipmod.com/openhuman",
       "kit": "https://github.com/nipmod/nipmod/tree/main/integrations/platform-connections/openhuman",
-      "setupCommand": null,
-      "smokeCommand": "Review OpenHuman docs and prepare owner approved MCP, CLI or skill setup path",
+      "setupCommand": "Configure OpenHuman mcp_client.servers with https://nipmod.com/api/mcp",
+      "smokeCommand": "OpenHuman agent: mcp_list_servers -> mcp_list_tools(server=nipmod) -> mcp_call_tool(server=nipmod, tool=nipmod.search)",
       "externalApprovalRequired": true,
       "externalDependency": "Tiny Humans owner review is required before claiming official OpenHuman support or publishing OpenHuman-owned packages through Nipmod.",
       "evidence": [
+        "https://nipmod.com/openhuman",
+        "https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml",
+        "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
         "https://github.com/tinyhumansai/openhuman",
+        "https://github.com/tinyhumansai/openhuman-skills",
         "https://tinyhumans.ai/openhuman"
       ]
     }

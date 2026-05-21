@@ -34,7 +34,7 @@ describe("platform readiness receipt", () => {
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "bankr")?.productReadiness).toBe(80);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "hermes")?.productReadiness).toBe(90);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "aeon")?.productReadiness).toBe(20);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(20);
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "openhuman")?.productReadiness).toBe(35);
     expect(readiness.platforms.find((platform: { id: string }) => platform.id === "claude-code")?.connectionStatus).toBe(
       "MCP ready"
     );
@@ -186,9 +186,14 @@ describe("platform readiness receipt", () => {
     const openhumanConnection = connections.connections.find((connection: { id: string }) => connection.id === "openhuman");
 
     expect(openhuman.connectionStatus).toBe("Candidate");
-    expect(openhuman.claim).toContain("agent-harness candidate");
+    expect(openhuman.status).toBe("review-packet-ready");
+    expect(openhuman.claim).toContain("review-ready remote MCP connection packet");
+    expect(openhuman.setupCommand).toContain("mcp_client.servers");
+    expect(openhuman.evidence).toContain("https://nipmod.com/openhuman");
+    expect(openhuman.evidence).toContain("https://nipmod.com/integrations/openhuman/openhuman.mcp-client.toml");
     expect(openhuman.externalDependency).toContain("Tiny Humans owner review");
     expect(openhumanConnection.externalApprovalRequired).toBe(true);
     expect(openhumanConnection.proofLevel).toContain("Candidate only");
+    expect(openhumanConnection.proofLevel).toContain("hosted read-only MCP");
   });
 });
