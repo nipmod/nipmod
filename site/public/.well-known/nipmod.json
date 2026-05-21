@@ -1,0 +1,228 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.discovery.v1",
+  "name": "Nipmod",
+  "homepage": "https://nipmod.com",
+  "trustPage": "https://nipmod.com/trust",
+  "docs": {
+    "docs": "https://nipmod.com/quickstart#docs",
+    "api": "https://nipmod.com/api-access",
+    "sources": "https://nipmod.com/sources",
+    "install": "https://nipmod.com/quickstart#install",
+    "setup": "https://nipmod.com/setup",
+    "demo": "https://nipmod.com/demo",
+    "status": "https://nipmod.com/status",
+    "platforms": "https://nipmod.com/platforms",
+    "examples": "https://nipmod.com/examples",
+    "packages": "https://nipmod.com/packages",
+    "createPackage": "https://nipmod.com/package",
+    "mcp": "https://nipmod.com/mcp",
+    "externalSearchApi": "https://nipmod.com/api/search",
+    "externalInspectApi": "https://nipmod.com/api/inspect",
+    "externalInstallPlanApi": "https://nipmod.com/api/install-plan",
+    "packageIntelligencePrepareApi": "https://nipmod.com/api/archive/prepare",
+    "packageIntelligenceSearchApi": "https://nipmod.com/api/archive/search",
+    "packageIntelligenceConfirmApi": "https://nipmod.com/api/archive/confirm",
+    "packageIntelligenceStatusApi": "https://nipmod.com/api/archive/status",
+    "audit": "https://nipmod.com/audit",
+    "trust": "https://nipmod.com/trust",
+    "security": "https://nipmod.com/security"
+  },
+  "claims": {
+    "index": "https://nipmod.com/claims/index.json",
+    "verifyCommand": "nipmod claim verify gitlawb://did:key:.../repo --json",
+    "indexCommand": "nipmod claim index --node https://node.nipmod.com --json"
+  },
+  "agent": {
+    "llms": "https://nipmod.com/llms.txt",
+    "prompts": "https://nipmod.com/agent-prompts.json",
+    "runbook": "https://nipmod.com/api-access",
+    "workflow": [
+      "install",
+      "verifyInstaller",
+      "setupPublish",
+      "doctor",
+      "search",
+      "externalSearch",
+      "externalInspect",
+      "externalInstallPlan",
+      "packageIntelligencePrepare",
+      "packageIntelligenceSearch",
+      "packageIntelligenceConfirmDryRun",
+      "packageIntelligenceStatus",
+      "inspect",
+      "view",
+      "installPlan",
+      "mcpResolve",
+      "mcpExternalInstallPlan",
+      "mcpDemo",
+      "mcpControlledInstall",
+      "installPackage",
+      "addPackage",
+      "audit",
+      "sbom",
+      "publishDryRun",
+      "claimVerify",
+      "claimIndex"
+    ],
+    "commands": {
+      "install": "curl https://nipmod.com/i|bash",
+      "verifyInstaller": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+      "setupPublish": "nipmod setup gitlawb",
+      "doctor": "nipmod doctor --online",
+      "search": "nipmod search <query> --online",
+      "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
+      "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
+      "externalInstallPlan": "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
+      "packageIntelligencePrepare": "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
+      "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query>",
+      "packageIntelligenceConfirmDryRun": "POST https://nipmod.com/api/archive/confirm {\"source\":\"npm\",\"name\":\"<package-name>\",\"dryRun\":true}",
+      "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status",
+      "inspect": "nipmod inspect <package-specifier> --json",
+      "view": "nipmod view <package-name> --json",
+      "installPlan": "nipmod install --plan <package-specifier> --json",
+      "mcpResolve": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.resolve\",\"arguments\":{\"query\":\"telegram bot\",\"sources\":[\"npm\",\"pypi\",\"github\",\"huggingface-model\",\"mcp\"]}}}",
+      "mcpExternalInstallPlan": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.external_install_plan\",\"arguments\":{\"source\":\"npm\",\"name\":\"node-telegram-bot-api\"}}}",
+      "mcpDemo": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.demo\",\"arguments\":{\"host\":\"Codex\",\"package\":\"<package-specifier>\"}}}",
+      "mcpControlledInstall": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.install\",\"arguments\":{\"specifier\":\"<package-specifier>\",\"confirmInstall\":\"write-lockfile\"}}}",
+      "installPackage": "nipmod install <package-specifier>",
+      "addPackage": "nipmod add <package-specifier> --online",
+      "audit": "nipmod audit --online",
+      "sbom": "nipmod sbom --json",
+      "publishDryRun": "nipmod publish . --dry-run --json",
+      "claimVerify": "nipmod claim verify gitlawb://did:key:.../repo --json",
+      "claimIndex": "nipmod claim index --node https://node.nipmod.com --json"
+    }
+  },
+  "mcp": {
+    "docs": "https://nipmod.com/mcp",
+    "remoteEndpoint": "https://nipmod.com/api/mcp",
+    "remoteMode": "read-only registry MCP over HTTPS; no workspace writes",
+    "remoteTools": [
+      "nipmod.search",
+      "nipmod.resolve",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.external_install_plan",
+      "nipmod.demo"
+    ],
+    "remoteNotExposed": [
+      "nipmod.install",
+      "nipmod.update_plan",
+      "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.verify",
+      "nipmod.audit",
+      "nipmod.sbom",
+      "nipmod.explain"
+    ],
+    "serverCommand": "nipmod mcp serve",
+    "demoPackage": null,
+    "installConfirmation": "confirmInstall must be write-lockfile before nipmod.install writes a local lockfile",
+    "tools": [
+      "nipmod.search",
+      "nipmod.view",
+      "nipmod.inspect",
+      "nipmod.install_plan",
+      "nipmod.install",
+      "nipmod.update_plan",
+      "nipmod.demo",
+      "nipmod.publish_plan",
+      "nipmod.claim_verify",
+      "nipmod.claim_index",
+      "nipmod.verify",
+      "nipmod.audit",
+      "nipmod.sbom",
+      "nipmod.explain"
+    ]
+  },
+  "advisories": "https://nipmod.com/advisories.json",
+  "advisoriesSignature": "https://nipmod.com/advisories.json.sig",
+  "advisoriesPublicKey": {
+    "algorithm": "Ed25519",
+    "publicKeySpkiBase64": "MCowBQYDK2VwAyEAI+Y0SgEn/OH7BW0OZzSnf3S1Eu+koiKosrAo3c/12DU=",
+    "spkiSha256": "448bb21fae566abf873b04f05623f137c7629d5f10131d951d79d40f71c0b90b"
+  },
+  "registry": {
+    "url": "https://nipmod.com/registry/packages.json",
+    "source": "https://node.nipmod.com",
+    "canonicalEncoding": "base64url(canonical package id), no padding",
+    "gitlawbOwnerPageTemplate": "https://nipmod.com/gitlawb/{owner}",
+    "gitlawbPackagePageTemplate": "https://nipmod.com/gitlawb/{owner}/{repo}",
+    "badgeTemplate": "https://nipmod.com/badge/{owner}/{repo}",
+    "packageDocumentTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}.json",
+    "packageVersionTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/{version}.json",
+    "dependenciesTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/dependencies.json",
+    "provenanceTemplate": "https://nipmod.com/registry/packages/{encodedCanonical}/provenance.json"
+  },
+  "externalIndex": {
+    "search": "https://nipmod.com/api/search",
+    "inspect": "https://nipmod.com/api/inspect",
+    "installPlan": "https://nipmod.com/api/install-plan",
+    "packageIntelligence": {
+      "confirm": "https://nipmod.com/api/archive/confirm",
+      "prepare": "https://nipmod.com/api/archive/prepare",
+      "search": "https://nipmod.com/api/archive/search",
+      "status": "https://nipmod.com/api/archive/status",
+      "writeBoundary": "Durable writes require the configured server-side archive store and an authorized server writer."
+    },
+    "sources": [
+      "npm",
+      "pypi",
+      "github",
+      "huggingface-model",
+      "huggingface-dataset",
+      "mcp"
+    ],
+    "status": "external_indexed records keep original owner attribution; verified_nipmod requires claim or direct publish"
+  },
+  "node": {
+    "url": "https://node.nipmod.com",
+    "health": "https://node.nipmod.com/health"
+  },
+  "witness": {
+    "did": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+    "statements": "https://nipmod-witness.fly.dev/witness-statements.json",
+    "health": "https://nipmod-witness.fly.dev/health"
+  },
+  "transparency": {
+    "status": "pending_first_public_package",
+    "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk"
+  },
+  "quorum": {
+    "policy": "https://nipmod.com/quorum/policy.json",
+    "receipts": "https://nipmod.com/quorum/receipts.json",
+    "signers": "https://nipmod.com/quorum/signers.json",
+    "meaning": "Public Nipmod packages require release and security approval receipts for the exact package digest and source tuple before listing."
+  },
+  "review": {
+    "packet": "https://nipmod.com/review/packet.json",
+    "packetMarkdown": "https://nipmod.com/review/packet.md",
+    "evidenceLedger": "https://nipmod.com/review/evidence-ledger.json",
+    "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json",
+    "proofTranscript": "https://nipmod.com/proof/transcript.json",
+    "platformReadiness": "https://nipmod.com/compatibility/platform-readiness.json",
+    "platformConnections": "https://nipmod.com/compatibility/platform-connections.json",
+    "systemReadiness": "https://nipmod.com/compatibility/system-readiness.json",
+    "launch": "https://nipmod.com/launch"
+  },
+  "install": {
+    "script": "https://nipmod.com/install.sh",
+    "shortCommand": "curl https://nipmod.com/i|bash",
+    "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
+    "release": {
+      "version": "1.2.5",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.5.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.5.tgz.sig",
+      "publicKey": {
+        "algorithm": "Ed25519",
+        "publicKeySpkiBase64": "MCowBQYDK2VwAyEAtTumyHEstKhOe5W5FNo4nOzhxzBLGq+I7AIN9oUCELQ=",
+        "spkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
+      },
+      "artifactSha256": "536e85c09a44fabedbdb3151815a2a11131d5a081145e80cef2e2a2a33c3aad1"
+    },
+    "scriptSha256": "a7f165b9d0f7d38a0ea040ad45e35df02a89b87cf9ea510fdfa19a9898dd97d2"
+  }
+}

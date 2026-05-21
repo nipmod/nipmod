@@ -1,0 +1,42 @@
+name: Production monitor
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-monitor
+  cancel-in-progress: false
+
+jobs:
+  production-monitor:
+    name: Production monitor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: corepack prepare pnpm@10.30.0 --activate
+      - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir nipmod build
+      - name: Production alert runner
+        env:
+          NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN }}
+          NIPMOD_ALERT_PRIMARY_WEBHOOK_URL: ${{ secrets.NIPMOD_ALERT_PRIMARY_WEBHOOK_URL }}
+          NIPMOD_ALERT_SECONDARY_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_SECONDARY_WEBHOOK_BEARER_TOKEN }}
+          NIPMOD_ALERT_SECONDARY_WEBHOOK_URL: ${{ secrets.NIPMOD_ALERT_SECONDARY_WEBHOOK_URL }}
+          NIPMOD_ALERT_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_WEBHOOK_BEARER_TOKEN }}
+          NIPMOD_ALERT_WEBHOOK_URLS: ${{ secrets.NIPMOD_ALERT_WEBHOOK_URLS }}
+        run: node tools/prod-alert-runner.mjs
+      - name: Node edge resilience smoke
+        run: node tools/node-edge-resilience-smoke.mjs

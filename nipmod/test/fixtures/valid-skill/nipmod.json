@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "name": "@probe/valid-skill",
+  "canonical": "pkg:did:key:z6Mkprobevalid/valid-skill",
+  "version": "0.1.0",
+  "type": "skill",
+  "description": "Valid skill fixture",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "README.md",
+    "SKILL.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": false
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6Mkprobevalid",
+    "provenance": "local"
+  }
+}
+

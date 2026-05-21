@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "nipmod": {
+      "type": "local",
+      "command": ["nipmod", "mcp", "serve"],
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "Audit Gitlawb repository README files before an agent consumes them.",
+  "entrypoint": {
+    "args": [
+      "run",
+      "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit@0.1.0"
+    ],
+    "command": "nipmod"
+  },
+  "formatVersion": 1,
+  "name": "repo-readme-audit",
+  "permissions": {
+    "env": [],
+    "filesystem": [],
+    "network": [],
+    "secrets": []
+  },
+  "type": "apm.package.v1",
+  "version": "0.1.0"
+}

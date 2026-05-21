@@ -1,0 +1,3963 @@
+{
+  "formatVersion": 1,
+  "generatedAt": "2026-05-16T21:45:49.535Z",
+  "packages": [
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+      "canonical": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+      "cloneUrl": "https://node.nipmod.com/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle.git",
+      "description": "Bundle Gitlawb repo review, diff summary and release review guidance.",
+      "digest": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+      "name": "gitlawb-review-tool-bundle",
+      "owner": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "gitlawb-review-tool-bundle",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "4b89193645af4a222bb6e8b7fb1f0a4419b6d715",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "tool-bundle",
+      "updatedAt": "2026-05-16T21:43:40.776642023+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "53b8d2626b140869f4214f8a6e3157d36f60af5e2f35b2c602d05907a8571888",
+        "leafHash": "544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1",
+        "leafIndex": 25,
+        "leafUrl": "/transparency/leaves/544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1.json",
+        "proofUrl": "/transparency/proofs/544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25ocWU1aVhkenhOaGVFSGY3NHp5WjlEVk5pZWZuc3lxNEVRNXFSVjRnYUgyL2dpdGxhd2ItcmV2aWV3LXRvb2wtYnVuZGxlQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+      "canonical": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+      "cloneUrl": "https://node.nipmod.com/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack.git",
+      "description": "Evaluate package safety scanners against known unsafe agent package fixtures.",
+      "digest": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+      "name": "package-safety-eval-pack",
+      "owner": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "package-safety-eval-pack",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "6c04f95135756f796a74db277c80f1fd31767d2e",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "eval-pack",
+      "updatedAt": "2026-05-16T21:43:39.586938356+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "86111d58daa5769f9e34287265130e50d408a0e5119f6de823ac0a8044f1fc07",
+        "leafHash": "e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76",
+        "leafIndex": 26,
+        "leafUrl": "/transparency/leaves/e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76.json",
+        "proofUrl": "/transparency/proofs/e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3A1MkFONkw2QXltVnZWOWJWSmZtdDVVRzNMd3J4N0pVbTJWUGZjVEcyYkpGL3BhY2thZ2Utc2FmZXR5LWV2YWwtcGFja0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "23c94ad2278906090f031278fa12aed35f3f207dceabadfdaa8d92d66f721590",
+      "canonical": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+      "cloneUrl": "https://node.nipmod.com/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack.git",
+      "description": "Apply launch strict install policy for verified agent packages.",
+      "digest": "23c94ad2278906090f031278fa12aed35f3f207dceabadfdaa8d92d66f721590",
+      "name": "launch-strict-policy-pack",
+      "owner": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "launch-strict-policy-pack",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "debf802eec9da17a971f84befa75b1b21c4238f9",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "policy-pack",
+      "updatedAt": "2026-05-16T21:43:38.313761319+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "9507a30f4d0291687420ae33c1d3a685cff83ef374b0d7e0d3d8b21c46a4680e",
+        "leafHash": "e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077",
+        "leafIndex": 29,
+        "leafUrl": "/transparency/leaves/e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077.json",
+        "proofUrl": "/transparency/proofs/e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3I4aktVU29EcFJKQnUxQXAzczdmZkJWaGdKRndramNRYndmQUp6MVI5VXlFL2xhdW5jaC1zdHJpY3QtcG9saWN5LXBhY2tAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+      "canonical": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+      "cloneUrl": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
+      "description": "Expose read only Nipmod registry search and inspect tools through MCP.",
+      "digest": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+      "name": "readonly-registry-mcp-server",
+      "owner": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "readonly-registry-mcp-server",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "1ab073a75f7f0390a3e40ace949bde404b6645c3",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "mcp-server",
+      "updatedAt": "2026-05-16T21:43:37.092574323+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "dc5c6c3d6eed0a49eb968e8df1deec63a8bff42f397a2c3131b175f69d0f516b",
+        "leafHash": "3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42",
+        "leafIndex": 28,
+        "leafUrl": "/transparency/leaves/3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42.json",
+        "proofUrl": "/transparency/proofs/3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3BHdHg0eVdZZmluenMzS3N5TEVSVU5oQmVQemNtZGs4SnZQUkh2ZGZVTDNqL3JlYWRvbmx5LXJlZ2lzdHJ5LW1jcC1zZXJ2ZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
+      "canonical": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+      "cloneUrl": "https://node.nipmod.com/z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner.git",
+      "description": "Plan a Gitlawb, MCP or APM source migration into a Nipmod package.",
+      "digest": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
+      "name": "package-migration-planner",
+      "owner": "did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "package-migration-planner",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "6c0dfc3da14be08ebe3afb9dffcabc341ca122d2",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "adapter",
+      "updatedAt": "2026-05-16T21:43:35.803457458+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "b8af64565bc471b287d15cd7e5a7243c5f57da457838417e9e8f8a0608975aeb",
+        "leafHash": "834dab34138256669a136f4883c32886df0db1470c4493f312b75271cabb8bb4",
+        "leafIndex": 27,
+        "leafUrl": "/transparency/leaves/834dab34138256669a136f4883c32886df0db1470c4493f312b75271cabb8bb4.json",
+        "proofUrl": "/transparency/proofs/834dab34138256669a136f4883c32886df0db1470c4493f312b75271cabb8bb4.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3A3dnB1R1kxYlJLWk5ISDlxbnVrOGZQVjVEdHF1RTRxMTgyQm5ZRUFxRzl6L3BhY2thZ2UtbWlncmF0aW9uLXBsYW5uZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+      "canonical": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+      "cloneUrl": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
+      "description": "Guide a new user through install, inspect, add, audit and publish dry run.",
+      "digest": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+      "name": "first-user-onboarding",
+      "owner": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "first-user-onboarding",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "1b6212908a6b1baf03dbc47251c39d01c8b1348a",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "workflow-pack",
+      "updatedAt": "2026-05-16T21:43:34.549380780+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "72a3d6e147cfbd0c7e2066e37d1658b7f535a4facfd4ec17402c18d6fb6f3a23",
+        "leafHash": "db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11",
+        "leafIndex": 24,
+        "leafUrl": "/transparency/leaves/db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11.json",
+        "proofUrl": "/transparency/proofs/db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hvMTY5TTQ3UHU4clptTHFrQnBDRXpHQVc2U0NBOE1Yc0g2WXdFQWp0TE00L2ZpcnN0LXVzZXItb25ib2FyZGluZ0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+      "canonical": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+      "cloneUrl": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
+      "description": "Prepare a complete external review packet from Nipmod proof and gate output.",
+      "digest": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+      "name": "external-review-packet",
+      "owner": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "external-review-packet",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "964c6bbf808e337ffbdc192d94de6693e355bc36",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "workflow-pack",
+      "updatedAt": "2026-05-16T21:43:33.217909796+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "605b0129005e64e789ec5e84a2849c844bd9848daa5317b81b00a5cbe09161f2",
+        "leafHash": "3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484",
+        "leafIndex": 30,
+        "leafUrl": "/transparency/leaves/3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484.json",
+        "proofUrl": "/transparency/proofs/3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3REQWlBNkpXa0dyNW9MZTlwRG15Z0NMNzNhYWE2eXVkOTNIenloMkRVSGpGL2V4dGVybmFsLXJldmlldy1wYWNrZXRAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
+      "canonical": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+      "cloneUrl": "https://node.nipmod.com/z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check.git",
+      "description": "Check whether an agent host can safely run Nipmod install, audit and MCP flows.",
+      "digest": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
+      "name": "agent-runtime-compat-check",
+      "owner": "did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "agent-runtime-compat-check",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "ccfeee27513b6bb5bdd0b4a272252fc6e59c3c0e",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "agent-profile",
+      "updatedAt": "2026-05-16T21:43:31.961914107+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "011886ad97a0d4a0a3eb100d6893b06cd20bc9088fb65d8cc7d691ac972c8b32",
+        "leafHash": "7c4295add6364e55bdd3f72aac90171ce5abd7b01f6852eb4062327afd4d35ff",
+        "leafIndex": 31,
+        "leafUrl": "/transparency/leaves/7c4295add6364e55bdd3f72aac90171ce5abd7b01f6852eb4062327afd4d35ff.json",
+        "proofUrl": "/transparency/proofs/7c4295add6364e55bdd3f72aac90171ce5abd7b01f6852eb4062327afd4d35ff.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3dOdmdveGM3OTRIand0Ujl3Yk5Zd1hnbnc4U29CUXIxOXZlMU5RcUVaZEVRL2FnZW50LXJ1bnRpbWUtY29tcGF0LWNoZWNrQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
+      "canonical": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+      "cloneUrl": "https://node.nipmod.com/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief.git",
+      "description": "Turn Nipmod inspect output into a short human review brief.",
+      "digest": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
+      "name": "package-evidence-brief",
+      "owner": "did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "package-evidence-brief",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "95ca0b252fb83b86a9d4027ae03f6532fc05a233",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "workflow-pack",
+      "updatedAt": "2026-05-16T21:43:30.655330504+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "91c16d778f7ea8efd755673adcf9fa76011cffb7820946ee05b6477cda5b89a0",
+        "leafHash": "169d00e1b7e39cec7230a3f4dc584ea6114b25be5a0b2f8072bd80336882853f",
+        "leafIndex": 22,
+        "leafUrl": "/transparency/leaves/169d00e1b7e39cec7230a3f4dc584ea6114b25be5a0b2f8072bd80336882853f.json",
+        "proofUrl": "/transparency/proofs/169d00e1b7e39cec7230a3f4dc584ea6114b25be5a0b2f8072bd80336882853f.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZDTUF4cWt2b01OdG94bVUzeW9uMllHbmlndlF4UnoyUUYzTHRmZXE1eFJLL3BhY2thZ2UtZXZpZGVuY2UtYnJpZWZAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+      "canonical": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+      "cloneUrl": "https://node.nipmod.com/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare.git",
+      "description": "Compare registry mirrors and flag digest, trust root, witness or advisory drift.",
+      "digest": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+      "name": "registry-mirror-compare",
+      "owner": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "registry-mirror-compare",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "a4150243a0ed9b4a7d2bbeba9184468f91a05ec4",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "adapter",
+      "updatedAt": "2026-05-16T21:43:29.255964616+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "f98502c8595d96ae8957eecc50d14706f729b74fd132afbae2341d0f00a5f3f6",
+        "leafHash": "eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269",
+        "leafIndex": 23,
+        "leafUrl": "/transparency/leaves/eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269.json",
+        "proofUrl": "/transparency/proofs/eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZKVnBuWnJIRUdLdmhTUXo1U1hhSFBEM2JNNmt0SEhCMTh1MTF2Y0R3QW5TL3JlZ2lzdHJ5LW1pcnJvci1jb21wYXJlQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
+      "canonical": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+      "cloneUrl": "https://node.nipmod.com/z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist.git",
+      "description": "Guide new package authors through a clean Nipmod publish candidate.",
+      "digest": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
+      "name": "package-onboarding-checklist",
+      "owner": "did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "package-onboarding-checklist",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "6291479ad72a823d6643e728bf412fe334a1c4ef",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:09.023795601+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "d6cfbb8070f929f81bca969e045680167c991bb613cd718faf38db0b58f26378",
+        "leafHash": "1b95b90c2c50bbfd202f6c0cb91df83bc688462ecd9c1d52c588c2ed46eb8112",
+        "leafIndex": 17,
+        "leafUrl": "/transparency/leaves/1b95b90c2c50bbfd202f6c0cb91df83bc688462ecd9c1d52c588c2ed46eb8112.json",
+        "proofUrl": "/transparency/proofs/1b95b90c2c50bbfd202f6c0cb91df83bc688462ecd9c1d52c588c2ed46eb8112.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa201Q25rWnVDN1hLQmJCMVVReEtzS1FHbUVrdGNwRDdyV1hQTW5SbnJyQjhCL3BhY2thZ2Utb25ib2FyZGluZy1jaGVja2xpc3RAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+      "canonical": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+      "cloneUrl": "https://node.nipmod.com/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review.git",
+      "description": "Review MCP server tools and manifests before agents expose them to package workflows.",
+      "digest": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+      "name": "mcp-tool-risk-review",
+      "owner": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "mcp-tool-risk-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "49b058505bf74c24975805d29cfb071359d76d29",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:06.968021013+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "74b1dbb47265194ae1295239574c1498fa36db50acbc14041014edc38e97c963",
+        "leafHash": "e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d",
+        "leafIndex": 21,
+        "leafUrl": "/transparency/leaves/e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d.json",
+        "proofUrl": "/transparency/proofs/e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3dZTm9KcXc3OFpoTUdXeXdKSGtFOGY3UHFuUjM3QlhBNVRhZ2MyMk42SHVWL21jcC10b29sLXJpc2stcmV2aWV3QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+      "canonical": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+      "cloneUrl": "https://node.nipmod.com/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review.git",
+      "description": "Review agent package permissions for least privilege before install or publish.",
+      "digest": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+      "name": "agent-permission-review",
+      "owner": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "agent-permission-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "38d0928c7cb747d85a390c964c9e552b3f2f215d",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:04.919747527+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "d2701a2fc57389aed3478d536ccd66d318c62f7434f47210f6807b08192e39ff",
+        "leafHash": "418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81",
+        "leafIndex": 18,
+        "leafUrl": "/transparency/leaves/418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81.json",
+        "proofUrl": "/transparency/proofs/418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3Bmekd3ZERxSnRCc3dkTGVXQlB3RHppc3JtQ2JGSkNWTnRWd05IOXFYN2tNL2FnZW50LXBlcm1pc3Npb24tcmV2aWV3QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "60a18ebdeed5973bdd6000ce4ca54f8781ac8a17841bfe1b438c668fed2ae087",
+      "canonical": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+      "cloneUrl": "https://node.nipmod.com/z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage.git",
+      "description": "Triage package security reports into advisory, quarantine and user-action decisions.",
+      "digest": "60a18ebdeed5973bdd6000ce4ca54f8781ac8a17841bfe1b438c668fed2ae087",
+      "name": "security-advisory-triage",
+      "owner": "did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "security-advisory-triage",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "a3b4c31fcc3e4ecfe06d07310f5dae90ef71d851",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:02.802189127+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "8eab0306e010de94d6566edf99de03bd6fcd03fcc84a5ff1e1b384356399e121",
+        "leafHash": "fdd6d390ef2a6b4371b078a6f2b21cc239f3871dc3a2fcf551f21e263e4158c5",
+        "leafIndex": 20,
+        "leafUrl": "/transparency/leaves/fdd6d390ef2a6b4371b078a6f2b21cc239f3871dc3a2fcf551f21e263e4158c5.json",
+        "proofUrl": "/transparency/proofs/fdd6d390ef2a6b4371b078a6f2b21cc239f3871dc3a2fcf551f21e263e4158c5.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3JFVUhMRTZYUXE4ZThXM0VYS1lWZHpuYnNqNEJKVkdTS1h1dThhaE51NjhqL3NlY3VyaXR5LWFkdmlzb3J5LXRyaWFnZUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+      "canonical": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+      "cloneUrl": "https://node.nipmod.com/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter.git",
+      "description": "Draft release notes from verified package, Gitlawb tag and changelog evidence.",
+      "digest": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+      "name": "release-notes-drafter",
+      "owner": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "release-notes-drafter",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "47fb8fee60b381b2d5fdf23409a36213c0627be3",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T21:00:00.845327274+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "4a78415b4aea393f01ba23521e9ffc1719fc539e2c8746235bad484acfd5d3df",
+        "leafHash": "7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4",
+        "leafIndex": 16,
+        "leafUrl": "/transparency/leaves/7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4.json",
+        "proofUrl": "/transparency/proofs/7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hMU2tiU1dTazRvTjJRVXdQTW93WDEydVIxNlFHZ1MzN0VZc2tDV3RnYnNLL3JlbGVhc2Utbm90ZXMtZHJhZnRlckAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "f1d1bf9e3df101cca7eb00294dc129e8958ae3dfc823d10665e29f491c084c0e",
+      "canonical": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+      "cloneUrl": "https://node.nipmod.com/z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer.git",
+      "description": "Summarize Gitlawb repository diffs with provenance, risk and next-action clarity for agents.",
+      "digest": "f1d1bf9e3df101cca7eb00294dc129e8958ae3dfc823d10665e29f491c084c0e",
+      "name": "gitlawb-diff-summarizer",
+      "owner": "did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "gitlawb-diff-summarizer",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "4fdf176081510999230d28ca9b90b2c6c4ea3a78",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T20:59:58.808613893+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "55cc373fd1040a060f79a9787cba2e3e494ba9fa9fcac3cbe85c967973f1cf0c",
+        "leafHash": "1a692c2dad9077c8ee54ddc2f2c486b8871c2143ba5c61958c920e4d271d74a0",
+        "leafIndex": 19,
+        "leafUrl": "/transparency/leaves/1a692c2dad9077c8ee54ddc2f2c486b8871c2143ba5c61958c920e4d271d74a0.json",
+        "proofUrl": "/transparency/proofs/1a692c2dad9077c8ee54ddc2f2c486b8871c2143ba5c61958c920e4d271d74a0.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FlZDRUZUh2eG9ac2NzSzhIc2ZqTGYzUFMzbWhQVGUzd0hCMlFrOXFtdUR1L2dpdGxhd2ItZGlmZi1zdW1tYXJpemVyQDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+      "canonical": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+      "cloneUrl": "https://node.nipmod.com/z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review.git",
+      "description": "Review Gitlawb package releases for immutable tags, signed release events and registry readiness.",
+      "digest": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+      "name": "gitlawb-release-review",
+      "owner": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "gitlawb-release-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "0f5c87a40c410111b620895184bb410206e1c770",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:08.993754021+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "ea3ec9e2e4ac205e86dd3d9510356fff0eba2b4b31efaa03aaef8bf964d0c064",
+        "leafHash": "564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185",
+        "leafIndex": 7,
+        "leafUrl": "/transparency/leaves/564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185.json",
+        "proofUrl": "/transparency/proofs/564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2ZBWlA1YXlxUGRYOWJpeXBBQVpBanRETTFBYnp0RlRtVUZOR1ZxanBuNDFOL2dpdGxhd2ItcmVsZWFzZS1yZXZpZXdAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+      "canonical": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+      "cloneUrl": "https://node.nipmod.com/z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example.git",
+      "description": "Show agents how to convert an APM package listing into Nipmod trust metadata.",
+      "digest": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+      "name": "apm-import-example",
+      "owner": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "apm-import-example",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "1d9077e315d22cfdb1a35671c708017619aa0b2a",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:07.818358601+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "65dd5971c4b95d2b93b4551f608e566b092294b496e3f2878acd0e653f64228a",
+        "leafHash": "27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497",
+        "leafIndex": 14,
+        "leafUrl": "/transparency/leaves/27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497.json",
+        "proofUrl": "/transparency/proofs/27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3JMY2VhYnhnUXo2d21RQk1EQ3BiUXB5NU1GOUJ3Smk3S3ltYXlvc041Q1JuL2FwbS1pbXBvcnQtZXhhbXBsZUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+      "canonical": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+      "cloneUrl": "https://node.nipmod.com/z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example.git",
+      "description": "Show agents how to model an MCP server as a safe Nipmod package with explicit trust evidence.",
+      "digest": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+      "name": "mcp-server-import-example",
+      "owner": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "mcp-server-import-example",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "47fac7bef0a2d8e93adb58558d64cd01681078df",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:06.660636790+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "a04921daf871bc72a1f7e42be7b393c6b33ac5099bdb42401ef21a712e8a4edc",
+        "leafHash": "f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b",
+        "leafIndex": 12,
+        "leafUrl": "/transparency/leaves/f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b.json",
+        "proofUrl": "/transparency/proofs/f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25mMUtWZVZXUlBYY0hVRmZMMVAzTkhRY2R6WHkyd0t1YUJqeFg5THI4Vm1kL21jcC1zZXJ2ZXItaW1wb3J0LWV4YW1wbGVAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+      "canonical": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+      "cloneUrl": "https://node.nipmod.com/z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures.git",
+      "description": "Provide safe negative-test fixtures for agent package scanners and policy reviews.",
+      "digest": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+      "name": "malicious-skill-fixtures",
+      "owner": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "malicious-skill-fixtures",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "60a3a7fc876369b6512a079c319fa10aacf5ddf4",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:05.405678272+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "dc8ea82d092a925a9234bb19783fec72937b652ab79ecf398d7d7b7ee59eb380",
+        "leafHash": "546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332",
+        "leafIndex": 13,
+        "leafUrl": "/transparency/leaves/546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332.json",
+        "proofUrl": "/transparency/proofs/546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25OWFFvVHAxSkJUMk1NcFRyR25CZXJ2R0JDVzR6OGJXZlJIVVJlTjdFUFdQL21hbGljaW91cy1za2lsbC1maXh0dXJlc0AwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+      "canonical": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+      "cloneUrl": "https://node.nipmod.com/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy.git",
+      "description": "Apply a practical default policy for developers trying agent packages safely before production use.",
+      "digest": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+      "name": "developer-default-policy",
+      "owner": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "developer-default-policy",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "5e4ed66e3a8eb635e66a02df960f22bc27664700",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:04.185206840+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "0d6938940bc37c58b199d5214203e1dc9e1eb787b11c03078a568a4aca1495fa",
+        "leafHash": "03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644",
+        "leafIndex": 15,
+        "leafUrl": "/transparency/leaves/03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644.json",
+        "proofUrl": "/transparency/proofs/03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3NGcm1DdFlHVHFKelVNc2kzaThhQUJnSDdtOTd6ZjRtaGZtaHZmbUY1cEFlL2RldmVsb3Blci1kZWZhdWx0LXBvbGljeUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+      "canonical": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+      "cloneUrl": "https://node.nipmod.com/z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy.git",
+      "description": "Apply a strict agent-package policy for production repositories that require verified supply chains.",
+      "digest": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+      "name": "strict-ci-policy",
+      "owner": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "strict-ci-policy",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "63477a439e561eba8035858ef9bee338b4528721",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:03.074473790+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "c4c5e215b5bdec546e60c1bad3b085bf4ee86126b6f4cf376419fa1f402dc7ed",
+        "leafHash": "f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1",
+        "leafIndex": 8,
+        "leafUrl": "/transparency/leaves/f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1.json",
+        "proofUrl": "/transparency/proofs/f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2htZEJzV0R6NGdlanV0WnpWM2JIWlVZWGFmMlVpZ05UN1FOOE1Tb3RiSEhOL3N0cmljdC1jaS1wb2xpY3lAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+      "canonical": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+      "cloneUrl": "https://node.nipmod.com/z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci.git",
+      "description": "Turn Nipmod audit and policy output into CI decisions agents can explain and enforce.",
+      "digest": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+      "name": "nipmod-audit-ci",
+      "owner": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "nipmod-audit-ci",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "048cf26e8bacfb85c33ff8d2c651edf611ca6603",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:01.919816609+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "994009b1ac805522b247e949dee38d0243463693358cb74a5898ab90db35bba1",
+        "leafHash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
+        "leafIndex": 10,
+        "leafUrl": "/transparency/leaves/01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb.json",
+        "proofUrl": "/transparency/proofs/01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2tzcWpTTXNiVUFNb3pqaVJnSFhyUmVrc2pnWXFvN1VSbjVvcHQzVXM2a250L25pcG1vZC1hdWRpdC1jaUAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+      "canonical": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+      "cloneUrl": "https://node.nipmod.com/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan.git",
+      "description": "Scan package docs, prompts and examples for instruction smuggling before agents reuse them.",
+      "digest": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+      "name": "prompt-injection-scan",
+      "owner": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "prompt-injection-scan",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "e14de1d95a19f7f04f193992189948a9299e9690",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:43:00.758273306+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "272007e8a3fecd27fdaf0679cceef0229952a7fc12f0d11292e041175fd91974",
+        "leafHash": "27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7",
+        "leafIndex": 9,
+        "leafUrl": "/transparency/leaves/27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7.json",
+        "proofUrl": "/transparency/proofs/27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2hTNHVvRFBRWFdNNkJlM3AxbnJ5cGhtUTFHRFFyR1ZxeUh1eXFhU3MyWFd2L3Byb21wdC1pbmplY3Rpb24tc2NhbkAwLjEuMA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+      "canonical": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+      "cloneUrl": "https://node.nipmod.com/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage.git",
+      "description": "Triage GitHub issues into reproducible bugs, support requests and security-sensitive reports for agents.",
+      "digest": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+      "name": "github-issue-triage",
+      "owner": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "github-issue-triage",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "c454a839ce89a0446dcc0010afd991dc3e4f25b8",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T15:42:59.376735717+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "9f3a443a2ad09d657f5ec26fb7918eae7131f0367a6d072c18c3f8d0b0ce99a4",
+        "leafHash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+        "leafIndex": 11,
+        "leafUrl": "/transparency/leaves/c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849.json",
+        "proofUrl": "/transparency/proofs/c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa25lQ1BLZWRmelhhUnpFdEdrRnJuaVV5NWFXcm1oQU5mUDl1d2FqbjNrWFVTL2dpdGh1Yi1pc3N1ZS10cmlhZ2VAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "canonical": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+      "cloneUrl": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "description": "Audit repository README files for installation clarity, trust evidence and agent-safe instructions.",
+      "digest": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+      "name": "repo-readme-audit",
+      "owner": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "repo-readme-audit",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T10:08:53.576138093+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "1e0c54476e578ddad2dbb2d5108a6fed74217e36272747f190abdd111371a561",
+        "leafHash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+        "leafIndex": 4,
+        "leafUrl": "/transparency/leaves/da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6.json",
+        "proofUrl": "/transparency/proofs/da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "compatibilityReceipts": [
+        {
+          "exampleUrl": "https://nipmod.com/compatibility/examples/apm-package.json",
+          "externalFormat": "apm-package",
+          "externalInputSha256": "8ca75cd43e96ca15a622e36f463e8f7449e1ebd21a6bf453238286df8ad8bdbc",
+          "id": "receipt.apm.repo-readme-audit",
+          "label": "APM package",
+          "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+          "packageDigest": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+          "preservedFields": [
+            "name",
+            "version",
+            "description",
+            "entrypoint",
+            "permissions"
+          ],
+          "provenanceLoss": [],
+          "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.apm.repo-readme-audit",
+          "sourceCommit": "a50ed66d2493eca8a0966d4f06c78d7277f63b3d",
+          "sourceRepo": "https://node.nipmod.com/z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit.git",
+          "sourceTag": "v0.1.0",
+          "type": "dev.nipmod.compatibility-receipt.v1",
+          "unsupportedFields": [],
+          "version": "0.1.0"
+        }
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa2dYWExOMlF0M0dLTDlLSlBvN1NIN1dHY1FxUlljcFQ1TXJ3YlRKOXFIcFp1L3JlcG8tcmVhZG1lLWF1ZGl0QDAuMS4w",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+      "canonical": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+      "cloneUrl": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+      "description": "Read a public Gitlawb repository and return a provenance-focused summary for agents.",
+      "digest": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+      "name": "gitlawb-repo-reader",
+      "owner": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "gitlawb-repo-reader",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "05d9b83f9ab2b6f8e1475eb7cd9a3f8fa8236c73",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T10:08:53.498837716+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "2fa34ba9ae6b9543156add08356509b29428c8a29d5cc022bae9fe294f3e5949",
+        "leafHash": "d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524",
+        "leafIndex": 5,
+        "leafUrl": "/transparency/leaves/d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524.json",
+        "proofUrl": "/transparency/proofs/d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "compatibilityReceipts": [
+        {
+          "exampleUrl": "https://nipmod.com/compatibility/examples/mcp-server.json",
+          "externalFormat": "mcp-server-json",
+          "externalInputSha256": "5e57556dc2c229e4449a5d8572f6d27a0026ba3cb937b7457eb562995a161376",
+          "id": "receipt.mcp.gitlawb-repo-reader",
+          "label": "MCP import",
+          "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+          "packageDigest": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+          "preservedFields": [
+            "mcpServers",
+            "command",
+            "args",
+            "env"
+          ],
+          "provenanceLoss": [],
+          "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.mcp.gitlawb-repo-reader",
+          "sourceCommit": "05d9b83f9ab2b6f8e1475eb7cd9a3f8fa8236c73",
+          "sourceRepo": "https://node.nipmod.com/z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader.git",
+          "sourceTag": "v0.1.0",
+          "type": "dev.nipmod.compatibility-receipt.v1",
+          "unsupportedFields": [],
+          "version": "0.1.0"
+        }
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXJAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    },
+    {
+      "artifactPath": "releases/0.1.0/bundle.nipmod",
+      "artifactSha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+      "canonical": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+      "cloneUrl": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+      "description": "Review agent package dependencies, permissions and lockfiles for supply-chain risk.",
+      "digest": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+      "name": "dependency-risk-review",
+      "owner": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+      "permissionDetails": {
+        "env": [],
+        "filesystem": [],
+        "mcpTools": [],
+        "network": [],
+        "secrets": []
+      },
+      "permissions": {
+        "env": 0,
+        "exec": false,
+        "filesystem": 0,
+        "mcpTools": 0,
+        "network": 0,
+        "postinstall": false,
+        "secrets": 0
+      },
+      "publisher": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+      "releasePath": "releases/0.1.0/release.json",
+      "repo": "dependency-risk-review",
+      "resolved": "https://node.nipmod.com/api/v1/repos/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review/blob/releases/0.1.0/bundle.nipmod",
+      "sourceCommit": "d763aee9761f18708d9b82cba65d92a056695862",
+      "sourceTag": "v0.1.0",
+      "sourceRepo": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+      "stars": 0,
+      "trust": {
+        "evidence": {
+          "artifactDigestVerified": true,
+          "bundleSignatureVerified": true,
+          "immutableSnapshotMatched": true,
+          "publisherMatchesCanonical": true,
+          "releaseEventSigned": true,
+          "sourceProvenanceVerified": true,
+          "transparencyLogIncluded": true,
+          "transparencyLogVerified": true
+        },
+        "level": "verified",
+        "score": 100,
+        "signals": [
+          "Artifact digest verified",
+          "Bundle signature verified",
+          "Publisher matches canonical owner",
+          "Version digest unchanged",
+          "Release event signed",
+          "Source tag verified",
+          "Transparency proof published",
+          "Witnessed checkpoint verified",
+          "No manifest permissions"
+        ],
+        "warnings": []
+      },
+      "type": "skill",
+      "updatedAt": "2026-05-16T10:08:53.491621872+00:00",
+      "version": "0.1.0",
+      "proof": {
+        "checkpointUrl": "/transparency/checkpoint.json",
+        "eventHash": "759de3ebf2f8cf2a39052b4b33025c177f1c27b6f7af80b329a9e90569139b42",
+        "leafHash": "f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601",
+        "leafIndex": 6,
+        "leafUrl": "/transparency/leaves/f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601.json",
+        "proofUrl": "/transparency/proofs/f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601.json",
+        "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+        "subject": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review@0.1.0",
+        "treeSize": 32,
+        "type": "dev.nipmod.registry.proof.v1",
+        "witnesses": [
+          "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ"
+        ],
+        "witnessUrls": [
+          "/transparency/witnesses/z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ.json"
+        ]
+      },
+      "compatibilityReceipts": [
+        {
+          "exampleUrl": "https://nipmod.com/compatibility/examples/git-source-provenance.json",
+          "externalFormat": "git-source-provenance",
+          "externalInputSha256": "38985e3efd3a4feb63425ea774061a8e0bbdfd61248dd67552a00533e2cc7692",
+          "id": "receipt.git.dependency-risk-review",
+          "label": "Git source",
+          "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+          "packageDigest": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+          "preservedFields": [
+            "package",
+            "version",
+            "artifact.sha256",
+            "source.repo",
+            "source.commit",
+            "source.tag"
+          ],
+          "provenanceLoss": [],
+          "receiptUrl": "https://nipmod.com/compatibility/receipts.json#receipt.git.dependency-risk-review",
+          "sourceCommit": "d763aee9761f18708d9b82cba65d92a056695862",
+          "sourceRepo": "https://node.nipmod.com/z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review.git",
+          "sourceTag": "v0.1.0",
+          "type": "dev.nipmod.compatibility-receipt.v1",
+          "unsupportedFields": [],
+          "version": "0.1.0"
+        }
+      ],
+      "quorum": {
+        "policyId": "nipmod-quorum-release-v1",
+        "receiptUrl": "https://nipmod.com/quorum/receipts.json#quorum.cGtnOmRpZDprZXk6ejZNa3FtOFViMXdiQTc5c2lSb3pGMVE3ajFEaml4eEZOQXNIblNTZlBhVDJpQTFDL2RlcGVuZGVuY3ktcmlzay1yZXZpZXdAMC4xLjA",
+        "requiredRoles": [
+          "release",
+          "security"
+        ],
+        "threshold": 2,
+        "type": "dev.nipmod.quorum-status.v1",
+        "approvedRoles": [
+          "release",
+          "security"
+        ],
+        "approvals": 2,
+        "statement": "2 of 2 quorum approvals match this package digest.",
+        "status": "passed"
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "reason": "package excluded by registry policy",
+      "repo": "dependency-risk-review"
+    },
+    {
+      "reason": "package excluded by registry policy",
+      "repo": "gitlawb-repo-reader"
+    },
+    {
+      "reason": "package excluded by registry policy",
+      "repo": "repo-readme-audit"
+    },
+    {
+      "reason": "package excluded by registry policy",
+      "repo": "source-bound-probe-1778883617"
+    }
+  ],
+  "source": "https://node.nipmod.com",
+  "transparencyLog": {
+    "entries": [
+      {
+        "inclusionProof": [
+          {
+            "hash": "800b206365833bcd4e86fae6b4cb396f7eb2c4de790b206286ca7dbcb7e5b9a4",
+            "side": "right"
+          },
+          {
+            "hash": "7c0730b87e112367ddb9d6b684578961157fa83207b476df2c6d60ae945c0ea0",
+            "side": "right"
+          },
+          {
+            "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+            "side": "right"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "e64a5932dc8dc43cff5fa66aab2817ceb8e159e231bea5d883ab0bba52d26e8e",
+          "eventHash": "188e3134c460f37cdbd3c407e37bc3e784667056872b293aea9cf59e16663cfb",
+          "package": "pkg:did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK/source-bound-probe-1778883617",
+          "publisher": "did:key:z6MkgUBL9PzsqaEip6m4CcvD9HeN9Q3DVMRzCasHjwBDbKTK",
+          "version": "0.1.0"
+        },
+        "leafHash": "7c4dab67f798a955b54e2d1d2b532adbb2906ba4008c24ff0186efb08335f7c8",
+        "leafIndex": 0
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "7c4dab67f798a955b54e2d1d2b532adbb2906ba4008c24ff0186efb08335f7c8",
+            "side": "left"
+          },
+          {
+            "hash": "7c0730b87e112367ddb9d6b684578961157fa83207b476df2c6d60ae945c0ea0",
+            "side": "right"
+          },
+          {
+            "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+            "side": "right"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "580777249f6fbd950a3c06dc57911d113f1645dce2e5670d814b2b842ae67e1b",
+          "eventHash": "f04dd720875a776dc8644a2b9867e371aee528a9858172b43bf2892fc77214f6",
+          "package": "pkg:did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5/repo-readme-audit",
+          "publisher": "did:key:z6Mkg7B1FyUKbKnnKw7RneGzrgpgx5SJNgLn7NHuLFaek1U5",
+          "version": "0.1.0"
+        },
+        "leafHash": "800b206365833bcd4e86fae6b4cb396f7eb2c4de790b206286ca7dbcb7e5b9a4",
+        "leafIndex": 1
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "f277b955ea61ef3289f30887af39db874e8d305c3f635fb6f51e8b1de1bb0bd6",
+            "side": "right"
+          },
+          {
+            "hash": "ae27661b97e9d51c052a59ccc8f519c4c99f692aadd7d582c0fed618c3ecbeab",
+            "side": "left"
+          },
+          {
+            "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+            "side": "right"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "dacc4bd3d1fd146b42d46761baf824c297425baa842772dfd154fe5c2ae13316",
+          "eventHash": "c170cf6358d0b3c36edae6448092e0ef61c674a8ed3e7534eba630a35a1ab6e3",
+          "package": "pkg:did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h/gitlawb-repo-reader",
+          "publisher": "did:key:z6MkpB5XPvAt6obE6sq81vhNY2kuUn23NxRt8a2GdQeW7u9h",
+          "version": "0.1.0"
+        },
+        "leafHash": "25d6875876c2bb9f635c3fda8b13c013515d5ee7fb83e80751479fb03009a9b1",
+        "leafIndex": 2
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "25d6875876c2bb9f635c3fda8b13c013515d5ee7fb83e80751479fb03009a9b1",
+            "side": "left"
+          },
+          {
+            "hash": "ae27661b97e9d51c052a59ccc8f519c4c99f692aadd7d582c0fed618c3ecbeab",
+            "side": "left"
+          },
+          {
+            "hash": "9b4636f2c4b960fd15a93d5318e9546371f3d1c0e72cc189be173452e2ed4252",
+            "side": "right"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "a88d5223d50782b02d41c923ca21cc1e0304601662ebbc0ce6493bd08c9d6c41",
+          "eventHash": "056b04bb454151ef3e68d95fe406ab22de7b933d8b2ca09122c841c412f1f9c7",
+          "package": "pkg:did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em/dependency-risk-review",
+          "publisher": "did:key:z6MkrdS5GUq3Yvx7G3VLA3HhUaWvZeoiUgMCfAX8zhNoP8Em",
+          "version": "0.1.0"
+        },
+        "leafHash": "f277b955ea61ef3289f30887af39db874e8d305c3f635fb6f51e8b1de1bb0bd6",
+        "leafIndex": 3
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524",
+            "side": "right"
+          },
+          {
+            "hash": "57310846d25daca0719000a79136de8d94f83c48314f48b2afbff672ddc9f1c6",
+            "side": "right"
+          },
+          {
+            "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+            "side": "left"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "aa102c984a663b1fb4811740667ac1b14a80c9000870dfc6d3e854b9b3c0ba58",
+          "eventHash": "1e0c54476e578ddad2dbb2d5108a6fed74217e36272747f190abdd111371a561",
+          "package": "pkg:did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu/repo-readme-audit",
+          "publisher": "did:key:z6MkgXXLN2Qt3GKL9KJPo7SH7WGcQqRYcpT5MrwbTJ9qHpZu",
+          "version": "0.1.0"
+        },
+        "leafHash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+        "leafIndex": 4
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "da41c8c905863e2e5469e37b008c0ab83805d3921f0cadb65edb30073ab8a1e6",
+            "side": "left"
+          },
+          {
+            "hash": "57310846d25daca0719000a79136de8d94f83c48314f48b2afbff672ddc9f1c6",
+            "side": "right"
+          },
+          {
+            "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+            "side": "left"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "d57b227f009f974d26537db6677083c12071d52a40121fbadd655ba54f302818",
+          "eventHash": "2fa34ba9ae6b9543156add08356509b29428c8a29d5cc022bae9fe294f3e5949",
+          "package": "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader",
+          "publisher": "did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD",
+          "version": "0.1.0"
+        },
+        "leafHash": "d9ab55e32fd8e0770f3f0b218e50cda7ad02d3dd476a4267487b2141cb815524",
+        "leafIndex": 5
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185",
+            "side": "right"
+          },
+          {
+            "hash": "e8ab142b06f2df270e445ce50c3d2ffd19f513fe6a141bcc241f61b3a1a2350e",
+            "side": "left"
+          },
+          {
+            "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+            "side": "left"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "30e7f7594ad3c17276cac9f736db5c7915a614ae24afdd11a93ed61e48cb0f3d",
+          "eventHash": "759de3ebf2f8cf2a39052b4b33025c177f1c27b6f7af80b329a9e90569139b42",
+          "package": "pkg:did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C/dependency-risk-review",
+          "publisher": "did:key:z6Mkqm8Ub1wbA79siRozF1Q7j1DjixxFNAsHnSSfPaT2iA1C",
+          "version": "0.1.0"
+        },
+        "leafHash": "f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601",
+        "leafIndex": 6
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "f68c98c08ba443b5835d55e12a884f035fac68884fb2d1f7b77a84152eec7601",
+            "side": "left"
+          },
+          {
+            "hash": "e8ab142b06f2df270e445ce50c3d2ffd19f513fe6a141bcc241f61b3a1a2350e",
+            "side": "left"
+          },
+          {
+            "hash": "02f72a28992ce93beac130c3de3a2d3dbb3b4035500c88e8adf07a576677448b",
+            "side": "left"
+          },
+          {
+            "hash": "d1b6c41d8746199ab45243d44f51766b9e175cbd62fa360656e16647ed905939",
+            "side": "right"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "9d1bf2053deb3932011a919e35b864e9406a030a07fe39d7b75856f3142e194c",
+          "eventHash": "ea3ec9e2e4ac205e86dd3d9510356fff0eba2b4b31efaa03aaef8bf964d0c064",
+          "package": "pkg:did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N/gitlawb-release-review",
+          "publisher": "did:key:z6MkfAZP5ayqPdX9biypAAZAjtDM1AbztFTmUFNGVqjpn41N",
+          "version": "0.1.0"
+        },
+        "leafHash": "564eda6fe3acb073dc649374b5f9f6d64f88e06236343edaf7f009ae9de0e185",
+        "leafIndex": 7
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7",
+            "side": "right"
+          },
+          {
+            "hash": "671bc94ab9ef0f38b8eeae70fb5a53a6d7c6fbf14916a698b4ecf3f9e8cc57bd",
+            "side": "right"
+          },
+          {
+            "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+            "side": "right"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "2073b8316b6af86f1ffb6d83c6c83d51dc2d598e7a8b01f12cd145f88a85dd27",
+          "eventHash": "c4c5e215b5bdec546e60c1bad3b085bf4ee86126b6f4cf376419fa1f402dc7ed",
+          "package": "pkg:did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN/strict-ci-policy",
+          "publisher": "did:key:z6MkhmdBsWDz4gejutZzV3bHZUYXaf2UigNT7QN8MSotbHHN",
+          "version": "0.1.0"
+        },
+        "leafHash": "f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1",
+        "leafIndex": 8
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "f6ff4f8a7e7c84cb9f0b8d7af2576ccfc6e3b500f8fb8095c51ba357fe0e44c1",
+            "side": "left"
+          },
+          {
+            "hash": "671bc94ab9ef0f38b8eeae70fb5a53a6d7c6fbf14916a698b4ecf3f9e8cc57bd",
+            "side": "right"
+          },
+          {
+            "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+            "side": "right"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "02e07edf261c07848b6c502ccb87eb938a42c814566a59156274ae5ec5008e6f",
+          "eventHash": "272007e8a3fecd27fdaf0679cceef0229952a7fc12f0d11292e041175fd91974",
+          "package": "pkg:did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv/prompt-injection-scan",
+          "publisher": "did:key:z6MkhS4uoDPQXWM6Be3p1nryphmQ1GDQrGVqyHuyqaSs2XWv",
+          "version": "0.1.0"
+        },
+        "leafHash": "27aadba3a7cab891a1fe44f15db95a740685c311ec6c4751c0954d5b89149ca7",
+        "leafIndex": 9
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+            "side": "right"
+          },
+          {
+            "hash": "d6ceb917c3ba78ed31889a9e66fffc3ff172063b8e7c145874a0f287c1f7066e",
+            "side": "left"
+          },
+          {
+            "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+            "side": "right"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "040b59573369953e086a201a92d0f20099eb88d8f99bcc3753c5936a8f07270c",
+          "eventHash": "994009b1ac805522b247e949dee38d0243463693358cb74a5898ab90db35bba1",
+          "package": "pkg:did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt/nipmod-audit-ci",
+          "publisher": "did:key:z6MkksqjSMsbUAMozjiRgHXrReksjgYqo7URn5opt3Us6knt",
+          "version": "0.1.0"
+        },
+        "leafHash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
+        "leafIndex": 10
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "01dcb9ccded49ff2eafd22ee66ccc0d09e122f5c02613f03b68e057c6c5183bb",
+            "side": "left"
+          },
+          {
+            "hash": "d6ceb917c3ba78ed31889a9e66fffc3ff172063b8e7c145874a0f287c1f7066e",
+            "side": "left"
+          },
+          {
+            "hash": "a7c755085e95f9a56e67e59bb196c1c999875631518b6f90776b0d68455cc0de",
+            "side": "right"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "19d436961fc4b3a43664ccc8dcafaba2d42288f48f0d673e6aecfafc46f0c6f8",
+          "eventHash": "9f3a443a2ad09d657f5ec26fb7918eae7131f0367a6d072c18c3f8d0b0ce99a4",
+          "package": "pkg:did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS/github-issue-triage",
+          "publisher": "did:key:z6MkneCPKedfzXaRzEtGkFrniUy5aWrmhANfP9uwajn3kXUS",
+          "version": "0.1.0"
+        },
+        "leafHash": "c9e86dea1824ee094410af74cf183a7039d92b26a42993683212a353b7885849",
+        "leafIndex": 11
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332",
+            "side": "right"
+          },
+          {
+            "hash": "7e40a78a75ec906c7a5dbe9396cc8f4750b27379c03a6248ba9690f0795633bc",
+            "side": "right"
+          },
+          {
+            "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+            "side": "left"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "98893d53d76998f8ac3aa281f1dba0db77fbcf9ca2ad69940d7bd303dd902924",
+          "eventHash": "a04921daf871bc72a1f7e42be7b393c6b33ac5099bdb42401ef21a712e8a4edc",
+          "package": "pkg:did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd/mcp-server-import-example",
+          "publisher": "did:key:z6Mknf1KVeVWRPXcHUFfL1P3NHQcdzXy2wKuaBjxX9Lr8Vmd",
+          "version": "0.1.0"
+        },
+        "leafHash": "f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b",
+        "leafIndex": 12
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "f569005c6836600c67d9e76aa5a9359cdac199f401581261692553c0ca82479b",
+            "side": "left"
+          },
+          {
+            "hash": "7e40a78a75ec906c7a5dbe9396cc8f4750b27379c03a6248ba9690f0795633bc",
+            "side": "right"
+          },
+          {
+            "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+            "side": "left"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "f2bb6bde69e521a9b16712400c6352c5b751a361355966b34df02ae353013da3",
+          "eventHash": "dc8ea82d092a925a9234bb19783fec72937b652ab79ecf398d7d7b7ee59eb380",
+          "package": "pkg:did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP/malicious-skill-fixtures",
+          "publisher": "did:key:z6MknNXQoTp1JBT2MMpTrGnBervGBCW4z8bWfRHUReN7EPWP",
+          "version": "0.1.0"
+        },
+        "leafHash": "546690c10ae6c340874bfcd4e65d9894c62ec3c7a1058e2592708cf6d6607332",
+        "leafIndex": 13
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644",
+            "side": "right"
+          },
+          {
+            "hash": "c4db7e6520577538a1885cfa239b69aa0297b2f485d5fe86411dab0a449ea1b0",
+            "side": "left"
+          },
+          {
+            "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+            "side": "left"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "41f0840974f39a80b42c2aaa08f1e46506e0de49f498cdb222923f573f7795d0",
+          "eventHash": "65dd5971c4b95d2b93b4551f608e566b092294b496e3f2878acd0e653f64228a",
+          "package": "pkg:did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn/apm-import-example",
+          "publisher": "did:key:z6MkrLceabxgQz6wmQBMDCpbQpy5MF9BwJi7KymayosN5CRn",
+          "version": "0.1.0"
+        },
+        "leafHash": "27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497",
+        "leafIndex": 14
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "27b8cc54f39a71a3b637bcbed6390b81912f5074a86d396413a7e2386ba2b497",
+            "side": "left"
+          },
+          {
+            "hash": "c4db7e6520577538a1885cfa239b69aa0297b2f485d5fe86411dab0a449ea1b0",
+            "side": "left"
+          },
+          {
+            "hash": "1f09eb4d4a91bc4a883792da8502e6b79260a5ccaa85098fb3bb1ecc8fbd1052",
+            "side": "left"
+          },
+          {
+            "hash": "0663dcf2804872e7ee96e5883a7dc7955ce0d5ac0069011df73837416613111c",
+            "side": "left"
+          },
+          {
+            "hash": "3655bbf7435a0aca8a0f91d92d2f11128375cccb25aa3dc8bb55088b8d6e340b",
+            "side": "right"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "16181af9a6d12b749dd16189c019fa75c91b27e7402c7cf489e81b3fa2cfc56b",
+          "eventHash": "0d6938940bc37c58b199d5214203e1dc9e1eb787b11c03078a568a4aca1495fa",
+          "package": "pkg:did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe/developer-default-policy",
+          "publisher": "did:key:z6MksFrmCtYGTqJzUMsi3i8aABgH7m97zf4mhfmhvfmF5pAe",
+          "version": "0.1.0"
+        },
+        "leafHash": "03738a8bb3886d76c33a5fa1860f43bffc504e2342e52ebed3ad954b6a133644",
+        "leafIndex": 15
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "1b95b90c2c50bbfd202f6c0cb91df83bc688462ecd9c1d52c588c2ed46eb8112",
+            "side": "right"
+          },
+          {
+            "hash": "f000a04d2bc827203b7af25286d0ef8813f2eb0f15038656c2489c9520808939",
+            "side": "right"
+          },
+          {
+            "hash": "64fc38325e2618f127d2d3017e4c6f5dac98de49661bac6d14554122f29edf60",
+            "side": "right"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "5b98bc39226eedcd1aa7babd9cf68c708f2ddfa5c2a71f15c6f7b4808db0e211",
+          "eventHash": "4a78415b4aea393f01ba23521e9ffc1719fc539e2c8746235bad484acfd5d3df",
+          "package": "pkg:did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK/release-notes-drafter",
+          "publisher": "did:key:z6MkhLSkbSWSk4oN2QUwPMowX12uR16QGgS37EYskCWtgbsK",
+          "version": "0.1.0"
+        },
+        "leafHash": "7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4",
+        "leafIndex": 16
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "7320ce5bc81b1ed6b1c567df99a204899ba34d5b1a265b3d9b9a3e785ef1afd4",
+            "side": "left"
+          },
+          {
+            "hash": "f000a04d2bc827203b7af25286d0ef8813f2eb0f15038656c2489c9520808939",
+            "side": "right"
+          },
+          {
+            "hash": "64fc38325e2618f127d2d3017e4c6f5dac98de49661bac6d14554122f29edf60",
+            "side": "right"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "d472e5f44b74704bd7f7625a5806978d70c7515e6c39844b75f254295246caea",
+          "eventHash": "d6cfbb8070f929f81bca969e045680167c991bb613cd718faf38db0b58f26378",
+          "package": "pkg:did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B/package-onboarding-checklist",
+          "publisher": "did:key:z6Mkm5CnkZuC7XKBbB1UQxKsKQGmEktcpD7rWXPMnRnrrB8B",
+          "version": "0.1.0"
+        },
+        "leafHash": "1b95b90c2c50bbfd202f6c0cb91df83bc688462ecd9c1d52c588c2ed46eb8112",
+        "leafIndex": 17
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "1a692c2dad9077c8ee54ddc2f2c486b8871c2143ba5c61958c920e4d271d74a0",
+            "side": "right"
+          },
+          {
+            "hash": "ca35399290564e49860b2ccf57b5ad7a9326c874808bb61018c1585f1a83ca8a",
+            "side": "left"
+          },
+          {
+            "hash": "64fc38325e2618f127d2d3017e4c6f5dac98de49661bac6d14554122f29edf60",
+            "side": "right"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "3c33a72ec97a5cdd84f3452da68a573464eb1206b0b63b00533653aaba5a2605",
+          "eventHash": "d2701a2fc57389aed3478d536ccd66d318c62f7434f47210f6807b08192e39ff",
+          "package": "pkg:did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM/agent-permission-review",
+          "publisher": "did:key:z6MkpfzGwdDqJtBswdLeWBPwDzisrmCbFJCVNtVwNH9qX7kM",
+          "version": "0.1.0"
+        },
+        "leafHash": "418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81",
+        "leafIndex": 18
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "418776864aed5660fa1e4570f2286916010b7c6e6f0011f92667a6c628a07d81",
+            "side": "left"
+          },
+          {
+            "hash": "ca35399290564e49860b2ccf57b5ad7a9326c874808bb61018c1585f1a83ca8a",
+            "side": "left"
+          },
+          {
+            "hash": "64fc38325e2618f127d2d3017e4c6f5dac98de49661bac6d14554122f29edf60",
+            "side": "right"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "f1d1bf9e3df101cca7eb00294dc129e8958ae3dfc823d10665e29f491c084c0e",
+          "eventHash": "55cc373fd1040a060f79a9787cba2e3e494ba9fa9fcac3cbe85c967973f1cf0c",
+          "package": "pkg:did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu/gitlawb-diff-summarizer",
+          "publisher": "did:key:z6Mkqed4TeHvxoZscsK8HsfjLf3PS3mhPTe3wHB2Qk9qmuDu",
+          "version": "0.1.0"
+        },
+        "leafHash": "1a692c2dad9077c8ee54ddc2f2c486b8871c2143ba5c61958c920e4d271d74a0",
+        "leafIndex": 19
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d",
+            "side": "right"
+          },
+          {
+            "hash": "0958b73a3de3fcd16b9f2436c2418c23ad0f7d2a96294db5f0f01b00af1ffaaf",
+            "side": "right"
+          },
+          {
+            "hash": "c5cfb4874a2dffa1e2348051a0aff1653f6a59c235b1830df12c49de5961169f",
+            "side": "left"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "60a18ebdeed5973bdd6000ce4ca54f8781ac8a17841bfe1b438c668fed2ae087",
+          "eventHash": "8eab0306e010de94d6566edf99de03bd6fcd03fcc84a5ff1e1b384356399e121",
+          "package": "pkg:did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j/security-advisory-triage",
+          "publisher": "did:key:z6MkrEUHLE6XQq8e8W3EXKYVdznbsj4BJVGSKXuu8ahNu68j",
+          "version": "0.1.0"
+        },
+        "leafHash": "fdd6d390ef2a6b4371b078a6f2b21cc239f3871dc3a2fcf551f21e263e4158c5",
+        "leafIndex": 20
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "fdd6d390ef2a6b4371b078a6f2b21cc239f3871dc3a2fcf551f21e263e4158c5",
+            "side": "left"
+          },
+          {
+            "hash": "0958b73a3de3fcd16b9f2436c2418c23ad0f7d2a96294db5f0f01b00af1ffaaf",
+            "side": "right"
+          },
+          {
+            "hash": "c5cfb4874a2dffa1e2348051a0aff1653f6a59c235b1830df12c49de5961169f",
+            "side": "left"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "feea10c8fd2c7a963e58dd372b19942982eb18c1515b3f1d9b104b0957bab456",
+          "eventHash": "74b1dbb47265194ae1295239574c1498fa36db50acbc14041014edc38e97c963",
+          "package": "pkg:did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV/mcp-tool-risk-review",
+          "publisher": "did:key:z6MkwYNoJqw78ZhMGWywJHkE8f7PqnR37BXA5Tagc22N6HuV",
+          "version": "0.1.0"
+        },
+        "leafHash": "e4cfb0d6d253da80ebbad6a8883ac4aa4828c5aabbf56a665b1409390f5fe91d",
+        "leafIndex": 21
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269",
+            "side": "right"
+          },
+          {
+            "hash": "c516511229c695d68dfebaacdf9fcc9960f2bf3c1836c9807ace1f5a180b89e4",
+            "side": "left"
+          },
+          {
+            "hash": "c5cfb4874a2dffa1e2348051a0aff1653f6a59c235b1830df12c49de5961169f",
+            "side": "left"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "47167ee7fb90ddb70e5439e3eb119b6873455be3fd76bf7215a379e80a1dcfa4",
+          "eventHash": "91c16d778f7ea8efd755673adcf9fa76011cffb7820946ee05b6477cda5b89a0",
+          "package": "pkg:did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK/package-evidence-brief",
+          "publisher": "did:key:z6MkfCMAxqkvoMNtoxmU3yon2YGnigvQxRz2QF3Ltfeq5xRK",
+          "version": "0.1.0"
+        },
+        "leafHash": "169d00e1b7e39cec7230a3f4dc584ea6114b25be5a0b2f8072bd80336882853f",
+        "leafIndex": 22
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "169d00e1b7e39cec7230a3f4dc584ea6114b25be5a0b2f8072bd80336882853f",
+            "side": "left"
+          },
+          {
+            "hash": "c516511229c695d68dfebaacdf9fcc9960f2bf3c1836c9807ace1f5a180b89e4",
+            "side": "left"
+          },
+          {
+            "hash": "c5cfb4874a2dffa1e2348051a0aff1653f6a59c235b1830df12c49de5961169f",
+            "side": "left"
+          },
+          {
+            "hash": "9cf49825bf9c54e15a47e41f2d04ed6ce008e8e9e77c11834f5a814ce6a34e81",
+            "side": "right"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "82b5f279afd0c2eb4125667c5953be5cc6b7a5204d69f79a64b532f95d7914a3",
+          "eventHash": "f98502c8595d96ae8957eecc50d14706f729b74fd132afbae2341d0f00a5f3f6",
+          "package": "pkg:did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS/registry-mirror-compare",
+          "publisher": "did:key:z6MkfJVpnZrHEGKvhSQz5SXaHPD3bM6ktHHB18u11vcDwAnS",
+          "version": "0.1.0"
+        },
+        "leafHash": "eaa75c7f6b09339f9c5f9718d39d69f67c172ab39345d02d13ddcb92cda96269",
+        "leafIndex": 23
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1",
+            "side": "right"
+          },
+          {
+            "hash": "97275eeb878851808da8b346dba16b78ba1cbe153f312949c90b07ba943582ca",
+            "side": "right"
+          },
+          {
+            "hash": "618e68ae2c71b2bb6656b938691b5bb88e8675ee8a166defc5e61da310165e28",
+            "side": "right"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "88e60e6e3fdd29fda4aeb07bf8a4b7dc42c532631d71b6f505973cb6475013f2",
+          "eventHash": "72a3d6e147cfbd0c7e2066e37d1658b7f535a4facfd4ec17402c18d6fb6f3a23",
+          "package": "pkg:did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4/first-user-onboarding",
+          "publisher": "did:key:z6Mkho169M47Pu8rZmLqkBpCEzGAW6SCA8MXsH6YwEAjtLM4",
+          "version": "0.1.0"
+        },
+        "leafHash": "db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11",
+        "leafIndex": 24
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "db0f06c9b0ae6ced421d43f01044f74024db413da0519affc5a5edf99e23ca11",
+            "side": "left"
+          },
+          {
+            "hash": "97275eeb878851808da8b346dba16b78ba1cbe153f312949c90b07ba943582ca",
+            "side": "right"
+          },
+          {
+            "hash": "618e68ae2c71b2bb6656b938691b5bb88e8675ee8a166defc5e61da310165e28",
+            "side": "right"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "78567cc270cac018e0d6fc43a6491d5b15e638d535ff05146779752f252e27f0",
+          "eventHash": "53b8d2626b140869f4214f8a6e3157d36f60af5e2f35b2c602d05907a8571888",
+          "package": "pkg:did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2/gitlawb-review-tool-bundle",
+          "publisher": "did:key:z6Mknhqe5iXdzxNheEHf74zyZ9DVNiefnsyq4EQ5qRV4gaH2",
+          "version": "0.1.0"
+        },
+        "leafHash": "544c0b1b58be156b3f1038f82f2eabd718662d8eac1f9bca4e1090fc04b663b1",
+        "leafIndex": 25
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "834dab34138256669a136f4883c32886df0db1470c4493f312b75271cabb8bb4",
+            "side": "right"
+          },
+          {
+            "hash": "cf4e389a868712115721fc1f4a02568ad46d49e0c22c16ed09e51cea439b6fce",
+            "side": "left"
+          },
+          {
+            "hash": "618e68ae2c71b2bb6656b938691b5bb88e8675ee8a166defc5e61da310165e28",
+            "side": "right"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "8d65da839fe411a1f8ea5bb7ecc5dafe52b3b261a8274f368c558cbd142a5f85",
+          "eventHash": "86111d58daa5769f9e34287265130e50d408a0e5119f6de823ac0a8044f1fc07",
+          "package": "pkg:did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF/package-safety-eval-pack",
+          "publisher": "did:key:z6Mkp52AN6L6AymVvV9bVJfmt5UG3Lwrx7JUm2VPfcTG2bJF",
+          "version": "0.1.0"
+        },
+        "leafHash": "e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76",
+        "leafIndex": 26
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "e92f75bb6865b64fc4d3057e577fc84a55242907ba251a60c3fb9ef7b5ec7f76",
+            "side": "left"
+          },
+          {
+            "hash": "cf4e389a868712115721fc1f4a02568ad46d49e0c22c16ed09e51cea439b6fce",
+            "side": "left"
+          },
+          {
+            "hash": "618e68ae2c71b2bb6656b938691b5bb88e8675ee8a166defc5e61da310165e28",
+            "side": "right"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "7feb301c84f65df1f7348d5db3f467fdf2652c2b7965e34aed5e0b8cd80e1c8c",
+          "eventHash": "b8af64565bc471b287d15cd7e5a7243c5f57da457838417e9e8f8a0608975aeb",
+          "package": "pkg:did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z/package-migration-planner",
+          "publisher": "did:key:z6Mkp7vpuGY1bRKZNHH9qnuk8fPV5DtquE4q182BnYEAqG9z",
+          "version": "0.1.0"
+        },
+        "leafHash": "834dab34138256669a136f4883c32886df0db1470c4493f312b75271cabb8bb4",
+        "leafIndex": 27
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077",
+            "side": "right"
+          },
+          {
+            "hash": "e4eb1e2cab2f37464094e5ac39a4339131f95e39ccf3ebab31dfe61e205a092a",
+            "side": "right"
+          },
+          {
+            "hash": "79eca7a93886030efa8f783be7fbe02b2d29298dc9c80444b72b953a559f52e4",
+            "side": "left"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "9f04f0cfd32b564b5cb96539e426671020765ea61339853750c8a19b20c99c77",
+          "eventHash": "dc5c6c3d6eed0a49eb968e8df1deec63a8bff42f397a2c3131b175f69d0f516b",
+          "package": "pkg:did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j/readonly-registry-mcp-server",
+          "publisher": "did:key:z6MkpGtx4yWYfinzs3KsyLERUNhBePzcmdk8JvPRHvdfUL3j",
+          "version": "0.1.0"
+        },
+        "leafHash": "3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42",
+        "leafIndex": 28
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "3deb8d400aca73be8698988cd9e72d21d951f436a348e75cbc701e1d33aafc42",
+            "side": "left"
+          },
+          {
+            "hash": "e4eb1e2cab2f37464094e5ac39a4339131f95e39ccf3ebab31dfe61e205a092a",
+            "side": "right"
+          },
+          {
+            "hash": "79eca7a93886030efa8f783be7fbe02b2d29298dc9c80444b72b953a559f52e4",
+            "side": "left"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "23c94ad2278906090f031278fa12aed35f3f207dceabadfdaa8d92d66f721590",
+          "eventHash": "9507a30f4d0291687420ae33c1d3a685cff83ef374b0d7e0d3d8b21c46a4680e",
+          "package": "pkg:did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE/launch-strict-policy-pack",
+          "publisher": "did:key:z6Mkr8jKUSoDpRJBu1Ap3s7ffBVhgJFwkjcQbwfAJz1R9UyE",
+          "version": "0.1.0"
+        },
+        "leafHash": "e679097cb215d7668e6d7cf553ccba3c1c69db46385bb1cfad9bff9b64b70077",
+        "leafIndex": 29
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "7c4295add6364e55bdd3f72aac90171ce5abd7b01f6852eb4062327afd4d35ff",
+            "side": "right"
+          },
+          {
+            "hash": "abf284a14da9e45413a34c9c0fa443c93f1c35461d545fb0d80543d3b9a4cb7f",
+            "side": "left"
+          },
+          {
+            "hash": "79eca7a93886030efa8f783be7fbe02b2d29298dc9c80444b72b953a559f52e4",
+            "side": "left"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "7b248ce8424d5ba45302437fbe7a59278dddd882e0b764279b4fa94db0aa09d5",
+          "eventHash": "605b0129005e64e789ec5e84a2849c844bd9848daa5317b81b00a5cbe09161f2",
+          "package": "pkg:did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF/external-review-packet",
+          "publisher": "did:key:z6MktDAiA6JWkGr5oLe9pDmygCL73aaa6yud93Hzyh2DUHjF",
+          "version": "0.1.0"
+        },
+        "leafHash": "3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484",
+        "leafIndex": 30
+      },
+      {
+        "inclusionProof": [
+          {
+            "hash": "3cf5dbc87e90f5ac43ce3d35f2a90a883d0b7687e8326e13cd7365b852f6f484",
+            "side": "left"
+          },
+          {
+            "hash": "abf284a14da9e45413a34c9c0fa443c93f1c35461d545fb0d80543d3b9a4cb7f",
+            "side": "left"
+          },
+          {
+            "hash": "79eca7a93886030efa8f783be7fbe02b2d29298dc9c80444b72b953a559f52e4",
+            "side": "left"
+          },
+          {
+            "hash": "8648fc97ec0f55e18312fa4de7133e23ab248ae1b817262c200ecd1de642ff68",
+            "side": "left"
+          },
+          {
+            "hash": "42f8bf58c33efa6628603d4ea1df9c525d6876ee41a6650e160c47bd4144161f",
+            "side": "left"
+          }
+        ],
+        "leaf": {
+          "artifactSha256": "05265abc74fd17b9bee9e4b9c0905788bd7f6767e30431fad5dd3283fb24f576",
+          "eventHash": "011886ad97a0d4a0a3eb100d6893b06cd20bc9088fb65d8cc7d691ac972c8b32",
+          "package": "pkg:did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ/agent-runtime-compat-check",
+          "publisher": "did:key:z6MkwNvgoxc794HjwtR9wbNYwXgnw8SoBQr19ve1NQqEZdEQ",
+          "version": "0.1.0"
+        },
+        "leafHash": "7c4295add6364e55bdd3f72aac90171ce5abd7b01f6852eb4062327afd4d35ff",
+        "leafIndex": 31
+      }
+    ],
+    "formatVersion": 1,
+    "treeHead": {
+      "formatVersion": 1,
+      "generatedAt": "2026-05-16T21:44:02.000Z",
+      "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+      "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+      "treeSize": 32,
+      "signature": {
+        "algorithm": "Ed25519",
+        "keyId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+        "signatureBase64": "uqQ+gh2MlxypX3zeJZAKSNfgeUiRzkT7XOpQaXnuwJJ+2C0Ye8spVqLz6/J84DjLHryVMd1w6RX5Fw+D+arSDw=="
+      }
+    },
+    "previousCheckpoint": {
+      "formatVersion": 1,
+      "generatedAt": "2026-05-16T21:44:02.000Z",
+      "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+      "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+      "treeSize": 32,
+      "signature": {
+        "algorithm": "Ed25519",
+        "keyId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+        "signatureBase64": "uqQ+gh2MlxypX3zeJZAKSNfgeUiRzkT7XOpQaXnuwJJ+2C0Ye8spVqLz6/J84DjLHryVMd1w6RX5Fw+D+arSDw=="
+      }
+    },
+    "witnesses": [
+      {
+        "formatVersion": 1,
+        "treeHead": {
+          "formatVersion": 1,
+          "generatedAt": "2026-05-16T21:44:02.000Z",
+          "logId": "did:key:z6MkugeJcjgGhG1EpUMhhJ1Q5SoYn65T4cmiuBFE8E82TMyk",
+          "rootHash": "3cc66da3292900a4ac482b2c301db5c6e0a00c2461847a29fec5275da7f631cf",
+          "treeSize": 32
+        },
+        "type": "dev.nipmod.transparency.witness.v1",
+        "witness": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+        "signature": {
+          "algorithm": "Ed25519",
+          "keyId": "did:key:z6Mkv8WH5QeiZU1sJwGrCs8xe35AiH4gMfAy86zFMiEkewWJ",
+          "signatureBase64": "LZgoBWz2iKOUauWaxELen3p084h+FoPf+cPs5wEJ+QPUfXgjmsaCl2qHsMzFGRKioR6gDD1HUysQ09CQSWk6Aw=="
+        }
+      }
+    ]
+  },
+  "quorumPolicy": {
+    "id": "nipmod-quorum-release-v1",
+    "mode": "registry-enforced",
+    "receipts": "https://nipmod.com/quorum/receipts.json",
+    "requiredRoles": [
+      "release",
+      "security"
+    ],
+    "signers": "https://nipmod.com/quorum/signers.json",
+    "threshold": 2,
+    "type": "dev.nipmod.quorum-policy.v1"
+  }
+}

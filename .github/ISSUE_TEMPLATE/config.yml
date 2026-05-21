@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security reports
+    url: https://nipmod.com/security
+    about: Do not open public issues for active vulnerabilities.
+  - name: API docs
+    url: https://nipmod.com/api-access
+    about: Start here for package search, inspect and install plan workflows.
+  - name: Community Telegram
+    url: https://t.me/nipmod
+    about: Public discussion, questions and ecosystem feedback.

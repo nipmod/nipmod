@@ -1,0 +1,131 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.platform-readiness.v1",
+  "generatedAt": "2026-05-21T20:20:25.892Z",
+  "meaning": "Product readiness receipt for the API-first Nipmod surface. It proves hosted API access, public source resolution, read-only hosted MCP, local MCP, GitHub mirror and Gitlawb source sync. It does not claim native third-party platform partnerships.",
+  "archive": {
+    "registry": "https://nipmod.com/registry/packages.json",
+    "llms": "https://nipmod.com/llms.txt",
+    "discovery": "https://nipmod.com/.well-known/nipmod.json",
+    "platformConnections": "https://nipmod.com/compatibility/platform-connections.json",
+    "setup": "https://nipmod.com/setup"
+  },
+  "criteria": [
+    "hosted API routes are reachable",
+    "public source resolver returns package records",
+    "install plans are read-only until a user approves workspace writes",
+    "hosted MCP exposes no workspace-write tools",
+    "local MCP keeps controlled write tools separate from hosted API use",
+    "public discovery documents point to current API and archive surfaces",
+    "GitHub and Gitlawb source mirrors are reachable",
+    "no third-party native integration is required for API use"
+  ],
+  "platforms": [
+    {
+      "id": "api",
+      "name": "Nipmod API",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Hosted package API is live for search, inspect, install plan and archive preparation.",
+      "evidence": [
+        "https://nipmod.com/api/search",
+        "https://nipmod.com/api/inspect",
+        "https://nipmod.com/api/install-plan"
+      ],
+      "checks": [
+        "public API routes return typed responses",
+        "responses include rate limit headers",
+        "hosted API performs no workspace writes"
+      ]
+    },
+    {
+      "id": "sources",
+      "name": "Package Sources",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Nipmod resolves public package metadata from npm, PyPI, GitHub, Hugging Face and MCP sources.",
+      "evidence": [
+        "https://nipmod.com/sources"
+      ],
+      "checks": [
+        "external search supports configured sources",
+        "inspect and install-plan keep original owner attribution"
+      ]
+    },
+    {
+      "id": "archive",
+      "name": "Nipmod Archive",
+      "productReadiness": 80,
+      "connectionStatus": "Safe mode",
+      "status": "resolver-only-safe-mode",
+      "claim": "Archive prepare, search, confirm dry-run and status endpoints are live; durable writes require archive store env vars.",
+      "evidence": [
+        "https://nipmod.com/packages",
+        "https://nipmod.com/api/archive/status",
+        "https://nipmod.com/registry/packages.json"
+      ],
+      "checks": [
+        "verified archive is empty after seed reset",
+        "archive prepare returns external_indexed records",
+        "confirm supports dry-run records"
+      ]
+    },
+    {
+      "id": "mcp",
+      "name": "MCP",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Hosted read-only MCP and local stdio MCP expose the current Nipmod package tools with write boundaries.",
+      "evidence": [
+        "https://nipmod.com/api/mcp",
+        "https://nipmod.com/mcp",
+        "https://nipmod.com/.well-known/nipmod.json"
+      ],
+      "checks": [
+        "hosted MCP exposes only safe read tools",
+        "local MCP install requires explicit write-lockfile approval"
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Public open-source mirror and CI surface for Nipmod itself.",
+      "evidence": [
+        "https://github.com/nipmod/nipmod"
+      ],
+      "checks": [
+        "origin refs/heads/main can be compared to the released commit"
+      ]
+    },
+    {
+      "id": "gitlawb",
+      "name": "Gitlawb",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Canonical source path and owner claim workflow for Nipmod package publishing.",
+      "evidence": [
+        "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+        "https://nipmod.com/package",
+        "https://nipmod.com/claims/index.json"
+      ],
+      "checks": [
+        "gitlawb refs/heads/main can be compared to the released commit",
+        "claim verification reports missing proofs without treating them as verified"
+      ]
+    }
+  ],
+  "notClaimed": [
+    "native platform partnership or marketplace approval is required for API use",
+    "Nipmod owns or republishes external npm, PyPI, GitHub, Hugging Face or MCP packages",
+    "every external source result is a verified Nipmod archive package",
+    "durable archive writes are enabled before server-side archive env vars are configured",
+    "wallet, trading, token launch or paid x402 workflows are part of core package use"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.review-packet.v1",
+  "generatedAt": "2026-05-17T00:00:00.000Z",
+  "status": "ready-for-independent-review",
+  "claims": {
+    "technicalLaunchReady": true,
+    "gitlawbEndorsed": false,
+    "independentlyAudited": false,
+    "externalAdoptionProven": false
+  },
+  "targets": {
+    "website": "https://nipmod.com",
+    "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
+    "launch": "https://nipmod.com/launch",
+    "security": "https://nipmod.com/security",
+    "discovery": "https://nipmod.com/.well-known/nipmod.json",
+    "registry": "https://nipmod.com/registry/packages.json",
+    "proofTranscript": "https://nipmod.com/proof/transcript.json",
+    "evidenceLedger": "https://nipmod.com/review/evidence-ledger.json",
+    "evidenceManifest": "https://nipmod.com/review/evidence-manifest.json"
+  },
+  "reviewScope": {
+    "sourceRef": "main",
+    "commitPolicy": "Reviewer resolves the exact Gitlawb commit before signing external evidence.",
+    "evidenceStatus": "checklist-and-public-proof-links",
+    "externalReceipts": {
+      "firstUserReceipts": 0,
+      "packageAuthorDryRuns": 0,
+      "externalPackagesAccepted": 0,
+      "signedIndependentReviews": 0
+    }
+  },
+  "commands": [
+    {
+      "id": "verify-all-prod",
+      "command": "node tools/verify-all.mjs --prod"
+    },
+    {
+      "id": "prod-load-smoke",
+      "command": "node tools/prod-load-smoke.mjs --profile launch"
+    },
+    {
+      "id": "prod-synthetic-monitor",
+      "command": "node tools/prod-synthetic-monitor.mjs"
+    },
+    {
+      "id": "restore-drill",
+      "command": "node tools/restore-drill.mjs"
+    },
+    {
+      "id": "supply-chain-check",
+      "command": "node tools/supply-chain-check.mjs"
+    },
+    {
+      "id": "browser-e2e",
+      "command": "pnpm --dir site test:e2e"
+    },
+    {
+      "id": "public-proof-loop",
+      "command": "node tools/public-proof-loop.mjs --registry https://nipmod.com/registry/packages.json"
+    }
+  ],
+  "externalProofTracks": [
+    {
+      "id": "gitlawb-review-signal",
+      "state": "prepared",
+      "count": 0,
+      "ready": "Public source, launch demo, founder post, founder DM and non endorsement language are ready.",
+      "blockedOn": "Gitlawb founder or maintainer response."
+    },
+    {
+      "id": "external-human-audit",
+      "state": "prepared",
+      "count": 0,
+      "ready": "Review packet, gates, proof loop, threat model and sign off template are ready.",
+      "blockedOn": "Independent reviewer signature or published findings."
+    },
+    {
+      "id": "real-user-adoption",
+      "state": "waiting-for-receipts",
+      "count": 0,
+      "ready": "First user loop, author dry run, repo claim preview and receipt template are ready.",
+      "blockedOn": "External redacted user receipts."
+    },
+    {
+      "id": "ecosystem-depth",
+      "state": "first-party-ready",
+      "count": 0,
+      "ready": "Verified first party packages cover every launch manifest type.",
+      "blockedOn": "External packages accepted into the registry."
+    }
+  ],
+  "signOffTemplate": {
+    "fields": [
+      "Reviewer",
+      "Organization",
+      "Date",
+      "Commit",
+      "Scope",
+      "Result",
+      "Critical findings",
+      "High findings",
+      "Medium findings",
+      "Residual risks",
+      "Signature"
+    ]
+  }
+}

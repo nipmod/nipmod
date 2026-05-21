@@ -1,0 +1,35 @@
+{
+  "formatVersion": 1,
+  "name": "@probe/postinstall-skill",
+  "canonical": "pkg:did:key:z6Mkprobepost/postinstall-skill",
+  "version": "0.1.0",
+  "type": "skill",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "files": [
+    "SKILL.md",
+    "nipmod.json"
+  ],
+  "permissions": {
+    "filesystem": [],
+    "network": [],
+    "mcpTools": [],
+    "env": [],
+    "secrets": [],
+    "exec": {
+      "allowed": false
+    },
+    "postinstall": {
+      "allowed": true,
+      "command": "node postinstall.js"
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6Mkprobepost",
+    "provenance": "local"
+  }
+}
+
