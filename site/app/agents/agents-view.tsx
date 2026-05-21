@@ -118,7 +118,8 @@ function AgentCard({ agent }: { agent: { id: string; name: string; logo?: string
         {agent.logo ? (
           <img
             alt=""
-            decoding="async"
+            decoding="sync"
+            fetchPriority="high"
             height={30}
             loading="eager"
             src={agent.logo}
