@@ -68,72 +68,111 @@ export function AnimatedTerminal({ height = 520, script = defaultScript, title =
   const stableScript = useMemo(() => script, [script]);
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [typing, setTyping] = useState("");
-  const [stepIndex, setStepIndex] = useState(0);
-  const timers = useRef<number[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollFrame = useRef<number | null>(null);
 
   useEffect(() => {
-    timers.current.forEach(window.clearTimeout);
-    timers.current = [];
     setLines([]);
     setTyping("");
-    setStepIndex(0);
   }, [stableScript]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    if (scrollFrame.current !== null) {
+      window.cancelAnimationFrame(scrollFrame.current);
+    }
+    scrollFrame.current = window.requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+      scrollFrame.current = null;
+    });
+
+    return () => {
+      if (scrollFrame.current !== null) {
+        window.cancelAnimationFrame(scrollFrame.current);
+        scrollFrame.current = null;
+      }
+    };
   }, [lines, typing]);
 
   useEffect(() => {
-    const step = stableScript[stepIndex];
-    if (!step) {
-      return;
-    }
-
     let cancelled = false;
-    const pushTimer = (delay: number, fn: () => void) => {
-      const timer = window.setTimeout(() => {
-        if (!cancelled) {
-          fn();
-        }
-      }, delay);
-      timers.current.push(timer);
-    };
 
-    const prompt = step.prompt ?? "~ $";
-    const commandLine = `${prompt} ${step.command}`;
-    let char = 0;
-
-    const typeNext = () => {
-      if (char <= commandLine.length) {
-        setTyping(commandLine.slice(0, char));
-        char += 1;
-        pushTimer(char < commandLine.length ? 18 : 220, typeNext);
-        return;
-      }
-
-      setLines((current) => [...current, { kind: "input", text: commandLine }]);
-      setTyping("");
-      let delay = 120;
-      for (const line of step.output) {
-        delay += line.pause ?? 70;
-        pushTimer(delay, () => setLines((current) => [...current, line]));
-      }
-      pushTimer(delay + 760, () => {
-        if (stepIndex < stableScript.length - 1) {
-          setStepIndex((index) => index + 1);
-        }
+    const frame = () =>
+      new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
       });
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        window.setTimeout(resolve, ms);
+      });
+
+    const typeCommand = async (commandLine: string) => {
+      const duration = Math.max(360, Math.min(820, commandLine.length * 16));
+      const start = window.performance.now();
+      let renderedChars = -1;
+
+      while (!cancelled) {
+        const elapsed = window.performance.now() - start;
+        const progress = Math.min(1, elapsed / duration);
+        const nextChars = Math.min(commandLine.length, Math.ceil(progress * commandLine.length));
+
+        if (nextChars !== renderedChars) {
+          renderedChars = nextChars;
+          setTyping(commandLine.slice(0, nextChars));
+        }
+
+        if (progress >= 1) {
+          return;
+        }
+
+        await frame();
+      }
     };
 
-    typeNext();
+    const run = async () => {
+      setLines([]);
+      setTyping("");
+
+      for (const step of stableScript) {
+        if (cancelled) {
+          return;
+        }
+
+        const prompt = step.prompt ?? "~ $";
+        const commandLine = `${prompt} ${step.command}`;
+        await typeCommand(commandLine);
+
+        if (cancelled) {
+          return;
+        }
+
+        setLines((current) => [...current, { kind: "input", text: commandLine }]);
+        setTyping("");
+        await wait(90);
+
+        for (const line of step.output) {
+          if (cancelled) {
+            return;
+          }
+
+          await wait(Math.min(line.pause ?? 58, 260));
+          if (!cancelled) {
+            setLines((current) => [...current, line]);
+          }
+        }
+
+        await wait(460);
+      }
+    };
+
+    void run();
 
     return () => {
       cancelled = true;
-      timers.current.forEach(window.clearTimeout);
-      timers.current = [];
     };
-  }, [stableScript, stepIndex]);
+  }, [stableScript]);
 
   return (
     <div className="mac-window" aria-label="Nipmod install terminal" style={{ "--terminal-height": `${height}px` } as CSSProperties}>

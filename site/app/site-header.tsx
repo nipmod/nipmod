@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
 import { homeContent } from "./content";
 import { NipmodMark } from "./editorial-mark";
 
@@ -15,19 +16,34 @@ const navItems = [
 
 export function SiteHeader() {
   const pathname = usePathname() || "/";
+  const router = useRouter();
+
+  useEffect(() => {
+    for (const item of navItems) {
+      router.prefetch(item.href);
+    }
+  }, [router]);
 
   return (
     <header className="topbar" aria-label="Primary">
-      <a className="brand" href="/" aria-label="Nipmod home">
+      <Link className="brand" href="/" aria-label="Nipmod home" prefetch>
         <NipmodMark size={78} />
         <span className="sr-only">{homeContent.brand}</span>
-      </a>
+      </Link>
 
       <nav className="nav-actions" aria-label="Site">
         {navItems.map((item) => (
-          <a className={item.match(pathname) ? "nav-link nav-active" : "nav-link"} href={item.href} key={item.href}>
+          <Link
+            aria-current={item.match(pathname) ? "page" : undefined}
+            className={item.match(pathname) ? "nav-link nav-active" : "nav-link"}
+            href={item.href}
+            key={item.href}
+            onFocus={() => router.prefetch(item.href)}
+            onPointerEnter={() => router.prefetch(item.href)}
+            prefetch
+          >
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
 
