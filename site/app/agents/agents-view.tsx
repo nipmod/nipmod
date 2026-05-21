@@ -15,12 +15,73 @@ const tokens = {
   mono: '"JetBrains Mono", "SF Mono", ui-monospace, monospace'
 };
 
-const agents = [
-  { id: "codex", name: "Codex", logo: "/agents/codex.png" },
-  { id: "claude", name: "Claude Code", logo: "/agents/claude.png" },
-  { id: "cursor", name: "Cursor", logo: "/agents/cursor.png" },
-  { id: "opencode", name: "OpenCode", logo: "/agents/opencode.png" },
-  { id: "hermes", name: "Hermes", logo: "/agents/hermes.png" }
+type AgentConnection = {
+  href: string;
+  id: string;
+  initials?: string;
+  logo?: string;
+  name: string;
+  note: string;
+  status: "Ready setup" | "Bridge packet" | "Partner review";
+};
+
+const agents: AgentConnection[] = [
+  {
+    href: "/setup?agent=codex",
+    id: "codex",
+    logo: "/agents/codex.png",
+    name: "Codex",
+    note: "Local MCP setup",
+    status: "Ready setup"
+  },
+  {
+    href: "/setup?agent=claude",
+    id: "claude",
+    logo: "/agents/claude.png",
+    name: "Claude Code",
+    note: "Local MCP setup",
+    status: "Ready setup"
+  },
+  {
+    href: "/setup?agent=cursor",
+    id: "cursor",
+    logo: "/agents/cursor.png",
+    name: "Cursor",
+    note: "Rules and MCP setup",
+    status: "Ready setup"
+  },
+  {
+    href: "/setup?agent=opencode",
+    id: "opencode",
+    logo: "/agents/opencode.png",
+    name: "OpenCode",
+    note: "Local MCP setup",
+    status: "Ready setup"
+  },
+  {
+    href: "/setup?agent=hermes",
+    id: "hermes",
+    logo: "/agents/hermes.png",
+    name: "Hermes",
+    note: "Skills and MCP setup",
+    status: "Ready setup"
+  },
+  {
+    href: "/openhuman",
+    id: "openhuman",
+    initials: "oh",
+    name: "OpenHuman",
+    note: "Hosted read-only MCP packet",
+    status: "Bridge packet"
+  },
+  {
+    href: "/aeon",
+    id: "aeon",
+    initials: "ae",
+    name: "Aeon",
+    note: "Skill collection bridge",
+    status: "Partner review"
+  }
 ];
 
 export function AgentsView() {
@@ -29,14 +90,16 @@ export function AgentsView() {
   useEffect(() => {
     let cancelled = false;
 
+    const logoPaths = agents.flatMap((agent) => (agent.logo ? [agent.logo] : []));
+
     Promise.all(
-      agents.map(
-        (agent) =>
+      logoPaths.map(
+        (logo) =>
           new Promise<void>((resolve) => {
             const image = new Image();
             image.onload = () => resolve();
             image.onerror = () => resolve();
-            image.src = agent.logo;
+            image.src = logo;
 
             if (image.complete) {
               resolve();
@@ -90,9 +153,28 @@ export function AgentsView() {
             margin: 0
           }}
         >
-          Pick an agent to start the setup.
+          One place for ready setup paths and review-ready bridge packets.
         </p>
       </section>
+      <div
+        style={{
+          alignItems: "center",
+          color: tokens.quiet,
+          display: "flex",
+          flexWrap: "wrap",
+          fontFamily: tokens.mono,
+          fontSize: 11,
+          gap: 8,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase"
+        }}
+      >
+        <span>Ready setup</span>
+        <span style={{ color: "rgba(237,237,239,0.22)" }}>/</span>
+        <span>Bridge packets</span>
+        <span style={{ color: "rgba(237,237,239,0.22)" }}>/</span>
+        <span>Partner review</span>
+      </div>
       <section
         style={{
           display: "grid",
@@ -109,15 +191,16 @@ export function AgentsView() {
   );
 }
 
-function AgentCard({ agent, logosReady }: { agent: { id: string; name: string; logo: string }; logosReady: boolean }) {
+function AgentCard({ agent, logosReady }: { agent: AgentConnection; logosReady: boolean }) {
   const [hover, setHover] = useState(false);
+  const isReady = agent.status === "Ready setup";
   const style: CSSProperties = {
     background: hover ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
     border: `1px solid ${hover ? "rgba(255,255,255,0.2)" : tokens.borderSoft}`,
-    padding: "16px 20px",
+    padding: "16px 18px",
     display: "flex",
     alignItems: "center",
-    gap: 14,
+    gap: 13,
     textDecoration: "none",
     color: "inherit",
     fontFamily: "inherit",
@@ -128,7 +211,7 @@ function AgentCard({ agent, logosReady }: { agent: { id: string; name: string; l
   };
   return (
     <Link
-      href={`/setup?agent=${agent.id}`}
+      href={agent.href}
       style={style}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -163,20 +246,94 @@ function AgentCard({ agent, logosReady }: { agent: { id: string; name: string; l
             }}
             width={30}
           />
-        ) : null}
+        ) : (
+          <span
+            style={{
+              alignItems: "center",
+              background: hover ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.08)",
+              border: `1px solid ${hover ? "rgba(255,255,255,0.22)" : tokens.border}`,
+              color: tokens.ink,
+              display: "inline-flex",
+              fontFamily: tokens.mono,
+              fontSize: 11,
+              height: 30,
+              justifyContent: "center",
+              letterSpacing: "0.02em",
+              textTransform: "uppercase",
+              transition: "background 200ms, border-color 200ms",
+              width: 30
+            }}
+          >
+            {agent.initials ?? agent.name.slice(0, 2)}
+          </span>
+        )}
       </span>
       <span
         style={{
-          fontFamily: tokens.serif,
-          fontSize: 22,
-          fontWeight: 400,
-          color: tokens.ink,
-          letterSpacing: "-0.016em",
-          lineHeight: 1,
-          flex: 1
+          alignItems: "flex-start",
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          gap: 6,
+          minWidth: 0
         }}
       >
-        {agent.name}
+        <span
+          style={{
+            alignItems: "center",
+            display: "flex",
+            gap: 9,
+            minWidth: 0,
+            width: "100%"
+          }}
+        >
+          <span
+            style={{
+              color: tokens.ink,
+              flex: "1 1 auto",
+              fontFamily: tokens.serif,
+              fontSize: 22,
+              fontWeight: 400,
+              letterSpacing: "-0.016em",
+              lineHeight: 1,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {agent.name}
+          </span>
+          <span
+            style={{
+              border: `1px solid ${isReady ? "rgba(115,176,123,0.35)" : tokens.borderSoft}`,
+              color: isReady ? "#73b07b" : tokens.quiet,
+              flex: "0 0 auto",
+              fontFamily: tokens.mono,
+              fontSize: 9,
+              letterSpacing: "0.04em",
+              lineHeight: 1,
+              padding: "4px 6px",
+              textTransform: "uppercase"
+            }}
+          >
+            {agent.status}
+          </span>
+        </span>
+        <span
+          style={{
+            color: tokens.muted,
+            fontFamily: tokens.mono,
+            fontSize: 11,
+            lineHeight: 1.3,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            width: "100%"
+          }}
+        >
+          {agent.note}
+        </span>
       </span>
       <span
         style={{
