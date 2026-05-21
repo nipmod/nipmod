@@ -3,10 +3,7 @@ import type { CSSProperties } from "react";
 export function NipmodMark({ size = 46 }: { size?: number }) {
   return (
     <span className="nipmod-mark" aria-hidden="true" style={{ "--mark-size": `${size}px` } as CSSProperties}>
-      <svg fill="currentColor" viewBox="12 8 42 44" width={size} height={size}>
-        <path d="M16 50 Q 16 14 32 14 Q 48 14 48 38 L48 50 L42 50 L42 38 Q 42 22 32 22 Q 22 22 22 50 Z" />
-        <circle cx="48" cy="14" r="3.5" />
-      </svg>
+      <img alt="" height={size} src="/nipmod-logo-transparent.png" width={size} />
     </span>
   );
 }

@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   },
   description: "Verified package archive for agents.",
   icons: {
-    apple: [{ sizes: "1000x1000", type: "image/png", url: "/nipmod-logo-1000.png" }],
-    icon: [{ sizes: "1000x1000", type: "image/png", url: "/nipmod-logo-1000.png" }]
+    apple: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }],
+    icon: [{ sizes: "1248x1248", type: "image/png", url: "/nipmod-logo-transparent.png" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {

@@ -19,7 +19,7 @@ export function SiteHeader() {
   return (
     <header className="topbar" aria-label="Primary">
       <a className="brand" href="/" aria-label="Nipmod home">
-        <NipmodMark size={46} />
+        <NipmodMark size={78} />
         <span className="sr-only">{homeContent.brand}</span>
       </a>
 

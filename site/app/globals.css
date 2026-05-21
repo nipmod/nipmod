@@ -2997,11 +2997,15 @@ body {
   color: var(--editorial-ink);
   display: inline-flex;
   height: var(--mark-size);
+  overflow: hidden;
   width: var(--mark-size);
 }
 
-.nipmod-mark svg {
+.nipmod-mark img {
   display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .nav-actions {
