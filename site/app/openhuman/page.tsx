@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/openhuman"
   },
-  description: "Review-ready Nipmod MCP connection packet for OpenHuman.",
+  description: "Review-ready Nipmod MCP connection path for OpenHuman.",
   openGraph: {
     description: "OpenHuman can review a hosted read-only Nipmod MCP path for package search, trust inspection and install plans.",
     title: "Nipmod for OpenHuman review",
@@ -46,7 +46,7 @@ export default function OpenHumanPage() {
           </div>
           <h1 id="openhuman-title">Nipmod for OpenHuman review.</h1>
           <p className="lead">
-            OpenHuman already has a remote MCP client path. This packet connects that path to Nipmod hosted
+            OpenHuman already has a remote MCP client path. This setup connects that path to Nipmod hosted
             read-only MCP so OpenHuman agents can search packages, inspect trust and create install plans before
             any workspace write.
           </p>
@@ -55,7 +55,7 @@ export default function OpenHumanPage() {
               Config
             </a>
             <a className="button button-ghost" href="/integrations/openhuman/OPENHUMAN_SUBMISSION.md">
-              Review packet
+              Review files
             </a>
             <a className="button button-ghost" href="https://github.com/tinyhumansai/openhuman" rel="noreferrer" target="_blank">
               OpenHuman repo
@@ -65,7 +65,7 @@ export default function OpenHumanPage() {
         <aside className="quickstart-card cursor-status-panel" aria-label="OpenHuman status">
           <span>Status</span>
           <h2>Candidate</h2>
-          <p>Review packet prepared. Not official until Tiny Humans reviews or accepts it.</p>
+          <p>Review files prepared. Not official until Tiny Humans reviews or accepts it.</p>
         </aside>
       </section>
 
@@ -80,7 +80,7 @@ export default function OpenHumanPage() {
         </article>
         <article className="usage-item">
           <h2>No fork needed</h2>
-          <p>The first pass is a config and review packet. OpenHuman code ownership stays with Tiny Humans.</p>
+          <p>The first pass is a config and review path. OpenHuman code ownership stays with Tiny Humans.</p>
         </article>
       </section>
 
@@ -114,7 +114,7 @@ export default function OpenHumanPage() {
             <span className="check-dot check-ok" aria-hidden="true" />
             <div>
               <h3>Accurate</h3>
-              <p>OpenHuman has a review-ready Nipmod MCP connection packet.</p>
+              <p>OpenHuman has a review-ready Nipmod MCP connection path.</p>
             </div>
           </article>
           <article className="check-row">

@@ -36,7 +36,7 @@ export default function CursorPage() {
               Manual setup
             </a>
             <a className="button button-ghost" href="#review">
-              Review packet
+              Review files
             </a>
           </div>
         </div>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/aeon"
   },
-  description: "Review-ready two-way Nipmod bridge packet for Aeon skills and Aeon agents.",
+  description: "Review-ready two-way Nipmod bridge draft for Aeon skills and Aeon agents.",
   openGraph: {
     description: "Aeon can review a small skill collection inside Nipmod and a Nipmod skill for Aeon agents.",
     title: "Nipmod for Aeon review",
@@ -33,15 +33,12 @@ export default function AeonPage() {
           </div>
           <h1 id="aeon-title">Nipmod for Aeon review.</h1>
           <p className="lead">
-            Aeon has a large real skill library. This packet drafts both directions: a small Aeon collection
+            Aeon has a large real skill library. This draft covers both directions: a small Aeon collection
             inside Nipmod, and a Nipmod skill that Aeon agents can use before package installs.
           </p>
           <div className="actions" aria-label="Aeon actions">
-            <a className="button button-primary" href="/integrations/aeon/aeon.collection.json">
-              Collection
-            </a>
             <a className="button button-ghost" href="/integrations/aeon/AEON_SUBMISSION.md">
-              Review packet
+              Review files
             </a>
             <a className="button button-ghost" href="https://github.com/aaronjmars/aeon" rel="noreferrer" target="_blank">
               Aeon repo
@@ -69,7 +66,7 @@ export default function AeonPage() {
         </article>
         <article className="usage-item">
           <h2>Owner review</h2>
-          <p>No official support or live Aeon package publication is claimed until Aeon accepts the exact packet.</p>
+          <p>No official support or live Aeon package publication is claimed until Aeon accepts the exact scope.</p>
         </article>
       </section>
 
@@ -79,9 +76,6 @@ export default function AeonPage() {
             <p className="eyebrow">Collection draft</p>
             <h2 id="aeon-collection-title">First 10 Aeon skills</h2>
           </div>
-          <a className="data-link" href="/integrations/aeon/aeon.collection.json">
-            JSON
-          </a>
         </div>
         <div className="package-grid">
           {skills.map((skill) => (

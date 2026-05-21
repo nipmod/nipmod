@@ -22,7 +22,6 @@ type AgentConnection = {
   logo?: string;
   name: string;
   note: string;
-  status: "Ready setup" | "Bridge packet";
 };
 
 const agents: AgentConnection[] = [
@@ -31,48 +30,42 @@ const agents: AgentConnection[] = [
     id: "codex",
     logo: "/agents/codex.png",
     name: "Codex",
-    note: "Local MCP setup",
-    status: "Ready setup"
+    note: "Local MCP setup"
   },
   {
     href: "/setup?agent=claude",
     id: "claude",
     logo: "/agents/claude.png",
     name: "Claude Code",
-    note: "Local MCP setup",
-    status: "Ready setup"
+    note: "Local MCP setup"
   },
   {
     href: "/setup?agent=cursor",
     id: "cursor",
     logo: "/agents/cursor.png",
     name: "Cursor",
-    note: "Rules and MCP setup",
-    status: "Ready setup"
+    note: "Rules and MCP setup"
   },
   {
     href: "/setup?agent=opencode",
     id: "opencode",
     logo: "/agents/opencode.png",
     name: "OpenCode",
-    note: "Local MCP setup",
-    status: "Ready setup"
+    note: "Local MCP setup"
   },
   {
     href: "/setup?agent=hermes",
     id: "hermes",
     logo: "/agents/hermes.png",
     name: "Hermes",
-    note: "Skills and MCP setup",
-    status: "Ready setup"
+    note: "Skills and MCP setup"
   },
   {
     href: "/openhuman",
     id: "openhuman",
     logo: "/agents/openhuman.svg",
     name: "OpenHuman",
-    note: "Hosted read-only MCP packet",
-    status: "Bridge packet"
+    note: "Read-only MCP review path"
   }
 ];
 
@@ -145,26 +138,9 @@ export function AgentsView() {
             margin: 0
           }}
         >
-          One place for ready setup paths and review-ready bridge packets.
+          Pick the agent environment you want to connect.
         </p>
       </section>
-      <div
-        style={{
-          alignItems: "center",
-          color: tokens.quiet,
-          display: "flex",
-          flexWrap: "wrap",
-          fontFamily: tokens.mono,
-          fontSize: 11,
-          gap: 8,
-          letterSpacing: "0.04em",
-          textTransform: "uppercase"
-        }}
-      >
-        <span>Ready setup</span>
-        <span style={{ color: "rgba(237,237,239,0.22)" }}>/</span>
-        <span>Bridge packet</span>
-      </div>
       <section
         style={{
           display: "grid",
@@ -183,7 +159,6 @@ export function AgentsView() {
 
 function AgentCard({ agent, logosReady }: { agent: AgentConnection; logosReady: boolean }) {
   const [hover, setHover] = useState(false);
-  const isReady = agent.status === "Ready setup";
   const style: CSSProperties = {
     background: hover ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
     border: `1px solid ${hover ? "rgba(255,255,255,0.2)" : tokens.borderSoft}`,
@@ -270,45 +245,20 @@ function AgentCard({ agent, logosReady }: { agent: AgentConnection; logosReady: 
       >
         <span
           style={{
-            alignItems: "center",
-            display: "flex",
-            gap: 9,
+            color: tokens.ink,
+            fontFamily: tokens.serif,
+            fontSize: 22,
+            fontWeight: 400,
+            letterSpacing: "-0.016em",
+            lineHeight: 1,
+            maxWidth: "100%",
             minWidth: 0,
-            width: "100%"
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
           }}
         >
-          <span
-            style={{
-              color: tokens.ink,
-              flex: "1 1 auto",
-              fontFamily: tokens.serif,
-              fontSize: 22,
-              fontWeight: 400,
-              letterSpacing: "-0.016em",
-              lineHeight: 1,
-              minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {agent.name}
-          </span>
-          <span
-            style={{
-              border: `1px solid ${isReady ? "rgba(115,176,123,0.35)" : tokens.borderSoft}`,
-              color: isReady ? "#73b07b" : tokens.quiet,
-              flex: "0 0 auto",
-              fontFamily: tokens.mono,
-              fontSize: 9,
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-              padding: "4px 6px",
-              textTransform: "uppercase"
-            }}
-          >
-            {agent.status}
-          </span>
+          {agent.name}
         </span>
         <span
           style={{

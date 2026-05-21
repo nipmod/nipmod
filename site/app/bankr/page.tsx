@@ -128,9 +128,9 @@ export default function BankrPage() {
           </article>
           <article className="quickstart-card">
             <span>Submission</span>
-            <h2>Catalog packet</h2>
-            <p>The PR packet lists the target path, README row, PR body and smoke test.</p>
-            <CommandBlock command={catalogSubmission} label="Copy catalog submission packet" />
+            <h2>Catalog review</h2>
+            <p>The review files list the target path, README row, PR body and smoke test.</p>
+            <CommandBlock command={catalogSubmission} label="Copy catalog review files" />
           </article>
           <article className="quickstart-card">
             <span>Format</span>
