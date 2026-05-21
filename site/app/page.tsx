@@ -12,10 +12,6 @@ export default function Home() {
             <em>everywhere</em>.
           </h1>
           <p className="landing-kicker">The package layer for AI-native agents.</p>
-          <p className="landing-lead">
-            Search the public archive. Read the publisher signature, the source commit, the witness threshold. Install
-            only after the plan is approved.
-          </p>
           <div className="landing-actions">
             <a className="landing-button landing-button-primary" href={homeContent.links.install}>
               Install Nipmod
