@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="OpenHuman">
+  <rect width="100" height="100" fill="transparent"/>
+  <circle cx="50" cy="17" r="9.5" fill="#fff"/>
+  <path
+    fill="#fff"
+    d="M50.3 32.7c12.9.1 21.4 12.8 20.2 29.4-.8 12.1-7.1 22.5-16.3 26.8-3.4 1.6-7.3.8-11.7-.3-5.3-1.3-11.4-2.8-17.2-.3-5.1 2.2-10.5-2.6-9.9-8.1 2.5-26.6 13.1-47.8 34.9-47.5z"
+  />
+</svg>

@@ -22,7 +22,7 @@ type AgentConnection = {
   logo?: string;
   name: string;
   note: string;
-  status: "Ready setup" | "Bridge packet" | "Partner review";
+  status: "Ready setup" | "Bridge packet";
 };
 
 const agents: AgentConnection[] = [
@@ -69,18 +69,10 @@ const agents: AgentConnection[] = [
   {
     href: "/openhuman",
     id: "openhuman",
-    initials: "oh",
+    logo: "/agents/openhuman.svg",
     name: "OpenHuman",
     note: "Hosted read-only MCP packet",
     status: "Bridge packet"
-  },
-  {
-    href: "/aeon",
-    id: "aeon",
-    initials: "ae",
-    name: "Aeon",
-    note: "Skill collection bridge",
-    status: "Partner review"
   }
 ];
 
@@ -171,9 +163,7 @@ export function AgentsView() {
       >
         <span>Ready setup</span>
         <span style={{ color: "rgba(237,237,239,0.22)" }}>/</span>
-        <span>Bridge packets</span>
-        <span style={{ color: "rgba(237,237,239,0.22)" }}>/</span>
-        <span>Partner review</span>
+        <span>Bridge packet</span>
       </div>
       <section
         style={{
