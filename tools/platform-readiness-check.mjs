@@ -239,7 +239,7 @@ async function checkLiveEndpoints() {
     [
       "openhuman_review_packet",
       "https://nipmod.com/integrations/openhuman/OPENHUMAN_SUBMISSION.md",
-      ["under review", "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill", "upstream skills repo is archived"]
+      ["under review", "https://github.com/nipmod/openhuman-skills/tree/add-nipmod-skill", "could not be submitted upstream"]
     ],
     [
       "aeon_page",
