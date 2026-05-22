@@ -15,6 +15,24 @@ export type ExternalPackageDecision = "recommended" | "usable_with_warning" | "a
 export type ExternalPackageRisk = "low" | "medium" | "high" | "unknown";
 export type ExternalSourceStatus = "ok" | "empty" | "failed";
 export type ExternalPackageSourceKind = "package-registry" | "source-repo" | "model-hub" | "tool-registry";
+export type ExternalTrustFactorCategory = "source" | "metadata" | "security" | "usage" | "maintenance" | "install";
+export type ExternalTrustFactorImpact = "positive" | "negative" | "neutral";
+
+export interface ExternalTrustFactor {
+  category: ExternalTrustFactorCategory;
+  evidence: string;
+  impact: ExternalTrustFactorImpact;
+  label: string;
+}
+
+export interface ExternalTrustPolicy {
+  summary: string;
+  thresholds: {
+    recommended: number;
+    usableWithWarning: number;
+  };
+  version: "external-v2";
+}
 
 export interface ExternalPackageRecord {
   archive: {
@@ -49,6 +67,8 @@ export interface ExternalPackageRecord {
   trust: {
     checkedAt: string;
     decision: ExternalPackageDecision;
+    factors: ExternalTrustFactor[];
+    policy: ExternalTrustPolicy;
     risk: ExternalPackageRisk;
     score: number;
     signals: string[];
@@ -145,6 +165,16 @@ const EXTERNAL_PACKAGE_RISKS = ["low", "medium", "high", "unknown"] as const;
 const EXTERNAL_PACKAGE_SOURCE_KINDS = ["package-registry", "source-repo", "model-hub", "tool-registry"] as const;
 const EXTERNAL_ARCHIVE_PERSISTENCE = ["ephemeral", "static", "database"] as const;
 const EXTERNAL_ARCHIVE_STATUS = ["external_indexed", "claimed", "verified_nipmod"] as const;
+const EXTERNAL_TRUST_FACTOR_CATEGORIES = ["source", "metadata", "security", "usage", "maintenance", "install"] as const;
+const EXTERNAL_TRUST_FACTOR_IMPACTS = ["positive", "negative", "neutral"] as const;
+const EXTERNAL_TRUST_POLICY: ExternalTrustPolicy = {
+  summary: "External scores combine source metadata, package health signals, public usage context, warnings and install-plan risk. A score is review context, not permission to execute code.",
+  thresholds: {
+    recommended: 75,
+    usableWithWarning: 50
+  },
+  version: "external-v2"
+};
 const MCP_REGISTRY_BASE_URL = "https://registry.modelcontextprotocol.io";
 const MCP_REGISTRY_LIVE_PATHS = ["v0", "v0.1"] as const;
 const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
@@ -1016,6 +1046,8 @@ function makeRecord(input: {
     trust: {
       checkedAt: new Date().toISOString(),
       decision: decisionFromScore(input.trustScore, input.warnings),
+      factors: trustFactors(input),
+      policy: EXTERNAL_TRUST_POLICY,
       risk: riskFromScore(input.trustScore, input.warnings),
       score: input.trustScore,
       signals: input.signals,
@@ -1025,6 +1057,100 @@ function makeRecord(input: {
     updatedAt: input.updatedAt,
     version: input.version
   };
+}
+
+function trustFactors(input: {
+  install: ExternalPackageRecord["install"];
+  license: string | null;
+  metrics: ExternalPackageRecord["metrics"];
+  repo: string | null;
+  signals: string[];
+  source: ExternalPackageSource;
+  sourceKind: ExternalPackageRecord["sourceKind"];
+  updatedAt: string | null;
+  warnings: string[];
+}): ExternalTrustFactor[] {
+  const commands = input.install.commands ?? [input.install.command];
+  const commandRisk = installCommandRisk(commands);
+  const factors: ExternalTrustFactor[] = [
+    trustFactor("source", "Source resolver", "positive", `${sourceDisplayName(input.source)} metadata normalized as ${input.sourceKind}.`),
+    input.license
+      ? trustFactor("metadata", "License present", "positive", `License metadata: ${input.license}.`)
+      : trustFactor("metadata", "License missing", "negative", "The source did not return clear license metadata."),
+    input.repo
+      ? trustFactor("metadata", "Source link present", "positive", `Repository or source URL: ${input.repo}.`)
+      : trustFactor("metadata", "Source link missing", "negative", "The source did not return a repository or source link."),
+    trustFactor("install", "Install plan boundary", commandRisk === "low" ? "positive" : "negative", `Install command risk: ${commandRisk}. Hosted API returns a plan only.`)
+  ];
+
+  const downloads = input.metrics.downloads ?? 0;
+  const stars = input.metrics.stars ?? 0;
+  const likes = input.metrics.likes ?? 0;
+  if (downloads > 0) {
+    factors.push(trustFactor("usage", "Download signal", "positive", `${downloads.toLocaleString("en-US")} downloads returned by the source.`));
+  }
+  if (stars > 0) {
+    factors.push(trustFactor("usage", "Repository stars", "positive", `${stars.toLocaleString("en-US")} GitHub stars returned by the source.`));
+  }
+  if (likes > 0) {
+    factors.push(trustFactor("usage", "Hub likes", "positive", `${likes.toLocaleString("en-US")} likes returned by the source.`));
+  }
+  if (input.updatedAt) {
+    factors.push(trustFactor("maintenance", "Recent source metadata", recencyBonus(input.updatedAt) > 0 ? "positive" : "neutral", `Last source update: ${input.updatedAt}.`));
+  }
+  for (const signal of input.signals) {
+    if (/\bintegrity\b|\bsignature\b|\bactive\b|\bvulnerabilit/i.test(signal)) {
+      factors.push(trustFactor("security", "Security signal", "positive", signal));
+    }
+  }
+  for (const warning of input.warnings) {
+    factors.push(trustFactor("security", "Warning", "negative", warning));
+  }
+
+  return dedupeTrustFactors(factors).slice(0, 14);
+}
+
+function trustFactor(
+  category: ExternalTrustFactorCategory,
+  label: string,
+  impact: ExternalTrustFactorImpact,
+  evidence: string
+): ExternalTrustFactor {
+  return {
+    category,
+    evidence: cleanPlainText(evidence, 240),
+    impact,
+    label: cleanPlainText(label, 80)
+  };
+}
+
+function dedupeTrustFactors(factors: ExternalTrustFactor[]): ExternalTrustFactor[] {
+  const seen = new Set<string>();
+  return factors.filter((factor) => {
+    const key = `${factor.category}:${factor.label}:${factor.evidence}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
+function sourceDisplayName(source: ExternalPackageSource): string {
+  switch (source) {
+    case "huggingface-dataset":
+      return "Hugging Face dataset";
+    case "huggingface-model":
+      return "Hugging Face model";
+    case "mcp":
+      return "MCP Registry";
+    case "npm":
+      return "npm";
+    case "pypi":
+      return "PyPI";
+    case "github":
+      return "GitHub";
+  }
 }
 
 async function fetchJson(
@@ -1329,10 +1455,49 @@ function readTrust(value: unknown): ExternalPackageRecord["trust"] {
   return {
     checkedAt: requiredCleanString(value.checkedAt, "trust.checkedAt", 80),
     decision: readEnum(value.decision, EXTERNAL_PACKAGE_DECISIONS, "trust.decision"),
+    factors: readTrustFactors(value.factors),
+    policy: readTrustPolicy(value.policy),
     risk: readEnum(value.risk, EXTERNAL_PACKAGE_RISKS, "trust.risk"),
     score: readBoundedInteger(value.score, "trust.score", 0, 100),
     signals: boundedStrings(value.signals, 16, 300, "trust.signals", 1),
     warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
+  };
+}
+
+function readTrustFactors(value: unknown): ExternalTrustFactor[] {
+  if (value === undefined) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    throw new ExternalPackageError("trust.factors must be an array", { code: "invalid_record", status: 400 });
+  }
+  return value.slice(0, 16).map((item, index) => {
+    if (!isRecord(item)) {
+      throw new ExternalPackageError(`trust.factors.${index} must be an object`, { code: "invalid_record", status: 400 });
+    }
+    return {
+      category: readEnum(item.category, EXTERNAL_TRUST_FACTOR_CATEGORIES, `trust.factors.${index}.category`),
+      evidence: requiredCleanString(item.evidence, `trust.factors.${index}.evidence`, 300),
+      impact: readEnum(item.impact, EXTERNAL_TRUST_FACTOR_IMPACTS, `trust.factors.${index}.impact`),
+      label: requiredCleanString(item.label, `trust.factors.${index}.label`, 120)
+    };
+  });
+}
+
+function readTrustPolicy(value: unknown): ExternalTrustPolicy {
+  if (value === undefined) {
+    return EXTERNAL_TRUST_POLICY;
+  }
+  if (!isRecord(value) || !isRecord(value.thresholds)) {
+    throw new ExternalPackageError("trust.policy must be an object", { code: "invalid_record", status: 400 });
+  }
+  return {
+    summary: requiredCleanString(value.summary, "trust.policy.summary", 400),
+    thresholds: {
+      recommended: readBoundedInteger(value.thresholds.recommended, "trust.policy.thresholds.recommended", 0, 100),
+      usableWithWarning: readBoundedInteger(value.thresholds.usableWithWarning, "trust.policy.thresholds.usableWithWarning", 0, 100)
+    },
+    version: readEnum(value.version, ["external-v2"] as const, "trust.policy.version")
   };
 }
 

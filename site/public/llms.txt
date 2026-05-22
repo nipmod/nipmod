@@ -32,8 +32,14 @@ GET https://nipmod.com/api/inspect?source=npm&name=<package-name>
 Plan before mutation:
 GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>
 
+Trust output:
+Records include trust.policy version external-v2 and trust.factors. Show score, decision, warnings and factors before approval.
+
 Prepare an archive record:
 GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>
+
+Confirm archive dry run:
+POST https://nipmod.com/api/archive/confirm {"source":"npm","name":"<package-name>","dryRun":true}
 
 Search the archive:
 GET https://nipmod.com/api/archive/search?q=<query>
@@ -46,6 +52,7 @@ GET https://nipmod.com/api/sources/health
 
 External records are external_indexed. Original package owners keep ownership. verified_nipmod requires a verified claim or direct publish.
 Durable package intelligence writes require the server side archive store and an authorized server writer.
+Archive confirm rejects avoid, high-risk trust results and high-risk install commands.
 Public package state: no public packages are listed yet. The seed archive was cleared.
 
 Local setup is only needed when an agent must write to a workspace.

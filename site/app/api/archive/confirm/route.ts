@@ -3,6 +3,7 @@ import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
   confirmPackageIntelligenceRecord,
+  createPackageIntelligenceReceipt,
   createPackageIntelligenceRecord,
   validatePackageIntelligenceRecord
 } from "../../../../lib/package-intelligence";
@@ -51,7 +52,13 @@ export async function POST(request: Request): Promise<Response> {
     });
     const validation = validatePackageIntelligenceRecord(confirmed);
     if (!validation.ok) {
-      return apiJsonWithUsage(request, { record: confirmed, type: "dev.nipmod.archive-confirm.v1", validation }, {
+      return apiJsonWithUsage(request, {
+        receipt: createPackageIntelligenceReceipt(confirmed, { dryRun: true, stored: false }),
+        record: confirmed,
+        stored: false,
+        type: "dev.nipmod.archive-confirm.v1",
+        validation
+      }, {
         access: rateLimit.access,
         context,
         headers: rateLimit.headers,
@@ -62,6 +69,7 @@ export async function POST(request: Request): Promise<Response> {
     if (dryRun) {
       return apiJsonWithUsage(request, {
         dryRun: true,
+        receipt: createPackageIntelligenceReceipt(confirmed, { dryRun: true, stored: false }),
         record: confirmed,
         store: archiveStoreStatus(),
         stored: false,
@@ -74,6 +82,7 @@ export async function POST(request: Request): Promise<Response> {
     const write = await upsertPackageIntelligenceRecord(confirmed);
     return apiJsonWithUsage(request, {
       ...write,
+      receipt: createPackageIntelligenceReceipt(write.record, { stored: write.stored }),
       store: archiveStoreStatus(),
       type: "dev.nipmod.archive-confirm.v1",
       validation

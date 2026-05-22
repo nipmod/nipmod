@@ -89,6 +89,22 @@ export interface PackageIntelligenceValidation {
   warnings: string[];
 }
 
+export interface PackageIntelligenceReceipt {
+  archiveStatus: PackageIntelligenceStatus;
+  confirmationCount: number;
+  dryRun: boolean;
+  generatedAt: string;
+  name: string;
+  receiptId: string;
+  recordId: string;
+  source: ExternalPackageRecord["source"];
+  stableKeyDigest: string;
+  stored: boolean;
+  trustDecision: ExternalPackageRecord["trust"]["decision"];
+  trustScore: number;
+  type: "dev.nipmod.package-intelligence-receipt.v1";
+}
+
 export function createPackageIntelligenceRecord(
   externalRecord: ExternalPackageRecord,
   options: CreatePackageIntelligenceOptions = {}
@@ -229,16 +245,41 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
     errors.push("verified_nipmod requires an owner claim workflow before persistence");
   }
   if (record.security.installCommandRisk === "high") {
-    warnings.push("install command risk is high");
+    errors.push("high risk install commands cannot be stored as confirmed archive records");
+  } else if (record.security.installCommandRisk === "medium") {
+    warnings.push("install command risk is medium");
   }
   if (record.trust.risk === "high" || record.trust.decision === "avoid") {
-    warnings.push("trust result indicates avoid or high risk");
+    errors.push("avoid or high risk trust results cannot be stored as confirmed archive records");
   }
 
   return {
     errors,
     ok: errors.length === 0,
     warnings
+  };
+}
+
+export function createPackageIntelligenceReceipt(
+  record: PackageIntelligenceRecord,
+  options: { dryRun?: boolean; now?: string; stored: boolean }
+): PackageIntelligenceReceipt {
+  const generatedAt = options.now ?? new Date().toISOString();
+  const receiptMaterial = [record.id, record.archive.updatedAt, record.archive.confirmationCount, record.archive.status, options.stored].join(":");
+  return {
+    archiveStatus: record.archive.status,
+    confirmationCount: record.archive.confirmationCount,
+    dryRun: Boolean(options.dryRun),
+    generatedAt,
+    name: record.name,
+    receiptId: `receipt_${sha256(receiptMaterial).slice(0, 24)}`,
+    recordId: record.id,
+    source: record.source,
+    stableKeyDigest: sha256(record.stableKey),
+    stored: options.stored,
+    trustDecision: record.trust.decision,
+    trustScore: record.trust.score,
+    type: "dev.nipmod.package-intelligence-receipt.v1"
   };
 }
 

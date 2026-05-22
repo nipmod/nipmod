@@ -84,18 +84,87 @@ function openApiDocument() {
             trust: {
               properties: {
                 decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+                factors: {
+                  items: { $ref: "#/components/schemas/TrustFactor" },
+                  type: "array"
+                },
+                policy: { $ref: "#/components/schemas/TrustPolicy" },
                 risk: { enum: ["low", "medium", "high", "unknown"], type: "string" },
                 score: { maximum: 100, minimum: 0, type: "integer" },
                 signals: { items: { type: "string" }, type: "array" },
                 warnings: { items: { type: "string" }, type: "array" }
               },
-              required: ["decision", "risk", "score", "signals", "warnings"],
+              required: ["decision", "factors", "policy", "risk", "score", "signals", "warnings"],
               type: "object"
             },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
             version: { nullable: true, type: "string" }
           },
           required: ["archive", "id", "install", "name", "originalUrl", "source", "trust", "type"],
+          type: "object"
+        },
+        PackageIntelligenceReceipt: {
+          additionalProperties: false,
+          description: "Receipt returned by archive prepare and confirm flows. It contains no raw API keys, IP addresses or user agent strings.",
+          properties: {
+            archiveStatus: { enum: ["external_indexed", "agent_confirmed", "claimed", "verified_nipmod", "quarantined", "yanked"], type: "string" },
+            confirmationCount: { minimum: 0, type: "integer" },
+            dryRun: { type: "boolean" },
+            generatedAt: { format: "date-time", type: "string" },
+            name: { type: "string" },
+            receiptId: { type: "string" },
+            recordId: { type: "string" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            stableKeyDigest: { type: "string" },
+            stored: { type: "boolean" },
+            trustDecision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+            trustScore: { maximum: 100, minimum: 0, type: "integer" },
+            type: { const: "dev.nipmod.package-intelligence-receipt.v1", type: "string" }
+          },
+          required: [
+            "archiveStatus",
+            "confirmationCount",
+            "dryRun",
+            "generatedAt",
+            "name",
+            "receiptId",
+            "recordId",
+            "source",
+            "stableKeyDigest",
+            "stored",
+            "trustDecision",
+            "trustScore",
+            "type"
+          ],
+          type: "object"
+        },
+        TrustFactor: {
+          additionalProperties: false,
+          properties: {
+            category: { enum: ["source", "metadata", "security", "usage", "maintenance", "install"], type: "string" },
+            evidence: { type: "string" },
+            impact: { enum: ["positive", "negative", "neutral"], type: "string" },
+            label: { type: "string" }
+          },
+          required: ["category", "evidence", "impact", "label"],
+          type: "object"
+        },
+        TrustPolicy: {
+          additionalProperties: false,
+          properties: {
+            summary: { type: "string" },
+            thresholds: {
+              additionalProperties: false,
+              properties: {
+                recommended: { type: "integer" },
+                usableWithWarning: { type: "integer" }
+              },
+              required: ["recommended", "usableWithWarning"],
+              type: "object"
+            },
+            version: { const: "external-v2", type: "string" }
+          },
+          required: ["summary", "thresholds", "version"],
           type: "object"
         }
       },
@@ -124,7 +193,22 @@ function openApiDocument() {
         get: {
           parameters: [sourceParameter(), nameParameter()],
           responses: {
-            "200": { description: "Prepared package intelligence record. This endpoint does not persist the record." },
+            "200": {
+              content: {
+                "application/json": {
+                  schema: {
+                    additionalProperties: true,
+                    properties: {
+                      receiptPreview: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+                      type: { const: "dev.nipmod.archive-prepare.v1", type: "string" }
+                    },
+                    required: ["receiptPreview", "type"],
+                    type: "object"
+                  }
+                }
+              },
+              description: "Prepared package intelligence record and receipt preview. This endpoint does not persist the record."
+            },
             "400": errorResponse(),
             "401": errorResponse(),
             "404": errorResponse(),
@@ -157,7 +241,22 @@ function openApiDocument() {
             required: true
           },
           responses: {
-            "200": { description: "Confirmed package intelligence record. Dry runs never persist; writes require authorization." },
+            "200": {
+              content: {
+                "application/json": {
+                  schema: {
+                    additionalProperties: true,
+                    properties: {
+                      receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+                      type: { const: "dev.nipmod.archive-confirm.v1", type: "string" }
+                    },
+                    required: ["receipt", "type"],
+                    type: "object"
+                  }
+                }
+              },
+              description: "Confirmed package intelligence record. Dry runs never persist; writes require authorization."
+            },
             "400": errorResponse(),
             "401": errorResponse(),
             "404": errorResponse(),

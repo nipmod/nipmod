@@ -23,6 +23,11 @@ const endpoints = [
     text: "Return a reviewable install plan before any local command runs."
   },
   {
+    method: "GET",
+    path: "/api/archive/prepare?source=npm&name=<package>",
+    text: "Prepare a confirmed-use archive record and receipt preview."
+  },
+  {
     method: "POST",
     path: "/api/mcp",
     text: "Expose the same read-only package surface through MCP JSON-RPC."
@@ -46,6 +51,11 @@ const examples = [
   {
     label: "Plan",
     command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"
+  },
+  {
+    label: "Archive dry run",
+    command:
+      "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'"
   },
   {
     label: "MCP",
@@ -81,7 +91,7 @@ export default function ApiAccessPage() {
           <p className="eyebrow">Nipmod API</p>
           <h1 id="api-title">One package surface for agents.</h1>
           <p className="lead">
-            Agents call Nipmod to search package sources, inspect trust signals and return safe install plans through one
+            Agents call Nipmod to search package sources, inspect trust factors and return safe install plans through one
             hosted API.
           </p>
         </div>
@@ -107,6 +117,7 @@ export default function ApiAccessPage() {
           <span>3</span>
           <h2>Inspect</h2>
           <p>The agent checks source context, license, metrics, warnings and trust decision.</p>
+          <p>Trust Engine v2 also returns structured factors agents can explain.</p>
         </div>
         <div className="api-flow-step">
           <span>4</span>

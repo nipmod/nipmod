@@ -13,11 +13,11 @@ describe("source and access matrix", () => {
       type: "dev.nipmod.platform-connections.v1"
     });
     expect(connections.meaning).toContain("API-first package discovery");
-    expect(connections.statusLegend.map((item: { status: string }) => item.status)).toEqual(["Live", "Safe mode"]);
+    expect(connections.statusLegend.map((item: { status: string }) => item.status)).toEqual(["Live", "Gated write"]);
     expect(connections.connections.map((connection: { id: string; status: string }) => `${connection.id}:${connection.status}`)).toEqual([
       "api:Live",
       "sources:Live",
-      "archive:Safe mode",
+      "archive:Live",
       "mcp:Live",
       "github:Live",
       "gitlawb:Live"

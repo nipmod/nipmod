@@ -75,6 +75,12 @@ const externalRecord: ExternalPackageRecord = {
   trust: {
     checkedAt: "2026-05-22T00:00:00.000Z",
     decision: "recommended",
+    factors: [],
+    policy: {
+      summary: "External scores combine public source metadata and warnings.",
+      thresholds: { recommended: 75, usableWithWarning: 50 },
+      version: "external-v2"
+    },
     risk: "low",
     score: 100,
     signals: ["Resolved from npm registry search."],

@@ -3,7 +3,7 @@
   "type": "dev.nipmod.system-readiness.v1",
   "generatedAt": "2026-05-21T20:20:25.892Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, hosted package API, public source resolution, public package archive, package intelligence safe mode, CLI access, local MCP access, hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
+  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, hosted package API, public source resolution, public package archive, durable package intelligence archive, CLI access, local MCP access, hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 0,
@@ -164,6 +164,7 @@
     "install writes a local receipt under .nipmod/receipts",
     "hosted read-only MCP exposes no workspace-write, local-file or publish tools",
     "install plan does not mutate the workspace",
+    "archive confirm requires an authorized Nipmod server writer before durable persistence",
     "publish_plan through MCP never signs locally and never writes remotely",
     "local agent setup writes only local project config files when explicitly run"
   ],
@@ -172,7 +173,7 @@
     "Nipmod owns or controls external source packages",
     "Nipmod owns or controls Gitlawb repos outside its own source path",
     "hosted read-only MCP can mutate a user workspace",
-    "durable archive writes are enabled before server-side archive env vars are configured",
+    "public callers can create durable archive records without an authorized Nipmod server writer",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

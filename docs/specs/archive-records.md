@@ -38,6 +38,26 @@ Archive records should preserve:
 - status transitions
 - timestamps
 
+Prepare and confirm responses also return receipts of type:
+
+```text
+dev.nipmod.package-intelligence-receipt.v1
+```
+
+Receipts include the record id, source, package name, trust score, trust decision, archive status, confirmation count, stored flag and a digest of the stable key. They do not include API keys, raw queries, IP addresses or user agent strings.
+
+## Confirmation Gate
+
+Confirmed archive records are meant to capture useful package intelligence, not unsafe recommendations.
+
+The confirm endpoint rejects records when:
+
+- `trust.decision` is `avoid`
+- `trust.risk` is `high`
+- install command risk is `high`
+
+Those records can still be inspected by an agent, but they are not persisted as confirmed archive records.
+
 ## Deletion and Quarantine
 
 Nipmod can remove or quarantine Nipmod records from active recommendations.

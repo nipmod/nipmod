@@ -100,6 +100,9 @@ describe("external package resolver", () => {
     expect(requestedUrls).not.toContain("https://registry.npmjs.org/react");
     expect(record.id).toBe("npm:react");
     expect(record.metrics.downloads).toBe(561_906_819);
+    expect(record.trust.policy.version).toBe("external-v2");
+    expect(record.trust.factors.map((factor) => factor.label)).toContain("Install plan boundary");
+    expect(record.trust.factors.some((factor) => factor.category === "security" && factor.evidence.includes("integrity"))).toBe(true);
     expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
     expect(record.trust.signals).toContain("npm registry signature metadata is present.");
     expect(plan.plan.commands).toEqual(["npm install react"]);

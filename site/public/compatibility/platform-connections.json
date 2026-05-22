@@ -9,8 +9,8 @@
       "meaning": "The path is usable now through Nipmod controlled code or public source APIs."
     },
     {
-      "status": "Safe mode",
-      "meaning": "The path is usable for dry runs or reads, while durable writes require server-side configuration."
+      "status": "Gated write",
+      "meaning": "The path is live, but durable writes require an authorized Nipmod server writer."
     }
   ],
   "connections": [
@@ -53,15 +53,15 @@
     {
       "id": "archive",
       "name": "Nipmod Archive",
-      "status": "Safe mode",
+      "status": "Live",
       "category": "package intelligence",
-      "scope": "Confirmed package records keep source context, trust checks and receipts. Durable writes require archive store env vars.",
-      "proofLevel": "Archive prepare, search, confirm dry-run and status endpoints are tested. Public verified archive is empty after seed reset.",
+      "scope": "Confirmed package records keep source context, Trust Engine v2 factors and receipts. Durable writes require an authorized Nipmod server writer.",
+      "proofLevel": "Archive prepare, search, confirm dry-run, receipt output and status endpoints are tested. Public verified archive is empty after seed reset.",
       "url": "https://nipmod.com/packages",
       "setupCommand": null,
       "smokeCommand": "curl 'https://nipmod.com/api/archive/status'",
       "externalApprovalRequired": false,
-      "externalDependency": "Durable writes require Nipmod server-side configuration, not third-party approval.",
+      "externalDependency": "Durable writes require Nipmod server-side authorization, not third-party approval.",
       "evidence": [
         "https://nipmod.com/packages",
         "https://nipmod.com/api/archive/status",
@@ -125,6 +125,6 @@
     "Native platform marketplace approval is not required for API use",
     "Nipmod does not own external npm, PyPI, GitHub, Hugging Face or MCP packages",
     "The empty verified archive does not mean every external source package is verified by Nipmod",
-    "Durable archive writes are enabled only after server-side archive env vars are configured"
+    "Public callers cannot create durable archive records without an authorized Nipmod server writer"
   ]
 }

@@ -26,7 +26,7 @@ describe("system readiness receipt", () => {
     expect(readiness.meaning).toContain("API-first system surface");
     expect(readiness.meaning).toContain("public verified archive is intentionally empty");
     expect(readiness.notClaimed).toContain("Nipmod owns or controls external source packages");
-    expect(readiness.notClaimed).toContain("durable archive writes are enabled before server-side archive env vars are configured");
+    expect(readiness.notClaimed).toContain("public callers can create durable archive records without an authorized Nipmod server writer");
     expect(JSON.stringify(readiness)).not.toContain("/integrations/");
   });
 
@@ -98,6 +98,7 @@ describe("system readiness receipt", () => {
     expect(readiness.parallelAccessProof.surfaces).toContain("Hosted MCP tools/list");
     expect(readiness.writeBoundaries).toContain("install writes only after confirmInstall is write-lockfile");
     expect(readiness.writeBoundaries).toContain("hosted read-only MCP exposes no workspace-write, local-file or publish tools");
+    expect(readiness.writeBoundaries).toContain("archive confirm requires an authorized Nipmod server writer before durable persistence");
     expect(readiness.writeBoundaries).toContain("install writes a local receipt under .nipmod/receipts");
   });
 });

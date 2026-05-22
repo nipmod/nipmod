@@ -1,6 +1,6 @@
 # Trust Signals Spec
 
-Status: implemented public beta
+Status: implemented public beta, external trust policy `external-v2`
 
 Nipmod exposes trust data so agents can decide what to show before install. A trust score is not a safety guarantee and is not permission to execute code. It is a structured review signal.
 
@@ -22,6 +22,22 @@ Every external package record includes:
   "trust": {
     "checkedAt": "2026-05-22T00:00:00.000Z",
     "decision": "recommended",
+    "factors": [
+      {
+        "category": "metadata",
+        "evidence": "Repository or source URL: https://github.com/nodejs/undici.",
+        "impact": "positive",
+        "label": "Source link present"
+      }
+    ],
+    "policy": {
+      "summary": "External scores combine source metadata, package health signals, public usage context, warnings and install-plan risk. A score is review context, not permission to execute code.",
+      "thresholds": {
+        "recommended": 75,
+        "usableWithWarning": 50
+      },
+      "version": "external-v2"
+    },
     "risk": "low",
     "score": 82,
     "signals": [],
@@ -29,6 +45,19 @@ Every external package record includes:
   }
 }
 ```
+
+`signals` and `warnings` remain short human-readable strings. `factors` are the structured explanation layer for agents. They let clients render why the score moved without scraping prose.
+
+Factor categories:
+
+| Category | Meaning |
+| --- | --- |
+| `source` | Which public source returned and normalized the record. |
+| `metadata` | License, source URL, owner and registry metadata quality. |
+| `security` | Integrity, signatures, vulnerability or source warning signals. |
+| `usage` | Downloads, stars, likes or source popularity signals. |
+| `maintenance` | Recency and freshness signals when the source returns them. |
+| `install` | Install-plan command risk and hosted API write boundary. |
 
 ## External Decision Thresholds
 

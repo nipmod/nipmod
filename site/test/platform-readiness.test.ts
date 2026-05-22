@@ -23,9 +23,7 @@ describe("API first readiness receipt", () => {
       "github",
       "gitlawb"
     ]);
-    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "archive")?.connectionStatus).toBe(
-      "Safe mode"
-    );
+    expect(readiness.platforms.find((platform: { id: string }) => platform.id === "archive")?.connectionStatus).toBe("Live");
     expect(readiness.meaning).toContain("API-first Nipmod surface");
     expect(readiness.meaning).toContain("does not claim native third-party platform partnerships");
     expect(readiness.notClaimed).toContain("native platform partnership or marketplace approval is required for API use");

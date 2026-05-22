@@ -32,9 +32,9 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 
 - Searches supported package sources through one API surface.
 - Normalizes records across npm, PyPI, GitHub, Hugging Face and MCP.
-- Returns source links, license data, package metadata, metrics, warnings and trust signals.
+- Returns source links, license data, package metadata, metrics, warnings and explainable trust factors.
 - Produces install plans agents can show before local commands run.
-- Prepares useful confirmed records for the Nipmod archive.
+- Prepares useful confirmed records for the Nipmod archive with receipts.
 
 Hosted API calls never read or write the caller workspace. Local CLI and MCP tools are only needed when a workflow explicitly needs controlled workspace writes.
 
@@ -57,9 +57,9 @@ Nipmod has four public layers:
 | Layer | Role |
 | --- | --- |
 | Source resolvers | Query public package sources and normalize records. |
-| Trust signals | Score metadata, warnings, source context and risk. |
+| Trust Engine v2 | Score metadata, warnings, source context, usage signals and install-plan risk with structured factors. |
 | Install plans | Give agents a reviewable plan before workspace writes. |
-| Archive records | Store confirmed useful package intelligence without taking ownership from original sources. |
+| Archive records | Store confirmed useful package intelligence with receipts, without taking ownership from original sources. |
 
 External package owners keep ownership. Nipmod adds package intelligence, source context and safer agent workflows.
 
@@ -76,6 +76,8 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 
 Optional builder keys use `x-nipmod-api-key` or `Authorization: Bearer <key>` and raise rate limits. Invalid keys return `401`. Usage logging stores hashed identifiers only, not raw queries, package names, IP addresses, user agents, or API keys.
 
+Trust output uses policy `external-v2`. Agents get `score`, `decision`, `warnings` and structured `factors` so they can explain why a package was recommended or flagged.
+
 Core endpoints:
 
 | Endpoint | Purpose |
@@ -86,6 +88,7 @@ Core endpoints:
 | `GET /api/archive/prepare` | Prepare a durable archive record after useful discovery. |
 | `GET /api/archive/search` | Search persisted package intelligence records when enabled. |
 | `GET /api/archive/status` | Report durable archive store state. |
+| `POST /api/archive/confirm` | Dry-run or authorized persist a confirmed package record with a receipt. |
 | `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
 | `GET /api/openapi` | OpenAPI document for the hosted API. |
 
