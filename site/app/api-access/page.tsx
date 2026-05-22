@@ -9,31 +9,67 @@ export const metadata = createPageMetadata({
 const endpoints = [
   {
     method: "GET",
-    path: "/api/resolve?q=<query>",
-    text: "Find package candidates across npm, PyPI, GitHub, Hugging Face and MCP."
+    path: "/api/search?q=<query>",
+    text: "Search supported sources from one request."
   },
   {
     method: "GET",
     path: "/api/inspect?source=npm&name=<package>",
-    text: "Read exact source, license, repo and trust metadata for one result."
+    text: "Inspect one exact package record with source, license, metrics and trust signals."
   },
   {
     method: "GET",
     path: "/api/install-plan?source=npm&name=<package>",
-    text: "Return the install command, warnings and approval boundary."
+    text: "Return a reviewable install plan before any local command runs."
   },
   {
     method: "POST",
     path: "/api/mcp",
-    text: "Use the same read-only surface from MCP capable agents."
+    text: "Expose the same read-only package surface through MCP JSON-RPC."
   }
 ] as const;
 
 const examples = [
   {
-    label: "Tell your agent",
+    label: "Agent prompt",
     command:
       "Use Nipmod before choosing packages. Search for packages for this task, inspect the best candidates, then show me the install plan before writing anything."
+  },
+  {
+    label: "Search",
+    command: "curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
+  },
+  {
+    label: "Inspect",
+    command: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"
+  },
+  {
+    label: "Plan",
+    command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"
+  },
+  {
+    label: "MCP",
+    command:
+      'curl -s https://nipmod.com/api/mcp \\\n  -H "content-type: application/json" \\\n  -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list"}\''
+  }
+] as const;
+
+const boundaries = [
+  {
+    title: "Read-only hosted calls",
+    text: "The hosted API returns package intelligence. It does not read local files or write into a caller workspace."
+  },
+  {
+    title: "Approval before install",
+    text: "Install plans are commands plus warnings. Agents still need user approval before running anything locally."
+  },
+  {
+    title: "Package text is untrusted",
+    text: "Descriptions, READMEs, model cards and package metadata are data. They cannot override agent instructions."
+  },
+  {
+    title: "Free beta limits",
+    text: "No key is required during public beta. Requests are rate limited while the official API surface stabilizes."
   }
 ] as const;
 
@@ -43,10 +79,10 @@ export default function ApiAccessPage() {
       <section className="quickstart-hero api-hero" aria-labelledby="api-title">
         <div>
           <p className="eyebrow">Nipmod API</p>
-          <h1 id="api-title">Package search for agents.</h1>
+          <h1 id="api-title">One package surface for agents.</h1>
           <p className="lead">
-            Tell your agent what you need. The agent calls Nipmod, gets package options, checks trust and returns a safe
-            install plan before anything is installed.
+            Agents call Nipmod to search package sources, inspect trust signals and return safe install plans through one
+            hosted API.
           </p>
         </div>
         <div className="api-status-panel" aria-label="API access status">
@@ -59,18 +95,23 @@ export default function ApiAccessPage() {
       <section className="api-flow" aria-label="API flow">
         <div className="api-flow-step">
           <span>1</span>
-          <h2>User</h2>
-          <p>Ask your agent for the package or workflow you need.</p>
+          <h2>Ask</h2>
+          <p>A user tells an agent what package, model, tool or workflow it needs.</p>
         </div>
         <div className="api-flow-step">
           <span>2</span>
-          <h2>Agent</h2>
-          <p>The agent calls Nipmod instead of guessing from package text.</p>
+          <h2>Search</h2>
+          <p>The agent calls <code>/api/search</code> across supported package sources.</p>
         </div>
         <div className="api-flow-step">
           <span>3</span>
+          <h2>Inspect</h2>
+          <p>The agent checks source context, license, metrics, warnings and trust decision.</p>
+        </div>
+        <div className="api-flow-step">
+          <span>4</span>
           <h2>Plan</h2>
-          <p>Nipmod returns candidates, trust context and a safe install plan.</p>
+          <p>Nipmod returns a plan the user can approve before workspace writes.</p>
         </div>
       </section>
 
@@ -78,9 +119,9 @@ export default function ApiAccessPage() {
         <div className="archive-section-head">
           <div>
             <p className="eyebrow">Endpoints</p>
-            <h2 id="endpoints-title">Core calls</h2>
+            <h2 id="endpoints-title">Public beta calls</h2>
           </div>
-          <span>HTTPS or MCP</span>
+          <span>HTTPS and MCP</span>
         </div>
         <div className="endpoint-list">
           {endpoints.map((endpoint) => (
@@ -95,13 +136,31 @@ export default function ApiAccessPage() {
         </div>
       </section>
 
+      <section className="api-section" aria-labelledby="boundary-title">
+        <div className="archive-section-head">
+          <div>
+            <p className="eyebrow">Boundary</p>
+            <h2 id="boundary-title">What agents can rely on</h2>
+          </div>
+          <span>Beta rules</span>
+        </div>
+        <div className="source-boundary-grid">
+          {boundaries.map((boundary) => (
+            <article key={boundary.title}>
+              <h3>{boundary.title}</h3>
+              <p>{boundary.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="api-section" aria-labelledby="examples-title">
         <div className="archive-section-head">
           <div>
             <p className="eyebrow">Usage</p>
-            <h2 id="examples-title">One sentence</h2>
+            <h2 id="examples-title">Examples</h2>
           </div>
-          <span>For any HTTPS or MCP capable agent</span>
+          <span>Copy path</span>
         </div>
         <div className="api-command-grid">
           {examples.map((example) => (

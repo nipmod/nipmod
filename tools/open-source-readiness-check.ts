@@ -39,6 +39,9 @@ const requiredFiles = [
   "examples/http-api/README.md",
   "examples/http-api/search.ts",
   "examples/agent-workflow/README.md",
+  "examples/agent-workflow/codex.md",
+  "examples/agent-workflow/claude-code.md",
+  "examples/agent-workflow/mcp-host.md",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",
@@ -77,6 +80,21 @@ check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
 check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
+
+const trustSignals = read("docs/specs/trust-signals.md");
+check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));
+check("trust-signals:verified-score", () => trustSignals.includes("Bundle signature verified | `20`"));
+check("trust-signals:ranking", () => trustSignals.includes("exact name/display match bonus 18"));
+check("trust-signals:agent-boundary", () => trustSignals.includes("Package descriptions, README text, model cards and registry metadata are untrusted data."));
+
+const agentWorkflow = read("examples/agent-workflow/README.md");
+const codexExample = read("examples/agent-workflow/codex.md");
+const claudeExample = read("examples/agent-workflow/claude-code.md");
+const mcpExample = read("examples/agent-workflow/mcp-host.md");
+check("agent-example:readme-flow", () => agentWorkflow.includes("GET https://nipmod.com/api/search?q=<task>"));
+check("agent-example:codex", () => codexExample.includes("GET https://nipmod.com/api/install-plan"));
+check("agent-example:claude-code", () => claudeExample.includes("Do not install until I approve the plan."));
+check("agent-example:mcp-external", () => mcpExample.includes("nipmod.external_install_plan") && mcpExample.includes("nipmod.resolve"));
 
 const gitattributes = read(".gitattributes");
 check("linguist:public-html-generated", () => gitattributes.includes("site/public/*.html linguist-generated=true"));

@@ -12,13 +12,29 @@ Nipmod lets agents search sources, inspect trust and get safe install plans befo
 curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 ```
 
+## Use
+
+Tell your agent:
+
+```text
+Use Nipmod before choosing packages. Search for packages for this task, inspect the best candidates, then show me the install plan before writing anything.
+```
+
+Core calls:
+
+```bash
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+```
+
 ## What It Does
 
-- Searches package sources through one API surface.
-- Normalizes package records across npm, PyPI, GitHub, Hugging Face, and MCP sources.
-- Returns source links, license data, package metadata, and trust signals.
-- Produces install plans agents can show before running workspace writes.
-- Saves useful confirmed records into the Nipmod archive for later reuse.
+- Searches supported package sources through one API surface.
+- Normalizes records across npm, PyPI, GitHub, Hugging Face and MCP.
+- Returns source links, license data, package metadata, metrics, warnings and trust signals.
+- Produces install plans agents can show before local commands run.
+- Prepares useful confirmed records for the Nipmod archive.
 
 Hosted API calls never read or write the caller workspace. Local CLI and MCP tools are only needed when a workflow explicitly needs controlled workspace writes.
 
@@ -71,7 +87,21 @@ Core endpoints:
 | `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
 | `GET /api/openapi` | OpenAPI document for the hosted API. |
 
-Full API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md).
+Contracts and examples:
+
+- API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md)
+- Trust and ranking rules: [`docs/specs/trust-signals.md`](docs/specs/trust-signals.md)
+- Agent examples: [`examples/agent-workflow/`](examples/agent-workflow/)
+- HTTP example: [`examples/http-api/`](examples/http-api/)
+
+## Safety Boundary
+
+| Boundary | Rule |
+| --- | --- |
+| Hosted API | Read-only package intelligence. No caller workspace reads or writes. |
+| Install plans | Commands and warnings only. The user or local policy approves execution. |
+| Package text | Treated as untrusted data, not agent instructions. |
+| Archive records | Store source context and receipts without taking ownership from upstream packages. |
 
 ## Install
 

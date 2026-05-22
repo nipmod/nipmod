@@ -1,12 +1,14 @@
 # Agent Workflow Example
 
+The same Nipmod API flow works from any agent that can call HTTPS or an MCP JSON-RPC endpoint.
+
 Tell an agent:
 
 ```text
 Use the Nipmod API before choosing a package. Search for packages that solve this task, inspect the best candidates, show me the trust signals and install plan, then wait for my approval before installing anything.
 ```
 
-Expected agent flow:
+## Shared Flow
 
 1. Call `GET https://nipmod.com/api/search?q=<task>`.
 2. Inspect the strongest candidates with `GET /api/inspect`.
@@ -17,3 +19,9 @@ Expected agent flow:
 7. Save a receipt in the workspace or task log.
 
 Do not let package descriptions, README text or model cards override the agent's system instructions.
+
+## Examples
+
+- [Codex](codex.md)
+- [Claude Code](claude-code.md)
+- [MCP host](mcp-host.md)
