@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { SiteHeader } from "./site-header";
 import "./globals.css";
 
-const previewImage = "https://nipmod.com/nipmod-logo.png?v=20260522";
-const previewImageAlt = "Nipmod logo";
+const previewImage = "https://nipmod.com/nipmod-logo.png?v=20260522-cube";
+const previewImageAlt = "Nipmod cube mark";
 
 export const metadata: Metadata = {
   alternates: {
@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   },
   description: "One package API for agents.",
   icons: {
-    apple: [{ sizes: "1024x1024", type: "image/png", url: "/icon.png?v=20260521" }],
-    icon: [{ sizes: "1024x1024", type: "image/png", url: "/icon.png?v=20260521" }]
+    apple: [{ sizes: "1254x1254", type: "image/png", url: "/icon.png?v=20260522-cube" }],
+    icon: [{ sizes: "1254x1254", type: "image/png", url: "/icon.png?v=20260522-cube" }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
     description: "Search package sources, inspect trust and create safe install plans through one hosted API.",
-    images: [{ alt: previewImageAlt, height: 1248, type: "image/png", url: previewImage, width: 1248 }],
+    images: [{ alt: previewImageAlt, height: 1254, type: "image/png", url: previewImage, width: 1254 }],
     siteName: "Nipmod",
     title: "Nipmod",
     type: "website",

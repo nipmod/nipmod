@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
-export const previewImageUrl = "https://nipmod.com/nipmod-logo.png?v=20260522";
+export const previewImageUrl = "https://nipmod.com/nipmod-logo.png?v=20260522-cube";
 
 const previewImage = {
-  alt: "Nipmod logo",
-  height: 1248,
+  alt: "Nipmod cube mark",
+  height: 1254,
   type: "image/png",
   url: previewImageUrl,
-  width: 1248
+  width: 1254
 } as const;
 
 export function withPreviewImage(openGraph: NonNullable<Metadata["openGraph"]>): NonNullable<Metadata["openGraph"]> {
