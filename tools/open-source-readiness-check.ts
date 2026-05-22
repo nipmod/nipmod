@@ -40,6 +40,7 @@ const requiredFiles = [
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",
+  ".github/workflows/dependency-review.yml",
   ".github/workflows/scorecard.yml",
   ".github/dependabot.yml",
   ".github/PULL_REQUEST_TEMPLATE.md",
