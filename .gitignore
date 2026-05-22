@@ -16,6 +16,8 @@ gitlawb-node/
 probe-work/
 site/.vercel/
 site/tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
+tools/tsconfig.tsbuildinfo
 
 # Local filesystem conflict copies of generated registry package docs
 site/public/registry/packages/* [0-9].json

@@ -77,7 +77,7 @@
       "proofLevel": "Hosted MCP exposes only safe read tools. Local MCP exposes controlled write tools behind approval.",
       "url": "https://nipmod.com/mcp",
       "setupCommand": "nipmod mcp serve",
-      "smokeCommand": "node tools/system-readiness-check.mjs",
+      "smokeCommand": "node --experimental-strip-types tools/system-readiness-check.ts",
       "externalApprovalRequired": false,
       "externalDependency": "No marketplace approval is required for standard MCP usage.",
       "evidence": [

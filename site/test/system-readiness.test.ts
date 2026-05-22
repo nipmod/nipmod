@@ -94,7 +94,7 @@ describe("system readiness receipt", () => {
       "mcp",
       "sources"
     ]);
-    expect(readiness.parallelAccessProof.checkedBy).toBe("node tools/system-readiness-check.mjs --live --parallel");
+    expect(readiness.parallelAccessProof.checkedBy).toBe("node --experimental-strip-types tools/system-readiness-check.ts --live --parallel");
     expect(readiness.parallelAccessProof.surfaces).toContain("Hosted MCP tools/list");
     expect(readiness.writeBoundaries).toContain("install writes only after confirmInstall is write-lockfile");
     expect(readiness.writeBoundaries).toContain("hosted read-only MCP exposes no workspace-write, local-file or publish tools");

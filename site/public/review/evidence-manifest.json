@@ -18,13 +18,13 @@
       "id": "public-proof-loop",
       "label": "Public proof transcript",
       "url": "https://nipmod.com/proof/transcript.json",
-      "command": "node tools/public-proof-loop.mjs --registry https://nipmod.com/registry/packages.json"
+      "command": "node --experimental-strip-types tools/public-proof-loop.ts --registry https://nipmod.com/registry/packages.json"
     },
     {
       "id": "synthetic-monitor",
       "label": "Synthetic monitor command",
       "url": "https://nipmod.com/review/evidence-manifest.json",
-      "command": "node tools/prod-synthetic-monitor.mjs"
+      "command": "node --experimental-strip-types tools/prod-synthetic-monitor.ts"
     },
     {
       "id": "witness-health",

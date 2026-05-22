@@ -28,7 +28,7 @@ NIPMOD_TELEGRAM_ANTHROPIC_API_KEY=<anthropic-key>
 Start the bot:
 
 ```bash
-node tools/telegram-bot.mjs
+node --experimental-strip-types tools/telegram-bot.ts
 ```
 
 Add `@nipmodbot` to the Telegram group and send:

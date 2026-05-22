@@ -24,13 +24,13 @@ Nipmod is technically live and ready for an external review. It is not officiall
 ## Required commands
 
 ```bash
-node tools/verify-all.mjs --prod
-node tools/prod-load-smoke.mjs --profile launch
-node tools/prod-synthetic-monitor.mjs
-node tools/restore-drill.mjs
-node tools/supply-chain-check.mjs
+node --experimental-strip-types tools/verify-all.ts --prod
+node --experimental-strip-types tools/prod-load-smoke.ts --profile launch
+node --experimental-strip-types tools/prod-synthetic-monitor.ts
+node --experimental-strip-types tools/restore-drill.ts
+node --experimental-strip-types tools/supply-chain-check.ts
 pnpm --dir site test:e2e
-node tools/public-proof-loop.mjs --registry https://nipmod.com/registry/packages.json
+node --experimental-strip-types tools/public-proof-loop.ts --registry https://nipmod.com/registry/packages.json
 ```
 
 ## Sign off

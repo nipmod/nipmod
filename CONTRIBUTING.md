@@ -13,17 +13,8 @@ Requirements:
 Useful checks:
 
 ```bash
-pnpm --dir nipmod install --frozen-lockfile
-pnpm --dir site install --frozen-lockfile
-pnpm --dir nipmod test
-pnpm --dir nipmod typecheck
-pnpm --dir nipmod build
-pnpm --dir site test
-pnpm --dir site typecheck
-pnpm --dir site build
-pnpm --dir site security:secrets
-node tools/open-source-readiness-check.mjs
-node tools/supply-chain-check.mjs
+pnpm install
+pnpm verify
 ```
 
 ## Pull requests
@@ -34,6 +25,8 @@ node tools/supply-chain-check.mjs
 - Do not commit `.env` files, private keys, tokens, local identity files or generated local service state.
 - Do not claim third party endorsement unless the third party has explicitly approved it.
 - Do not commit tool handoff files, assistant scratch folders, private prompts or generated design notes.
+- Keep runtime and operator tooling in TypeScript. Do not add new `tools/*.js`, `tools/*.mjs`, or `site/scripts/*.mjs` files.
+- Type annotations for migrated operator tooling should be added in focused patches, with tests kept green.
 
 ## Commit Style
 

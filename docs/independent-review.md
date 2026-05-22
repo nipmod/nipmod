@@ -15,11 +15,11 @@ Nipmod must not claim third party audit status until an independent reviewer has
 Attach or link:
 
 - git commit under review
-- `node tools/verify-all.mjs --prod` output
-- `node tools/prod-load-smoke.mjs --profile launch` output
-- `node tools/prod-synthetic-monitor.mjs` output
-- `node tools/restore-drill.mjs` output
-- `node tools/supply-chain-check.mjs` output
+- `node --experimental-strip-types tools/verify-all.ts --prod` output
+- `node --experimental-strip-types tools/prod-load-smoke.ts --profile launch` output
+- `node --experimental-strip-types tools/prod-synthetic-monitor.ts` output
+- `node --experimental-strip-types tools/restore-drill.ts` output
+- `node --experimental-strip-types tools/supply-chain-check.ts` output
 - browser test output for the public site
 - public proof loop transcript
 - catalog depth matrix
@@ -29,8 +29,8 @@ Attach or link:
 Generate the packet:
 
 ```bash
-node tools/generate-review-packet.mjs /tmp/nipmod-review-packet.md
-node tools/generate-review-packet.mjs /tmp/nipmod-review-packet.md --evidence-dir /tmp/nipmod-review-evidence
+node --experimental-strip-types tools/generate-review-packet.ts /tmp/nipmod-review-packet.md
+node --experimental-strip-types tools/generate-review-packet.ts /tmp/nipmod-review-packet.md --evidence-dir /tmp/nipmod-review-evidence
 ```
 
 ## Threat Model Focus

@@ -22,4 +22,4 @@ ENV NIPMOD_MONITOR_INTERVAL_MS=60000
 
 EXPOSE 8080
 
-CMD ["node", "tools/monitor-server.mjs"]
+CMD ["node", "--experimental-strip-types", "tools/monitor-server.ts"]

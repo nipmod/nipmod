@@ -15,7 +15,7 @@ Install and verify:
 ```bash
 pnpm --dir nipmod install
 pnpm --dir site install
-node tools/verify-all.mjs
+node --experimental-strip-types tools/verify-all.ts
 ```
 
 Expected registry state:
@@ -39,12 +39,12 @@ vercel inspect https://nipmod.com --timeout 120s
 fly status --app nipmod-gitlawb-node-v2
 fly status --app nipmod-witness
 curl -i -X POST https://nipmod-witness.fly.dev/run
-node tools/prod-synthetic-monitor.mjs
-node tools/prod-load-smoke.mjs --profile launch
-node tools/supply-chain-check.mjs
-node tools/restore-drill.mjs
-node tools/node-edge-resilience-smoke.mjs
-node tools/verify-all.mjs --prod
+node --experimental-strip-types tools/prod-synthetic-monitor.ts
+node --experimental-strip-types tools/prod-load-smoke.ts --profile launch
+node --experimental-strip-types tools/supply-chain-check.ts
+node --experimental-strip-types tools/restore-drill.ts
+node --experimental-strip-types tools/node-edge-resilience-smoke.ts
+node --experimental-strip-types tools/verify-all.ts --prod
 nipmod search policy --registries https://nipmod.com/registry/packages.json,https://mirror.example/packages.json
 ```
 
@@ -64,7 +64,7 @@ The registry is public-ready only when:
 
 ## Synthetic Monitoring
 
-`node tools/prod-synthetic-monitor.mjs` is the alerting contract. It exits non-zero when any production surface is unsafe for public use and prints a `dev.nipmod.prod-synthetic-monitor.v1` JSON payload.
+`node --experimental-strip-types tools/prod-synthetic-monitor.ts` is the alerting contract. It exits non-zero when any production surface is unsafe for public use and prints a `dev.nipmod.prod-synthetic-monitor.v1` JSON payload.
 
 Checks covered:
 
@@ -84,7 +84,7 @@ Run it every 60 seconds from the external monitor. Alert when `.ok` is false, wh
 
 ## Node Edge Resilience Smoke
 
-`node tools/node-edge-resilience-smoke.mjs` is the bounded public Gitlawb edge smoke. It is intentionally small enough to run inside `verify-all --prod` without behaving like a load test.
+`node --experimental-strip-types tools/node-edge-resilience-smoke.ts` is the bounded public Gitlawb edge smoke. It is intentionally small enough to run inside `verify-all --prod` without behaving like a load test.
 
 It uses exactly 5 serial node requests with no retries:
 
@@ -100,7 +100,7 @@ This does not prove real per-IP rate limits, DID rate limits or aggressive crawl
 
 ## Production Load Smoke
 
-`node tools/prod-load-smoke.mjs` is the bounded launch smoke for 100 early users. It is not a stress test and does not try to exhaust Gitlawb or Vercel.
+`node --experimental-strip-types tools/prod-load-smoke.ts` is the bounded launch smoke for 100 early users. It is not a stress test and does not try to exhaust Gitlawb or Vercel.
 
 It verifies:
 
@@ -113,14 +113,14 @@ It verifies:
 Default budget is 120 iterations with concurrency 12 and a 10 second request timeout. Launch budget is 360 iterations with concurrency 24 and a 10 second request timeout:
 
 ```bash
-node tools/prod-load-smoke.mjs --profile launch
+node --experimental-strip-types tools/prod-load-smoke.ts --profile launch
 ```
 
 Run the launch profile before public posts and after deploys that touch registry, trust, security or node health.
 
 ## Alert Delivery
 
-`node tools/prod-alert-runner.mjs` wraps the synthetic monitor and restore drill into the alert delivery contract. In normal mode it sends a critical `dev.nipmod.production-alert.v1` JSON payload only when a production check fails. In probe mode it sends an info alert even when production is healthy, which proves the primary and secondary operator paths are reachable.
+`node --experimental-strip-types tools/prod-alert-runner.ts` wraps the synthetic monitor and restore drill into the alert delivery contract. In normal mode it sends a critical `dev.nipmod.production-alert.v1` JSON payload only when a production check fails. In probe mode it sends an info alert even when production is healthy, which proves the primary and secondary operator paths are reachable.
 
 Configure at least two destinations outside Vercel and Fly:
 
@@ -132,7 +132,7 @@ export NIPMOD_ALERT_SECONDARY_WEBHOOK_URL="https://..."
 Delivery proof:
 
 ```bash
-node tools/prod-alert-runner.mjs --probe
+node --experimental-strip-types tools/prod-alert-runner.ts --probe
 ```
 
 The command exits non-zero when a destination is missing or returns non-2xx. Its stdout redacts webhook URLs and reports destinations only as short SHA-256 ids. A public launch requires a successful `--probe` from the external runner plus a normal 60-second schedule outside the nipmod production stack.
@@ -152,7 +152,7 @@ Legacy Fly monitor config remains at `tools/fly.monitor.toml` for operators with
 
 ## Restore Drill
 
-`node tools/restore-drill.mjs` is a non-destructive live restore proof. It does not mutate Fly volumes, Postgres, Gitlawb repositories or witness state.
+`node --experimental-strip-types tools/restore-drill.ts` is a non-destructive live restore proof. It does not mutate Fly volumes, Postgres, Gitlawb repositories or witness state.
 
 It proves:
 
@@ -196,7 +196,7 @@ The Postgres backup feature requires accepting Tigris Terms of Service via Fly. 
 Use this before public launch, after advisory key rotation, and after changing `audit` or `ci`.
 
 ```bash
-node tools/advisory-drill.mjs --registry https://nipmod.com/registry/packages.json --target repo-readme-audit --quiet
+node --experimental-strip-types tools/advisory-drill.ts --registry https://nipmod.com/registry/packages.json --target repo-readme-audit --quiet
 ```
 
 Expected output:
@@ -269,7 +269,7 @@ Vercel must print `registry verified for build` before `next build`.
 3. Build the signed release:
 
 ```bash
-node tools/build-nipmod-release.mjs
+node --experimental-strip-types tools/build-nipmod-release.ts
 ```
 
 4. Verify the local installer path:
@@ -326,7 +326,7 @@ If the node is replaced:
 3. Set Cloudflare DNS-only records for `node.nipmod.com`.
 4. Issue Fly certificate.
 5. Verify `/health`, `/api/v1/repos`, package blobs and `git ls-remote`.
-6. Run `node tools/restore-drill.mjs`.
+6. Run `node --experimental-strip-types tools/restore-drill.ts`.
 7. Run `pnpm --dir site registry:verified`.
 8. Deploy site only after source provenance and witness checks pass.
 

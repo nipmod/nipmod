@@ -24,4 +24,4 @@ ENV NIPMOD_WITNESS_IDENTITY_PATH=/data/transparency-witness-identity.json
 
 EXPOSE 8080
 
-CMD ["node", "tools/witness-server.mjs"]
+CMD ["node", "--experimental-strip-types", "tools/witness-server.ts"]

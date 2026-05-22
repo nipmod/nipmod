@@ -130,20 +130,13 @@ nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
 - `site/` - Next.js website, API routes, registry surfaces, and public machine files.
 - `packages/first-party/` - First-party package fixtures used for verified archive gates.
 - `docs/` - Operator docs, trust model, package publishing, and architecture notes.
-- `tools/` - Release, readiness, registry, monitor, and security tooling.
+- `tools/` - TypeScript release, readiness, registry, monitor, and security tooling.
 
 ## Verify
 
 ```bash
-pnpm --dir nipmod test
-pnpm --dir nipmod typecheck
-pnpm --dir nipmod build
-pnpm --dir site test
-pnpm --dir site typecheck
-pnpm --dir site build
-pnpm --dir site security:secrets
-node tools/open-source-readiness-check.mjs
-node tools/supply-chain-check.mjs
+pnpm install
+pnpm verify
 ```
 
 ## Links

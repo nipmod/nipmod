@@ -53,7 +53,7 @@ For the current live pins:
 set -a
 . tools/verified-registry.env
 set +a
-node tools/rebuild-verified-registry.mjs
+node --experimental-strip-types tools/rebuild-verified-registry.ts
 ```
 
 Expected package trust after a valid external witness:

@@ -89,7 +89,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 - Evidence manifest: https://nipmod.com/review/evidence-manifest.json
 - Evidence ledger: https://nipmod.com/review/evidence-ledger.json
 - Review packet source: docs/independent-review.md
-- Review packet generator: `node tools/generate-review-packet.mjs review-packet.md --evidence-dir <dir>`
+- Review packet generator: `node --experimental-strip-types tools/generate-review-packet.ts review-packet.md --evidence-dir <dir>`
 - Catalog depth: docs/catalog-depth.md
 - Adoption readiness: docs/adoption-readiness.md
 - External proof tracks: docs/external-proof-tracks.md

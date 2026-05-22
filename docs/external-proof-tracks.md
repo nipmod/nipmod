@@ -24,7 +24,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 ### External audit ask
 
 ```text
-Please review Nipmod as an install trust layer for agent packages on Gitlawb. Focus on signature, digest, transparency, witness, advisory, lockfile and installer bypasses. The review packet generator is `node tools/generate-review-packet.mjs`.
+Please review Nipmod as an install trust layer for agent packages on Gitlawb. Focus on signature, digest, transparency, witness, advisory, lockfile and installer bypasses. The review packet generator is `node --experimental-strip-types tools/generate-review-packet.ts`.
 ```
 
 ### First user ask

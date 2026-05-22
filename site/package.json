@@ -7,10 +7,10 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "prebuild": "node scripts/verify-registry-before-build.mjs",
-    "registry:verified": "node ../tools/rebuild-verified-registry.mjs",
+    "prebuild": "node --experimental-strip-types scripts/verify-registry-before-build.ts",
+    "registry:verified": "node --experimental-strip-types ../tools/rebuild-verified-registry.ts",
     "security:deps": "pnpm audit --audit-level high",
-    "security:secrets": "node ../tools/secret-scan.mjs",
+    "security:secrets": "node --experimental-strip-types ../tools/secret-scan.ts",
     "test": "vitest run --testTimeout 20000",
     "test:operator": "NIPMOD_INCLUDE_OPERATOR_TESTS=1 vitest run --testTimeout 20000",
     "test:e2e": "playwright test",
@@ -28,10 +28,5 @@
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
-  },
-  "pnpm": {
-    "overrides": {
-      "postcss": "^8.5.14"
-    }
   }
 }

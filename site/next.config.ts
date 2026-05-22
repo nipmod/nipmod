@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = dirname(projectRoot);
 const isDevelopment = process.env.NODE_ENV === "development";
 const scriptSrc = isDevelopment ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'";
 const connectSrc = isDevelopment
@@ -88,7 +89,7 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   turbopack: {
-    root: projectRoot
+    root: workspaceRoot
   }
 };
 

@@ -24,7 +24,7 @@ This is the operator path for a real package quarantine. It separates decentrali
 Before touching public advisory files, prove the intended package would be blocked:
 
 ```bash
-node tools/advisory-drill.mjs \
+node --experimental-strip-types tools/advisory-drill.ts \
   --registry https://nipmod.com/registry/packages.json \
   --target <package-name-or-canonical> \
   --quiet
@@ -51,14 +51,14 @@ Required result:
 4. Sign the feed:
 
 ```bash
-node tools/sign-advisories.mjs
+node --experimental-strip-types tools/sign-advisories.ts
 ```
 
 5. Add matching registry quarantine metadata for high or critical active incidents.
 6. Run the full gate:
 
 ```bash
-node tools/verify-all.mjs
+node --experimental-strip-types tools/verify-all.ts
 ```
 
 7. Deploy the site:
@@ -70,7 +70,7 @@ pnpm --dir site exec vercel deploy --prod --yes
 8. Run production verification:
 
 ```bash
-node tools/verify-all.mjs --prod
+node --experimental-strip-types tools/verify-all.ts --prod
 ```
 
 ## Public Update

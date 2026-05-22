@@ -40,8 +40,7 @@ const tracks = [
     label: "Review",
     title: "Independent review packet",
     text: "Review the source, production gates, load smoke, supply chain check and known limitations.",
-    command:
-      "node tools/verify-all.mjs --prod\nnode tools/prod-load-smoke.mjs --profile launch\nnode tools/supply-chain-check.mjs"
+    command: "pnpm verify\nnode --experimental-strip-types tools/verify-all.ts --prod"
   },
   {
     label: "Mirror",

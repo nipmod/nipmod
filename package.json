@@ -1,0 +1,27 @@
+{
+  "name": "nipmod-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.0",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --dir nipmod build && pnpm --dir site build",
+    "public:check": "node --experimental-strip-types tools/open-source-readiness-check.ts",
+    "security": "pnpm --dir nipmod security:deps && pnpm --dir site security:deps && pnpm --dir site security:secrets && pnpm supply-chain:check",
+    "supply-chain:check": "node --experimental-strip-types tools/supply-chain-check.ts",
+    "test": "pnpm --dir nipmod test && pnpm --dir site test && pnpm tools:test",
+    "tools:test": "NIPMOD_SKIP_QUORUM_RECEIPTS=1 node --experimental-strip-types --test tools/telegram-bot.test.ts && NIPMOD_SKIP_QUORUM_RECEIPTS=1 vitest run --config tools/vitest.config.ts --testTimeout 20000",
+    "typecheck": "pnpm --dir nipmod typecheck && pnpm --dir site typecheck",
+    "verify": "pnpm test && pnpm typecheck && pnpm build && pnpm security && pnpm public:check"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.14"
+    }
+  }
+}

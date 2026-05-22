@@ -254,8 +254,8 @@ https://nipmod.com/compatibility/system-readiness.json
 Run the repeatable local/live proof from this repo:
 
 ```bash
-node tools/platform-readiness-check.mjs --live --host-smoke
-node tools/system-readiness-check.mjs --live --parallel
+node --experimental-strip-types tools/platform-readiness-check.ts --live --host-smoke
+node --experimental-strip-types tools/system-readiness-check.ts --live --parallel
 ```
 
 This verifies the source mirrors, live setup and discovery endpoints, the MCP tool list, Codex registration, Claude Code `.mcp.json`, Cursor `.cursor/mcp.json`, Cursor deeplink metadata, OpenCode `opencode.json`, Hermes config generation, shared archive invariants and parallel read access. It proves product readiness for the current API and MCP scope; it does not claim third-party adoption, native marketplace acceptance or review-track support.

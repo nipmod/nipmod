@@ -27,7 +27,7 @@ jobs:
           node-version: 22
       - run: corepack enable
       - run: corepack prepare pnpm@10.30.0 --activate
-      - run: pnpm --dir nipmod install --frozen-lockfile --ignore-scripts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm --dir nipmod build
       - name: Production alert runner
         env:
@@ -37,6 +37,6 @@ jobs:
           NIPMOD_ALERT_SECONDARY_WEBHOOK_URL: ${{ secrets.NIPMOD_ALERT_SECONDARY_WEBHOOK_URL }}
           NIPMOD_ALERT_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_WEBHOOK_BEARER_TOKEN }}
           NIPMOD_ALERT_WEBHOOK_URLS: ${{ secrets.NIPMOD_ALERT_WEBHOOK_URLS }}
-        run: node tools/prod-alert-runner.mjs
+        run: node --experimental-strip-types tools/prod-alert-runner.ts
       - name: Node edge resilience smoke
-        run: node tools/node-edge-resilience-smoke.mjs
+        run: node --experimental-strip-types tools/node-edge-resilience-smoke.ts

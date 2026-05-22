@@ -19,7 +19,7 @@ Do not paste secrets into public chat, issues or committed files. Use Vercel env
    - Generate locally with:
 
 ```bash
-node tools/package-intelligence-ops.mjs generate-token
+node --experimental-strip-types tools/package-intelligence-ops.ts generate-token
 ```
 
 4. Database schema
@@ -27,7 +27,7 @@ node tools/package-intelligence-ops.mjs generate-token
    - Verify with:
 
 ```bash
-node tools/package-intelligence-ops.mjs verify-secrets --env-file /tmp/nipmod-archive.env
+node --experimental-strip-types tools/package-intelligence-ops.ts verify-secrets --env-file /tmp/nipmod-archive.env
 ```
 
 ## Local secret file template
@@ -35,7 +35,7 @@ node tools/package-intelligence-ops.mjs verify-secrets --env-file /tmp/nipmod-ar
 Create this outside the repo or under a gitignored path:
 
 ```bash
-node tools/package-intelligence-ops.mjs env-template > /tmp/nipmod-archive.env
+node --experimental-strip-types tools/package-intelligence-ops.ts env-template > /tmp/nipmod-archive.env
 ```
 
 Then fill in the values.
@@ -45,13 +45,13 @@ Then fill in the values.
 Check current Production env names:
 
 ```bash
-node tools/package-intelligence-ops.mjs vercel-env-status
+node --experimental-strip-types tools/package-intelligence-ops.ts vercel-env-status
 ```
 
 Apply required Production env vars:
 
 ```bash
-node tools/package-intelligence-ops.mjs vercel-apply --env-file /tmp/nipmod-archive.env --replace
+node --experimental-strip-types tools/package-intelligence-ops.ts vercel-apply --env-file /tmp/nipmod-archive.env --replace
 ```
 
 Deploy:
@@ -63,9 +63,9 @@ vercel --prod --yes
 Verify live:
 
 ```bash
-node tools/package-intelligence-ops.mjs live-smoke
-node tools/prod-synthetic-monitor.mjs
-node tools/system-readiness-check.mjs --live --parallel
+node --experimental-strip-types tools/package-intelligence-ops.ts live-smoke
+node --experimental-strip-types tools/prod-synthetic-monitor.ts
+node --experimental-strip-types tools/system-readiness-check.ts --live --parallel
 ```
 
 ## Optional access that improves coverage

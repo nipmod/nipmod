@@ -149,7 +149,7 @@
   "proofPackage": null,
   "parallelAccessProof": {
     "claim": "CLI, local MCP, hosted read-only MCP, website and machine discovery read the same public archive. The archive is currently empty after the seed reset.",
-    "checkedBy": "node tools/system-readiness-check.mjs --live --parallel",
+    "checkedBy": "node --experimental-strip-types tools/system-readiness-check.ts --live --parallel",
     "surfaces": [
       "registry index",
       "CLI search",
