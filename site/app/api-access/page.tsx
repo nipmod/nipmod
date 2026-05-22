@@ -1,4 +1,5 @@
 import { createPageMetadata } from "../metadata";
+import { OnePagePanelDeck, type OnePagePanel } from "../one-page-panels";
 
 export const metadata = createPageMetadata({
   description: "One hosted API agents can call for package discovery, trust checks and safe install plans.",
@@ -83,9 +84,47 @@ const boundaries = [
 ] as const;
 
 export default function ApiAccessPage() {
+  const panels: OnePagePanel[] = [
+    {
+      eyebrow: "Endpoints",
+      id: "endpoints",
+      rows: endpoints.map((endpoint) => ({
+        code: `${endpoint.method} ${endpoint.path}`,
+        label: endpoint.method,
+        text: endpoint.text,
+        title: endpoint.path
+      })),
+      summary: "The public read-only surface agents call before package installs.",
+      title: "API calls"
+    },
+    {
+      eyebrow: "Usage",
+      id: "usage",
+      rows: examples.map((example) => ({
+        code: example.command,
+        label: example.label,
+        text: example.label === "Agent prompt" ? "Use this as the instruction for any agent with HTTPS access." : "Direct call for testing the same surface an agent uses.",
+        title: example.label
+      })),
+      summary: "A short agent instruction plus direct HTTPS examples.",
+      title: "Examples"
+    },
+    {
+      eyebrow: "Safety",
+      id: "safety",
+      rows: boundaries.map((boundary) => ({
+        label: "Rule",
+        text: boundary.text,
+        title: boundary.title
+      })),
+      summary: "Hosted calls return intelligence and plans. Workspace writes stay local.",
+      title: "Boundaries"
+    }
+  ];
+
   return (
-    <main className="page-shell api-page-shell" id="main">
-      <section className="quickstart-hero api-hero" aria-labelledby="api-title">
+    <main className="page-shell api-page-shell one-page-shell" id="main">
+      <section className="quickstart-hero api-hero one-page-hero" aria-labelledby="api-title">
         <div>
           <p className="eyebrow">Nipmod API</p>
           <h1 id="api-title">One package surface for agents.</h1>
@@ -101,86 +140,30 @@ export default function ApiAccessPage() {
         </div>
       </section>
 
-      <section className="api-flow" aria-label="API flow">
-        <div className="api-flow-step">
-          <span>1</span>
-          <h2>Ask</h2>
-          <p>A user asks an agent to solve a task.</p>
-        </div>
-        <div className="api-flow-step">
-          <span>2</span>
-          <h2>Search</h2>
-          <p>The agent calls <code>/api/search</code> across sources.</p>
-        </div>
-        <div className="api-flow-step">
-          <span>3</span>
-          <h2>Inspect</h2>
-          <p>The agent checks source context, warnings and Trust Engine v2 factors.</p>
-        </div>
-        <div className="api-flow-step">
-          <span>4</span>
-          <h2>Plan</h2>
-          <p>Nipmod returns the install plan before workspace writes.</p>
-        </div>
-      </section>
-
-      <section className="api-section" aria-labelledby="endpoints-title">
-        <div className="archive-section-head">
-          <div>
-            <p className="eyebrow">Endpoints</p>
-            <h2 id="endpoints-title">Public beta calls</h2>
+      <section className="one-page-board api-one-page-board" aria-label="API overview">
+        <div className="api-flow compact-flow" aria-label="API flow">
+          <div className="api-flow-step">
+            <span>1</span>
+            <h2>Ask</h2>
+            <p>A user asks an agent to solve a task.</p>
           </div>
-          <span>HTTPS and MCP</span>
-        </div>
-        <div className="endpoint-list">
-          {endpoints.map((endpoint) => (
-            <article className="endpoint-row" key={`${endpoint.method} ${endpoint.path}`}>
-              <div>
-                <span>{endpoint.method}</span>
-                <code>{endpoint.path}</code>
-              </div>
-              <p>{endpoint.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="api-section" aria-labelledby="boundary-title">
-        <div className="archive-section-head">
-          <div>
-            <p className="eyebrow">Boundary</p>
-            <h2 id="boundary-title">What agents can rely on</h2>
+          <div className="api-flow-step">
+            <span>2</span>
+            <h2>Search</h2>
+            <p>The agent calls <code>/api/search</code>.</p>
           </div>
-          <span>Beta rules</span>
-        </div>
-        <div className="source-boundary-grid">
-          {boundaries.map((boundary) => (
-            <article key={boundary.title}>
-              <h3>{boundary.title}</h3>
-              <p>{boundary.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="api-section" aria-labelledby="examples-title">
-        <div className="archive-section-head">
-          <div>
-            <p className="eyebrow">Usage</p>
-            <h2 id="examples-title">Examples</h2>
+          <div className="api-flow-step">
+            <span>3</span>
+            <h2>Inspect</h2>
+            <p>Nipmod returns source context and trust factors.</p>
           </div>
-          <span>Copy path</span>
+          <div className="api-flow-step">
+            <span>4</span>
+            <h2>Plan</h2>
+            <p>The agent shows a safe install plan before writes.</p>
+          </div>
         </div>
-        <div className="api-command-grid">
-          {examples.map((example) => (
-            <article className="api-command-card" key={example.label}>
-              <span>{example.label}</span>
-              <pre>
-                <code>{example.command}</code>
-              </pre>
-            </article>
-          ))}
-        </div>
+        <OnePagePanelDeck panels={panels} />
       </section>
     </main>
   );
