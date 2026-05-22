@@ -145,6 +145,32 @@ const EXTERNAL_PACKAGE_RISKS = ["low", "medium", "high", "unknown"] as const;
 const EXTERNAL_PACKAGE_SOURCE_KINDS = ["package-registry", "source-repo", "model-hub", "tool-registry"] as const;
 const EXTERNAL_ARCHIVE_PERSISTENCE = ["ephemeral", "static", "database"] as const;
 const EXTERNAL_ARCHIVE_STATUS = ["external_indexed", "claimed", "verified_nipmod"] as const;
+const MCP_REGISTRY_BASE_URL = "https://registry.modelcontextprotocol.io";
+const MCP_REGISTRY_LIVE_PATHS = ["v0", "v0.1"] as const;
+const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
+const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
+  {
+    _meta: {
+      "io.modelcontextprotocol.registry/official": {
+        isLatest: true,
+        publishedAt: "2026-04-22T21:06:34.500049Z",
+        status: "active",
+        statusChangedAt: "2026-04-22T21:06:34.500049Z",
+        updatedAt: "2026-04-22T21:06:34.500049Z"
+      }
+    },
+    _nipmodSnapshot: MCP_REGISTRY_BOOTSTRAP_SNAPSHOT,
+    server: {
+      "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+      description: "Remote MCP server for Tandem docs, install guides, SDKs, workflows, and agent setup help.",
+      name: "ac.tandem/docs-mcp",
+      remotes: [{ type: "streamable-http", url: "https://tandem.ac/mcp" }],
+      repository: { source: "github", url: "https://github.com/frumu-ai/tandem" },
+      version: "0.3.2",
+      websiteUrl: "https://tandem.ac/docs-mcp"
+    }
+  }
+];
 
 const fetchCache = new Map<string, { expiresAt: number; value: UnknownRecord | UnknownRecord[] }>();
 
@@ -814,11 +840,8 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
 }
 
 async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
-  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500), {
-    source: "mcp"
-  });
-  const items = isRecord(payload) && Array.isArray(payload.servers) ? payload.servers : Array.isArray(payload) ? payload : [];
   const normalized = query.toLowerCase();
+  const items = await fetchMcpServers(mcpSearchUrls(query, limit), normalized, fetchImpl, timeoutMs);
   return items
     .map(mcpRecord)
     .filter(isExternalPackageRecord)
@@ -827,12 +850,66 @@ async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, 
 }
 
 async function inspectMcp(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
-  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500), {
-    source: "mcp"
-  });
-  const items = isRecord(payload) && Array.isArray(payload.servers) ? payload.servers : Array.isArray(payload) ? payload : [];
   const normalized = name.toLowerCase();
+  const items = await fetchMcpServers(mcpSearchUrls(name, 6), normalized, fetchImpl, timeoutMs);
   return items.map(mcpRecord).find((record) => record?.name.toLowerCase() === normalized || record?.id.toLowerCase() === `mcp:${normalized}`) ?? null;
+}
+
+async function fetchMcpServers(
+  urls: string[],
+  normalizedQuery: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<unknown[]> {
+  let lastError: unknown;
+  for (const url of urls) {
+    try {
+      const payload = await fetchJson(url, fetchImpl, Math.min(timeoutMs, 1600), { source: "mcp" });
+      const items = mcpItems(payload);
+      if (items.length > 0) {
+        return items;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const bootstrap = MCP_REGISTRY_BOOTSTRAP_SERVERS.filter((item) => {
+    const record = mcpRecord(item);
+    return record ? [record.name, record.displayName, record.description].join(" ").toLowerCase().includes(normalizedQuery) : false;
+  });
+  if (bootstrap.length > 0) {
+    return bootstrap;
+  }
+
+  if (lastError instanceof ExternalPackageError) {
+    throw lastError;
+  }
+  throw new ExternalPackageError("MCP Registry is unavailable", {
+    code: "mcp_registry_unavailable",
+    retryable: true,
+    source: "mcp",
+    status: 502
+  });
+}
+
+function mcpSearchUrls(query: string, limit: number): string[] {
+  const safeLimit = Math.min(100, Math.max(3, limit));
+  return MCP_REGISTRY_LIVE_PATHS.map((path) => {
+    const params = new URLSearchParams({
+      limit: String(safeLimit),
+      search: query,
+      version: "latest"
+    });
+    return `${MCP_REGISTRY_BASE_URL}/${path}/servers?${params.toString()}`;
+  });
+}
+
+function mcpItems(payload: UnknownRecord | UnknownRecord[]): unknown[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  return Array.isArray(payload.servers) ? payload.servers : [];
 }
 
 function mcpRecord(item: unknown): ExternalPackageRecord | null {
@@ -841,6 +918,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   }
   const server = isRecord(item.server) ? item.server : item;
   const official = readRecord(readRecord(item._meta)?.["io.modelcontextprotocol.registry/official"]);
+  const snapshot = readString(item._nipmodSnapshot);
   if (official?.isLatest === false) {
     return null;
   }
@@ -859,7 +937,8 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   const license = readString(server.license);
   const warnings = [
     ...(repo ? [] : ["No source repository returned by MCP Registry."]),
-    ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : [])
+    ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : []),
+    ...(snapshot ? [`MCP Registry live request was unavailable; returned pinned public registry snapshot from ${snapshot}.`] : [])
   ];
 
   return makeRecord({
@@ -876,12 +955,13 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
     name,
     originalUrl: homepage,
     owner: readString(server.author) ?? (name.includes("/") ? name.split("/")[0]! : null),
-    registryUrl: "https://registry.modelcontextprotocol.io/v0.1/servers",
+    registryUrl: `${MCP_REGISTRY_BASE_URL}/v0/servers`,
     repo,
     source: "mcp",
     sourceKind: "tool-registry",
     signals: [
       "Resolved from the MCP Registry.",
+      ...(snapshot ? [`Pinned from public MCP Registry snapshot: ${snapshot}.`] : []),
       status ? `MCP Registry status: ${status}.` : "MCP Registry status was not returned.",
       remoteUrl ? "Remote MCP endpoint metadata is present." : "Remote MCP endpoint metadata is missing.",
       repo ? "Source repository is present." : "Source repository was not returned."

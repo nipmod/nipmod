@@ -127,6 +127,25 @@ describe("external package resolver", () => {
     expect(record.trust.signals).toContain("MCP Registry status: active.");
   });
 
+  test("keeps known MCP results available when the live registry is unavailable", async () => {
+    const result = await searchExternalPackages("tandem", {
+      fetchImpl: async () => {
+        throw new TypeError("network unavailable");
+      },
+      limit: 3,
+      sources: ["mcp"],
+      timeoutMs: 20
+    });
+
+    expect(result.partial).toBe(false);
+    expect(result.records[0]).toMatchObject({
+      id: "mcp:ac.tandem/docs-mcp",
+      source: "mcp",
+      version: "0.3.2"
+    });
+    expect(result.records[0]?.trust.warnings.join(" ")).toContain("pinned public registry snapshot");
+  });
+
   test("publishes search, inspect and install-plan API routes", async () => {
     vi.stubGlobal("fetch", mockFetch);
 
