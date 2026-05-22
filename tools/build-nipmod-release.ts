@@ -49,7 +49,7 @@ try {
       {
         name: "nipmod",
         version,
-        description: "Verifiable packages for agents on Gitlawb.",
+        description: "One package API for agents.",
         type: "module",
         bin: {
           nipmod: "./dist/cli.js"
@@ -73,7 +73,8 @@ try {
   });
   await writeFile(`${artifactPath}.sha256`, `${digest}  ${packageName}\n`);
   await writeFile(`${artifactPath}.sig`, `${JSON.stringify(signature, null, 2)}\n`);
-  await assertReleaseArtifactsAreTrackable([artifactPath, `${artifactPath}.sha256`, `${artifactPath}.sig`]);
+  await assertReleaseArchiveIsIgnored(artifactPath);
+  await assertReleaseArtifactsAreTrackable([`${artifactPath}.sha256`, `${artifactPath}.sig`]);
   console.log(`${artifactPath}`);
   console.log(`${digest}`);
   console.log(`${artifactPath}.sig`);
@@ -129,6 +130,12 @@ async function assertReleaseArtifactsAreTrackable(paths) {
     if (await isGitIgnored(path)) {
       throw new Error(`release artifact is ignored by git; update .gitignore before publishing: ${path}`);
     }
+  }
+}
+
+async function assertReleaseArchiveIsIgnored(path) {
+  if (!(await isGitIgnored(path))) {
+    throw new Error(`release archive should be uploaded to GitHub Releases, not committed: ${path}`);
   }
 }
 

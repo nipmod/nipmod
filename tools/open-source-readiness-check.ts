@@ -80,6 +80,9 @@ check(
       "site/public/releases/** linguist-generated=true linguist-vendored=true linguist-detectable=false"
     )
 );
+const gitignore = read(".gitignore");
+check("gitignore:release-archives-ignored", () => gitignore.includes("site/public/releases/*.tgz"));
+check("gitignore:release-sidecars-trackable", () => gitignore.includes("!site/public/releases/*.tgz.sha256"));
 
 const trademarks = read("TRADEMARKS.md");
 check("trademarks:no-affiliation", () => trademarks.includes("not affiliated with, endorsed by or sponsored by"));
@@ -99,6 +102,12 @@ const forbiddenGenerated = tracked
   .filter(Boolean)
   .filter((file) => /(^|\/)(node_modules|\.next|\.vercel)\//.test(file) || file === "site/public/claude-original.html");
 check("git:no-tracked-build-output", () => forbiddenGenerated.length === 0, { forbiddenGenerated });
+
+const forbiddenReleaseArchives = tracked
+  .split("\n")
+  .filter(Boolean)
+  .filter((file) => /^site\/public\/releases\/nipmod-[^/]+\.tgz$/.test(file));
+check("git:no-tracked-release-archives", () => forbiddenReleaseArchives.length === 0, { forbiddenReleaseArchives });
 
 const forbiddenJavascriptTooling = tracked
   .split("\n")

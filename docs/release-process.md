@@ -13,7 +13,9 @@ Before a public release:
 5. `CHANGELOG.md` includes user-facing changes, verification and security notes.
 6. Public docs match the shipped API surface.
 7. No new third-party endorsement is claimed without explicit approval.
-8. Release artifacts are signed or checksum verifiable.
+8. Release artifacts are signed and checksum verifiable.
+9. Release tarballs are uploaded to GitHub Releases, not committed to the source tree.
+10. The matching `.sha256` and `.sig` sidecars are committed under `site/public/releases`.
 
 ## Versioning
 
@@ -32,6 +34,13 @@ Every release note should include:
 - compatibility impact
 - security impact
 - verification evidence
+
+## Artifacts
+
+The source repository must not track `nipmod-*.tgz` archives. The public site keeps the stable
+`https://nipmod.com/releases/nipmod-<version>.tgz` URL and redirects tarball downloads to the matching
+GitHub Release asset. Checksum and detached Ed25519 signature sidecars remain in `site/public/releases`
+so the installer can fail closed if either verification file is missing or changed.
 
 ## Rollback
 

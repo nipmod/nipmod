@@ -11,6 +11,7 @@ const readmePath = join(import.meta.dirname, "..", "..", "README.md");
 const version = JSON.parse(await readFile(join(import.meta.dirname, "..", "..", "nipmod", "package.json"), "utf8")).version;
 const releaseName = `nipmod-${version}.tgz`;
 const releasePath = join(import.meta.dirname, "..", "public", "releases", releaseName);
+const releaseUrl = `https://github.com/nipmod/nipmod/releases/download/v${version}/${releaseName}`;
 const releaseChecksumPath = `${releasePath}.sha256`;
 const releaseSignaturePath = `${releasePath}.sig`;
 const releasePublicKey = JSON.parse(
@@ -49,10 +50,10 @@ describe("install script", () => {
     expect(readme).toContain("shasum -a 256 -c install.sh.sha256");
   });
 
-  test("installs the committed signed release artifact", async () => {
+  test("installs the signed GitHub release artifact", async () => {
     const temp = await mkdtemp(join(tmpdir(), "nipmod-install-script-real-release-"));
     const result = await runScript({
-      NIPMOD_PACKAGE_URL: `file://${releasePath}`,
+      NIPMOD_PACKAGE_URL: releaseUrl,
       NIPMOD_CHECKSUM_URL: `file://${releaseChecksumPath}`,
       NIPMOD_SIGNATURE_URL: `file://${releaseSignaturePath}`,
       NIPMOD_HOME: join(temp, "home"),
