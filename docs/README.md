@@ -12,6 +12,7 @@ Public docs are organized around the product surface that agents and maintainers
 
 ## Architecture
 
+- [API-first 100% plan](api-first-100-plan.md)
 - [Package intelligence architecture](package-intelligence-architecture.md)
 - [Trust model](trust-model.md)
 - [Source resolver spec](specs/source-resolvers.md)
