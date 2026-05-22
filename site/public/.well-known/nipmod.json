@@ -16,6 +16,10 @@
     "installPlan": "https://nipmod.com/api/install-plan",
     "sourceHealth": "https://nipmod.com/api/sources/health",
     "mcp": "https://nipmod.com/api/mcp",
+    "trustPolicy": {
+      "version": "external-v2",
+      "summary": "External scores combine source metadata, package health signals, public usage context, warnings and install-plan risk. A score is review context, not permission to execute code."
+    },
     "writeBoundary": "Hosted API calls do not write to a caller workspace."
   },
   "sources": [
@@ -31,8 +35,14 @@
     "search": "https://nipmod.com/api/archive/search",
     "confirm": "https://nipmod.com/api/archive/confirm",
     "status": "https://nipmod.com/api/archive/status",
+    "receiptType": "dev.nipmod.package-intelligence-receipt.v1",
     "prepareStores": false,
     "confirmStores": "requires authorized server writer",
+    "rejects": [
+      "trust.decision avoid",
+      "trust.risk high",
+      "high risk install commands"
+    ],
     "writeBoundary": "Prepared records are not persisted by /api/archive/prepare. Durable writes require archive confirmation and an authorized server writer."
   },
   "docs": {
@@ -199,11 +209,23 @@
     "health": "https://nipmod.com/api/sources/health",
     "inspect": "https://nipmod.com/api/inspect",
     "installPlan": "https://nipmod.com/api/install-plan",
+    "trustPolicy": {
+      "version": "external-v2",
+      "factors": [
+        "source",
+        "metadata",
+        "security",
+        "usage",
+        "maintenance",
+        "install"
+      ]
+    },
     "packageIntelligence": {
       "confirm": "https://nipmod.com/api/archive/confirm",
       "prepare": "https://nipmod.com/api/archive/prepare",
       "search": "https://nipmod.com/api/archive/search",
       "status": "https://nipmod.com/api/archive/status",
+      "receiptType": "dev.nipmod.package-intelligence-receipt.v1",
       "writeBoundary": "Durable writes require the configured server-side archive store and an authorized server writer."
     },
     "sources": [

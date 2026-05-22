@@ -6,7 +6,11 @@ import {
 } from "../../../../lib/external-packages";
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
-import { createPackageIntelligenceRecord, validatePackageIntelligenceRecord } from "../../../../lib/package-intelligence";
+import {
+  createPackageIntelligenceReceipt,
+  createPackageIntelligenceRecord,
+  validatePackageIntelligenceRecord
+} from "../../../../lib/package-intelligence";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
 import { checkApiRateLimit } from "../../../../lib/rate-limit";
 import { parseSource, readExternalRecord } from "../shared";
@@ -84,6 +88,7 @@ function archiveRecordResponse(
       writeBoundary: "Prepared records are not persisted by this endpoint. Durable writes require archive confirmation and an authorized server writer."
     },
     preparedOnly: true,
+    receiptPreview: createPackageIntelligenceReceipt(record, { dryRun: true, stored: false }),
     record,
     store: archiveStoreStatus(),
     stored: false,

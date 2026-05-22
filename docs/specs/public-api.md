@@ -6,6 +6,8 @@ Nipmod exposes a hosted package intelligence API for agents. The API searches su
 
 Hosted API calls do not read or write caller workspaces.
 
+Trust output uses policy `external-v2`. Agents should display `trust.score`, `trust.decision`, `trust.warnings` and structured `trust.factors` before asking for install approval.
+
 ## Access
 
 Public beta requests can be made without a key. Optional keys increase rate limits for builders and partners.
@@ -114,11 +116,13 @@ Response type:
 dev.nipmod.external-install-plan.v1
 ```
 
+Install plans return commands as review data only. The hosted API never runs the command.
+
 ## `GET /api/archive/prepare`
 
 Prepare a durable archive record from a resolved external package.
 
-This endpoint does not persist by itself. It returns the normalized archive record and store status.
+This endpoint does not persist by itself. It returns the normalized archive record, validation result, store status and a receipt preview.
 
 Example:
 
@@ -130,6 +134,12 @@ Response type:
 
 ```text
 dev.nipmod.archive-prepare.v1
+```
+
+Receipt preview type:
+
+```text
+dev.nipmod.package-intelligence-receipt.v1
 ```
 
 ## `GET /api/archive/search`
@@ -174,6 +184,8 @@ curl 'https://nipmod.com/api/sources/health'
 Confirm a prepared package intelligence record for durable archive storage.
 
 Public callers can dry run the confirmation. Durable writes require server-side archive configuration and an authorized writer token.
+
+Confirm responses include a receipt. Records with `trust.decision: "avoid"`, `trust.risk: "high"` or high-risk install commands fail validation and are not stored as confirmed archive records.
 
 ## `POST /api/mcp`
 

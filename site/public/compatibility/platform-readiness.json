@@ -57,10 +57,10 @@
     {
       "id": "archive",
       "name": "Nipmod Archive",
-      "productReadiness": 80,
-      "connectionStatus": "Safe mode",
-      "status": "resolver-only-safe-mode",
-      "claim": "Archive prepare, search, confirm dry-run and status endpoints are live; durable writes require archive store env vars.",
+      "productReadiness": 100,
+      "connectionStatus": "Live",
+      "status": "ready",
+      "claim": "Archive prepare, search, confirm dry-run, receipt output and status endpoints are live; durable writes require an authorized Nipmod server writer.",
       "evidence": [
         "https://nipmod.com/packages",
         "https://nipmod.com/api/archive/status",
@@ -69,7 +69,9 @@
       "checks": [
         "verified archive is empty after seed reset",
         "archive prepare returns external_indexed records",
-        "confirm supports dry-run records"
+        "confirm supports dry-run records",
+        "confirm returns package intelligence receipts",
+        "avoid, high-risk trust and high-risk install commands are rejected before persistence"
       ]
     },
     {
@@ -125,7 +127,7 @@
     "native platform partnership or marketplace approval is required for API use",
     "Nipmod owns or republishes external npm, PyPI, GitHub, Hugging Face or MCP packages",
     "every external source result is a verified Nipmod archive package",
-    "durable archive writes are enabled before server-side archive env vars are configured",
+    "public callers can create durable archive records without an authorized Nipmod server writer",
     "wallet, trading, token launch or paid x402 workflows are part of core package use"
   ]
 }

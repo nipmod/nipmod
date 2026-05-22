@@ -41,6 +41,10 @@ describe("package intelligence archive", () => {
 
     expect(record.security.installCommandRisk).toBe("high");
     expect(record.security.warnings).toContain("Install command contains shell patterns that require manual review before execution.");
+    expect(validatePackageIntelligenceRecord(record)).toMatchObject({
+      ok: false,
+      errors: ["high risk install commands cannot be stored as confirmed archive records"]
+    });
   });
 
   test("confirms agent usage as a separate status transition", () => {
@@ -93,6 +97,12 @@ describe("package intelligence archive", () => {
     expect(prepared.preparedOnly).toBe(true);
     expect(prepared.store.configured).toBe(false);
     expect(prepared.stored).toBe(false);
+    expect(prepared.receiptPreview).toMatchObject({
+      dryRun: true,
+      recordId: prepared.record.id,
+      stored: false,
+      type: "dev.nipmod.package-intelligence-receipt.v1"
+    });
     expect(prepared.next.writeBoundary).toContain("not persisted");
 
     const confirm = await confirmPost(
@@ -105,7 +115,35 @@ describe("package intelligence archive", () => {
     const confirmed = await confirm.json();
     expect(confirm.status).toBe(200);
     expect(confirmed.record.archive.status).toBe("agent_confirmed");
+    expect(confirmed.receipt).toMatchObject({
+      archiveStatus: "agent_confirmed",
+      dryRun: true,
+      recordId: confirmed.record.id,
+      stored: false,
+      type: "dev.nipmod.package-intelligence-receipt.v1"
+    });
     expect(confirmed.stored).toBe(false);
+  });
+
+  test("rejects confirmed archive writes for avoid or high-risk records", async () => {
+    const response = await confirmPost(
+      new Request("https://nipmod.com/api/archive/confirm", {
+        body: JSON.stringify({
+          dryRun: true,
+          record: {
+            ...externalRecord,
+            trust: { ...externalRecord.trust, decision: "avoid", risk: "high", warnings: ["Known malicious package pattern."] }
+          }
+        }),
+        headers: { "content-type": "application/json" },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body.validation.errors).toContain("avoid or high risk trust results cannot be stored as confirmed archive records");
+    expect(body.stored).toBe(false);
   });
 
   test("rejects malformed archive record posts instead of persisting untrusted shapes", async () => {
@@ -220,6 +258,12 @@ const externalRecord: ExternalPackageRecord = {
   trust: {
     checkedAt: "2026-05-21T00:00:00.000Z",
     decision: "recommended",
+    factors: [],
+    policy: {
+      summary: "External scores combine public source metadata and warnings.",
+      thresholds: { recommended: 75, usableWithWarning: 50 },
+      version: "external-v2"
+    },
     risk: "low",
     score: 100,
     signals: ["Resolved from npm registry search.", "Repository link is present."],
