@@ -49,7 +49,8 @@ const requiredFiles = [
   ".github/ISSUE_TEMPLATE/feature_request.yml",
   ".github/ISSUE_TEMPLATE/api_bug.yml",
   ".github/ISSUE_TEMPLATE/source_request.yml",
-  ".github/ISSUE_TEMPLATE/package_risk.yml"
+  ".github/ISSUE_TEMPLATE/package_risk.yml",
+  "site/.npmrc"
 ];
 
 const checks = [];
@@ -83,6 +84,8 @@ check(
 const gitignore = read(".gitignore");
 check("gitignore:release-archives-ignored", () => gitignore.includes("site/public/releases/*.tgz"));
 check("gitignore:release-sidecars-trackable", () => gitignore.includes("!site/public/releases/*.tgz.sha256"));
+const siteNpmrc = read("site/.npmrc");
+check("site-npmrc:sharp-build-policy", () => siteNpmrc.includes("only-built-dependencies[]=sharp"));
 
 const trademarks = read("TRADEMARKS.md");
 check("trademarks:no-affiliation", () => trademarks.includes("not affiliated with, endorsed by or sponsored by"));
