@@ -5,7 +5,6 @@ export const homeContent = {
   links: {
     api: "/api-access",
     bankrCoin: "https://token.nipmod.com",
-    bankrCoinExternal: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     docs: "/quickstart#docs",
     github: "https://github.com/nipmod/nipmod",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",

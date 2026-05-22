@@ -32,18 +32,6 @@ test("home page presents the API-first product", async ({ page }) => {
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 });
 
-test("token page gives controlled token routing", async ({ page }) => {
-  await page.goto("/token");
-
-  await expect(page).toHaveTitle("Nipmod");
-  await expect(page.getByRole("heading", { name: "Product first. Token second." })).toBeVisible();
-  await expect(page.getByText("0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open on Bankr" })).toHaveAttribute(
-    "href",
-    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
-  );
-});
-
 test("API access page exposes one public package surface", async ({ page }) => {
   await page.goto("/api-access");
 
