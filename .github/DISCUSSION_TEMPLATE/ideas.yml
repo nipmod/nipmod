@@ -1,0 +1,18 @@
+title: "[idea] "
+labels: ["idea"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What should Nipmod make easier for agents or package maintainers?
+    validations:
+      required: true
+  - type: textarea
+    id: user
+    attributes:
+      label: Who benefits?
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk or abuse concern

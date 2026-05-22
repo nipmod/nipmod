@@ -1,0 +1,31 @@
+name: Source request
+description: Request a new package source resolver.
+title: "[source] "
+labels: ["enhancement", "source"]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      placeholder: "Example: crates.io, Docker Hub, GitLab"
+    validations:
+      required: true
+  - type: input
+    id: public-api
+    attributes:
+      label: Public API or documentation
+      placeholder: "https://..."
+    validations:
+      required: true
+  - type: textarea
+    id: agent-use
+    attributes:
+      label: Agent use case
+      description: What should agents discover or inspect from this source?
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Known constraints
+      description: Rate limits, auth, terms, licenses or private access requirements.

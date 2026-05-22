@@ -34,6 +34,19 @@ Hosted API calls never read or write the caller workspace. Local CLI and MCP too
 | Local MCP server | Live for controlled workspace installs |
 | Hosted MCP endpoint | Live, read-only |
 
+## Architecture
+
+Nipmod has four public layers:
+
+| Layer | Role |
+| --- | --- |
+| Source resolvers | Query public package sources and normalize records. |
+| Trust signals | Score metadata, warnings, source context and risk. |
+| Install plans | Give agents a reviewable plan before workspace writes. |
+| Archive records | Store confirmed useful package intelligence without taking ownership from original sources. |
+
+External package owners keep ownership. Nipmod adds package intelligence, source context and safer agent workflows.
+
 ## API
 
 Public beta access does not require an API key.
@@ -53,7 +66,12 @@ Core endpoints:
 | `GET /api/inspect` | Inspect one exact package record. |
 | `GET /api/install-plan` | Return a safe install plan for an agent to review. |
 | `GET /api/archive/prepare` | Prepare a durable archive record after useful discovery. |
+| `GET /api/archive/search` | Search persisted package intelligence records when enabled. |
+| `GET /api/archive/status` | Report durable archive store state. |
 | `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
+| `GET /api/openapi` | OpenAPI document for the hosted API. |
+
+Full API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md).
 
 ## Install
 
@@ -104,9 +122,9 @@ nipmod mcp serve
 
 The hosted endpoint exposes search, resolve, inspect, view, install plan, and demo tools. It does not expose workspace writes, local file reads, audit, SBOM, claim, or publish tools.
 
-## Publish
+## Publish And Claims
 
-Use publish flows only for repos you own or maintain.
+Use publish and claim flows only for packages or source repos you own or maintain.
 
 ```bash
 nipmod setup gitlawb
@@ -116,7 +134,7 @@ nipmod manifest validate --dir . --json
 nipmod publish . --dry-run --json
 ```
 
-For Gitlawb source packages:
+For source packages that use the current Gitlawb claim helper:
 
 ```bash
 nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json
@@ -131,6 +149,15 @@ nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
 - `packages/first-party/` - First-party package fixtures used for verified archive gates.
 - `docs/` - Operator docs, trust model, package publishing, and architecture notes.
 - `tools/` - TypeScript release, readiness, registry, monitor, and security tooling.
+- `examples/` - Minimal API and agent workflow examples.
+
+## Governance
+
+- Governance: [`GOVERNANCE.md`](GOVERNANCE.md)
+- Maintainers: [`MAINTAINERS.md`](MAINTAINERS.md)
+- Roadmap: [`ROADMAP.md`](ROADMAP.md)
+- Release process: [`docs/release-process.md`](docs/release-process.md)
+- Decision records: [`docs/decisions/`](docs/decisions/)
 
 ## Verify
 

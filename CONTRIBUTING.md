@@ -27,6 +27,8 @@ pnpm verify
 - Do not commit tool handoff files, assistant scratch folders, private prompts or generated design notes.
 - Keep runtime and operator tooling in TypeScript. Do not add new `tools/*.js`, `tools/*.mjs`, or `site/scripts/*.mjs` files.
 - Type annotations for migrated operator tooling should be added in focused patches, with tests kept green.
+- Add a decision record under `docs/decisions/` for changes that affect public API shape, source policy, trust scoring, archive semantics or security boundaries.
+- Update `docs/specs/` when public behavior changes.
 
 ## Commit Style
 

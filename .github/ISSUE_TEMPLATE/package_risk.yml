@@ -1,0 +1,31 @@
+name: Package risk report
+description: Report a suspicious or incorrect package intelligence record.
+title: "[package-risk] "
+labels: ["risk", "package"]
+body:
+  - type: input
+    id: record
+    attributes:
+      label: Package record
+      placeholder: "source:name or package URL"
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: Concern
+      description: What looks wrong, unsafe or misleading?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link public evidence. Do not paste secrets or exploit details.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: This is not an active vulnerability report. Active vulnerabilities should go through SECURITY.md.
+          required: true

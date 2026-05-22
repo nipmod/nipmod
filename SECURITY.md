@@ -1,6 +1,6 @@
 # Security Policy
 
-Nipmod is a decentralized package and verification layer for agent packages stored on Gitlawb.
+Nipmod is a package intelligence API and verification layer for agents.
 
 ## Scope
 
@@ -10,12 +10,12 @@ In scope:
 - `https://node.nipmod.com`
 - `https://nipmod-witness.fly.dev`
 - `https://nipmod-monitor.fly.dev`
-- the Nipmod CLI, installer, registry, advisory feed, transparency log, witness flow and first party packages in this repository
+- the Nipmod hosted API, CLI, installer, registry, advisory feed, transparency log, witness flow and first party packages in this repository
 
 Out of scope:
 
-- third party Gitlawb repositories not owned by Nipmod
-- denial of service that attempts to exhaust Gitlawb, Fly, Vercel or Cloudflare capacity
+- third party packages, repositories, models, datasets or MCP servers not owned by Nipmod
+- denial of service that attempts to exhaust external source APIs, Fly, Vercel or Cloudflare capacity
 - social engineering, spam, physical attacks or attacks against unrelated accounts
 
 ## Report A Vulnerability
@@ -28,8 +28,8 @@ Primary contact:
 
 Include:
 
-- package id, version and digest
-- source repo and source commit
+- package id, source, version and digest when available
+- source repo, source URL and source commit when available
 - proof URL, witness URL and advisory URL when relevant
 - exact command or HTTP request that reproduces the issue
 - expected impact and whether exploitation mutates state
@@ -46,7 +46,7 @@ These are targets, not a paid bug bounty promise.
 
 ## What Nipmod Can Do
 
-Nipmod cannot delete decentralized Gitlawb content. It can:
+Nipmod cannot delete third-party packages from their original source. It can:
 
 - publish signed advisories
 - mark registry entries as quarantined

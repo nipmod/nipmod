@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If Nipmod is useful in your research or product work, cite the software repository."
+title: "Nipmod"
+type: software
+authors:
+  - family-names: "Okur"
+    given-names: "Hazar Kemal"
+license: MIT
+repository-code: "https://github.com/nipmod/nipmod"
+url: "https://nipmod.com"
+version: "1.2.5"
+date-released: "2026-05-21"

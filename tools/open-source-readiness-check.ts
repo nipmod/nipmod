@@ -6,24 +6,49 @@ import { join, resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 
 const requiredFiles = [
+  ".editorconfig",
+  ".node-version",
   "package.json",
   "pnpm-workspace.yaml",
   ".gitattributes",
   "README.md",
   "LICENSE",
+  "CITATION.cff",
+  "GOVERNANCE.md",
+  "MAINTAINERS.md",
+  "ROADMAP.md",
   "SECURITY.md",
   "CONTRIBUTING.md",
   "CODE_OF_CONDUCT.md",
   "TRADEMARKS.md",
   "SUPPORT.md",
   "docs/README.md",
+  "docs/github-excellence.md",
+  "docs/release-process.md",
+  "docs/decisions/README.md",
+  "docs/decisions/0001-api-first-package-network.md",
+  "docs/decisions/0002-external-source-ownership.md",
+  "docs/decisions/0003-durable-archive-gating.md",
+  "docs/specs/public-api.md",
+  "docs/specs/source-resolvers.md",
+  "docs/specs/trust-signals.md",
+  "docs/specs/archive-records.md",
+  "docs/security/supply-chain.md",
+  "examples/http-api/README.md",
+  "examples/http-api/search.ts",
+  "examples/agent-workflow/README.md",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
+  ".github/workflows/codeql.yml",
+  ".github/workflows/scorecard.yml",
   ".github/dependabot.yml",
   ".github/PULL_REQUEST_TEMPLATE.md",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
-  ".github/ISSUE_TEMPLATE/feature_request.yml"
+  ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/ISSUE_TEMPLATE/api_bug.yml",
+  ".github/ISSUE_TEMPLATE/source_request.yml",
+  ".github/ISSUE_TEMPLATE/package_risk.yml"
 ];
 
 const checks = [];
@@ -41,6 +66,8 @@ check("readme:no-stale-safe-mode", () => !readme.includes("durable archive env v
 check("readme:no-duplicate-github-mirror", () => !readme.includes("GitHub mirror"));
 check("readme:telegram", () => readme.includes("| Telegram | https://t.me/nipmod |"));
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
+check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
+check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
 
 const gitattributes = read(".gitattributes");
@@ -83,7 +110,7 @@ check("git:no-public-assistant-artifacts", () => forbiddenPublicArtifacts.length
 const publicTextFiles = tracked
   .split("\n")
   .filter(Boolean)
-  .filter((file) => /\.(css|md|mdx|txt|tsx?|jsx?|json|ya?ml)$/i.test(file))
+  .filter((file) => /\.(cff|css|md|mdx|txt|tsx?|jsx?|json|ya?ml)$/i.test(file))
   .filter((file) => !/(^|\/)(node_modules|dist|\.next|\.vercel)\//.test(file));
 const internalCopyMarkers = [
   "Claude editorial" + " redesign",

@@ -17,10 +17,10 @@ describe("public security policy", () => {
     expect(securityTxt).toContain("Expires: 2027-05-16T00:00:00.000Z");
   });
 
-  test("root security policy documents decentralized quarantine limits", async () => {
+  test("root security policy documents third party source quarantine limits", async () => {
     const policy = await readFile(join(root, "SECURITY.md"), "utf8");
 
-    expect(policy).toContain("Nipmod cannot delete decentralized Gitlawb content");
+    expect(policy).toContain("Nipmod cannot delete third-party packages from their original source");
     expect(policy).toContain("publish signed advisories");
     expect(policy).toContain("quarantined");
     expect(policy).toContain("third party audit status");

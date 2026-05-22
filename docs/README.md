@@ -6,6 +6,7 @@ Public docs are organized around the product surface that agents and maintainers
 
 - [Quickstart](quickstart.md)
 - [Registry API](registry-api.md)
+- [Public API spec](specs/public-api.md)
 - [MCP hosts](mcp-hosts.md)
 - [Packages](packages.md)
 
@@ -13,8 +14,17 @@ Public docs are organized around the product surface that agents and maintainers
 
 - [Package intelligence architecture](package-intelligence-architecture.md)
 - [Trust model](trust-model.md)
+- [Source resolver spec](specs/source-resolvers.md)
+- [Trust signals spec](specs/trust-signals.md)
+- [Archive records spec](specs/archive-records.md)
 - [CLI contract](cli-contract.md)
 - [Multi-source registry](multi-source-registry.md)
+
+## Governance
+
+- [GitHub excellence plan](github-excellence.md)
+- [Decision records](decisions/README.md)
+- [Release process](release-process.md)
 
 ## Product Direction
 
@@ -27,6 +37,7 @@ Public docs are organized around the product surface that agents and maintainers
 
 - [Adoption readiness](adoption-readiness.md)
 - [Audit readiness](audit-readiness.md)
+- [Supply chain security](security/supply-chain.md)
 - [Incident publication](incident-publication.md)
 - [Independent review](independent-review.md)
 
