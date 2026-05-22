@@ -17,6 +17,7 @@ Current public maintainers:
 - Treat external package metadata as untrusted input.
 - Keep API compatibility notes in release entries.
 - Keep public repository history professional.
+- Use verified commit signing for maintainer-led repository changes.
 
 ## Access Review
 
