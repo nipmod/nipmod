@@ -16,6 +16,13 @@ Public docs are organized around the product surface that agents and maintainers
 - [CLI contract](cli-contract.md)
 - [Multi-source registry](multi-source-registry.md)
 
+## Strategy
+
+- [Strategy operating system](strategy/README.md)
+- [Decision register](strategy/decision-register.md)
+- [Market map](strategy/market-map.md)
+- [Product master plan](strategy/product-master-plan.md)
+
 ## Operations
 
 - [Adoption readiness](adoption-readiness.md)
