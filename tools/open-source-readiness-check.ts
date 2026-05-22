@@ -72,7 +72,13 @@ check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly
 
 const gitattributes = read(".gitattributes");
 check("linguist:public-html-generated", () => gitattributes.includes("site/public/*.html linguist-generated=true"));
-check("linguist:release-artifacts-generated", () => gitattributes.includes("site/public/releases/** linguist-generated=true"));
+check(
+  "linguist:release-artifacts-generated",
+  () =>
+    gitattributes.includes(
+      "site/public/releases/** linguist-generated=true linguist-vendored=true linguist-detectable=false"
+    )
+);
 
 const trademarks = read("TRADEMARKS.md");
 check("trademarks:no-affiliation", () => trademarks.includes("not affiliated with, endorsed by or sponsored by"));

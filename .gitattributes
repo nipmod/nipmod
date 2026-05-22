@@ -1,5 +1,5 @@
 # Keep GitHub language stats focused on source code, not generated public artifacts.
-site/public/releases/** linguist-generated=true
+site/public/releases/** linguist-generated=true linguist-vendored=true linguist-detectable=false
 site/public/registry/** linguist-generated=true
 site/public/compatibility/** linguist-generated=true
 site/public/review/** linguist-generated=true
