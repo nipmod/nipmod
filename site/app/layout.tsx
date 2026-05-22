@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { SiteHeader } from "./site-header";
 import "./globals.css";
 
+const previewImage = "https://nipmod.com/nipmod-logo.png?v=20260522";
+const previewImageAlt = "Nipmod logo";
+
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com"
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
     description: "Search package sources, inspect trust and create safe install plans through one hosted API.",
-    images: [{ height: 1248, type: "image/png", url: "/nipmod-logo.png", width: 1248 }],
+    images: [{ alt: previewImageAlt, height: 1248, type: "image/png", url: previewImage, width: 1248 }],
     siteName: "Nipmod",
     title: "Nipmod",
     type: "website",
@@ -25,10 +28,10 @@ export const metadata: Metadata = {
     template: "Nipmod"
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     creator: "@Nipmod",
     description: "Search package sources, inspect trust and create safe install plans through one hosted API.",
-    images: ["/nipmod-logo.png"],
+    images: [previewImage],
     site: "@Nipmod",
     title: "Nipmod"
   }

@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { homeContent } from "../content";
 
 export const metadata: Metadata = {
   alternates: { canonical: "https://nipmod.com/sources" },
   description: "Public package sources Nipmod can resolve for agents.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive through one API for agents.",
     title: "Nipmod sources",
     url: "https://nipmod.com/sources"
-  },
+  }),
   title: "Nipmod"
 };
 

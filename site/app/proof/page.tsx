@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { proofContent } from "./content";
 
 export const metadata: Metadata = {
@@ -6,11 +7,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/proof"
   },
   description: "Run the Nipmod public proof loop for verified install, audit and unsafe manifest blocking.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "A public package installs cleanly, audits cleanly and unsafe manifests fail before release.",
     title: "Nipmod proof",
     url: "https://nipmod.com/proof"
-  },
+  }),
   title: "Nipmod proof"
 };
 

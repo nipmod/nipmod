@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../../metadata";
 import { notFound } from "next/navigation";
 import { CommandBlock } from "../../command-block";
 import {
@@ -39,11 +40,11 @@ export async function generateMetadata({ params }: PackagePageProps): Promise<Me
       canonical: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
     },
     description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
-    openGraph: {
+    openGraph: withPreviewImage({
       description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
       title,
       url: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
-    },
+    }),
     title
   };
 }

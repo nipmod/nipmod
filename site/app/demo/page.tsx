@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { CommandBlock } from "../command-block";
 import registryData from "../registry-data.json";
 import type { RegistryIndex } from "../../lib/registry";
@@ -45,11 +46,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/demo"
   },
   description: "Run the Nipmod package search, trust inspect, install plan and receipt demo.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "A short demo path for agents and humans using the same Nipmod package archive.",
     title: "Nipmod demo",
     url: "https://nipmod.com/demo"
-  },
+  }),
   title: "Nipmod demo"
 };
 

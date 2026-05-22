@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 import { OwnerClaimFlow } from "../owner-claim-flow";
@@ -15,11 +16,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/package"
   },
   description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
     title: "Create a Gitlawb package",
     url: "https://nipmod.com/package"
-  },
+  }),
   title: "Create a Gitlawb package"
 };
 

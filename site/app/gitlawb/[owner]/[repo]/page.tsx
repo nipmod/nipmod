@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../../../metadata";
 import { notFound } from "next/navigation";
 import registryData from "../../../registry-data.json";
 import { CommandBlock } from "../../../command-block";
@@ -42,11 +43,11 @@ export async function generateMetadata({ params }: GitlawbPackagePageProps): Pro
       canonical: `https://nipmod.com/gitlawb/${owner}/${repo}`
     },
     description,
-    openGraph: {
+    openGraph: withPreviewImage({
       description,
       title,
       url: `https://nipmod.com/gitlawb/${owner}/${repo}`
-    },
+    }),
     title
   };
 }

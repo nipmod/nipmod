@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import platformConnections from "../../public/compatibility/platform-connections.json";
 import platformReadiness from "../../public/compatibility/platform-readiness.json";
 import systemReadiness from "../../public/compatibility/system-readiness.json";
@@ -25,11 +26,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/status"
   },
   description: "Public Nipmod proof dashboard for API, archive and source readiness.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Public proof dashboard for the Nipmod API and package archive.",
     title: "Nipmod status",
     url: "https://nipmod.com/status"
-  },
+  }),
   title: "Nipmod status"
 };
 
