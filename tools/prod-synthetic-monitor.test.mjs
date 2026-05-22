@@ -15,13 +15,14 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 17, total: 17 });
+    expect(result.summary).toEqual({ fail: 0, pass: 18, total: 18 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
       "platform_connections",
       "security_disclosure",
       "discovery_manifest",
+      "package_api_contract",
       "remote_readonly_mcp",
       "package_intelligence_archive_api",
       "deploy_drift",
@@ -47,7 +48,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 17, total: 17 });
+    expect(result.summary).toEqual({ fail: 0, pass: 18, total: 18 });
     expect(result.checks.find((check) => check.name === "registry_verified")).toMatchObject({
       data: {
         mode: "empty-public-archive",
@@ -311,9 +312,13 @@ function createFixture({
     archiveStatus: "https://nipmod.test/api/archive/status",
     checkpoint: "https://nipmod.test/transparency/checkpoint.json",
     discovery: "https://nipmod.test/.well-known/nipmod.json",
+    externalInspect: "https://nipmod.test/api/inspect",
+    externalInstallPlan: "https://nipmod.test/api/install-plan",
+    externalSearch: "https://nipmod.test/api/search",
     home: "https://nipmod.test",
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
+    openApi: "https://nipmod.test/api/openapi",
     platforms: "https://nipmod.test/platforms",
     platformConnections: "https://nipmod.test/compatibility/platform-connections.json",
     quorumPolicy: "https://nipmod.test/quorum/policy.json",
@@ -347,6 +352,7 @@ function createFixture({
       formatVersion: 1,
       homepage: endpoints.home,
       docs: {
+        apiSpec: endpoints.openApi,
         platforms: endpoints.platforms
       },
       install: {
@@ -424,6 +430,40 @@ function createFixture({
       `Contact: https://nipmod.test/security\nCanonical: ${endpoints.securityTxt}\nPolicy: ${endpoints.security}`
     ),
     [`GET ${endpoints.discovery}`]: jsonResponse(discovery),
+    [`GET ${endpoints.openApi}`]: jsonResponse({
+      info: { title: "Nipmod API" },
+      openapi: "3.1.0",
+      paths: {
+        "/api/inspect": {},
+        "/api/install-plan": {},
+        "/api/search": {}
+      }
+    }),
+    [`GET ${endpoints.externalSearch}?q=http%20client&sources=npm&limit=3`]: jsonResponse({
+      generatedAt: "2026-05-16T12:40:00.000Z",
+      partial: false,
+      query: "http client",
+      records: [],
+      sourceReports: [{ durationMs: 12, recordCount: 1, source: "npm", status: "ok" }],
+      sourceSummary: { empty: 0, failed: 0, ok: 1, requested: 1 },
+      sources: ["npm"],
+      total: 0,
+      type: "dev.nipmod.external-search.v1"
+    }),
+    [`GET ${endpoints.externalInspect}?source=npm&name=undici`]: jsonResponse({
+      record: {
+        source: "npm",
+        type: "dev.nipmod.external-package.v1"
+      },
+      type: "dev.nipmod.external-inspect.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=npm&name=undici`]: jsonResponse({
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
     [`GET ${endpoints.remoteMcp}`]: jsonResponse({
       endpoint: endpoints.remoteMcp,
       mode: "remote-read-only",

@@ -9,7 +9,10 @@ export function parseSource(value: string | null): ExternalPackageSource {
   if (typeof value === "string" && (EXTERNAL_PACKAGE_SOURCES as readonly string[]).includes(value)) {
     return value as ExternalPackageSource;
   }
-  throw new ExternalPackageError("source must be one of npm, pypi, github, huggingface-model, huggingface-dataset or mcp", 400);
+  throw new ExternalPackageError("source must be one of npm, pypi, github, huggingface-model, huggingface-dataset or mcp", {
+    code: "invalid_source",
+    status: 400
+  });
 }
 
 export function readExternalRecord(value: unknown): ExternalPackageRecord | null {

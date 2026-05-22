@@ -15,9 +15,13 @@ const DEFAULT_ENDPOINTS = {
   archiveStatus: "https://nipmod.com/api/archive/status",
   checkpoint: "https://nipmod.com/transparency/checkpoint.json",
   discovery: "https://nipmod.com/.well-known/nipmod.json",
+  externalInspect: "https://nipmod.com/api/inspect",
+  externalInstallPlan: "https://nipmod.com/api/install-plan",
+  externalSearch: "https://nipmod.com/api/search",
   home: "https://nipmod.com",
   nodeHealth: "https://node.nipmod.com/health",
   nodeUrl: "https://node.nipmod.com",
+  openApi: "https://nipmod.com/api/openapi",
   platforms: "https://nipmod.com/platforms",
   platformConnections: "https://nipmod.com/compatibility/platform-connections.json",
   quorumPolicy: "https://nipmod.com/quorum/policy.json",
@@ -103,6 +107,7 @@ export async function runSyntheticMonitor({
       assertEqual(state.discovery.transparency.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
     }
     assertEqual(state.discovery.docs?.platforms, endpoints.platforms, "discovery platforms URL mismatch");
+    assertEqual(state.discovery.docs?.apiSpec, endpoints.openApi, "discovery OpenAPI URL mismatch");
     assertEqual(
       state.discovery.review?.platformConnections,
       endpoints.platformConnections,
@@ -121,6 +126,38 @@ export async function runSyntheticMonitor({
       "discovery review evidence ledger URL mismatch"
     );
     return { url: endpoints.discovery };
+  });
+
+  await runCheck(checks, "package_api_contract", async () => {
+    const openApi = await fetchJson(endpoints.openApi, timedFetch);
+    assertEqual(openApi.openapi, "3.1.0", "OpenAPI version mismatch");
+    assertEqual(openApi.info?.title, "Nipmod API", "OpenAPI title mismatch");
+    if (!openApi.paths?.["/api/search"] || !openApi.paths?.["/api/inspect"] || !openApi.paths?.["/api/install-plan"]) {
+      throw new Error("OpenAPI package paths missing");
+    }
+
+    const search = await fetchJson(`${endpoints.externalSearch}?q=http%20client&sources=npm&limit=3`, timedFetch);
+    assertEqual(search.type, "dev.nipmod.external-search.v1", "external search type mismatch");
+    if (!Array.isArray(search.sourceReports) || search.sourceReports[0]?.source !== "npm") {
+      throw new Error("external search source reports missing");
+    }
+
+    const inspect = await fetchJson(`${endpoints.externalInspect}?source=npm&name=undici`, timedFetch);
+    assertEqual(inspect.type, "dev.nipmod.external-inspect.v1", "external inspect type mismatch");
+    assertEqual(inspect.record?.type, "dev.nipmod.external-package.v1", "external inspect record type mismatch");
+    assertEqual(inspect.record?.source, "npm", "external inspect source mismatch");
+
+    const plan = await fetchJson(`${endpoints.externalInstallPlan}?source=npm&name=undici`, timedFetch);
+    assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "external install plan type mismatch");
+    assertEqual(plan.plan?.requiresApprovalBeforeWrite, true, "external install plan approval boundary mismatch");
+    if (!Array.isArray(plan.plan?.writes) || plan.plan.writes.length !== 0) {
+      throw new Error("external install plan should not write remotely");
+    }
+
+    return {
+      openapi: endpoints.openApi,
+      searchReports: search.sourceReports.length
+    };
   });
 
   await runCheck(checks, "remote_readonly_mcp", async () => {

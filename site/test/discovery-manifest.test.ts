@@ -50,6 +50,7 @@ describe("nipmod discovery manifest", () => {
   test("keeps docs and agent commands focused on API access", () => {
     expect(manifest.docs).toEqual({
       api: "https://nipmod.com/api-access",
+      apiSpec: "https://nipmod.com/api/openapi",
       audit: "https://nipmod.com/audit",
       createPackage: "https://nipmod.com/package",
       demo: "https://nipmod.com/demo",

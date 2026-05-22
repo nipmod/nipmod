@@ -1,3 +1,5 @@
+import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
+
 type RateLimitPolicy = {
   limit: number;
   name: string;
@@ -18,7 +20,7 @@ type RateLimitResult = {
 const buckets = new Map<string, Bucket>();
 const MAX_BUCKETS = 10_000;
 
-export function checkRateLimit(request: Request, policy: RateLimitPolicy): RateLimitResult {
+export function checkRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
   const now = Date.now();
   pruneBuckets(now);
 
@@ -37,16 +39,19 @@ export function checkRateLimit(request: Request, policy: RateLimitPolicy): RateL
     return {
       headers,
       ok: false,
-      response: Response.json(
+      response: apiJson(
         {
+          code: "rate_limited",
           error: `rate limit exceeded for ${policy.name}`,
-          retryAfter: resetSeconds,
-          type: "dev.nipmod.rate-limit.v1"
+          retryable: true,
+          source: null,
+          status: 429,
+          type: "dev.nipmod.api-error.v1"
         },
         {
+          context,
           headers: {
             ...headers,
-            "cache-control": "no-store",
             "retry-after": String(resetSeconds)
           },
           status: 429

@@ -10,6 +10,7 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("# Nipmod");
     expect(llmsText).toContain("Primary machine manifest: https://nipmod.com/.well-known/nipmod.json");
     expect(llmsText).toContain("API access: https://nipmod.com/api-access");
+    expect(llmsText).toContain("OpenAPI spec: https://nipmod.com/api/openapi");
     expect(llmsText).toContain("Sources: https://nipmod.com/sources");
     expect(llmsText).toContain("System readiness receipt: https://nipmod.com/compatibility/system-readiness.json");
     expect(llmsText).toContain("Platform readiness receipt: https://nipmod.com/compatibility/platform-readiness.json");

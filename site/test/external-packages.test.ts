@@ -26,6 +26,27 @@ describe("external package resolver", () => {
     expect(result.records.map((record) => record.id)).toContain("huggingface-model:IlyaGusev/rut5_base_headline_gen_telegram");
     expect(result.records.every((record) => record.archive.status === "external_indexed")).toBe(true);
     expect(result.records.every((record) => record.archive.persistence === "ephemeral")).toBe(true);
+    expect(result.partial).toBe(false);
+    expect(result.sourceSummary).toMatchObject({ failed: 0, ok: 2, requested: 2 });
+    expect(result.sourceReports.map((report) => report.source)).toEqual(["npm", "huggingface-model"]);
+    expect(result.sourceReports.every((report) => report.durationMs >= 0)).toBe(true);
+  });
+
+  test("reports partial source failures without hiding successful records", async () => {
+    const result = await searchExternalPackages("telegram bot", {
+      fetchImpl: mockFetch,
+      limit: 4,
+      sources: ["npm", "github"]
+    });
+
+    expect(result.partial).toBe(true);
+    expect(result.records.map((record) => record.id)).toContain("npm:node-telegram-bot-api");
+    expect(result.sourceSummary).toMatchObject({ failed: 1, ok: 1, requested: 2 });
+    expect(result.sourceReports.find((report) => report.source === "github")).toMatchObject({
+      error: { code: "source_not_found", retryable: false, status: 404 },
+      recordCount: 0,
+      status: "failed"
+    });
   });
 
   test("inspects exact packages and creates safe install plans", async () => {
@@ -46,11 +67,15 @@ describe("external package resolver", () => {
     const search = await searchGet(new Request("https://nipmod.com/api/search?q=telegram&sources=npm&limit=2"));
     const searchBody = await search.json();
     expect(search.status).toBe(200);
+    expect(search.headers.get("access-control-allow-origin")).toBe("*");
+    expect(search.headers.get("x-nipmod-api-version")).toBe("2026-05-22");
+    expect(search.headers.get("x-nipmod-request-id")).toBeTruthy();
     expect(searchBody.records[0]).toMatchObject({
       archive: { status: "external_indexed" },
       id: "npm:node-telegram-bot-api",
       source: "npm"
     });
+    expect(searchBody.sourceReports[0]).toMatchObject({ source: "npm", status: "ok" });
     expect(searchBody.archivePolicy.ownership).toContain("Original package owners");
 
     const inspect = await inspectGet(new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api"));
@@ -70,6 +95,44 @@ describe("external package resolver", () => {
     );
     const postPlanBody = await postPlan.json();
     expect(postPlanBody.package.id).toBe("npm:node-telegram-bot-api");
+  });
+
+  test("returns structured API errors when all requested sources fail", async () => {
+    vi.stubGlobal("fetch", mockFetch);
+
+    const response = await searchGet(new Request("https://nipmod.com/api/search?q=missing&sources=github&limit=2"));
+    const body = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(body).toMatchObject({
+      code: "all_sources_failed",
+      retryable: true,
+      source: null,
+      status: 502,
+      type: "dev.nipmod.api-error.v1"
+    });
+  });
+
+  test("rejects invalid source and limit parameters instead of silently widening search", async () => {
+    const badSource = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm,bad-source&limit=2"));
+    const badSourceBody = await badSource.json();
+    expect(badSource.status).toBe(400);
+    expect(badSourceBody).toMatchObject({
+      code: "invalid_source",
+      retryable: false,
+      status: 400,
+      type: "dev.nipmod.api-error.v1"
+    });
+
+    const badLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=two"));
+    const badLimitBody = await badLimit.json();
+    expect(badLimit.status).toBe(400);
+    expect(badLimitBody).toMatchObject({
+      code: "invalid_limit",
+      retryable: false,
+      status: 400,
+      type: "dev.nipmod.api-error.v1"
+    });
   });
 });
 

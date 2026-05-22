@@ -4,6 +4,7 @@ Nipmod is one package API for agents.
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API access: https://nipmod.com/api-access
+OpenAPI spec: https://nipmod.com/api/openapi
 Sources: https://nipmod.com/sources
 Archive: https://nipmod.com/packages
 Public package archive registry: https://nipmod.com/registry/packages.json
