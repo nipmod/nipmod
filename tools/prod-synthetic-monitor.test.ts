@@ -15,7 +15,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 18, total: 18 });
+    expect(result.summary).toEqual({ fail: 0, pass: 19, total: 19 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
@@ -23,6 +23,7 @@ describe("production synthetic monitor", () => {
       "security_disclosure",
       "discovery_manifest",
       "package_api_contract",
+      "source_capability_health",
       "remote_readonly_mcp",
       "package_intelligence_archive_api",
       "deploy_drift",
@@ -48,7 +49,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 18, total: 18 });
+    expect(result.summary).toEqual({ fail: 0, pass: 19, total: 19 });
     expect(result.checks.find((check) => check.name === "registry_verified")).toMatchObject({
       data: {
         mode: "empty-public-archive",
@@ -328,6 +329,7 @@ function createFixture({
     remoteMcp: "https://nipmod.test/api/mcp",
     security: "https://nipmod.test/security",
     securityTxt: "https://nipmod.test/.well-known/security.txt",
+    sourceHealth: "https://nipmod.test/api/sources/health",
     trust: "https://nipmod.test/trust",
     witnessHealth: "https://witness.nipmod.test/health",
     witnessRun: "https://witness.nipmod.test/run"
@@ -463,6 +465,36 @@ function createFixture({
         writes: []
       },
       type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=npm&name=react`]: jsonResponse({
+      package: {
+        id: "npm:react",
+        trust: {
+          signals: ["Latest tarball integrity metadata is present."]
+        }
+      },
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.sourceHealth}`]: jsonResponse({
+      archive: {
+        mode: "durable-archive-enabled"
+      },
+      sources: [
+        { installPlanWritesWorkspace: false, source: "npm" },
+        { installPlanWritesWorkspace: false, source: "pypi" },
+        { installPlanWritesWorkspace: false, source: "github" },
+        { installPlanWritesWorkspace: false, source: "huggingface-model" },
+        { installPlanWritesWorkspace: false, source: "huggingface-dataset" },
+        { installPlanWritesWorkspace: false, source: "mcp" }
+      ],
+      summary: {
+        workspaceWritesFromHostedApi: false
+      },
+      type: "dev.nipmod.source-health.v1"
     }),
     [`GET ${endpoints.remoteMcp}`]: jsonResponse({
       endpoint: endpoints.remoteMcp,

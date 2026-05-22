@@ -31,6 +31,7 @@ const DEFAULT_ENDPOINTS = {
   remoteMcp: "https://nipmod.com/api/mcp",
   security: "https://nipmod.com/security",
   securityTxt: "https://nipmod.com/.well-known/security.txt",
+  sourceHealth: "https://nipmod.com/api/sources/health",
   trust: "https://nipmod.com/trust",
   witnessHealth: "https://nipmod-witness.fly.dev/health",
   witnessRun: "https://nipmod-witness.fly.dev/run"
@@ -154,9 +155,34 @@ export async function runSyntheticMonitor({
       throw new Error("external install plan should not write remotely");
     }
 
+    const largeNpmPlan = await fetchJson(`${endpoints.externalInstallPlan}?source=npm&name=react`, timedFetch);
+    assertEqual(largeNpmPlan.type, "dev.nipmod.external-install-plan.v1", "large npm install plan type mismatch");
+    assertEqual(largeNpmPlan.package?.id, "npm:react", "large npm install plan package mismatch");
+    assertEqual(largeNpmPlan.plan?.requiresApprovalBeforeWrite, true, "large npm install plan approval boundary mismatch");
+    if (!Array.isArray(largeNpmPlan.package?.trust?.signals) || !largeNpmPlan.package.trust.signals.length) {
+      throw new Error("large npm install plan missing trust signals");
+    }
+
     return {
       openapi: endpoints.openApi,
       searchReports: search.sourceReports.length
+    };
+  });
+
+  await runCheck(checks, "source_capability_health", async () => {
+    const health = await fetchJson(endpoints.sourceHealth, timedFetch);
+    assertEqual(health.type, "dev.nipmod.source-health.v1", "source health type mismatch");
+    assertEqual(health.summary?.workspaceWritesFromHostedApi, false, "hosted source health write boundary mismatch");
+    const sources = Array.isArray(health.sources) ? health.sources : [];
+    const names = sources.map((source) => source.source).sort().join(",");
+    assertEqual(names, "github,huggingface-dataset,huggingface-model,mcp,npm,pypi", "source health source list mismatch");
+    const unsafe = sources.find((source) => source.installPlanWritesWorkspace !== false);
+    if (unsafe) {
+      throw new Error(`source health exposes workspace writes for ${unsafe.source ?? "unknown"}`);
+    }
+    return {
+      archiveMode: health.archive?.mode,
+      sources: sources.length
     };
   });
 
