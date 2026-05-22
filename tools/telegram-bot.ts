@@ -1283,9 +1283,9 @@ export async function runTelegramBot({
   };
 
   log(
-    `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; disabled=${activeState.disabled}; chat=${
+    `[nipmod-telegram-bot] started; groupOnly=${groupOnly}; disabled=${activeState.disabled}; chat=${
       activeState.allowedChatId ? "configured" : "waiting-for-start"
-    }; mentionOnly=${mentionOnly}; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? `${aiProvider}:${aiModel}` : "off"}`
+    }; mentionOnly=${mentionOnly}; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? "configured" : "off"}`
   );
 
   while (!signal?.aborted) {
