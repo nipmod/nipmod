@@ -1,4 +1,8 @@
 # Keep GitHub language stats focused on source code, not generated public artifacts.
+*.tgz binary -diff linguist-generated=true linguist-vendored=true linguist-detectable=false
+*.tgz.sha256 text linguist-generated=true linguist-vendored=true linguist-detectable=false
+*.tgz.sig text linguist-generated=true linguist-vendored=true linguist-detectable=false
+*.json.sig text linguist-generated=true linguist-vendored=true linguist-detectable=false
 site/public/releases/** linguist-generated=true linguist-vendored=true linguist-detectable=false
 site/public/registry/** linguist-generated=true
 site/public/compatibility/** linguist-generated=true
