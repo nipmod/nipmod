@@ -126,7 +126,7 @@ function fakeFetch({
       });
       return Response.json({ ok: true }, { status: 202 });
     }
-    const payload = overrides[url] ?? fixture(url);
+    const payload = overrides[url] ?? fixture(url, init);
     if (typeof payload === "string") {
       return new Response(payload, {
         headers: { "content-type": "text/html; charset=utf-8" },
@@ -137,7 +137,7 @@ function fakeFetch({
   }) as typeof fetch;
 }
 
-function fixture(url: string): unknown {
+function fixture(url: string, init?: RequestInit): unknown {
   switch (url) {
     case endpoints.home:
       return "<html>nipmod</html>";
@@ -219,12 +219,26 @@ function fixture(url: string): unknown {
         type: "dev.nipmod.archive-status.v1"
       };
     case endpoints.mcp:
-      return {
-        jsonrpc: "2.0",
-        result: {
-          tools: [{ name: "nipmod.resolve" }]
-        }
-      };
+      return String(init?.body).includes("nipmod.external_install_plan")
+        ? {
+            jsonrpc: "2.0",
+            result: {
+              structuredContent: {
+                plan: {
+                  plan: {
+                    requiresApprovalBeforeWrite: true
+                  },
+                  type: "dev.nipmod.external-install-plan.v1"
+                }
+              }
+            }
+          }
+        : {
+            jsonrpc: "2.0",
+            result: {
+              tools: [{ name: "nipmod.resolve" }]
+            }
+          };
     case endpoints.nodeHealth:
       return { status: "ok" };
     case endpoints.witnessHealth:

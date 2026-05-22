@@ -222,6 +222,35 @@ export async function runProductionMonitor({
     return { url: endpoints.mcp };
   });
 
+  await runCheck(checks, "api_remote_mcp_install_plan", async () => {
+    const payload = await fetchJsonPost(
+      endpoints.mcp,
+      {
+        id: 2,
+        jsonrpc: "2.0",
+        method: "tools/call",
+        params: {
+          arguments: {
+            name: "react",
+            source: "npm"
+          },
+          name: "nipmod.external_install_plan"
+        }
+      },
+      timedFetch
+    );
+    assertRecord(payload, "remote MCP install plan");
+    assertEqual(payload.jsonrpc, "2.0", "remote MCP install plan jsonrpc mismatch");
+    assertNestedEqual(payload, ["result", "structuredContent", "plan", "type"], "dev.nipmod.external-install-plan.v1", "remote MCP install plan type mismatch");
+    assertNestedEqual(
+      payload,
+      ["result", "structuredContent", "plan", "plan", "requiresApprovalBeforeWrite"],
+      true,
+      "remote MCP install plan approval boundary drifted"
+    );
+    return { url: endpoints.mcp };
+  });
+
   await runCheck(checks, "node_health", async () => {
     const payload = await fetchJson(endpoints.nodeHealth, timedFetch);
     assertRecord(payload, "node health");
