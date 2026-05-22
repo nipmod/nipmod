@@ -62,6 +62,49 @@ describe("external package resolver", () => {
     expect(plan.plan.commands).toEqual(["npm install node-telegram-bot-api"]);
   });
 
+  test("uses compact npm latest manifests for popular packages", async () => {
+    const requestedUrls: string[] = [];
+    const fetchImpl = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      requestedUrls.push(url);
+      if (url === "https://registry.npmjs.org/react") {
+        return new Response("x".repeat(2_500_000), {
+          headers: { "content-type": "application/json" },
+          status: 200
+        });
+      }
+      if (url === "https://registry.npmjs.org/react/latest") {
+        return jsonResponse({
+          _npmUser: { name: "react-bot" },
+          description: "React is a JavaScript library for building user interfaces.",
+          dist: {
+            integrity: "sha512-test",
+            signatures: [{ keyid: "SHA256:test", sig: "test" }]
+          },
+          license: "MIT",
+          name: "react",
+          repository: { url: "git+https://github.com/facebook/react.git" },
+          version: "19.2.6"
+        });
+      }
+      if (url === "https://api.npmjs.org/downloads/point/last-month/react") {
+        return jsonResponse({ downloads: 561_906_819, package: "react" });
+      }
+      return jsonResponse({ error: "not found" }, 404);
+    };
+
+    const record = await inspectExternalPackage("npm", "react", { fetchImpl });
+    const plan = createExternalInstallPlan(record);
+
+    expect(requestedUrls).toContain("https://registry.npmjs.org/react/latest");
+    expect(requestedUrls).not.toContain("https://registry.npmjs.org/react");
+    expect(record.id).toBe("npm:react");
+    expect(record.metrics.downloads).toBe(561_906_819);
+    expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
+    expect(record.trust.signals).toContain("npm registry signature metadata is present.");
+    expect(plan.plan.commands).toEqual(["npm install react"]);
+  });
+
   test("publishes search, inspect and install-plan API routes", async () => {
     vi.stubGlobal("fetch", mockFetch);
 

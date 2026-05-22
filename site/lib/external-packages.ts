@@ -501,32 +501,75 @@ async function searchNpm(query: string, limit: number, fetchImpl: typeof fetch, 
 }
 
 async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
-  const payload = await fetchJson(`https://registry.npmjs.org/${encodeNpmName(name)}`, fetchImpl, timeoutMs, { source: "npm" });
-  if (!isRecord(payload)) {
+  const manifest = await fetchJson(`https://registry.npmjs.org/${encodeNpmName(name)}/latest`, fetchImpl, timeoutMs, { source: "npm" });
+  if (!isRecord(manifest)) {
     return null;
   }
-  const latest = readNestedString(payload, ["dist-tags", "latest"]);
-  const versionData = latest && isRecord(payload.versions) ? readRecord(payload.versions[latest]) : null;
-  const normalized = {
-    downloads: null,
-    package: {
-      date: readString(payload.time),
-      description: readString(versionData?.description) ?? readString(payload.description),
-      keywords: [],
-      license: readString(versionData?.license) ?? readString(payload.license),
-      links: {
-        bugs: readNestedString(versionData, ["bugs", "url"]),
-        homepage: readString(versionData?.homepage),
-        npm: `https://www.npmjs.com/package/${name}`,
-        repository: normalizeRepositoryUrl(readNestedString(versionData, ["repository", "url"]) ?? readString(versionData?.repository))
-      },
-      name: readString(payload.name) ?? name,
-      version: latest
+  const packageName = readString(manifest.name) ?? name;
+  const version = readString(manifest.version);
+  const repo = normalizeRepositoryUrl(readNestedString(manifest, ["repository", "url"]) ?? readString(manifest.repository));
+  const license = readString(manifest.license);
+  const integrity = readNestedString(manifest, ["dist", "integrity"]);
+  const signatures = readRecord(manifest.dist)?.signatures;
+  const hasSignature = Array.isArray(signatures) && signatures.length > 0;
+  const downloads = await npmMonthlyDownloads(packageName, fetchImpl, timeoutMs);
+  const warnings = [
+    ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
+    ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."])
+  ];
+  const score = clampScore(
+    52 +
+      (license ? 8 : 0) +
+      (repo ? 8 : 0) +
+      (integrity ? 10 : 0) +
+      (hasSignature ? 8 : 0) +
+      Math.min(12, Math.log10((downloads ?? 0) + 1) * 2)
+  );
+
+  return makeRecord({
+    description: readString(manifest.description) ?? "",
+    displayName: packageName,
+    id: `npm:${packageName}`,
+    install: {
+      command: `npm install ${packageName}`,
+      manager: "npm",
+      notes: ["Install from the original npm registry. Nipmod does not claim ownership of this package."]
     },
-    score: { detail: { maintenance: 0.5, popularity: 0.5, quality: 0.5 } },
-    updated: latest ? readNestedString(payload.time, [latest]) : readString(payload.modified)
-  };
-  return npmSearchRecord(normalized);
+    license,
+    metrics: { downloads },
+    name: packageName,
+    originalUrl: `https://www.npmjs.com/package/${packageName}`,
+    owner: readNestedString(manifest, ["_npmUser", "name"]) ?? null,
+    registryUrl: `https://registry.npmjs.org/${encodeNpmName(packageName)}/latest`,
+    repo,
+    source: "npm",
+    sourceKind: "package-registry",
+    signals: [
+      "Resolved from the npm latest package manifest.",
+      downloads ? `npm monthly downloads: ${downloads.toLocaleString("en-US")}` : "npm download data was not returned.",
+      integrity ? "Latest tarball integrity metadata is present." : "Latest tarball integrity metadata is missing.",
+      hasSignature ? "npm registry signature metadata is present." : "npm registry signature metadata is missing.",
+      repo ? "Repository link is present." : "Repository link is missing."
+    ],
+    trustScore: score,
+    updatedAt: null,
+    version,
+    warnings
+  });
+}
+
+async function npmMonthlyDownloads(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<number | null> {
+  try {
+    const payload = await fetchJson(
+      `https://api.npmjs.org/downloads/point/last-month/${encodeNpmName(name)}`,
+      fetchImpl,
+      Math.min(timeoutMs, 3500),
+      { source: "npm" }
+    );
+    return isRecord(payload) ? readNumber(payload.downloads) : null;
+  } catch {
+    return null;
+  }
 }
 
 function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
