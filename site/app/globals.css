@@ -3700,13 +3700,14 @@ body {
 .brand-icon-button svg {
   display: block;
   filter: brightness(0) invert(1);
-  height: 18px;
+  height: 17px;
+  object-fit: contain;
   opacity: 1;
-  width: 18px;
+  width: 17px;
 }
 
 .brand-icon-button .brand-base-icon {
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .brand-icon-button:hover {

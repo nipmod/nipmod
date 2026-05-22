@@ -48,6 +48,9 @@ export function SiteHeader() {
       </nav>
 
       <div className="brand-socials" aria-label="Nipmod links">
+        <SocialIcon href={homeContent.links.github} label="Open Nipmod GitHub repository in a new tab" title="GitHub">
+          <img alt="" height="18" src="/github-logo.svg" width="18" />
+        </SocialIcon>
         <SocialIcon href={homeContent.links.x} label="Open Nipmod on X in a new tab" title="X">
           <svg aria-hidden="true" viewBox="0 0 24 24">
             <path
@@ -56,14 +59,11 @@ export function SiteHeader() {
             />
           </svg>
         </SocialIcon>
-        <SocialIcon href={homeContent.links.bankrCoin} label="Open Nipmod token page in a new tab" title="$NPM on Base">
-          <img alt="" className="brand-base-icon" height="18" src="/base-logo.svg" width="18" />
-        </SocialIcon>
         <SocialIcon href={homeContent.links.telegram} label="Open Nipmod Telegram group in a new tab" title="Telegram">
           <img alt="" height="18" src="/telegram-logo.svg" width="18" />
         </SocialIcon>
-        <SocialIcon href={homeContent.links.github} label="Open Nipmod GitHub repository in a new tab" title="GitHub">
-          <img alt="" height="18" src="/github-logo.svg" width="18" />
+        <SocialIcon href={homeContent.links.bankrCoin} label="Open Nipmod token page in a new tab" title="$NPM on Base">
+          <img alt="" className="brand-base-icon" height="18" src="/base-logo.svg" width="18" />
         </SocialIcon>
       </div>
     </header>
