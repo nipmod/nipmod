@@ -599,7 +599,7 @@ function createFixture({
       writeBoundary:
         "Durable package intelligence writes require the configured server-side archive store and an authorized server writer."
     }),
-    [`GET ${endpoints.archiveSearch}?q=http%20client`]: jsonResponse({
+    [`GET ${endpoints.archiveSearch}?q=react`]: jsonResponse({
       configured: false,
       records: [],
       total: 0,

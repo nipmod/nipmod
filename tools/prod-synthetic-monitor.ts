@@ -251,10 +251,14 @@ export async function runSyntheticMonitor({
       throw new Error("archive status mode is invalid");
     }
 
-    const search = await fetchJson(`${endpoints.archiveSearch}?q=http%20client`, timedFetch);
+    const archiveSearchQuery = "react";
+    const search = await fetchJson(`${endpoints.archiveSearch}?q=${encodeURIComponent(archiveSearchQuery)}`, timedFetch);
     assertEqual(search.type, "dev.nipmod.package-intelligence-search.v1", "archive search type mismatch");
     if (!Array.isArray(search.records)) {
       throw new Error("archive search records are not an array");
+    }
+    if (status.mode === "durable-archive-enabled" && search.total < 1) {
+      throw new Error("durable archive search returned no seeded package intelligence records");
     }
 
     const prepare = await fetchJson(`${endpoints.archivePrepare}?source=npm&name=undici`, timedFetch);
@@ -279,6 +283,7 @@ export async function runSyntheticMonitor({
 
     return {
       mode: status.mode,
+      query: archiveSearchQuery,
       persistedRecords: search.total
     };
   });
