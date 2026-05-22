@@ -121,8 +121,9 @@ describe("telegram bot message metadata", () => {
     assert.equal(getTelegramMessageText(captionUpdate.message), "secret words should not be logged");
     assert.equal(getTelegramMessageType(captionUpdate.message), "caption");
     assert.equal(getTelegramUpdateMessage(captionUpdate), captionUpdate.message);
-    assert.equal(safeTelegramMessageLogMeta(captionUpdate), "update=22 chat=-100123 user=7 type=caption hasText=true textLength=33 thread=none");
+    assert.equal(safeTelegramMessageLogMeta(captionUpdate), "update=22 chat=present user=present type=caption hasText=true textLength=33 thread=none");
     assert.doesNotMatch(safeTelegramMessageLogMeta(captionUpdate), /secret words/);
+    assert.doesNotMatch(safeTelegramMessageLogMeta(captionUpdate), /-100123|user=7/);
   });
 
   test("reads edited messages as normal update text", () => {
@@ -137,7 +138,7 @@ describe("telegram bot message metadata", () => {
     };
 
     assert.equal(getTelegramUpdateMessage(editedUpdate), editedUpdate.edited_message);
-    assert.equal(safeTelegramMessageLogMeta(editedUpdate), "update=23 chat=-100123 user=7 type=text hasText=true textLength=13 thread=12");
+    assert.equal(safeTelegramMessageLogMeta(editedUpdate), "update=23 chat=present user=present type=text hasText=true textLength=13 thread=present");
   });
 });
 

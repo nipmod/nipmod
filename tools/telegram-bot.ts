@@ -388,18 +388,19 @@ export function safeTelegramMessageLogMeta(update) {
     return `update=${update?.update_id ?? "unknown"} type=no-message`;
   }
   const text = getTelegramMessageText(message);
-  const threadId = message.message_thread_id === undefined ? "none" : message.message_thread_id;
-  const userId = message.from?.id === undefined ? "unknown" : message.from.id;
-  const chatId = message.chat?.id === undefined ? "unknown" : message.chat.id;
   return [
     `update=${update?.update_id ?? "unknown"}`,
-    `chat=${chatId}`,
-    `user=${userId}`,
+    `chat=${logPresence(message.chat?.id)}`,
+    `user=${logPresence(message.from?.id)}`,
     `type=${getTelegramMessageType(message)}`,
     `hasText=${text ? "true" : "false"}`,
     `textLength=${text.length}`,
-    `thread=${threadId}`
+    `thread=${logPresence(message.message_thread_id)}`
   ].join(" ");
+}
+
+function logPresence(value) {
+  return value === undefined || value === null ? "none" : "present";
 }
 
 export function createConversationMemory() {
@@ -1283,7 +1284,7 @@ export async function runTelegramBot({
 
   log(
     `[nipmod-telegram-bot] @${normalizedUsername} started; groupOnly=${groupOnly}; disabled=${activeState.disabled}; chat=${
-      activeState.allowedChatId ?? "waiting-for-/start"
+      activeState.allowedChatId ? "configured" : "waiting-for-start"
     }; mentionOnly=${mentionOnly}; answerGroupQuestions=${answerGroupQuestions}; ai=${aiEnabled && aiApiKey ? `${aiProvider}:${aiModel}` : "off"}`
   );
 
@@ -1342,19 +1343,21 @@ export async function runTelegramBot({
           activeState.allowedChatId = reply.statePatch.allowedChatId;
           activeState.allowedChatTitle = reply.statePatch.allowedChatTitle;
           activeState.boundAt = reply.statePatch.boundAt;
-          log(`[nipmod-telegram-bot] bound to group ${activeState.allowedChatTitle ?? activeState.allowedChatId}`);
+          log(
+            `[nipmod-telegram-bot] bound to group chat=configured title=${activeState.allowedChatTitle ? "present" : "none"}`
+          );
         }
         if (reply.adminAction === "pause") {
           activeState.disabled = true;
           activeState.disabledAt = new Date().toISOString();
           activeState.disabledBy = userId;
-          log(`[nipmod-telegram-bot] paused chat=${message.chat.id} user=${userId ?? "unknown"} update=${update.update_id}`);
+          log(`[nipmod-telegram-bot] paused update=${update.update_id} user=${logPresence(userId)}`);
         }
         if (reply.adminAction === "resume") {
           activeState.disabled = false;
           activeState.resumedAt = new Date().toISOString();
           activeState.resumedBy = userId;
-          log(`[nipmod-telegram-bot] resumed chat=${message.chat.id} user=${userId ?? "unknown"} update=${update.update_id}`);
+          log(`[nipmod-telegram-bot] resumed update=${update.update_id} user=${logPresence(userId)}`);
         }
         if (reply.text) {
           if (!isAdminCommand && !reply.statePatch?.allowedChatId) {
@@ -1368,16 +1371,20 @@ export async function runTelegramBot({
               await client.sendMessage(message.chat.id, "Rate limit. Try again in a minute.", {
                 messageThreadId: message.message_thread_id
               });
-              log(`[nipmod-telegram-bot] rate_limited chat=${message.chat.id} user=${userId ?? "unknown"} update=${update.update_id}`);
+              log(`[nipmod-telegram-bot] rate_limited update=${update.update_id} user=${logPresence(userId)}`);
               continue;
             }
           }
           await client.sendMessage(message.chat.id, reply.text, {
             messageThreadId: message.message_thread_id
           });
-          log(`[nipmod-telegram-bot] replied chat=${message.chat.id} update=${update.update_id}${reply.safetyEvent ? ` safety=${reply.safetyEvent}` : ""}${reply.adminAction ? ` admin=${reply.adminAction}` : ""}`);
+          log(
+            `[nipmod-telegram-bot] replied update=${update.update_id}${reply.safetyEvent ? ` safety=${reply.safetyEvent}` : ""}${
+              reply.adminAction ? ` admin=${reply.adminAction}` : ""
+            }`
+          );
         } else if (reply.ignored) {
-          log(`[nipmod-telegram-bot] ignored reason=${reply.reason} chat=${message.chat.id} update=${update.update_id}`);
+          log(`[nipmod-telegram-bot] ignored reason=${reply.reason} update=${update.update_id}`);
         }
         if (isChatAllowed(message.chat, { allowedChatId: activeState.allowedChatId, groupOnly })) {
           rememberConversationText(conversationMemory, message, messageText, {

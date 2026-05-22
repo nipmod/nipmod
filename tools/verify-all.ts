@@ -181,8 +181,8 @@ async function verifyProduction() {
     "https://nipmod.com",
     (text) =>
       text.includes("Search, inspect and install verified agent packages") &&
-      text.includes("https://x.com/Nipmod") &&
-      text.includes("https://github.com/nipmod/nipmod"),
+      hasHtmlHref(text, "https://x.com/Nipmod") &&
+      hasHtmlHref(text, "https://github.com/nipmod/nipmod"),
     "homepage product surface missing"
   );
   await assertText(
@@ -367,6 +367,23 @@ async function assertText(url, predicate, message) {
   if (!predicate(text)) {
     throw new Error(message);
   }
+}
+
+function hasHtmlHref(html, expectedHref) {
+  for (const segment of html.split("href=").slice(1)) {
+    const quote = segment[0];
+    if (quote !== `"` && quote !== "'") {
+      continue;
+    }
+    const endIndex = segment.indexOf(quote, 1);
+    if (endIndex === -1) {
+      continue;
+    }
+    if (segment.slice(1, endIndex) === expectedHref) {
+      return true;
+    }
+  }
+  return false;
 }
 
 async function fetchBytes(url) {

