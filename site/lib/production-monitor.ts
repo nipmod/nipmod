@@ -8,10 +8,17 @@ export interface MonitorDestination {
 }
 
 export interface MonitorEndpointConfig {
+  archivePrepare: string;
+  archiveStatus: string;
   discovery: string;
   home: string;
+  installPlan: string;
+  mcp: string;
   nodeHealth: string;
+  openapi: string;
   registry: string;
+  search: string;
+  sourceHealth: string;
   trust: string;
   witnessHealth: string;
 }
@@ -55,10 +62,17 @@ export interface ProductionMonitorResult {
 }
 
 const DEFAULT_ENDPOINTS: MonitorEndpointConfig = {
+  archivePrepare: "https://nipmod.com/api/archive/prepare?source=npm&name=react",
+  archiveStatus: "https://nipmod.com/api/archive/status",
   discovery: "https://nipmod.com/.well-known/nipmod.json",
   home: "https://nipmod.com",
+  installPlan: "https://nipmod.com/api/install-plan?source=npm&name=react",
+  mcp: "https://nipmod.com/api/mcp",
   nodeHealth: "https://node.nipmod.com/health",
+  openapi: "https://nipmod.com/api/openapi",
   registry: "https://nipmod.com/registry/packages.json",
+  search: "https://nipmod.com/api/search?q=react&sources=npm&limit=1",
+  sourceHealth: "https://nipmod.com/api/sources/health",
   trust: "https://nipmod.com/trust",
   witnessHealth: "https://nipmod-witness.fly.dev/health"
 };
@@ -124,6 +138,88 @@ export async function runProductionMonitor({
       mode: registry.packages.length === 0 ? "empty-public-archive" : "verified-public-packages",
       packages: registry.packages.length
     };
+  });
+
+  await runCheck(checks, "api_source_health", async () => {
+    const payload = await fetchJson(endpoints.sourceHealth, timedFetch);
+    assertRecord(payload, "source health");
+    assertEqual(payload.type, "dev.nipmod.source-health.v1", "source health type mismatch");
+    assertNestedEqual(payload, ["summary", "workspaceWritesFromHostedApi"], false, "hosted API workspace write boundary drifted");
+    const sources = payload.sources;
+    if (!Array.isArray(sources) || sources.length < 6) {
+      throw new Error("source health missing expected sources");
+    }
+    return { sources: sources.length, url: endpoints.sourceHealth };
+  });
+
+  await runCheck(checks, "api_openapi_contract", async () => {
+    const payload = await fetchJson(endpoints.openapi, timedFetch);
+    assertRecord(payload, "openapi");
+    assertEqual(payload.openapi, "3.1.0", "OpenAPI version mismatch");
+    const paths = payload.paths;
+    assertRecord(paths, "openapi paths");
+    for (const path of ["/api/search", "/api/inspect", "/api/install-plan", "/api/archive/prepare", "/api/archive/confirm", "/api/mcp"]) {
+      if (!isRecordValue(paths[path])) {
+        throw new Error(`OpenAPI missing ${path}`);
+      }
+    }
+    return { paths: Object.keys(paths).length, url: endpoints.openapi };
+  });
+
+  await runCheck(checks, "api_external_search", async () => {
+    const payload = await fetchJson(endpoints.search, timedFetch);
+    assertRecord(payload, "external search");
+    assertEqual(payload.type, "dev.nipmod.external-search.v1", "external search type mismatch");
+    const records = payload.records;
+    if (!Array.isArray(records) || records.length < 1) {
+      throw new Error("external search returned no records");
+    }
+    const first = records[0];
+    assertRecord(first, "external search first record");
+    assertEqual(first.source, "npm", "external search first source mismatch");
+    return { records: records.length, url: endpoints.search };
+  });
+
+  await runCheck(checks, "api_install_plan", async () => {
+    const payload = await fetchJson(endpoints.installPlan, timedFetch);
+    assertRecord(payload, "install plan");
+    assertEqual(payload.type, "dev.nipmod.external-install-plan.v1", "install plan type mismatch");
+    assertNestedEqual(payload, ["plan", "requiresApprovalBeforeWrite"], true, "install plan approval boundary drifted");
+    return { url: endpoints.installPlan };
+  });
+
+  await runCheck(checks, "api_archive_prepare", async () => {
+    const payload = await fetchJson(endpoints.archivePrepare, timedFetch);
+    assertRecord(payload, "archive prepare");
+    assertEqual(payload.type, "dev.nipmod.archive-prepare.v1", "archive prepare type mismatch");
+    assertEqual(payload.preparedOnly, true, "archive prepare must remain prepare-only");
+    assertEqual(payload.stored, false, "archive prepare must not persist records");
+    return { url: endpoints.archivePrepare };
+  });
+
+  await runCheck(checks, "api_archive_status", async () => {
+    const payload = await fetchJson(endpoints.archiveStatus, timedFetch);
+    assertRecord(payload, "archive status");
+    assertEqual(payload.type, "dev.nipmod.archive-status.v1", "archive status type mismatch");
+    assertEqual(payload.driver, "supabase-rest", "archive store driver mismatch");
+    return { url: endpoints.archiveStatus };
+  });
+
+  await runCheck(checks, "api_remote_mcp", async () => {
+    const payload = await fetchJsonPost(
+      endpoints.mcp,
+      {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "tools/list",
+        params: {}
+      },
+      timedFetch
+    );
+    assertRecord(payload, "remote MCP");
+    assertEqual(payload.jsonrpc, "2.0", "remote MCP jsonrpc mismatch");
+    assertNestedArrayIncludes(payload, ["result", "tools"], "nipmod.resolve", "remote MCP missing resolve tool");
+    return { url: endpoints.mcp };
   });
 
   await runCheck(checks, "node_health", async () => {
@@ -361,6 +457,18 @@ async function fetchJson(url: string, fetchFn: typeof fetch): Promise<unknown> {
   return response.json();
 }
 
+async function fetchJsonPost(url: string, body: unknown, fetchFn: typeof fetch): Promise<unknown> {
+  const response = await fetchFn(url, {
+    body: JSON.stringify(body),
+    headers: { accept: "application/json", "content-type": "application/json" },
+    method: "POST"
+  });
+  if (!response.ok) {
+    throw new Error(`failed to post ${url}: ${response.status}`);
+  }
+  return response.json();
+}
+
 function isVerifiedPackage(value: unknown): boolean {
   if (!isRecordValue(value)) {
     return false;
@@ -421,6 +529,23 @@ function assertNestedEqual(value: Record<string, unknown>, path: string[], expec
     current = current[part];
   }
   assertEqual(current, expected, message);
+}
+
+function assertNestedArrayIncludes(value: Record<string, unknown>, path: string[], expectedName: string, message: string): void {
+  let current: unknown = value;
+  for (const part of path) {
+    if (!isRecordValue(current)) {
+      throw new Error(message);
+    }
+    current = current[part];
+  }
+  if (!Array.isArray(current)) {
+    throw new Error(message);
+  }
+  const hasExpected = current.some((item) => isRecordValue(item) && item.name === expectedName);
+  if (!hasExpected) {
+    throw new Error(message);
+  }
 }
 
 function assertRecord(value: unknown, label: string): asserts value is Record<string, unknown> {

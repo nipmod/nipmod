@@ -2,10 +2,17 @@ import { describe, expect, test } from "vitest";
 import { readMonitorDestinationsFromEnv, runProductionMonitor, type MonitorEndpointConfig } from "../lib/production-monitor";
 
 const endpoints: MonitorEndpointConfig = {
+  archivePrepare: "https://nipmod.test/api/archive/prepare?source=npm&name=react",
+  archiveStatus: "https://nipmod.test/api/archive/status",
   discovery: "https://nipmod.test/.well-known/nipmod.json",
   home: "https://nipmod.test",
+  installPlan: "https://nipmod.test/api/install-plan?source=npm&name=react",
+  mcp: "https://nipmod.test/api/mcp",
   nodeHealth: "https://node.nipmod.test/health",
+  openapi: "https://nipmod.test/api/openapi",
   registry: "https://nipmod.test/registry/packages.json",
+  search: "https://nipmod.test/api/search?q=react&sources=npm&limit=1",
+  sourceHealth: "https://nipmod.test/api/sources/health",
   trust: "https://nipmod.test/trust",
   witnessHealth: "https://witness.nipmod.test/health"
 };
@@ -112,7 +119,7 @@ function fakeFetch({
 } = {}): typeof fetch {
   return (async (input, init) => {
     const url = String(input);
-    if (init?.method === "POST") {
+    if (init?.method === "POST" && url.includes("/api/alerts/")) {
       posts.push({
         authorization: new Headers(init.headers).get("authorization"),
         url
@@ -160,6 +167,63 @@ function fixture(url: string): unknown {
             }
           }
         ]
+      };
+    case endpoints.sourceHealth:
+      return {
+        sources: [
+          { source: "npm", status: "available" },
+          { source: "pypi", status: "available" },
+          { source: "github", status: "available" },
+          { source: "huggingface-model", status: "available" },
+          { source: "huggingface-dataset", status: "available" },
+          { source: "mcp", status: "available" }
+        ],
+        summary: {
+          available: 6,
+          requested: 6,
+          workspaceWritesFromHostedApi: false
+        },
+        type: "dev.nipmod.source-health.v1"
+      };
+    case endpoints.openapi:
+      return {
+        openapi: "3.1.0",
+        paths: {
+          "/api/archive/confirm": {},
+          "/api/archive/prepare": {},
+          "/api/inspect": {},
+          "/api/install-plan": {},
+          "/api/mcp": {},
+          "/api/search": {}
+        }
+      };
+    case endpoints.search:
+      return {
+        records: [{ name: "react", source: "npm" }],
+        type: "dev.nipmod.external-search.v1"
+      };
+    case endpoints.installPlan:
+      return {
+        plan: { requiresApprovalBeforeWrite: true },
+        type: "dev.nipmod.external-install-plan.v1"
+      };
+    case endpoints.archivePrepare:
+      return {
+        preparedOnly: true,
+        stored: false,
+        type: "dev.nipmod.archive-prepare.v1"
+      };
+    case endpoints.archiveStatus:
+      return {
+        driver: "supabase-rest",
+        type: "dev.nipmod.archive-status.v1"
+      };
+    case endpoints.mcp:
+      return {
+        jsonrpc: "2.0",
+        result: {
+          tools: [{ name: "nipmod.resolve" }]
+        }
       };
     case endpoints.nodeHealth:
       return { status: "ok" };
