@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 
-export const previewImageUrl = "https://nipmod.com/nipmod-logo.png?v=20260522-orange-cube";
+export const siteName = "Nipmod";
+export const siteUrl = "https://nipmod.com";
+export const brandVersion = "20260522-orange-cube";
+export const siteDescription =
+  "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.";
+export const previewImageUrl = `${siteUrl}/nipmod-logo.png?v=${brandVersion}`;
 
-const previewImage = {
+export const previewImage = {
   alt: "Nipmod cube mark",
   height: 1254,
   type: "image/png",
@@ -14,5 +19,38 @@ export function withPreviewImage(openGraph: NonNullable<Metadata["openGraph"]>):
   return {
     ...openGraph,
     images: [previewImage]
+  };
+}
+
+export function createPageMetadata({
+  description = siteDescription,
+  path = "/",
+  title = siteName
+}: {
+  description?: string;
+  path?: string;
+  title?: string;
+} = {}): Metadata {
+  const url = new URL(path, siteUrl).toString();
+
+  return {
+    alternates: { canonical: url },
+    description,
+    openGraph: withPreviewImage({
+      description,
+      siteName,
+      title,
+      type: "website",
+      url
+    }),
+    title: siteName,
+    twitter: {
+      card: "summary_large_image",
+      creator: "@Nipmod",
+      description,
+      images: [previewImageUrl],
+      site: "@Nipmod",
+      title
+    }
   };
 }

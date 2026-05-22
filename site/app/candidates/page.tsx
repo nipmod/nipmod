@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { siteDescription, siteName } from "../metadata";
 
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/package"
   },
-  description: "Use the self service package flow for Gitlawb repos you own.",
+  description: siteDescription,
   robots: {
     follow: false,
     index: false
   },
-  title: "Create package"
+  title: siteName
 };
 
 export default function CandidatesPage() {

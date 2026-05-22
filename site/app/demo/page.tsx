@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 import registryData from "../registry-data.json";
 import type { RegistryIndex } from "../../lib/registry";
@@ -41,18 +40,11 @@ const demoSteps = [
   }
 ];
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/demo"
-  },
-  description: "Run the Nipmod package search, trust inspect, install plan and receipt demo.",
-  openGraph: withPreviewImage({
-    description: "A short demo path for agents and humans using the same Nipmod package archive.",
-    title: "Nipmod demo",
-    url: "https://nipmod.com/demo"
-  }),
+export const metadata = createPageMetadata({
+  description: "Run the Nipmod flow for package search, trust inspection and safe install planning.",
+  path: "/demo",
   title: "Nipmod demo"
-};
+});
 
 export default function DemoPage() {
   return (

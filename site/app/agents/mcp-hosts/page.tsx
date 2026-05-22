@@ -1,20 +1,12 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../../metadata";
+import { createPageMetadata } from "../../metadata";
 import { CommandBlock } from "../../command-block";
 import { agentHostContent } from "./content";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/agents/mcp-hosts"
-  },
-  description: "Set up Nipmod for agent hosts with one local MCP server and a shared package archive workflow.",
-  openGraph: withPreviewImage({
-    description: "Use Nipmod from agent hosts for search, trust inspection, install planning and audit.",
-    title: "Nipmod for agent hosts",
-    url: "https://nipmod.com/agents/mcp-hosts"
-  }),
+export const metadata = createPageMetadata({
+  description: "Use Nipmod from agent hosts for package search, trust checks and safe install plans.",
+  path: "/agents/mcp-hosts",
   title: "Nipmod for agent hosts"
-};
+});
 
 export default function AgentHostsPage() {
   return (

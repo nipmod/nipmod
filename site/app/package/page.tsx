@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 import { OwnerClaimFlow } from "../owner-claim-flow";
@@ -11,18 +10,11 @@ type PackagePageProps = {
   }>;
 };
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/package"
-  },
-  description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
-  openGraph: withPreviewImage({
-    description: "Prepare a Nipmod package from a Gitlawb repo you own and verify it with a DID signature.",
-    title: "Create a Gitlawb package",
-    url: "https://nipmod.com/package"
-  }),
-  title: "Create a Gitlawb package"
-};
+export const metadata = createPageMetadata({
+  description: "Prepare a source repo you own for Nipmod package review, trust checks and publish dry run.",
+  path: "/package",
+  title: "Create a Nipmod package"
+});
 
 const publishPath = [
   {

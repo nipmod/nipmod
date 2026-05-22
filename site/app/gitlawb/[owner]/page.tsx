@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { withPreviewImage } from "../../metadata";
+import { createPageMetadata } from "../../metadata";
 import { notFound } from "next/navigation";
 import registryData from "../../registry-data.json";
 import { CommandBlock } from "../../command-block";
@@ -26,18 +26,11 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: GitlawbOwnerPageProps): Promise<Metadata> {
   const { owner } = await params;
 
-  return {
-    alternates: {
-      canonical: `https://nipmod.com/gitlawb/${owner}`
-    },
-    description: "Nipmod package status for a Gitlawb DID owner.",
-    openGraph: withPreviewImage({
-      description: "Nipmod package status for a Gitlawb DID owner.",
-      title: "Gitlawb owner package status",
-      url: `https://nipmod.com/gitlawb/${owner}`
-    }),
-    title: "Gitlawb owner package status"
-  };
+  return createPageMetadata({
+    description: "Nipmod source owner package status with package records, trust checks and install planning context.",
+    path: `/gitlawb/${owner}`,
+    title: "Nipmod owner package status"
+  });
 }
 
 export default async function GitlawbOwnerPage({ params }: GitlawbOwnerPageProps) {

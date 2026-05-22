@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import platformConnections from "../../public/compatibility/platform-connections.json";
 import platformReadiness from "../../public/compatibility/platform-readiness.json";
 import systemReadiness from "../../public/compatibility/system-readiness.json";
@@ -21,18 +20,11 @@ const connections = platformConnections.connections.filter(
   (connection) => connection.status === "Live" || connection.status === "MCP ready"
 );
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/status"
-  },
-  description: "Public Nipmod proof dashboard for API, archive and source readiness.",
-  openGraph: withPreviewImage({
-    description: "Public proof dashboard for the Nipmod API and package archive.",
-    title: "Nipmod status",
-    url: "https://nipmod.com/status"
-  }),
+export const metadata = createPageMetadata({
+  description: "Public status for the Nipmod API, source resolver, archive mode, MCP boundary and readiness receipts.",
+  path: "/status",
   title: "Nipmod status"
-};
+});
 
 export default function StatusPage() {
   return (

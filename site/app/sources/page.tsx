@@ -1,17 +1,11 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { homeContent } from "../content";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "https://nipmod.com/sources" },
-  description: "Public package sources Nipmod can resolve for agents.",
-  openGraph: withPreviewImage({
-    description: "npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive through one API for agents.",
-    title: "Nipmod sources",
-    url: "https://nipmod.com/sources"
-  }),
-  title: "Nipmod"
-};
+export const metadata = createPageMetadata({
+  description: "npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive through one API for agents.",
+  path: "/sources",
+  title: "Nipmod sources"
+});
 
 export default function SourcesPage() {
   return (

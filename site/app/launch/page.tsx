@@ -1,18 +1,10 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/launch"
-  },
-  description: "Launch, adoption, review, publishing and multi source registry readiness for Nipmod.",
-  openGraph: withPreviewImage({
-    description: "The public paths for using, reviewing and publishing Nipmod packages.",
-    title: "Nipmod launch",
-    url: "https://nipmod.com/launch"
-  }),
+export const metadata = createPageMetadata({
+  description: "Public Nipmod launch paths for API use, proof checks, review and package readiness.",
+  path: "/launch",
   title: "Nipmod launch"
-};
+});
 
 const tracks = [
   {

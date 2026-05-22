@@ -1,22 +1,14 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { PlatformMark, platformStatusClass } from "../platform-brand";
 import platformConnections from "../../public/compatibility/platform-connections.json";
 
 type PlatformConnection = (typeof platformConnections.connections)[number];
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/platforms"
-  },
-  description: "Public Nipmod source and access paths for API-first package discovery.",
-  openGraph: withPreviewImage({
-    description: "Check the source and access paths behind the Nipmod API.",
-    title: "Nipmod source and access",
-    url: "https://nipmod.com/platforms"
-  }),
+export const metadata = createPageMetadata({
+  description: "See the public source and access paths behind the Nipmod package API for agents.",
+  path: "/platforms",
   title: "Nipmod source and access"
-};
+});
 
 export default function PlatformsPage() {
   const visibleConnections = platformConnections.connections;

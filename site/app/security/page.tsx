@@ -1,18 +1,10 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/security"
-  },
-  description: "Security policy, vulnerability reporting and incident response for Nipmod.",
-  openGraph: withPreviewImage({
-    description: "Report Nipmod vulnerabilities and verify the public security policy.",
-    title: "Nipmod security",
-    url: "https://nipmod.com/security"
-  }),
+export const metadata = createPageMetadata({
+  description: "Security policy, vulnerability reporting and incident response for the Nipmod package API.",
+  path: "/security",
   title: "Nipmod security"
-};
+});
 
 const responseTargets = [
   ["Critical", "24 hour acknowledgement, signed advisory or mitigation note as soon as a safe fix exists."],

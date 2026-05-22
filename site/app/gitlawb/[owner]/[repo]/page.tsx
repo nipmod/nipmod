@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { withPreviewImage } from "../../../metadata";
+import { createPageMetadata } from "../../../metadata";
 import { notFound } from "next/navigation";
 import registryData from "../../../registry-data.json";
 import { CommandBlock } from "../../../command-block";
@@ -33,23 +33,16 @@ export function generateStaticParams(): Array<{ owner: string; repo: string }> {
 export async function generateMetadata({ params }: GitlawbPackagePageProps): Promise<Metadata> {
   const { owner, repo } = await params;
   const pkg = findPackageByGitlawbPath(registry.packages, owner, repo);
-  const title = pkg ? `${pkg.name} Gitlawb package` : `${repo} package status`;
+  const title = pkg ? `${pkg.name} package` : `${repo} package status`;
   const description = pkg
-    ? `${pkg.name}: installable Nipmod package sourced from Gitlawb.`
-    : "Nipmod package status for a Gitlawb repo.";
+    ? `${pkg.name}: Nipmod package status with source context, trust checks and install planning.`
+    : "Nipmod package status with source context, trust checks and install planning.";
 
-  return {
-    alternates: {
-      canonical: `https://nipmod.com/gitlawb/${owner}/${repo}`
-    },
+  return createPageMetadata({
     description,
-    openGraph: withPreviewImage({
-      description,
-      title,
-      url: `https://nipmod.com/gitlawb/${owner}/${repo}`
-    }),
+    path: `/gitlawb/${owner}/${repo}`,
     title
-  };
+  });
 }
 
 export default async function GitlawbPackagePage({ params }: GitlawbPackagePageProps) {

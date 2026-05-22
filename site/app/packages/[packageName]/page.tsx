@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { withPreviewImage } from "../../metadata";
+import { createPageMetadata } from "../../metadata";
 import { notFound } from "next/navigation";
 import { CommandBlock } from "../../command-block";
 import {
@@ -34,19 +34,15 @@ export async function generateMetadata({ params }: PackagePageProps): Promise<Me
   const { packageName } = await params;
   const pkg = findPackage(packageName);
   const title = pkg ? `${pkg.name} package` : "package";
+  const description = pkg
+    ? `${pkg.name}: source context, trust signals and a safe install plan through Nipmod.`
+    : "Nipmod package record with source context, trust signals and safe install planning.";
 
-  return {
-    alternates: {
-      canonical: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
-    },
-    description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
-    openGraph: withPreviewImage({
-      description: pkg ? `${pkg.name}: ${pkg.description}` : "Verified Nipmod package.",
-      title,
-      url: pkg ? `https://nipmod.com${packagePageHref(pkg)}` : "https://nipmod.com/packages"
-    }),
+  return createPageMetadata({
+    description,
+    path: pkg ? packagePageHref(pkg) : "/packages",
     title
-  };
+  });
 }
 
 export default async function PackagePage({ params }: PackagePageProps) {

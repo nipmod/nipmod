@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 
 const posts = [
@@ -29,18 +28,11 @@ const assets = [
   { label: "GitHub", href: "https://github.com/nipmod/nipmod" }
 ];
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/launch-kit"
-  },
-  description: "Nipmod launch kit with posts, proof links, demo links and package author next steps.",
-  openGraph: withPreviewImage({
-    description: "Shareable Nipmod launch kit for proof links, demo paths and short posts.",
-    title: "Nipmod launch kit",
-    url: "https://nipmod.com/launch-kit"
-  }),
+export const metadata = createPageMetadata({
+  description: "Shareable Nipmod links, proof paths and short update copy tied to live product receipts.",
+  path: "/launch-kit",
   title: "Nipmod launch kit"
-};
+});
 
 export default function LaunchKitPage() {
   return (

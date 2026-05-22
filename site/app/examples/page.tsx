@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 import registryData from "../registry-data.json";
 import { packagePageHref } from "../packages/content";
@@ -18,18 +17,11 @@ const examples = exampleNames
   .map((name) => registry.packages.find((pkg) => pkg.name === name))
   .filter((pkg): pkg is RegistryIndex["packages"][number] => Boolean(pkg));
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/examples"
-  },
-  description: "Example Nipmod packages for agent repo reading, safety review, imports and migration planning.",
-  openGraph: withPreviewImage({
-    description: "A small set of package examples agents can search, inspect and install from Nipmod.",
-    title: "Nipmod examples",
-    url: "https://nipmod.com/examples"
-  }),
+export const metadata = createPageMetadata({
+  description: "Example package records agents can search, inspect and turn into safe install plans through Nipmod.",
+  path: "/examples",
   title: "Nipmod examples"
-};
+});
 
 export default function ExamplesPage() {
   return (

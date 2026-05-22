@@ -1,16 +1,10 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "https://nipmod.com/api-access" },
-  description: "Give agents one API for package search, trust checks and safe install plans.",
-  openGraph: withPreviewImage({
-    description: "One hosted package API agents can call before choosing dependencies.",
-    title: "Nipmod API",
-    url: "https://nipmod.com/api-access"
-  }),
-  title: "Nipmod"
-};
+export const metadata = createPageMetadata({
+  description: "One hosted API agents can call for package discovery, trust checks and safe install plans.",
+  path: "/api-access",
+  title: "Nipmod API"
+});
 
 const endpoints = [
   {

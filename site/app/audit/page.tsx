@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import registryData from "../registry-data.json";
 import { CommandBlock } from "../command-block";
 import { auditSummaryForPackage, packageQualityStats } from "../../lib/package-quality";
@@ -11,18 +10,11 @@ const summary = registryTrustSummary(registry);
 const publicPackages = searchPackages(registry.packages, "");
 const auditPackages = publicPackages.slice(0, 8);
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/audit"
-  },
-  description: "Audit Nipmod packages before install with trust, permission, advisory and provenance checks.",
-  openGraph: withPreviewImage({
-    description: "Audit Nipmod packages before install with trust, permission, advisory and provenance checks.",
-    title: "Nipmod audit",
-    url: "https://nipmod.com/audit"
-  }),
+export const metadata = createPageMetadata({
+  description: "Audit package trust, permissions, advisories and source context before an agent changes a workspace.",
+  path: "/audit",
   title: "Nipmod audit"
-};
+});
 
 export default function AuditPage() {
   return (

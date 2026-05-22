@@ -1,40 +1,37 @@
 import type { Metadata } from "next";
+import { brandVersion, previewImage, previewImageUrl, siteDescription, siteName, siteUrl } from "./metadata";
 import { SiteHeader } from "./site-header";
 import "./globals.css";
 
-const logoVersion = "20260522-orange-cube";
-const previewImage = `https://nipmod.com/nipmod-logo.png?v=${logoVersion}`;
-const previewImageAlt = "Nipmod cube mark";
-
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://nipmod.com"
+    canonical: siteUrl
   },
-  description: "One package API for agents.",
+  description: siteDescription,
   icons: {
-    apple: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${logoVersion}` }],
-    icon: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${logoVersion}` }]
+    apple: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${brandVersion}` }],
+    icon: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${brandVersion}` }]
   },
-  metadataBase: new URL("https://nipmod.com"),
+  metadataBase: new URL(siteUrl),
   openGraph: {
-    description: "Search package sources, inspect trust and create safe install plans through one hosted API.",
-    images: [{ alt: previewImageAlt, height: 1254, type: "image/png", url: previewImage, width: 1254 }],
-    siteName: "Nipmod",
-    title: "Nipmod",
+    description: siteDescription,
+    images: [previewImage],
+    siteName,
+    title: siteName,
     type: "website",
-    url: "https://nipmod.com"
+    url: siteUrl
   },
   title: {
-    default: "Nipmod",
-    template: "Nipmod"
+    default: siteName,
+    template: siteName
   },
   twitter: {
     card: "summary_large_image",
     creator: "@Nipmod",
-    description: "Search package sources, inspect trust and create safe install plans through one hosted API.",
-    images: [previewImage],
+    description: siteDescription,
+    images: [previewImageUrl],
     site: "@Nipmod",
-    title: "Nipmod"
+    title: siteName
   }
 };
 

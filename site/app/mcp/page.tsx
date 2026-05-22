@@ -1,20 +1,12 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 import { mcpContent } from "./content";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/mcp"
-  },
-  description: "Use Nipmod through hosted read-only MCP or a local MCP server.",
-  openGraph: withPreviewImage({
-    description: "Use Nipmod as a local MCP server for package search, exact metadata, inspect, plans, verify and audit.",
-    title: "Nipmod MCP",
-    url: "https://nipmod.com/mcp"
-  }),
+export const metadata = createPageMetadata({
+  description: "Use Nipmod through hosted read-only MCP or a local MCP server for controlled workspace writes.",
+  path: "/mcp",
   title: "Nipmod MCP"
-};
+});
 
 export default function McpPage() {
   return (

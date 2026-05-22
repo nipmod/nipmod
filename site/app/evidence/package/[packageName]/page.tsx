@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { withPreviewImage } from "../../../metadata";
+import { createPageMetadata } from "../../../metadata";
 import { notFound } from "next/navigation";
 import { EvidenceView, evidencePackageParams, findEvidencePackage } from "../../evidence-view";
 import { packageEvidenceHref } from "../../../packages/content";
@@ -18,19 +18,15 @@ export async function generateMetadata({ params }: PackageEvidencePageProps): Pr
   const { packageName } = await params;
   const pkg = findEvidencePackage(packageName);
   const title = pkg ? `${pkg.name} evidence` : "package evidence";
+  const path = pkg ? packageEvidenceHref(pkg).split("#")[0] ?? "/evidence" : "/evidence";
 
-  return {
-    alternates: {
-      canonical: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
-    },
-    description: pkg ? `Human readable Nipmod proof for ${pkg.name}.` : "Human readable Nipmod package proof.",
-    openGraph: withPreviewImage({
-      description: pkg ? `Digest, signer, source, witness and raw proof links for ${pkg.name}.` : "Human readable Nipmod package proof.",
-      title,
-      url: pkg ? `https://nipmod.com${packageEvidenceHref(pkg).split("#")[0]}` : "https://nipmod.com/evidence"
-    }),
+  return createPageMetadata({
+    description: pkg
+      ? `${pkg.name}: package evidence, source context, trust signals and proof links for agents.`
+      : "Nipmod package evidence with source context, trust signals and proof links for agents.",
+    path,
     title
-  };
+  });
 }
 
 export default async function PackageEvidencePage({ params }: PackageEvidencePageProps) {

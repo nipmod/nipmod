@@ -83,7 +83,7 @@ function openApiDocument() {
       }
     },
     info: {
-      description: "Nipmod package intelligence API for agent package discovery, inspection and safe install planning.",
+      description: "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
       title: "Nipmod API",
       version: "2026-05-22"
     },

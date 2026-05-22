@@ -6,7 +6,7 @@
 
 One package API for agents.
 
-Nipmod lets an agent search package sources, inspect trust signals, and request a safe install plan before code enters a workspace. Public beta access is free and rate limited.
+Nipmod lets agents search sources, inspect trust and get safe install plans before workspace writes. Public beta access is free and rate limited.
 
 ```bash
 curl 'https://nipmod.com/api/search?q=http%20client&limit=3'

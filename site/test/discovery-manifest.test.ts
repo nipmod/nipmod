@@ -17,8 +17,10 @@ describe("nipmod discovery manifest", () => {
   test("publishes a stable API first discovery document", () => {
     expect(manifest).toMatchObject({
       formatVersion: 1,
+      description: "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
       homepage: "https://nipmod.com",
       name: "Nipmod",
+      previewImage: "https://nipmod.com/nipmod-logo.png",
       trustPage: "https://nipmod.com/trust",
       type: "dev.nipmod.discovery.v1"
     });
@@ -30,6 +32,7 @@ describe("nipmod discovery manifest", () => {
       "api",
       "archive",
       "claims",
+      "description",
       "docs",
       "externalIndex",
       "formatVersion",
@@ -38,6 +41,7 @@ describe("nipmod discovery manifest", () => {
       "mcp",
       "name",
       "node",
+      "previewImage",
       "quorum",
       "registry",
       "review",
@@ -169,6 +173,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.sources).toEqual(manifest.externalIndex.sources);
     expect(manifest.api).toMatchObject({
       baseUrl: "https://nipmod.com",
+      description: "Hosted package discovery, trust checks and safe install plans for agents.",
       installPlan: "https://nipmod.com/api/install-plan",
       openapi: "https://nipmod.com/api/openapi",
       search: "https://nipmod.com/api/search",

@@ -1,20 +1,12 @@
-import type { Metadata } from "next";
-import { withPreviewImage } from "../metadata";
+import { createPageMetadata } from "../metadata";
 import { CommandBlock } from "../command-block";
 import { homeContent } from "../content";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://nipmod.com/quickstart"
-  },
-  description: "Nipmod docs for install, package search, workspace install, publishing, MCP, trust and security.",
-  openGraph: withPreviewImage({
-    description: "Nipmod docs for install, package search, workspace install, publishing, MCP, trust and security.",
-    title: "Nipmod docs",
-    url: "https://nipmod.com/quickstart"
-  }),
+export const metadata = createPageMetadata({
+  description: "Nipmod docs for API access, package search, trust checks, install plans, MCP and security.",
+  path: "/quickstart",
   title: "Nipmod docs"
-};
+});
 
 const docSections = [
   {
