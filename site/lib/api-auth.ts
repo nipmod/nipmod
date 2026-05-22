@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { scryptSync, timingSafeEqual } from "node:crypto";
 import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 
 type ApiAuthEnv = Record<string, string | undefined>;
@@ -54,7 +54,7 @@ export function readApiAccess(
     return unauthorized(context, "api keys are not enabled on this deployment");
   }
 
-  const providedHash = hmacApiKey(provided, env);
+  const providedHash = digestApiKey(provided, env);
   if (!providedHash) {
     return unauthorized(context, "api key hashing is not configured on this deployment");
   }
@@ -82,7 +82,11 @@ export function publicApiAccess(): ApiAccess {
 }
 
 export function fingerprintApiKey(rawKey: string): string {
-  return `key_${hmacValue(rawKey, "nipmod-api-key-fingerprint-v1").slice(0, 16)}`;
+  return `key_${deriveKeyedDigest(rawKey, "nipmod-api-key-fingerprint-v1").slice(0, 16)}`;
+}
+
+export function deriveApiKeyDigestForStorage(rawKey: string, secret: string): string {
+  return deriveKeyedDigest(rawKey, secret);
 }
 
 function readProvidedKey(request: Request): string | null {
@@ -173,16 +177,16 @@ function tierMultiplier(tier: ApiAccessTier): number {
   }
 }
 
-function hmacApiKey(value: string, env: ApiAuthEnv): string | null {
+function digestApiKey(value: string, env: ApiAuthEnv): string | null {
   const secret = env[API_KEY_HASH_SECRET_ENV];
   if (!secret) {
     return null;
   }
-  return hmacValue(value, secret);
+  return deriveKeyedDigest(value, secret);
 }
 
-function hmacValue(value: string, secret: string): string {
-  return createHmac("sha256", secret).update(value).digest("hex");
+function deriveKeyedDigest(value: string, secret: string): string {
+  return scryptSync(value, secret, 32).toString("hex");
 }
 
 function constantTimeEqual(left: string, right: string): boolean {

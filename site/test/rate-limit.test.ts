@@ -1,6 +1,6 @@
-import { createHmac } from "node:crypto";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { createApiHttpContext } from "../lib/api-http";
+import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
 import { checkApiRateLimit, checkRateLimit } from "../lib/rate-limit";
 
 afterEach(() => {
@@ -58,7 +58,7 @@ describe("API rate limits", () => {
   test("applies configured API key tiers without exposing the raw key", () => {
     const rawKey = "nka_test_builder_key_1234567890";
     const hashKey = ["test", "api", "key", "hash", "fixture"].join("-");
-    const hash = createHmac("sha256", hashKey).update(rawKey).digest("hex");
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashKey);
     vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashKey);
     vi.stubEnv("NIPMOD_API_KEY_HASHES", `builder-test:builder:${hash}`);
     const request = new Request("https://nipmod.com/api/search", {
