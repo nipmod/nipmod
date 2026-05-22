@@ -190,7 +190,7 @@ async function supabaseJson<T>(
       apikey: key,
       authorization: `Bearer ${key}`,
       "content-type": "application/json",
-      ...(publishableKey && writeToken ? { "x-nipmod-archive-token": writeToken } : {}),
+      ...(options.method === "POST" && publishableKey && writeToken ? { "x-nipmod-archive-token": writeToken } : {}),
       ...options.headers
     },
     method: options.method

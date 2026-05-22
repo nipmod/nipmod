@@ -23,7 +23,7 @@ https://nipmod.com
 | Hugging Face datasets | `huggingface-dataset` | Hugging Face dataset API |
 | MCP Registry | `mcp` | MCP registry server list |
 
-## `GET /api/search`
+## `GET /api/resolve`
 
 Search supported sources from one request.
 
@@ -38,7 +38,7 @@ Query parameters:
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&limit=5'
+curl 'https://nipmod.com/api/resolve?q=http%20client&limit=5'
 ```
 
 Response type:
@@ -46,6 +46,10 @@ Response type:
 ```text
 dev.nipmod.external-search.v1
 ```
+
+## `GET /api/search`
+
+Compatibility alias for `GET /api/resolve`.
 
 ## `GET /api/inspect`
 
@@ -136,6 +140,16 @@ Example:
 
 ```bash
 curl 'https://nipmod.com/api/archive/status'
+```
+
+## `GET /api/sources/health`
+
+Return supported source capabilities, optional auth status and the hosted API write boundary.
+
+Example:
+
+```bash
+curl 'https://nipmod.com/api/sources/health'
 ```
 
 ## `POST /api/archive/confirm`

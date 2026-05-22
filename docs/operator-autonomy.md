@@ -23,7 +23,14 @@ node --experimental-strip-types tools/package-intelligence-ops.ts generate-token
 ```
 
 4. Database schema
-   - Apply `docs/package-intelligence-schema.sql` to the Supabase project.
+   - Apply `supabase/migrations/20260522073000_package_intelligence_archive.sql` to the Supabase project.
+   - If using the Supabase SQL editor, `docs/package-intelligence-schema.sql` contains the same SQL.
+   - Register the same write token that is stored in Vercel:
+
+```sql
+select nipmod_private.set_archive_write_token('<NIPMOD_ARCHIVE_WRITE_TOKEN>', 'production');
+```
+
    - Verify with:
 
 ```bash

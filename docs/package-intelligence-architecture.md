@@ -33,7 +33,7 @@ Current production store contract:
 - `NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY`
 - `NIPMOD_ARCHIVE_WRITE_TOKEN`
 
-The preferred hosted mode uses the Supabase publishable key with RLS policies that require the server-only `x-nipmod-archive-token` header. A service-role key remains an operator fallback, but is not required for the hosted Nipmod API.
+The preferred hosted mode uses the Supabase publishable key with RLS policies. Public reads are allowed. Writes require the server-only `x-nipmod-archive-token` header and a matching SHA-256 token hash stored in the private `nipmod_private.archive_write_tokens` table. A service-role key remains an operator fallback, but is not required for the hosted Nipmod API.
 
 Without those values, the write APIs stay safe and return a configured false state.
 
@@ -65,6 +65,7 @@ Nipmod metadata is never treated as executable instructions. Agents must treat d
 Before public writeback is turned on at scale:
 
 - database migrations applied
+- archive write token registered with `nipmod_private.set_archive_write_token`
 - archive write token stored as a server secret
 - rate limits on write endpoints
 - background refresh job for stored records

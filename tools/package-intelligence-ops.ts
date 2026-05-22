@@ -54,6 +54,8 @@ Commands:
 Recommended order:
   node --experimental-strip-types tools/package-intelligence-ops.ts env-template > /tmp/nipmod-archive.env
   node --experimental-strip-types tools/package-intelligence-ops.ts generate-token
+  Apply supabase/migrations/20260522073000_package_intelligence_archive.sql
+  Run select nipmod_private.set_archive_write_token('<generated-token>', 'production') in Supabase SQL editor
   node --experimental-strip-types tools/package-intelligence-ops.ts verify-secrets --env-file /tmp/nipmod-archive.env
   node --experimental-strip-types tools/package-intelligence-ops.ts vercel-apply --env-file /tmp/nipmod-archive.env --replace
   vercel --prod --yes
@@ -181,7 +183,7 @@ async function verifySupabaseTable(env) {
   if (!response.ok) {
     const body = await response.text();
     throw new Error(
-      `Supabase archive table check failed with ${response.status}. Apply docs/package-intelligence-schema.sql and ensure the table is exposed to the Data API. ${body.slice(0, 300)}`
+      `Supabase archive table check failed with ${response.status}. Apply supabase/migrations/20260522073000_package_intelligence_archive.sql and ensure the table is exposed to the Data API. ${body.slice(0, 300)}`
     );
   }
   const rows = await response.json();

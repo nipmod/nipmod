@@ -21,6 +21,8 @@ Public callers may prepare records.
 
 Durable writes require server-side archive credentials and an authorized writer token. This prevents public spam and keeps the archive useful.
 
+The Supabase production schema lives in `supabase/migrations/20260522073000_package_intelligence_archive.sql`. It enables RLS, allows public reads, stores archive write tokens only as SHA-256 hashes in `nipmod_private.archive_write_tokens`, and permits writes only when the server sends the matching `x-nipmod-archive-token` header.
+
 ## Stored Evidence
 
 Archive records should preserve:

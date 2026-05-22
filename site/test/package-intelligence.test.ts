@@ -140,12 +140,13 @@ describe("package intelligence archive", () => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
       expect(init?.headers).toMatchObject({
         apikey: "publishable-key",
-        authorization: "Bearer publishable-key",
-        "x-nipmod-archive-token": "write-token"
+        authorization: "Bearer publishable-key"
       });
       if (url.includes("package_intelligence_records?on_conflict=id")) {
+        expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": "write-token" });
         return new Response(null, { status: 204 });
       }
+      expect(JSON.stringify(init?.headers)).not.toContain("write-token");
       return Response.json([{ record }]);
     }) as unknown as typeof fetch;
 

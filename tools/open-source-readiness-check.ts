@@ -33,6 +33,8 @@ const requiredFiles = [
   "docs/specs/source-resolvers.md",
   "docs/specs/trust-signals.md",
   "docs/specs/archive-records.md",
+  "docs/package-intelligence-schema.sql",
+  "supabase/migrations/20260522073000_package_intelligence_archive.sql",
   "docs/security/supply-chain.md",
   "examples/http-api/README.md",
   "examples/http-api/search.ts",
