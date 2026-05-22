@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 
 export const metadata: Metadata = {
   alternates: { canonical: "https://nipmod.com/api-access" },
   description: "Give agents one API for package search, trust checks and safe install plans.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "One hosted package API agents can call before choosing dependencies.",
     title: "Nipmod API",
     url: "https://nipmod.com/api-access"
-  },
+  }),
   title: "Nipmod"
 };
 

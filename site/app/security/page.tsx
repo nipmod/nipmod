@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 
 export const metadata: Metadata = {
   alternates: {
     canonical: "https://nipmod.com/security"
   },
   description: "Security policy, vulnerability reporting and incident response for Nipmod.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Report Nipmod vulnerabilities and verify the public security policy.",
     title: "Nipmod security",
     url: "https://nipmod.com/security"
-  },
+  }),
   title: "Nipmod security"
 };
 

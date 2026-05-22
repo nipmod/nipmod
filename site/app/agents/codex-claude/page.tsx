@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../../metadata";
 import { CommandBlock } from "../../command-block";
 import { codexClaudeContent } from "./content";
 
@@ -7,11 +8,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/agents/codex-claude"
   },
   description: "Set up Nipmod for Codex and Claude Code with one local MCP server and a shared package archive workflow.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Use Nipmod from Codex and Claude Code for search, trust inspection, install planning and audit.",
     title: "Nipmod for Codex and Claude Code",
     url: "https://nipmod.com/agents/codex-claude"
-  },
+  }),
   title: "Nipmod for Codex and Claude Code"
 };
 

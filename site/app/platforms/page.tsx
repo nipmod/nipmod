@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { PlatformMark, platformStatusClass } from "../platform-brand";
 import platformConnections from "../../public/compatibility/platform-connections.json";
 
@@ -9,11 +10,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/platforms"
   },
   description: "Public Nipmod source and access paths for API-first package discovery.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Check the source and access paths behind the Nipmod API.",
     title: "Nipmod source and access",
     url: "https://nipmod.com/platforms"
-  },
+  }),
   title: "Nipmod source and access"
 };
 

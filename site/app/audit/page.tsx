@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import registryData from "../registry-data.json";
 import { CommandBlock } from "../command-block";
 import { auditSummaryForPackage, packageQualityStats } from "../../lib/package-quality";
@@ -15,11 +16,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/audit"
   },
   description: "Audit Nipmod packages before install with trust, permission, advisory and provenance checks.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Audit Nipmod packages before install with trust, permission, advisory and provenance checks.",
     title: "Nipmod audit",
     url: "https://nipmod.com/audit"
-  },
+  }),
   title: "Nipmod audit"
 };
 

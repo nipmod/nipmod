@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../../metadata";
 import { notFound } from "next/navigation";
 import registryData from "../../registry-data.json";
 import { CommandBlock } from "../../command-block";
@@ -30,11 +31,11 @@ export async function generateMetadata({ params }: GitlawbOwnerPageProps): Promi
       canonical: `https://nipmod.com/gitlawb/${owner}`
     },
     description: "Nipmod package status for a Gitlawb DID owner.",
-    openGraph: {
+    openGraph: withPreviewImage({
       description: "Nipmod package status for a Gitlawb DID owner.",
       title: "Gitlawb owner package status",
       url: `https://nipmod.com/gitlawb/${owner}`
-    },
+    }),
     title: "Gitlawb owner package status"
   };
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { CommandBlock } from "../command-block";
 import registryData from "../registry-data.json";
 import { packagePageHref } from "../packages/content";
@@ -22,11 +23,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/examples"
   },
   description: "Example Nipmod packages for agent repo reading, safety review, imports and migration planning.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "A small set of package examples agents can search, inspect and install from Nipmod.",
     title: "Nipmod examples",
     url: "https://nipmod.com/examples"
-  },
+  }),
   title: "Nipmod examples"
 };
 

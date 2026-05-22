@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { CommandBlock } from "../command-block";
 
 const posts = [
@@ -33,11 +34,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/launch-kit"
   },
   description: "Nipmod launch kit with posts, proof links, demo links and package author next steps.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Shareable Nipmod launch kit for proof links, demo paths and short posts.",
     title: "Nipmod launch kit",
     url: "https://nipmod.com/launch-kit"
-  },
+  }),
   title: "Nipmod launch kit"
 };
 

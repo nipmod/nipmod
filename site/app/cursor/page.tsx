@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { withPreviewImage } from "../metadata";
 import { CommandBlock } from "../command-block";
 import { PlatformMark } from "../platform-brand";
 import { cursorContent, cursorInstallLink, cursorMcpJson } from "./content";
@@ -8,11 +9,11 @@ export const metadata: Metadata = {
     canonical: "https://nipmod.com/cursor"
   },
   description: "Connect Nipmod to Cursor through MCP.",
-  openGraph: {
+  openGraph: withPreviewImage({
     description: "Use Nipmod in Cursor for package search, trust inspection and install plans through MCP.",
     title: "Nipmod for Cursor",
     url: "https://nipmod.com/cursor"
-  },
+  }),
   title: "Nipmod for Cursor"
 };
 
