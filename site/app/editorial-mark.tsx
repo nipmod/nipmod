@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 export function NipmodMark({ size = 46 }: { size?: number }) {
   return (
     <span className="nipmod-mark" aria-hidden="true" style={{ "--mark-size": `${size}px` } as CSSProperties}>
-      <img alt="" height={size} src="/nipmod-logo-transparent.png" width={size} />
+      <img alt="" height={size} src="/nipmod-logo-transparent.png?v=20260522-orange-cube" width={size} />
     </span>
   );
 }

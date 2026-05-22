@@ -4,8 +4,8 @@ type PlatformMarkProps = {
 };
 
 const IMAGE_MARKS: Record<string, { className?: string; src: string }> = {
-  api: { src: "/nipmod-logo-transparent.png" },
-  archive: { src: "/nipmod-logo-transparent.png" },
+  api: { src: "/nipmod-logo-transparent.png?v=20260522-orange-cube" },
+  archive: { src: "/nipmod-logo-transparent.png?v=20260522-orange-cube" },
   "claude-code": { src: "/claude-logo.png" },
   cursor: { src: "/agents/cursor.png" },
   github: { className: "platform-mark-github", src: "/github-logo.svg" },

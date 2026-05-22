@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const previewImageUrl = "https://nipmod.com/nipmod-logo.png?v=20260522-cube";
+export const previewImageUrl = "https://nipmod.com/nipmod-logo.png?v=20260522-orange-cube";
 
 const previewImage = {
   alt: "Nipmod cube mark",

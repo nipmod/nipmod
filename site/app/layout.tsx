@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { SiteHeader } from "./site-header";
 import "./globals.css";
 
-const previewImage = "https://nipmod.com/nipmod-logo.png?v=20260522-cube";
+const logoVersion = "20260522-orange-cube";
+const previewImage = `https://nipmod.com/nipmod-logo.png?v=${logoVersion}`;
 const previewImageAlt = "Nipmod cube mark";
 
 export const metadata: Metadata = {
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
   },
   description: "One package API for agents.",
   icons: {
-    apple: [{ sizes: "1254x1254", type: "image/png", url: "/icon.png?v=20260522-cube" }],
-    icon: [{ sizes: "1254x1254", type: "image/png", url: "/icon.png?v=20260522-cube" }]
+    apple: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${logoVersion}` }],
+    icon: [{ sizes: "1254x1254", type: "image/png", url: `/icon.png?v=${logoVersion}` }]
   },
   metadataBase: new URL("https://nipmod.com"),
   openGraph: {
