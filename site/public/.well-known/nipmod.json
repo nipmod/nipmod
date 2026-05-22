@@ -7,6 +7,7 @@
   "docs": {
     "docs": "https://nipmod.com/quickstart#docs",
     "api": "https://nipmod.com/api-access",
+    "apiSpec": "https://nipmod.com/api/openapi",
     "sources": "https://nipmod.com/sources",
     "install": "https://nipmod.com/quickstart#install",
     "setup": "https://nipmod.com/setup",

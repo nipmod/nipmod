@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { GET, POST } from "../app/api/mcp/route";
+import { GET, OPTIONS, POST } from "../app/api/mcp/route";
 
 async function postJson(body: unknown) {
   const response = await POST(
@@ -21,10 +21,12 @@ describe("hosted read-only MCP route", () => {
   });
 
   test("publishes endpoint metadata without workspace write tools", async () => {
-    const response = await GET();
+    const response = await GET(new Request("https://nipmod.com/api/mcp", { headers: { "x-request-id": "mcp-route-test" } }));
     const body = await response.json();
 
+    expect(response.headers.get("access-control-allow-origin")).toBe("*");
     expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("x-nipmod-request-id")).toBe("mcp-route-test");
     expect(body).toMatchObject({
       endpoint: "https://nipmod.com/api/mcp",
       localServerCommand: "nipmod mcp serve",
@@ -42,6 +44,15 @@ describe("hosted read-only MCP route", () => {
     ]);
     expect(body.notExposed).toContain("nipmod.install");
     expect(body.notExposed).toContain("nipmod.audit");
+  });
+
+  test("supports CORS preflight for hosted MCP clients", async () => {
+    const response = OPTIONS(new Request("https://nipmod.com/api/mcp", { headers: { "x-request-id": "mcp-options-test" } }));
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-methods")).toContain("POST");
+    expect(response.headers.get("access-control-allow-origin")).toBe("*");
+    expect(response.headers.get("x-nipmod-request-id")).toBe("mcp-options-test");
   });
 
   test("supports initialize and tools/list through JSON-RPC", async () => {

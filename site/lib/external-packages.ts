@@ -11,6 +11,7 @@ export type ExternalPackageSource = (typeof EXTERNAL_PACKAGE_SOURCES)[number];
 
 export type ExternalPackageDecision = "recommended" | "usable_with_warning" | "avoid" | "unknown";
 export type ExternalPackageRisk = "low" | "medium" | "high" | "unknown";
+export type ExternalSourceStatus = "ok" | "empty" | "failed";
 
 export interface ExternalPackageRecord {
   archive: {
@@ -62,10 +63,31 @@ export interface ExternalSearchOptions {
   timeoutMs?: number;
 }
 
+export interface ExternalSourceReport {
+  durationMs: number;
+  error?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+    status: number;
+  };
+  recordCount: number;
+  source: ExternalPackageSource;
+  status: ExternalSourceStatus;
+}
+
 export interface ExternalSearchResult {
   generatedAt: string;
+  partial: boolean;
   query: string;
   records: ExternalPackageRecord[];
+  sourceReports: ExternalSourceReport[];
+  sourceSummary: {
+    empty: number;
+    failed: number;
+    ok: number;
+    requested: number;
+  };
   sources: ExternalPackageSource[];
   total: number;
   type: "dev.nipmod.external-search.v1";
@@ -91,11 +113,16 @@ type UnknownRecord = Record<string, unknown>;
 
 const DEFAULT_TIMEOUT_MS = 6500;
 const DEFAULT_LIMIT = 12;
+const SOURCE_USER_AGENT = "nipmod-package-api/1.2.5 (+https://nipmod.com)";
+const FETCH_CACHE_TTL_MS = 30_000;
+const FETCH_CACHE_MAX_ITEMS = 500;
+
+const fetchCache = new Map<string, { expiresAt: number; value: UnknownRecord | UnknownRecord[] }>();
 
 export async function searchExternalPackages(query: string, options: ExternalSearchOptions = {}): Promise<ExternalSearchResult> {
   const normalized = normalizeQuery(query);
   if (!normalized) {
-    throw new ExternalPackageError("query must not be empty", 400);
+    throw new ExternalPackageError("query must not be empty", { code: "invalid_query", status: 400 });
   }
 
   const sources = normalizeSources(options.sources);
@@ -103,19 +130,37 @@ export async function searchExternalPackages(query: string, options: ExternalSea
   const fetchImpl = options.fetchImpl ?? fetch;
   const perSourceLimit = Math.max(2, Math.ceil(limit / Math.max(sources.length, 1)) + 2);
 
-  const settled = await Promise.allSettled(
-    sources.map((source) => searchSource(source, normalized, perSourceLimit, fetchImpl, options.timeoutMs ?? DEFAULT_TIMEOUT_MS))
+  const sourceResults = await Promise.all(
+    sources.map((source) => searchSourceWithReport(source, normalized, perSourceLimit, fetchImpl, options.timeoutMs ?? DEFAULT_TIMEOUT_MS))
   );
+  const sourceReports = sourceResults.map((result) => result.report);
+  const failed = sourceReports.filter((report) => report.status === "failed").length;
 
-  const records = settled
-    .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
+  if (failed === sourceReports.length) {
+    throw new ExternalPackageError("all external package sources failed", {
+      code: "all_sources_failed",
+      retryable: true,
+      status: 502
+    });
+  }
+
+  const records = sourceResults
+    .flatMap((result) => result.records)
     .sort(compareExternalRecords)
     .slice(0, limit);
 
   return {
     generatedAt: new Date().toISOString(),
+    partial: failed > 0,
     query: normalized,
     records,
+    sourceReports,
+    sourceSummary: {
+      empty: sourceReports.filter((report) => report.status === "empty").length,
+      failed,
+      ok: sourceReports.filter((report) => report.status === "ok").length,
+      requested: sourceReports.length
+    },
     sources,
     total: records.length,
     type: "dev.nipmod.external-search.v1"
@@ -129,14 +174,32 @@ export async function inspectExternalPackage(
 ): Promise<ExternalPackageRecord> {
   const normalizedName = normalizeName(name);
   if (!normalizedName) {
-    throw new ExternalPackageError("name must not be empty", 400);
+    throw new ExternalPackageError("name must not be empty", { code: "invalid_name", status: 400 });
   }
 
   const fetchImpl = options.fetchImpl ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const record = await inspectSource(source, normalizedName, fetchImpl, timeoutMs);
+  let record: ExternalPackageRecord | null;
+  try {
+    record = await inspectSource(source, normalizedName, fetchImpl, timeoutMs);
+  } catch (error) {
+    if (error instanceof ExternalPackageError && error.status === 404) {
+      throw new ExternalPackageError(`no external package found for ${source}:${normalizedName}`, {
+        code: "package_not_found",
+        retryable: false,
+        source,
+        status: 404
+      });
+    }
+    throw error;
+  }
   if (!record) {
-    throw new ExternalPackageError(`no external package found for ${source}:${normalizedName}`, 404);
+    throw new ExternalPackageError(`no external package found for ${source}:${normalizedName}`, {
+      code: "package_not_found",
+      retryable: false,
+      source,
+      status: 404
+    });
   }
   return record;
 }
@@ -182,16 +245,93 @@ export function parseExternalSources(value: string | null): ExternalPackageSourc
     .map((part) => part.trim())
     .filter(Boolean);
   const allowed = new Set<string>(EXTERNAL_PACKAGE_SOURCES);
+  const invalid = requested.filter((source) => !allowed.has(source));
+  if (invalid.length > 0) {
+    throw new ExternalPackageError(`invalid source: ${invalid.join(", ")}`, { code: "invalid_source", status: 400 });
+  }
   const sources = requested.filter((source): source is ExternalPackageSource => allowed.has(source));
-  return sources.length > 0 ? sources : [...EXTERNAL_PACKAGE_SOURCES];
+  return sources.length > 0 ? [...new Set(sources)] : [...EXTERNAL_PACKAGE_SOURCES];
 }
 
 export class ExternalPackageError extends Error {
-  constructor(
-    message: string,
-    readonly status = 500
-  ) {
+  readonly code: string;
+  readonly retryable: boolean;
+  readonly source: ExternalPackageSource | null;
+  readonly status: number;
+
+  constructor(message: string, options: { code?: string; retryable?: boolean; source?: ExternalPackageSource | null; status?: number } = {}) {
     super(message);
+    this.code = options.code ?? "external_package_error";
+    this.retryable = options.retryable ?? false;
+    this.source = options.source ?? null;
+    this.status = options.status ?? 500;
+  }
+}
+
+export function externalPackageApiError(error: unknown, fallback: string): {
+  code: string;
+  error: string;
+  retryable: boolean;
+  source: ExternalPackageSource | null;
+  status: number;
+  type: "dev.nipmod.api-error.v1";
+} {
+  if (error instanceof ExternalPackageError) {
+    return {
+      code: error.code,
+      error: error.message,
+      retryable: error.retryable,
+      source: error.source,
+      status: error.status,
+      type: "dev.nipmod.api-error.v1"
+    };
+  }
+  return {
+    code: "internal_error",
+    error: error instanceof Error ? error.message : fallback,
+    retryable: false,
+    source: null,
+    status: 500,
+    type: "dev.nipmod.api-error.v1"
+  };
+}
+
+async function searchSourceWithReport(
+  source: ExternalPackageSource,
+  query: string,
+  limit: number,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<{ records: ExternalPackageRecord[]; report: ExternalSourceReport }> {
+  const startedAt = Date.now();
+  try {
+    const records = await searchSource(source, query, limit, fetchImpl, timeoutMs);
+    return {
+      records,
+      report: {
+        durationMs: Date.now() - startedAt,
+        recordCount: records.length,
+        source,
+        status: records.length > 0 ? "ok" : "empty"
+      }
+    };
+  } catch (error) {
+    const apiError = externalPackageApiError(error, "source search failed");
+    return {
+      records: [],
+      report: {
+        durationMs: Date.now() - startedAt,
+        error: {
+          code: apiError.code,
+          message: apiError.error,
+          retryable: apiError.retryable,
+          status: apiError.status
+        },
+        recordCount: 0,
+        source,
+        status: "failed"
+      }
+    };
   }
 }
 
@@ -244,14 +384,15 @@ async function searchNpm(query: string, limit: number, fetchImpl: typeof fetch, 
   const payload = await fetchJson(
     `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=${limit}`,
     fetchImpl,
-    timeoutMs
+    timeoutMs,
+    { source: "npm" }
   );
   const objects = isRecord(payload) && Array.isArray(payload.objects) ? payload.objects : [];
   return objects.map((item) => npmSearchRecord(item)).filter(isExternalPackageRecord);
 }
 
 async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
-  const payload = await fetchJson(`https://registry.npmjs.org/${encodeNpmName(name)}`, fetchImpl, timeoutMs);
+  const payload = await fetchJson(`https://registry.npmjs.org/${encodeNpmName(name)}`, fetchImpl, timeoutMs, { source: "npm" });
   if (!isRecord(payload)) {
     return null;
   }
@@ -335,7 +476,7 @@ async function searchPyPi(query: string, fetchImpl: typeof fetch, timeoutMs: num
 }
 
 async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
-  const payload = await fetchJson(`https://pypi.org/pypi/${encodeURIComponent(name)}/json`, fetchImpl, timeoutMs);
+  const payload = await fetchJson(`https://pypi.org/pypi/${encodeURIComponent(name)}/json`, fetchImpl, timeoutMs, { source: "pypi" });
   if (!isRecord(payload) || !isRecord(payload.info)) {
     return null;
   }
@@ -383,7 +524,8 @@ async function searchGitHub(query: string, limit: number, fetchImpl: typeof fetc
   const payload = await fetchJson(
     `https://api.github.com/search/repositories?q=${encodeURIComponent(`${query} archived:false`)}&sort=stars&order=desc&per_page=${limit}`,
     fetchImpl,
-    timeoutMs
+    timeoutMs,
+    { source: "github" }
   );
   const items = isRecord(payload) && Array.isArray(payload.items) ? payload.items : [];
   return items.map(gitHubRecord).filter(isExternalPackageRecord);
@@ -393,7 +535,7 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
   if (!name.includes("/")) {
     return null;
   }
-  const payload = await fetchJson(`https://api.github.com/repos/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs);
+  const payload = await fetchJson(`https://api.github.com/repos/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs, { source: "github" });
   return gitHubRecord(payload);
 }
 
@@ -452,7 +594,8 @@ async function searchHuggingFace(
   const payload = await fetchJson(
     `https://huggingface.co/api/${endpoint}?search=${encodeURIComponent(query)}&limit=${limit}&sort=downloads&direction=-1`,
     fetchImpl,
-    timeoutMs
+    timeoutMs,
+    { source }
   );
   const items = Array.isArray(payload) ? payload : [];
   return items.map((item) => huggingFaceRecord(source, item)).filter(isExternalPackageRecord);
@@ -465,7 +608,7 @@ async function inspectHuggingFace(
   timeoutMs: number
 ): Promise<ExternalPackageRecord | null> {
   const endpoint = source === "huggingface-model" ? "models" : "datasets";
-  const payload = await fetchJson(`https://huggingface.co/api/${endpoint}/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs);
+  const payload = await fetchJson(`https://huggingface.co/api/${endpoint}/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs, { source });
   return huggingFaceRecord(source, payload);
 }
 
@@ -519,7 +662,9 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
 }
 
 async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
-  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500));
+  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500), {
+    source: "mcp"
+  });
   const items = isRecord(payload) && Array.isArray(payload.servers) ? payload.servers : Array.isArray(payload) ? payload : [];
   const normalized = query.toLowerCase();
   return items
@@ -530,7 +675,9 @@ async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, 
 }
 
 async function inspectMcp(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
-  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500));
+  const payload = await fetchJson("https://registry.modelcontextprotocol.io/v0.1/servers", fetchImpl, Math.min(timeoutMs, 3500), {
+    source: "mcp"
+  });
   const items = isRecord(payload) && Array.isArray(payload.servers) ? payload.servers : Array.isArray(payload) ? payload : [];
   const normalized = name.toLowerCase();
   return items.map(mcpRecord).find((record) => record?.name.toLowerCase() === normalized || record?.id.toLowerCase() === `mcp:${normalized}`) ?? null;
@@ -627,23 +774,115 @@ function makeRecord(input: {
   };
 }
 
-async function fetchJson(url: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<UnknownRecord | UnknownRecord[]> {
+async function fetchJson(
+  url: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number,
+  options: { source?: ExternalPackageSource } = {}
+): Promise<UnknownRecord | UnknownRecord[]> {
+  const canCache = fetchImpl === fetch;
+  const now = Date.now();
+  if (canCache) {
+    const cached = fetchCache.get(url);
+    if (cached && cached.expiresAt > now) {
+      return structuredClone(cached.value);
+    }
+    if (cached) {
+      fetchCache.delete(url);
+    }
+  }
+
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const value = await fetchJsonOnce(url, fetchImpl, timeoutMs, options.source);
+      if (canCache) {
+        rememberFetchCache(url, value);
+      }
+      return structuredClone(value);
+    } catch (error) {
+      lastError = error;
+      if (!(error instanceof ExternalPackageError) || !error.retryable || attempt === 1) {
+        throw error;
+      }
+      await wait(120);
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new ExternalPackageError("source request failed", { source: options.source ?? null, status: 502 });
+}
+
+function rememberFetchCache(url: string, value: UnknownRecord | UnknownRecord[]): void {
+  if (fetchCache.size >= FETCH_CACHE_MAX_ITEMS) {
+    const oldest = fetchCache.keys().next().value as string | undefined;
+    if (oldest) {
+      fetchCache.delete(oldest);
+    }
+  }
+  fetchCache.set(url, {
+    expiresAt: Date.now() + FETCH_CACHE_TTL_MS,
+    value: structuredClone(value)
+  });
+}
+
+async function fetchJsonOnce(
+  url: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number,
+  source: ExternalPackageSource | undefined
+): Promise<UnknownRecord | UnknownRecord[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(url, {
       headers: {
-        accept: "application/json"
+        accept: "application/json",
+        "user-agent": SOURCE_USER_AGENT
       },
       signal: controller.signal
     });
     if (!response.ok) {
-      throw new ExternalPackageError(`source request failed with ${response.status}`, response.status);
+      const retryable = response.status === 429 || response.status >= 500;
+      throw new ExternalPackageError(`source request failed with ${response.status}`, {
+        code: response.status === 404 ? "source_not_found" : retryable ? "source_unavailable" : "source_rejected",
+        retryable,
+        source: source ?? null,
+        status: response.status === 404 ? 404 : response.status === 429 ? 429 : 502
+      });
     }
     return (await response.json()) as UnknownRecord | UnknownRecord[];
+  } catch (error) {
+    if (error instanceof ExternalPackageError) {
+      throw error;
+    }
+    if (isAbortError(error)) {
+      throw new ExternalPackageError("source request timed out", {
+        code: "source_timeout",
+        retryable: true,
+        source: source ?? null,
+        status: 504
+      });
+    }
+    throw new ExternalPackageError(error instanceof Error ? error.message : "source request failed", {
+      code: "source_fetch_failed",
+      retryable: true,
+      source: source ?? null,
+      status: 502
+    });
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 function compareExternalRecords(left: ExternalPackageRecord, right: ExternalPackageRecord): number {
@@ -668,7 +907,7 @@ function normalizeLimit(limit: number | undefined): number {
     return DEFAULT_LIMIT;
   }
   if (!Number.isInteger(limit)) {
-    throw new ExternalPackageError("limit must be an integer", 400);
+    throw new ExternalPackageError("limit must be an integer", { code: "invalid_limit", status: 400 });
   }
   return Math.min(50, Math.max(1, limit));
 }
