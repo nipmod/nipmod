@@ -201,6 +201,15 @@ function openApiDocument() {
           },
           summary: "Search external package sources through one API."
         }
+      },
+      "/api/sources/health": {
+        get: {
+          responses: {
+            "200": { description: "Source capability, optional auth and archive mode metadata." },
+            "429": errorResponse()
+          },
+          summary: "Return source capabilities and hosted API write boundaries."
+        }
       }
     },
     servers: [{ url: "https://nipmod.com" }]

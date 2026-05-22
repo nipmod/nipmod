@@ -12,6 +12,7 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("API access: https://nipmod.com/api-access");
     expect(llmsText).toContain("OpenAPI spec: https://nipmod.com/api/openapi");
     expect(llmsText).toContain("Sources: https://nipmod.com/sources");
+    expect(llmsText).toContain("Source health: https://nipmod.com/api/sources/health");
     expect(llmsText).toContain("System readiness receipt: https://nipmod.com/compatibility/system-readiness.json");
     expect(llmsText).toContain("Platform readiness receipt: https://nipmod.com/compatibility/platform-readiness.json");
     expect(llmsText).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");
@@ -30,6 +31,7 @@ describe("agent discovery text", () => {
       "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
       "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       "GET https://nipmod.com/api/archive/status",
+      "GET https://nipmod.com/api/sources/health",
       "curl https://nipmod.com/i|bash",
       "curl -fLO https://nipmod.com/install.sh.sha256",
       "shasum -a 256 -c install.sh.sha256",

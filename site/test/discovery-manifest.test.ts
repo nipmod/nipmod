@@ -69,6 +69,7 @@ describe("nipmod discovery manifest", () => {
       packages: "https://nipmod.com/packages",
       platforms: "https://nipmod.com/platforms",
       security: "https://nipmod.com/security",
+      sourceHealthApi: "https://nipmod.com/api/sources/health",
       setup: "https://nipmod.com/setup",
       sources: "https://nipmod.com/sources",
       status: "https://nipmod.com/status",
@@ -86,6 +87,7 @@ describe("nipmod discovery manifest", () => {
       install: shortInstallerCommand,
       packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       packageIntelligenceStatus: "GET https://nipmod.com/api/archive/status",
+      sourceHealth: "GET https://nipmod.com/api/sources/health",
       verifyInstaller: verifyInstallerCommand
     });
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();

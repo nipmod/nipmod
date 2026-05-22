@@ -19,7 +19,8 @@ describe("OpenAPI route", () => {
       "/api/install-plan",
       "/api/mcp",
       "/api/resolve",
-      "/api/search"
+      "/api/search",
+      "/api/sources/health"
     ]);
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
   });

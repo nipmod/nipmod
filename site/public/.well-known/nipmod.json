@@ -9,6 +9,7 @@
     "api": "https://nipmod.com/api-access",
     "apiSpec": "https://nipmod.com/api/openapi",
     "sources": "https://nipmod.com/sources",
+    "sourceHealthApi": "https://nipmod.com/api/sources/health",
     "install": "https://nipmod.com/quickstart#install",
     "setup": "https://nipmod.com/setup",
     "demo": "https://nipmod.com/demo",
@@ -81,6 +82,7 @@
       "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query>",
       "packageIntelligenceConfirmDryRun": "POST https://nipmod.com/api/archive/confirm {\"source\":\"npm\",\"name\":\"<package-name>\",\"dryRun\":true}",
       "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status",
+      "sourceHealth": "GET https://nipmod.com/api/sources/health",
       "inspect": "nipmod inspect <package-specifier> --json",
       "view": "nipmod view <package-name> --json",
       "installPlan": "nipmod install --plan <package-specifier> --json",
@@ -163,6 +165,7 @@
   "externalIndex": {
     "search": "https://nipmod.com/api/search",
     "resolve": "https://nipmod.com/api/resolve",
+    "health": "https://nipmod.com/api/sources/health",
     "inspect": "https://nipmod.com/api/inspect",
     "installPlan": "https://nipmod.com/api/install-plan",
     "packageIntelligence": {

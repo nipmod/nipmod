@@ -6,6 +6,7 @@ Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API access: https://nipmod.com/api-access
 OpenAPI spec: https://nipmod.com/api/openapi
 Sources: https://nipmod.com/sources
+Source health: https://nipmod.com/api/sources/health
 Archive: https://nipmod.com/packages
 Public package archive registry: https://nipmod.com/registry/packages.json
 Public status: https://nipmod.com/status
@@ -39,6 +40,9 @@ GET https://nipmod.com/api/archive/search?q=<query>
 
 Check archive mode:
 GET https://nipmod.com/api/archive/status
+
+Check source capability:
+GET https://nipmod.com/api/sources/health
 
 External records are external_indexed. Original package owners keep ownership. verified_nipmod requires a verified claim or direct publish.
 Durable package intelligence writes require the server side archive store and an authorized server writer.

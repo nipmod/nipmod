@@ -96,6 +96,17 @@ export interface ExternalSearchResult {
   type: "dev.nipmod.external-search.v1";
 }
 
+export interface ExternalSourceCapability {
+  access: "public" | "public-with-optional-token";
+  authConfigured: boolean;
+  capabilities: Array<"search" | "inspect" | "install-plan" | "archive-prepare">;
+  endpointHost: string;
+  installPlanWritesWorkspace: false;
+  source: ExternalPackageSource;
+  sourceKind: ExternalPackageSourceKind;
+  status: "available";
+}
+
 export interface ExternalInstallPlan {
   generatedAt: string;
   package: Pick<
@@ -277,6 +288,27 @@ export function parseExternalSources(value: string | null): ExternalPackageSourc
   }
   const sources = requested.filter((source): source is ExternalPackageSource => allowed.has(source));
   return sources.length > 0 ? [...new Set(sources)] : [...EXTERNAL_PACKAGE_SOURCES];
+}
+
+export function externalSourceCapabilities(env: Record<string, string | undefined> = process.env): ExternalSourceCapability[] {
+  return [
+    sourceCapability("npm", "package-registry", "registry.npmjs.org", false),
+    sourceCapability("pypi", "package-registry", "pypi.org", false),
+    sourceCapability("github", "source-repo", "api.github.com", Boolean(env.NIPMOD_GITHUB_TOKEN)),
+    sourceCapability(
+      "huggingface-model",
+      "model-hub",
+      "huggingface.co",
+      Boolean(env.NIPMOD_HUGGINGFACE_TOKEN || env.HF_TOKEN)
+    ),
+    sourceCapability(
+      "huggingface-dataset",
+      "model-hub",
+      "huggingface.co",
+      Boolean(env.NIPMOD_HUGGINGFACE_TOKEN || env.HF_TOKEN)
+    ),
+    sourceCapability("mcp", "tool-registry", "registry.modelcontextprotocol.io", false)
+  ];
 }
 
 export function readExternalPackageRecord(value: unknown): ExternalPackageRecord {
@@ -1063,6 +1095,24 @@ function normalizeQuery(query: string): string {
 
 function normalizeName(name: string): string {
   return cleanPlainText(name, MAX_NAME_LENGTH);
+}
+
+function sourceCapability(
+  source: ExternalPackageSource,
+  sourceKind: ExternalPackageSourceKind,
+  endpointHost: string,
+  authConfigured: boolean
+): ExternalSourceCapability {
+  return {
+    access: authConfigured ? "public-with-optional-token" : "public",
+    authConfigured,
+    capabilities: ["search", "inspect", "install-plan", "archive-prepare"],
+    endpointHost,
+    installPlanWritesWorkspace: false,
+    source,
+    sourceKind,
+    status: "available"
+  };
 }
 
 function unwrapExternalPackageRecord(value: unknown): unknown {
