@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 
 type ApiAuthEnv = Record<string, string | undefined>;
@@ -20,7 +20,8 @@ export interface ApiAccessResult {
   response?: Response;
 }
 
-const API_KEY_HASHES_ENV = "NIPMOD_API_KEY_SHA256S";
+const API_KEY_HASHES_ENV = "NIPMOD_API_KEY_HASHES";
+const API_KEY_HASH_SECRET_ENV = "NIPMOD_API_KEY_HASH_SECRET";
 const API_KEY_MIN_LENGTH = 24;
 
 const PUBLIC_ACCESS: ApiAccess = {
@@ -53,7 +54,10 @@ export function readApiAccess(
     return unauthorized(context, "api keys are not enabled on this deployment");
   }
 
-  const providedHash = sha256(provided);
+  const providedHash = hmacApiKey(provided, env);
+  if (!providedHash) {
+    return unauthorized(context, "api key hashing is not configured on this deployment");
+  }
   const match = configured.find((candidate) => constantTimeEqual(candidate.hash, providedHash));
   if (!match) {
     return unauthorized(context, "api key is invalid");
@@ -78,7 +82,7 @@ export function publicApiAccess(): ApiAccess {
 }
 
 export function fingerprintApiKey(rawKey: string): string {
-  return `key_${sha256(rawKey).slice(0, 16)}`;
+  return `key_${hmacValue(rawKey, "nipmod-api-key-fingerprint-v1").slice(0, 16)}`;
 }
 
 function readProvidedKey(request: Request): string | null {
@@ -125,7 +129,7 @@ interface ConfiguredKey {
 
 function readConfiguredKeys(env: ApiAuthEnv): ConfiguredKey[] {
   const raw = env[API_KEY_HASHES_ENV];
-  if (!raw) {
+  if (!raw || !env[API_KEY_HASH_SECRET_ENV]) {
     return [];
   }
   return raw
@@ -169,8 +173,16 @@ function tierMultiplier(tier: ApiAccessTier): number {
   }
 }
 
-function sha256(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
+function hmacApiKey(value: string, env: ApiAuthEnv): string | null {
+  const secret = env[API_KEY_HASH_SECRET_ENV];
+  if (!secret) {
+    return null;
+  }
+  return hmacValue(value, secret);
+}
+
+function hmacValue(value: string, secret: string): string {
+  return createHmac("sha256", secret).update(value).digest("hex");
 }
 
 function constantTimeEqual(left: string, right: string): boolean {
