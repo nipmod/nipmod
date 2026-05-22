@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.30.0",
   "type": "module",
   "scripts": {
+    "archive:seed": "node --experimental-strip-types tools/seed-package-intelligence.ts",
     "build": "pnpm --dir nipmod build && pnpm --dir site build",
     "public:check": "node --experimental-strip-types tools/open-source-readiness-check.ts",
     "security": "pnpm --dir nipmod security:deps && pnpm --dir site security:deps && pnpm --dir site security:secrets && pnpm supply-chain:check",

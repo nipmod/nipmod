@@ -17,7 +17,7 @@ curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 Tell your agent:
 
 ```text
-Use Nipmod before choosing packages. Search for packages for this task, inspect the best candidates, then show me the install plan before writing anything.
+Use Nipmod before choosing packages. Search, inspect, show trust factors and return the install plan before writing anything.
 ```
 
 Core calls:
@@ -96,6 +96,7 @@ Contracts and examples:
 
 - API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md)
 - Trust and ranking rules: [`docs/specs/trust-signals.md`](docs/specs/trust-signals.md)
+- API beta launch kit: [`docs/launch/api-beta.md`](docs/launch/api-beta.md)
 - Agent examples: [`examples/agent-workflow/`](examples/agent-workflow/)
 - HTTP example: [`examples/http-api/`](examples/http-api/)
 

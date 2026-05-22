@@ -1,4 +1,4 @@
-const query = process.argv.slice(2).join(" ").trim() || "http client";
+const query = process.argv.slice(2).join(" ").trim() || "react";
 const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
 
 const searchUrl = new URL("/api/search", baseUrl);

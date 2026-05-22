@@ -38,12 +38,15 @@ const requiredFiles = [
   "supabase/migrations/20260522073000_package_intelligence_archive.sql",
   "supabase/migrations/20260522151945_api_usage_events.sql",
   "docs/security/supply-chain.md",
+  "docs/launch/api-beta.md",
   "examples/http-api/README.md",
   "examples/http-api/search.ts",
+  "examples/http-api/agent-flow.ts",
   "examples/agent-workflow/README.md",
   "examples/agent-workflow/codex.md",
   "examples/agent-workflow/claude-code.md",
   "examples/agent-workflow/mcp-host.md",
+  "tools/seed-package-intelligence.ts",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",
@@ -81,6 +84,7 @@ check(
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
 check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
+check("readme:api-launch-kit", () => readme.includes("docs/launch/api-beta.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
 
 const trustSignals = read("docs/specs/trust-signals.md");
@@ -97,7 +101,12 @@ const mcpExample = read("examples/agent-workflow/mcp-host.md");
 check("agent-example:readme-flow", () => agentWorkflow.includes("GET https://nipmod.com/api/search?q=<task>"));
 check("agent-example:codex", () => codexExample.includes("GET https://nipmod.com/api/install-plan"));
 check("agent-example:claude-code", () => claudeExample.includes("Do not install until I approve the plan."));
+check("agent-example:trust-factors", () => agentWorkflow.includes("trust factors") && codexExample.includes("trust factors"));
 check("agent-example:mcp-external", () => mcpExample.includes("nipmod.external_install_plan") && mcpExample.includes("nipmod.resolve"));
+
+const apiBetaLaunch = read("docs/launch/api-beta.md");
+check("launch-kit:api-beta", () => apiBetaLaunch.includes("Trust Engine v2") && apiBetaLaunch.includes("Production monitor passes before posting."));
+check("launch-kit:operator-seed", () => apiBetaLaunch.includes("pnpm archive:seed") && apiBetaLaunch.includes("NIPMOD_ARCHIVE_WRITE_TOKEN"));
 
 const gitattributes = read(".gitattributes");
 check("linguist:public-html-generated", () => gitattributes.includes("site/public/*.html linguist-generated=true"));

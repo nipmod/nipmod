@@ -3,13 +3,13 @@
 This example shows the API-first Nipmod flow an agent can use from any host that can make HTTPS requests.
 
 ```bash
-node --experimental-strip-types examples/http-api/search.ts "http client"
+node --experimental-strip-types examples/http-api/search.ts "react"
 ```
 
 For the agent-style output with trust factors and safety data:
 
 ```bash
-node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+node --experimental-strip-types examples/http-api/agent-flow.ts "react"
 ```
 
 Flow:

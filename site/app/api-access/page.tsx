@@ -10,17 +10,17 @@ const endpoints = [
   {
     method: "GET",
     path: "/api/search?q=<query>",
-    text: "Search supported sources from one request."
+    text: "Find candidates across supported package sources."
   },
   {
     method: "GET",
     path: "/api/inspect?source=npm&name=<package>",
-    text: "Inspect one exact package record with source, license, metrics and trust signals."
+    text: "Inspect source, license, metrics, warnings and trust factors."
   },
   {
     method: "GET",
     path: "/api/install-plan?source=npm&name=<package>",
-    text: "Return a reviewable install plan before any local command runs."
+    text: "Return a plan an agent can show before local execution."
   },
   {
     method: "GET",
@@ -30,7 +30,7 @@ const endpoints = [
   {
     method: "POST",
     path: "/api/mcp",
-    text: "Expose the same read-only package surface through MCP JSON-RPC."
+    text: "Use the same read-only package surface through MCP."
   }
 ] as const;
 
@@ -38,11 +38,11 @@ const examples = [
   {
     label: "Agent prompt",
     command:
-      "Use Nipmod before choosing packages. Search for packages for this task, inspect the best candidates, then show me the install plan before writing anything."
+      "Use Nipmod before choosing packages. Search, inspect, show trust factors and return the install plan before writing anything."
   },
   {
     label: "Search",
-    command: "curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
+    command: "curl 'https://nipmod.com/api/search?q=react&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
   },
   {
     label: "Inspect",
@@ -54,8 +54,7 @@ const examples = [
   },
   {
     label: "Archive dry run",
-    command:
-      "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'"
+    command: "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'"
   },
   {
     label: "MCP",
@@ -91,8 +90,8 @@ export default function ApiAccessPage() {
           <p className="eyebrow">Nipmod API</p>
           <h1 id="api-title">One package surface for agents.</h1>
           <p className="lead">
-            Agents call Nipmod to search package sources, inspect trust factors and return safe install plans through one
-            hosted API.
+            Agents call Nipmod before choosing dependencies. One hosted API returns candidates, trust factors and safe
+            install plans.
           </p>
         </div>
         <div className="api-status-panel" aria-label="API access status">
@@ -106,23 +105,22 @@ export default function ApiAccessPage() {
         <div className="api-flow-step">
           <span>1</span>
           <h2>Ask</h2>
-          <p>A user tells an agent what package, model, tool or workflow it needs.</p>
+          <p>A user asks an agent to solve a task.</p>
         </div>
         <div className="api-flow-step">
           <span>2</span>
           <h2>Search</h2>
-          <p>The agent calls <code>/api/search</code> across supported package sources.</p>
+          <p>The agent calls <code>/api/search</code> across sources.</p>
         </div>
         <div className="api-flow-step">
           <span>3</span>
           <h2>Inspect</h2>
-          <p>The agent checks source context, license, metrics, warnings and trust decision.</p>
-          <p>Trust Engine v2 also returns structured factors agents can explain.</p>
+          <p>The agent checks source context, warnings and Trust Engine v2 factors.</p>
         </div>
         <div className="api-flow-step">
           <span>4</span>
           <h2>Plan</h2>
-          <p>Nipmod returns a plan the user can approve before workspace writes.</p>
+          <p>Nipmod returns the install plan before workspace writes.</p>
         </div>
       </section>
 

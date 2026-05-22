@@ -148,6 +148,10 @@ export async function runSyntheticMonitor({
     assertEqual(inspect.type, "dev.nipmod.external-inspect.v1", "external inspect type mismatch");
     assertEqual(inspect.record?.type, "dev.nipmod.external-package.v1", "external inspect record type mismatch");
     assertEqual(inspect.record?.source, "npm", "external inspect source mismatch");
+    assertEqual(inspect.record?.trust?.policy?.version, "external-v2", "external inspect trust policy mismatch");
+    if (!Array.isArray(inspect.record?.trust?.factors) || inspect.record.trust.factors.length === 0) {
+      throw new Error("external inspect trust factors missing");
+    }
 
     const plan = await fetchJson(`${endpoints.externalInstallPlan}?source=npm&name=undici`, timedFetch);
     assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "external install plan type mismatch");
@@ -166,6 +170,7 @@ export async function runSyntheticMonitor({
 
     return {
       openapi: endpoints.openApi,
+      trustFactors: inspect.record.trust.factors.length,
       searchReports: search.sourceReports.length
     };
   });

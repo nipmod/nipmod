@@ -21,7 +21,7 @@ Search:
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","mcp"],"limit":5}}}'
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"react","sources":["npm","pypi","github","mcp"],"limit":5}}}'
 ```
 
 Install plan:

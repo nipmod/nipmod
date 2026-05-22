@@ -463,6 +463,23 @@ function createFixture({
     [`GET ${endpoints.externalInspect}?source=npm&name=undici`]: jsonResponse({
       record: {
         source: "npm",
+        trust: {
+          factors: [
+            {
+              category: "install",
+              evidence: "Install command risk: low. Hosted API returns a plan only.",
+              impact: "positive",
+              label: "Install plan boundary"
+            }
+          ],
+          policy: {
+            thresholds: {
+              recommended: 75,
+              usableWithWarning: 50
+            },
+            version: "external-v2"
+          }
+        },
         type: "dev.nipmod.external-package.v1"
       },
       type: "dev.nipmod.external-inspect.v1"
