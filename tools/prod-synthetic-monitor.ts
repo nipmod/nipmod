@@ -186,6 +186,33 @@ export async function runSyntheticMonitor({
     };
   });
 
+  await runCheck(checks, "external_source_matrix", async () => {
+    const plans = await Promise.all([
+      fetchJson(`${endpoints.externalInstallPlan}?source=pypi&name=requests`, timedFetch),
+      fetchJson(`${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`, timedFetch),
+      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`, timedFetch),
+      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`, timedFetch)
+    ]);
+    for (const plan of plans) {
+      assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "source matrix install plan type mismatch");
+      assertEqual(plan.plan?.requiresApprovalBeforeWrite, true, "source matrix approval boundary mismatch");
+      if (!Array.isArray(plan.plan?.writes) || plan.plan.writes.length !== 0) {
+        throw new Error("source matrix install plan should not write remotely");
+      }
+    }
+
+    const mcpSearch = await fetchJson(`${endpoints.externalSearch}?q=tandem&sources=mcp&limit=3`, timedFetch);
+    assertEqual(mcpSearch.type, "dev.nipmod.external-search.v1", "MCP source search type mismatch");
+    if (!Array.isArray(mcpSearch.records) || !mcpSearch.records.some((record) => record.source === "mcp")) {
+      throw new Error("MCP source search returned no MCP records");
+    }
+
+    return {
+      installPlans: plans.length,
+      mcpRecords: mcpSearch.records.length
+    };
+  });
+
   await runCheck(checks, "remote_readonly_mcp", async () => {
     const info = await fetchJson(endpoints.remoteMcp, timedFetch);
     assertEqual(info.type, "dev.nipmod.remote-mcp.v1", "remote MCP type mismatch");

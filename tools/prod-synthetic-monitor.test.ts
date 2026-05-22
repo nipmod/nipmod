@@ -15,7 +15,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 19, total: 19 });
+    expect(result.summary).toEqual({ fail: 0, pass: 20, total: 20 });
     expect(result.checks.map((check) => check.name)).toEqual([
       "site_home",
       "trust_page",
@@ -24,6 +24,7 @@ describe("production synthetic monitor", () => {
       "discovery_manifest",
       "package_api_contract",
       "source_capability_health",
+      "external_source_matrix",
       "remote_readonly_mcp",
       "package_intelligence_archive_api",
       "deploy_drift",
@@ -49,7 +50,7 @@ describe("production synthetic monitor", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 19, total: 19 });
+    expect(result.summary).toEqual({ fail: 0, pass: 20, total: 20 });
     expect(result.checks.find((check) => check.name === "registry_verified")).toMatchObject({
       data: {
         mode: "empty-public-archive",
@@ -495,6 +496,38 @@ function createFixture({
         workspaceWritesFromHostedApi: false
       },
       type: "dev.nipmod.source-health.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=pypi&name=requests`]: jsonResponse({
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`]: jsonResponse({
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`]: jsonResponse({
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`]: jsonResponse({
+      plan: {
+        requiresApprovalBeforeWrite: true,
+        writes: []
+      },
+      type: "dev.nipmod.external-install-plan.v1"
+    }),
+    [`GET ${endpoints.externalSearch}?q=tandem&sources=mcp&limit=3`]: jsonResponse({
+      records: [{ id: "mcp:ac.tandem/docs-mcp", source: "mcp" }],
+      type: "dev.nipmod.external-search.v1"
     }),
     [`GET ${endpoints.remoteMcp}`]: jsonResponse({
       endpoint: endpoints.remoteMcp,

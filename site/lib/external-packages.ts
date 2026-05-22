@@ -839,36 +839,57 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   if (!isRecord(item)) {
     return null;
   }
-  const name = readString(item.name) ?? readString(item.id);
+  const server = isRecord(item.server) ? item.server : item;
+  const official = readRecord(readRecord(item._meta)?.["io.modelcontextprotocol.registry/official"]);
+  if (official?.isLatest === false) {
+    return null;
+  }
+  const name = readString(server.name) ?? readString(server.id);
   if (!name) {
     return null;
   }
-  const repo = normalizeRepositoryUrl(readString(item.repository) ?? readNestedString(item, ["source", "url"]));
-  const homepage = readString(item.homepage) ?? readString(item.url) ?? repo ?? "https://registry.modelcontextprotocol.io";
+  const remotes = Array.isArray(server.remotes) ? server.remotes.filter(isRecord) : [];
+  const remoteUrl = remotes.map((remote) => readString(remote.url)).find(Boolean) ?? null;
+  const repo = normalizeRepositoryUrl(
+    readNestedString(server, ["repository", "url"]) ?? readString(server.repository) ?? readNestedString(server, ["source", "url"])
+  );
+  const homepage = readString(server.homepage) ?? readString(server.url) ?? repo ?? remoteUrl ?? "https://registry.modelcontextprotocol.io";
+  const status = readString(official?.status);
+  const updatedAt = readString(official?.updatedAt) ?? readString(official?.publishedAt) ?? readString(server.updatedAt) ?? readString(server.updated_at);
+  const license = readString(server.license);
+  const warnings = [
+    ...(repo ? [] : ["No source repository returned by MCP Registry."]),
+    ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : [])
+  ];
 
   return makeRecord({
-    description: readString(item.description) ?? "",
-    displayName: name,
+    description: readString(server.description) ?? "",
+    displayName: readString(server.title) ?? name,
     id: `mcp:${name}`,
     install: {
       command: `mcp install ${name}`,
       manager: "mcp",
       notes: ["MCP install commands differ by host. Use the server's original documentation before adding it to an agent runtime."]
     },
-    license: readString(item.license),
+    license,
     metrics: {},
     name,
     originalUrl: homepage,
-    owner: readString(item.author) ?? null,
+    owner: readString(server.author) ?? (name.includes("/") ? name.split("/")[0]! : null),
     registryUrl: "https://registry.modelcontextprotocol.io/v0.1/servers",
     repo,
     source: "mcp",
     sourceKind: "tool-registry",
-    signals: ["Resolved from the MCP Registry.", repo ? "Source repository is present." : "Source repository was not returned."],
-    trustScore: clampScore(52 + (repo ? 12 : 0) + (readString(item.license) ? 8 : 0)),
-    updatedAt: readString(item.updatedAt) ?? readString(item.updated_at),
-    version: readString(item.version),
-    warnings: repo ? [] : ["No source repository returned by MCP Registry."]
+    signals: [
+      "Resolved from the MCP Registry.",
+      status ? `MCP Registry status: ${status}.` : "MCP Registry status was not returned.",
+      remoteUrl ? "Remote MCP endpoint metadata is present." : "Remote MCP endpoint metadata is missing.",
+      repo ? "Source repository is present." : "Source repository was not returned."
+    ],
+    trustScore: clampScore(52 + (repo ? 12 : 0) + (remoteUrl ? 8 : 0) + (license ? 8 : 0) + (status === "active" ? 8 : 0)),
+    updatedAt,
+    version: readString(server.version),
+    warnings
   });
 }
 

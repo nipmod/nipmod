@@ -105,6 +105,28 @@ describe("external package resolver", () => {
     expect(plan.plan.commands).toEqual(["npm install react"]);
   });
 
+  test("normalizes current MCP registry server records", async () => {
+    const result = await searchExternalPackages("tandem docs", {
+      fetchImpl: mockFetch,
+      limit: 3,
+      sources: ["mcp"]
+    });
+    const record = await inspectExternalPackage("mcp", "ac.tandem/docs-mcp", { fetchImpl: mockFetch });
+
+    expect(result.records.map((item) => item.id)).toContain("mcp:ac.tandem/docs-mcp");
+    expect(result.records.map((item) => item.version)).toContain("0.3.1");
+    expect(result.records.map((item) => item.version)).not.toContain("0.3.0");
+    expect(record).toMatchObject({
+      displayName: "Tandem docs",
+      id: "mcp:ac.tandem/docs-mcp",
+      originalUrl: "https://github.com/frumu-ai/tandem",
+      repo: "https://github.com/frumu-ai/tandem",
+      source: "mcp",
+      version: "0.3.1"
+    });
+    expect(record.trust.signals).toContain("MCP Registry status: active.");
+  });
+
   test("publishes search, inspect and install-plan API routes", async () => {
     vi.stubGlobal("fetch", mockFetch);
 
@@ -291,6 +313,46 @@ async function mockFetch(input: string | URL | Request): Promise<Response> {
         tags: ["transformers", "license:apache-2.0"]
       }
     ]);
+  }
+
+  if (url.includes("registry.modelcontextprotocol.io/v0.1/servers")) {
+    return jsonResponse({
+      servers: [
+        {
+          _meta: {
+            "io.modelcontextprotocol.registry/official": {
+              isLatest: false,
+              status: "active",
+              updatedAt: "2026-04-02T11:22:40.005Z"
+            }
+          },
+          server: {
+            description: "Remote MCP server for Tandem docs.",
+            name: "ac.tandem/docs-mcp",
+            repository: { source: "github", url: "https://github.com/frumu-ai/tandem" },
+            title: "Tandem docs",
+            version: "0.3.0"
+          }
+        },
+        {
+          _meta: {
+            "io.modelcontextprotocol.registry/official": {
+              isLatest: true,
+              status: "active",
+              updatedAt: "2026-04-04T11:22:40.005Z"
+            }
+          },
+          server: {
+            description: "Remote MCP server for Tandem docs, install guides, SDKs and workflows.",
+            name: "ac.tandem/docs-mcp",
+            remotes: [{ type: "streamable-http", url: "https://tandem.ac/mcp" }],
+            repository: { source: "github", url: "https://github.com/frumu-ai/tandem" },
+            title: "Tandem docs",
+            version: "0.3.1"
+          }
+        }
+      ]
+    });
   }
 
   return jsonResponse({ error: "not found" }, 404);
