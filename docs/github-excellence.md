@@ -30,6 +30,7 @@ The public repository should answer:
 | Security | Security policy, supply chain policy, advisories and private reporting path. |
 | Releases | Changelog entries, verification notes and compatibility notes. |
 | Governance | Maintainer rules, decision records and release rules. |
+| Maintainer commits | Commits authored by maintainers are signed and GitHub-verifiable. |
 | Examples | Minimal working examples for direct API and agent usage. |
 | CI | Tests, typecheck, build, supply chain checks, public readiness and code scanning. |
 | Metadata | Topics, description, homepage, license, citation and community files. |
@@ -69,6 +70,7 @@ Until then, keep the product concentrated in this repository.
 - No private keys, tokens, local state or assistant handoff files in git.
 - No unexplained generated blobs.
 - No vague commit subjects.
+- No unsigned maintainer-led repository changes.
 - No public API behavior without tests.
 - No source integration claim without a resolver, docs and monitor coverage.
 - No payment or token claims that imply guaranteed return.
@@ -82,6 +84,7 @@ Until then, keep the product concentrated in this repository.
 - [x] API, source, trust and archive specs.
 - [x] Structured issue and pull request intake.
 - [x] Code scanning and Scorecard workflows.
+- [x] Verified maintainer commit signing.
 - [ ] Public org profile repo.
 - [ ] SDK packages.
 - [ ] Public examples expanded into integration tests.
