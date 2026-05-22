@@ -8,9 +8,9 @@ export default function Home() {
       <section className="editorial-landing" aria-labelledby="hero-title">
         <div className="landing-copy">
           <h1 id="hero-title">
-            One package API
+            The package layer
             <br />
-            <em>for agents</em>.
+            <em>for AI agents</em>.
           </h1>
           <p className="landing-kicker">Tell your agent what you need. Nipmod returns package options and safe install plans.</p>
           <div className="landing-actions">

@@ -183,7 +183,7 @@ function openApiDocument() {
       }
     },
     info: {
-      description: "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
+      description: "The package layer for AI agents. Search sources, inspect trust and get safe install plans before workspace writes.",
       title: "Nipmod API",
       version: "2026-05-22"
     },

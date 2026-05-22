@@ -70,7 +70,7 @@ for (const file of requiredFiles) {
 }
 
 const readme = read("README.md");
-check("readme:positioning", () => readme.includes("One package API for agents."));
+check("readme:positioning", () => readme.includes("The package layer for AI agents."));
 check("readme:hosted-api", () => readme.includes("Public beta access does not require an API key."));
 check("readme:api-search-example", () => readme.includes("https://nipmod.com/api/search?q=http%20client"));
 check("readme:no-telegram-example", () => !readme.includes("telegram%20bot") && !readme.includes("node-telegram-bot-api"));

@@ -1,6 +1,6 @@
 export const homeContent = {
   brand: "Nipmod",
-  headline: "One package API for agents.",
+  headline: "The package layer for AI agents.",
   lead: "Tell your agent what you need. The agent calls Nipmod for package options, trust context and a safe install plan.",
   links: {
     api: "/api-access",

@@ -1,7 +1,7 @@
 {
   "name": "nipmod-site",
   "version": "0.0.0",
-  "description": "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
+  "description": "The package layer for AI agents.",
   "private": true,
   "packageManager": "pnpm@10.30.0",
   "type": "module",

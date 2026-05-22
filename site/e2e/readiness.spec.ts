@@ -6,11 +6,11 @@ test("home page presents the API-first product", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle("Nipmod");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "One package API for agents.");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "The package layer for AI agents.");
   await expect(page.locator('head link[rel="alternate"][type="text/plain"][href="/llms.txt"]')).toHaveCount(1);
   await expect(page.locator('head link[rel="alternate"][type="application/json"][href="/.well-known/nipmod.json"]')).toHaveCount(1);
 
-  await expect(page.getByRole("heading", { name: /One package API\s+for agents\./ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /The package layer\s+for AI agents\./ })).toBeVisible();
   await expect(page.getByText("Tell your agent what you need. Nipmod returns package options and safe install plans.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Get API access" })).toHaveAttribute("href", "/api-access");
   await expect(page.getByRole("link", { name: "View sources" })).toHaveAttribute("href", "/sources");

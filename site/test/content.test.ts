@@ -24,7 +24,7 @@ function collectText(value: unknown): string[] {
 describe("home content", () => {
   test("keeps the product message short and direct", () => {
     expect(homeContent.brand).toBe("Nipmod");
-    expect(homeContent.headline).toBe("One package API for agents.");
+    expect(homeContent.headline).toBe("The package layer for AI agents.");
     expect(homeContent.lead.length).toBeLessThanOrEqual(180);
   });
 

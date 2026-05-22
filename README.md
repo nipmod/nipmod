@@ -4,7 +4,7 @@
 [![Production monitor](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml/badge.svg)](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-white.svg)](LICENSE)
 
-One package API for agents.
+The package layer for AI agents.
 
 Nipmod lets agents search sources, inspect trust and get safe install plans before workspace writes. Public beta access is free and rate limited.
 

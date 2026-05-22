@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "type": "dev.nipmod.discovery.v1",
   "name": "Nipmod",
-  "description": "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
+  "description": "The package layer for AI agents.",
   "homepage": "https://nipmod.com",
   "previewImage": "https://nipmod.com/nipmod-logo.png",
   "trustPage": "https://nipmod.com/trust",

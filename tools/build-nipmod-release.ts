@@ -49,7 +49,7 @@ try {
       {
         name: "nipmod",
         version,
-        description: "One package API for agents.",
+        description: "The package layer for AI agents.",
         type: "module",
         bin: {
           nipmod: "./dist/cli.js"
