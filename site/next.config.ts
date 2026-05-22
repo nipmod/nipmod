@@ -4,6 +4,7 @@ import type { NextConfig } from "next";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = dirname(projectRoot);
+const nextRoot = process.env.VERCEL === "1" ? projectRoot : workspaceRoot;
 const isDevelopment = process.env.NODE_ENV === "development";
 const scriptSrc = isDevelopment ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'";
 const connectSrc = isDevelopment
@@ -87,9 +88,10 @@ const nextConfig: NextConfig = {
       }
     ];
   },
+  outputFileTracingRoot: nextRoot,
   reactStrictMode: true,
   turbopack: {
-    root: workspaceRoot
+    root: nextRoot
   }
 };
 
