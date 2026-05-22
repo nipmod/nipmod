@@ -13,6 +13,7 @@ describe("OpenAPI route", () => {
     expect(body.info.title).toBe("Nipmod API");
     expect(Object.keys(body.paths)).toEqual([
       "/api/archive/prepare",
+      "/api/archive/confirm",
       "/api/archive/search",
       "/api/archive/status",
       "/api/inspect",
@@ -23,6 +24,8 @@ describe("OpenAPI route", () => {
       "/api/sources/health"
     ]);
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
+    expect(body.paths["/api/archive/prepare"].get.responses["200"].description).toContain("does not persist");
+    expect(body.paths["/api/archive/confirm"].post.summary).toContain("authorized archive writer");
   });
 
   test("supports CORS preflight", () => {

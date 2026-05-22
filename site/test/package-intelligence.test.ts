@@ -62,7 +62,10 @@ describe("package intelligence archive", () => {
     const prepared = await prepare.json();
     expect(prepare.status).toBe(200);
     expect(prepared.record.archive.status).toBe("external_indexed");
+    expect(prepared.preparedOnly).toBe(true);
     expect(prepared.store.configured).toBe(false);
+    expect(prepared.stored).toBe(false);
+    expect(prepared.next.writeBoundary).toContain("not persisted");
 
     const confirm = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {

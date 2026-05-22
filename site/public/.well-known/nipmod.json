@@ -4,6 +4,34 @@
   "name": "Nipmod",
   "homepage": "https://nipmod.com",
   "trustPage": "https://nipmod.com/trust",
+  "api": {
+    "baseUrl": "https://nipmod.com",
+    "openapi": "https://nipmod.com/api/openapi",
+    "search": "https://nipmod.com/api/search",
+    "resolve": "https://nipmod.com/api/resolve",
+    "inspect": "https://nipmod.com/api/inspect",
+    "installPlan": "https://nipmod.com/api/install-plan",
+    "sourceHealth": "https://nipmod.com/api/sources/health",
+    "mcp": "https://nipmod.com/api/mcp",
+    "writeBoundary": "Hosted API calls do not write to a caller workspace."
+  },
+  "sources": [
+    "npm",
+    "pypi",
+    "github",
+    "huggingface-model",
+    "huggingface-dataset",
+    "mcp"
+  ],
+  "archive": {
+    "prepare": "https://nipmod.com/api/archive/prepare",
+    "search": "https://nipmod.com/api/archive/search",
+    "confirm": "https://nipmod.com/api/archive/confirm",
+    "status": "https://nipmod.com/api/archive/status",
+    "prepareStores": false,
+    "confirmStores": "requires authorized server writer",
+    "writeBoundary": "Prepared records are not persisted by /api/archive/prepare. Durable writes require archive confirmation and an authorized server writer."
+  },
   "docs": {
     "docs": "https://nipmod.com/quickstart#docs",
     "api": "https://nipmod.com/api-access",

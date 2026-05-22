@@ -78,8 +78,14 @@ function archiveRecordResponse(
   const record = createPackageIntelligenceRecord(externalRecord);
   const validation = validatePackageIntelligenceRecord(record);
   return json({
+    next: {
+      confirm: "POST /api/archive/confirm",
+      writeBoundary: "Prepared records are not persisted by this endpoint. Durable writes require archive confirmation and an authorized server writer."
+    },
+    preparedOnly: true,
     record,
     store: archiveStoreStatus(),
+    stored: false,
     type: "dev.nipmod.archive-prepare.v1",
     validation
   }, 200, headers, context);

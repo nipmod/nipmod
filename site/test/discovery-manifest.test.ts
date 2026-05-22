@@ -27,6 +27,8 @@ describe("nipmod discovery manifest", () => {
       "advisoriesPublicKey",
       "advisoriesSignature",
       "agent",
+      "api",
+      "archive",
       "claims",
       "docs",
       "externalIndex",
@@ -39,6 +41,7 @@ describe("nipmod discovery manifest", () => {
       "quorum",
       "registry",
       "review",
+      "sources",
       "transparency",
       "trustPage",
       "type",
@@ -163,6 +166,21 @@ describe("nipmod discovery manifest", () => {
       "huggingface-dataset",
       "mcp"
     ]);
+    expect(manifest.sources).toEqual(manifest.externalIndex.sources);
+    expect(manifest.api).toMatchObject({
+      baseUrl: "https://nipmod.com",
+      installPlan: "https://nipmod.com/api/install-plan",
+      openapi: "https://nipmod.com/api/openapi",
+      search: "https://nipmod.com/api/search",
+      writeBoundary: "Hosted API calls do not write to a caller workspace."
+    });
+    expect(manifest.archive).toMatchObject({
+      confirm: "https://nipmod.com/api/archive/confirm",
+      prepare: "https://nipmod.com/api/archive/prepare",
+      prepareStores: false,
+      search: "https://nipmod.com/api/archive/search",
+      status: "https://nipmod.com/api/archive/status"
+    });
     expect(manifest.externalIndex.packageIntelligence.writeBoundary).toContain("Durable writes require");
     expect(manifest.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
     expect(manifest.mcp.remoteTools).toContain("nipmod.resolve");

@@ -93,13 +93,47 @@ function openApiDocument() {
         get: {
           parameters: [sourceParameter(), nameParameter()],
           responses: {
-            "200": { description: "Prepared package intelligence record." },
+            "200": { description: "Prepared package intelligence record. This endpoint does not persist the record." },
             "400": errorResponse(),
             "404": errorResponse(),
             "502": errorResponse(),
             "504": errorResponse()
           },
-          summary: "Prepare an archive record from an exact external package."
+          summary: "Prepare an archive record from an exact external package before confirmation."
+        }
+      },
+      "/api/archive/confirm": {
+        post: {
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: {
+                  additionalProperties: true,
+                  properties: {
+                    actor: { type: "string" },
+                    dryRun: { type: "boolean" },
+                    message: { type: "string" },
+                    name: { type: "string" },
+                    record: { $ref: "#/components/schemas/ExternalPackageRecord" },
+                    source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
+                  },
+                  type: "object"
+                }
+              }
+            },
+            required: true
+          },
+          responses: {
+            "200": { description: "Confirmed package intelligence record. Dry runs never persist; writes require authorization." },
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "404": errorResponse(),
+            "422": errorResponse(),
+            "502": errorResponse(),
+            "503": errorResponse(),
+            "504": errorResponse()
+          },
+          summary: "Confirm useful package discovery and persist only with an authorized archive writer."
         }
       },
       "/api/archive/search": {
