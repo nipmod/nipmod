@@ -19,7 +19,7 @@ Authorization: Bearer <key>
 
 Invalid keys return `401`. Requests without a key stay on the public rate limit.
 
-Server-side key storage uses HMAC-SHA256 hashes with a deployment secret. Raw API keys are never stored in repo files, Vercel config output or usage events.
+Server-side key storage uses scrypt-derived keyed digests with a deployment secret. Raw API keys are never stored in repo files, Vercel config output or usage events.
 
 Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, result count, error code and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
 
