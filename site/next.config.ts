@@ -77,6 +77,15 @@ const nextConfig: NextConfig = {
       }
     ];
   },
+  async redirects() {
+    return [
+      {
+        destination: "/agents/mcp-hosts",
+        permanent: true,
+        source: "/agents/codex-claude"
+      }
+    ];
+  },
   reactStrictMode: true,
   turbopack: {
     root: projectRoot

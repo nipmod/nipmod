@@ -1,6 +1,6 @@
-# Strategic Decision Register
+# Product Decisions
 
-This register records accepted strategic decisions so Nipmod does not drift every time the market narrative changes.
+This register records accepted product decisions so public docs, API behavior and roadmap language stay aligned.
 
 ## D-001: Make API-first the public product
 
@@ -91,4 +91,3 @@ The next technical expansion should focus on resolver depth, trust scoring, inst
 
 Reason:
 This compounds the core product. More logos, platform pages or unreviewed integration claims do not.
-

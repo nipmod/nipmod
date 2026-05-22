@@ -21,6 +21,9 @@ site/tsconfig.tsbuildinfo
 site/public/registry/packages/* [0-9].json
 
 # Local planning artifacts
+.claude/
+CLAUDE.md
+site/CLAUDE.md
 findings.md
 mass-readiness-plan.md
 nipmod-*-snapshot.md

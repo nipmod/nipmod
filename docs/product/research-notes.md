@@ -1,6 +1,6 @@
-# Research Cadence
+# Research Notes
 
-Nipmod strategy should be updated through evidence, not mood.
+Nipmod product direction should be updated through evidence, not mood.
 
 ## Weekly Checks
 
@@ -82,4 +82,3 @@ Not allowed without proof:
 - GitHub Blog and Changelog: https://github.blog/changelog/
 - OpenAI developer docs: https://platform.openai.com/docs
 - Anthropic docs: https://docs.anthropic.com/
-

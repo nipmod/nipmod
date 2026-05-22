@@ -64,6 +64,33 @@ const forbiddenGenerated = tracked
   .filter((file) => /(^|\/)(node_modules|\.next|\.vercel)\//.test(file) || file === "site/public/claude-original.html");
 check("git:no-tracked-build-output", () => forbiddenGenerated.length === 0, { forbiddenGenerated });
 
+const forbiddenPublicArtifacts = tracked
+  .split("\n")
+  .filter(Boolean)
+  .filter((file) =>
+    /(^|\/)(CLAUDE\.md|\.claude\/|.*handoff.*|.*scratch.*|.*private-prompt.*)/i.test(file)
+  );
+check("git:no-public-assistant-artifacts", () => forbiddenPublicArtifacts.length === 0, { forbiddenPublicArtifacts });
+
+const publicTextFiles = tracked
+  .split("\n")
+  .filter(Boolean)
+  .filter((file) => /\.(css|md|mdx|txt|tsx?|jsx?|json|ya?ml)$/i.test(file))
+  .filter((file) => !/(^|\/)(node_modules|dist|\.next|\.vercel)\//.test(file));
+const internalCopyMarkers = [
+  "Claude editorial" + " redesign",
+  "Website Redesign" + " Handoff",
+  "Strategy Operating" + " System"
+];
+const forbiddenPublicText = [];
+for (const file of publicTextFiles) {
+  const text = read(file);
+  if (internalCopyMarkers.some((marker) => text.toLowerCase().includes(marker.toLowerCase()))) {
+    forbiddenPublicText.push(file);
+  }
+}
+check("git:no-internal-public-copy", () => forbiddenPublicText.length === 0, { forbiddenPublicText });
+
 const result = {
   checkedAt: new Date().toISOString(),
   checks,

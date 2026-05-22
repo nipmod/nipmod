@@ -1,14 +1,14 @@
-# Nipmod Strategy Operating System
+# Product Direction
 
-This folder is the decision system for Nipmod.
+This folder documents Nipmod's public product direction.
 
-The purpose is to keep product, market, technical and messaging choices aligned around one company direction:
+The direction is:
 
 > Nipmod is the package intelligence API for agents.
 
 Nipmod should help agents find, evaluate and plan package usage across the existing software ecosystem. It should not present itself as a Gitlawb add-on, a generic package mirror, an agent IDE integration collection or a token-first story.
 
-## Current Doctrine
+## Product Principles
 
 1. API first.
    The public product is one package intelligence API for agents. CLI and MCP are support surfaces.
@@ -50,8 +50,7 @@ If a decision fails two or more checks, it needs a stronger argument before ship
 
 ## Files
 
-- [Decision register](decision-register.md)
-- [Market map](market-map.md)
-- [Product master plan](product-master-plan.md)
-- [Research cadence](research-cadence.md)
-
+- [Product decisions](decisions.md)
+- [Market context](market-context.md)
+- [Roadmap](roadmap.md)
+- [Research notes](research-notes.md)

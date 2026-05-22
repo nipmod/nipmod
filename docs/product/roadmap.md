@@ -1,6 +1,6 @@
-# Product Master Plan
+# Roadmap
 
-This plan turns the strategy into execution. It is intentionally API-first.
+This roadmap is intentionally API-first.
 
 ## North Star
 
@@ -213,4 +213,3 @@ Quality metrics:
 - rate limit hit rate
 - false positive trust warnings
 - false negative risky recommendations
-

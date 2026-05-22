@@ -1,4 +1,4 @@
-# Market Map
+# Market Context
 
 Nipmod sits between package sources, agent hosts and security tooling.
 
@@ -55,7 +55,7 @@ They can become default discovery points for agent tools.
 Counter:
 Nipmod should support MCP as one source type, but its broader value is package intelligence across packages, repos, models, datasets, tools and workflows.
 
-## Strategic White Space
+## Product White Space
 
 The strongest market position is:
 
@@ -78,4 +78,3 @@ This is different from:
 - Socket package scoring and firewall docs: https://docs.socket.dev/
 - Snyk Open Source docs: https://docs.snyk.io/scan-with-snyk/snyk-open-source
 - Sonatype Repository Firewall: https://www.sonatype.com/products/sonatype-repository-firewall
-

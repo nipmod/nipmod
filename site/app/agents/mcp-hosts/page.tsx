@@ -1,30 +1,30 @@
 import type { Metadata } from "next";
 import { withPreviewImage } from "../../metadata";
 import { CommandBlock } from "../../command-block";
-import { codexClaudeContent } from "./content";
+import { agentHostContent } from "./content";
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://nipmod.com/agents/codex-claude"
+    canonical: "https://nipmod.com/agents/mcp-hosts"
   },
-  description: "Set up Nipmod for Codex and Claude Code with one local MCP server and a shared package archive workflow.",
+  description: "Set up Nipmod for agent hosts with one local MCP server and a shared package archive workflow.",
   openGraph: withPreviewImage({
-    description: "Use Nipmod from Codex and Claude Code for search, trust inspection, install planning and audit.",
-    title: "Nipmod for Codex and Claude Code",
-    url: "https://nipmod.com/agents/codex-claude"
+    description: "Use Nipmod from agent hosts for search, trust inspection, install planning and audit.",
+    title: "Nipmod for agent hosts",
+    url: "https://nipmod.com/agents/mcp-hosts"
   }),
-  title: "Nipmod for Codex and Claude Code"
+  title: "Nipmod for agent hosts"
 };
 
-export default function CodexClaudePage() {
+export default function AgentHostsPage() {
   return (
     <main className="page-shell" id="main">
-      <section className="setup-hero" aria-labelledby="codex-claude-title">
+      <section className="setup-hero" aria-labelledby="agent-host-title">
         <div className="setup-hero-copy">
-          <p className="eyebrow">Codex and Claude Code</p>
-          <h1 id="codex-claude-title">{codexClaudeContent.headline}</h1>
-          <p className="lead">{codexClaudeContent.lead}</p>
-          <div className="actions" aria-label="Codex and Claude actions">
+          <p className="eyebrow">Agent hosts</p>
+          <h1 id="agent-host-title">{agentHostContent.headline}</h1>
+          <p className="lead">{agentHostContent.lead}</p>
+          <div className="actions" aria-label="Agent host actions">
             <a className="button button-primary" href="#setup">
               Setup
             </a>
@@ -39,8 +39,8 @@ export default function CodexClaudePage() {
         <aside className="quickstart-card setup-hero-panel" aria-label="Install command">
           <span>01</span>
           <h2>Install once</h2>
-          <p>One local CLI gives both hosts the same package archive path.</p>
-          <CommandBlock command={codexClaudeContent.installCommand} label="Copy install command" />
+          <p>One local CLI gives supported hosts the same package archive path.</p>
+          <CommandBlock command={agentHostContent.installCommand} label="Copy install command" />
         </aside>
       </section>
 
@@ -51,7 +51,7 @@ export default function CodexClaudePage() {
           <p>Both commands register the same local Nipmod MCP server. The archive and proof do not fork per host.</p>
         </div>
         <div className="host-grid">
-          {codexClaudeContent.hosts.map((host) => (
+          {agentHostContent.hosts.map((host) => (
             <article className="host-card" key={host.name}>
               <div className="host-card-head">
                 <h3>{host.name}</h3>
@@ -74,7 +74,7 @@ export default function CodexClaudePage() {
             <span className="check-dot check-ok" aria-hidden="true" />
             <div>
               <h3>Shared instruction</h3>
-              <CommandBlock command={codexClaudeContent.sharedPrompt} label="Copy shared agent prompt" />
+              <CommandBlock command={agentHostContent.sharedPrompt} label="Copy shared agent prompt" />
             </div>
           </article>
         </div>
@@ -86,7 +86,7 @@ export default function CodexClaudePage() {
           <h2 id="agent-workflow-title">What the agent does after setup</h2>
         </div>
         <div className="agent-workflow-grid">
-          {codexClaudeContent.workflow.map((item) => (
+          {agentHostContent.workflow.map((item) => (
             <article className="usage-item" key={item.label}>
               <h2>{item.label}</h2>
               <p>{item.text}</p>
@@ -101,7 +101,7 @@ export default function CodexClaudePage() {
           <h2 id="boundaries-title">Same archive, controlled writes</h2>
         </div>
         <div className="check-list">
-          {codexClaudeContent.boundaries.map((item) => (
+          {agentHostContent.boundaries.map((item) => (
             <article className="check-row" key={item}>
               <span className="check-dot check-ok" aria-hidden="true" />
               <div>

@@ -1,5 +1,5 @@
-export const codexClaudeContent = {
-  headline: "Use Nipmod from Codex and Claude Code",
+export const agentHostContent = {
+  headline: "Use Nipmod from your agent host",
   lead:
     "Install once, connect the local MCP server, then ask the agent to search the shared package archive before using agent packages.",
   installCommand: "curl https://nipmod.com/i|bash",
