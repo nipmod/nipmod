@@ -154,7 +154,8 @@ nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
 ## Governance
 
 - Governance: [`GOVERNANCE.md`](GOVERNANCE.md)
-- Maintainers: [`MAINTAINERS.md`](MAINTAINERS.md)
+- Maintainer: [`@hazarxyz`](https://github.com/hazarxyz)
+- Maintainer policy: [`MAINTAINERS.md`](MAINTAINERS.md)
 - Roadmap: [`ROADMAP.md`](ROADMAP.md)
 - Release process: [`docs/release-process.md`](docs/release-process.md)
 - Decision records: [`docs/decisions/`](docs/decisions/)

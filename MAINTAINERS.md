@@ -1,13 +1,13 @@
 # Maintainers
 
-Current public maintainer:
+Current public maintainers:
 
 | Area | Owner |
 | --- | --- |
-| Product direction | `@nipmod` |
-| Repository maintenance | `@nipmod` |
-| Security response | `@nipmod` |
-| Release approval | `@nipmod` |
+| Product direction | [`@hazarxyz`](https://github.com/hazarxyz) |
+| Repository maintenance | [`@hazarxyz`](https://github.com/hazarxyz), [`@nipmod`](https://github.com/nipmod) |
+| Security response | [`@hazarxyz`](https://github.com/hazarxyz), [`@nipmod`](https://github.com/nipmod) |
+| Release approval | [`@hazarxyz`](https://github.com/hazarxyz) |
 
 ## Maintainer Expectations
 
