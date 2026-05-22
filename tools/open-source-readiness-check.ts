@@ -67,6 +67,10 @@ check("readme:no-telegram-example", () => !readme.includes("telegram%20bot") && 
 check("readme:no-stale-safe-mode", () => !readme.includes("durable archive env vars") && !readme.includes("Resolver safe mode"));
 check("readme:no-duplicate-github-mirror", () => !readme.includes("GitHub mirror"));
 check("readme:telegram", () => readme.includes("| Telegram | https://t.me/nipmod |"));
+check(
+  "readme:npm-token-link",
+  () => readme.includes("| $NPM on Base | https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3 |")
+);
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
 check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));

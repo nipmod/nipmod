@@ -179,5 +179,6 @@ pnpm verify
 | Machine discovery | https://nipmod.com/.well-known/nipmod.json |
 | X | https://x.com/Nipmod |
 | Telegram | https://t.me/nipmod |
+| $NPM on Base | https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3 |
 
 License: `MIT`. Security: `SECURITY.md`. Trademark and affiliation notice: `TRADEMARKS.md`.
