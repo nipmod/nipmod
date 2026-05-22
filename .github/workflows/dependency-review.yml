@@ -1,6 +1,9 @@
 name: Dependency review
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -19,5 +22,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
         with:
           fail-on-severity: high
+      - name: Push context
+        if: github.event_name == 'push'
+        run: |
+          echo "Dependency review runs on pull requests. This push check keeps the required branch-protection context consistent."
