@@ -434,6 +434,13 @@ function createFixture({
     ),
     [`GET ${endpoints.discovery}`]: jsonResponse(discovery),
     [`GET ${endpoints.openApi}`]: jsonResponse({
+      components: {
+        securitySchemes: {
+          NipmodApiKey: {
+            name: "x-nipmod-api-key"
+          }
+        }
+      },
       info: { title: "Nipmod API" },
       openapi: "3.1.0",
       paths: {
@@ -481,6 +488,9 @@ function createFixture({
       type: "dev.nipmod.external-install-plan.v1"
     }),
     [`GET ${endpoints.sourceHealth}`]: jsonResponse({
+      apiAccess: {
+        publicBeta: true
+      },
       archive: {
         mode: "durable-archive-enabled"
       },
@@ -572,13 +582,13 @@ function createFixture({
       writeBoundary:
         "Durable package intelligence writes require the configured server-side archive store and an authorized server writer."
     }),
-    [`GET ${endpoints.archiveSearch}?q=telegram`]: jsonResponse({
+    [`GET ${endpoints.archiveSearch}?q=http%20client`]: jsonResponse({
       configured: false,
       records: [],
       total: 0,
       type: "dev.nipmod.package-intelligence-search.v1"
     }),
-    [`GET ${endpoints.archivePrepare}?source=npm&name=node-telegram-bot-api`]: jsonResponse({
+    [`GET ${endpoints.archivePrepare}?source=npm&name=undici`]: jsonResponse({
       record: {
         archive: {
           status: "external_indexed"

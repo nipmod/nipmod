@@ -3,18 +3,23 @@ import { GET, OPTIONS } from "../app/api/sources/health/route";
 
 describe("source health route", () => {
   test("publishes source capability metadata without secrets or workspace writes", async () => {
-    const response = GET(new Request("https://nipmod.com/api/sources/health", { headers: { "x-request-id": "source-health-test" } }));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "x-request-id": "source-health-test" } }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(response.headers.get("access-control-allow-origin")).toBe("*");
     expect(response.headers.get("x-nipmod-request-id")).toBe("source-health-test");
     expect(body).toMatchObject({
+      apiAccess: {
+        publicBeta: true
+      },
       summary: {
         workspaceWritesFromHostedApi: false
       },
       type: "dev.nipmod.source-health.v1"
     });
+    expect(body.usage).toMatchObject({ driver: "supabase-rest" });
+    expect(typeof body.usage.configured).toBe("boolean");
     expect(body.sources.map((source: { source: string }) => source.source)).toEqual([
       "npm",
       "pypi",

@@ -5,6 +5,8 @@ import { describe, expect, test } from "vitest";
 const root = join(import.meta.dirname, "..", "..");
 const migration = readFileSync(join(root, "supabase", "migrations", "20260522073000_package_intelligence_archive.sql"), "utf8");
 const manualSql = readFileSync(join(root, "docs", "package-intelligence-schema.sql"), "utf8");
+const usageMigration = readFileSync(join(root, "supabase", "migrations", "20260522151945_api_usage_events.sql"), "utf8");
+const usageManualSql = readFileSync(join(root, "docs", "api-usage-schema.sql"), "utf8");
 
 describe("package intelligence Supabase schema", () => {
   test("keeps the manual SQL copy aligned with the migration", () => {
@@ -22,5 +24,14 @@ describe("package intelligence Supabase schema", () => {
     expect(migration).toContain("package_intelligence_authorized_update");
     expect(migration).toContain("nipmod_private.archive_write_allowed()");
     expect(migration).not.toMatch(/service[-_ ]role key/i);
+  });
+
+  test("keeps private API usage logging aligned with the migration", () => {
+    expect(usageManualSql).toBe(usageMigration);
+    expect(usageMigration).toContain("create table if not exists public.api_usage_events");
+    expect(usageMigration).toContain("alter table public.api_usage_events enable row level security");
+    expect(usageMigration).toContain("revoke all on table public.api_usage_events from public, anon, authenticated");
+    expect(usageMigration).toContain("grant select, insert, delete on table public.api_usage_events to service_role");
+    expect(usageMigration).not.toMatch(/raw_query|raw_package|raw_ip|user_agent|api_key\s/i);
   });
 });

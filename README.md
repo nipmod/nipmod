@@ -74,6 +74,8 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
+Optional builder keys use `x-nipmod-api-key` or `Authorization: Bearer <key>` and raise rate limits. Invalid keys return `401`. Usage logging stores hashed identifiers only, not raw queries, package names, IP addresses, user agents, or API keys.
+
 Core endpoints:
 
 | Endpoint | Purpose |

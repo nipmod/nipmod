@@ -39,7 +39,7 @@ export function apiHeaders(context: ApiHttpContext, headers: Record<string, stri
   const durationMs = Math.max(0, Date.now() - context.startedAt);
   return {
     ...headers,
-    "access-control-allow-headers": "authorization, content-type, x-nipmod-archive-token, x-request-id",
+    "access-control-allow-headers": "authorization, content-type, x-nipmod-api-key, x-nipmod-archive-token, x-request-id",
     "access-control-allow-methods": "GET, POST, OPTIONS",
     "access-control-allow-origin": "*",
     "cache-control": cacheControl,

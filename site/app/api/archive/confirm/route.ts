@@ -1,5 +1,6 @@
 import { ExternalPackageError, externalPackageApiError, inspectExternalPackage } from "../../../../lib/external-packages";
-import { apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
   confirmPackageIntelligenceRecord,
   createPackageIntelligenceRecord,
@@ -11,7 +12,7 @@ import {
   assertArchiveWriteAuthorized,
   upsertPackageIntelligenceRecord
 } from "../../../../lib/package-intelligence-store";
-import { checkRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimit } from "../../../../lib/rate-limit";
 import { parseSource, readExternalRecord } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -32,11 +33,9 @@ export async function POST(request: Request): Promise<Response> {
   try {
     body = await request.json();
   } catch {
-    return json(
+    return apiJsonWithUsage(request,
       { code: "invalid_json", error: "invalid JSON", retryable: false, source: null, status: 400, type: "dev.nipmod.api-error.v1" },
-      400,
-      rateLimit.headers,
-      context
+      { access: rateLimit.access, context, headers: rateLimit.headers, status: 400 }
     );
   }
 
@@ -52,30 +51,35 @@ export async function POST(request: Request): Promise<Response> {
     });
     const validation = validatePackageIntelligenceRecord(confirmed);
     if (!validation.ok) {
-      return json({ record: confirmed, type: "dev.nipmod.archive-confirm.v1", validation }, 422, rateLimit.headers, context);
+      return apiJsonWithUsage(request, { record: confirmed, type: "dev.nipmod.archive-confirm.v1", validation }, {
+        access: rateLimit.access,
+        context,
+        headers: rateLimit.headers,
+        status: 422
+      });
     }
 
     if (dryRun) {
-      return json({
+      return apiJsonWithUsage(request, {
         dryRun: true,
         record: confirmed,
         store: archiveStoreStatus(),
         stored: false,
         type: "dev.nipmod.archive-confirm.v1",
         validation
-      }, 200, rateLimit.headers, context);
+      }, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
     }
 
     assertArchiveWriteAuthorized(request);
     const write = await upsertPackageIntelligenceRecord(confirmed);
-    return json({
+    return apiJsonWithUsage(request, {
       ...write,
       store: archiveStoreStatus(),
       type: "dev.nipmod.archive-confirm.v1",
       validation
-    }, 200, rateLimit.headers, context);
+    }, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
   } catch (error) {
-    return errorJson(error, rateLimit.headers, context);
+    return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
   }
 }
 
@@ -89,12 +93,18 @@ function readBoolean(value: unknown, key: string): boolean {
   return Boolean(value && typeof value === "object" && !Array.isArray(value) && (value as Record<string, unknown>)[key] === true);
 }
 
-function errorJson(error: unknown, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
+function errorJson(
+  error: unknown,
+  access: ReturnType<typeof checkApiRateLimit>["access"],
+  headers: Record<string, string> = {},
+  context = createApiHttpContext(),
+  request = new Request("https://nipmod.com/api/archive/confirm")
+): Promise<Response> {
   if (error instanceof ExternalPackageError) {
-    return json(externalPackageApiError(error, "archive confirm failed"), error.status, headers, context);
+    return apiJsonWithUsage(request, externalPackageApiError(error, "archive confirm failed"), { access, context, headers, status: error.status });
   }
   if (error instanceof ArchiveStoreError) {
-    return json(
+    return apiJsonWithUsage(request,
       {
         code: "archive_store_error",
         error: error.message,
@@ -103,14 +113,8 @@ function errorJson(error: unknown, headers: Record<string, string> = {}, context
         status: error.status,
         type: "dev.nipmod.api-error.v1"
       },
-      error.status,
-      headers,
-      context
+      { access, context, headers, status: error.status }
     );
   }
-  return json(externalPackageApiError(error, "archive confirm failed"), 500, headers, context);
-}
-
-function json(value: unknown, status = 200, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
-  return apiJson(value, { context, headers, status });
+  return apiJsonWithUsage(request, externalPackageApiError(error, "archive confirm failed"), { access, context, headers, status: 500 });
 }

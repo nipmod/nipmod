@@ -181,6 +181,34 @@ export function confirmPackageIntelligenceRecord(
   };
 }
 
+export function mergePackageIntelligenceRecords(
+  existing: PackageIntelligenceRecord,
+  incoming: PackageIntelligenceRecord
+): PackageIntelligenceRecord {
+  const incomingConfirmations = incoming.events.filter((event) => event.type === "agent_confirmed");
+  const protectedStatuses: PackageIntelligenceStatus[] = ["claimed", "verified_nipmod", "quarantined", "yanked"];
+  const status = protectedStatuses.includes(existing.archive.status)
+    ? existing.archive.status
+    : incoming.archive.status === "agent_confirmed"
+      ? "agent_confirmed"
+      : existing.archive.status;
+  const mergedEvents = mergeEvents(existing.events, incomingConfirmations);
+
+  return {
+    ...incoming,
+    archive: {
+      ...incoming.archive,
+      confirmationCount: existing.archive.confirmationCount + incomingConfirmations.length,
+      firstSeenAt: existing.archive.firstSeenAt,
+      firstSeenReason: existing.archive.firstSeenReason,
+      status,
+      updatedAt: incoming.archive.updatedAt
+    },
+    events: mergedEvents,
+    ownership: protectedStatuses.includes(existing.archive.status) ? existing.ownership : incoming.ownership
+  };
+}
+
 export function validatePackageIntelligenceRecord(record: PackageIntelligenceRecord): PackageIntelligenceValidation {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -248,4 +276,23 @@ function cleanText(value: string, maxLength: number): string {
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function mergeEvents(existing: PackageIntelligenceEvent[], incomingConfirmations: PackageIntelligenceEvent[]): PackageIntelligenceEvent[] {
+  const seen = new Set(existing.map(eventKey));
+  const newEvents = incomingConfirmations.filter((event) => {
+    const key = eventKey(event);
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+  const firstEvent = existing[0];
+  const timeline = [...existing.slice(1), ...newEvents].slice(-99);
+  return firstEvent ? [firstEvent, ...timeline] : timeline;
+}
+
+function eventKey(event: PackageIntelligenceEvent): string {
+  return `${event.type}:${event.actor}:${event.at}:${event.message}`;
 }

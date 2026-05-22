@@ -1,6 +1,7 @@
 import { ExternalPackageError, externalPackageApiError, parseExternalSources, searchExternalPackages } from "../../../lib/external-packages";
-import { PUBLIC_READ_CACHE, apiJson, apiOptions, createApiHttpContext } from "../../../lib/api-http";
-import { checkRateLimit } from "../../../lib/rate-limit";
+import { PUBLIC_READ_CACHE, apiOptions, createApiHttpContext } from "../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../lib/api-response";
+import { checkApiRateLimit } from "../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,7 +12,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 120, name: "external-search", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 120, name: "external-search", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -23,16 +24,16 @@ export async function GET(request: Request): Promise<Response> {
     const limit = readLimit(url.searchParams.get("limit"));
     const sources = parseExternalSources(url.searchParams.get("sources"));
     const result = await searchExternalPackages(query, limit === undefined ? { sources } : { limit, sources });
-    return json({
+    return apiJsonWithUsage(request, {
       ...result,
       archivePolicy: {
         externalRecords: "Stored as external_indexed records after confirmed use.",
         ownership: "Original package owners keep ownership. Nipmod adds source context, trust checks, install plans and receipts.",
         verifiedRecords: "Only claimed or directly published packages become verified_nipmod."
       }
-    }, 200, rateLimit.headers, context, PUBLIC_READ_CACHE);
+    }, { access: rateLimit.access, cacheControl: PUBLIC_READ_CACHE, context, headers: rateLimit.headers, status: 200 });
   } catch (error) {
-    return errorJson(error, rateLimit.headers, context);
+    return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
   }
 }
 
@@ -50,19 +51,15 @@ function readLimit(value: string | null): number | undefined {
   return parsed;
 }
 
-function errorJson(error: unknown, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
-  if (error instanceof ExternalPackageError) {
-    return json(externalPackageApiError(error, "external search failed"), error.status, headers, context);
-  }
-  return json(externalPackageApiError(error, "external search failed"), 500, headers, context);
-}
-
-function json(
-  value: unknown,
-  status = 200,
+async function errorJson(
+  error: unknown,
+  access: ReturnType<typeof checkApiRateLimit>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext(),
-  cacheControl?: string
-): Response {
-  return apiJson(value, { cacheControl, context, headers, status });
+  request = new Request("https://nipmod.com/api/search")
+): Promise<Response> {
+  if (error instanceof ExternalPackageError) {
+    return apiJsonWithUsage(request, externalPackageApiError(error, "external search failed"), { access, context, headers, status: error.status });
+  }
+  return apiJsonWithUsage(request, externalPackageApiError(error, "external search failed"), { access, context, headers, status: 500 });
 }

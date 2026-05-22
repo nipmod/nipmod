@@ -74,7 +74,11 @@ trust score
 + prefix match bonus 10
 + text match bonus 6
 + metrics bonus
++ source reliability bonus
++ recency bonus
 - warning or high risk penalty
+- missing metadata penalty
+- install command risk penalty
 ```
 
 Metrics bonus:
@@ -85,12 +89,33 @@ Metrics bonus:
 | GitHub stars | `8` |
 | Hugging Face likes | `4` |
 
+Source reliability bonus:
+
+| Source | Bonus |
+| --- | ---: |
+| npm, PyPI | `8` |
+| MCP Registry | `6` |
+| GitHub, Hugging Face | `5` |
+
+Recency bonus:
+
+| Last Update | Max Bonus |
+| --- | ---: |
+| under 90 days | `6` |
+| under 365 days | `5` |
+| under 730 days | `3` |
+| older or unknown | `0` |
+
 Penalty:
 
 | Case | Penalty |
 | --- | --- |
 | `decision: avoid` or `risk: high` | `35` |
 | other warnings | `4` per warning |
+| missing license | `6` |
+| missing repository/source link | `6` |
+| medium install command risk | `8` |
+| high install command risk | `24` |
 
 Ties are resolved by downloads, then stars, then display name.
 

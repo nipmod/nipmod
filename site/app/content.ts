@@ -141,17 +141,17 @@ export const homeContent = {
     {
       label: "Inspect API",
       text: "Inspect an exact source package.",
-      command: "curl 'https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api'"
+      command: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"
     },
     {
       label: "Install plan API",
       text: "Ask for the safe plan before any workspace write.",
-      command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=node-telegram-bot-api'"
+      command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"
     },
     {
       label: "Prepare archive",
       text: "Create a record that can be stored after useful confirmed use.",
-      command: "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=node-telegram-bot-api'"
+      command: "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'"
     },
     {
       label: "Archive status",

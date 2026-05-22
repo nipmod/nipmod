@@ -1,4 +1,5 @@
 import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
+import { publicApiAccess, readApiAccess, type ApiAccess } from "./api-auth";
 
 type RateLimitPolicy = {
   limit: number;
@@ -12,6 +13,7 @@ type Bucket = {
 };
 
 type RateLimitResult = {
+  access: ApiAccess;
   headers: Record<string, string>;
   ok: boolean;
   response?: Response;
@@ -21,22 +23,49 @@ const buckets = new Map<string, Bucket>();
 const MAX_BUCKETS = 10_000;
 
 export function checkRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
+  return checkRateLimitForAccess(request, policy, context, publicApiAccess());
+}
+
+export function checkApiRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
+  const access = readApiAccess(request, context);
+  if (!access.ok) {
+    return {
+      access: access.access,
+      headers: access.access.headers,
+      ok: false,
+      response: access.response!
+    };
+  }
+  return checkRateLimitForAccess(request, policy, context, access.access);
+}
+
+function checkRateLimitForAccess(
+  request: Request,
+  policy: RateLimitPolicy,
+  context: ApiHttpContext,
+  access: ApiAccess
+): RateLimitResult {
   const now = Date.now();
   pruneBuckets(now);
 
-  const client = clientKey(request);
-  const key = `${policy.name}:${client}`;
+  const effectivePolicy = {
+    ...policy,
+    limit: Math.min(50_000, Math.max(policy.limit, Math.floor(policy.limit * access.limitMultiplier)))
+  };
+  const client = access.keyId ?? clientKey(request);
+  const key = `${effectivePolicy.name}:${client}`;
   const existing = buckets.get(key);
-  const bucket = existing && existing.resetAt > now ? existing : { count: 0, resetAt: now + policy.windowMs };
+  const bucket = existing && existing.resetAt > now ? existing : { count: 0, resetAt: now + effectivePolicy.windowMs };
   bucket.count += 1;
   buckets.set(key, bucket);
 
-  const remaining = Math.max(0, policy.limit - bucket.count);
+  const remaining = Math.max(0, effectivePolicy.limit - bucket.count);
   const resetSeconds = Math.ceil((bucket.resetAt - now) / 1000);
-  const headers = rateLimitHeaders(policy, remaining, bucket.resetAt);
+  const headers = { ...rateLimitHeaders(effectivePolicy, remaining, bucket.resetAt), ...access.headers };
 
-  if (bucket.count > policy.limit) {
+  if (bucket.count > effectivePolicy.limit) {
     return {
+      access,
       headers,
       ok: false,
       response: apiJson(
@@ -60,7 +89,7 @@ export function checkRateLimit(request: Request, policy: RateLimitPolicy, contex
     };
   }
 
-  return { headers, ok: true };
+  return { access, headers, ok: true };
 }
 
 function rateLimitHeaders(policy: RateLimitPolicy, remaining: number, resetAt: number): Record<string, string> {

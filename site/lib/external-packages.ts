@@ -1128,11 +1128,41 @@ function rankExternalRecord(record: ExternalPackageRecord, query: string): numbe
   const prefixMatch = name.startsWith(normalizedQuery) || displayName.startsWith(normalizedQuery) ? 10 : 0;
   const textMatch = `${name} ${displayName} ${description}`.includes(normalizedQuery) ? 6 : 0;
   const qualityPenalty = record.trust.decision === "avoid" || record.trust.risk === "high" ? 35 : record.trust.warnings.length * 4;
+  const metadataPenalty = (record.license ? 0 : 6) + (record.repo ? 0 : 6);
+  const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
+  const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
+  const sourceBonus = sourceReliabilityBonus(record.source);
+  const recency = record.updatedAt ? Math.min(6, Math.round(recencyBonus(record.updatedAt) / 2)) : 0;
   const metricsBonus =
     Math.min(10, Math.log10((record.metrics.downloads ?? 0) + 1) * 2) +
     Math.min(8, Math.log10((record.metrics.stars ?? 0) + 1) * 2) +
     Math.min(4, Math.log10((record.metrics.likes ?? 0) + 1) * 1.5);
-  return Math.round(record.trust.score + exactMatch + prefixMatch + textMatch + metricsBonus - qualityPenalty);
+  return Math.round(
+    record.trust.score +
+      exactMatch +
+      prefixMatch +
+      textMatch +
+      metricsBonus +
+      sourceBonus +
+      recency -
+      qualityPenalty -
+      metadataPenalty -
+      commandPenalty
+  );
+}
+
+function sourceReliabilityBonus(source: ExternalPackageSource): number {
+  switch (source) {
+    case "npm":
+    case "pypi":
+      return 8;
+    case "mcp":
+      return 6;
+    case "github":
+    case "huggingface-dataset":
+    case "huggingface-model":
+      return 5;
+  }
 }
 
 function normalizeSources(sources: ExternalPackageSource[] | undefined): ExternalPackageSource[] {

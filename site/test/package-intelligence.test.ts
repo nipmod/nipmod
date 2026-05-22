@@ -3,7 +3,12 @@ import { POST as confirmPost } from "../app/api/archive/confirm/route";
 import { POST as preparePost } from "../app/api/archive/prepare/route";
 import { GET as archiveSearchGet } from "../app/api/archive/search/route";
 import { GET as archiveStatusGet } from "../app/api/archive/status/route";
-import { confirmPackageIntelligenceRecord, createPackageIntelligenceRecord, validatePackageIntelligenceRecord } from "../lib/package-intelligence";
+import {
+  confirmPackageIntelligenceRecord,
+  createPackageIntelligenceRecord,
+  mergePackageIntelligenceRecords,
+  validatePackageIntelligenceRecord
+} from "../lib/package-intelligence";
 import {
   archiveStoreStatus,
   searchPackageIntelligenceArchive,
@@ -49,6 +54,29 @@ describe("package intelligence archive", () => {
     expect(confirmed.archive.status).toBe("agent_confirmed");
     expect(confirmed.archive.confirmationCount).toBe(1);
     expect(confirmed.events.at(-1)).toMatchObject({ actor: "codex", type: "agent_confirmed" });
+  });
+
+  test("merges repeated confirmations without losing receipt history", () => {
+    const first = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" }), {
+      actor: "codex",
+      message: "Used in a workspace plan.",
+      now: "2026-05-21T00:05:00.000Z"
+    });
+    const second = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-22T00:00:00.000Z" }), {
+      actor: "claude-code",
+      message: "Confirmed for another package search.",
+      now: "2026-05-22T00:05:00.000Z"
+    });
+
+    const merged = mergePackageIntelligenceRecords(first, second);
+
+    expect(merged.archive.firstSeenAt).toBe(first.archive.firstSeenAt);
+    expect(merged.archive.confirmationCount).toBe(2);
+    expect(merged.archive.status).toBe("agent_confirmed");
+    expect(merged.events.filter((event) => event.type === "agent_confirmed").map((event) => event.actor)).toEqual([
+      "codex",
+      "claude-code"
+    ]);
   });
 
   test("prepares and dry-runs archive confirmation through public routes", async () => {

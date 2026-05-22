@@ -7,8 +7,9 @@ import {
   searchExternalPackages,
   type ExternalPackageSource
 } from "../../../lib/external-packages";
-import { apiJson, apiOptions, createApiHttpContext } from "../../../lib/api-http";
-import { checkRateLimit } from "../../../lib/rate-limit";
+import { apiOptions, createApiHttpContext } from "../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../lib/api-response";
+import { checkApiRateLimit } from "../../../lib/rate-limit";
 import { searchPackages, type RegistryIndex, type RegistryPackage } from "../../../lib/registry";
 
 export const dynamic = "force-dynamic";
@@ -197,16 +198,16 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request = new Request(REMOTE_ENDPOINT)): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
-  return json(remoteServerInfo(), 200, rateLimit.headers, context);
+  return json(request, remoteServerInfo(), { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
 }
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -215,15 +216,15 @@ export async function POST(request: Request): Promise<Response> {
   try {
     body = await request.json();
   } catch {
-    return json(errorResponse(null, -32700, "invalid JSON"), 400, rateLimit.headers, context);
+    return json(request, errorResponse(null, -32700, "invalid JSON"), { access: rateLimit.access, context, headers: rateLimit.headers, status: 400 });
   }
 
   if (Array.isArray(body)) {
     const responses = await Promise.all(body.map((message) => handleJsonRpc(message)));
-    return json(responses, 200, rateLimit.headers, context);
+    return json(request, responses, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
   }
 
-  return json(await handleJsonRpc(body), 200, rateLimit.headers, context);
+  return json(request, await handleJsonRpc(body), { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
 }
 
 async function handleJsonRpc(message: unknown): Promise<JsonRpcResponse> {
@@ -723,12 +724,31 @@ function errorResponse(id: number | string | null, code: number, message: string
 }
 
 function json(
+  request: Request,
   value: JsonValue | JsonRpcResponse | JsonRpcResponse[],
-  status = 200,
-  headers: Record<string, string> = {},
-  context = createApiHttpContext()
-): Response {
-  return apiJson(value, { context, headers, status });
+  options: {
+    access: ReturnType<typeof checkApiRateLimit>["access"];
+    context: ReturnType<typeof createApiHttpContext>;
+    headers?: Record<string, string>;
+    status?: number;
+  }
+): Promise<Response> {
+  const responseOptions: {
+    access: ReturnType<typeof checkApiRateLimit>["access"];
+    context: ReturnType<typeof createApiHttpContext>;
+    headers?: Record<string, string>;
+    status?: number;
+  } = {
+    access: options.access,
+    context: options.context
+  };
+  if (options.headers !== undefined) {
+    responseOptions.headers = options.headers;
+  }
+  if (options.status !== undefined) {
+    responseOptions.status = options.status;
+  }
+  return apiJsonWithUsage(request, value, responseOptions);
 }
 
 function toJsonValue(value: unknown): JsonValue {

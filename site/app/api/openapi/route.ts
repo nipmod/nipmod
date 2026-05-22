@@ -1,5 +1,7 @@
-import { PUBLIC_READ_CACHE, apiJson, apiOptions, createApiHttpContext } from "../../../lib/api-http";
+import { PUBLIC_READ_CACHE, apiOptions, createApiHttpContext } from "../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../lib/api-response";
 import { EXTERNAL_PACKAGE_SOURCES } from "../../../lib/external-packages";
+import { checkApiRateLimit } from "../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,12 +10,19 @@ export function OPTIONS(request: Request): Response {
   return apiOptions(createApiHttpContext(request));
 }
 
-export function GET(request: Request): Response {
+export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  return apiJson(openApiDocument(), {
+  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "openapi", windowMs: 60_000 }, context);
+  if (!rateLimit.ok) {
+    return rateLimit.response!;
+  }
+
+  return apiJsonWithUsage(request, openApiDocument(), {
+    access: rateLimit.access,
     cacheControl: PUBLIC_READ_CACHE,
     context,
     headers: {
+      ...rateLimit.headers,
       "content-type": "application/openapi+json; charset=utf-8"
     }
   });
@@ -23,6 +32,15 @@ function openApiDocument() {
   return {
     components: {
       schemas: {
+        ApiAccess: {
+          additionalProperties: false,
+          properties: {
+            publicBeta: { const: true, type: "boolean" },
+            writeBoundary: { type: "string" }
+          },
+          required: ["publicBeta", "writeBoundary"],
+          type: "object"
+        },
         ApiError: {
           additionalProperties: false,
           properties: {
@@ -80,6 +98,19 @@ function openApiDocument() {
           required: ["archive", "id", "install", "name", "originalUrl", "source", "trust", "type"],
           type: "object"
         }
+      },
+      securitySchemes: {
+        BearerAuth: {
+          description: "Optional Nipmod API key as an Authorization bearer token. Public beta requests can omit it.",
+          scheme: "bearer",
+          type: "http"
+        },
+        NipmodApiKey: {
+          description: "Optional Nipmod API key. Public beta requests can omit it.",
+          in: "header",
+          name: "x-nipmod-api-key",
+          type: "apiKey"
+        }
       }
     },
     info: {
@@ -95,7 +126,9 @@ function openApiDocument() {
           responses: {
             "200": { description: "Prepared package intelligence record. This endpoint does not persist the record." },
             "400": errorResponse(),
+            "401": errorResponse(),
             "404": errorResponse(),
+            "429": errorResponse(),
             "502": errorResponse(),
             "504": errorResponse()
           },
@@ -141,6 +174,8 @@ function openApiDocument() {
           parameters: [queryParameter(), limitParameter()],
           responses: {
             "200": { description: "Durable package intelligence archive search." },
+            "401": errorResponse(),
+            "429": errorResponse(),
             "503": errorResponse()
           },
           summary: "Search durable confirmed package intelligence records."
@@ -149,7 +184,9 @@ function openApiDocument() {
       "/api/archive/status": {
         get: {
           responses: {
-            "200": { description: "Archive store status without secrets." }
+            "200": { description: "Archive store status without secrets." },
+            "401": errorResponse(),
+            "429": errorResponse()
           },
           summary: "Check archive persistence mode."
         }
@@ -160,7 +197,9 @@ function openApiDocument() {
           responses: {
             "200": { description: "Exact external package record." },
             "400": errorResponse(),
+            "401": errorResponse(),
             "404": errorResponse(),
+            "429": errorResponse(),
             "502": errorResponse(),
             "504": errorResponse()
           },
@@ -173,7 +212,9 @@ function openApiDocument() {
           responses: {
             "200": { description: "Safe install plan." },
             "400": errorResponse(),
+            "401": errorResponse(),
             "404": errorResponse(),
+            "429": errorResponse(),
             "502": errorResponse(),
             "504": errorResponse()
           },
@@ -185,6 +226,7 @@ function openApiDocument() {
           responses: {
             "200": { description: "MCP JSON-RPC response." },
             "400": errorResponse(),
+            "401": errorResponse(),
             "429": errorResponse()
           },
           summary: "Hosted read-only MCP JSON-RPC endpoint."
@@ -207,6 +249,7 @@ function openApiDocument() {
               description: "Resolved package options with source reports and partial failure status."
             },
             "400": errorResponse(),
+            "401": errorResponse(),
             "429": errorResponse(),
             "502": errorResponse()
           },
@@ -230,6 +273,7 @@ function openApiDocument() {
               description: "Search result with per-source reports and partial failure status."
             },
             "400": errorResponse(),
+            "401": errorResponse(),
             "429": errorResponse(),
             "502": errorResponse()
           },
@@ -240,12 +284,14 @@ function openApiDocument() {
         get: {
           responses: {
             "200": { description: "Source capability, optional auth and archive mode metadata." },
+            "401": errorResponse(),
             "429": errorResponse()
           },
           summary: "Return source capabilities and hosted API write boundaries."
         }
       }
     },
+    security: [{}, { NipmodApiKey: [] }, { BearerAuth: [] }],
     servers: [{ url: "https://nipmod.com" }]
   };
 }

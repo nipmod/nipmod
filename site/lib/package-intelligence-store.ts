@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import type { PackageIntelligenceRecord } from "./package-intelligence";
+import { mergePackageIntelligenceRecords, type PackageIntelligenceRecord } from "./package-intelligence";
 
 type ArchiveEnv = Record<string, string | undefined>;
 
@@ -118,8 +118,10 @@ export async function upsertPackageIntelligenceRecord(
     };
   }
 
+  const existing = await readPackageIntelligenceRecordById(record.id, options);
+  const recordToStore = existing ? mergePackageIntelligenceRecords(existing, record) : record;
   const requestOptions: SupabaseRequestOptions = {
-    body: JSON.stringify([toSupabaseRow(record)]),
+    body: JSON.stringify([toSupabaseRow(recordToStore)]),
     headers: {
       Prefer: "resolution=merge-duplicates"
     },
@@ -132,10 +134,33 @@ export async function upsertPackageIntelligenceRecord(
 
   return {
     configured: true,
-    record,
+    record: recordToStore,
     stored: true,
     type: "dev.nipmod.package-intelligence-write.v1"
   };
+}
+
+export async function readPackageIntelligenceRecordById(
+  id: string,
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch } = {}
+): Promise<PackageIntelligenceRecord | null> {
+  const env = options.env ?? process.env;
+  const status = archiveStoreStatus(env);
+  if (!status.configured) {
+    return null;
+  }
+
+  const requestOptions: SupabaseRequestOptions = { method: "GET" };
+  if (options.fetchImpl) {
+    requestOptions.fetchImpl = options.fetchImpl;
+  }
+  const rows = await supabaseJson<Array<{ record: PackageIntelligenceRecord }>>(
+    env,
+    `/rest/v1/package_intelligence_records?id=eq.${encodeURIComponent(id)}&select=record&limit=1`,
+    requestOptions
+  );
+  const record = rows.at(0)?.record;
+  return isPackageIntelligenceRecord(record) ? record : null;
 }
 
 export class ArchiveStoreError extends Error {

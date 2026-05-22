@@ -3,7 +3,7 @@ import { GET, OPTIONS } from "../app/api/openapi/route";
 
 describe("OpenAPI route", () => {
   test("publishes the agent package API contract", async () => {
-    const response = GET(new Request("https://nipmod.com/api/openapi"));
+    const response = await GET(new Request("https://nipmod.com/api/openapi"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -11,6 +11,8 @@ describe("OpenAPI route", () => {
     expect(response.headers.get("content-type")).toContain("application/openapi+json");
     expect(body.openapi).toBe("3.1.0");
     expect(body.info.title).toBe("Nipmod API");
+    expect(body.components.securitySchemes.NipmodApiKey.name).toBe("x-nipmod-api-key");
+    expect(body.security).toContainEqual({});
     expect(Object.keys(body.paths)).toEqual([
       "/api/archive/prepare",
       "/api/archive/confirm",

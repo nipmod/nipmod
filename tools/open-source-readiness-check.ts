@@ -34,7 +34,9 @@ const requiredFiles = [
   "docs/specs/trust-signals.md",
   "docs/specs/archive-records.md",
   "docs/package-intelligence-schema.sql",
+  "docs/api-usage-schema.sql",
   "supabase/migrations/20260522073000_package_intelligence_archive.sql",
+  "supabase/migrations/20260522151945_api_usage_events.sql",
   "docs/security/supply-chain.md",
   "examples/http-api/README.md",
   "examples/http-api/search.ts",
@@ -85,6 +87,7 @@ const trustSignals = read("docs/specs/trust-signals.md");
 check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));
 check("trust-signals:verified-score", () => trustSignals.includes("Bundle signature verified | `20`"));
 check("trust-signals:ranking", () => trustSignals.includes("exact name/display match bonus 18"));
+check("trust-signals:ranking-v2", () => trustSignals.includes("source reliability bonus") && trustSignals.includes("install command risk penalty"));
 check("trust-signals:agent-boundary", () => trustSignals.includes("Package descriptions, README text, model cards and registry metadata are untrusted data."));
 
 const agentWorkflow = read("examples/agent-workflow/README.md");

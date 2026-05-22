@@ -136,6 +136,7 @@ export async function runSyntheticMonitor({
     if (!openApi.paths?.["/api/search"] || !openApi.paths?.["/api/inspect"] || !openApi.paths?.["/api/install-plan"]) {
       throw new Error("OpenAPI package paths missing");
     }
+    assertEqual(openApi.components?.securitySchemes?.NipmodApiKey?.name, "x-nipmod-api-key", "OpenAPI API key scheme mismatch");
 
     const search = await fetchJson(`${endpoints.externalSearch}?q=http%20client&sources=npm&limit=3`, timedFetch);
     assertEqual(search.type, "dev.nipmod.external-search.v1", "external search type mismatch");
@@ -173,6 +174,7 @@ export async function runSyntheticMonitor({
     const health = await fetchJson(endpoints.sourceHealth, timedFetch);
     assertEqual(health.type, "dev.nipmod.source-health.v1", "source health type mismatch");
     assertEqual(health.summary?.workspaceWritesFromHostedApi, false, "hosted source health write boundary mismatch");
+    assertEqual(health.apiAccess?.publicBeta, true, "source health API access mismatch");
     const sources = Array.isArray(health.sources) ? health.sources : [];
     const names = sources.map((source) => source.source).sort().join(",");
     assertEqual(names, "github,huggingface-dataset,huggingface-model,mcp,npm,pypi", "source health source list mismatch");
@@ -244,13 +246,13 @@ export async function runSyntheticMonitor({
       throw new Error("archive status mode is invalid");
     }
 
-    const search = await fetchJson(`${endpoints.archiveSearch}?q=telegram`, timedFetch);
+    const search = await fetchJson(`${endpoints.archiveSearch}?q=http%20client`, timedFetch);
     assertEqual(search.type, "dev.nipmod.package-intelligence-search.v1", "archive search type mismatch");
     if (!Array.isArray(search.records)) {
       throw new Error("archive search records are not an array");
     }
 
-    const prepare = await fetchJson(`${endpoints.archivePrepare}?source=npm&name=node-telegram-bot-api`, timedFetch);
+    const prepare = await fetchJson(`${endpoints.archivePrepare}?source=npm&name=undici`, timedFetch);
     assertEqual(prepare.type, "dev.nipmod.archive-prepare.v1", "archive prepare type mismatch");
     assertEqual(prepare.record?.archive?.status, "external_indexed", "archive prepare status mismatch");
     assertEqual(prepare.validation?.ok, true, "archive prepare validation failed");
@@ -260,7 +262,7 @@ export async function runSyntheticMonitor({
         actor: "prod-synthetic-monitor",
         dryRun: true,
         source: "npm",
-        name: "node-telegram-bot-api"
+        name: "undici"
       }),
       headers: { "content-type": "application/json" },
       method: "POST"

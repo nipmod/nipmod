@@ -4,10 +4,11 @@ import {
   type ExternalPackageRecord,
   inspectExternalPackage
 } from "../../../../lib/external-packages";
-import { apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { createPackageIntelligenceRecord, validatePackageIntelligenceRecord } from "../../../../lib/package-intelligence";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
-import { checkRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimit } from "../../../../lib/rate-limit";
 import { parseSource, readExternalRecord } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -30,15 +31,15 @@ export async function GET(request: Request): Promise<Response> {
     const source = parseSource(url.searchParams.get("source"));
     const name = url.searchParams.get("name") ?? "";
     const externalRecord = await inspectExternalPackage(source, name);
-    return archiveRecordResponse(externalRecord, rateLimit.headers, context);
+    return archiveRecordResponse(request, externalRecord, rateLimit.access, rateLimit.headers, context);
   } catch (error) {
-    return errorJson(error, rateLimit.headers, context);
+    return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
   }
 }
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -47,37 +48,37 @@ export async function POST(request: Request): Promise<Response> {
   try {
     body = await request.json();
   } catch {
-    return json(
+    return apiJsonWithUsage(request,
       { code: "invalid_json", error: "invalid JSON", retryable: false, source: null, status: 400, type: "dev.nipmod.api-error.v1" },
-      400,
-      rateLimit.headers,
-      context
+      { access: rateLimit.access, context, headers: rateLimit.headers, status: 400 }
     );
   }
 
   try {
     const bodyRecord = readExternalRecord(body);
     if (bodyRecord) {
-      return archiveRecordResponse(bodyRecord, rateLimit.headers, context);
+      return archiveRecordResponse(request, bodyRecord, rateLimit.access, rateLimit.headers, context);
     }
 
     const source = parseSource(readString(body, "source"));
     const name = readString(body, "name") ?? "";
     const externalRecord = await inspectExternalPackage(source, name);
-    return archiveRecordResponse(externalRecord, rateLimit.headers, context);
+    return archiveRecordResponse(request, externalRecord, rateLimit.access, rateLimit.headers, context);
   } catch (error) {
-    return errorJson(error, rateLimit.headers, context);
+    return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
   }
 }
 
 function archiveRecordResponse(
+  request: Request,
   externalRecord: ExternalPackageRecord,
+  access: ReturnType<typeof checkApiRateLimit>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext()
-): Response {
+): Promise<Response> {
   const record = createPackageIntelligenceRecord(externalRecord);
   const validation = validatePackageIntelligenceRecord(record);
-  return json({
+  return apiJsonWithUsage(request, {
     next: {
       confirm: "POST /api/archive/confirm",
       writeBoundary: "Prepared records are not persisted by this endpoint. Durable writes require archive confirmation and an authorized server writer."
@@ -88,7 +89,7 @@ function archiveRecordResponse(
     stored: false,
     type: "dev.nipmod.archive-prepare.v1",
     validation
-  }, 200, headers, context);
+  }, { access, context, headers, status: 200 });
 }
 
 function readString(value: unknown, key: string): string | null {
@@ -97,13 +98,15 @@ function readString(value: unknown, key: string): string | null {
     : null;
 }
 
-function errorJson(error: unknown, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
+function errorJson(
+  error: unknown,
+  access: ReturnType<typeof checkApiRateLimit>["access"],
+  headers: Record<string, string> = {},
+  context = createApiHttpContext(),
+  request = new Request("https://nipmod.com/api/archive/prepare")
+): Promise<Response> {
   if (error instanceof ExternalPackageError) {
-    return json(externalPackageApiError(error, "archive prepare failed"), error.status, headers, context);
+    return apiJsonWithUsage(request, externalPackageApiError(error, "archive prepare failed"), { access, context, headers, status: error.status });
   }
-  return json(externalPackageApiError(error, "archive prepare failed"), 500, headers, context);
-}
-
-function json(value: unknown, status = 200, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
-  return apiJson(value, { context, headers, status });
+  return apiJsonWithUsage(request, externalPackageApiError(error, "archive prepare failed"), { access, context, headers, status: 500 });
 }

@@ -1,7 +1,8 @@
 import { ArchiveStoreError, archiveStoreStatus, searchPackageIntelligenceArchive } from "../../../../lib/package-intelligence-store";
 import { ExternalPackageError, externalPackageApiError } from "../../../../lib/external-packages";
-import { apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
-import { checkRateLimit } from "../../../../lib/rate-limit";
+import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { apiJsonWithUsage } from "../../../../lib/api-response";
+import { checkApiRateLimit } from "../../../../lib/rate-limit";
 import { readLimit } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkRateLimit(request, { limit: 120, name: "archive-search", windowMs: 60_000 }, context);
+  const rateLimit = checkApiRateLimit(request, { limit: 120, name: "archive-search", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -25,18 +26,24 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const options = limit === undefined ? {} : { limit };
     const result = await searchPackageIntelligenceArchive(query, options);
-    return json({
+    return apiJsonWithUsage(request, {
       ...result,
       store: archiveStoreStatus()
-    }, 200, rateLimit.headers, context);
+    }, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
   } catch (error) {
-    return errorJson(error, rateLimit.headers, context);
+    return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
   }
 }
 
-function errorJson(error: unknown, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
+function errorJson(
+  error: unknown,
+  access: ReturnType<typeof checkApiRateLimit>["access"],
+  headers: Record<string, string> = {},
+  context = createApiHttpContext(),
+  request = new Request("https://nipmod.com/api/archive/search")
+): Promise<Response> {
   if (error instanceof ArchiveStoreError) {
-    return json(
+    return apiJsonWithUsage(request,
       {
         code: "archive_store_error",
         error: error.message,
@@ -45,15 +52,13 @@ function errorJson(error: unknown, headers: Record<string, string> = {}, context
         status: error.status,
         type: "dev.nipmod.api-error.v1"
       },
-      error.status,
-      headers,
-      context
+      { access, context, headers, status: error.status }
     );
   }
   if (error instanceof ExternalPackageError) {
-    return json(externalPackageApiError(error, "archive search failed"), error.status, headers, context);
+    return apiJsonWithUsage(request, externalPackageApiError(error, "archive search failed"), { access, context, headers, status: error.status });
   }
-  return json(
+  return apiJsonWithUsage(request,
     {
       code: "internal_error",
       error: error instanceof Error ? error.message : "archive search failed",
@@ -62,12 +67,6 @@ function errorJson(error: unknown, headers: Record<string, string> = {}, context
       status: 500,
       type: "dev.nipmod.api-error.v1"
     },
-    500,
-    headers,
-    context
+    { access, context, headers, status: 500 }
   );
-}
-
-function json(value: unknown, status = 200, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {
-  return apiJson(value, { context, headers, status });
 }
