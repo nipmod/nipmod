@@ -16,7 +16,7 @@ export const homeContent = {
   },
   primaryAction: "Get API access",
   secondaryAction: "X",
-  commands: ["curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'"],
+  commands: ["curl 'https://nipmod.com/api/resolve?q=package%20for%20http%20requests&limit=3'"],
   terminalOutput: [
     "Searching npm, PyPI, GitHub, Hugging Face and MCP",
     "Returning source records, trust signals and install plans",
@@ -136,7 +136,7 @@ export const homeContent = {
     {
       label: "Search API",
       text: "Search sources through Nipmod.",
-      command: "curl 'https://nipmod.com/api/search?q=telegram%20bot&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
+      command: "curl 'https://nipmod.com/api/resolve?q=package%20for%20http%20requests&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
     },
     {
       label: "Inspect API",

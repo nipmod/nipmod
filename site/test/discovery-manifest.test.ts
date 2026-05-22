@@ -58,6 +58,7 @@ describe("nipmod discovery manifest", () => {
       examples: "https://nipmod.com/examples",
       externalInspectApi: "https://nipmod.com/api/inspect",
       externalInstallPlanApi: "https://nipmod.com/api/install-plan",
+      externalResolveApi: "https://nipmod.com/api/resolve",
       externalSearchApi: "https://nipmod.com/api/search",
       install: "https://nipmod.com/quickstart#install",
       mcp: "https://nipmod.com/mcp",
@@ -75,11 +76,12 @@ describe("nipmod discovery manifest", () => {
     });
     expect(manifest.agent.runbook).toBe("https://nipmod.com/api-access");
     expect(manifest.agent.workflow).not.toContain("setupCursorOneClick");
-    expect(manifest.agent.workflow).toContain("externalSearch");
+    expect(manifest.agent.workflow).toContain("externalResolve");
     expect(manifest.agent.workflow).toContain("externalInstallPlan");
     expect(manifest.agent.commands).toMatchObject({
       externalInspect: "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       externalInstallPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
+      externalResolve: "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       externalSearch: "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       install: shortInstallerCommand,
       packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",

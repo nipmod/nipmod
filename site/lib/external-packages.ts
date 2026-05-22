@@ -1,3 +1,5 @@
+import { cleanPlainText, commandWarnings, installCommandRisk, type InstallCommandRisk } from "./package-command-safety";
+
 export const EXTERNAL_PACKAGE_SOURCES = [
   "npm",
   "pypi",
@@ -12,6 +14,7 @@ export type ExternalPackageSource = (typeof EXTERNAL_PACKAGE_SOURCES)[number];
 export type ExternalPackageDecision = "recommended" | "usable_with_warning" | "avoid" | "unknown";
 export type ExternalPackageRisk = "low" | "medium" | "high" | "unknown";
 export type ExternalSourceStatus = "ok" | "empty" | "failed";
+export type ExternalPackageSourceKind = "package-registry" | "source-repo" | "model-hub" | "tool-registry";
 
 export interface ExternalPackageRecord {
   archive: {
@@ -42,7 +45,7 @@ export interface ExternalPackageRecord {
   registryUrl: string;
   repo: string | null;
   source: ExternalPackageSource;
-  sourceKind: "package-registry" | "source-repo" | "model-hub" | "tool-registry";
+  sourceKind: ExternalPackageSourceKind;
   trust: {
     checkedAt: string;
     decision: ExternalPackageDecision;
@@ -106,6 +109,12 @@ export interface ExternalInstallPlan {
     steps: string[];
     writes: string[];
   };
+  safety: {
+    commandRisk: InstallCommandRisk;
+    metadataIsInstruction: false;
+    requiresApprovalBeforeWrite: true;
+    warnings: string[];
+  };
   type: "dev.nipmod.external-install-plan.v1";
 }
 
@@ -113,9 +122,18 @@ type UnknownRecord = Record<string, unknown>;
 
 const DEFAULT_TIMEOUT_MS = 6500;
 const DEFAULT_LIMIT = 12;
+const MAX_LIMIT = 50;
+const MAX_QUERY_LENGTH = 200;
+const MAX_NAME_LENGTH = 220;
+const MAX_SOURCE_RESPONSE_BYTES = 2_000_000;
 const SOURCE_USER_AGENT = "nipmod-package-api/1.2.5 (+https://nipmod.com)";
 const FETCH_CACHE_TTL_MS = 30_000;
 const FETCH_CACHE_MAX_ITEMS = 500;
+const EXTERNAL_PACKAGE_DECISIONS = ["recommended", "usable_with_warning", "avoid", "unknown"] as const;
+const EXTERNAL_PACKAGE_RISKS = ["low", "medium", "high", "unknown"] as const;
+const EXTERNAL_PACKAGE_SOURCE_KINDS = ["package-registry", "source-repo", "model-hub", "tool-registry"] as const;
+const EXTERNAL_ARCHIVE_PERSISTENCE = ["ephemeral", "static", "database"] as const;
+const EXTERNAL_ARCHIVE_STATUS = ["external_indexed", "claimed", "verified_nipmod"] as const;
 
 const fetchCache = new Map<string, { expiresAt: number; value: UnknownRecord | UnknownRecord[] }>();
 
@@ -146,7 +164,7 @@ export async function searchExternalPackages(query: string, options: ExternalSea
 
   const records = sourceResults
     .flatMap((result) => result.records)
-    .sort(compareExternalRecords)
+    .sort((left, right) => compareExternalRecords(left, right, normalized))
     .slice(0, limit);
 
   return {
@@ -205,6 +223,8 @@ export async function inspectExternalPackage(
 }
 
 export function createExternalInstallPlan(record: ExternalPackageRecord): ExternalInstallPlan {
+  const commands = boundedStrings(record.install.commands ?? [record.install.command], 6, 1000, "install.commands", 1);
+  const warnings = [...record.trust.warnings, ...commandWarnings(commands)];
   return {
     generatedAt: new Date().toISOString(),
     package: {
@@ -220,7 +240,7 @@ export function createExternalInstallPlan(record: ExternalPackageRecord): Extern
       version: record.version
     },
     plan: {
-      commands: record.install.commands ?? [record.install.command],
+      commands,
       requiresApprovalBeforeWrite: true,
       sourceOwnership: record.archive.status === "verified_nipmod" ? "nipmod-verified" : "external-owner-retained",
       steps: [
@@ -231,6 +251,12 @@ export function createExternalInstallPlan(record: ExternalPackageRecord): Extern
         "Save a receipt with the source, version and trust result."
       ],
       writes: []
+    },
+    safety: {
+      commandRisk: installCommandRisk(commands),
+      metadataIsInstruction: false,
+      requiresApprovalBeforeWrite: true,
+      warnings
     },
     type: "dev.nipmod.external-install-plan.v1"
   };
@@ -251,6 +277,57 @@ export function parseExternalSources(value: string | null): ExternalPackageSourc
   }
   const sources = requested.filter((source): source is ExternalPackageSource => allowed.has(source));
   return sources.length > 0 ? [...new Set(sources)] : [...EXTERNAL_PACKAGE_SOURCES];
+}
+
+export function readExternalPackageRecord(value: unknown): ExternalPackageRecord {
+  const record = unwrapExternalPackageRecord(value);
+  if (!isRecord(record)) {
+    throw new ExternalPackageError("request body must include a record object", { code: "invalid_record", status: 400 });
+  }
+
+  const source = readEnum(record.source, EXTERNAL_PACKAGE_SOURCES, "source");
+  const sourceKind = readEnum(record.sourceKind, EXTERNAL_PACKAGE_SOURCE_KINDS, "sourceKind");
+  const archive = readArchive(record.archive);
+  const trust = readTrust(record.trust);
+  const install = readInstall(record.install);
+  const name = requiredCleanString(record.name, "name", MAX_NAME_LENGTH);
+  const id = requiredCleanString(record.id, "id", 320);
+  const originalUrl = requiredHttpUrl(record.originalUrl, "originalUrl");
+  const registryUrl = requiredHttpUrl(record.registryUrl, "registryUrl");
+  const repo = nullableHttpUrl(record.repo, "repo");
+  const displayName = requiredCleanString(record.displayName, "displayName", MAX_NAME_LENGTH);
+
+  if (record.type !== "dev.nipmod.external-package.v1") {
+    throw new ExternalPackageError("record must be a dev.nipmod.external-package.v1 object", { code: "invalid_record", status: 400 });
+  }
+  if (record.formatVersion !== 1) {
+    throw new ExternalPackageError("record formatVersion must be 1", { code: "invalid_record", status: 400 });
+  }
+  if (!id.startsWith(`${source}:`)) {
+    throw new ExternalPackageError("record id must be prefixed by its source", { code: "invalid_record", status: 400 });
+  }
+
+  return {
+    archive,
+    description: cleanPlainText(readOptionalString(record.description) ?? "", 1000),
+    displayName,
+    formatVersion: 1,
+    id,
+    install,
+    license: nullableCleanString(record.license, "license", 120),
+    metrics: readMetrics(record.metrics),
+    name,
+    originalUrl,
+    owner: nullableCleanString(record.owner, "owner", MAX_NAME_LENGTH),
+    registryUrl,
+    repo,
+    source,
+    sourceKind,
+    trust,
+    type: "dev.nipmod.external-package.v1",
+    updatedAt: nullableCleanString(record.updatedAt, "updatedAt", 80),
+    version: nullableCleanString(record.version, "version", 120)
+  };
 }
 
 export class ExternalPackageError extends Error {
@@ -836,10 +913,7 @@ async function fetchJsonOnce(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(url, {
-      headers: {
-        accept: "application/json",
-        "user-agent": SOURCE_USER_AGENT
-      },
+      headers: sourceRequestHeaders(url),
       signal: controller.signal
     });
     if (!response.ok) {
@@ -851,7 +925,34 @@ async function fetchJsonOnce(
         status: response.status === 404 ? 404 : response.status === 429 ? 429 : 502
       });
     }
-    return (await response.json()) as UnknownRecord | UnknownRecord[];
+    const contentLength = response.headers.get("content-length");
+    if (contentLength && Number.parseInt(contentLength, 10) > MAX_SOURCE_RESPONSE_BYTES) {
+      throw new ExternalPackageError("source response is too large", {
+        code: "source_response_too_large",
+        retryable: true,
+        source: source ?? null,
+        status: 502
+      });
+    }
+    const text = await response.text();
+    if (text.length > MAX_SOURCE_RESPONSE_BYTES) {
+      throw new ExternalPackageError("source response is too large", {
+        code: "source_response_too_large",
+        retryable: true,
+        source: source ?? null,
+        status: 502
+      });
+    }
+    try {
+      return JSON.parse(text) as UnknownRecord | UnknownRecord[];
+    } catch {
+      throw new ExternalPackageError("source returned invalid JSON", {
+        code: "source_invalid_json",
+        retryable: true,
+        source: source ?? null,
+        status: 502
+      });
+    }
   } catch (error) {
     if (error instanceof ExternalPackageError) {
       throw error;
@@ -875,6 +976,34 @@ async function fetchJsonOnce(
   }
 }
 
+function sourceRequestHeaders(url: string): HeadersInit {
+  const headers: Record<string, string> = {
+    accept: "application/json",
+    "user-agent": SOURCE_USER_AGENT
+  };
+  const auth = sourceAuthHeader(url, process.env);
+  if (auth) {
+    headers.authorization = auth;
+  }
+  return headers;
+}
+
+function sourceAuthHeader(url: string, env: Record<string, string | undefined>): string | null {
+  let hostname = "";
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return null;
+  }
+  if (hostname === "api.github.com" && env.NIPMOD_GITHUB_TOKEN) {
+    return `Bearer ${env.NIPMOD_GITHUB_TOKEN}`;
+  }
+  if (hostname === "huggingface.co" && (env.NIPMOD_HUGGINGFACE_TOKEN || env.HF_TOKEN)) {
+    return `Bearer ${env.NIPMOD_HUGGINGFACE_TOKEN ?? env.HF_TOKEN}`;
+  }
+  return null;
+}
+
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -885,13 +1014,29 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-function compareExternalRecords(left: ExternalPackageRecord, right: ExternalPackageRecord): number {
+function compareExternalRecords(left: ExternalPackageRecord, right: ExternalPackageRecord, query: string): number {
   return (
-    right.trust.score - left.trust.score ||
+    rankExternalRecord(right, query) - rankExternalRecord(left, query) ||
     (right.metrics.downloads ?? 0) - (left.metrics.downloads ?? 0) ||
     (right.metrics.stars ?? 0) - (left.metrics.stars ?? 0) ||
     left.displayName.localeCompare(right.displayName)
   );
+}
+
+function rankExternalRecord(record: ExternalPackageRecord, query: string): number {
+  const normalizedQuery = query.toLowerCase();
+  const name = record.name.toLowerCase();
+  const displayName = record.displayName.toLowerCase();
+  const description = record.description.toLowerCase();
+  const exactMatch = name === normalizedQuery || displayName === normalizedQuery ? 18 : 0;
+  const prefixMatch = name.startsWith(normalizedQuery) || displayName.startsWith(normalizedQuery) ? 10 : 0;
+  const textMatch = `${name} ${displayName} ${description}`.includes(normalizedQuery) ? 6 : 0;
+  const qualityPenalty = record.trust.decision === "avoid" || record.trust.risk === "high" ? 35 : record.trust.warnings.length * 4;
+  const metricsBonus =
+    Math.min(10, Math.log10((record.metrics.downloads ?? 0) + 1) * 2) +
+    Math.min(8, Math.log10((record.metrics.stars ?? 0) + 1) * 2) +
+    Math.min(4, Math.log10((record.metrics.likes ?? 0) + 1) * 1.5);
+  return Math.round(record.trust.score + exactMatch + prefixMatch + textMatch + metricsBonus - qualityPenalty);
 }
 
 function normalizeSources(sources: ExternalPackageSource[] | undefined): ExternalPackageSource[] {
@@ -909,15 +1054,163 @@ function normalizeLimit(limit: number | undefined): number {
   if (!Number.isInteger(limit)) {
     throw new ExternalPackageError("limit must be an integer", { code: "invalid_limit", status: 400 });
   }
-  return Math.min(50, Math.max(1, limit));
+  return Math.min(MAX_LIMIT, Math.max(1, limit));
 }
 
 function normalizeQuery(query: string): string {
-  return query.trim().replace(/\s+/g, " ").slice(0, 200);
+  return cleanPlainText(query, MAX_QUERY_LENGTH);
 }
 
 function normalizeName(name: string): string {
-  return name.trim().slice(0, 220);
+  return cleanPlainText(name, MAX_NAME_LENGTH);
+}
+
+function unwrapExternalPackageRecord(value: unknown): unknown {
+  if (!isRecord(value)) {
+    return value;
+  }
+  return Object.prototype.hasOwnProperty.call(value, "record") ? value.record : value;
+}
+
+function readArchive(value: unknown): ExternalPackageRecord["archive"] {
+  if (!isRecord(value)) {
+    throw new ExternalPackageError("record.archive must be an object", { code: "invalid_record", status: 400 });
+  }
+  return {
+    firstSeenReason: requiredCleanString(value.firstSeenReason, "archive.firstSeenReason", 240),
+    persistence: readEnum(value.persistence, EXTERNAL_ARCHIVE_PERSISTENCE, "archive.persistence"),
+    status: readEnum(value.status, EXTERNAL_ARCHIVE_STATUS, "archive.status")
+  };
+}
+
+function readInstall(value: unknown): ExternalPackageRecord["install"] {
+  if (!isRecord(value)) {
+    throw new ExternalPackageError("record.install must be an object", { code: "invalid_record", status: 400 });
+  }
+  const command = requiredCleanString(value.command, "install.command", 1000);
+  const commands = value.commands === undefined ? undefined : boundedStrings(value.commands, 6, 1000, "install.commands", 1);
+  const notes = boundedStrings(value.notes, 10, 300, "install.notes", 1);
+  const base = {
+    command,
+    manager: requiredCleanString(value.manager, "install.manager", 80),
+    notes
+  };
+  return commands === undefined ? base : { ...base, commands };
+}
+
+function readTrust(value: unknown): ExternalPackageRecord["trust"] {
+  if (!isRecord(value)) {
+    throw new ExternalPackageError("record.trust must be an object", { code: "invalid_record", status: 400 });
+  }
+  return {
+    checkedAt: requiredCleanString(value.checkedAt, "trust.checkedAt", 80),
+    decision: readEnum(value.decision, EXTERNAL_PACKAGE_DECISIONS, "trust.decision"),
+    risk: readEnum(value.risk, EXTERNAL_PACKAGE_RISKS, "trust.risk"),
+    score: readBoundedInteger(value.score, "trust.score", 0, 100),
+    signals: boundedStrings(value.signals, 16, 300, "trust.signals", 1),
+    warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
+  };
+}
+
+function readMetrics(value: unknown): ExternalPackageRecord["metrics"] {
+  if (!isRecord(value)) {
+    return {};
+  }
+  return {
+    dependents: nullableNonNegativeNumber(value.dependents, "metrics.dependents"),
+    downloads: nullableNonNegativeNumber(value.downloads, "metrics.downloads"),
+    likes: nullableNonNegativeNumber(value.likes, "metrics.likes"),
+    stars: nullableNonNegativeNumber(value.stars, "metrics.stars")
+  };
+}
+
+function readEnum<T extends readonly string[]>(value: unknown, allowed: T, label: string): T[number] {
+  if (typeof value === "string" && (allowed as readonly string[]).includes(value)) {
+    return value as T[number];
+  }
+  throw new ExternalPackageError(`${label} is invalid`, { code: "invalid_record", status: 400 });
+}
+
+function requiredCleanString(value: unknown, label: string, maxLength: number): string {
+  if (typeof value !== "string") {
+    throw new ExternalPackageError(`${label} must be a string`, { code: "invalid_record", status: 400 });
+  }
+  const cleaned = cleanPlainText(value, maxLength);
+  if (!cleaned) {
+    throw new ExternalPackageError(`${label} must not be empty`, { code: "invalid_record", status: 400 });
+  }
+  return cleaned;
+}
+
+function nullableCleanString(value: unknown, label: string, maxLength: number): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value !== "string") {
+    throw new ExternalPackageError(`${label} must be a string or null`, { code: "invalid_record", status: 400 });
+  }
+  return cleanPlainText(value, maxLength) || null;
+}
+
+function readOptionalString(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+function boundedStrings(value: unknown, maxItems: number, maxLength: number, label: string, minItems = 0): string[] {
+  if (!Array.isArray(value)) {
+    throw new ExternalPackageError(`${label} must be an array`, { code: "invalid_record", status: 400 });
+  }
+  if (value.length < minItems) {
+    throw new ExternalPackageError(`${label} has too few items`, { code: "invalid_record", status: 400 });
+  }
+  if (value.length > maxItems) {
+    throw new ExternalPackageError(`${label} has too many items`, { code: "invalid_record", status: 400 });
+  }
+  return value.map((item, index) => requiredCleanString(item, `${label}.${index}`, maxLength));
+}
+
+function requiredHttpUrl(value: unknown, label: string): string {
+  if (typeof value !== "string") {
+    throw new ExternalPackageError(`${label} must be a URL`, { code: "invalid_record", status: 400 });
+  }
+  const cleaned = cleanPlainText(value, 1000);
+  if (!isHttpUrl(cleaned)) {
+    throw new ExternalPackageError(`${label} must be an http or https URL`, { code: "invalid_record", status: 400 });
+  }
+  return cleaned;
+}
+
+function nullableHttpUrl(value: unknown, label: string): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return requiredHttpUrl(value, label);
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function readBoundedInteger(value: unknown, label: string, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < min || value > max) {
+    throw new ExternalPackageError(`${label} must be an integer from ${min} to ${max}`, { code: "invalid_record", status: 400 });
+  }
+  return value;
+}
+
+function nullableNonNegativeNumber(value: unknown, label: string): number | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new ExternalPackageError(`${label} must be a non-negative number or null`, { code: "invalid_record", status: 400 });
+  }
+  return value;
 }
 
 function decisionFromScore(score: number, warnings: string[]): ExternalPackageDecision {

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const endpoints = [
   {
     method: "GET",
-    path: "/api/search?q=<query>",
+    path: "/api/resolve?q=<query>",
     text: "Find package candidates across npm, PyPI, GitHub, Hugging Face and MCP."
   },
   {

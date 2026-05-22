@@ -22,8 +22,8 @@ Read https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json.
 
 API first package discovery:
 
-Search external sources:
-GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp
+Resolve external sources:
+GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp
 
 Inspect one package:
 GET https://nipmod.com/api/inspect?source=npm&name=<package-name>

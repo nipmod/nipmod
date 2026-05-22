@@ -156,6 +156,29 @@ function openApiDocument() {
           summary: "Hosted read-only MCP JSON-RPC endpoint."
         }
       },
+      "/api/resolve": {
+        get: {
+          parameters: [
+            queryParameter(),
+            {
+              description: "Comma-separated source list. Invalid values return 400.",
+              in: "query",
+              name: "sources",
+              schema: { items: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }, type: "array" }
+            },
+            limitParameter()
+          ],
+          responses: {
+            "200": {
+              description: "Resolved package options with source reports and partial failure status."
+            },
+            "400": errorResponse(),
+            "429": errorResponse(),
+            "502": errorResponse()
+          },
+          summary: "Resolve package options from external sources through one API."
+        }
+      },
       "/api/search": {
         get: {
           parameters: [

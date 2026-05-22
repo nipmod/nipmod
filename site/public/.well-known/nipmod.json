@@ -19,6 +19,7 @@
     "createPackage": "https://nipmod.com/package",
     "mcp": "https://nipmod.com/mcp",
     "externalSearchApi": "https://nipmod.com/api/search",
+    "externalResolveApi": "https://nipmod.com/api/resolve",
     "externalInspectApi": "https://nipmod.com/api/inspect",
     "externalInstallPlanApi": "https://nipmod.com/api/install-plan",
     "packageIntelligencePrepareApi": "https://nipmod.com/api/archive/prepare",
@@ -44,7 +45,7 @@
       "setupPublish",
       "doctor",
       "search",
-      "externalSearch",
+      "externalResolve",
       "externalInspect",
       "externalInstallPlan",
       "packageIntelligencePrepare",
@@ -72,6 +73,7 @@
       "setupPublish": "nipmod setup gitlawb",
       "doctor": "nipmod doctor --online",
       "search": "nipmod search <query> --online",
+      "externalResolve": "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       "externalInstallPlan": "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
@@ -160,6 +162,7 @@
   },
   "externalIndex": {
     "search": "https://nipmod.com/api/search",
+    "resolve": "https://nipmod.com/api/resolve",
     "inspect": "https://nipmod.com/api/inspect",
     "installPlan": "https://nipmod.com/api/install-plan",
     "packageIntelligence": {

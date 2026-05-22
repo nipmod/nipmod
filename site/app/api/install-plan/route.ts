@@ -4,6 +4,7 @@ import {
   createExternalInstallPlan,
   externalPackageApiError,
   inspectExternalPackage,
+  readExternalPackageRecord,
   type ExternalPackageRecord,
   type ExternalPackageSource
 } from "../../../lib/external-packages";
@@ -77,15 +78,7 @@ function readRecord(value: unknown): ExternalPackageRecord {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ExternalPackageError("request body must be an external package record", { code: "invalid_record", status: 400 });
   }
-  const record = "record" in value ? (value as { record: unknown }).record : value;
-  if (!record || typeof record !== "object" || Array.isArray(record)) {
-    throw new ExternalPackageError("request body must include a record object", { code: "invalid_record", status: 400 });
-  }
-  const candidate = record as Partial<ExternalPackageRecord>;
-  if (candidate.type !== "dev.nipmod.external-package.v1" || typeof candidate.id !== "string") {
-    throw new ExternalPackageError("record must be a dev.nipmod.external-package.v1 object", { code: "invalid_record", status: 400 });
-  }
-  return candidate as ExternalPackageRecord;
+  return readExternalPackageRecord(value);
 }
 
 function errorJson(error: unknown, headers: Record<string, string> = {}, context = createApiHttpContext()): Response {

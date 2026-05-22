@@ -72,7 +72,7 @@ describe("home content", () => {
 
   test("states what people can do on the site", () => {
     expect(homeContent.usage.map((item) => item.label)).toEqual(["Resolve", "Check", "Plan"]);
-    expect(homeContent.commands).toEqual(["curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'"]);
+    expect(homeContent.commands).toEqual(["curl 'https://nipmod.com/api/resolve?q=package%20for%20http%20requests&limit=3'"]);
     expect(homeContent.terminalOutput[0]).toBe("Searching npm, PyPI, GitHub, Hugging Face and MCP");
   });
 
@@ -118,7 +118,7 @@ describe("home content", () => {
       "Audit",
       "Publish"
     ]);
-    expect(homeContent.quickstartSteps.find((step) => step.label === "Search API")?.command).toContain("/api/search");
+    expect(homeContent.quickstartSteps.find((step) => step.label === "Search API")?.command).toContain("/api/resolve");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install plan API")?.command).toContain("/api/install-plan");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Local CLI")?.command).toBe("curl https://nipmod.com/i|bash");
     expect(homeContent.quickstartSteps.find((step) => step.label === "Install package")?.command).toContain("mkdir -p nipmod-demo");

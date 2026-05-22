@@ -1,4 +1,5 @@
 import { ArchiveStoreError, archiveStoreStatus, searchPackageIntelligenceArchive } from "../../../../lib/package-intelligence-store";
+import { ExternalPackageError, externalPackageApiError } from "../../../../lib/external-packages";
 import { apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { checkRateLimit } from "../../../../lib/rate-limit";
 import { readLimit } from "../shared";
@@ -48,6 +49,9 @@ function errorJson(error: unknown, headers: Record<string, string> = {}, context
       headers,
       context
     );
+  }
+  if (error instanceof ExternalPackageError) {
+    return json(externalPackageApiError(error, "archive search failed"), error.status, headers, context);
   }
   return json(
     {

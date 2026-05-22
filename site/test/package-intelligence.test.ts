@@ -77,6 +77,24 @@ describe("package intelligence archive", () => {
     expect(confirmed.stored).toBe(false);
   });
 
+  test("rejects malformed archive record posts instead of persisting untrusted shapes", async () => {
+    const response = await preparePost(
+      new Request("https://nipmod.com/api/archive/prepare", {
+        body: JSON.stringify({ record: { id: "npm:broken", type: "dev.nipmod.external-package.v1" } }),
+        headers: { "content-type": "application/json" },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body).toMatchObject({
+      code: "invalid_record",
+      status: 400,
+      type: "dev.nipmod.api-error.v1"
+    });
+  });
+
   test("does not allow unauthenticated archive writes", async () => {
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {

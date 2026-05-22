@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GET as inspectGet } from "../app/api/inspect/route";
 import { GET as installPlanGet, POST as installPlanPost } from "../app/api/install-plan/route";
+import { GET as resolveGet } from "../app/api/resolve/route";
 import { GET as searchGet } from "../app/api/search/route";
 import {
   createExternalInstallPlan,
@@ -78,6 +79,11 @@ describe("external package resolver", () => {
     expect(searchBody.sourceReports[0]).toMatchObject({ source: "npm", status: "ok" });
     expect(searchBody.archivePolicy.ownership).toContain("Original package owners");
 
+    const resolve = await resolveGet(new Request("https://nipmod.com/api/resolve?q=telegram&sources=npm&limit=2"));
+    const resolveBody = await resolve.json();
+    expect(resolve.status).toBe(200);
+    expect(resolveBody.records[0]).toMatchObject({ id: "npm:node-telegram-bot-api", source: "npm" });
+
     const inspect = await inspectGet(new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api"));
     const inspectBody = await inspect.json();
     expect(inspectBody.record.id).toBe("npm:node-telegram-bot-api");
@@ -85,6 +91,11 @@ describe("external package resolver", () => {
     const plan = await installPlanGet(new Request("https://nipmod.com/api/install-plan?source=npm&name=node-telegram-bot-api"));
     const planBody = await plan.json();
     expect(planBody.plan.commands).toEqual(["npm install node-telegram-bot-api"]);
+    expect(planBody.safety).toMatchObject({
+      commandRisk: "low",
+      metadataIsInstruction: false,
+      requiresApprovalBeforeWrite: true
+    });
 
     const postPlan = await installPlanPost(
       new Request("https://nipmod.com/api/install-plan", {
@@ -95,6 +106,41 @@ describe("external package resolver", () => {
     );
     const postPlanBody = await postPlan.json();
     expect(postPlanBody.package.id).toBe("npm:node-telegram-bot-api");
+  });
+
+  test("strictly validates posted external records before creating install plans", async () => {
+    vi.stubGlobal("fetch", mockFetch);
+
+    const inspect = await inspectGet(new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api"));
+    const inspectBody = await inspect.json();
+    const record = inspectBody.record as ExternalPackageRecord;
+
+    const unsafeUrl = await installPlanPost(
+      new Request("https://nipmod.com/api/install-plan", {
+        body: JSON.stringify({ record: { ...record, originalUrl: "file:///etc/passwd" } }),
+        headers: { "content-type": "application/json" },
+        method: "POST"
+      })
+    );
+    const unsafeUrlBody = await unsafeUrl.json();
+    expect(unsafeUrl.status).toBe(400);
+    expect(unsafeUrlBody).toMatchObject({
+      code: "invalid_record",
+      status: 400,
+      type: "dev.nipmod.api-error.v1"
+    });
+    expect(unsafeUrlBody.error).toContain("originalUrl");
+
+    const incomplete = await installPlanPost(
+      new Request("https://nipmod.com/api/install-plan", {
+        body: JSON.stringify({ record: { id: "npm:broken", type: "dev.nipmod.external-package.v1" } }),
+        headers: { "content-type": "application/json" },
+        method: "POST"
+      })
+    );
+    const incompleteBody = await incomplete.json();
+    expect(incomplete.status).toBe(400);
+    expect(incompleteBody.code).toBe("invalid_record");
   });
 
   test("returns structured API errors when all requested sources fail", async () => {
@@ -133,6 +179,11 @@ describe("external package resolver", () => {
       status: 400,
       type: "dev.nipmod.api-error.v1"
     });
+
+    const tooLargeLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=51"));
+    const tooLargeLimitBody = await tooLargeLimit.json();
+    expect(tooLargeLimit.status).toBe(400);
+    expect(tooLargeLimitBody.code).toBe("invalid_limit");
   });
 });
 

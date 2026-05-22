@@ -73,7 +73,7 @@ export async function searchPackageIntelligenceArchive(
     };
   }
 
-  const search = query.trim().slice(0, 120);
+  const search = sanitizeArchiveSearchTerm(query);
   const limit = normalizeLimit(options.limit);
   const params = new URLSearchParams({
     limit: String(limit),
@@ -81,8 +81,7 @@ export async function searchPackageIntelligenceArchive(
     select: "record"
   });
   if (search) {
-    const escaped = search.replaceAll("*", "").replaceAll(",", " ");
-    params.set("or", `(name.ilike.*${escaped}*,display_name.ilike.*${escaped}*,description.ilike.*${escaped}*)`);
+    params.set("or", `(name.ilike.*${search}*,display_name.ilike.*${search}*,description.ilike.*${search}*)`);
   }
 
   const requestOptions: SupabaseRequestOptions = { method: "GET" };
@@ -229,6 +228,14 @@ function normalizeLimit(limit: number | undefined): number {
     return 20;
   }
   return Math.min(100, Math.max(1, limit));
+}
+
+function sanitizeArchiveSearchTerm(value: string): string {
+  return value
+    .replace(/[^\p{L}\p{N}@._/\-\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
 }
 
 function isPackageIntelligenceRecord(value: unknown): value is PackageIntelligenceRecord {

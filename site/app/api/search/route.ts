@@ -44,6 +44,9 @@ function readLimit(value: string | null): number | undefined {
   if (!Number.isFinite(parsed) || String(parsed) !== value.trim()) {
     throw new ExternalPackageError("limit must be an integer", { code: "invalid_limit", status: 400 });
   }
+  if (parsed < 1 || parsed > 50) {
+    throw new ExternalPackageError("limit must be an integer from 1 to 50", { code: "invalid_limit", status: 400 });
+  }
   return parsed;
 }
 

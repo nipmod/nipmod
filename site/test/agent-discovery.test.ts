@@ -25,7 +25,7 @@ describe("agent discovery text", () => {
 
   test("lists the commands an agent needs for API use and controlled local writes", () => {
     for (const command of [
-      "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
+      "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
       "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
