@@ -37,7 +37,7 @@ const OFFICIAL_LINKS = [
   ["Telegram", "https://t.me/nipmod"],
   ["X", "https://x.com/Nipmod"],
   ["Install script", "https://nipmod.com/install.sh"],
-  ["Bankr coin", "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"],
+  ["$NPM on Base", "https://token.nipmod.com"],
   ["Agent discovery", "https://nipmod.com/.well-known/nipmod.json"],
   ["Agent instructions", "https://nipmod.com/llms.txt"],
   ["Quickstart", "https://nipmod.com/quickstart"],
@@ -52,7 +52,7 @@ const FACTS = {
   archive:
     "Nipmod is the shared package archive for agents. Packages are verified, signed, digest pinned and sourced from Gitlawb.",
   bankr:
-    "Bankr is a review track, not a ready native Nipmod host yet. The public Bankr link is the $NPM coin link.",
+    "Bankr is a review track, not a ready native Nipmod host yet. The public $NPM page is https://token.nipmod.com.",
   github:
     "GitHub is the public mirror for review, CI and developer access. Gitlawb stays the canonical source for signed provenance.",
   gitlawb:
@@ -1589,7 +1589,7 @@ function xText() {
 function coinText() {
   return [
     "Coin",
-    "Bankr coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+    "$NPM on Base https://token.nipmod.com"
   ].join("\n");
 }
 
@@ -1613,7 +1613,7 @@ function bankrText() {
   return [
     "Bankr",
     FACTS.bankr,
-    "Coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+    "$NPM on Base https://token.nipmod.com"
   ].join("\n");
 }
 

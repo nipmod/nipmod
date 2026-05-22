@@ -4729,6 +4729,24 @@ body {
   margin: 0;
 }
 
+.token-page-shell {
+  gap: 34px;
+}
+
+.token-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
+}
+
+.token-detail-row code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.token-status-panel {
+  min-width: 0;
+}
+
 .api-command-grid {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }

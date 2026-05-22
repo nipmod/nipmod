@@ -4,7 +4,8 @@ export const homeContent = {
   lead: "Tell your agent what you need. The agent calls Nipmod for package options, trust context and a safe install plan.",
   links: {
     api: "/api-access",
-    bankrCoin: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
+    bankrCoin: "https://token.nipmod.com",
+    bankrCoinExternal: "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
     docs: "/quickstart#docs",
     github: "https://github.com/nipmod/nipmod",
     gitlawbProfile: "https://gitlawb.com/z6MkwbuduCUUwy8fp78CZ2pnhLyRSibkSjcCGexT355xNw5R",

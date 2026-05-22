@@ -297,7 +297,7 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /Gitlawb https:\/\/gitlawb\.com\/node\/repos\/z6Mkwbud\/nipmod/);
     assert.match(reply.text, /Install script https:\/\/nipmod\.com\/install\.sh/);
     assert.match(reply.text, /Demo https:\/\/nipmod\.com\/demo/);
-    assert.match(reply.text, /Bankr coin https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
+    assert.match(reply.text, /\$NPM on Base https:\/\/token\.nipmod\.com/);
     assert.doesNotMatch(reply.text, / - /);
   });
 
@@ -312,7 +312,7 @@ describe("telegram bot knowledge base", () => {
 
     assert.match(reply.text, /Bankr is a review track/);
     assert.doesNotMatch(reply.text, /integrations\/bankr\/nipmod\/SKILL\.md/);
-    assert.match(reply.text, /https:\/\/bankr\.bot\/launches\/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3/);
+    assert.match(reply.text, /https:\/\/token\.nipmod\.com/);
   });
 
   test("answers specific social and coin questions concisely", async () => {
@@ -336,7 +336,7 @@ describe("telegram bot knowledge base", () => {
     });
     assert.equal(
       coinReply.text,
-      "Coin\nBankr coin https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+      "Coin\n$NPM on Base https://token.nipmod.com"
     );
   });
 
@@ -428,7 +428,7 @@ describe("telegram bot knowledge base", () => {
   test("routes typo heavy questions to the right answers", async () => {
     const cases = [
       ["githb link bitte", /GitHub is the public mirror/],
-      ["banr coin?", /Bankr coin https:\/\/bankr\.bot\/launches/],
+      ["banr coin?", /\$NPM on Base https:\/\/token\.nipmod\.com/],
       ["cluade code setup?", /Claude Code Setup/],
       ["cursor setup?", /Cursor Setup/],
       ["geht das mit coedx?", /Codex Setup/],

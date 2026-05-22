@@ -79,7 +79,7 @@ Could you review the trust model against Gitlawb's goals and tell us the stronge
 
 - Website: https://nipmod.com
 - Telegram: https://t.me/nipmod
-- $NPM on Base: https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3
+- $NPM on Base: https://token.nipmod.com
 - Launch path: https://nipmod.com/launch
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Registry: https://nipmod.com/registry/packages.json

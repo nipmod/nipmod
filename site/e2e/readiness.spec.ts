@@ -23,13 +23,25 @@ test("home page presents the API-first product", async ({ page }) => {
   await expect(siteNav.getByRole("link", { name: "Trust" })).toHaveAttribute("href", "/trust");
   if (await page.locator(".brand-socials").isVisible()) {
     await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Open Nipmod token on Base in a new tab" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "Open Nipmod token page in a new tab" })).toHaveAttribute(
       "href",
-      "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+      "https://token.nipmod.com"
     );
   }
 
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
+});
+
+test("token page gives controlled token routing", async ({ page }) => {
+  await page.goto("/token");
+
+  await expect(page).toHaveTitle("Nipmod");
+  await expect(page.getByRole("heading", { name: "Product first. Token second." })).toBeVisible();
+  await expect(page.getByText("0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open on Bankr" })).toHaveAttribute(
+    "href",
+    "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3"
+  );
 });
 
 test("API access page exposes one public package surface", async ({ page }) => {
