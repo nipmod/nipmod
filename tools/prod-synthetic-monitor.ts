@@ -156,6 +156,11 @@ export async function runSyntheticMonitor({
     const plan = await fetchJson(`${endpoints.externalInstallPlan}?source=npm&name=undici`, timedFetch);
     assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "external install plan type mismatch");
     assertEqual(plan.plan?.requiresApprovalBeforeWrite, true, "external install plan approval boundary mismatch");
+    assertEqual(plan.safety?.blocked, false, "external install plan should not be blocked");
+    assertEqual(plan.safety?.requiresApprovalBeforeWrite, true, "external install plan safety boundary mismatch");
+    const firstCommand = plan.plan?.commandDetails?.[0];
+    assertEqual(firstCommand?.hostedApiExecutes, false, "external install plan hosted execution boundary mismatch");
+    assertEqual(firstCommand?.requiresApprovalBeforeWrite, true, "external install plan command approval boundary mismatch");
     if (!Array.isArray(plan.plan?.writes) || plan.plan.writes.length !== 0) {
       throw new Error("external install plan should not write remotely");
     }

@@ -53,6 +53,26 @@ describe("production load smoke", () => {
       status: "fail"
     });
   });
+
+  test("allows an intentionally empty public registry", async () => {
+    const result = await runLoadSmoke({
+      concurrency: 1,
+      fetchFn: async (url) => (url.endsWith("/registry/packages.json") ? emptyRegistryResponse() : responseFor(url)),
+      iterations: 1,
+      targets: {
+        home: "https://nipmod.test",
+        nodeHealth: "https://node.nipmod.test/health",
+        registry: "https://nipmod.test/registry/packages.json",
+        security: "https://nipmod.test/security",
+        trust: "https://nipmod.test/trust"
+      }
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.checks.find((check) => check.name === "registry_load")).toMatchObject({
+      status: "pass"
+    });
+  });
 });
 
 function responseFor(url) {
@@ -63,7 +83,7 @@ function responseFor(url) {
     return Response.json({ status: "ok" });
   }
   if (url.endsWith("/trust")) {
-    return new Response("<main>Verified registry Current public roots Release key</main>", {
+    return new Response("<main>What makes a package Five anchors Source</main>", {
       headers: { "content-type": "text/html" }
     });
   }
@@ -74,5 +94,12 @@ function responseFor(url) {
   }
   return new Response('<main>nipmod <a href="/trust">Trust</a></main>', {
     headers: { "content-type": "text/html" }
+  });
+}
+
+function emptyRegistryResponse() {
+  return Response.json({
+    packages: [],
+    skipped: [{ reason: "Seed archive cleared; public packages must be republished through the verified flow." }]
   });
 }

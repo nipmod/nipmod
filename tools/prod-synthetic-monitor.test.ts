@@ -484,13 +484,7 @@ function createFixture({
       },
       type: "dev.nipmod.external-inspect.v1"
     }),
-    [`GET ${endpoints.externalInstallPlan}?source=npm&name=undici`]: jsonResponse({
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
-      type: "dev.nipmod.external-install-plan.v1"
-    }),
+    [`GET ${endpoints.externalInstallPlan}?source=npm&name=undici`]: jsonResponse(installPlanFixture()),
     [`GET ${endpoints.externalInstallPlan}?source=npm&name=react`]: jsonResponse({
       package: {
         id: "npm:react",
@@ -498,10 +492,8 @@ function createFixture({
           signals: ["Latest tarball integrity metadata is present."]
         }
       },
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
+      plan: installPlanFixture("npm install react", "npm").plan,
+      safety: installPlanFixture("npm install react", "npm").safety,
       type: "dev.nipmod.external-install-plan.v1"
     }),
     [`GET ${endpoints.sourceHealth}`]: jsonResponse({
@@ -524,34 +516,16 @@ function createFixture({
       },
       type: "dev.nipmod.source-health.v1"
     }),
-    [`GET ${endpoints.externalInstallPlan}?source=pypi&name=requests`]: jsonResponse({
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
-      type: "dev.nipmod.external-install-plan.v1"
-    }),
-    [`GET ${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`]: jsonResponse({
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
-      type: "dev.nipmod.external-install-plan.v1"
-    }),
-    [`GET ${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`]: jsonResponse({
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
-      type: "dev.nipmod.external-install-plan.v1"
-    }),
-    [`GET ${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`]: jsonResponse({
-      plan: {
-        requiresApprovalBeforeWrite: true,
-        writes: []
-      },
-      type: "dev.nipmod.external-install-plan.v1"
-    }),
+    [`GET ${endpoints.externalInstallPlan}?source=pypi&name=requests`]: jsonResponse(installPlanFixture("python -m pip install requests", "pip")),
+    [`GET ${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`]: jsonResponse(
+      installPlanFixture("git clone https://github.com/vercel/next.js.git", "git")
+    ),
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`]: jsonResponse(
+      installPlanFixture("python -m pip install huggingface_hub", "huggingface_hub")
+    ),
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`]: jsonResponse(
+      installPlanFixture("python -m pip install huggingface_hub", "huggingface_hub")
+    ),
     [`GET ${endpoints.externalSearch}?q=tandem&sources=mcp&limit=3`]: jsonResponse({
       records: [{ id: "mcp:ac.tandem/docs-mcp", source: "mcp" }],
       type: "dev.nipmod.external-search.v1"
@@ -719,6 +693,37 @@ function registryFixture(checkpoint, packagePatch = {}) {
     formatVersion: 1,
     packages: [pkg],
     source: "https://node.nipmod.test"
+  };
+}
+
+function installPlanFixture(command = "npm install undici", manager = "npm") {
+  return {
+    plan: {
+      commandDetails: [
+        {
+          blocked: false,
+          boundary: "manual-after-user-approval",
+          command,
+          hostedApiExecutes: false,
+          manager,
+          metadataIsInstruction: false,
+          requiresApprovalBeforeWrite: true,
+          risk: "low"
+        }
+      ],
+      commands: [command],
+      requiresApprovalBeforeWrite: true,
+      writes: []
+    },
+    safety: {
+      blocked: false,
+      blockReason: null,
+      commandRisk: "low",
+      metadataIsInstruction: false,
+      requiresApprovalBeforeWrite: true,
+      warnings: []
+    },
+    type: "dev.nipmod.external-install-plan.v1"
   };
 }
 

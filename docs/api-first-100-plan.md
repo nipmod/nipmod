@@ -66,6 +66,7 @@ Recent hardening:
 - Client-supplied trust scores, decisions and factors cannot upgrade durable archive records.
 - Agent-targeted instructions in package metadata block confirmed archive persistence.
 - Install plans now include structured command boundary metadata and block high-risk shell patterns from normal execution.
+- `pnpm launch:verify` now provides a non-destructive API-beta launch gate over local verification and live production checks.
 
 ## Workstream 1: API Contract
 
@@ -374,22 +375,22 @@ Goal: one command should prove the release is safe enough to launch.
 
 Tasks:
 
-- Add `pnpm launch:verify`.
+- Add `pnpm launch:verify`. Done.
 - Include:
-  - `pnpm verify`
+  - `pnpm verify` done
   - site e2e tests
-  - production synthetic monitor
+  - production synthetic monitor done
   - restore drill
-  - load smoke
+  - load smoke done
   - archive seed dry-run
-  - OpenAPI contract tests
+  - OpenAPI contract tests done for live API-critical fields
   - public proof loop or explicit empty-public-archive waiver
 - Update stale e2e and load-smoke assumptions for the API-first product.
 
 Definition of Done:
 
-- One command gives a reliable launch signal.
-- The command is non-destructive.
+- One command gives a reliable launch signal. Partially done for API beta.
+- The command is non-destructive. Done for current `pnpm launch:verify` checks.
 - The command can run locally and in CI.
 
 ## Workstream 11: GitHub and Supply Chain Hardening
@@ -466,8 +467,8 @@ Definition of Done:
 - [ ] Archive write auth before source resolution.
 - [ ] Non-dry-run archive writes fail loudly when persistence is unavailable.
 - [ ] Source health does live cached probes.
-- [ ] Install plans include structured command data.
-- [ ] Launch verify command exists.
+- [x] Install plans include structured command data.
+- [x] Launch verify command exists.
 
 ### 90%: Production-Ready API Surface
 

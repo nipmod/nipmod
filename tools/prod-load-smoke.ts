@@ -44,7 +44,7 @@ export async function runLoadSmoke({
       throw new Error("crawler did not discover trust page");
     }
     const trust = await fetchText(targets.trust, timedFetch);
-    for (const marker of ["Verified registry", "Current public roots", "Release key"]) {
+    for (const marker of ["What makes a package", "Five anchors", "Source"]) {
       assertIncludes(trust, marker, `trust page missing ${marker}`);
     }
     const security = await fetchText(targets.security, timedFetch);
@@ -62,8 +62,11 @@ export async function runLoadSmoke({
           throw new Error(`registry returned ${response.status}`);
         }
         const payload = await response.json();
-        if (!Array.isArray(payload.packages) || payload.packages.length === 0) {
-          throw new Error("registry returned no packages");
+        if (!Array.isArray(payload.packages)) {
+          throw new Error("registry packages must be an array");
+        }
+        if (payload.packages.length === 0 && !allowsEmptyPublicRegistry(payload)) {
+          throw new Error("empty registry must declare an explicit empty-public-archive state");
         }
       },
       url: targets.registry
@@ -102,7 +105,7 @@ export async function runLoadSmoke({
           throw new Error(`trust page returned ${response.status}`);
         }
         const text = await response.text();
-        assertIncludes(text, "Verified registry", "trust page missing verified registry marker");
+        assertIncludes(text, "What makes a package", "trust page missing package verification marker");
       },
       url: targets.trust
     });
@@ -130,6 +133,14 @@ export async function runLoadSmoke({
     summary,
     type: "dev.nipmod.prod-load-smoke.v1"
   };
+}
+
+function allowsEmptyPublicRegistry(payload) {
+  return (
+    payload.transparency?.status === "pending_first_public_package" ||
+    (Array.isArray(payload.skipped) &&
+      payload.skipped.some((entry) => String(entry?.reason ?? "").toLowerCase().includes("seed archive cleared")))
+  );
 }
 
 async function runCheck(checks, name, fn) {

@@ -8,14 +8,15 @@ Before a public release:
 
 1. `pnpm install` completes with the committed lockfile.
 2. `pnpm verify` passes locally or in CI.
-3. GitHub CI is green on `main`.
-4. Production monitor is green.
-5. `CHANGELOG.md` includes user-facing changes, verification and security notes.
-6. Public docs match the shipped API surface.
-7. No new third-party endorsement is claimed without explicit approval.
-8. Release artifacts are signed and checksum verifiable.
-9. Release tarballs are uploaded to GitHub Releases, not committed to the source tree.
-10. The matching `.sha256` and `.sig` sidecars are committed under `site/public/releases`.
+3. `pnpm launch:verify` passes before public API-beta release posts.
+4. GitHub CI is green on `main`.
+5. Production monitor is green.
+6. `CHANGELOG.md` includes user-facing changes, verification and security notes.
+7. Public docs match the shipped API surface.
+8. No new third-party endorsement is claimed without explicit approval.
+9. Release artifacts are signed and checksum verifiable.
+10. Release tarballs are uploaded to GitHub Releases, not committed to the source tree.
+11. The matching `.sha256` and `.sig` sidecars are committed under `site/public/releases`.
 
 ## Versioning
 
