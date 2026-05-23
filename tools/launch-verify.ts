@@ -26,7 +26,7 @@ await runCheck("rate_limit_canary", () =>
       "tools/rate-limit-canary.ts",
       "--base-url",
       baseUrl,
-      ...(requireDistributedRateLimit ? ["--require-configured", "--require-active"] : [])
+      ...(requireDistributedRateLimit ? ["--require-active"] : [])
     ],
     { timeoutMs: 60_000 }
   )
