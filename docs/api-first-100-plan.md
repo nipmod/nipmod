@@ -80,6 +80,7 @@ Recent hardening:
 - GitHub exact repo inspect now detects common package manifest files and package.json dependency/script metadata when GitHub exposes them.
 - Source crawling now has an API-first policy, candidate audit and admission checklist so future crawler workers do not bypass official source APIs, robots rules, terms or licensing boundaries.
 - Launch verification now runs the rate-limit canary, and `--require-distributed-rate-limit` promotes Supabase RPC activation from advisory status to a hard gate.
+- Launch verification now runs the public API contract canary for success responses, structured errors, request-id echoing, CORS and rate-limit headers.
 
 ## Workstream 1: API Contract
 
@@ -114,6 +115,7 @@ Definition of Done:
 - All public routes have complete OpenAPI schemas.
 - API examples in docs match live responses.
 - Contract tests fail when a route returns a shape not described by OpenAPI.
+- Live API contract canary passes for success, invalid query, invalid source, invalid JSON and invalid API-key cases.
 - `pnpm verify` and API contract tests pass.
 
 ## Workstream 2: Trust Engine v3

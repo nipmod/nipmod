@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "archive:seed": "node --experimental-strip-types tools/seed-package-intelligence.ts",
+    "api:contract": "node --experimental-strip-types tools/api-contract-canary.ts",
     "build": "pnpm --dir nipmod build && pnpm --dir site build",
     "launch:verify": "node --experimental-strip-types tools/launch-verify.ts",
     "public:check": "node --experimental-strip-types tools/open-source-readiness-check.ts",
