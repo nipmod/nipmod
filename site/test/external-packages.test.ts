@@ -236,13 +236,78 @@ describe("external package resolver", () => {
     const response = await searchGet(new Request("https://nipmod.com/api/search?q=missing&sources=github&limit=2"));
     const body = await response.json();
 
-    expect(response.status).toBe(502);
+    expect(response.status).toBe(404);
     expect(body).toMatchObject({
-      code: "all_sources_failed",
-      retryable: true,
-      source: null,
-      status: 502,
+      code: "source_not_found",
+      retryable: false,
+      source: "github",
+      status: 404,
       type: "dev.nipmod.api-error.v1"
+    });
+  });
+
+  test("preserves timeout status when every requested source times out", async () => {
+    const response = await searchExternalPackages("timeout", {
+      fetchImpl: async () => {
+        throw new DOMException("aborted", "AbortError");
+      },
+      sources: ["npm", "github"],
+      timeoutMs: 1
+    }).catch((error) => error);
+
+    expect(response).toMatchObject({
+      code: "all_sources_timeout",
+      retryable: true,
+      status: 504
+    });
+  });
+
+  test("treats reported vulnerabilities as negative trust evidence", async () => {
+    const record = await inspectExternalPackage("pypi", "risky-package", {
+      fetchImpl: async () =>
+        jsonResponse({
+          info: {
+            classifiers: ["License :: OSI Approved :: MIT License"],
+            name: "risky-package",
+            package_url: "https://pypi.org/project/risky-package/",
+            project_urls: { Source: "https://github.com/example/risky-package" },
+            summary: "Risk fixture.",
+            version: "1.0.0"
+          },
+          releases: { "1.0.0": [{ upload_time_iso_8601: "2026-05-01T00:00:00.000Z" }] },
+          vulnerabilities: [{ id: "PYSEC-test" }]
+        })
+    });
+
+    expect(record.trust.warnings).toContain("PyPI reports 1 known vulnerabilities for the latest release.");
+    expect(record.trust.factors).toContainEqual(
+      expect.objectContaining({
+        category: "security",
+        evidence: "PyPI returned vulnerability records.",
+        impact: "negative"
+      })
+    );
+  });
+
+  test("aborts oversized source bodies before full buffering", async () => {
+    const chunk = new Uint8Array(1_100_000).fill(120);
+    const error = await inspectExternalPackage("npm", "oversized", {
+      fetchImpl: async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            pull(controller) {
+              controller.enqueue(chunk);
+              controller.enqueue(chunk);
+              controller.close();
+            }
+          }),
+          { headers: { "content-type": "application/json" }, status: 200 }
+        )
+    }).catch((caught) => caught);
+
+    expect(error).toMatchObject({
+      code: "source_response_too_large",
+      status: 502
     });
   });
 

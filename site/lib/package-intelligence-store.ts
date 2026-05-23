@@ -29,6 +29,7 @@ const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
 const WRITE_TOKEN_ENV = "NIPMOD_ARCHIVE_WRITE_TOKEN";
+const SUPABASE_REQUEST_TIMEOUT_MS = 5_000;
 
 export function archiveStoreStatus(env: ArchiveEnv = process.env): ArchiveStoreStatus {
   const hasServiceRole = Boolean(env[SUPABASE_SERVICE_ROLE_KEY_ENV]);
@@ -52,7 +53,7 @@ export function assertArchiveWriteAuthorized(request: Request, env: ArchiveEnv =
     throw new ArchiveStoreError("archive write token is not configured", 503);
   }
 
-  const provided = request.headers.get("x-nipmod-archive-token") ?? bearerToken(request.headers.get("authorization"));
+  const provided = request.headers.get("x-nipmod-archive-token");
   if (!provided || !constantTimeEqual(provided, expected)) {
     throw new ArchiveStoreError("archive write token is required", 401);
   }
@@ -60,7 +61,7 @@ export function assertArchiveWriteAuthorized(request: Request, env: ArchiveEnv =
 
 export async function searchPackageIntelligenceArchive(
   query: string,
-  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; limit?: number } = {}
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; limit?: number; timeoutMs?: number } = {}
 ): Promise<ArchiveSearchResult> {
   const env = options.env ?? process.env;
   const status = archiveStoreStatus(env);
@@ -88,6 +89,9 @@ export async function searchPackageIntelligenceArchive(
   if (options.fetchImpl) {
     requestOptions.fetchImpl = options.fetchImpl;
   }
+  if (options.timeoutMs !== undefined) {
+    requestOptions.timeoutMs = options.timeoutMs;
+  }
   const rows = await supabaseJson<Array<{ record: PackageIntelligenceRecord }>>(
     env,
     `/rest/v1/package_intelligence_records?${params.toString()}`,
@@ -105,7 +109,7 @@ export async function searchPackageIntelligenceArchive(
 
 export async function upsertPackageIntelligenceRecord(
   record: PackageIntelligenceRecord,
-  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch } = {}
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; timeoutMs?: number } = {}
 ): Promise<ArchiveWriteResult> {
   const env = options.env ?? process.env;
   const status = archiveStoreStatus(env);
@@ -130,6 +134,9 @@ export async function upsertPackageIntelligenceRecord(
   if (options.fetchImpl) {
     requestOptions.fetchImpl = options.fetchImpl;
   }
+  if (options.timeoutMs !== undefined) {
+    requestOptions.timeoutMs = options.timeoutMs;
+  }
   await supabaseJson(env, "/rest/v1/package_intelligence_records?on_conflict=id", requestOptions);
 
   return {
@@ -142,7 +149,7 @@ export async function upsertPackageIntelligenceRecord(
 
 export async function readPackageIntelligenceRecordById(
   id: string,
-  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch } = {}
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; timeoutMs?: number } = {}
 ): Promise<PackageIntelligenceRecord | null> {
   const env = options.env ?? process.env;
   const status = archiveStoreStatus(env);
@@ -153,6 +160,9 @@ export async function readPackageIntelligenceRecordById(
   const requestOptions: SupabaseRequestOptions = { method: "GET" };
   if (options.fetchImpl) {
     requestOptions.fetchImpl = options.fetchImpl;
+  }
+  if (options.timeoutMs !== undefined) {
+    requestOptions.timeoutMs = options.timeoutMs;
   }
   const rows = await supabaseJson<Array<{ record: PackageIntelligenceRecord }>>(
     env,
@@ -194,6 +204,7 @@ interface SupabaseRequestOptions {
   fetchImpl?: typeof fetch;
   headers?: Record<string, string>;
   method: "GET" | "POST";
+  timeoutMs?: number;
 }
 
 async function supabaseJson<T>(
@@ -210,6 +221,8 @@ async function supabaseJson<T>(
     throw new ArchiveStoreError("archive store is not configured", 503);
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? SUPABASE_REQUEST_TIMEOUT_MS);
   const requestInit: RequestInit = {
     headers: {
       apikey: key,
@@ -218,34 +231,41 @@ async function supabaseJson<T>(
       ...(options.method === "POST" && publishableKey && writeToken ? { "x-nipmod-archive-token": writeToken } : {}),
       ...options.headers
     },
-    method: options.method
+    method: options.method,
+    signal: controller.signal
   };
   if (options.body !== undefined) {
     requestInit.body = options.body;
   }
 
-  const response = await (options.fetchImpl ?? fetch)(`${baseUrl.replace(/\/$/, "")}${path}`, requestInit);
-  if (!response.ok) {
-    throw new ArchiveStoreError(`archive store request failed with ${response.status}`, response.status);
+  try {
+    const response = await (options.fetchImpl ?? fetch)(`${baseUrl.replace(/\/$/, "")}${path}`, requestInit);
+    if (!response.ok) {
+      throw new ArchiveStoreError(`archive store request failed with ${response.status}`, response.status);
+    }
+    if (response.status === 204) {
+      return null as T;
+    }
+    const text = await response.text();
+    return text ? (JSON.parse(text) as T) : (null as T);
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new ArchiveStoreError("archive store request timed out", 504);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-  if (response.status === 204) {
-    return null as T;
-  }
-  const text = await response.text();
-  return text ? (JSON.parse(text) as T) : (null as T);
-}
-
-function bearerToken(value: string | null): string | null {
-  if (!value?.toLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-  return value.slice(7).trim();
 }
 
 function constantTimeEqual(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
   const rightBuffer = Buffer.from(right);
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 function normalizeLimit(limit: number | undefined): number {

@@ -27,7 +27,15 @@ describe("OpenAPI route", () => {
     ]);
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
     expect(body.paths["/api/archive/prepare"].get.responses["200"].description).toContain("does not persist");
+    expect(body.paths["/api/archive/prepare"].post.summary).toContain("posted external package");
     expect(body.paths["/api/archive/confirm"].post.summary).toContain("authorized archive writer");
+    expect(body.paths["/api/install-plan"].post.summary).toContain("posted external package record");
+    expect(body.components.schemas.ExternalPackageRecord.required).toEqual(
+      expect.arrayContaining(["formatVersion", "displayName", "registryUrl", "sourceKind", "metrics"])
+    );
+    expect(body.components.schemas.ExternalPackageRecord.properties.trust.required).toContain("checkedAt");
+    expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
+    expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");
   });
 
   test("supports CORS preflight", () => {

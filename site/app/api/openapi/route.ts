@@ -66,6 +66,9 @@ function openApiDocument() {
               required: ["persistence", "status"],
               type: "object"
             },
+            description: { type: "string" },
+            displayName: { type: "string" },
+            formatVersion: { const: 1, type: "integer" },
             id: { type: "string" },
             install: {
               properties: {
@@ -78,11 +81,26 @@ function openApiDocument() {
               type: "object"
             },
             license: { nullable: true, type: "string" },
+            metrics: {
+              additionalProperties: false,
+              properties: {
+                dependents: { nullable: true, type: "integer" },
+                downloads: { nullable: true, type: "integer" },
+                likes: { nullable: true, type: "integer" },
+                stars: { nullable: true, type: "integer" }
+              },
+              type: "object"
+            },
             name: { type: "string" },
             originalUrl: { format: "uri", type: "string" },
+            owner: { nullable: true, type: "string" },
+            registryUrl: { format: "uri", type: "string" },
+            repo: { nullable: true, type: "string" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
             trust: {
               properties: {
+                checkedAt: { format: "date-time", type: "string" },
                 decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
                 factors: {
                   items: { $ref: "#/components/schemas/TrustFactor" },
@@ -94,13 +112,34 @@ function openApiDocument() {
                 signals: { items: { type: "string" }, type: "array" },
                 warnings: { items: { type: "string" }, type: "array" }
               },
-              required: ["decision", "factors", "policy", "risk", "score", "signals", "warnings"],
+              required: ["checkedAt", "decision", "factors", "policy", "risk", "score", "signals", "warnings"],
               type: "object"
             },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
+            updatedAt: { nullable: true, type: "string" },
             version: { nullable: true, type: "string" }
           },
-          required: ["archive", "id", "install", "name", "originalUrl", "source", "trust", "type"],
+          required: [
+            "archive",
+            "description",
+            "displayName",
+            "formatVersion",
+            "id",
+            "install",
+            "license",
+            "metrics",
+            "name",
+            "originalUrl",
+            "owner",
+            "registryUrl",
+            "repo",
+            "source",
+            "sourceKind",
+            "trust",
+            "type",
+            "updatedAt",
+            "version"
+          ],
           type: "object"
         },
         PackageIntelligenceReceipt: {
@@ -217,6 +256,26 @@ function openApiDocument() {
             "504": errorResponse()
           },
           summary: "Prepare an archive record from an exact external package before confirmation."
+        },
+        post: {
+          requestBody: exactPackageOrRecordBody(),
+          responses: {
+            "200": {
+              content: {
+                "application/json": {
+                  schema: archivePrepareResponseSchema()
+                }
+              },
+              description: "Prepared package intelligence record and receipt preview. This endpoint does not persist the record."
+            },
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "404": errorResponse(),
+            "429": errorResponse(),
+            "502": errorResponse(),
+            "504": errorResponse()
+          },
+          summary: "Prepare an archive record from a posted external package or exact source/name pair."
         }
       },
       "/api/archive/confirm": {
@@ -260,7 +319,14 @@ function openApiDocument() {
             "400": errorResponse(),
             "401": errorResponse(),
             "404": errorResponse(),
-            "422": errorResponse(),
+            "422": {
+              content: {
+                "application/json": {
+                  schema: archiveConfirmResponseSchema()
+                }
+              },
+              description: "Archive confirmation validation failed. The rejected record and receipt preview are returned for review."
+            },
             "502": errorResponse(),
             "503": errorResponse(),
             "504": errorResponse()
@@ -270,7 +336,7 @@ function openApiDocument() {
       },
       "/api/archive/search": {
         get: {
-          parameters: [queryParameter(), limitParameter()],
+          parameters: [queryParameter(), limitParameter(100)],
           responses: {
             "200": { description: "Durable package intelligence archive search." },
             "401": errorResponse(),
@@ -318,6 +384,30 @@ function openApiDocument() {
             "504": errorResponse()
           },
           summary: "Create a safe install plan for one exact package."
+        },
+        post: {
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: {
+                  additionalProperties: false,
+                  properties: {
+                    record: { $ref: "#/components/schemas/ExternalPackageRecord" }
+                  },
+                  required: ["record"],
+                  type: "object"
+                }
+              }
+            },
+            required: true
+          },
+          responses: {
+            "200": { description: "Safe install plan from a posted external package record." },
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "429": errorResponse()
+          },
+          summary: "Create a safe install plan from a posted external package record."
         }
       },
       "/api/mcp": {
@@ -422,11 +512,11 @@ function nameParameter() {
   };
 }
 
-function limitParameter() {
+function limitParameter(maximum = 50) {
   return {
     in: "query",
     name: "limit",
-    schema: { maximum: 50, minimum: 1, type: "integer" }
+    schema: { maximum, minimum: 1, type: "integer" }
   };
 }
 
@@ -438,5 +528,61 @@ function errorResponse() {
       }
     },
     description: "Structured API error."
+  };
+}
+
+function exactPackageOrRecordBody() {
+  return {
+    content: {
+      "application/json": {
+        schema: {
+          additionalProperties: true,
+          properties: {
+            name: { type: "string" },
+            record: { $ref: "#/components/schemas/ExternalPackageRecord" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
+          },
+          type: "object"
+        }
+      }
+    },
+    required: true
+  };
+}
+
+function archivePrepareResponseSchema() {
+  return {
+    additionalProperties: true,
+    properties: {
+      preparedOnly: { const: true, type: "boolean" },
+      receiptPreview: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+      stored: { const: false, type: "boolean" },
+      type: { const: "dev.nipmod.archive-prepare.v1", type: "string" }
+    },
+    required: ["preparedOnly", "receiptPreview", "stored", "type"],
+    type: "object"
+  };
+}
+
+function archiveConfirmResponseSchema() {
+  return {
+    additionalProperties: true,
+    properties: {
+      receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+      stored: { type: "boolean" },
+      type: { const: "dev.nipmod.archive-confirm.v1", type: "string" },
+      validation: {
+        additionalProperties: true,
+        properties: {
+          errors: { items: { type: "string" }, type: "array" },
+          ok: { type: "boolean" },
+          warnings: { items: { type: "string" }, type: "array" }
+        },
+        required: ["errors", "ok", "warnings"],
+        type: "object"
+      }
+    },
+    required: ["receipt", "stored", "type", "validation"],
+    type: "object"
   };
 }

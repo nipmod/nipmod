@@ -222,11 +222,7 @@ export async function searchExternalPackages(query: string, options: ExternalSea
   const failed = sourceReports.filter((report) => report.status === "failed").length;
 
   if (failed === sourceReports.length) {
-    throw new ExternalPackageError("all external package sources failed", {
-      code: "all_sources_failed",
-      retryable: true,
-      status: 502
-    });
+    throw allSourcesFailedError(sourceReports);
   }
 
   const records = sourceResults
@@ -498,6 +494,28 @@ async function searchSourceWithReport(
       }
     };
   }
+}
+
+function allSourcesFailedError(sourceReports: ExternalSourceReport[]): ExternalPackageError {
+  const failedReports = sourceReports.filter((report) => report.status === "failed" && report.error);
+  const single = failedReports.length === 1 && sourceReports.length === 1 ? failedReports[0]?.error : null;
+  if (single) {
+    return new ExternalPackageError(single.message, {
+      code: single.code,
+      retryable: single.retryable,
+      source: sourceReports[0]?.source ?? null,
+      status: single.status
+    });
+  }
+
+  const hasTimeout = failedReports.some((report) => report.error?.status === 504);
+  const hasRateLimit = failedReports.some((report) => report.error?.status === 429);
+  const retryable = failedReports.length === 0 || failedReports.some((report) => report.error?.retryable);
+  return new ExternalPackageError("all external package sources failed", {
+    code: hasTimeout ? "all_sources_timeout" : hasRateLimit ? "all_sources_rate_limited" : "all_sources_failed",
+    retryable,
+    status: hasTimeout ? 504 : hasRateLimit ? 429 : 502
+  });
 }
 
 async function searchSource(
@@ -1099,7 +1117,11 @@ function trustFactors(input: {
     factors.push(trustFactor("maintenance", "Recent source metadata", recencyBonus(input.updatedAt) > 0 ? "positive" : "neutral", `Last source update: ${input.updatedAt}.`));
   }
   for (const signal of input.signals) {
-    if (/\bintegrity\b|\bsignature\b|\bactive\b|\bvulnerabilit/i.test(signal)) {
+    if (/\bvulnerabilit/i.test(signal) && !/\bno\b.{0,40}\bvulnerabilit/i.test(signal)) {
+      factors.push(trustFactor("security", "Security signal", "negative", signal));
+      continue;
+    }
+    if (/\bintegrity\b|\bsignature\b|\bactive\b|\bno\b.{0,40}\bvulnerabilit/i.test(signal)) {
       factors.push(trustFactor("security", "Security signal", "positive", signal));
     }
   }
@@ -1236,15 +1258,7 @@ async function fetchJsonOnce(
         status: 502
       });
     }
-    const text = await response.text();
-    if (text.length > MAX_SOURCE_RESPONSE_BYTES) {
-      throw new ExternalPackageError("source response is too large", {
-        code: "source_response_too_large",
-        retryable: true,
-        source: source ?? null,
-        status: 502
-      });
-    }
+    const text = await readLimitedResponseText(response, MAX_SOURCE_RESPONSE_BYTES, source);
     try {
       return JSON.parse(text) as UnknownRecord | UnknownRecord[];
     } catch {
@@ -1276,6 +1290,56 @@ async function fetchJsonOnce(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function readLimitedResponseText(
+  response: Response,
+  maxBytes: number,
+  source: ExternalPackageSource | undefined
+): Promise<string> {
+  if (!response.body) {
+    const text = await response.text();
+    if (new TextEncoder().encode(text).byteLength > maxBytes) {
+      throw responseTooLargeError(source);
+    }
+    return text;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      received += value.byteLength;
+      if (received > maxBytes) {
+        await reader.cancel();
+        throw responseTooLargeError(source);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const merged = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(merged);
+}
+
+function responseTooLargeError(source: ExternalPackageSource | undefined): ExternalPackageError {
+  return new ExternalPackageError("source response is too large", {
+    code: "source_response_too_large",
+    retryable: true,
+    source: source ?? null,
+    status: 502
+  });
 }
 
 function sourceRequestHeaders(url: string): HeadersInit {

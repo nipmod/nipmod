@@ -50,8 +50,18 @@ Known limits:
 - Trust scores are useful review signals, but external records are not yet cryptographic provenance.
 - Rate limits are not yet distributed across all server instances.
 - Source health is mostly capability status and should become real dependency health.
-- OpenAPI needs complete response schemas and contract validation.
+- OpenAPI describes the main runtime fields and implemented POST routes, but still needs full response-schema contract validation.
 - Launch gates are not yet unified into one non-destructive release command.
+
+Recent hardening:
+
+- Archive writes use the dedicated archive token header instead of overloading bearer API-key auth.
+- Supabase archive requests have bounded timeouts.
+- External source response bodies are capped while streaming instead of after full buffering.
+- All-source failures preserve more accurate timeout and single-source failure status.
+- PyPI vulnerability signals are negative trust evidence, not positive security evidence.
+- Install command scanning ignores shell separators inside quoted language snippets while still catching real shell composition.
+- OpenAPI now documents the implemented POST forms for install-plan and archive prepare.
 
 ## Workstream 1: API Contract
 
@@ -59,7 +69,7 @@ Goal: make the API contract stable enough for agent builders to integrate withou
 
 Tasks:
 
-- Complete OpenAPI schemas for every public response.
+- Complete OpenAPI schemas for every public response. Partially complete for external records, archive prepare, archive confirm and install-plan.
 - Add operation ids, examples and error responses for every endpoint.
 - Document both GET and POST forms where implemented.
 - Add schema validation tests that call real route handlers and validate actual JSON against OpenAPI.
@@ -101,6 +111,7 @@ Tasks:
   - `provenanceStatus`
 - Keep `trust.score` as a compatibility field during transition.
 - Prevent downloads, stars or likes from being treated as security proof.
+- Prevent vulnerability signals from being counted as positive security evidence. Done for current PyPI signal text.
 - Reserve strongest labels for packages with stronger provenance, integrity and advisory signals.
 - Add golden fixtures for npm, PyPI, GitHub, Hugging Face and MCP.
 - Update trust docs and API examples.
@@ -151,6 +162,13 @@ Tasks:
   - environment exfiltration
   - package-manager lifecycle risks
 - Add regression tests for unsafe command examples.
+
+Current hardening:
+
+- Remote script downloads piped into shell are high risk.
+- Destructive or privileged commands are high risk.
+- Real shell chaining outside quotes is medium risk.
+- Quoted language snippets such as `python -c "a; b"` are not treated as shell chaining.
 
 Definition of Done:
 
@@ -237,6 +255,54 @@ Definition of Done:
 - Search can return useful persisted records even when an upstream source is degraded.
 - Archive counts are accurate.
 - Records can be refreshed, replayed and audited.
+
+## Workstream 7: Source Health and Abuse Controls
+
+Goal: keep the public beta usable without letting source outages, retries or hostile clients degrade the service.
+
+Tasks:
+
+- Replace static source capability status with bounded live probes.
+- Track source latency, status class and last error type.
+- Add per-source circuit breakers so a degraded source does not slow every request.
+- Add shared rate limits or edge-level rate limiting for production.
+- Add query/result caching and request coalescing for hot lookups.
+- Add source-specific budgets for npm, PyPI, GitHub, Hugging Face and MCP.
+- Keep hosted API read-only and never execute install commands.
+
+Definition of Done:
+
+- `/api/sources/health` distinguishes configured capability from live source reachability.
+- Repeated identical source requests are cached or coalesced.
+- A single degraded source cannot stall all-source search.
+- Abuse controls survive multi-instance production.
+
+## Workstream 8: Agent-Specific Threat Model
+
+Goal: make Nipmod better than normal package search for autonomous agents.
+
+Threats:
+
+- Package descriptions or READMEs instruct the agent to ignore safety rules.
+- MCP tool descriptions hide destructive behavior behind harmless names.
+- Popularity is mistaken for safety.
+- Posted archive records forge higher trust than source evidence supports.
+- Install plans include shell composition, remote script downloads or environment exfiltration.
+- Source metadata changes after an archive record is saved.
+
+Tasks:
+
+- Add prompt-injection fixtures for package metadata and MCP tool descriptions.
+- Add server-side trust recomputation before durable archive writes.
+- Add stale-record detection for archive confirmations.
+- Add provenance/advisory enrichment where public sources expose it.
+- Add policy output that can say `allow`, `ask-human`, `block` and explain why.
+
+Definition of Done:
+
+- A hostile package record cannot make itself recommended by POSTing trust fields.
+- Agent-targeted prompt injection is detected as a separate risk signal.
+- Package decisions separate popularity, source quality, security confidence and provenance.
 
 ## Workstream 7: Rate Limits and Abuse Protection
 

@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { POST as confirmPost } from "../app/api/archive/confirm/route";
 import { POST as preparePost } from "../app/api/archive/prepare/route";
 import { GET as archiveSearchGet } from "../app/api/archive/search/route";
@@ -17,6 +17,11 @@ import {
 import type { ExternalPackageRecord } from "../lib/external-packages";
 
 describe("package intelligence archive", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
   test("creates deterministic external records without claiming ownership", () => {
     const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
 
@@ -178,6 +183,36 @@ describe("package intelligence archive", () => {
     expect(body.error).toContain("archive write token is not configured");
   });
 
+  test("accepts authorized archive writes through the archive token header", async () => {
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY", "publishable-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", "write-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url.includes("package_intelligence_records?id=eq.")) {
+          return Response.json([]);
+        }
+        expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": "write-token" });
+        return new Response(null, { status: 204 });
+      })
+    );
+
+    const response = await confirmPost(
+      new Request("https://nipmod.com/api/archive/confirm", {
+        body: JSON.stringify({ actor: "codex", record: externalRecord }),
+        headers: { "content-type": "application/json", "x-nipmod-archive-token": "write-token" },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.stored).toBe(true);
+    expect(body.receipt.stored).toBe(true);
+  });
+
   test("reports disabled archive search without a configured database", async () => {
     const response = await archiveSearchGet(new Request("https://nipmod.com/api/archive/search?q=telegram"));
     const body = await response.json();
@@ -227,6 +262,27 @@ describe("package intelligence archive", () => {
     await expect(searchPackageIntelligenceArchive("telegram", { env, fetchImpl: fetchMock })).resolves.toMatchObject({
       configured: true,
       total: 1
+    });
+  });
+
+  test("times out Supabase archive reads instead of hanging", async () => {
+    const env = {
+      NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
+      NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+    };
+    const hangingFetch = vi.fn((_input: string | URL | Request, init?: RequestInit) => {
+      const signal = init?.signal;
+      return new Promise<Response>((_resolve, reject) => {
+        signal?.addEventListener("abort", () => {
+          reject(new DOMException("aborted", "AbortError"));
+        });
+      });
+    }) as unknown as typeof fetch;
+
+    await expect(searchPackageIntelligenceArchive("telegram", { env, fetchImpl: hangingFetch, timeoutMs: 5 })).rejects.toMatchObject({
+      message: "archive store request timed out",
+      status: 504
     });
   });
 });

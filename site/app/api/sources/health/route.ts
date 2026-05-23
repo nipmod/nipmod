@@ -1,7 +1,7 @@
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { usageStoreStatus } from "../../../../lib/api-usage";
-import { externalSourceCapabilities } from "../../../../lib/external-packages";
+import { EXTERNAL_PACKAGE_SOURCES, externalSourceCapabilities, type ExternalPackageSource } from "../../../../lib/external-packages";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
 import { checkApiRateLimit } from "../../../../lib/rate-limit";
 
@@ -19,9 +19,12 @@ export async function GET(request: Request): Promise<Response> {
     return rateLimit.response!;
   }
 
+  const url = new URL(request.url);
+  const shouldProbe = url.searchParams.get("probe") === "live";
   const archive = archiveStoreStatus();
   const usage = usageStoreStatus();
   const sources = externalSourceCapabilities();
+  const live = shouldProbe ? await probeExternalSources() : null;
   return apiJsonWithUsage(
     request,
     {
@@ -37,9 +40,18 @@ export async function GET(request: Request): Promise<Response> {
         mode: archive.configured ? "durable-archive-enabled" : "resolver-only-safe-mode"
       },
       generatedAt: new Date().toISOString(),
-      sources,
+      probe: {
+        mode: shouldProbe ? "live" : "capability",
+        timeoutMs: SOURCE_PROBE_TIMEOUT_MS
+      },
+      sources: sources.map((source) => ({
+        ...source,
+        ...(live ? { live: live[source.source] } : {})
+      })),
       summary: {
         available: sources.length,
+        liveFailed: live ? Object.values(live).filter((item) => item.status === "failed").length : null,
+        liveOk: live ? Object.values(live).filter((item) => item.status === "ok").length : null,
         optionalAuthConfigured: sources.filter((source) => source.authConfigured).length,
         requested: sources.length,
         workspaceWritesFromHostedApi: false
@@ -57,4 +69,66 @@ export async function GET(request: Request): Promise<Response> {
       headers: rateLimit.headers
     }
   );
+}
+
+const SOURCE_PROBE_TIMEOUT_MS = 1_800;
+
+interface SourceLiveProbe {
+  durationMs: number;
+  endpointHost: string;
+  status: "ok" | "failed";
+  statusCode: number | null;
+}
+
+async function probeExternalSources(): Promise<Record<ExternalPackageSource, SourceLiveProbe>> {
+  const entries = await Promise.all(EXTERNAL_PACKAGE_SOURCES.map(async (source) => [source, await probeSource(source)] as const));
+  return Object.fromEntries(entries) as Record<ExternalPackageSource, SourceLiveProbe>;
+}
+
+async function probeSource(source: ExternalPackageSource): Promise<SourceLiveProbe> {
+  const endpoint = probeEndpoint(source);
+  const startedAt = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOURCE_PROBE_TIMEOUT_MS);
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        accept: "application/json",
+        "user-agent": "nipmod-source-health/1.2.5 (+https://nipmod.com)"
+      },
+      signal: controller.signal
+    });
+    return {
+      durationMs: Date.now() - startedAt,
+      endpointHost: new URL(endpoint).host,
+      status: response.status < 500 ? "ok" : "failed",
+      statusCode: response.status
+    };
+  } catch {
+    return {
+      durationMs: Date.now() - startedAt,
+      endpointHost: new URL(endpoint).host,
+      status: "failed",
+      statusCode: null
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function probeEndpoint(source: ExternalPackageSource): string {
+  switch (source) {
+    case "npm":
+      return "https://registry.npmjs.org/-/ping";
+    case "pypi":
+      return "https://pypi.org/pypi/pip/json";
+    case "github":
+      return "https://api.github.com/rate_limit";
+    case "huggingface-model":
+      return "https://huggingface.co/api/models?search=bert&limit=1";
+    case "huggingface-dataset":
+      return "https://huggingface.co/api/datasets?search=imdb&limit=1";
+    case "mcp":
+      return "https://registry.modelcontextprotocol.io/v0.1/servers?limit=1";
+  }
 }

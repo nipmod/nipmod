@@ -34,7 +34,7 @@ function normalizeCommandForRisk(command: string): string {
 }
 
 function hasPipedShellDownload(command: string): boolean {
-  const pipeIndex = command.indexOf("|");
+  const pipeIndex = indexOfShellOperatorOutsideQuotes(command, "|");
   if (pipeIndex === -1) {
     return false;
   }
@@ -48,7 +48,13 @@ function hasPrivilegedOrDestructiveCommand(command: string): boolean {
 }
 
 function hasCompoundShellSyntax(command: string): boolean {
-  return command.includes("&&") || command.includes("||") || command.includes(";") || command.includes("`") || command.includes("$(");
+  return (
+    indexOfShellOperatorOutsideQuotes(command, "&&") !== -1 ||
+    indexOfShellOperatorOutsideQuotes(command, "||") !== -1 ||
+    indexOfShellOperatorOutsideQuotes(command, ";") !== -1 ||
+    indexOfShellOperatorOutsideQuotes(command, "`") !== -1 ||
+    indexOfShellOperatorOutsideQuotes(command, "$(") !== -1
+  );
 }
 
 function containsRecursiveForcedRemove(command: string): boolean {
@@ -94,4 +100,35 @@ function isCommandTokenChar(char: string): boolean {
     char === "_" ||
     char === "."
   );
+}
+
+function indexOfShellOperatorOutsideQuotes(command: string, operator: string): number {
+  let quote: "\"" | "'" | null = null;
+  let escaped = false;
+  for (let index = 0; index <= command.length - operator.length; index += 1) {
+    const char = command[index];
+    if (!char) {
+      break;
+    }
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaped = quote === "\"";
+      continue;
+    }
+    if (char === "\"" || char === "'") {
+      if (quote === char) {
+        quote = null;
+      } else if (!quote) {
+        quote = char;
+      }
+      continue;
+    }
+    if (!quote && command.slice(index, index + operator.length) === operator) {
+      return index;
+    }
+  }
+  return -1;
 }
