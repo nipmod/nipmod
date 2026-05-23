@@ -3,10 +3,12 @@ import { POST as confirmPost } from "../app/api/archive/confirm/route";
 import { POST as preparePost } from "../app/api/archive/prepare/route";
 import { GET as archiveSearchGet } from "../app/api/archive/search/route";
 import { GET as archiveStatusGet } from "../app/api/archive/status/route";
+import { GET as searchGet } from "../app/api/search/route";
 import {
   confirmPackageIntelligenceRecord,
   createPackageIntelligenceRecord,
   mergePackageIntelligenceRecords,
+  packageIntelligenceLifecycleState,
   validatePackageIntelligenceRecord
 } from "../lib/package-intelligence";
 import {
@@ -153,6 +155,32 @@ describe("package intelligence archive", () => {
     expect(confirmed.events.at(-1)).toMatchObject({ actor: "codex", type: "agent_confirmed" });
   });
 
+  test("maps package intelligence records to public lifecycle states", () => {
+    const indexed = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const confirmed = confirmPackageIntelligenceRecord(indexed, { actor: "codex" });
+    const verified = {
+      ...indexed,
+      archive: { ...indexed.archive, status: "verified_nipmod" as const }
+    };
+    const quarantined = { ...indexed, archive: { ...indexed.archive, status: "quarantined" as const } };
+    const blocked = createPackageIntelligenceRecord({
+      ...externalRecord,
+      trust: {
+        ...externalRecord.trust,
+        decision: "avoid",
+        risk: "high",
+        score: 20,
+        warnings: ["Lifecycle script postinstall contains remote download or hidden background execution behavior."]
+      }
+    });
+
+    expect(packageIntelligenceLifecycleState(indexed)).toBe("indexed");
+    expect(packageIntelligenceLifecycleState(confirmed)).toBe("confirmed_use");
+    expect(packageIntelligenceLifecycleState(verified)).toBe("verified");
+    expect(packageIntelligenceLifecycleState(quarantined)).toBe("quarantined");
+    expect(packageIntelligenceLifecycleState(blocked)).toBe("blocked");
+  });
+
   test("merges repeated confirmations without losing receipt history", () => {
     const first = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" }), {
       actor: "codex",
@@ -259,6 +287,25 @@ describe("package intelligence archive", () => {
         "npm did not return registry signature metadata for the latest release."
       ])
     );
+  });
+
+  test("search results stay ephemeral and do not become verified archive records", async () => {
+    stubArchiveRouteFetch();
+
+    const response = await searchGet(new Request("https://nipmod.com/api/search?q=http%20client&sources=npm&limit=1"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.records).toHaveLength(1);
+    expect(body.records[0]).toMatchObject({
+      archive: {
+        persistence: "ephemeral",
+        status: "external_indexed"
+      },
+      source: "npm"
+    });
+    expect(body.records[0].archive.status).not.toBe("verified_nipmod");
+    expect(body.stored).toBeUndefined();
   });
 
   test("rejects stale submitted records before archive confirmation", async () => {
@@ -493,17 +540,52 @@ function stubArchiveRouteFetch(
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-      if (url === `https://registry.npmjs.org/${packageName}/latest`) {
+      const href = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      const requestUrl = new URL(href);
+      if (requestUrl.hostname === "registry.npmjs.org" && requestUrl.pathname === "/-/v1/search") {
+        return Response.json({
+          objects: [
+            {
+              dependents: "652",
+              downloads: { monthly: downloads, weekly: 247_635 },
+              package: {
+                date: "2025-12-13T02:21:02.338Z",
+                description: "Telegram Bot API",
+                license: "MIT",
+                links: {
+                  npm: `https://www.npmjs.com/package/${packageName}`,
+                  repository: "git+https://github.com/yagop/node-telegram-bot-api.git"
+                },
+                name: packageName,
+                publisher: { username: "gochomugo" },
+                version: "0.67.0"
+              },
+              score: { detail: { maintenance: 1, popularity: 1, quality: 1 } },
+              updated: "2026-05-21T08:43:37.654Z"
+            }
+          ]
+        });
+      }
+      if (requestUrl.hostname === "registry.npmjs.org" && requestUrl.pathname === `/${packageName}/latest`) {
         return Response.json(manifest);
       }
-      if (url === `https://api.npmjs.org/downloads/point/last-month/${packageName}`) {
+      if (requestUrl.hostname === "api.npmjs.org" && requestUrl.pathname === `/downloads/point/last-month/${packageName}`) {
         return Response.json({ downloads, package: packageName });
       }
-      if (options.supabaseConfigured && url.includes("package_intelligence_records?id=eq.")) {
+      if (
+        options.supabaseConfigured &&
+        requestUrl.hostname === "db.example.test" &&
+        requestUrl.pathname.endsWith("/package_intelligence_records") &&
+        requestUrl.searchParams.has("id")
+      ) {
         return Response.json([]);
       }
-      if (options.supabaseConfigured && url.includes("package_intelligence_records?on_conflict=id")) {
+      if (
+        options.supabaseConfigured &&
+        requestUrl.hostname === "db.example.test" &&
+        requestUrl.pathname.endsWith("/package_intelligence_records") &&
+        requestUrl.searchParams.get("on_conflict") === "id"
+      ) {
         expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": options.expectSupabaseWriteToken });
         return new Response(null, { status: 204 });
       }

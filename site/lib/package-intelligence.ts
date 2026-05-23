@@ -13,6 +13,16 @@ export const PACKAGE_INTELLIGENCE_STATUSES = [
 
 export type PackageIntelligenceStatus = (typeof PACKAGE_INTELLIGENCE_STATUSES)[number];
 
+export const PACKAGE_INTELLIGENCE_LIFECYCLE_STATES = [
+  "indexed",
+  "confirmed_use",
+  "verified",
+  "quarantined",
+  "blocked"
+] as const;
+
+export type PackageIntelligenceLifecycleState = (typeof PACKAGE_INTELLIGENCE_LIFECYCLE_STATES)[number];
+
 export interface PackageIntelligenceEvent {
   actor: string;
   at: string;
@@ -278,6 +288,28 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
     ok: errors.length === 0 && eligibility.ok,
     warnings: [...warnings, ...eligibility.warnings]
   };
+}
+
+export function packageIntelligenceLifecycleState(record: PackageIntelligenceRecord): PackageIntelligenceLifecycleState {
+  if (
+    record.installPlan.safety.blocked ||
+    record.security.installCommandRisk === "high" ||
+    record.trust.decision === "avoid" ||
+    record.trust.risk === "high" ||
+    record.archive.status === "yanked"
+  ) {
+    return "blocked";
+  }
+  if (record.archive.status === "quarantined") {
+    return "quarantined";
+  }
+  if (record.archive.status === "verified_nipmod") {
+    return "verified";
+  }
+  if (record.archive.status === "agent_confirmed" || record.archive.confirmationCount > 0) {
+    return "confirmed_use";
+  }
+  return "indexed";
 }
 
 export function archiveEligibility(record: PackageIntelligenceRecord): PackageIntelligenceArchiveEligibility {

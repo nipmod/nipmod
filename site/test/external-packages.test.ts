@@ -242,6 +242,41 @@ describe("external package resolver", () => {
     );
   });
 
+  test("blocks Hugging Face models that require trust_remote_code", async () => {
+    const record = await inspectExternalPackage("huggingface-model", "example/remote-code-model", {
+      fetchImpl: async () =>
+        jsonResponse({
+          config: { trust_remote_code: true },
+          downloads: 2000,
+          id: "example/remote-code-model",
+          likes: 12,
+          modelId: "example/remote-code-model",
+          private: false,
+          sha: "abc123",
+          siblings: [{ rfilename: "config.json" }, { rfilename: "model.safetensors" }],
+          tags: ["license:apache-2.0"]
+        })
+    });
+    const plan = createExternalInstallPlan(record);
+
+    expect(record.trust.decision).toBe("avoid");
+    expect(record.trust.risk).toBe("high");
+    expect(record.trust.warnings).toContain("Hugging Face model metadata indicates trust_remote_code is required or enabled.");
+    expect(record.trust.signals).toContain("Hugging Face trust_remote_code metadata requires manual review before local model loading.");
+    expect(record.trust.factors).toContainEqual(
+      expect.objectContaining({
+        category: "security",
+        impact: "negative",
+        label: "Warning"
+      })
+    );
+    expect(plan.safety).toMatchObject({
+      blocked: true,
+      blockReason: "Source trust signals require manual security review before installation."
+    });
+    expect(plan.plan.commandDetails.every((command) => command.hostedApiExecutes === false)).toBe(true);
+  });
+
   test("blocks npm packages with suspicious install-time lifecycle scripts", async () => {
     const fetchImpl = async (input: string | URL | Request) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;

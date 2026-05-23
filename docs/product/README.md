@@ -4,14 +4,16 @@ This folder documents Nipmod's public product direction.
 
 The direction is:
 
-> Nipmod is the package intelligence API for agents.
+> Nipmod is the package layer for AI agents.
+
+Agents use Nipmod to search packages, inspect trust, and get safe install plans before touching a workspace.
 
 Nipmod should help agents find, evaluate and plan package usage across the existing software ecosystem. It should not present itself as a Gitlawb add-on, a generic package mirror, an agent IDE integration collection or a token-first story.
 
 ## Product Principles
 
 1. API first.
-   The public product is one package intelligence API for agents. CLI and MCP are support surfaces.
+   The public product is one package intelligence layer for agents. CLI and MCP are support surfaces.
 
 2. Multi-source by default.
    npm, PyPI, GitHub, Hugging Face, MCP and future sources remain source owners. Nipmod normalizes, ranks, explains and records package intelligence.
@@ -52,5 +54,6 @@ If a decision fails two or more checks, it needs a stronger argument before ship
 
 - [Product decisions](decisions.md)
 - [Market context](market-context.md)
+- [Positioning](positioning.md)
 - [Roadmap](roadmap.md)
 - [Research notes](research-notes.md)

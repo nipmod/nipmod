@@ -1305,6 +1305,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const hasConfig = siblingNames.some((name) => /(^|\/)(config|tokenizer_config|dataset_info)\.json$/i.test(name));
   const hasSafetensors = source === "huggingface-model" && siblingNames.some((name) => /\.safetensors$/i.test(name));
   const hasPickleWeights = source === "huggingface-model" && siblingNames.some((name) => /\.(bin|pkl|pickle)$/i.test(name));
+  const requiresTrustRemoteCode = source === "huggingface-model" && huggingFaceTrustRemoteCode(item, tags);
   const sha = readString(item.sha);
   const libraryName = readString(item.library_name);
   const pipelineTag = readString(item.pipeline_tag);
@@ -1319,13 +1320,15 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       (hasConfig ? 2 : 0) +
       (gated ? 12 : 0) -
       (isPrivate ? 30 : 0) -
-      (hasPickleWeights && !hasSafetensors ? 10 : 0)
+      (hasPickleWeights && !hasSafetensors ? 10 : 0) -
+      (requiresTrustRemoteCode ? 34 : 0)
   );
   const kind = source === "huggingface-model" ? "model" : "dataset";
   const warnings = [
     ...(license ? [] : ["No license tag returned by Hugging Face."]),
     ...(gated ? [`Hugging Face marks this ${kind} as gated.`] : []),
     ...(isPrivate ? [`Hugging Face marks this ${kind} as private.`] : []),
+    ...(requiresTrustRemoteCode ? ["Hugging Face model metadata indicates trust_remote_code is required or enabled."] : []),
     ...(hasPickleWeights && !hasSafetensors
       ? ["Hugging Face model exposes pickle or binary weight files without safetensors metadata in the source response."]
       : [])
@@ -1371,6 +1374,11 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
           ? "Hugging Face safetensors weight file is present."
           : "Hugging Face safetensors weight file was not returned."
         : "Hugging Face dataset files are treated as source metadata, not executable instructions.",
+      requiresTrustRemoteCode
+        ? "Hugging Face trust_remote_code metadata requires manual review before local model loading."
+        : source === "huggingface-model"
+          ? "Hugging Face trust_remote_code metadata was not enabled in the source response."
+          : "Hugging Face dataset metadata is not treated as executable code.",
       sha ? "Hugging Face commit digest metadata is present." : "Hugging Face commit digest metadata is missing.",
       gated ? `Hugging Face gated access flag is enabled for this ${kind}.` : `Hugging Face gated access flag is not enabled for this ${kind}.`
     ],
@@ -1703,6 +1711,8 @@ function hasHighSeverityWarning(warning: string): boolean {
     normalized.includes("insecure") ||
     normalized.includes("malicious") ||
     normalized.includes("remote download") ||
+    normalized.includes("trust_remote_code") ||
+    normalized.includes("remote code") ||
     normalized.includes("hidden background") ||
     normalized.includes("shell patterns")
   );
@@ -2872,6 +2882,20 @@ function readBoolean(value: unknown): boolean {
 
 function readHubBoolean(value: unknown): boolean {
   return value === true || (typeof value === "string" && value !== "false" && value !== "none" && value !== "null");
+}
+
+function huggingFaceTrustRemoteCode(item: UnknownRecord, tags: string[]): boolean {
+  const config = readRecord(item.config);
+  const cardData = readRecord(item.cardData);
+  const inference = readRecord(item.inference);
+  return (
+    readHubBoolean(config?.trust_remote_code) ||
+    readHubBoolean(config?.trustRemoteCode) ||
+    readHubBoolean(cardData?.trust_remote_code) ||
+    readHubBoolean(cardData?.trustRemoteCode) ||
+    readHubBoolean(inference?.trust_remote_code) ||
+    tags.some((tag) => tag.toLowerCase().replace(/[-\s]/g, "_") === "trust_remote_code")
+  );
 }
 
 function arrayLength(value: unknown): number {
