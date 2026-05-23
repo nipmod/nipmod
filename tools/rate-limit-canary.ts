@@ -18,6 +18,17 @@ export async function runRateLimitCanary({
 } = {}) {
   const startedAt = Date.now();
   const checks = [];
+
+  const health = await fetchSourceHealth({ baseUrl, fetchFn, requestId });
+  checks.push({
+    data: health.data,
+    name: "live_rate_limit_store",
+    status:
+      health.ok && (!requireActive || (health.data.activeStore === "supabase" && health.data.distributedActive === true))
+        ? "pass"
+        : "fail"
+  });
+
   const missing = REQUIRED_ENV.filter((key) => !env[key]);
 
   if (missing.length > 0) {
@@ -29,18 +40,20 @@ export async function runRateLimitCanary({
     return result({ checks, startedAt });
   }
 
-  const rpc = await callRateLimitRpc({ env, fetchFn, now, requestId });
+  const rpc = await callRateLimitRpc({ env, fetchFn, now, requestId }).catch((error) => ({
+    data: {
+      code: null,
+      error: safeError(error),
+      exposedToDataApi: false,
+      responseShape: [],
+      status: null
+    },
+    ok: false
+  }));
   checks.push({
     data: rpc.data,
     name: "rate_limit_rpc",
     status: rpc.ok ? "pass" : "fail"
-  });
-
-  const health = await fetchSourceHealth({ baseUrl, fetchFn, requestId });
-  checks.push({
-    data: health.data,
-    name: "live_rate_limit_store",
-    status: health.ok && (!requireActive || health.data.activeStore === "supabase") ? "pass" : "fail"
   });
 
   return result({ checks, startedAt });
@@ -104,24 +117,38 @@ async function callRateLimitRpc({ env, fetchFn, now, requestId }) {
 
 async function fetchSourceHealth({ baseUrl, fetchFn, requestId }) {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
-  const response = await fetchFn(`${normalizedBaseUrl}/api/sources/health`, {
-    headers: {
-      "user-agent": "nipmod-rate-limit-canary/1.2.5 (+https://nipmod.com)",
-      "x-request-id": requestId
-    }
-  });
-  const text = await response.text();
-  const parsed = parseJson(text);
-  return {
-    data: {
-      activeStore: parsed?.rateLimit?.activeStore ?? null,
-      configured: parsed?.rateLimit?.configured ?? null,
-      distributedActive: parsed?.rateLimit?.distributedActive ?? null,
-      missing: parsed?.rateLimit?.missing ?? null,
-      status: response.status
-    },
-    ok: response.ok && parsed?.type === "dev.nipmod.source-health.v1"
-  };
+  try {
+    const response = await fetchFn(`${normalizedBaseUrl}/api/sources/health`, {
+      headers: {
+        "user-agent": "nipmod-rate-limit-canary/1.2.5 (+https://nipmod.com)",
+        "x-request-id": requestId
+      }
+    });
+    const text = await response.text();
+    const parsed = parseJson(text);
+    return {
+      data: {
+        activeStore: parsed?.rateLimit?.activeStore ?? null,
+        configured: parsed?.rateLimit?.configured ?? null,
+        distributedActive: parsed?.rateLimit?.distributedActive ?? null,
+        missing: parsed?.rateLimit?.missing ?? null,
+        status: response.status
+      },
+      ok: response.ok && parsed?.type === "dev.nipmod.source-health.v1"
+    };
+  } catch (error) {
+    return {
+      data: {
+        activeStore: null,
+        configured: null,
+        distributedActive: null,
+        error: safeError(error),
+        missing: null,
+        status: null
+      },
+      ok: false
+    };
+  }
 }
 
 function result({ checks, startedAt }) {
@@ -158,6 +185,10 @@ function errorCode(value) {
     return null;
   }
   return typeof value.code === "string" ? value.code : null;
+}
+
+function safeError(error) {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function isRateLimitRow(value) {

@@ -2,23 +2,68 @@ import { describe, expect, test, vi } from "vitest";
 import { parseEnvFile, runRateLimitCanary } from "./rate-limit-canary.ts";
 
 describe("rate limit canary", () => {
-  test("skips when Supabase config is missing unless required", async () => {
-    const result = await runRateLimitCanary({ env: {}, fetchFn: vi.fn() as unknown as typeof fetch });
+  test("uses live health even when local Supabase config is missing", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({
+        rateLimit: {
+          activeStore: "memory-fallback",
+          configured: true,
+          distributedActive: false,
+          missing: []
+        },
+        type: "dev.nipmod.source-health.v1"
+      })
+    ) as unknown as typeof fetch;
+    const result = await runRateLimitCanary({ env: {}, fetchFn });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 0, skip: 1, total: 1 });
-    expect(result.checks[0].name).toBe("rate_limit_store_config");
+    expect(result.summary).toEqual({ fail: 0, pass: 1, skip: 1, total: 2 });
+    expect(result.checks.map((check) => check.name)).toEqual(["live_rate_limit_store", "rate_limit_store_config"]);
   });
 
   test("fails missing config when required", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({
+        rateLimit: {
+          activeStore: "memory-fallback",
+          configured: true,
+          distributedActive: false,
+          missing: []
+        },
+        type: "dev.nipmod.source-health.v1"
+      })
+    ) as unknown as typeof fetch;
     const result = await runRateLimitCanary({
       env: {},
-      fetchFn: vi.fn() as unknown as typeof fetch,
+      fetchFn,
       requireConfigured: true
     });
 
     expect(result.ok).toBe(false);
-    expect(result.checks[0].status).toBe("fail");
+    expect(result.checks[1]).toMatchObject({ name: "rate_limit_store_config", status: "fail" });
+  });
+
+  test("fails live fallback when distributed store is required", async () => {
+    const fetchFn = vi.fn(async () =>
+      Response.json({
+        rateLimit: {
+          activeStore: "memory-fallback",
+          configured: true,
+          distributedActive: false,
+          missing: []
+        },
+        type: "dev.nipmod.source-health.v1"
+      })
+    ) as unknown as typeof fetch;
+    const result = await runRateLimitCanary({
+      env: {},
+      fetchFn,
+      requireActive: true
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.checks[0]).toMatchObject({ name: "live_rate_limit_store", status: "fail" });
+    expect(result.checks[1]).toMatchObject({ name: "rate_limit_store_config", status: "skip" });
   });
 
   test("passes direct RPC and live active store checks", async () => {
@@ -49,6 +94,7 @@ describe("rate limit canary", () => {
     expect(result.ok).toBe(true);
     expect(result.summary).toEqual({ fail: 0, pass: 2, skip: 0, total: 2 });
     expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(result.checks.map((check) => check.name)).toEqual(["live_rate_limit_store", "rate_limit_rpc"]);
   });
 
   test("detects RPC exposure failures without printing secrets", async () => {
@@ -76,7 +122,7 @@ describe("rate limit canary", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.checks[0]).toMatchObject({
+    expect(result.checks[1]).toMatchObject({
       data: {
         code: "PGRST202",
         exposedToDataApi: false,

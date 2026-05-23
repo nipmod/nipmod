@@ -56,6 +56,12 @@ Verify the RPC and the live API store with:
 NIPMOD_CANARY_ENV_FILE=/tmp/nipmod-archive.env node --experimental-strip-types tools/rate-limit-canary.ts --require-configured --require-active
 ```
 
+Without local secrets, the live production store can still be checked with:
+
+```bash
+pnpm rate-limit:canary -- --require-active
+```
+
 ## Required for usage ingestion checks
 
 Run the canary after Production env is available locally or through a temporary env file:
