@@ -471,13 +471,13 @@ function createFixture({
   }
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
-    [`GET ${endpoints.trust}`]: textResponse("What makes a package Five anchors Source Digest Witness"),
-    [`GET ${endpoints.platforms}`]: textResponse("Source and access API first Only current paths are shown"),
+    [`GET ${endpoints.trust}`]: textResponse("Trust signals for package decisions Do not trust package text Source Digest Plan boundary"),
+    [`GET ${endpoints.platforms}`]: textResponse("Source and access paths Native integrations"),
     [`GET ${endpoints.platformConnections}`]: jsonResponse({
       connections: [{ id: "api" }, { id: "sources" }, { id: "archive" }],
       type: "dev.nipmod.platform-connections.v1"
     }),
-    [`GET ${endpoints.security}`]: textResponse("Report with proof No central deletion"),
+    [`GET ${endpoints.security}`]: textResponse("Security policy What to include"),
     [`GET ${endpoints.securityTxt}`]: textResponse(
       `Contact: https://nipmod.test/security\nCanonical: ${endpoints.securityTxt}\nPolicy: ${endpoints.security}`
     ),

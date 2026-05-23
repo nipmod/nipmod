@@ -83,12 +83,12 @@ function responseFor(url) {
     return Response.json({ status: "ok" });
   }
   if (url.endsWith("/trust")) {
-    return new Response("<main>What makes a package Five anchors Source</main>", {
+    return new Response("<main>Trust signals for package decisions Do not trust package text Source</main>", {
       headers: { "content-type": "text/html" }
     });
   }
   if (url.endsWith("/security")) {
-    return new Response("<main>Report with proof</main>", {
+    return new Response("<main>Security policy What to include</main>", {
       headers: { "content-type": "text/html" }
     });
   }

@@ -164,8 +164,8 @@ async function checkLiveEndpoints() {
     ["sources_page", "https://nipmod.com/sources", ["npm", "PyPI", "Hugging Face"]],
     ["llms_entrypoint", "https://nipmod.com/llms.txt", ["API first package discovery", "https://nipmod.com/api/search", "nipmod mcp serve"]],
     ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
-    ["status_page", "https://nipmod.com/status", ["Public proof dashboard", "System readiness"]],
-    ["platform_page", "https://nipmod.com/platforms", ["Source and access", "API first", "Total paths"]],
+    ["status_page", "https://nipmod.com/status", ["Public status", "Machine readable proof"]],
+    ["platform_page", "https://nipmod.com/platforms", ["Source and access paths", "Native integrations"]],
     [
       "discovery_manifest",
       "https://nipmod.com/.well-known/nipmod.json",

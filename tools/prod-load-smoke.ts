@@ -44,11 +44,11 @@ export async function runLoadSmoke({
       throw new Error("crawler did not discover trust page");
     }
     const trust = await fetchText(targets.trust, timedFetch);
-    for (const marker of ["What makes a package", "Five anchors", "Source"]) {
+    for (const marker of ["Trust signals for package decisions", "Do not trust package text", "Source"]) {
       assertIncludes(trust, marker, `trust page missing ${marker}`);
     }
     const security = await fetchText(targets.security, timedFetch);
-    assertIncludes(security, "Report with proof", "security page missing report marker");
+    assertIncludes(security, "Security policy", "security page missing report marker");
     return { discoveredLinks: links.length };
   });
 
@@ -105,7 +105,7 @@ export async function runLoadSmoke({
           throw new Error(`trust page returned ${response.status}`);
         }
         const text = await response.text();
-        assertIncludes(text, "What makes a package", "trust page missing package verification marker");
+        assertIncludes(text, "Trust signals for package decisions", "trust page missing package verification marker");
       },
       url: targets.trust
     });
