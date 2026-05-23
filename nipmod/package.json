@@ -1,6 +1,6 @@
 {
   "name": "nipmod",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "One package API for agents. Search sources, inspect trust and get safe install plans before workspace writes.",
   "private": true,
   "packageManager": "pnpm@10.30.0",

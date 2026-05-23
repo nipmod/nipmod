@@ -268,7 +268,7 @@ const MAX_LIMIT = 50;
 const MAX_QUERY_LENGTH = 200;
 const MAX_NAME_LENGTH = 220;
 const MAX_SOURCE_RESPONSE_BYTES = 2_000_000;
-const SOURCE_USER_AGENT = "nipmod-package-api/1.2.7 (+https://nipmod.com)";
+const SOURCE_USER_AGENT = "nipmod-package-api/1.2.8 (+https://nipmod.com)";
 const FETCH_CACHE_TTL_MS = 30_000;
 const FETCH_CACHE_MAX_ITEMS = 500;
 const SOURCE_CIRCUIT_FAILURE_THRESHOLD = 3;
@@ -295,6 +295,17 @@ const EXTERNAL_TRUST_POLICY: ExternalTrustPolicy = {
 const MCP_REGISTRY_BASE_URL = "https://registry.modelcontextprotocol.io";
 const MCP_REGISTRY_LIVE_PATHS = ["v0", "v0.1"] as const;
 const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
+const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
+  { names: ["requests", "httpx", "aiohttp"], pattern: /\b(http|https|request|requests|client|api)\b/i },
+  { names: ["fastapi", "flask", "django"], pattern: /\b(web|server|api|framework|backend)\b/i },
+  { names: ["python-telegram-bot", "aiogram"], pattern: /\b(telegram|bot)\b/i },
+  { names: ["pandas", "numpy", "polars"], pattern: /\b(data|csv|table|analysis|analytics|frame)\b/i },
+  { names: ["pytest", "ruff", "mypy"], pattern: /\b(test|testing|lint|typecheck|quality)\b/i },
+  { names: ["typer", "click", "rich"], pattern: /\b(cli|terminal|command|console)\b/i },
+  { names: ["beautifulsoup4", "playwright", "selenium"], pattern: /\b(scrape|crawler|browser|automation|parse html|web crawl)\b/i },
+  { names: ["sqlalchemy", "psycopg", "asyncpg"], pattern: /\b(database|postgres|postgresql|sql|orm)\b/i },
+  { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i }
+];
 const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
   {
     _meta: {
@@ -899,9 +910,16 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
 }
 
 async function searchPyPi(query: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
-  const names = [...new Set([query, query.replace(/\s+/g, "-"), query.replace(/\s+/g, "_")].map(normalizeName).filter(Boolean))];
+  const names = pyPiCandidateNames(query);
   const settled = await Promise.allSettled(names.map((name) => inspectPyPi(name, fetchImpl, timeoutMs)));
   return settled.flatMap((result) => (result.status === "fulfilled" && result.value ? [result.value] : []));
+}
+
+function pyPiCandidateNames(query: string): string[] {
+  const normalized = normalizeName(query);
+  const baseNames = [normalized, normalized.replace(/\s+/g, "-"), normalized.replace(/\s+/g, "_")];
+  const hintNames = PYPI_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
+  return [...new Set([...baseNames, ...hintNames].map(normalizeName).filter(Boolean))].slice(0, 10);
 }
 
 async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -917,11 +935,15 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     normalizeRepositoryUrl(readString(projectUrls?.Source) ?? readString(projectUrls?.Homepage) ?? readString(info.home_page)) ?? null;
   const license = readString(info.license) || licenseFromClassifiers(info.classifiers);
   const releaseFiles = latestPyPiReleaseFiles(payload, readString(info.version));
+  const simpleFiles = await fetchPyPiSimpleLatestFiles(projectName, releaseFiles, fetchImpl, timeoutMs);
   const fileHashCount = releaseFiles.filter(pyPiFileHasHash).length;
   const fileSignatureCount = releaseFiles.filter((file) => readBoolean(file.has_sig)).length;
   const yankedCount = releaseFiles.filter((file) => readBoolean(file.yanked)).length;
   const fileTypes = [...new Set(releaseFiles.map(pyPiFileType).filter(Boolean))];
   const totalFileSize = releaseFiles.reduce((sum, file) => sum + (readNumber(file.size) ?? 0), 0);
+  const provenanceCount = simpleFiles.filter((file) => readString(file.provenance)).length;
+  const coreMetadataCount = simpleFiles.filter((file) => Boolean(file["core-metadata"])).length;
+  const distInfoMetadataCount = simpleFiles.filter((file) => Boolean(file["data-dist-info-metadata"])).length;
   const requiresPython = readString(info.requires_python);
   const classifierCount = arrayLength(info.classifiers);
   const warnings = [
@@ -936,6 +958,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       (repo ? 12 : 0) +
       (fileHashCount ? 8 : 0) +
       (fileSignatureCount ? 4 : 0) +
+      (provenanceCount ? 8 : 0) +
+      (coreMetadataCount || distInfoMetadataCount ? 3 : 0) +
       (fileTypes.includes("bdist_wheel") ? 4 : 0) +
       (requiresPython ? 4 : 0) -
       vulnerabilities.length * 24 -
@@ -967,6 +991,15 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       releaseFiles.length ? `PyPI latest release files returned: ${releaseFiles.length}.` : "PyPI latest release files were not returned.",
       fileHashCount ? `PyPI latest release files with digest metadata: ${fileHashCount}.` : "PyPI did not return latest release file digests.",
       fileSignatureCount ? `PyPI latest release files with signature metadata: ${fileSignatureCount}.` : "PyPI latest release file signature metadata was not returned.",
+      provenanceCount
+        ? `PyPI simple API provenance links returned for ${provenanceCount} latest release file(s).`
+        : "PyPI simple API did not return provenance links for latest release files.",
+      coreMetadataCount
+        ? `PyPI simple API core metadata hashes returned for ${coreMetadataCount} latest release file(s).`
+        : "PyPI simple API core metadata hashes were not returned for latest release files.",
+      distInfoMetadataCount
+        ? `PyPI simple API dist-info metadata hashes returned for ${distInfoMetadataCount} latest release file(s).`
+        : "PyPI simple API dist-info metadata hashes were not returned for latest release files.",
       fileTypes.length ? `PyPI latest release file types: ${fileTypes.join(", ")}.` : "PyPI latest release file types were not returned.",
       totalFileSize ? `PyPI latest release total file size bytes: ${totalFileSize}.` : "PyPI latest release file size metadata was not returned.",
       yankedCount === 0 ? "PyPI latest release files are not marked yanked." : "PyPI latest release files include yanked files.",
@@ -978,6 +1011,34 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     version: readString(info.version),
     warnings
   });
+}
+
+async function fetchPyPiSimpleLatestFiles(
+  projectName: string,
+  latestReleaseFiles: UnknownRecord[],
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<UnknownRecord[]> {
+  if (latestReleaseFiles.length === 0) {
+    return [];
+  }
+  try {
+    const payload = await fetchJson(
+      `https://pypi.org/simple/${encodeURIComponent(projectName)}/`,
+      fetchImpl,
+      Math.min(timeoutMs, 2500),
+      { circuitBreaker: false, source: "pypi" }
+    );
+    if (!isRecord(payload) || !Array.isArray(payload.files)) {
+      return [];
+    }
+    const latestFilenames = new Set(
+      latestReleaseFiles.map((file) => readString(file.filename)).filter((filename): filename is string => Boolean(filename))
+    );
+    return payload.files.filter((file): file is UnknownRecord => isRecord(file) && latestFilenames.has(readString(file.filename) ?? ""));
+  } catch {
+    return [];
+  }
 }
 
 async function searchGitHub(query: string, limit: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
@@ -1558,7 +1619,10 @@ function popularitySignal(metrics: ExternalPackageRecord["metrics"]): ExternalPo
 }
 
 function provenanceStatus(signals: string[], repo: string | null): ExternalProvenanceStatus {
-  const text = signals.join(" ").toLowerCase();
+  const text = signals
+    .filter((signal) => !/\b(missing|not returned|did not return|unavailable|failed)\b/i.test(signal))
+    .join(" ")
+    .toLowerCase();
   if (/\battestation\b|\bprovenance\b/.test(text)) {
     return "attested";
   }
@@ -2109,6 +2173,14 @@ export function externalSourceRequestHeaders(url: string, env: Record<string, st
     accept: "application/json",
     "user-agent": SOURCE_USER_AGENT
   };
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "pypi.org" && parsed.pathname.startsWith("/simple/")) {
+      headers.accept = "application/vnd.pypi.simple.v1+json";
+    }
+  } catch {
+    // Keep the default JSON accept header for invalid URLs; fetch will fail later with a structured source error.
+  }
   const auth = sourceAuthHeader(url, env);
   if (auth) {
     headers.authorization = auth;

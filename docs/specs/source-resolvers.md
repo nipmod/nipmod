@@ -91,7 +91,7 @@ Resolvers should expose source-native context as `trust.signals` and risk as `tr
 Current depth signals include:
 
 - npm deprecation, maintainer count, dependency count, Node engine, funding metadata, tarball host, file count, unpacked size, integrity and signature metadata
-- PyPI latest release files, file types, file size, yanked status, digest metadata, signature metadata, `requires-python`, classifiers and vulnerability records
+- PyPI latest release files, file types, file size, yanked status, digest metadata, signature metadata, Simple API provenance links, core metadata hashes, `requires-python`, classifiers and vulnerability records
 - GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count, package manifest hints, security files and lockfiles for exact repo inspect
 - Hugging Face gated/private flags, pipeline tag, library, repository file count, README/model card, config metadata, safetensors metadata for models and commit digest metadata
 - MCP remote endpoint count, environment requirements, package metadata, registry status and source repository
@@ -103,7 +103,7 @@ These signals are review context. They improve package comparison and install-pl
 | Resolver | Status | Main Limit |
 | --- | --- | --- |
 | npm | Live | Search quality depends on npm search API ranking. |
-| PyPI | Live | Search uses exact and normalized name candidates. |
+| PyPI | Live | Search uses exact names, normalized name candidates and validated task hints because PyPI does not expose a stable broad search API. |
 | GitHub | Live | Search is repository-level; exact repo inspect can detect common package manifest files. |
 | Hugging Face models | Live | Gated/private repos require the user access outside Nipmod. |
 | Hugging Face datasets | Live | Gated/private datasets require the user access outside Nipmod. |

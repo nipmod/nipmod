@@ -127,7 +127,7 @@ Scores are clamped to `0-100`.
 | --- | --- |
 | npm inspect | `52 + license 8 + repo 8 + tarball integrity 10 + registry signature 8 + monthly download bonus up to 12` |
 | npm search | `45 + npm popularity 18 + npm quality 18 + npm maintenance 18 + license 6 + repo 6` |
-| PyPI inspect | `58 + license 10 + repo 12 - 24 per reported vulnerability` |
+| PyPI inspect | `58 + license 10 + repo 12 + file digest 8 + provenance 8 + metadata hash 3 - 24 per reported vulnerability` |
 | GitHub search or inspect | `42 + star bonus up to 24 + license 10 + recency bonus` |
 | Hugging Face model or dataset | `46 + download bonus up to 22 + like bonus up to 12 + license tag 8` |
 | MCP Registry | `52 + source repo 12 + remote endpoint 8 + license 8 + active status 8` |
@@ -137,7 +137,7 @@ Current source-depth additions:
 | Source | Extra Signals |
 | --- | --- |
 | npm | Tarball host, file count, unpacked size, lifecycle scripts, dependencies, maintainers, funding and Node engine. |
-| PyPI | Release file types, file digests, signature metadata, yanked file status, total file size, vulnerabilities and Python version bounds. |
+| PyPI | Release file types, file digests, signature metadata, Simple API provenance links, core metadata hashes, yanked file status, total file size, vulnerabilities and Python version bounds. |
 | GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, security files and lockfiles. |
 | Hugging Face | Repository files, README/model card, config metadata, safetensors presence for models, commit digest and gated access. |
 

@@ -80,12 +80,14 @@ async function sourceResponse(url: string): Promise<Response> {
   }
   if (url.includes("source=pypi")) {
     return inspectResponse({
-      dimensions: { popularitySignal: "none", provenanceStatus: "integrity", qualityScore: 85, securityConfidence: "medium" },
+      dimensions: { popularitySignal: "none", provenanceStatus: "attested", qualityScore: 85, securityConfidence: "medium" },
       id: "pypi:requests",
       signals: [
         "PyPI returned no vulnerabilities for the latest release.",
         "PyPI latest release files returned: 2.",
         "PyPI latest release files with digest metadata: 2.",
+        "PyPI simple API provenance links returned for 2 latest release file(s).",
+        "PyPI simple API core metadata hashes returned for 1 latest release file(s).",
         "PyPI latest release file types: bdist_wheel, sdist.",
         "PyPI latest release files are not marked yanked.",
         "PyPI requires-python: >=3.10."
