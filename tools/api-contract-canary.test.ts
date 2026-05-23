@@ -7,6 +7,15 @@ describe("api contract canary", () => {
       const url = String(input);
       const requestId = new Headers(init?.headers).get("x-request-id") ?? "missing-request-id";
       const headers = contractHeaders(requestId);
+      if (url.endsWith("/api/openapi")) {
+        return Response.json(openApiFixture(), {
+          headers: {
+            ...Object.fromEntries(headers.entries()),
+            "content-type": "application/openapi+json; charset=utf-8"
+          },
+          status: 200
+        });
+      }
       if (url.includes("/api/search?") && new Headers(init?.headers).get("x-nipmod-api-key") === "short-key") {
         return Response.json(apiError(401, "invalid_api_key", "api key is too short"), { headers, status: 401 });
       }
@@ -25,14 +34,27 @@ describe("api contract canary", () => {
     const result = await runApiContractCanary({ baseUrl: "https://nipmod.test", fetchFn });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toEqual({ fail: 0, pass: 5, total: 5 });
-    expect(fetchFn).toHaveBeenCalledTimes(5);
+    expect(result.summary).toEqual({ fail: 0, pass: 6, total: 6 });
+    expect(result.checks[0]).toMatchObject({
+      data: {
+        openapi: "3.1.0",
+        operationCount: 12,
+        pathCount: 10,
+        title: "Nipmod API"
+      },
+      name: "openapi_contract",
+      status: "pass"
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(6);
   });
 
   test("fails when validation errors omit rate-limit headers", async () => {
     const fetchFn = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const requestId = new Headers(init?.headers).get("x-request-id") ?? "missing-request-id";
       const headers = contractHeaders(requestId);
+      if (String(input).endsWith("/api/openapi")) {
+        return Response.json(openApiFixture(), { headers, status: 200 });
+      }
       if (String(input).includes("/api/search?q=&")) {
         headers.delete("x-ratelimit-store");
         return Response.json(apiError(400, "invalid_query", "query must not be empty"), { headers, status: 400 });
@@ -56,11 +78,14 @@ describe("api contract canary", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.checks[0].error).toContain("missing rate-limit header x-ratelimit-store");
+    expect(result.checks[1].error).toContain("missing rate-limit header x-ratelimit-store");
   });
 
   test("fails malformed API error payloads", async () => {
     const fetchFn = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      if (String(_input).endsWith("/api/openapi")) {
+        return Response.json(openApiFixture(), { headers: contractHeaders("openapi-request"), status: 200 });
+      }
       const requestId = new Headers(init?.headers).get("x-request-id") ?? "missing-request-id";
       return Response.json({ code: "invalid_query", error: "query must not be empty", status: 400 }, {
         headers: contractHeaders(requestId),
@@ -84,7 +109,22 @@ describe("api contract canary", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.checks[0].error).toContain("API error type mismatch");
+    expect(result.checks[1].error).toContain("API error type mismatch");
+  });
+
+  test("fails OpenAPI operations without operation ids", async () => {
+    const fixture = openApiFixture();
+    delete fixture.paths["/api/search"].get.operationId;
+    const fetchFn = vi.fn(async () => Response.json(fixture, { headers: contractHeaders("openapi-request"), status: 200 })) as unknown as typeof fetch;
+
+    const result = await runApiContractCanary({ checks: [], fetchFn });
+
+    expect(result.ok).toBe(false);
+    expect(result.checks[0]).toMatchObject({
+      name: "openapi_contract",
+      status: "fail"
+    });
+    expect(result.checks[0].error).toContain("GET /api/search");
   });
 });
 
@@ -113,5 +153,61 @@ function apiError(status: number, code: string, error: string) {
     source: null,
     status,
     type: "dev.nipmod.api-error.v1"
+  };
+}
+
+function openApiFixture() {
+  return {
+    info: {
+      title: "Nipmod API",
+      version: "2026-05-22"
+    },
+    openapi: "3.1.0",
+    paths: {
+      "/api/archive/prepare": {
+        get: operation("prepareArchiveRecord"),
+        post: operation("prepareArchiveRecordFromBody")
+      },
+      "/api/archive/confirm": {
+        post: operation("confirmArchiveRecord")
+      },
+      "/api/archive/search": {
+        get: operation("searchArchiveRecords")
+      },
+      "/api/archive/status": {
+        get: operation("getArchiveStatus")
+      },
+      "/api/inspect": {
+        get: operation("inspectPackage")
+      },
+      "/api/install-plan": {
+        get: operation("createInstallPlan"),
+        post: operation("createInstallPlanFromRecord")
+      },
+      "/api/mcp": {
+        post: operation("callHostedMcp")
+      },
+      "/api/resolve": {
+        get: operation("resolvePackages")
+      },
+      "/api/search": {
+        get: operation("searchPackages")
+      },
+      "/api/sources/health": {
+        get: operation("getSourceHealth")
+      }
+    }
+  };
+}
+
+function operation(operationId: string) {
+  return {
+    operationId,
+    responses: {
+      "200": {
+        description: "OK"
+      }
+    },
+    summary: operationId
   };
 }

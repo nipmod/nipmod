@@ -16,6 +16,20 @@ const REQUIRED_API_HEADERS = [
   "x-nipmod-request-id",
   "x-nipmod-response-time-ms"
 ];
+const REQUIRED_OPENAPI_OPERATIONS = [
+  "GET /api/archive/prepare",
+  "POST /api/archive/prepare",
+  "POST /api/archive/confirm",
+  "GET /api/archive/search",
+  "GET /api/archive/status",
+  "GET /api/inspect",
+  "GET /api/install-plan",
+  "POST /api/install-plan",
+  "POST /api/mcp",
+  "GET /api/resolve",
+  "GET /api/search",
+  "GET /api/sources/health"
+] as const;
 
 const CONTRACT_CHECKS = [
   {
@@ -78,6 +92,24 @@ export async function runApiContractCanary({
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
   const results = [];
 
+  const openApiStartedAt = Date.now();
+  try {
+    const data = await runOpenApiCheck(normalizedBaseUrl, fetchFn);
+    results.push({
+      data,
+      durationMs: Date.now() - openApiStartedAt,
+      name: "openapi_contract",
+      status: "pass"
+    });
+  } catch (error) {
+    results.push({
+      durationMs: Date.now() - openApiStartedAt,
+      error: safeError(error),
+      name: "openapi_contract",
+      status: "fail"
+    });
+  }
+
   for (const check of checks) {
     const startedCheckAt = Date.now();
     try {
@@ -99,6 +131,38 @@ export async function runApiContractCanary({
   }
 
   return result({ baseUrl: normalizedBaseUrl, checks: results, startedAt });
+}
+
+async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch) {
+  const response = await fetchFn(`${baseUrl}/api/openapi`, {
+    headers: {
+      accept: "application/openapi+json, application/json",
+      "user-agent": "nipmod-api-contract-canary/1.2.5 (+https://nipmod.com)"
+    },
+    method: "GET"
+  });
+  const text = await response.text();
+  const payload = parseJson(text);
+
+  if (response.status !== 200) {
+    throw new Error(`expected OpenAPI status 200, got ${response.status}`);
+  }
+  assertJsonContentType(response.headers);
+  assertOpenApiDocument(payload);
+
+  const operations = openApiOperations(payload);
+  const missingOperationIds = operations.filter((operation) => !operation.operationId);
+  if (missingOperationIds.length > 0) {
+    throw new Error(`OpenAPI operations missing operationId: ${missingOperationIds.map((operation) => operation.id).join(", ")}`);
+  }
+
+  return {
+    operationCount: operations.length,
+    openapi: payload.openapi,
+    pathCount: Object.keys(payload.paths).length,
+    title: payload.info.title,
+    version: payload.info.version
+  };
 }
 
 async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)[number], fetchFn: typeof fetch) {
@@ -150,6 +214,66 @@ async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)
   };
 }
 
+function assertOpenApiDocument(payload: unknown): asserts payload is {
+  info: { title: string; version: string };
+  openapi: string;
+  paths: Record<string, Record<string, { operationId?: string; responses?: unknown; summary?: string }>>;
+} {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("OpenAPI payload must be an object");
+  }
+  const document = payload as Record<string, unknown>;
+  if (document.openapi !== "3.1.0") {
+    throw new Error(`OpenAPI version mismatch: ${String(document.openapi)}`);
+  }
+  if (!document.info || typeof document.info !== "object" || Array.isArray(document.info)) {
+    throw new Error("OpenAPI info must be an object");
+  }
+  const info = document.info as Record<string, unknown>;
+  if (info.title !== "Nipmod API" || typeof info.version !== "string") {
+    throw new Error("OpenAPI info title or version mismatch");
+  }
+  if (!document.paths || typeof document.paths !== "object" || Array.isArray(document.paths)) {
+    throw new Error("OpenAPI paths must be an object");
+  }
+  const paths = document.paths as Record<string, unknown>;
+  for (const operation of REQUIRED_OPENAPI_OPERATIONS) {
+    const [method, path] = operation.split(" ");
+    const methods = paths[path];
+    if (!methods || typeof methods !== "object" || Array.isArray(methods)) {
+      throw new Error(`OpenAPI missing path ${path}`);
+    }
+    const operationObject = (methods as Record<string, unknown>)[method.toLowerCase()];
+    if (!operationObject || typeof operationObject !== "object" || Array.isArray(operationObject)) {
+      throw new Error(`OpenAPI missing operation ${operation}`);
+    }
+  }
+}
+
+function openApiOperations(payload: {
+  paths: Record<string, Record<string, { operationId?: string; responses?: unknown; summary?: string }>>;
+}) {
+  const operations: Array<{ id: string; operationId?: string }> = [];
+  for (const [path, methods] of Object.entries(payload.paths)) {
+    for (const [method, operation] of Object.entries(methods)) {
+      if (!["delete", "get", "patch", "post", "put"].includes(method)) {
+        continue;
+      }
+      operations.push({
+        id: `${method.toUpperCase()} ${path}`,
+        operationId: operation.operationId
+      });
+      if (!operation.responses || typeof operation.responses !== "object") {
+        throw new Error(`OpenAPI operation ${method.toUpperCase()} ${path} must include responses`);
+      }
+      if (!operation.summary || typeof operation.summary !== "string") {
+        throw new Error(`OpenAPI operation ${method.toUpperCase()} ${path} must include summary`);
+      }
+    }
+  }
+  return operations;
+}
+
 function assertApiHeaders(headers: Headers, requestId: string) {
   for (const header of REQUIRED_API_HEADERS) {
     if (!headers.get(header)) {
@@ -185,7 +309,8 @@ function assertRateLimitHeaders(headers: Headers) {
 
 function assertJsonContentType(headers: Headers) {
   const contentType = headers.get("content-type") ?? "";
-  if (!contentType.toLowerCase().includes("application/json")) {
+  const normalized = contentType.toLowerCase();
+  if (!normalized.includes("application/json") && !normalized.includes("+json")) {
     throw new Error(`expected JSON content-type, got ${contentType || "missing"}`);
   }
 }
