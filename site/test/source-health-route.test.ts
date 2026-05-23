@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { GET, OPTIONS } from "../app/api/sources/health/route";
+import { GET, OPTIONS, resetSourceHealthProbeCacheForTests } from "../app/api/sources/health/route";
 
 describe("source health route", () => {
   afterEach(() => {
+    resetSourceHealthProbeCacheForTests();
     vi.unstubAllGlobals();
   });
 
@@ -18,6 +19,7 @@ describe("source health route", () => {
         publicBeta: true
       },
       probe: {
+        cacheTtlMs: expect.any(Number),
         mode: "capability"
       },
       summary: {
@@ -67,10 +69,34 @@ describe("source health route", () => {
 
     expect(response.status).toBe(200);
     expect(body.probe.mode).toBe("live");
+    expect(body.probe.cacheTtlMs).toBeGreaterThan(0);
     expect(body.summary.liveOk).toBe(6);
     expect(body.summary.liveFailed).toBe(0);
-    expect(body.sources.every((source: { live?: { durationMs: number; status: string } }) => source.live?.status === "ok")).toBe(true);
+    expect(body.summary.liveCached).toBe(0);
+    expect(
+      body.sources.every(
+        (source: { live?: { cached: boolean; checkedAt: string; durationMs: number; status: string } }) =>
+          source.live?.status === "ok" && source.live.cached === false && typeof source.live.checkedAt === "string"
+      )
+    ).toBe(true);
     expect(fetch).toHaveBeenCalledTimes(6);
+  });
+
+  test("caches repeated live source probes within the probe TTL", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const first = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const second = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const firstBody = await first.json();
+    const secondBody = await second.json();
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    expect(firstBody.summary.liveCached).toBe(0);
+    expect(secondBody.summary.liveCached).toBe(6);
+    expect(secondBody.sources.every((source: { live?: { cached: boolean } }) => source.live?.cached === true)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
   });
 
   test("supports CORS preflight", () => {

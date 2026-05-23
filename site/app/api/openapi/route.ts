@@ -453,12 +453,14 @@ function openApiDocument() {
         ExternalSourceLiveProbe: {
           additionalProperties: false,
           properties: {
+            cached: { type: "boolean" },
+            checkedAt: { format: "date-time", type: "string" },
             durationMs: { minimum: 0, type: "integer" },
             endpointHost: { type: "string" },
             status: { enum: ["ok", "failed"], type: "string" },
             statusCode: { nullable: true, type: "integer" }
           },
-          required: ["durationMs", "endpointHost", "status", "statusCode"],
+          required: ["cached", "checkedAt", "durationMs", "endpointHost", "status", "statusCode"],
           type: "object"
         },
         SourceHealthResponse: {
@@ -489,10 +491,11 @@ function openApiDocument() {
             probe: {
               additionalProperties: false,
               properties: {
+                cacheTtlMs: { minimum: 1, type: "integer" },
                 mode: { enum: ["capability", "live"], type: "string" },
                 timeoutMs: { minimum: 1, type: "integer" }
               },
-              required: ["mode", "timeoutMs"],
+              required: ["cacheTtlMs", "mode", "timeoutMs"],
               type: "object"
             },
             sources: { items: { $ref: "#/components/schemas/ExternalSourceCapability" }, type: "array" },
@@ -500,13 +503,22 @@ function openApiDocument() {
               additionalProperties: false,
               properties: {
                 available: { minimum: 0, type: "integer" },
+                liveCached: { nullable: true, minimum: 0, type: "integer" },
                 liveFailed: { nullable: true, minimum: 0, type: "integer" },
                 liveOk: { nullable: true, minimum: 0, type: "integer" },
                 optionalAuthConfigured: { minimum: 0, type: "integer" },
                 requested: { minimum: 0, type: "integer" },
                 workspaceWritesFromHostedApi: { const: false, type: "boolean" }
               },
-              required: ["available", "liveFailed", "liveOk", "optionalAuthConfigured", "requested", "workspaceWritesFromHostedApi"],
+              required: [
+                "available",
+                "liveCached",
+                "liveFailed",
+                "liveOk",
+                "optionalAuthConfigured",
+                "requested",
+                "workspaceWritesFromHostedApi"
+              ],
               type: "object"
             },
             type: { const: "dev.nipmod.source-health.v1", type: "string" },

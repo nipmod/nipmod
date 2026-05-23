@@ -41,6 +41,7 @@ export async function GET(request: Request): Promise<Response> {
       },
       generatedAt: new Date().toISOString(),
       probe: {
+        cacheTtlMs: SOURCE_PROBE_CACHE_TTL_MS,
         mode: shouldProbe ? "live" : "capability",
         timeoutMs: SOURCE_PROBE_TIMEOUT_MS
       },
@@ -50,6 +51,7 @@ export async function GET(request: Request): Promise<Response> {
       })),
       summary: {
         available: sources.length,
+        liveCached: live ? Object.values(live).filter((item) => item.cached).length : null,
         liveFailed: live ? Object.values(live).filter((item) => item.status === "failed").length : null,
         liveOk: live ? Object.values(live).filter((item) => item.status === "ok").length : null,
         optionalAuthConfigured: sources.filter((source) => source.authConfigured).length,
@@ -72,20 +74,68 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 const SOURCE_PROBE_TIMEOUT_MS = 1_800;
+const SOURCE_PROBE_CACHE_TTL_MS = 30_000;
 
 interface SourceLiveProbe {
+  cached: boolean;
+  checkedAt: string;
   durationMs: number;
   endpointHost: string;
   status: "ok" | "failed";
   statusCode: number | null;
 }
 
+type SourceLiveProbeMeasurement = Omit<SourceLiveProbe, "cached" | "checkedAt">;
+
+const sourceProbeCache = new Map<ExternalPackageSource, { expiresAt: number; probe: SourceLiveProbe }>();
+const sourceProbeInflight = new Map<ExternalPackageSource, Promise<SourceLiveProbe>>();
+
+export function resetSourceHealthProbeCacheForTests(): void {
+  sourceProbeCache.clear();
+  sourceProbeInflight.clear();
+}
+
 async function probeExternalSources(): Promise<Record<ExternalPackageSource, SourceLiveProbe>> {
-  const entries = await Promise.all(EXTERNAL_PACKAGE_SOURCES.map(async (source) => [source, await probeSource(source)] as const));
+  const entries = await Promise.all(EXTERNAL_PACKAGE_SOURCES.map(async (source) => [source, await probeSourceCached(source)] as const));
   return Object.fromEntries(entries) as Record<ExternalPackageSource, SourceLiveProbe>;
 }
 
-async function probeSource(source: ExternalPackageSource): Promise<SourceLiveProbe> {
+async function probeSourceCached(source: ExternalPackageSource): Promise<SourceLiveProbe> {
+  const now = Date.now();
+  const cached = sourceProbeCache.get(source);
+  if (cached && cached.expiresAt > now) {
+    return {
+      ...cached.probe,
+      cached: true
+    };
+  }
+
+  const inflight = sourceProbeInflight.get(source);
+  if (inflight) {
+    return inflight;
+  }
+
+  const promise = probeSource(source)
+    .then((measurement) => {
+      const probe = {
+        ...measurement,
+        cached: false,
+        checkedAt: new Date().toISOString()
+      };
+      sourceProbeCache.set(source, {
+        expiresAt: Date.now() + SOURCE_PROBE_CACHE_TTL_MS,
+        probe
+      });
+      return probe;
+    })
+    .finally(() => {
+      sourceProbeInflight.delete(source);
+    });
+  sourceProbeInflight.set(source, promise);
+  return promise;
+}
+
+async function probeSource(source: ExternalPackageSource): Promise<SourceLiveProbeMeasurement> {
   const endpoint = probeEndpoint(source);
   const startedAt = Date.now();
   const controller = new AbortController();

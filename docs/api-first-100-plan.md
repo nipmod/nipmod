@@ -69,6 +69,7 @@ Recent hardening:
 - `pnpm launch:verify` now provides a non-destructive API-beta launch gate over local verification and live production checks.
 - OpenAPI now publishes concrete response schemas for inspect, install-plan, archive prepare/search/status/confirm, source health and hosted MCP responses.
 - Archive confirmation writes must now pass the archive token and configured persistence checks before Nipmod resolves any external source metadata.
+- Source health live probes now use a bounded in-process cache and expose whether each source result was freshly checked or served from cache.
 
 ## Workstream 1: API Contract
 
@@ -468,7 +469,7 @@ Definition of Done:
 - [x] Contract tests for public API responses.
 - [x] Archive write auth before source resolution.
 - [x] Non-dry-run archive writes fail loudly when persistence is unavailable.
-- [ ] Source health does live cached probes.
+- [x] Source health does live cached probes.
 - [x] Install plans include structured command data.
 - [x] Launch verify command exists.
 
