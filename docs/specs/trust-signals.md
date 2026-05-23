@@ -1,6 +1,6 @@
 # Trust Signals Spec
 
-Status: implemented public beta, external trust policy `external-v2`
+Status: implemented public beta, external trust policy `external-v2`, selection policy `agent-selection-v1`
 
 Nipmod exposes trust data so agents can decide what to show before install. A trust score is not a safety guarantee and is not permission to execute code. It is a structured review signal.
 
@@ -88,6 +88,20 @@ Otherwise:
 
 Agents should treat `recommended` as "reasonable to present", not "safe to run". A package can be recommended by source metadata and still be blocked by an install plan.
 
+## Evidence Caps
+
+Nipmod caps external trust scores when important evidence is missing. Caps prevent a package from looking strong only because it is popular.
+
+| Case | Maximum Score |
+| --- | ---: |
+| Vulnerability warning, suspicious lifecycle behavior, remote shell pattern or high-risk install command | `49` |
+| Medium-risk install command | `74` |
+| Missing license and missing repository/source link | `68` |
+| Missing either license or repository/source link | `88` |
+| Unknown provenance with weak metadata | `74` |
+
+The cap is applied after source scoring. When a cap changes the score, the record includes a security signal explaining which evidence limited the result.
+
 ## Archive Eligibility Gates
 
 External search results do not automatically become durable Nipmod archive records.
@@ -117,6 +131,15 @@ Scores are clamped to `0-100`.
 | GitHub search or inspect | `42 + star bonus up to 24 + license 10 + recency bonus` |
 | Hugging Face model or dataset | `46 + download bonus up to 22 + like bonus up to 12 + license tag 8` |
 | MCP Registry | `52 + source repo 12 + remote endpoint 8 + license 8 + active status 8` |
+
+Current source-depth additions:
+
+| Source | Extra Signals |
+| --- | --- |
+| npm | Tarball host, file count, unpacked size, lifecycle scripts, dependencies, maintainers, funding and Node engine. |
+| PyPI | Release file types, file digests, signature metadata, yanked file status, total file size, vulnerabilities and Python version bounds. |
+| GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, security files and lockfiles. |
+| Hugging Face | Repository files, README/model card, config metadata, safetensors presence for models, commit digest and gated access. |
 
 GitHub recency bonus:
 
@@ -196,6 +219,34 @@ Penalty:
 Ties are resolved by downloads, then stars, then display name.
 
 ## Agent Selection Policy
+
+Search responses include a `selection` object using `policy: "agent-selection-v1"`. It is a query-specific shortlist for agents. It explains gates and ranking without executing code.
+
+Example shape:
+
+```json
+{
+  "selection": {
+    "policy": "agent-selection-v1",
+    "recommendedId": "npm:undici",
+    "candidates": [
+      {
+        "id": "npm:undici",
+        "source": "npm",
+        "gate": "pass",
+        "rank": {
+          "trustScore": 91,
+          "exactMatch": 18,
+          "metricsBonus": 8,
+          "sourceReliabilityBonus": 8,
+          "score": 125
+        },
+        "reasons": ["Exact package name match.", "High security confidence."]
+      }
+    ]
+  }
+}
+```
 
 Agents should select packages with gates before ranking. The gate prevents a popular package from winning when the safety context is weak.
 

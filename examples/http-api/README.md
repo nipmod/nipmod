@@ -15,10 +15,10 @@ node --experimental-strip-types examples/http-api/agent-flow.ts "react"
 Flow:
 
 1. Search packages.
-2. Pick a source record.
+2. Read `selection.recommendedId` and candidate gates.
 3. Inspect the exact package.
 4. Request an install plan.
 5. Prepare an archive preview after useful discovery.
-6. Show trust factors and safety warnings before approval.
+6. Show trust factors, rank reasons and safety warnings before approval.
 
 The examples print plans only. They do not install anything and they do not persist archive records.

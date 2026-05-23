@@ -18,6 +18,11 @@ console.log(
   JSON.stringify(
     {
       task,
+      selection: {
+        policy: search.selection?.policy,
+        recommendedId: search.selection?.recommendedId,
+        candidates: search.selection?.candidates?.slice(0, 3)
+      },
       selected: {
         id: inspectedRecord.id,
         name: inspectedRecord.name,
@@ -88,5 +93,10 @@ async function readJson(url: URL): Promise<Record<string, any>> {
 }
 
 function firstRecord(value: Record<string, any>): Record<string, any> | null {
-  return Array.isArray(value.records) && value.records[0] && typeof value.records[0] === "object" ? value.records[0] : null;
+  if (!Array.isArray(value.records)) {
+    return null;
+  }
+  const recommendedId = typeof value.selection?.recommendedId === "string" ? value.selection.recommendedId : null;
+  const recommended = recommendedId ? value.records.find((record) => record?.id === recommendedId) : null;
+  return recommended && typeof recommended === "object" ? recommended : value.records[0] && typeof value.records[0] === "object" ? value.records[0] : null;
 }

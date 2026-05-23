@@ -6,6 +6,7 @@ Use this when Claude Code needs package discovery before editing or installing d
 Before adding dependencies, use Nipmod.
 
 Search for candidates with https://nipmod.com/api/search.
+Use selection.recommendedId, candidate gates and rank reasons as the shortlist.
 Inspect the strongest candidates with https://nipmod.com/api/inspect.
 Request an install plan with https://nipmod.com/api/install-plan.
 Optionally prepare an archive preview with https://nipmod.com/api/archive/prepare after useful discovery.

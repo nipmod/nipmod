@@ -138,8 +138,15 @@ export async function runSyntheticMonitor({
     }
     assertEqual(openApi.components?.securitySchemes?.NipmodApiKey?.name, "x-nipmod-api-key", "OpenAPI API key scheme mismatch");
 
-    const search = await fetchJson(`${endpoints.externalSearch}?q=http%20client&sources=npm&limit=3`, timedFetch);
+    const search = await fetchJson(`${endpoints.externalSearch}?q=undici&sources=npm&limit=3`, timedFetch);
     assertEqual(search.type, "dev.nipmod.external-search.v1", "external search type mismatch");
+    assertEqual(search.selection?.policy, "agent-selection-v1", "external search selection policy mismatch");
+    if (!Array.isArray(search.selection?.candidates) || search.selection.candidates.length === 0) {
+      throw new Error("external search selection candidates missing");
+    }
+    if (typeof search.selection?.recommendedId !== "string" || !search.selection.recommendedId.startsWith("npm:")) {
+      throw new Error("external search recommended package missing");
+    }
     if (!Array.isArray(search.sourceReports) || search.sourceReports[0]?.source !== "npm") {
       throw new Error("external search source reports missing");
     }
@@ -175,6 +182,7 @@ export async function runSyntheticMonitor({
 
     return {
       openapi: endpoints.openApi,
+      recommendedId: search.selection.recommendedId,
       trustFactors: inspect.record.trust.factors.length,
       searchReports: search.sourceReports.length
     };

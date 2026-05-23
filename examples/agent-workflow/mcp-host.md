@@ -24,6 +24,8 @@ curl -s https://nipmod.com/api/mcp \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","mcp"],"limit":5}}}'
 ```
 
+The result includes the same `selection.recommendedId`, candidate gates and rank reasons as the HTTPS API.
+
 Install plan:
 
 ```bash

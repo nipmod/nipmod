@@ -68,6 +68,7 @@ Archive records should preserve:
 - source metadata snapshot
 - trust score and warnings
 - install plan
+- deterministic evidence digests for the source record, source snapshot, trust object and install plan
 - confirmation events
 - status transitions
 - timestamps
@@ -88,7 +89,22 @@ Prepare and confirm responses also return receipts of type:
 dev.nipmod.package-intelligence-receipt.v1
 ```
 
-Receipts include the record id, source, package name, trust score, trust decision, archive status, confirmation count, stored flag and a digest of the stable key. They do not include API keys, raw queries, IP addresses or user agent strings.
+Receipts include the record id, source, package name, trust score, trust decision, archive status, confirmation count, stored flag, evidence digest and a digest of the stable key. They do not include API keys, raw queries, IP addresses or user agent strings.
+
+Record evidence uses:
+
+```json
+{
+  "archivePolicy": "agent-confirmed-source-owned-v1",
+  "generatedFrom": "server-reinspected-source",
+  "installPlanDigest": "<sha256>",
+  "sourceRecordDigest": "<sha256>",
+  "sourceSnapshotDigest": "<sha256>",
+  "trustDigest": "<sha256>"
+}
+```
+
+This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores.
 
 ## Confirmation Gate
 

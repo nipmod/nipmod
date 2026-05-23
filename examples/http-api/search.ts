@@ -6,7 +6,10 @@ searchUrl.searchParams.set("q", query);
 searchUrl.searchParams.set("limit", "3");
 
 const search = await readJson(searchUrl);
-const first = search.records?.[0];
+const recommendedId = typeof search.selection?.recommendedId === "string" ? search.selection.recommendedId : null;
+const first = recommendedId
+  ? search.records?.find((record: Record<string, any>) => record.id === recommendedId) ?? search.records?.[0]
+  : search.records?.[0];
 
 if (!first) {
   console.log(JSON.stringify({ query, result: "no package records returned" }, null, 2));
@@ -34,6 +37,11 @@ console.log(
         score: record.trust?.score,
         source: record.source
       })),
+      selection: {
+        policy: search.selection?.policy,
+        recommendedId,
+        candidates: search.selection?.candidates?.slice(0, 3)
+      },
       inspected: inspect.record?.id,
       query,
       recommendation: first.trust?.decision,

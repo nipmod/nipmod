@@ -28,7 +28,7 @@ describe("api contract canary", () => {
       if (url.endsWith("/api/install-plan")) {
         return Response.json(apiError(400, "invalid_json", "invalid JSON"), { headers, status: 400 });
       }
-      return Response.json({ records: [], sourceReports: [], type: "dev.nipmod.external-search.v1" }, { headers, status: 200 });
+      return Response.json(searchFixture(), { headers, status: 200 });
     }) as unknown as typeof fetch;
 
     const result = await runApiContractCanary({ baseUrl: "https://nipmod.test", fetchFn });
@@ -59,7 +59,7 @@ describe("api contract canary", () => {
         headers.delete("x-ratelimit-store");
         return Response.json(apiError(400, "invalid_query", "query must not be empty"), { headers, status: 400 });
       }
-      return Response.json({ records: [], sourceReports: [], type: "dev.nipmod.external-search.v1" }, { headers, status: 200 });
+      return Response.json(searchFixture(), { headers, status: 200 });
     }) as unknown as typeof fetch;
 
     const result = await runApiContractCanary({
@@ -134,7 +134,7 @@ function contractHeaders(requestId: string) {
     "cache-control": "no-store",
     "content-type": "application/json",
     "server-timing": "app;dur=1",
-    "x-nipmod-api-version": "2026-05-22",
+    "x-nipmod-api-version": "2026-05-23",
     "x-nipmod-request-id": requestId,
     "x-nipmod-response-time-ms": "1",
     "x-ratelimit-limit": "120",
@@ -156,11 +156,64 @@ function apiError(status: number, code: string, error: string) {
   };
 }
 
+function searchFixture() {
+  return {
+    generatedAt: "2026-05-23T00:00:00.000Z",
+    partial: false,
+    query: "undici",
+    records: [
+      {
+        id: "npm:undici",
+        name: "undici",
+        source: "npm",
+        trust: {
+          decision: "recommended",
+          score: 91
+        },
+        type: "dev.nipmod.external-package.v1"
+      }
+    ],
+    selection: {
+      candidateCount: 1,
+      candidates: [
+        {
+          gate: "pass",
+          id: "npm:undici",
+          rank: {
+            commandPenalty: 0,
+            exactMatch: 18,
+            metadataPenalty: 0,
+            metricsBonus: 8,
+            prefixMatch: 0,
+            qualityPenalty: 0,
+            recencyBonus: 0,
+            score: 125,
+            sourceReliabilityBonus: 8,
+            textMatch: 0,
+            trustScore: 91
+          },
+          reasons: ["Selected by agent-selection-v1 ranking."],
+          source: "npm"
+        }
+      ],
+      gates: ["Remove avoid/high-risk candidates before ranking."],
+      policy: "agent-selection-v1",
+      recommendedId: "npm:undici",
+      rankSignals: ["trust score", "exact match"]
+    },
+    sourceReports: [],
+    sourceSummary: { empty: 0, failed: 0, ok: 1, requested: 1 },
+    sources: ["npm"],
+    total: 1,
+    type: "dev.nipmod.external-search.v1"
+  };
+}
+
 function openApiFixture() {
   return {
     info: {
       title: "Nipmod API",
-      version: "2026-05-22"
+      version: "2026-05-23"
     },
     openapi: "3.1.0",
     paths: {

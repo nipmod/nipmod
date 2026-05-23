@@ -36,6 +36,14 @@ export interface PackageIntelligenceRecord {
     status: PackageIntelligenceStatus;
     updatedAt: string;
   };
+  evidence: {
+    archivePolicy: "agent-confirmed-source-owned-v1";
+    generatedFrom: "server-reinspected-source";
+    installPlanDigest: string;
+    sourceRecordDigest: string;
+    sourceSnapshotDigest: string;
+    trustDigest: string;
+  };
   events: PackageIntelligenceEvent[];
   formatVersion: 1;
   id: string;
@@ -107,6 +115,7 @@ export interface PackageIntelligenceReceipt {
   receiptId: string;
   recordId: string;
   source: ExternalPackageRecord["source"];
+  evidenceDigest: string;
   stableKeyDigest: string;
   stored: boolean;
   trustDecision: ExternalPackageRecord["trust"]["decision"];
@@ -125,6 +134,16 @@ export function createPackageIntelligenceRecord(
   const installPlan = createExternalInstallPlan(sourceRecord);
   const securityWarnings = commandWarnings(installPlan.plan.commands);
   const metadataWarnings = metadataInstructionWarnings(sourceRecord);
+  const sourceSnapshot = {
+    license: sourceRecord.license,
+    metrics: sourceRecord.metrics,
+    originalUrl: sourceRecord.originalUrl,
+    owner: sourceRecord.owner,
+    registryUrl: sourceRecord.registryUrl,
+    repo: sourceRecord.repo,
+    updatedAt: sourceRecord.updatedAt,
+    version: sourceRecord.version
+  };
 
   return {
     archive: {
@@ -143,6 +162,7 @@ export function createPackageIntelligenceRecord(
         type: "external_resolved"
       }
     ],
+    evidence: packageIntelligenceEvidence(sourceRecord, sourceSnapshot, installPlan, sourceRecord.trust),
     formatVersion: 1,
     id,
     installPlan,
@@ -162,16 +182,7 @@ export function createPackageIntelligenceRecord(
     source: sourceRecord.source,
     sourceKind: sourceRecord.sourceKind,
     sourceRecord,
-    sourceSnapshot: {
-      license: sourceRecord.license,
-      metrics: sourceRecord.metrics,
-      originalUrl: sourceRecord.originalUrl,
-      owner: sourceRecord.owner,
-      registryUrl: sourceRecord.registryUrl,
-      repo: sourceRecord.repo,
-      updatedAt: sourceRecord.updatedAt,
-      version: sourceRecord.version
-    },
+    sourceSnapshot,
     stableKey,
     trust: sourceRecord.trust,
     type: "dev.nipmod.package-intelligence-record.v1",
@@ -211,6 +222,8 @@ export function mergePackageIntelligenceRecords(
   existing: PackageIntelligenceRecord,
   incoming: PackageIntelligenceRecord
 ): PackageIntelligenceRecord {
+  existing = ensurePackageIntelligenceEvidence(existing);
+  incoming = ensurePackageIntelligenceEvidence(incoming);
   const incomingConfirmations = incoming.events.filter((event) => event.type === "agent_confirmed");
   const protectedStatuses: PackageIntelligenceStatus[] = ["claimed", "verified_nipmod", "quarantined", "yanked"];
   const status = protectedStatuses.includes(existing.archive.status)
@@ -251,6 +264,9 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
   }
   if (!record.ownership.retainedByOriginalSource) {
     errors.push("external source ownership boundary is missing");
+  }
+  if (!validEvidenceDigests(record)) {
+    errors.push("archive evidence digests are invalid");
   }
   if (record.archive.status === "verified_nipmod" && record.ownership.claimRequiredForVerified) {
     errors.push("verified_nipmod requires an owner claim workflow before persistence");
@@ -314,6 +330,7 @@ export function createPackageIntelligenceReceipt(
     receiptId: `receipt_${sha256(receiptMaterial).slice(0, 24)}`,
     recordId: record.id,
     source: record.source,
+    evidenceDigest: sha256(stableJson(record.evidence)),
     stableKeyDigest: sha256(record.stableKey),
     stored: options.stored,
     trustDecision: record.trust.decision,
@@ -322,8 +339,55 @@ export function createPackageIntelligenceReceipt(
   };
 }
 
+export function ensurePackageIntelligenceEvidence(record: PackageIntelligenceRecord): PackageIntelligenceRecord {
+  const existing = (record as PackageIntelligenceRecord & { evidence?: PackageIntelligenceRecord["evidence"] }).evidence;
+  if (existing && validEvidenceDigests({ ...record, evidence: existing })) {
+    return { ...record, evidence: existing };
+  }
+  return {
+    ...record,
+    evidence: packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust)
+  };
+}
+
 export function createStableKey(record: ExternalPackageRecord): string {
   return [record.source, record.name.toLowerCase(), record.version ?? "latest", record.originalUrl].join(":");
+}
+
+function packageIntelligenceEvidence(
+  sourceRecord: ExternalPackageRecord,
+  sourceSnapshot: PackageIntelligenceRecord["sourceSnapshot"],
+  installPlan: ExternalInstallPlan,
+  trust: ExternalPackageRecord["trust"]
+): PackageIntelligenceRecord["evidence"] {
+  return {
+    archivePolicy: "agent-confirmed-source-owned-v1",
+    generatedFrom: "server-reinspected-source",
+    installPlanDigest: sha256(stableJson(installPlan)),
+    sourceRecordDigest: sha256(stableJson(sourceRecord)),
+    sourceSnapshotDigest: sha256(stableJson(sourceSnapshot)),
+    trustDigest: sha256(stableJson(trust))
+  };
+}
+
+function validEvidenceDigests(record: PackageIntelligenceRecord): boolean {
+  const expected = packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust);
+  return (
+    record.evidence?.archivePolicy === "agent-confirmed-source-owned-v1" &&
+    record.evidence.generatedFrom === "server-reinspected-source" &&
+    record.evidence.installPlanDigest === expected.installPlanDigest &&
+    record.evidence.sourceRecordDigest === expected.sourceRecordDigest &&
+    record.evidence.sourceSnapshotDigest === expected.sourceSnapshotDigest &&
+    record.evidence.trustDigest === expected.trustDigest &&
+    isSha256(record.evidence.installPlanDigest) &&
+    isSha256(record.evidence.sourceRecordDigest) &&
+    isSha256(record.evidence.sourceSnapshotDigest) &&
+    isSha256(record.evidence.trustDigest)
+  );
+}
+
+function isSha256(value: unknown): boolean {
+  return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 }
 
 function sanitizeExternalRecord(record: ExternalPackageRecord): ExternalPackageRecord {
@@ -380,6 +444,19 @@ function cleanText(value: string, maxLength: number): string {
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function stableJson(value: unknown): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map(stableJson).join(",")}]`;
+  }
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([, entryValue]) => entryValue !== undefined)
+    .sort(([left], [right]) => left.localeCompare(right));
+  return `{${entries.map(([key, entryValue]) => `${JSON.stringify(key)}:${stableJson(entryValue)}`).join(",")}}`;
 }
 
 function mergeEvents(existing: PackageIntelligenceEvent[], incomingConfirmations: PackageIntelligenceEvent[]): PackageIntelligenceEvent[] {

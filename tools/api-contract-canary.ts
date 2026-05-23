@@ -39,7 +39,7 @@ const CONTRACT_CHECKS = [
     expectedType: "dev.nipmod.external-search.v1",
     method: "GET",
     name: "search_success_contract",
-    path: "/api/search?q=http%20client&sources=npm&limit=1"
+    path: "/api/search?q=undici&sources=npm&limit=1"
   },
   {
     expectCode: "invalid_query",
@@ -137,7 +137,7 @@ async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch) {
   const response = await fetchFn(`${baseUrl}/api/openapi`, {
     headers: {
       accept: "application/openapi+json, application/json",
-      "user-agent": "nipmod-api-contract-canary/1.2.5 (+https://nipmod.com)"
+      "user-agent": "nipmod-api-contract-canary/1.2.7 (+https://nipmod.com)"
     },
     method: "GET"
   });
@@ -171,7 +171,7 @@ async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)
     body: "body" in check ? check.body : undefined,
     headers: {
       accept: "application/json",
-      "user-agent": "nipmod-api-contract-canary/1.2.5 (+https://nipmod.com)",
+      "user-agent": "nipmod-api-contract-canary/1.2.7 (+https://nipmod.com)",
       "x-request-id": requestId,
       ...("headers" in check ? check.headers : {})
     },
@@ -201,6 +201,9 @@ async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)
     if (payload?.type !== check.expectedType) {
       throw new Error(`expected response type ${check.expectedType}, got ${payload?.type ?? "unknown"}`);
     }
+    if (check.name === "search_success_contract") {
+      assertSearchSelection(payload);
+    }
   }
 
   return {
@@ -212,6 +215,36 @@ async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)
     status: response.status,
     type: payload?.type ?? null
   };
+}
+
+function assertSearchSelection(payload: unknown) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("search response must be an object");
+  }
+  const search = payload as Record<string, any>;
+  const selection = search.selection;
+  if (!selection || typeof selection !== "object" || Array.isArray(selection)) {
+    throw new Error("search response selection missing");
+  }
+  if (selection.policy !== "agent-selection-v1") {
+    throw new Error(`selection policy mismatch: ${String(selection.policy)}`);
+  }
+  if (!("recommendedId" in selection)) {
+    throw new Error("selection recommendedId missing");
+  }
+  if (!Array.isArray(selection.candidates)) {
+    throw new Error("selection candidates missing");
+  }
+  if (selection.candidates.length === 0) {
+    throw new Error("selection candidates should not be empty for success canary");
+  }
+  const first = selection.candidates[0];
+  if (!first || typeof first !== "object" || !["pass", "review", "blocked"].includes(first.gate)) {
+    throw new Error("selection candidate gate mismatch");
+  }
+  if (!first.rank || typeof first.rank !== "object" || !Number.isFinite(first.rank.score)) {
+    throw new Error("selection candidate rank missing");
+  }
 }
 
 function assertOpenApiDocument(payload: unknown): asserts payload is {

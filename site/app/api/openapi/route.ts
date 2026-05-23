@@ -255,6 +255,7 @@ function openApiDocument() {
             partial: { type: "boolean" },
             query: { type: "string" },
             records: { items: { $ref: "#/components/schemas/ExternalPackageRecord" }, type: "array" },
+            selection: { $ref: "#/components/schemas/ExternalSearchSelection" },
             sourceReports: { items: { $ref: "#/components/schemas/ExternalSourceReport" }, type: "array" },
             sourceSummary: {
               additionalProperties: false,
@@ -271,7 +272,63 @@ function openApiDocument() {
             total: { minimum: 0, type: "integer" },
             type: { const: "dev.nipmod.external-search.v1", type: "string" }
           },
-          required: ["generatedAt", "partial", "query", "records", "sourceReports", "sourceSummary", "sources", "total", "type"],
+          required: ["generatedAt", "partial", "query", "records", "selection", "sourceReports", "sourceSummary", "sources", "total", "type"],
+          type: "object"
+        },
+        ExternalSearchSelection: {
+          additionalProperties: false,
+          description: "Query-specific agent selection output. It explains ranking gates without executing or installing anything.",
+          properties: {
+            candidateCount: { minimum: 0, type: "integer" },
+            candidates: { items: { $ref: "#/components/schemas/ExternalSelectionCandidate" }, type: "array" },
+            gates: { items: { type: "string" }, type: "array" },
+            policy: { const: "agent-selection-v1", type: "string" },
+            recommendedId: { nullable: true, type: "string" },
+            rankSignals: { items: { type: "string" }, type: "array" }
+          },
+          required: ["candidateCount", "candidates", "gates", "policy", "recommendedId", "rankSignals"],
+          type: "object"
+        },
+        ExternalSelectionCandidate: {
+          additionalProperties: false,
+          properties: {
+            gate: { enum: ["pass", "review", "blocked"], type: "string" },
+            id: { type: "string" },
+            rank: { $ref: "#/components/schemas/ExternalRankBreakdown" },
+            reasons: { items: { type: "string" }, type: "array" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
+          },
+          required: ["gate", "id", "rank", "reasons", "source"],
+          type: "object"
+        },
+        ExternalRankBreakdown: {
+          additionalProperties: false,
+          properties: {
+            commandPenalty: { type: "integer" },
+            exactMatch: { type: "integer" },
+            metadataPenalty: { type: "integer" },
+            metricsBonus: { type: "integer" },
+            prefixMatch: { type: "integer" },
+            qualityPenalty: { type: "integer" },
+            recencyBonus: { type: "integer" },
+            score: { type: "integer" },
+            sourceReliabilityBonus: { type: "integer" },
+            textMatch: { type: "integer" },
+            trustScore: { maximum: 100, minimum: 0, type: "integer" }
+          },
+          required: [
+            "commandPenalty",
+            "exactMatch",
+            "metadataPenalty",
+            "metricsBonus",
+            "prefixMatch",
+            "qualityPenalty",
+            "recencyBonus",
+            "score",
+            "sourceReliabilityBonus",
+            "textMatch",
+            "trustScore"
+          ],
           type: "object"
         },
         ExternalSourceReport: {
@@ -608,6 +665,7 @@ function openApiDocument() {
           additionalProperties: false,
           properties: {
             archive: { $ref: "#/components/schemas/PackageIntelligenceArchiveState" },
+            evidence: { $ref: "#/components/schemas/PackageIntelligenceEvidence" },
             events: { items: { $ref: "#/components/schemas/PackageIntelligenceEvent" }, type: "array" },
             formatVersion: { const: 1, type: "integer" },
             id: { type: "string" },
@@ -660,6 +718,7 @@ function openApiDocument() {
           },
           required: [
             "archive",
+            "evidence",
             "events",
             "formatVersion",
             "id",
@@ -675,6 +734,27 @@ function openApiDocument() {
             "trust",
             "type",
             "version"
+          ],
+          type: "object"
+        },
+        PackageIntelligenceEvidence: {
+          additionalProperties: false,
+          description: "Deterministic digests proving the archive record was rebuilt from server-side source inspection.",
+          properties: {
+            archivePolicy: { const: "agent-confirmed-source-owned-v1", type: "string" },
+            generatedFrom: { const: "server-reinspected-source", type: "string" },
+            installPlanDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            sourceRecordDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            sourceSnapshotDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            trustDigest: { pattern: "^[a-f0-9]{64}$", type: "string" }
+          },
+          required: [
+            "archivePolicy",
+            "generatedFrom",
+            "installPlanDigest",
+            "sourceRecordDigest",
+            "sourceSnapshotDigest",
+            "trustDigest"
           ],
           type: "object"
         },
@@ -784,6 +864,7 @@ function openApiDocument() {
             receiptId: { type: "string" },
             recordId: { type: "string" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            evidenceDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
             stableKeyDigest: { type: "string" },
             stored: { type: "boolean" },
             trustDecision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
@@ -799,6 +880,7 @@ function openApiDocument() {
             "receiptId",
             "recordId",
             "source",
+            "evidenceDigest",
             "stableKeyDigest",
             "stored",
             "trustDecision",
@@ -854,7 +936,7 @@ function openApiDocument() {
     info: {
       description: "The package layer for AI agents. Search sources, inspect trust and get safe install plans before workspace writes.",
       title: "Nipmod API",
-      version: "2026-05-22"
+      version: "2026-05-23"
     },
     openapi: "3.1.0",
     paths: {

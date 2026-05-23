@@ -449,15 +449,43 @@ function createFixture({
         "/api/search": {}
       }
     }),
-    [`GET ${endpoints.externalSearch}?q=http%20client&sources=npm&limit=3`]: jsonResponse({
+    [`GET ${endpoints.externalSearch}?q=undici&sources=npm&limit=3`]: jsonResponse({
       generatedAt: "2026-05-16T12:40:00.000Z",
       partial: false,
-      query: "http client",
-      records: [],
+      query: "undici",
+      records: [{ id: "npm:undici", name: "undici", source: "npm", type: "dev.nipmod.external-package.v1" }],
+      selection: {
+        candidateCount: 1,
+        candidates: [
+          {
+            gate: "pass",
+            id: "npm:undici",
+            rank: {
+              commandPenalty: 0,
+              exactMatch: 18,
+              metadataPenalty: 0,
+              metricsBonus: 8,
+              prefixMatch: 0,
+              qualityPenalty: 0,
+              recencyBonus: 0,
+              score: 125,
+              sourceReliabilityBonus: 8,
+              textMatch: 0,
+              trustScore: 91
+            },
+            reasons: ["Selected by agent-selection-v1 ranking."],
+            source: "npm"
+          }
+        ],
+        gates: ["Remove avoid/high-risk candidates before ranking."],
+        policy: "agent-selection-v1",
+        recommendedId: "npm:undici",
+        rankSignals: ["trust score", "exact match"]
+      },
       sourceReports: [{ durationMs: 12, recordCount: 1, source: "npm", status: "ok" }],
       sourceSummary: { empty: 0, failed: 0, ok: 1, requested: 1 },
       sources: ["npm"],
-      total: 0,
+      total: 1,
       type: "dev.nipmod.external-search.v1"
     }),
     [`GET ${endpoints.externalInspect}?source=npm&name=undici`]: jsonResponse({

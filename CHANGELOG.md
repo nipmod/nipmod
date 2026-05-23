@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.7 - 2026-05-23
+
+### Added
+
+- `agent-selection-v1` search output with recommended candidate, gate state, rank breakdown and rank reasons.
+- Evidence caps that limit external trust scores when metadata, provenance or install-command evidence is weak.
+- Deeper source signals for npm, PyPI, GitHub and Hugging Face records.
+- Deterministic archive evidence digests and receipt evidence digests for package intelligence records.
+- Expanded API docs and examples for agent selection, archive previews and install-plan review.
+
+### Verified
+
+- API contract, source-depth, install-plan and production monitor canaries now check v1.2.7 selection and source-depth fields.
+- Hosted API calls remain read-only and install plans remain review data only.
+
 ## 1.2.6 - 2026-05-23
 
 ### Added
