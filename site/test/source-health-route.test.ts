@@ -28,6 +28,7 @@ describe("source health route", () => {
         configured: false,
         distributedActive: false,
         driver: "supabase-rpc",
+        fallbackReason: null,
         fallback: "memory"
       },
       summary: {
@@ -85,7 +86,29 @@ describe("source health route", () => {
       activeStore: "supabase",
       configured: true,
       distributedActive: true,
+      fallbackReason: null,
       driver: "supabase-rpc",
+      missing: []
+    });
+    expect(JSON.stringify(body)).not.toContain("service-role-key");
+  });
+
+  test("publishes a coarse distributed rate-limit fallback reason", async () => {
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ code: "missing_function" }, { status: 404 })));
+
+    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "user-agent": "source-health-fallback-test" } }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-ratelimit-store")).toBe("memory-fallback");
+    expect(response.headers.get("x-ratelimit-fallback-reason")).toBe("distributed_rpc_http_404");
+    expect(body.rateLimit).toMatchObject({
+      activeStore: "memory-fallback",
+      configured: true,
+      distributedActive: false,
+      fallbackReason: "distributed_rpc_http_404",
       missing: []
     });
     expect(JSON.stringify(body)).not.toContain("service-role-key");

@@ -82,6 +82,7 @@ Recent hardening:
 - Launch verification now runs the rate-limit canary, and `--require-distributed-rate-limit` promotes Supabase RPC activation from advisory status to a hard gate.
 - Launch verification now runs the public API contract canary for success responses, structured errors, request-id echoing, CORS and rate-limit headers.
 - Launch verification now runs an install-plan safety canary across npm, PyPI, GitHub, Hugging Face and MCP so hosted responses cannot regress into workspace writes or command execution.
+- Source health now exposes a coarse distributed rate-limit fallback reason so operators can distinguish missing RPC exposure, auth failure, timeout and invalid response shape without leaking secrets.
 
 ## Workstream 1: API Contract
 
@@ -300,6 +301,7 @@ Tasks:
 Definition of Done:
 
 - `/api/sources/health` distinguishes configured capability from live source reachability.
+- `/api/sources/health` reports a coarse distributed rate-limit fallback reason when Supabase is configured but not active.
 - Search and resolve reports expose endpoint host, resolver strategy, timeout, response budget and normalization boundaries.
 - Repeated identical source requests are cached or coalesced. Done in-process.
 - A single degraded source cannot stall all-source search. Improved with per-source partial failures and circuit-open fast failures.

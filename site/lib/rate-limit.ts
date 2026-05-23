@@ -15,6 +15,7 @@ type Bucket = {
 
 type RateLimitResult = {
   access: ApiAccess;
+  fallbackReason?: RateLimitFallbackReason | null;
   headers: Record<string, string>;
   ok: boolean;
   response?: Response;
@@ -22,12 +23,31 @@ type RateLimitResult = {
 
 type RateLimitEnv = Record<string, string | undefined>;
 type RateLimitStore = "memory" | "memory-fallback" | "supabase";
+type RateLimitFallbackReason =
+  | "distributed_rpc_http_401"
+  | "distributed_rpc_http_403"
+  | "distributed_rpc_http_404"
+  | "distributed_rpc_http_5xx"
+  | "distributed_rpc_invalid_json"
+  | "distributed_rpc_invalid_shape"
+  | "distributed_rpc_network_error"
+  | "distributed_rpc_timeout"
+  | "distributed_rpc_unavailable";
 type DistributedRateLimitRow = {
   allowed: boolean;
   count: number;
   remaining: number;
   reset_at: string;
 };
+type DistributedRateLimitResult =
+  | {
+      row: DistributedRateLimitRow;
+      fallbackReason: null;
+    }
+  | {
+      row: null;
+      fallbackReason: RateLimitFallbackReason | null;
+    };
 type RateLimitCheckOptions = {
   env?: RateLimitEnv;
   fetchImpl?: typeof fetch;
@@ -76,21 +96,21 @@ export async function checkApiRateLimitAsync(
 
   const effectivePolicy = effectiveRateLimitPolicy(policy, access.access);
   const distributed = await consumeDistributedRateLimit(request, effectivePolicy, access.access, options);
-  if (distributed) {
+  if (distributed.row) {
     return rateLimitResultFromBucket({
       access: access.access,
-      allowed: distributed.allowed,
+      allowed: distributed.row.allowed,
       context,
-      count: distributed.count,
+      count: distributed.row.count,
       policy,
       effectivePolicy,
-      remaining: distributed.remaining,
-      resetAt: Date.parse(distributed.reset_at),
+      remaining: distributed.row.remaining,
+      resetAt: Date.parse(distributed.row.reset_at),
       store: "supabase"
     });
   }
 
-  return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback");
+  return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback", distributed.fallbackReason);
 }
 
 export function rateLimitStoreStatus(env: RateLimitEnv = process.env): {
@@ -115,7 +135,8 @@ function checkRateLimitForAccess(
   policy: RateLimitPolicy,
   context: ApiHttpContext,
   access: ApiAccess,
-  store: RateLimitStore
+  store: RateLimitStore,
+  fallbackReason: RateLimitFallbackReason | null = null
 ): RateLimitResult {
   const now = Date.now();
   pruneBuckets(now);
@@ -137,7 +158,8 @@ function checkRateLimitForAccess(
     effectivePolicy,
     remaining,
     resetAt: bucket.resetAt,
-    store
+    store,
+    fallbackReason
   });
 }
 
@@ -151,13 +173,18 @@ function rateLimitResultFromBucket(input: {
   remaining: number;
   resetAt: number;
   store: RateLimitStore;
+  fallbackReason?: RateLimitFallbackReason | null;
 }): RateLimitResult {
   const resetSeconds = Math.max(1, Math.ceil((input.resetAt - Date.now()) / 1000));
-  const headers = { ...rateLimitHeaders(input.effectivePolicy, input.remaining, input.resetAt, input.store), ...input.access.headers };
+  const headers = {
+    ...rateLimitHeaders(input.effectivePolicy, input.remaining, input.resetAt, input.store, input.fallbackReason),
+    ...input.access.headers
+  };
 
   if (input.allowed === false || input.count > input.effectivePolicy.limit) {
     return {
       access: input.access,
+      fallbackReason: input.fallbackReason ?? null,
       headers,
       ok: false,
       response: apiJson(
@@ -181,7 +208,7 @@ function rateLimitResultFromBucket(input: {
     };
   }
 
-  return { access: input.access, headers, ok: true };
+  return { access: input.access, fallbackReason: input.fallbackReason ?? null, headers, ok: true };
 }
 
 function effectiveRateLimitPolicy(policy: RateLimitPolicy, access: ApiAccess): RateLimitPolicy {
@@ -191,13 +218,20 @@ function effectiveRateLimitPolicy(policy: RateLimitPolicy, access: ApiAccess): R
   };
 }
 
-function rateLimitHeaders(policy: RateLimitPolicy, remaining: number, resetAt: number, store: RateLimitStore): Record<string, string> {
+function rateLimitHeaders(
+  policy: RateLimitPolicy,
+  remaining: number,
+  resetAt: number,
+  store: RateLimitStore,
+  fallbackReason: RateLimitFallbackReason | null = null
+): Record<string, string> {
   return {
     "x-ratelimit-limit": String(policy.limit),
     "x-ratelimit-policy": policy.name,
     "x-ratelimit-remaining": String(remaining),
     "x-ratelimit-reset": new Date(resetAt).toISOString(),
-    "x-ratelimit-store": store
+    "x-ratelimit-store": store,
+    ...(fallbackReason ? { "x-ratelimit-fallback-reason": fallbackReason } : {})
   };
 }
 
@@ -206,11 +240,11 @@ async function consumeDistributedRateLimit(
   policy: RateLimitPolicy,
   access: ApiAccess,
   options: RateLimitCheckOptions
-): Promise<DistributedRateLimitRow | null> {
+): Promise<DistributedRateLimitResult> {
   const env = options.env ?? process.env;
   const status = rateLimitStoreStatus(env);
   if (!status.configured) {
-    return null;
+    return { fallbackReason: null, row: null };
   }
   const baseUrl = env[SUPABASE_URL_ENV]!;
   const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV]!;
@@ -237,17 +271,43 @@ async function consumeDistributedRateLimit(
       signal: controller.signal
     });
     if (!response.ok) {
-      return null;
+      return { fallbackReason: httpFallbackReason(response.status), row: null };
     }
     const text = await response.text();
-    const parsed = text ? (JSON.parse(text) as unknown) : null;
+    let parsed: unknown;
+    try {
+      parsed = text ? (JSON.parse(text) as unknown) : null;
+    } catch {
+      return { fallbackReason: "distributed_rpc_invalid_json", row: null };
+    }
     const row = Array.isArray(parsed) ? parsed.at(0) : parsed;
-    return isDistributedRateLimitRow(row) ? row : null;
-  } catch {
-    return null;
+    return isDistributedRateLimitRow(row)
+      ? { fallbackReason: null, row }
+      : { fallbackReason: "distributed_rpc_invalid_shape", row: null };
+  } catch (error) {
+    return {
+      fallbackReason: error instanceof DOMException && error.name === "AbortError" ? "distributed_rpc_timeout" : "distributed_rpc_network_error",
+      row: null
+    };
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function httpFallbackReason(status: number): RateLimitFallbackReason {
+  if (status === 401) {
+    return "distributed_rpc_http_401";
+  }
+  if (status === 403) {
+    return "distributed_rpc_http_403";
+  }
+  if (status === 404) {
+    return "distributed_rpc_http_404";
+  }
+  if (status >= 500) {
+    return "distributed_rpc_http_5xx";
+  }
+  return "distributed_rpc_unavailable";
 }
 
 function clientKey(request: Request): string {

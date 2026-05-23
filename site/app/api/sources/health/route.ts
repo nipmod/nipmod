@@ -52,6 +52,7 @@ export async function GET(request: Request): Promise<Response> {
         configured: rateLimitStore.configured,
         distributedActive: activeRateLimitStore === "supabase",
         driver: rateLimitStore.driver,
+        fallbackReason: rateLimit.fallbackReason ?? null,
         fallback: rateLimitStore.fallback,
         missing: rateLimitStore.missing
       },

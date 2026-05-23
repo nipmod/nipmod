@@ -174,9 +174,40 @@ describe("API rate limits", () => {
 
     expect(first.ok).toBe(true);
     expect(first.headers["x-ratelimit-store"]).toBe("memory-fallback");
+    expect(first.headers["x-ratelimit-fallback-reason"]).toBe("distributed_rpc_http_404");
+    expect(first.fallbackReason).toBe("distributed_rpc_http_404");
     expect(second.ok).toBe(false);
     expect(second.response?.headers.get("x-ratelimit-store")).toBe("memory-fallback");
+    expect(second.response?.headers.get("x-ratelimit-fallback-reason")).toBe("distributed_rpc_http_404");
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("reports invalid distributed bucket shapes without leaking upstream details", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: true }), { status: 200 }));
+    const request = new Request("https://nipmod.com/api/search", {
+      headers: {
+        "user-agent": "distributed-invalid-shape-test",
+        "x-forwarded-for": "203.0.113.253"
+      }
+    });
+
+    const result = await checkApiRateLimitAsync(
+      request,
+      { limit: 5, name: "distributed-invalid-shape", windowMs: 60_000 },
+      createApiHttpContext(request),
+      {
+        env: {
+          NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+          NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test"
+        },
+        fetchImpl: fetchMock as unknown as typeof fetch
+      }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.headers["x-ratelimit-store"]).toBe("memory-fallback");
+    expect(result.headers["x-ratelimit-fallback-reason"]).toBe("distributed_rpc_invalid_shape");
+    expect(JSON.stringify(result)).not.toContain("service-role-key");
   });
 
   test("reports distributed rate-limit store readiness without secrets", () => {
