@@ -65,6 +65,25 @@ describe("package intelligence archive", () => {
     });
   });
 
+  test("blocks archive confirmation when source trust flags lifecycle malware risk", () => {
+    const record = createPackageIntelligenceRecord({
+      ...externalRecord,
+      trust: {
+        ...externalRecord.trust,
+        decision: "avoid",
+        risk: "high",
+        score: 20,
+        warnings: ["Lifecycle script postinstall contains remote download or hidden background execution behavior."]
+      }
+    });
+
+    expect(record.security.warnings).toContain("Lifecycle script postinstall contains remote download or hidden background execution behavior.");
+    expect(validatePackageIntelligenceRecord(record)).toMatchObject({
+      ok: false,
+      errors: ["avoid or high risk trust results cannot be stored as confirmed archive records"]
+    });
+  });
+
   test("confirms agent usage as a separate status transition", () => {
     const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
     const confirmed = confirmPackageIntelligenceRecord(record, {

@@ -189,8 +189,8 @@ function assertCommandDetail(detail: Record<string, any>, command: string, id: s
   }
 
   if (detail.risk === "high" || detail.blocked === true || planBlocked) {
-    if (detail.boundary !== "blocked-high-risk-command" || detail.blocked !== true) {
-      throw new Error(`high-risk command must be blocked for ${id}`);
+    if (!["blocked-high-risk-command", "blocked-source-risk"].includes(detail.boundary) || detail.blocked !== true) {
+      throw new Error(`unsafe install plan must be blocked for ${id}`);
     }
     return;
   }
