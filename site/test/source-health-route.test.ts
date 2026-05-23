@@ -4,6 +4,7 @@ import { GET, OPTIONS, resetSourceHealthProbeCacheForTests } from "../app/api/so
 describe("source health route", () => {
   afterEach(() => {
     resetSourceHealthProbeCacheForTests();
+    vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
@@ -22,6 +23,13 @@ describe("source health route", () => {
         cacheTtlMs: expect.any(Number),
         mode: "capability"
       },
+      rateLimit: {
+        activeStore: "memory-fallback",
+        configured: false,
+        distributedActive: false,
+        driver: "supabase-rpc",
+        fallback: "memory"
+      },
       summary: {
         workspaceWritesFromHostedApi: false
       },
@@ -29,6 +37,7 @@ describe("source health route", () => {
     });
     expect(body.usage).toMatchObject({ driver: "supabase-rest" });
     expect(typeof body.usage.configured).toBe("boolean");
+    expect(body.rateLimit.missing).toEqual(["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY"]);
     expect(body.sources.map((source: { source: string }) => source.source)).toEqual([
       "npm",
       "pypi",
@@ -56,6 +65,30 @@ describe("source health route", () => {
       searchStrategy: "registry-ranked-search"
     });
     expect(JSON.stringify(body)).not.toMatch(/secret|service-role|bearer|publishable-key/i);
+  });
+
+  test("publishes distributed rate-limit activation without leaking secrets", async () => {
+    const resetAt = new Date(Date.now() + 60_000).toISOString();
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify([{ allowed: true, count: 1, remaining: 9, reset_at: resetAt }]), { status: 200 }))
+    );
+
+    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "user-agent": "source-health-test" } }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-ratelimit-store")).toBe("supabase");
+    expect(body.rateLimit).toMatchObject({
+      activeStore: "supabase",
+      configured: true,
+      distributedActive: true,
+      driver: "supabase-rpc",
+      missing: []
+    });
+    expect(JSON.stringify(body)).not.toContain("service-role-key");
   });
 
   test("can run bounded live source probes on demand", async () => {

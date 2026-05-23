@@ -3,7 +3,7 @@ import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { usageStoreStatus } from "../../../../lib/api-usage";
 import { EXTERNAL_PACKAGE_SOURCES, externalSourceCapabilities, type ExternalPackageSource } from "../../../../lib/external-packages";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
-import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync, rateLimitStoreStatus } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -23,6 +23,8 @@ export async function GET(request: Request): Promise<Response> {
   const shouldProbe = url.searchParams.get("probe") === "live";
   const archive = archiveStoreStatus();
   const usage = usageStoreStatus();
+  const rateLimitStore = rateLimitStoreStatus();
+  const activeRateLimitStore = rateLimit.headers["x-ratelimit-store"] ?? "unknown";
   const sources = externalSourceCapabilities();
   const live = shouldProbe ? await probeExternalSources() : null;
   return apiJsonWithUsage(
@@ -44,6 +46,14 @@ export async function GET(request: Request): Promise<Response> {
         cacheTtlMs: SOURCE_PROBE_CACHE_TTL_MS,
         mode: shouldProbe ? "live" : "capability",
         timeoutMs: SOURCE_PROBE_TIMEOUT_MS
+      },
+      rateLimit: {
+        activeStore: activeRateLimitStore,
+        configured: rateLimitStore.configured,
+        distributedActive: activeRateLimitStore === "supabase",
+        driver: rateLimitStore.driver,
+        fallback: rateLimitStore.fallback,
+        missing: rateLimitStore.missing
       },
       sources: sources.map((source) => ({
         ...source,
