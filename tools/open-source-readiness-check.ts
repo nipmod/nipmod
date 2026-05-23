@@ -55,6 +55,8 @@ const requiredFiles = [
   "tools/api-usage-canary.ts",
   "tools/rate-limit-canary.ts",
   "tools/rate-limit-canary.test.ts",
+  "tools/install-plan-canary.ts",
+  "tools/install-plan-canary.test.ts",
   "tools/source-depth-canary.ts",
   "tools/source-crawler-candidate-audit.ts",
   "tools/source-crawler-candidate-audit.test.ts",
@@ -99,6 +101,7 @@ check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly
 const publicApiSpec = read("docs/specs/public-api.md");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
+check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");
 check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));
