@@ -33,8 +33,11 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.ExternalPackageRecord.required).toEqual(
       expect.arrayContaining(["formatVersion", "displayName", "registryUrl", "sourceKind", "metrics"])
     );
-    expect(body.components.schemas.ExternalPackageRecord.properties.trust.required).toContain("checkedAt");
-    expect(body.components.schemas.ExternalPackageRecord.properties.trust.required).toContain("dimensions");
+    expect(body.components.schemas.ExternalPackageRecord.properties.archive.required).toContain("firstSeenReason");
+    expect(body.components.schemas.ExternalPackageRecord.properties.metrics.$ref).toBe("#/components/schemas/ExternalPackageMetrics");
+    expect(body.components.schemas.ExternalPackageRecord.properties.trust.$ref).toBe("#/components/schemas/ExternalPackageTrust");
+    expect(body.components.schemas.ExternalPackageTrust.required).toContain("checkedAt");
+    expect(body.components.schemas.ExternalPackageTrust.required).toContain("dimensions");
     expect(body.components.schemas.ExternalTrustDimensions.required).toEqual([
       "popularitySignal",
       "provenanceStatus",
@@ -54,14 +57,56 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.ExternalInstallPlan.required).toEqual(["generatedAt", "package", "plan", "safety", "type"]);
     expect(body.components.schemas.ExternalInstallPlan.properties.plan.required).toContain("commandDetails");
     expect(body.components.schemas.ExternalInstallPlan.properties.safety.required).toContain("blocked");
+    expect(body.components.schemas.PackageIntelligenceRecord.required).toEqual(
+      expect.arrayContaining(["archive", "installPlan", "ownership", "security", "sourceRecord", "trust"])
+    );
+    expect(body.components.schemas.ArchivePrepareResponse.required).toEqual([
+      "next",
+      "preparedOnly",
+      "receiptPreview",
+      "record",
+      "store",
+      "stored",
+      "type",
+      "validation"
+    ]);
+    expect(body.components.schemas.ArchiveConfirmResponse.required).toEqual(["receipt", "record", "stored", "type", "validation"]);
+    expect(body.components.schemas.SourceHealthResponse.required).toEqual([
+      "apiAccess",
+      "archive",
+      "generatedAt",
+      "probe",
+      "sources",
+      "summary",
+      "type",
+      "usage"
+    ]);
     expect(body.paths["/api/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ExternalSearchResult"
+    );
+    expect(body.paths["/api/inspect"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ExternalInspectResponse"
     );
     expect(body.paths["/api/install-plan"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ExternalInstallPlan"
     );
+    expect(body.paths["/api/archive/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ArchiveSearchResponse"
+    );
+    expect(body.paths["/api/archive/status"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ArchiveStatusResponse"
+    );
+    expect(body.paths["/api/sources/health"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/SourceHealthResponse"
+    );
+    expect(body.paths["/api/mcp"].post.responses["200"].content["application/json"].schema.oneOf).toHaveLength(2);
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
     expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");
+    for (const path of Object.values(body.paths)) {
+      for (const operation of Object.values(path as Record<string, any>)) {
+        expect(operation.responses["200"].content?.["application/json"]?.schema).toBeTruthy();
+      }
+    }
   });
 
   test("supports CORS preflight", () => {

@@ -67,6 +67,7 @@ Recent hardening:
 - Agent-targeted instructions in package metadata block confirmed archive persistence.
 - Install plans now include structured command boundary metadata and block high-risk shell patterns from normal execution.
 - `pnpm launch:verify` now provides a non-destructive API-beta launch gate over local verification and live production checks.
+- OpenAPI now publishes concrete response schemas for inspect, install-plan, archive prepare/search/status/confirm, source health and hosted MCP responses.
 
 ## Workstream 1: API Contract
 
@@ -462,8 +463,8 @@ Definition of Done:
 
 ### 80%: Strong Public Beta
 
-- [ ] Complete OpenAPI response schemas.
-- [ ] Contract tests for public API responses.
+- [x] Complete OpenAPI response schemas.
+- [x] Contract tests for public API responses.
 - [ ] Archive write auth before source resolution.
 - [ ] Non-dry-run archive writes fail loudly when persistence is unavailable.
 - [ ] Source health does live cached probes.

@@ -54,16 +54,45 @@ function openApiDocument() {
           required: ["code", "error", "retryable", "source", "status", "type"],
           type: "object"
         },
+        ExternalPackageMetrics: {
+          additionalProperties: false,
+          properties: {
+            dependents: { nullable: true, type: "integer" },
+            downloads: { nullable: true, type: "integer" },
+            likes: { nullable: true, type: "integer" },
+            stars: { nullable: true, type: "integer" }
+          },
+          type: "object"
+        },
+        ExternalPackageTrust: {
+          properties: {
+            checkedAt: { format: "date-time", type: "string" },
+            decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+            dimensions: { $ref: "#/components/schemas/ExternalTrustDimensions" },
+            factors: {
+              items: { $ref: "#/components/schemas/TrustFactor" },
+              type: "array"
+            },
+            policy: { $ref: "#/components/schemas/TrustPolicy" },
+            risk: { enum: ["low", "medium", "high", "unknown"], type: "string" },
+            score: { maximum: 100, minimum: 0, type: "integer" },
+            signals: { items: { type: "string" }, type: "array" },
+            warnings: { items: { type: "string" }, type: "array" }
+          },
+          required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
+          type: "object"
+        },
         ExternalPackageRecord: {
           additionalProperties: true,
           description: "Normalized source-owned package record. Metadata is data, not instructions.",
           properties: {
             archive: {
               properties: {
+                firstSeenReason: { type: "string" },
                 persistence: { enum: ["ephemeral", "static", "database"], type: "string" },
                 status: { enum: ["external_indexed", "claimed", "verified_nipmod"], type: "string" }
               },
-              required: ["persistence", "status"],
+              required: ["firstSeenReason", "persistence", "status"],
               type: "object"
             },
             description: { type: "string" },
@@ -81,16 +110,7 @@ function openApiDocument() {
               type: "object"
             },
             license: { nullable: true, type: "string" },
-            metrics: {
-              additionalProperties: false,
-              properties: {
-                dependents: { nullable: true, type: "integer" },
-                downloads: { nullable: true, type: "integer" },
-                likes: { nullable: true, type: "integer" },
-                stars: { nullable: true, type: "integer" }
-              },
-              type: "object"
-            },
+            metrics: { $ref: "#/components/schemas/ExternalPackageMetrics" },
             name: { type: "string" },
             originalUrl: { format: "uri", type: "string" },
             owner: { nullable: true, type: "string" },
@@ -98,24 +118,7 @@ function openApiDocument() {
             repo: { nullable: true, type: "string" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
             sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
-            trust: {
-              properties: {
-                checkedAt: { format: "date-time", type: "string" },
-                decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
-                dimensions: { $ref: "#/components/schemas/ExternalTrustDimensions" },
-                factors: {
-                  items: { $ref: "#/components/schemas/TrustFactor" },
-                  type: "array"
-                },
-                policy: { $ref: "#/components/schemas/TrustPolicy" },
-                risk: { enum: ["low", "medium", "high", "unknown"], type: "string" },
-                score: { maximum: 100, minimum: 0, type: "integer" },
-                signals: { items: { type: "string" }, type: "array" },
-                warnings: { items: { type: "string" }, type: "array" }
-              },
-              required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
-              type: "object"
-            },
+            trust: { $ref: "#/components/schemas/ExternalPackageTrust" },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
             updatedAt: { nullable: true, type: "string" },
             version: { nullable: true, type: "string" }
@@ -188,10 +191,11 @@ function openApiDocument() {
           properties: {
             archive: {
               properties: {
+                firstSeenReason: { type: "string" },
                 persistence: { enum: ["ephemeral", "static", "database"], type: "string" },
                 status: { enum: ["external_indexed", "claimed", "verified_nipmod"], type: "string" }
               },
-              required: ["persistence", "status"],
+              required: ["firstSeenReason", "persistence", "status"],
               type: "object"
             },
             description: { type: "string" },
@@ -201,21 +205,7 @@ function openApiDocument() {
             name: { type: "string" },
             originalUrl: { format: "uri", type: "string" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
-            trust: {
-              properties: {
-                checkedAt: { format: "date-time", type: "string" },
-                decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
-                dimensions: { $ref: "#/components/schemas/ExternalTrustDimensions" },
-                factors: { items: { $ref: "#/components/schemas/TrustFactor" }, type: "array" },
-                policy: { $ref: "#/components/schemas/TrustPolicy" },
-                risk: { enum: ["low", "medium", "high", "unknown"], type: "string" },
-                score: { maximum: 100, minimum: 0, type: "integer" },
-                signals: { items: { type: "string" }, type: "array" },
-                warnings: { items: { type: "string" }, type: "array" }
-              },
-              required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
-              type: "object"
-            },
+            trust: { $ref: "#/components/schemas/ExternalPackageTrust" },
             version: { nullable: true, type: "string" }
           },
           required: ["archive", "description", "displayName", "id", "license", "name", "originalUrl", "source", "trust", "version"],
@@ -373,6 +363,347 @@ function openApiDocument() {
           ],
           type: "object"
         },
+        ApiUsageStoreStatus: {
+          additionalProperties: false,
+          description: "Usage store status without raw query text, API keys, IP addresses or user agents.",
+          properties: {
+            configured: { type: "boolean" },
+            driver: { enum: ["supabase-rest"], type: "string" }
+          },
+          required: ["configured", "driver"],
+          type: "object"
+        },
+        ArchiveStoreStatus: {
+          additionalProperties: false,
+          description: "Archive persistence status without secrets.",
+          properties: {
+            configured: { type: "boolean" },
+            driver: { enum: ["supabase-rest"], type: "string" },
+            keyMode: { enum: ["publishable-token-rls", "service-role", "missing"], type: "string" },
+            missing: { items: { type: "string" }, type: "array" },
+            type: { const: "dev.nipmod.archive-store-status.v1", type: "string" }
+          },
+          required: ["configured", "driver", "keyMode", "missing", "type"],
+          type: "object"
+        },
+        ArchiveStatusResponse: {
+          additionalProperties: false,
+          properties: {
+            configured: { type: "boolean" },
+            driver: { enum: ["supabase-rest"], type: "string" },
+            missing: { items: { type: "string" }, type: "array" },
+            mode: { enum: ["durable-archive-enabled", "resolver-only-safe-mode"], type: "string" },
+            type: { const: "dev.nipmod.archive-status.v1", type: "string" },
+            usage: { $ref: "#/components/schemas/ApiUsageStoreStatus" },
+            writeBoundary: { type: "string" }
+          },
+          required: ["configured", "driver", "missing", "mode", "type", "usage", "writeBoundary"],
+          type: "object"
+        },
+        ExternalInspectResponse: {
+          additionalProperties: false,
+          properties: {
+            meta: {
+              additionalProperties: false,
+              properties: {
+                generatedAt: { format: "date-time", type: "string" },
+                source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
+              },
+              required: ["generatedAt", "source"],
+              type: "object"
+            },
+            record: { $ref: "#/components/schemas/ExternalPackageRecord" },
+            type: { const: "dev.nipmod.external-inspect.v1", type: "string" }
+          },
+          required: ["meta", "record", "type"],
+          type: "object"
+        },
+        ExternalSourceCapability: {
+          additionalProperties: false,
+          properties: {
+            access: { enum: ["public", "public-with-optional-token"], type: "string" },
+            authConfigured: { type: "boolean" },
+            capabilities: {
+              items: { enum: ["search", "inspect", "install-plan", "archive-prepare"], type: "string" },
+              type: "array"
+            },
+            circuit: { $ref: "#/components/schemas/ExternalSourceCircuitReport" },
+            endpointHost: { type: "string" },
+            installPlanWritesWorkspace: { const: false, type: "boolean" },
+            live: { $ref: "#/components/schemas/ExternalSourceLiveProbe" },
+            resolver: { $ref: "#/components/schemas/ExternalSourceResolverProfile" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
+            status: { const: "available", type: "string" }
+          },
+          required: [
+            "access",
+            "authConfigured",
+            "capabilities",
+            "circuit",
+            "endpointHost",
+            "installPlanWritesWorkspace",
+            "resolver",
+            "source",
+            "sourceKind",
+            "status"
+          ],
+          type: "object"
+        },
+        ExternalSourceLiveProbe: {
+          additionalProperties: false,
+          properties: {
+            durationMs: { minimum: 0, type: "integer" },
+            endpointHost: { type: "string" },
+            status: { enum: ["ok", "failed"], type: "string" },
+            statusCode: { nullable: true, type: "integer" }
+          },
+          required: ["durationMs", "endpointHost", "status", "statusCode"],
+          type: "object"
+        },
+        SourceHealthResponse: {
+          additionalProperties: false,
+          properties: {
+            apiAccess: {
+              additionalProperties: false,
+              properties: {
+                authorizationHeaderSupported: { const: true, type: "boolean" },
+                keyHeaders: { items: { type: "string" }, type: "array" },
+                publicBeta: { const: true, type: "boolean" },
+                tiers: { items: { enum: ["public", "builder", "partner", "admin"], type: "string" }, type: "array" }
+              },
+              required: ["authorizationHeaderSupported", "keyHeaders", "publicBeta", "tiers"],
+              type: "object"
+            },
+            archive: {
+              additionalProperties: false,
+              properties: {
+                configured: { type: "boolean" },
+                driver: { enum: ["supabase-rest"], type: "string" },
+                mode: { enum: ["durable-archive-enabled", "resolver-only-safe-mode"], type: "string" }
+              },
+              required: ["configured", "driver", "mode"],
+              type: "object"
+            },
+            generatedAt: { format: "date-time", type: "string" },
+            probe: {
+              additionalProperties: false,
+              properties: {
+                mode: { enum: ["capability", "live"], type: "string" },
+                timeoutMs: { minimum: 1, type: "integer" }
+              },
+              required: ["mode", "timeoutMs"],
+              type: "object"
+            },
+            sources: { items: { $ref: "#/components/schemas/ExternalSourceCapability" }, type: "array" },
+            summary: {
+              additionalProperties: false,
+              properties: {
+                available: { minimum: 0, type: "integer" },
+                liveFailed: { nullable: true, minimum: 0, type: "integer" },
+                liveOk: { nullable: true, minimum: 0, type: "integer" },
+                optionalAuthConfigured: { minimum: 0, type: "integer" },
+                requested: { minimum: 0, type: "integer" },
+                workspaceWritesFromHostedApi: { const: false, type: "boolean" }
+              },
+              required: ["available", "liveFailed", "liveOk", "optionalAuthConfigured", "requested", "workspaceWritesFromHostedApi"],
+              type: "object"
+            },
+            type: { const: "dev.nipmod.source-health.v1", type: "string" },
+            usage: {
+              additionalProperties: false,
+              properties: {
+                configured: { type: "boolean" },
+                driver: { enum: ["supabase-rest"], type: "string" },
+                privacy: { type: "string" }
+              },
+              required: ["configured", "driver", "privacy"],
+              type: "object"
+            }
+          },
+          required: ["apiAccess", "archive", "generatedAt", "probe", "sources", "summary", "type", "usage"],
+          type: "object"
+        },
+        PackageIntelligenceArchiveState: {
+          additionalProperties: false,
+          properties: {
+            confirmationCount: { minimum: 0, type: "integer" },
+            firstSeenAt: { format: "date-time", type: "string" },
+            firstSeenReason: { type: "string" },
+            persistence: { const: "database", type: "string" },
+            status: { enum: ["external_indexed", "agent_confirmed", "claimed", "verified_nipmod", "quarantined", "yanked"], type: "string" },
+            updatedAt: { format: "date-time", type: "string" }
+          },
+          required: ["confirmationCount", "firstSeenAt", "firstSeenReason", "persistence", "status", "updatedAt"],
+          type: "object"
+        },
+        PackageIntelligenceEvent: {
+          additionalProperties: false,
+          properties: {
+            actor: { type: "string" },
+            at: { format: "date-time", type: "string" },
+            message: { type: "string" },
+            type: {
+              enum: ["external_resolved", "agent_confirmed", "owner_claimed", "verified", "quarantined", "yanked", "restored"],
+              type: "string"
+            }
+          },
+          required: ["actor", "at", "message", "type"],
+          type: "object"
+        },
+        PackageIntelligenceRecord: {
+          additionalProperties: false,
+          properties: {
+            archive: { $ref: "#/components/schemas/PackageIntelligenceArchiveState" },
+            events: { items: { $ref: "#/components/schemas/PackageIntelligenceEvent" }, type: "array" },
+            formatVersion: { const: 1, type: "integer" },
+            id: { type: "string" },
+            installPlan: { $ref: "#/components/schemas/ExternalInstallPlan" },
+            name: { type: "string" },
+            ownership: {
+              additionalProperties: false,
+              properties: {
+                claimRequiredForVerified: { const: true, type: "boolean" },
+                originalOwner: { nullable: true, type: "string" },
+                originalUrl: { format: "uri", type: "string" },
+                retainedByOriginalSource: { const: true, type: "boolean" }
+              },
+              required: ["claimRequiredForVerified", "originalOwner", "originalUrl", "retainedByOriginalSource"],
+              type: "object"
+            },
+            security: {
+              additionalProperties: false,
+              properties: {
+                installCommandRisk: { enum: ["low", "medium", "high"], type: "string" },
+                metadataIsInstruction: { const: false, type: "boolean" },
+                requiresHumanOrAgentApprovalBeforeWrite: { const: true, type: "boolean" },
+                warnings: { items: { type: "string" }, type: "array" }
+              },
+              required: ["installCommandRisk", "metadataIsInstruction", "requiresHumanOrAgentApprovalBeforeWrite", "warnings"],
+              type: "object"
+            },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
+            sourceRecord: { $ref: "#/components/schemas/ExternalPackageRecord" },
+            sourceSnapshot: {
+              additionalProperties: false,
+              properties: {
+                license: { nullable: true, type: "string" },
+                metrics: { $ref: "#/components/schemas/ExternalPackageMetrics" },
+                originalUrl: { format: "uri", type: "string" },
+                owner: { nullable: true, type: "string" },
+                registryUrl: { format: "uri", type: "string" },
+                repo: { nullable: true, type: "string" },
+                updatedAt: { nullable: true, type: "string" },
+                version: { nullable: true, type: "string" }
+              },
+              required: ["license", "metrics", "originalUrl", "owner", "registryUrl", "repo", "updatedAt", "version"],
+              type: "object"
+            },
+            stableKey: { type: "string" },
+            trust: { $ref: "#/components/schemas/ExternalPackageTrust" },
+            type: { const: "dev.nipmod.package-intelligence-record.v1", type: "string" },
+            version: { nullable: true, type: "string" }
+          },
+          required: [
+            "archive",
+            "events",
+            "formatVersion",
+            "id",
+            "installPlan",
+            "name",
+            "ownership",
+            "security",
+            "source",
+            "sourceKind",
+            "sourceRecord",
+            "sourceSnapshot",
+            "stableKey",
+            "trust",
+            "type",
+            "version"
+          ],
+          type: "object"
+        },
+        PackageIntelligenceValidation: {
+          additionalProperties: false,
+          properties: {
+            errors: { items: { type: "string" }, type: "array" },
+            ok: { type: "boolean" },
+            warnings: { items: { type: "string" }, type: "array" }
+          },
+          required: ["errors", "ok", "warnings"],
+          type: "object"
+        },
+        ArchivePrepareResponse: {
+          additionalProperties: false,
+          properties: {
+            next: {
+              additionalProperties: false,
+              properties: {
+                confirm: { const: "POST /api/archive/confirm", type: "string" },
+                writeBoundary: { type: "string" }
+              },
+              required: ["confirm", "writeBoundary"],
+              type: "object"
+            },
+            preparedOnly: { const: true, type: "boolean" },
+            receiptPreview: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+            record: { $ref: "#/components/schemas/PackageIntelligenceRecord" },
+            store: { $ref: "#/components/schemas/ArchiveStoreStatus" },
+            stored: { const: false, type: "boolean" },
+            type: { const: "dev.nipmod.archive-prepare.v1", type: "string" },
+            validation: { $ref: "#/components/schemas/PackageIntelligenceValidation" }
+          },
+          required: ["next", "preparedOnly", "receiptPreview", "record", "store", "stored", "type", "validation"],
+          type: "object"
+        },
+        ArchiveConfirmResponse: {
+          additionalProperties: false,
+          properties: {
+            configured: { type: "boolean" },
+            dryRun: { type: "boolean" },
+            receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
+            record: { $ref: "#/components/schemas/PackageIntelligenceRecord" },
+            store: { $ref: "#/components/schemas/ArchiveStoreStatus" },
+            stored: { type: "boolean" },
+            type: { const: "dev.nipmod.archive-confirm.v1", type: "string" },
+            validation: { $ref: "#/components/schemas/PackageIntelligenceValidation" }
+          },
+          required: ["receipt", "record", "stored", "type", "validation"],
+          type: "object"
+        },
+        ArchiveSearchResponse: {
+          additionalProperties: false,
+          properties: {
+            configured: { type: "boolean" },
+            records: { items: { $ref: "#/components/schemas/PackageIntelligenceRecord" }, type: "array" },
+            store: { $ref: "#/components/schemas/ArchiveStoreStatus" },
+            total: { minimum: 0, type: "integer" },
+            type: { const: "dev.nipmod.package-intelligence-search.v1", type: "string" }
+          },
+          required: ["configured", "records", "store", "total", "type"],
+          type: "object"
+        },
+        JsonRpcResponse: {
+          additionalProperties: false,
+          properties: {
+            error: {
+              additionalProperties: true,
+              properties: {
+                code: { type: "integer" },
+                message: { type: "string" }
+              },
+              required: ["code", "message"],
+              type: "object"
+            },
+            id: { nullable: true },
+            jsonrpc: { const: "2.0", type: "string" },
+            result: { additionalProperties: true, type: "object" }
+          },
+          required: ["id", "jsonrpc"],
+          type: "object"
+        },
         PackageIntelligenceReceipt: {
           additionalProperties: false,
           description: "Receipt returned by archive prepare and confirm flows. It contains no raw API keys, IP addresses or user agent strings.",
@@ -466,15 +797,7 @@ function openApiDocument() {
             "200": {
               content: {
                 "application/json": {
-                  schema: {
-                    additionalProperties: true,
-                    properties: {
-                      receiptPreview: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
-                      type: { const: "dev.nipmod.archive-prepare.v1", type: "string" }
-                    },
-                    required: ["receiptPreview", "type"],
-                    type: "object"
-                  }
+                  schema: { $ref: "#/components/schemas/ArchivePrepareResponse" }
                 }
               },
               description: "Prepared package intelligence record and receipt preview. This endpoint does not persist the record."
@@ -494,7 +817,7 @@ function openApiDocument() {
             "200": {
               content: {
                 "application/json": {
-                  schema: archivePrepareResponseSchema()
+                  schema: { $ref: "#/components/schemas/ArchivePrepareResponse" }
                 }
               },
               description: "Prepared package intelligence record and receipt preview. This endpoint does not persist the record."
@@ -534,15 +857,7 @@ function openApiDocument() {
             "200": {
               content: {
                 "application/json": {
-                  schema: {
-                    additionalProperties: true,
-                    properties: {
-                      receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
-                      type: { const: "dev.nipmod.archive-confirm.v1", type: "string" }
-                    },
-                    required: ["receipt", "type"],
-                    type: "object"
-                  }
+                  schema: { $ref: "#/components/schemas/ArchiveConfirmResponse" }
                 }
               },
               description: "Confirmed package intelligence record. Dry runs never persist; writes require authorization."
@@ -553,7 +868,7 @@ function openApiDocument() {
             "422": {
               content: {
                 "application/json": {
-                  schema: archiveConfirmResponseSchema()
+                  schema: { $ref: "#/components/schemas/ArchiveConfirmResponse" }
                 }
               },
               description: "Archive confirmation validation failed. The rejected record and receipt preview are returned for review."
@@ -569,7 +884,10 @@ function openApiDocument() {
         get: {
           parameters: [queryParameter(), limitParameter(100)],
           responses: {
-            "200": { description: "Durable package intelligence archive search." },
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/ArchiveSearchResponse" },
+              "Durable package intelligence archive search."
+            ),
             "401": errorResponse(),
             "429": errorResponse(),
             "503": errorResponse()
@@ -580,7 +898,10 @@ function openApiDocument() {
       "/api/archive/status": {
         get: {
           responses: {
-            "200": { description: "Archive store status without secrets." },
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/ArchiveStatusResponse" },
+              "Archive store status without secrets."
+            ),
             "401": errorResponse(),
             "429": errorResponse()
           },
@@ -591,7 +912,10 @@ function openApiDocument() {
         get: {
           parameters: [sourceParameter(), nameParameter()],
           responses: {
-            "200": { description: "Exact external package record." },
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/ExternalInspectResponse" },
+              "Exact external package record."
+            ),
             "400": errorResponse(),
             "401": errorResponse(),
             "404": errorResponse(),
@@ -658,7 +982,15 @@ function openApiDocument() {
       "/api/mcp": {
         post: {
           responses: {
-            "200": { description: "MCP JSON-RPC response." },
+            "200": jsonResponse(
+              {
+                oneOf: [
+                  { $ref: "#/components/schemas/JsonRpcResponse" },
+                  { items: { $ref: "#/components/schemas/JsonRpcResponse" }, type: "array" }
+                ]
+              },
+              "MCP JSON-RPC response."
+            ),
             "400": errorResponse(),
             "401": errorResponse(),
             "429": errorResponse()
@@ -727,7 +1059,10 @@ function openApiDocument() {
       "/api/sources/health": {
         get: {
           responses: {
-            "200": { description: "Source capability, optional auth and archive mode metadata." },
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/SourceHealthResponse" },
+              "Source capability, optional auth and archive mode metadata."
+            ),
             "401": errorResponse(),
             "429": errorResponse()
           },
@@ -786,6 +1121,17 @@ function errorResponse() {
   };
 }
 
+function jsonResponse(schema: Record<string, unknown>, description: string) {
+  return {
+    content: {
+      "application/json": {
+        schema
+      }
+    },
+    description
+  };
+}
+
 function exactPackageOrRecordBody() {
   return {
     content: {
@@ -802,42 +1148,5 @@ function exactPackageOrRecordBody() {
       }
     },
     required: true
-  };
-}
-
-function archivePrepareResponseSchema() {
-  return {
-    additionalProperties: true,
-    properties: {
-      preparedOnly: { const: true, type: "boolean" },
-      receiptPreview: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
-      stored: { const: false, type: "boolean" },
-      type: { const: "dev.nipmod.archive-prepare.v1", type: "string" }
-    },
-    required: ["preparedOnly", "receiptPreview", "stored", "type"],
-    type: "object"
-  };
-}
-
-function archiveConfirmResponseSchema() {
-  return {
-    additionalProperties: true,
-    properties: {
-      receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
-      stored: { type: "boolean" },
-      type: { const: "dev.nipmod.archive-confirm.v1", type: "string" },
-      validation: {
-        additionalProperties: true,
-        properties: {
-          errors: { items: { type: "string" }, type: "array" },
-          ok: { type: "boolean" },
-          warnings: { items: { type: "string" }, type: "array" }
-        },
-        required: ["errors", "ok", "warnings"],
-        type: "object"
-      }
-    },
-    required: ["receipt", "stored", "type", "validation"],
-    type: "object"
   };
 }
