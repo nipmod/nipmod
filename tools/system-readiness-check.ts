@@ -463,7 +463,7 @@ async function checkLiveSystemEndpoints() {
     ["live_agent_prompts", state.receipt.entrypoints.agentPrompts, ["dev.nipmod.agent-prompts.v1"]],
     ["live_remote_mcp", state.receipt.entrypoints.remoteMcp, ["dev.nipmod.remote-mcp.v1", "remote-read-only"]],
     ["live_demo", state.receipt.entrypoints.demo, ["Search, inspect, plan, receipt."]],
-    ["live_status", state.receipt.entrypoints.status, ["Public proof dashboard"]],
+    ["live_status", state.receipt.entrypoints.status, ["Public status"]],
     ["live_manifest", state.receipt.entrypoints.machineManifest, [state.receipt.entrypoints.systemReadiness]],
     ["live_quorum_policy", "https://nipmod.com/quorum/policy.json", ["dev.nipmod.quorum-policy.v1"]],
     ["live_quorum_receipts", "https://nipmod.com/quorum/receipts.json", ["dev.nipmod.quorum-receipts.v1"]],

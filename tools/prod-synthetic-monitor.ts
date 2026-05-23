@@ -63,7 +63,7 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "trust_page", async () => {
     const text = await fetchText(endpoints.trust, timedFetch);
-    for (const marker of ["What makes a package", "Five anchors", "Source", "Digest", "Witness"]) {
+    for (const marker of ["Trust signals for package decisions", "Do not trust package text", "Source", "Digest", "Plan boundary"]) {
       assertIncludes(text, marker, `trust page missing ${marker}`);
     }
     return { url: endpoints.trust };
@@ -71,8 +71,8 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "platform_connections", async () => {
     const page = await fetchText(endpoints.platforms, timedFetch);
-    assertIncludes(page, "Source and access", "platform page missing source access title");
-    assertIncludes(page, "API first", "platform page missing API-first scope");
+    assertIncludes(page, "Source and access paths", "platform page missing source access title");
+    assertIncludes(page, "Native integrations", "platform page missing API scope");
     const matrix = await fetchJson(endpoints.platformConnections, timedFetch);
     assertEqual(matrix.type, "dev.nipmod.platform-connections.v1", "platform connection type mismatch");
     assertIncludes(JSON.stringify(matrix), "api", "platform matrix missing API path");
@@ -83,8 +83,8 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "security_disclosure", async () => {
     const page = await fetchText(endpoints.security, timedFetch);
-    assertIncludes(page, "Report with proof", "security page missing disclosure marker");
-    assertIncludes(page, "No central deletion", "security page missing decentralized control marker");
+    assertIncludes(page, "Security policy", "security page missing disclosure marker");
+    assertIncludes(page, "What to include", "security page missing report guidance marker");
     const securityTxt = await fetchText(endpoints.securityTxt, timedFetch);
     assertIncludes(securityTxt, `Canonical: ${endpoints.securityTxt}`, "security.txt canonical mismatch");
     assertIncludes(securityTxt, `Policy: ${endpoints.security}`, "security.txt policy mismatch");
