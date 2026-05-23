@@ -44,7 +44,7 @@ body {
 .topbar {
   background: rgba(15, 15, 16, 0.94);
   backdrop-filter: blur(22px) saturate(150%);
-  grid-template-columns: minmax(72px, 1fr) auto minmax(120px, 1fr);
+  grid-template-columns: auto minmax(120px, 1fr);
   height: var(--topbar-height);
   padding: 0 32px;
 }
@@ -517,7 +517,7 @@ summary:focus-visible {
   background: #101011;
   border-bottom: 1px solid rgba(255, 255, 255, 0.105);
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 1fr);
+  grid-template-columns: auto minmax(120px, 1fr);
   height: 90px;
   justify-content: stretch;
   margin: 0;
@@ -4909,7 +4909,7 @@ body {
 
 @media (max-width: 980px) {
   .topbar {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     height: auto;
     min-height: 78px;
     padding: 0 22px;
@@ -4922,16 +4922,6 @@ body {
   .brand-socials {
     display: flex;
     gap: 4px;
-  }
-
-  .nav-actions {
-    gap: 18px;
-    justify-content: center;
-  }
-
-  .nav-link {
-    font-size: 13px;
-    min-height: 78px;
   }
 
   .editorial-landing,
@@ -4981,18 +4971,6 @@ body {
 
   .brand-socials {
     display: none;
-  }
-
-  .nav-actions {
-    gap: 14px;
-  }
-
-  .nav-actions .nav-link:nth-child(3) {
-    display: none;
-  }
-
-  .nav-link {
-    font-size: 12.5px;
   }
 
   .nipmod-mark {
