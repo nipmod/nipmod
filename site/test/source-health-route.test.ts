@@ -132,10 +132,11 @@ describe("source health route", () => {
     expect(body.summary.liveCached).toBe(0);
     expect(
       body.sources.every(
-        (source: { live?: { cached: boolean; checkedAt: string; degraded: boolean; durationMs: number; retryable: boolean; status: string } }) =>
+        (source: { live?: { cached: boolean; checkedAt: string; degraded: boolean; durationMs: number; probePath: string; retryable: boolean; status: string } }) =>
           source.live?.status === "ok" &&
           source.live.cached === false &&
           source.live.degraded === false &&
+          source.live.probePath === "upstream-live" &&
           source.live.retryable === false &&
           typeof source.live.checkedAt === "string"
       )
@@ -153,14 +154,62 @@ describe("source health route", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.summary.liveOk).toBe(0);
-    expect(body.summary.liveFailed).toBe(6);
+    expect(body.summary.liveOk).toBe(1);
+    expect(body.summary.liveFailed).toBe(5);
     expect(
-      body.sources.every(
-        (source: { live?: { degraded: boolean; retryable: boolean; status: string; statusCode: number } }) =>
-          source.live?.status === "failed" && source.live.degraded === true && source.live.retryable === true && source.live.statusCode === 503
-      )
+      body.sources
+        .filter((source: { source: string }) => source.source !== "mcp")
+        .every(
+          (source: { live?: { degraded: boolean; retryable: boolean; status: string; statusCode: number } }) =>
+            source.live?.status === "failed" && source.live.degraded === true && source.live.retryable === true && source.live.statusCode === 503
+        )
     ).toBe(true);
+    expect(body.sources.find((source: { source: string }) => source.source === "mcp").live).toMatchObject({
+      degraded: false,
+      fallback: {
+        recordCount: 1,
+        snapshot: "2026-05-22",
+        type: "pinned-public-registry-snapshot"
+      },
+      probePath: "resolver-fallback",
+      retryable: false,
+      status: "ok",
+      statusCode: null
+    });
+  });
+
+  test("keeps MCP source usable through pinned resolver fallback when the registry times out", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (new URL(url).hostname === "registry.modelcontextprotocol.io") {
+          throw new DOMException("timeout", "AbortError");
+        }
+        return Response.json({ ok: true });
+      })
+    );
+
+    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const body = await response.json();
+    const mcp = body.sources.find((source: { source: string }) => source.source === "mcp");
+
+    expect(response.status).toBe(200);
+    expect(body.summary.liveOk).toBe(6);
+    expect(body.summary.liveFailed).toBe(0);
+    expect(mcp.live).toMatchObject({
+      degraded: false,
+      endpointHost: "registry.modelcontextprotocol.io",
+      fallback: {
+        recordCount: 1,
+        snapshot: "2026-05-22",
+        type: "pinned-public-registry-snapshot"
+      },
+      probePath: "resolver-fallback",
+      retryable: false,
+      status: "ok",
+      statusCode: null
+    });
   });
 
   test("caches repeated live source probes within the probe TTL", async () => {
