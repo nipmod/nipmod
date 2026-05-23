@@ -14,6 +14,9 @@ if (!skipLocal) {
 }
 
 await runCheck("live_api_contract", () => verifyLiveApi(baseUrl, { requireDistributedRateLimit }));
+await runCheck("api_contract_canary", () =>
+  run(process.execPath, ["--experimental-strip-types", "tools/api-contract-canary.ts", "--base-url", baseUrl], { timeoutMs: 60_000 })
+);
 await runCheck("source_depth_canary", () =>
   run(process.execPath, ["--experimental-strip-types", "tools/source-depth-canary.ts", "--base-url", baseUrl], { timeoutMs: 90_000 })
 );

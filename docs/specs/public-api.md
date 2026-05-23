@@ -33,6 +33,8 @@ Production deployments can use a Supabase-backed rate-limit bucket through `cons
 
 `GET /api/sources/health` also returns coarse rate-limit store status with `configured`, `driver`, `activeStore` and `distributedActive`. This lets operators and agents distinguish an intended Supabase-backed setup from a live fallback without exposing Supabase URLs, keys or raw client identifiers.
 
+Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
+
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
 
 ## Base URL

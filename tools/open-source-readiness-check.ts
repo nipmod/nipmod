@@ -50,6 +50,8 @@ const requiredFiles = [
   "examples/agent-workflow/claude-code.md",
   "examples/agent-workflow/mcp-host.md",
   "tools/seed-package-intelligence.ts",
+  "tools/api-contract-canary.ts",
+  "tools/api-contract-canary.test.ts",
   "tools/api-usage-canary.ts",
   "tools/rate-limit-canary.ts",
   "tools/rate-limit-canary.test.ts",
@@ -96,6 +98,7 @@ check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly
 
 const publicApiSpec = read("docs/specs/public-api.md");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
+check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
 
 const trustSignals = read("docs/specs/trust-signals.md");
 check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));
