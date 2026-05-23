@@ -52,6 +52,8 @@ const requiredFiles = [
   "tools/seed-package-intelligence.ts",
   "tools/api-contract-canary.ts",
   "tools/api-contract-canary.test.ts",
+  "tools/archive-depth-canary.ts",
+  "tools/archive-depth-canary.test.ts",
   "tools/api-usage-canary.ts",
   "tools/rate-limit-canary.ts",
   "tools/rate-limit-canary.test.ts",
@@ -103,6 +105,7 @@ check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly
 const publicApiSpec = read("docs/specs/public-api.md");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
+check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");

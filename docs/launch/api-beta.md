@@ -72,6 +72,7 @@ Run before posting a beta update:
 pnpm api:contract
 pnpm source:canary
 pnpm install-plan:canary
+pnpm archive:canary -- --require-durable
 pnpm rate-limit:canary -- --require-active
 pnpm archive:seed
 pnpm launch:verify

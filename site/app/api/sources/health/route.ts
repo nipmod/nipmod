@@ -93,7 +93,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 const SOURCE_PROBE_TIMEOUT_MS = 1_800;
-const SLOW_SOURCE_PROBE_TIMEOUT_MS = 6_500;
+const SLOW_SOURCE_PROBE_TIMEOUT_MS = 10_000;
 const SOURCE_PROBE_CACHE_TTL_MS = 30_000;
 
 interface SourceLiveProbe {
