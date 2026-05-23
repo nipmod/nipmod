@@ -1506,6 +1506,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   const warnings = [
     ...(repo ? [] : ["No source repository returned by MCP Registry."]),
     ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : []),
+    ...(envRequirementCount ? [`MCP server declares ${envRequirementCount} environment requirements; review secret scope before enabling.`] : []),
     ...(snapshot ? [`MCP Registry live request was unavailable; returned pinned public registry snapshot from ${snapshot}.`] : [])
   ];
 
@@ -1717,7 +1718,11 @@ function securityConfidence(input: {
 }
 
 function hasNegativeWarnings(warnings: string[]): boolean {
-  return warnings.some((warning) => /vulnerab|insecure|malicious|remote download|hidden background|lifecycle|missing|unavailable|not returned/i.test(warning));
+  return warnings.some((warning) =>
+    /vulnerab|insecure|malicious|remote download|hidden background|encoded|inline interpreter|lifecycle|missing|unavailable|not returned/i.test(
+      warning
+    )
+  );
 }
 
 function hasHighSeverityWarning(warning: string): boolean {
@@ -1730,6 +1735,8 @@ function hasHighSeverityWarning(warning: string): boolean {
     normalized.includes("trust_remote_code") ||
     normalized.includes("remote code") ||
     normalized.includes("hidden background") ||
+    normalized.includes("encoded") ||
+    normalized.includes("inline interpreter") ||
     normalized.includes("shell patterns")
   );
 }

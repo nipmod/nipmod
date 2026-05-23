@@ -14,6 +14,10 @@ const coreCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
 
+const clientExamples = `node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+python3 examples/http-api/agent_flow.py "http client"
+curl 'https://nipmod.com/api/openapi'`;
+
 const mcpCall = `curl -s https://nipmod.com/api/mcp \\
   -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
@@ -50,6 +54,21 @@ export default function ApiAccessPage() {
 
       <DocsSection title="Three calls">
         <DocsCode>{coreCalls}</DocsCode>
+      </DocsSection>
+
+      <DocsSection title="Client examples">
+        <DocsGrid>
+          <DocsCard label="TS" title="TypeScript agent flow">
+            <p>Runs search, inspect and install-plan against the public API with no local workspace writes.</p>
+          </DocsCard>
+          <DocsCard label="PY" title="Python agent flow">
+            <p>Same contract for Python-based agents or automation hosts.</p>
+          </DocsCard>
+          <DocsCard label="API" title="OpenAPI contract">
+            <p>Use the live contract for generated clients, tool schemas and host-side validation.</p>
+          </DocsCard>
+        </DocsGrid>
+        <DocsCode>{clientExamples}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Endpoints">
@@ -162,8 +181,13 @@ export default function ApiAccessPage() {
             },
             {
               first: "Examples",
+              second: <code>https://github.com/nipmod/nipmod/tree/main/examples/http-api</code>,
+              third: "Copyable HTTPS examples for any agent host."
+            },
+            {
+              first: "Agent prompts",
               second: <code>https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow</code>,
-              third: "Copyable prompts for Codex, Claude Code, MCP hosts and HTTPS agents."
+              third: "Short host prompts that tell agents to use Search, Inspect and Install Plan."
             },
             {
               first: "Trust scoring",

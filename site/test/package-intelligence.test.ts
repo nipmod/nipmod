@@ -442,7 +442,7 @@ describe("package intelligence archive", () => {
         apikey: "publishable-key",
         authorization: "Bearer publishable-key"
       });
-      if (url.includes("package_intelligence_records?on_conflict=id")) {
+      if (url.includes("package_intelligence_records?on_conflict=stable_key")) {
         expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": "write-token" });
         return new Response(null, { status: 204 });
       }
@@ -458,6 +458,41 @@ describe("package intelligence archive", () => {
     await expect(searchPackageIntelligenceArchive("telegram", { env, fetchImpl: fetchMock })).resolves.toMatchObject({
       configured: true,
       total: 1
+    });
+  });
+
+  test("deduplicates Supabase archive writes by stable source identity", async () => {
+    const env = {
+      NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
+      NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+    };
+    const record = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord), { actor: "codex" });
+    const legacyRecord = { ...record, id: "pkgintel_legacyarchive000001" };
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      if (url.includes("id=eq.")) {
+        return Response.json([]);
+      }
+      if (url.includes("stable_key=eq.")) {
+        return Response.json([{ record: legacyRecord }]);
+      }
+      if (url.includes("package_intelligence_records?on_conflict=stable_key")) {
+        const body = JSON.parse(String(init?.body)) as Array<{ id: string; stable_key: string }>;
+        expect(body[0]?.id).toBe(legacyRecord.id);
+        expect(body[0]?.stable_key).toBe(record.stableKey);
+        return new Response(null, { status: 204 });
+      }
+      return Response.json({ error: "unexpected request" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    await expect(upsertPackageIntelligenceRecord(record, { env, fetchImpl: fetchMock })).resolves.toMatchObject({
+      record: {
+        archive: { confirmationCount: 2 },
+        id: legacyRecord.id,
+        stableKey: record.stableKey
+      },
+      stored: true
     });
   });
 
@@ -576,7 +611,7 @@ function stubArchiveRouteFetch(
         options.supabaseConfigured &&
         requestUrl.hostname === "db.example.test" &&
         requestUrl.pathname.endsWith("/package_intelligence_records") &&
-        requestUrl.searchParams.has("id")
+        (requestUrl.searchParams.has("id") || requestUrl.searchParams.has("stable_key"))
       ) {
         return Response.json([]);
       }
@@ -584,7 +619,7 @@ function stubArchiveRouteFetch(
         options.supabaseConfigured &&
         requestUrl.hostname === "db.example.test" &&
         requestUrl.pathname.endsWith("/package_intelligence_records") &&
-        requestUrl.searchParams.get("on_conflict") === "id"
+        requestUrl.searchParams.get("on_conflict") === "stable_key"
       ) {
         expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": options.expectSupabaseWriteToken });
         return new Response(null, { status: 204 });

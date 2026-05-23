@@ -466,6 +466,44 @@ describe("external package resolver", () => {
     });
   });
 
+  test("blocks npm packages with encoded inline lifecycle payloads", async () => {
+    const fetchImpl = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      if (url === "https://registry.npmjs.org/encoded-lifecycle/latest") {
+        return jsonResponse({
+          description: "Encoded lifecycle fixture.",
+          dist: {
+            integrity: "sha512-encoded",
+            signatures: [{ keyid: "SHA256:encoded", sig: "encoded" }]
+          },
+          license: "MIT",
+          name: "encoded-lifecycle",
+          repository: { url: "git+https://github.com/example/encoded-lifecycle.git" },
+          scripts: {
+            postinstall: "node -e \"eval(Buffer.from(process.env.NPM_POSTINSTALL_PAYLOAD || '', 'base64').toString())\""
+          },
+          version: "1.0.0"
+        });
+      }
+      if (url === "https://api.npmjs.org/downloads/point/last-month/encoded-lifecycle") {
+        return jsonResponse({ downloads: 100_000, package: "encoded-lifecycle" });
+      }
+      return jsonResponse({ error: "not found" }, 404);
+    };
+
+    const record = await inspectExternalPackage("npm", "encoded-lifecycle", { fetchImpl });
+    const plan = createExternalInstallPlan(record);
+
+    expect(record.trust.decision).toBe("avoid");
+    expect(record.trust.risk).toBe("high");
+    expect(record.trust.warnings).toContain("Lifecycle script postinstall contains encoded or inline interpreter execution behavior.");
+    expect(record.trust.signals).toContain("npm latest release declares install-time lifecycle scripts (postinstall) with high lifecycle risk.");
+    expect(plan.safety).toMatchObject({
+      blocked: true,
+      blockReason: "Source trust signals require manual security review before installation."
+    });
+  });
+
   test("surfaces GitHub package lifecycle risk from repository manifests", async () => {
     const fetchImpl = async (input: string | URL | Request) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
@@ -846,6 +884,7 @@ describe("external package resolver", () => {
     expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
     expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
     expect(mcp.trust.signals).toContain("MCP registry packages returned: 1.");
+    expect(mcp.trust.warnings).toContain("MCP server declares 2 environment requirements; review secret scope before enabling.");
   });
 
   test("aborts oversized source bodies before full buffering", async () => {
