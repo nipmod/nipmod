@@ -65,6 +65,7 @@ Recent hardening:
 - Archive prepare and confirm now re-inspect posted external records from the original source before using them.
 - Client-supplied trust scores, decisions and factors cannot upgrade durable archive records.
 - Agent-targeted instructions in package metadata block confirmed archive persistence.
+- Install plans now include structured command boundary metadata and block high-risk shell patterns from normal execution.
 
 ## Workstream 1: API Contract
 
@@ -151,9 +152,9 @@ Goal: make install plans useful for agents without turning untrusted metadata in
 
 Tasks:
 
-- Return structured command data alongside display commands.
+- Return structured command data alongside display commands. Done with `plan.commandDetails`.
 - Generate install commands only from source-specific safe templates.
-- Add `blocked: true` for high-risk install plans.
+- Add `blocked: true` for high-risk install plans. Done with `safety.blocked`.
 - Expand command scanner coverage for:
   - shell chaining
   - `bash -c`
@@ -176,7 +177,7 @@ Current hardening:
 Definition of Done:
 
 - Agents can render a safe install plan without executing anything.
-- High-risk commands are blocked rather than presented as normal install commands.
+- High-risk commands are marked blocked, return explicit command boundary metadata and tell agents not to execute.
 - The hosted API stays read-only.
 - Tests cover common shell injection and remote-script patterns.
 

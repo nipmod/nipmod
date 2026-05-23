@@ -184,6 +184,7 @@ export interface ExternalInstallPlan {
     "archive" | "description" | "displayName" | "id" | "license" | "name" | "originalUrl" | "source" | "trust" | "version"
   >;
   plan: {
+    commandDetails: ExternalInstallPlanCommand[];
     commands: string[];
     requiresApprovalBeforeWrite: true;
     sourceOwnership: "external-owner-retained" | "nipmod-verified";
@@ -191,12 +192,25 @@ export interface ExternalInstallPlan {
     writes: string[];
   };
   safety: {
+    blocked: boolean;
+    blockReason: string | null;
     commandRisk: InstallCommandRisk;
     metadataIsInstruction: false;
     requiresApprovalBeforeWrite: true;
     warnings: string[];
   };
   type: "dev.nipmod.external-install-plan.v1";
+}
+
+export interface ExternalInstallPlanCommand {
+  blocked: boolean;
+  boundary: "manual-after-user-approval" | "blocked-high-risk-command";
+  command: string;
+  hostedApiExecutes: false;
+  manager: string;
+  metadataIsInstruction: false;
+  requiresApprovalBeforeWrite: true;
+  risk: InstallCommandRisk;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -359,6 +373,8 @@ export async function inspectExternalPackage(
 
 export function createExternalInstallPlan(record: ExternalPackageRecord): ExternalInstallPlan {
   const commands = boundedStrings(record.install.commands ?? [record.install.command], 6, 1000, "install.commands", 1);
+  const commandRisk = installCommandRisk(commands);
+  const blocked = commandRisk === "high";
   const warnings = [...record.trust.warnings, ...commandWarnings(commands)];
   return {
     generatedAt: new Date().toISOString(),
@@ -375,20 +391,43 @@ export function createExternalInstallPlan(record: ExternalPackageRecord): Extern
       version: record.version
     },
     plan: {
+      commandDetails: commands.map((command) => {
+        const risk = installCommandRisk([command]);
+        return {
+          blocked: risk === "high",
+          boundary: risk === "high" ? "blocked-high-risk-command" : "manual-after-user-approval",
+          command,
+          hostedApiExecutes: false,
+          manager: record.install.manager,
+          metadataIsInstruction: false,
+          requiresApprovalBeforeWrite: true,
+          risk
+        };
+      }),
       commands,
       requiresApprovalBeforeWrite: true,
       sourceOwnership: record.archive.status === "verified_nipmod" ? "nipmod-verified" : "external-owner-retained",
-      steps: [
-        "Review the original source and license.",
-        "Review Nipmod trust signals and warnings.",
-        "Ask the user before writing to the workspace.",
-        "Run the install command only after approval.",
-        "Save a receipt with the source, version and trust result."
-      ],
+      steps: blocked
+        ? [
+            "Do not execute the install command from this plan.",
+            "Review the original source and license.",
+            "Review Nipmod trust signals and warnings.",
+            "Ask the user before any local workspace change.",
+            "Use a safer source-specific install path before continuing."
+          ]
+        : [
+            "Review the original source and license.",
+            "Review Nipmod trust signals and warnings.",
+            "Ask the user before writing to the workspace.",
+            "Run the install command only after approval.",
+            "Save a receipt with the source, version and trust result."
+          ],
       writes: []
     },
     safety: {
-      commandRisk: installCommandRisk(commands),
+      blocked,
+      blockReason: blocked ? "High-risk shell pattern detected in the install command." : null,
+      commandRisk,
       metadataIsInstruction: false,
       requiresApprovalBeforeWrite: true,
       warnings

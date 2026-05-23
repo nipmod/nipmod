@@ -51,8 +51,14 @@ describe("OpenAPI route", () => {
       "status"
     ]);
     expect(body.components.schemas.ExternalSourceResolverProfile.required).toContain("normalization");
+    expect(body.components.schemas.ExternalInstallPlan.required).toEqual(["generatedAt", "package", "plan", "safety", "type"]);
+    expect(body.components.schemas.ExternalInstallPlan.properties.plan.required).toContain("commandDetails");
+    expect(body.components.schemas.ExternalInstallPlan.properties.safety.required).toContain("blocked");
     expect(body.paths["/api/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ExternalSearchResult"
+    );
+    expect(body.paths["/api/install-plan"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ExternalInstallPlan"
     );
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
     expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");

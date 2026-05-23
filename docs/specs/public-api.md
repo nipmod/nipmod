@@ -124,6 +124,15 @@ dev.nipmod.external-install-plan.v1
 
 Install plans return commands as review data only. The hosted API never runs the command.
 
+Each command includes structured boundary data:
+
+- `plan.commandDetails[].hostedApiExecutes` is always `false`.
+- `plan.commandDetails[].requiresApprovalBeforeWrite` is always `true`.
+- `plan.commandDetails[].risk` is `low`, `medium` or `high`.
+- `safety.blocked` is `true` when the command contains a high-risk shell pattern such as a remote script piped into a shell.
+
+Blocked plans are still returned for review, but agents must not execute the command.
+
 ## `GET /api/archive/prepare`
 
 Prepare a durable archive record from a resolved external package.

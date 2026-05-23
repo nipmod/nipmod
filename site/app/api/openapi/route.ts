@@ -143,6 +143,108 @@ function openApiDocument() {
           ],
           type: "object"
         },
+        ExternalInstallPlan: {
+          additionalProperties: false,
+          description: "Read-only install plan for an agent to show before any local workspace write.",
+          properties: {
+            generatedAt: { format: "date-time", type: "string" },
+            package: { $ref: "#/components/schemas/ExternalInstallPlanPackage" },
+            plan: {
+              additionalProperties: false,
+              properties: {
+                commandDetails: {
+                  items: { $ref: "#/components/schemas/ExternalInstallPlanCommand" },
+                  type: "array"
+                },
+                commands: { items: { type: "string" }, type: "array" },
+                requiresApprovalBeforeWrite: { const: true, type: "boolean" },
+                sourceOwnership: { enum: ["external-owner-retained", "nipmod-verified"], type: "string" },
+                steps: { items: { type: "string" }, type: "array" },
+                writes: { items: { type: "string" }, type: "array" }
+              },
+              required: ["commandDetails", "commands", "requiresApprovalBeforeWrite", "sourceOwnership", "steps", "writes"],
+              type: "object"
+            },
+            safety: {
+              additionalProperties: false,
+              properties: {
+                blocked: { type: "boolean" },
+                blockReason: { nullable: true, type: "string" },
+                commandRisk: { enum: ["low", "medium", "high"], type: "string" },
+                metadataIsInstruction: { const: false, type: "boolean" },
+                requiresApprovalBeforeWrite: { const: true, type: "boolean" },
+                warnings: { items: { type: "string" }, type: "array" }
+              },
+              required: ["blocked", "blockReason", "commandRisk", "metadataIsInstruction", "requiresApprovalBeforeWrite", "warnings"],
+              type: "object"
+            },
+            type: { const: "dev.nipmod.external-install-plan.v1", type: "string" }
+          },
+          required: ["generatedAt", "package", "plan", "safety", "type"],
+          type: "object"
+        },
+        ExternalInstallPlanPackage: {
+          additionalProperties: false,
+          properties: {
+            archive: {
+              properties: {
+                persistence: { enum: ["ephemeral", "static", "database"], type: "string" },
+                status: { enum: ["external_indexed", "claimed", "verified_nipmod"], type: "string" }
+              },
+              required: ["persistence", "status"],
+              type: "object"
+            },
+            description: { type: "string" },
+            displayName: { type: "string" },
+            id: { type: "string" },
+            license: { nullable: true, type: "string" },
+            name: { type: "string" },
+            originalUrl: { format: "uri", type: "string" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            trust: {
+              properties: {
+                checkedAt: { format: "date-time", type: "string" },
+                decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+                dimensions: { $ref: "#/components/schemas/ExternalTrustDimensions" },
+                factors: { items: { $ref: "#/components/schemas/TrustFactor" }, type: "array" },
+                policy: { $ref: "#/components/schemas/TrustPolicy" },
+                risk: { enum: ["low", "medium", "high", "unknown"], type: "string" },
+                score: { maximum: 100, minimum: 0, type: "integer" },
+                signals: { items: { type: "string" }, type: "array" },
+                warnings: { items: { type: "string" }, type: "array" }
+              },
+              required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
+              type: "object"
+            },
+            version: { nullable: true, type: "string" }
+          },
+          required: ["archive", "description", "displayName", "id", "license", "name", "originalUrl", "source", "trust", "version"],
+          type: "object"
+        },
+        ExternalInstallPlanCommand: {
+          additionalProperties: false,
+          properties: {
+            blocked: { type: "boolean" },
+            boundary: { enum: ["manual-after-user-approval", "blocked-high-risk-command"], type: "string" },
+            command: { type: "string" },
+            hostedApiExecutes: { const: false, type: "boolean" },
+            manager: { type: "string" },
+            metadataIsInstruction: { const: false, type: "boolean" },
+            requiresApprovalBeforeWrite: { const: true, type: "boolean" },
+            risk: { enum: ["low", "medium", "high"], type: "string" }
+          },
+          required: [
+            "blocked",
+            "boundary",
+            "command",
+            "hostedApiExecutes",
+            "manager",
+            "metadataIsInstruction",
+            "requiresApprovalBeforeWrite",
+            "risk"
+          ],
+          type: "object"
+        },
         ExternalTrustDimensions: {
           additionalProperties: false,
           description:
@@ -504,7 +606,14 @@ function openApiDocument() {
         get: {
           parameters: [sourceParameter(), nameParameter()],
           responses: {
-            "200": { description: "Safe install plan." },
+            "200": {
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ExternalInstallPlan" }
+                }
+              },
+              description: "Safe install plan."
+            },
             "400": errorResponse(),
             "401": errorResponse(),
             "404": errorResponse(),
@@ -531,7 +640,14 @@ function openApiDocument() {
             required: true
           },
           responses: {
-            "200": { description: "Safe install plan from a posted external package record." },
+            "200": {
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ExternalInstallPlan" }
+                }
+              },
+              description: "Safe install plan from a posted external package record."
+            },
             "400": errorResponse(),
             "401": errorResponse(),
             "429": errorResponse()
