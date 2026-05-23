@@ -1,6 +1,7 @@
 import {
   EXTERNAL_PACKAGE_SOURCES,
   ExternalPackageError,
+  inspectExternalPackage,
   readExternalPackageRecord,
   type ExternalPackageRecord,
   type ExternalPackageSource
@@ -31,6 +32,40 @@ export function readExternalRecord(value: unknown): ExternalPackageRecord | null
   return readExternalPackageRecord(record);
 }
 
+export async function inspectExternalRecordFromRequest(value: unknown): Promise<ExternalPackageRecord> {
+  const suppliedRecord = readExternalRecord(value);
+  const suppliedSource = readString(value, "source");
+  const suppliedName = readString(value, "name");
+
+  if (suppliedRecord && suppliedSource && suppliedSource !== suppliedRecord.source) {
+    throw new ExternalPackageError("record source does not match request source", { code: "invalid_record", status: 400 });
+  }
+  if (suppliedRecord && suppliedName && normalizeComparableName(suppliedName) !== normalizeComparableName(suppliedRecord.name)) {
+    throw new ExternalPackageError("record name does not match request name", { code: "invalid_record", status: 400 });
+  }
+
+  const source = suppliedRecord?.source ?? parseSource(suppliedSource);
+  const name = suppliedRecord?.name ?? suppliedName ?? "";
+  const inspected = await inspectExternalPackage(source, name);
+
+  if (suppliedRecord) {
+    if (inspected.source !== suppliedRecord.source || normalizeComparableName(inspected.name) !== normalizeComparableName(suppliedRecord.name)) {
+      throw new ExternalPackageError("source inspection returned a different package than the submitted record", {
+        code: "source_record_mismatch",
+        status: 409
+      });
+    }
+    if (suppliedRecord.version && inspected.version && suppliedRecord.version !== inspected.version) {
+      throw new ExternalPackageError("submitted record version is stale; refresh from the source before archive confirmation", {
+        code: "stale_record",
+        status: 409
+      });
+    }
+  }
+
+  return inspected;
+}
+
 export function readLimit(value: string | null): number | undefined {
   if (!value) {
     return undefined;
@@ -40,4 +75,14 @@ export function readLimit(value: string | null): number | undefined {
     throw new ExternalPackageError("limit must be an integer from 1 to 100", { code: "invalid_limit", status: 400 });
   }
   return parsed;
+}
+
+function readString(value: unknown, key: string): string | null {
+  return value && typeof value === "object" && !Array.isArray(value) && typeof (value as Record<string, unknown>)[key] === "string"
+    ? ((value as Record<string, string>)[key] ?? null)
+    : null;
+}
+
+function normalizeComparableName(value: string): string {
+  return value.trim().toLowerCase();
 }

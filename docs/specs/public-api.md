@@ -142,6 +142,8 @@ Receipt preview type:
 dev.nipmod.package-intelligence-receipt.v1
 ```
 
+`POST /api/archive/prepare` accepts either a `{ "source": "...", "name": "..." }` pair or a previously resolved `{ "record": ... }`. Posted records are untrusted hints. The server refreshes the exact source record before creating the archive preview.
+
 ## `GET /api/archive/search`
 
 Search persisted package intelligence records when the durable archive store is configured.
@@ -185,7 +187,11 @@ Confirm a prepared package intelligence record for durable archive storage.
 
 Public callers can dry run the confirmation. Durable writes require server-side archive configuration and an authorized writer token.
 
-Confirm responses include a receipt. Records with `trust.decision: "avoid"`, `trust.risk: "high"` or high-risk install commands fail validation and are not stored as confirmed archive records.
+Confirm responses include a receipt. Posted records are re-inspected from the original source before confirmation, so callers cannot forge higher trust by modifying `trust.score`, `trust.decision` or `trust.factors`.
+
+Records with `trust.decision: "avoid"`, `trust.risk: "high"`, high-risk install commands, stale submitted versions or agent-targeted package metadata fail validation and are not stored as confirmed archive records.
+
+Durable writes use `x-nipmod-archive-token`. The public API key bearer header is not accepted as an archive writer token.
 
 ## `POST /api/mcp`
 

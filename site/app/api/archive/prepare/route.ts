@@ -13,7 +13,7 @@ import {
 } from "../../../../lib/package-intelligence";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
 import { checkApiRateLimit } from "../../../../lib/rate-limit";
-import { parseSource, readExternalRecord } from "../shared";
+import { inspectExternalRecordFromRequest, parseSource } from "../shared";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -59,14 +59,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const bodyRecord = readExternalRecord(body);
-    if (bodyRecord) {
-      return archiveRecordResponse(request, bodyRecord, rateLimit.access, rateLimit.headers, context);
-    }
-
-    const source = parseSource(readString(body, "source"));
-    const name = readString(body, "name") ?? "";
-    const externalRecord = await inspectExternalPackage(source, name);
+    const externalRecord = await inspectExternalRecordFromRequest(body);
     return archiveRecordResponse(request, externalRecord, rateLimit.access, rateLimit.headers, context);
   } catch (error) {
     return errorJson(error, rateLimit.access, rateLimit.headers, context, request);

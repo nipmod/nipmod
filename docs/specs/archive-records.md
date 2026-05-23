@@ -23,6 +23,10 @@ Durable writes require server-side archive credentials and an authorized writer 
 
 The Supabase production schema lives in `supabase/migrations/20260522073000_package_intelligence_archive.sql`. It enables RLS, allows public reads, stores archive write tokens only as SHA-256 hashes in `nipmod_private.archive_write_tokens`, and permits writes only when the server sends the matching `x-nipmod-archive-token` header.
 
+Submitted records are treated as hints, not authority. Before prepare or confirm returns an archive record, Nipmod inspects the original source again and uses server-generated source metadata, trust factors, warnings and install plans. Client-supplied `trust.score`, `trust.decision`, `trust.factors` and warnings are not allowed to upgrade the durable archive record.
+
+If a submitted record points to a different source/name than the inspected source returns, the request fails. If the submitted version is stale against the current exact source inspection, archive confirmation fails with `stale_record`.
+
 ## Stored Evidence
 
 Archive records should preserve:
@@ -55,6 +59,7 @@ The confirm endpoint rejects records when:
 - `trust.decision` is `avoid`
 - `trust.risk` is `high`
 - install command risk is `high`
+- package metadata contains agent-targeted prompt instructions
 
 Those records can still be inspected by an agent, but they are not persisted as confirmed archive records.
 

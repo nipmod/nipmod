@@ -62,6 +62,9 @@ Recent hardening:
 - PyPI vulnerability signals are negative trust evidence, not positive security evidence.
 - Install command scanning ignores shell separators inside quoted language snippets while still catching real shell composition.
 - OpenAPI now documents the implemented POST forms for install-plan and archive prepare.
+- Archive prepare and confirm now re-inspect posted external records from the original source before using them.
+- Client-supplied trust scores, decisions and factors cannot upgrade durable archive records.
+- Agent-targeted instructions in package metadata block confirmed archive persistence.
 
 ## Workstream 1: API Contract
 
@@ -130,16 +133,16 @@ Goal: make sure clients cannot forge trust by posting their own package records.
 
 Tasks:
 
-- Treat posted package records as untrusted input.
-- Recompute trust server-side from source, package name, version and fetched source metadata.
-- Reject durable archive writes when supplied trust conflicts with server-generated trust.
+- Treat posted package records as untrusted input. Done for archive prepare and confirm.
+- Recompute trust server-side from source, package name, version and fetched source metadata. Done for current exact inspect flow.
+- Reject durable archive writes when supplied trust conflicts with server-generated trust. Implemented by ignoring supplied trust and using the refreshed source record.
 - Add server-side receipt material for archive records.
-- Add tests for forged trust score, forged trust decision, forged factors and stale records.
+- Add tests for forged trust score, forged trust decision, forged factors and stale records. Partially done for forged score/decision and stale record.
 
 Definition of Done:
 
-- A caller cannot POST a fake `recommended` package and make Nipmod store it as trusted.
-- Archive records always contain server-generated trust.
+- A caller cannot POST a fake `recommended` package and make Nipmod store it as trusted. Done for archive prepare and confirm.
+- Archive records always contain server-generated trust. Done for current external source exact inspect path.
 - Tests cover forged trust and stale metadata attacks.
 
 ## Workstream 4: Install-Plan Safety
@@ -292,7 +295,7 @@ Threats:
 
 Tasks:
 
-- Add prompt-injection fixtures for package metadata and MCP tool descriptions.
+- Add prompt-injection fixtures for package metadata and MCP tool descriptions. Initial package metadata fixture added.
 - Add server-side trust recomputation before durable archive writes.
 - Add stale-record detection for archive confirmations.
 - Add provenance/advisory enrichment where public sources expose it.

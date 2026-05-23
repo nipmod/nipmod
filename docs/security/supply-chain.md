@@ -16,6 +16,9 @@ Nipmod is built for package intelligence, so the repository itself has to keep a
 ## Product Controls
 
 - External package metadata is untrusted input.
+- Posted external records are re-inspected from the original source before archive prepare or confirm uses them.
+- Client-supplied trust scores, decisions or factors cannot upgrade durable archive records.
+- Agent-targeted instructions inside package metadata block confirmed archive persistence.
 - Hosted API does not read or write caller workspaces.
 - Install plans require approval before workspace writes.
 - Local CLI verifies package metadata before controlled installs.

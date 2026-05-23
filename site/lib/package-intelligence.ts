@@ -115,6 +115,7 @@ export function createPackageIntelligenceRecord(
   const id = `pkgintel_${sha256(stableKey).slice(0, 24)}`;
   const installPlan = createExternalInstallPlan(sourceRecord);
   const securityWarnings = commandWarnings(installPlan.plan.commands);
+  const metadataWarnings = metadataInstructionWarnings(sourceRecord);
 
   return {
     archive: {
@@ -147,7 +148,7 @@ export function createPackageIntelligenceRecord(
       installCommandRisk: installCommandRisk(installPlan.plan.commands),
       metadataIsInstruction: false,
       requiresHumanOrAgentApprovalBeforeWrite: true,
-      warnings: [...sourceRecord.trust.warnings, ...securityWarnings]
+      warnings: [...sourceRecord.trust.warnings, ...securityWarnings, ...metadataWarnings]
     },
     source: sourceRecord.source,
     sourceKind: sourceRecord.sourceKind,
@@ -252,6 +253,9 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
   if (record.trust.risk === "high" || record.trust.decision === "avoid") {
     errors.push("avoid or high risk trust results cannot be stored as confirmed archive records");
   }
+  if (record.security.warnings.some((warning) => warning.includes("agent-targeted instructions"))) {
+    errors.push("agent-targeted package metadata cannot be stored as a confirmed archive record");
+  }
 
   return {
     errors,
@@ -309,6 +313,30 @@ function sanitizeExternalRecord(record: ExternalPackageRecord): ExternalPackageR
       warnings: record.trust.warnings.map((warning) => cleanText(warning, 300)).filter(Boolean)
     }
   };
+}
+
+function metadataInstructionWarnings(record: ExternalPackageRecord): string[] {
+  const text = cleanPlainText(
+    [
+      record.description,
+      record.displayName,
+      record.install.notes.join(" "),
+      record.trust.signals.join(" "),
+      record.trust.warnings.join(" ")
+    ].join(" "),
+    4000
+  ).toLowerCase();
+  const patterns = [
+    /ignore (all )?(previous|prior|system|developer) instructions/,
+    /reveal (the )?(system prompt|developer message|secret|api key|token)/,
+    /send (the )?(secret|api key|token|private key)/,
+    /exfiltrat(e|ion)/,
+    /do not tell (the )?(user|developer|operator)/,
+    /run (this|the) command without (asking|approval|confirmation)/
+  ];
+  return patterns.some((pattern) => pattern.test(text))
+    ? ["Package metadata contains agent-targeted instructions and must be treated as untrusted data."]
+    : [];
 }
 
 function cleanText(value: string, maxLength: number): string {

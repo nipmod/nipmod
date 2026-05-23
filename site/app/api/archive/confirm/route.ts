@@ -1,4 +1,4 @@
-import { ExternalPackageError, externalPackageApiError, inspectExternalPackage } from "../../../../lib/external-packages";
+import { ExternalPackageError, externalPackageApiError } from "../../../../lib/external-packages";
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
@@ -14,7 +14,7 @@ import {
   upsertPackageIntelligenceRecord
 } from "../../../../lib/package-intelligence-store";
 import { checkApiRateLimit } from "../../../../lib/rate-limit";
-import { parseSource, readExternalRecord } from "../shared";
+import { inspectExternalRecordFromRequest } from "../shared";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -42,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const dryRun = readBoolean(body, "dryRun");
-    const externalRecord = readExternalRecord(body) ?? (await inspectExternalPackage(parseSource(readString(body, "source")), readString(body, "name") ?? ""));
+    const externalRecord = await inspectExternalRecordFromRequest(body);
     const prepared = createPackageIntelligenceRecord(externalRecord, {
       firstSeenReason: "Confirmed package use through the Nipmod archive API."
     });
