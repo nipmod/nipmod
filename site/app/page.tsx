@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "./docs-shell";
 
-const agentInstruction = `Use Nipmod before choosing packages.
-Search candidates, inspect trust factors and return the install plan before running anything locally.`;
+const agentInstruction = `Before choosing a package, call Nipmod.
+Search, inspect the selected record, then show the install plan before any workspace write.`;
 
 export default function Home() {
   return (
     <DocsShell
-      description="One hosted API for agents to search package sources, inspect trust signals and request safe install plans before code touches a workspace."
+      description="Agents use Nipmod to search package sources, inspect trust and get safe install plans before touching a workspace."
       eyebrow="Overview"
       stats={[
         { label: "Sources", value: "6 live" },
@@ -16,25 +16,22 @@ export default function Home() {
       ]}
       title="The package layer for AI agents."
     >
-      <DocsSection title="How it works">
+      <DocsSection title="Agent flow">
         <DocsGrid>
-          <DocsCard label="1" title="Agent asks">
-            <p>A user tells an agent what they need. The agent calls Nipmod instead of guessing a dependency from memory.</p>
+          <DocsCard label="1" title="Search">
+            <p>The agent asks Nipmod for package candidates across supported sources.</p>
           </DocsCard>
-          <DocsCard label="2" title="Nipmod resolves">
-            <p>Nipmod searches supported public sources and normalizes the result into one agent-readable package record.</p>
+          <DocsCard label="2" title="Inspect">
+            <p>The agent checks one exact record for source context, license, warnings and trust factors.</p>
           </DocsCard>
-          <DocsCard label="3" title="Agent plans">
-            <p>The API returns source context, trust signals and an install plan. Hosted calls never write to the workspace.</p>
+          <DocsCard label="3" title="Plan">
+            <p>The API returns install steps for approval. The hosted API never executes them.</p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection title="Use it from any agent">
+      <DocsSection title="Agent instruction">
         <DocsCode>{agentInstruction}</DocsCode>
-        <p className="docs-note">
-          Any agent that can make HTTPS requests can use the public API. Native platform integrations are not required for the core flow.
-        </p>
       </DocsSection>
 
       <DocsSection title="Core endpoints">
@@ -42,7 +39,7 @@ export default function Home() {
           rows={[
             {
               first: "Search",
-              second: <code>GET /api/search?q=react&amp;sources=npm,pypi,github&amp;limit=5</code>,
+              second: <code>GET /api/search?q=http%20client&amp;limit=3</code>,
               third: "Find candidates."
             },
             {
@@ -53,18 +50,18 @@ export default function Home() {
             {
               first: "Plan",
               second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
-              third: "Return install steps for approval."
+              third: "Return reviewable install steps."
             },
             {
-              first: "MCP",
-              second: <code>POST /api/mcp</code>,
-              third: "Use the same read-only surface through MCP."
+              first: "Archive",
+              second: <code>GET /api/archive/prepare?source=npm&amp;name=undici</code>,
+              third: "Preview a reusable record."
             }
           ]}
         />
       </DocsSection>
 
-      <DocsSection title="Current boundaries">
+      <DocsSection title="Boundaries">
         <DocsGrid>
           <DocsCard title="Not a mirror">
             <p>Nipmod does not claim ownership of npm, PyPI, GitHub, Hugging Face or MCP packages. Source ownership stays external.</p>
@@ -72,15 +69,15 @@ export default function Home() {
           <DocsCard title="Not an executor">
             <p>The hosted API returns package intelligence and install plans. Local writes still require approval and happen outside the hosted API.</p>
           </DocsCard>
-          <DocsCard title="Not paid yet">
-            <p>The public beta is free with rate limits. API keys and paid access can come later without changing the core safety model.</p>
+          <DocsCard title="Not a shortcut around trust">
+            <p>Search ranking is not install permission. Exact package inspection and policy checks come before any local change.</p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
 
       <div className="docs-next">
         <Link href="/api-access">Open API docs</Link>
-        <Link href="/sources">View sources</Link>
+        <Link href="/examples">View examples</Link>
       </div>
     </DocsShell>
   );

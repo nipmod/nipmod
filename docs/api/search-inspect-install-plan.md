@@ -18,6 +18,12 @@ Search does not persist a verified record.
 
 Search output is useful for shortlisting. It is not permission to install.
 
+Production canary search:
+
+```bash
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'
+```
+
 ## Inspect
 
 ```bash
@@ -40,6 +46,17 @@ Inspect returns:
 - trust factors
 - source-specific evidence
 
+Known exact inspect records:
+
+```bash
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'
+curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'
+curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'
+curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad'
+curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'
+```
+
 ## Install Plan
 
 ```bash
@@ -60,6 +77,13 @@ It includes:
 - whether a workspace write would happen if approved locally
 
 The hosted API never executes the command.
+
+Every install plan includes:
+
+- `hostedApiExecutes: false`
+- `requiresApprovalBeforeWrite: true`
+- command risk and warnings
+- source ownership boundary
 
 ## Approval
 

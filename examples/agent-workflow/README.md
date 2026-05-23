@@ -32,6 +32,17 @@ curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 ```
 
+## Known Exact Records
+
+```bash
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'
+curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'
+curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'
+curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad'
+curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'
+```
+
 ## Safety Rule
 
 Search can recommend candidates. It cannot approve installation.

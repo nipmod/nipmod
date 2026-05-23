@@ -10,42 +10,42 @@ export const metadata = createPageMetadata({
 const sources = [
   {
     access: "public",
-    example: "sources=npm",
+    example: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici'",
     kind: "package registry",
     name: "npm",
     use: "JavaScript and TypeScript packages."
   },
   {
     access: "public",
-    example: "sources=pypi",
+    example: "curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'",
     kind: "package registry",
     name: "PyPI",
     use: "Python packages."
   },
   {
     access: "public",
-    example: "sources=github",
+    example: "curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'",
     kind: "source repositories",
     name: "GitHub",
     use: "Repository discovery and source context."
   },
   {
     access: "public",
-    example: "sources=huggingface-model,huggingface-dataset",
+    example: "curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'",
     kind: "model and dataset hub",
     name: "Hugging Face",
     use: "Public model and dataset records."
   },
   {
     access: "public",
-    example: "sources=mcp",
+    example: "curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'",
     kind: "tool registry",
     name: "MCP",
     use: "Public MCP server records."
   },
   {
     access: "internal",
-    example: "/api/archive/*",
+    example: "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'",
     kind: "confirmed records",
     name: "Nipmod archive",
     use: "Records saved after useful confirmed discovery."
@@ -55,7 +55,7 @@ const sources = [
 export default function SourcesPage() {
   return (
     <DocsShell
-      description="Nipmod bundles public package sources into one API response format. It links back to original sources and keeps source ownership external."
+      description="Nipmod resolves public sources into one agent-readable response format. Source ownership stays external."
       eyebrow="Sources"
       stats={[
         { label: "Live sources", value: "6" },
@@ -74,7 +74,7 @@ export default function SourcesPage() {
         />
       </DocsSection>
 
-      <DocsSection title="Source selectors">
+      <DocsSection title="Exact examples">
         <DocsGrid>
           {sources.slice(0, 5).map((source) => (
             <DocsCard key={source.name} label={source.kind} title={source.name}>

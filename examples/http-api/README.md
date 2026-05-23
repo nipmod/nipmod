@@ -3,13 +3,13 @@
 This example shows the API-first Nipmod flow an agent can use from any host that can make HTTPS requests.
 
 ```bash
-node --experimental-strip-types examples/http-api/search.ts "react"
+node --experimental-strip-types examples/http-api/search.ts "http client"
 ```
 
 For the agent-style output with inspect data, trust factors, install-plan safety and archive preview:
 
 ```bash
-node --experimental-strip-types examples/http-api/agent-flow.ts "react"
+node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
 ```
 
 Flow:
@@ -22,3 +22,14 @@ Flow:
 6. Show trust factors, rank reasons and safety warnings before approval.
 
 The examples print plans only. They do not install anything and they do not persist archive records.
+
+Known exact records used by production canaries:
+
+```bash
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'
+curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'
+curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'
+curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad'
+curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'
+```

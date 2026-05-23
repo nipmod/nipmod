@@ -811,7 +811,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     displayName: packageName,
     id: `npm:${packageName}`,
     install: {
-      command: `npm install ${packageName}`,
+      command: `npm install ${shellArg(packageName)}`,
       manager: "npm",
       notes: ["Install from the original npm registry. Nipmod does not claim ownership of this package."]
     },
@@ -884,7 +884,7 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
     displayName: name,
     id: `npm:${name}`,
     install: {
-      command: `npm install ${name}`,
+      command: `npm install ${shellArg(name)}`,
       manager: "npm",
       notes: ["Install from the original npm registry. Nipmod does not claim ownership of this package."]
     },
@@ -940,6 +940,9 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const fileSignatureCount = releaseFiles.filter((file) => readBoolean(file.has_sig)).length;
   const yankedCount = releaseFiles.filter((file) => readBoolean(file.yanked)).length;
   const fileTypes = [...new Set(releaseFiles.map(pyPiFileType).filter(Boolean))];
+  const hasWheel = fileTypes.includes("bdist_wheel");
+  const hasSourceDistribution = fileTypes.includes("sdist");
+  const sourceOnlyRelease = hasSourceDistribution && !hasWheel;
   const totalFileSize = releaseFiles.reduce((sum, file) => sum + (readNumber(file.size) ?? 0), 0);
   const provenanceCount = simpleFiles.filter((file) => readString(file.provenance)).length;
   const coreMetadataCount = simpleFiles.filter((file) => Boolean(file["core-metadata"])).length;
@@ -950,6 +953,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     ...(vulnerabilities.length > 0 ? [`PyPI reports ${vulnerabilities.length} known vulnerabilities for the latest release.`] : []),
     ...(releaseFiles.length === 0 ? ["PyPI did not return latest release file metadata."] : []),
     ...(releaseFiles.length > 0 && fileHashCount < releaseFiles.length ? ["Some PyPI latest release files are missing digest metadata."] : []),
+    ...(sourceOnlyRelease ? ["PyPI latest release has only source distribution files; local install may execute build backend code."] : []),
     ...(yankedCount > 0 ? [`PyPI marks ${yankedCount} latest release file(s) as yanked.`] : [])
   ];
   const score = clampScore(
@@ -960,9 +964,10 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       (fileSignatureCount ? 4 : 0) +
       (provenanceCount ? 8 : 0) +
       (coreMetadataCount || distInfoMetadataCount ? 3 : 0) +
-      (fileTypes.includes("bdist_wheel") ? 4 : 0) +
+      (hasWheel ? 4 : 0) +
       (requiresPython ? 4 : 0) -
       vulnerabilities.length * 24 -
+      (sourceOnlyRelease ? 10 : 0) -
       yankedCount * 30
   );
 
@@ -971,7 +976,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     displayName: projectName,
     id: `pypi:${projectName}`,
     install: {
-      command: `python -m pip install ${projectName}`,
+      command: `python -m pip install ${shellArg(projectName)}`,
       manager: "pip",
       notes: ["Install from the original PyPI project. Nipmod does not claim ownership of this package."]
     },
@@ -1001,6 +1006,9 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
         ? `PyPI simple API dist-info metadata hashes returned for ${distInfoMetadataCount} latest release file(s).`
         : "PyPI simple API dist-info metadata hashes were not returned for latest release files.",
       fileTypes.length ? `PyPI latest release file types: ${fileTypes.join(", ")}.` : "PyPI latest release file types were not returned.",
+      sourceOnlyRelease
+        ? "PyPI latest release is source-only and may run local build backend code during installation."
+        : "PyPI latest release includes wheel metadata or did not expose a source-only latest release.",
       totalFileSize ? `PyPI latest release total file size bytes: ${totalFileSize}.` : "PyPI latest release file size metadata was not returned.",
       yankedCount === 0 ? "PyPI latest release files are not marked yanked." : "PyPI latest release files include yanked files.",
       requiresPython ? `PyPI requires-python: ${requiresPython}.` : "PyPI did not return requires-python metadata.",
@@ -1214,7 +1222,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
     displayName: fullName,
     id: `github:${fullName}`,
     install: {
-      command: `git clone ${readString(item.clone_url) ?? `https://github.com/${fullName}.git`}`,
+      command: `git clone ${shellArg(readString(item.clone_url) ?? `https://github.com/${fullName}.git`)}`,
       manager: "git",
       notes: ["Clone from the original GitHub repository. Review project-specific install instructions before execution."]
     },
@@ -1343,7 +1351,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     displayName: id,
     id: `${source}:${id}`,
     install: {
-      command: `python -m pip install huggingface_hub`,
+      command: "python -m pip install huggingface_hub",
       commands: [
         "python -m pip install huggingface_hub",
         `python -c ${shellSingleQuote(snapshotCommand)}`
@@ -1498,7 +1506,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
     displayName: readString(server.title) ?? name,
     id: `mcp:${name}`,
     install: {
-      command: `mcp install ${name}`,
+      command: `mcp install ${shellArg(name)}`,
       manager: "mcp",
       notes: ["MCP install commands differ by host. Use the server's original documentation before adding it to an agent runtime."]
     },
@@ -2854,6 +2862,10 @@ function pythonStringLiteral(value: string): string {
 
 function shellSingleQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function shellArg(value: string): string {
+  return /^[A-Za-z0-9@._/:+-]+$/.test(value) ? value : shellSingleQuote(value);
 }
 
 function encodeNpmName(name: string): string {
