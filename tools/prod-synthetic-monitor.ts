@@ -214,8 +214,8 @@ export async function runSyntheticMonitor({
     const plans = await Promise.all([
       fetchJson(`${endpoints.externalInstallPlan}?source=pypi&name=requests`, timedFetch),
       fetchJson(`${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`, timedFetch),
-      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`, timedFetch),
-      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`, timedFetch)
+      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-model&name=google-bert/bert-base-uncased`, timedFetch),
+      fetchJson(`${endpoints.externalInstallPlan}?source=huggingface-dataset&name=rajpurkar/squad`, timedFetch)
     ]);
     for (const plan of plans) {
       assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "source matrix install plan type mismatch");

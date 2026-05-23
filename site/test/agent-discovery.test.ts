@@ -19,7 +19,8 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain(
       "Generic agent prompt:\nRead https://nipmod.com/llms.txt and https://nipmod.com/.well-known/nipmod.json."
     );
-    expect(llmsText).toContain("Public package state: no public packages are listed yet.");
+    expect(llmsText).toContain("Package intelligence archive state: durable archive is enabled.");
+    expect(llmsText).toContain("Public verified archive state: no verified_nipmod packages are listed by default after the seed reset.");
     expect(llmsText).toContain("Archive: https://nipmod.com/packages");
     expect(llmsText).not.toContain("/integrations/");
   });

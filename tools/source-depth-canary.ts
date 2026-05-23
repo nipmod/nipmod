@@ -56,7 +56,7 @@ const DEFAULT_CANARIES = [
   },
   {
     name: "Hugging Face model depth",
-    path: "/api/inspect?source=huggingface-model&name=bert-base-uncased",
+    path: "/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased",
     requiredDimensions: {
       provenanceStatus: "integrity"
     },
@@ -72,7 +72,7 @@ const DEFAULT_CANARIES = [
   },
   {
     name: "Hugging Face dataset depth",
-    path: "/api/inspect?source=huggingface-dataset&name=squad",
+    path: "/api/inspect?source=huggingface-dataset&name=rajpurkar/squad",
     requiredDimensions: {
       provenanceStatus: "integrity"
     },

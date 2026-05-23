@@ -25,13 +25,13 @@ const DEFAULT_CANARIES = [
   {
     expectBlocked: false,
     name: "Hugging Face model install-plan boundary",
-    path: "/api/install-plan?source=huggingface-model&name=bert-base-uncased",
+    path: "/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased",
     source: "huggingface-model"
   },
   {
     expectBlocked: false,
     name: "Hugging Face dataset install-plan boundary",
-    path: "/api/install-plan?source=huggingface-dataset&name=squad",
+    path: "/api/install-plan?source=huggingface-dataset&name=rajpurkar/squad",
     source: "huggingface-dataset"
   },
   {

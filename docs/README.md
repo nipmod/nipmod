@@ -17,6 +17,7 @@ Public docs are organized around the product surface that agents and maintainers
 - [API-first 100% plan](api-first-100-plan.md)
 - [Package intelligence architecture](package-intelligence-architecture.md)
 - [Package intelligence lifecycle](archive/package-intelligence-lifecycle.md)
+- [Package intelligence seed v1](archive/seed-v1.md)
 - [Trust model](trust-model.md)
 - [Source resolver spec](specs/source-resolvers.md)
 - [Source crawling spec](specs/source-crawling.md)
@@ -63,6 +64,7 @@ Public docs are organized around the product surface that agents and maintainers
 ## Launch Materials
 
 - [API beta launch kit](launch/api-beta.md)
+- [API beta post](launch/api-beta-post.md)
 - [Launch kit](launch-kit.md)
 - [Public launch packet](public-launch-packet.md)
 - [Release posting](release-posting.md)

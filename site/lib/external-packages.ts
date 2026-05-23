@@ -306,6 +306,86 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["sqlalchemy", "psycopg", "asyncpg"], pattern: /\b(database|postgres|postgresql|sql|orm)\b/i },
   { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i }
 ];
+const QUERY_INTENT_RANKING_HINTS: Array<{
+  matches: Array<{ bonus: number; name: string; reason: string; source?: ExternalPackageSource }>;
+  pattern: RegExp;
+}> = [
+  {
+    matches: [
+      { bonus: 14, name: "undici", reason: "Node HTTP client fit", source: "npm" },
+      { bonus: 12, name: "got", reason: "Node HTTP client fit", source: "npm" },
+      { bonus: 14, name: "requests", reason: "Python HTTP client fit", source: "pypi" },
+      { bonus: 13, name: "httpx", reason: "Python HTTP client fit", source: "pypi" }
+    ],
+    pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "zod", reason: "TypeScript schema validation fit", source: "npm" },
+      { bonus: 12, name: "valibot", reason: "TypeScript schema validation fit", source: "npm" },
+      { bonus: 14, name: "pydantic", reason: "Python schema validation fit", source: "pypi" }
+    ],
+    pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "fastapi", reason: "Python API framework fit", source: "pypi" },
+      { bonus: 12, name: "django", reason: "Python web framework fit", source: "pypi" },
+      { bonus: 12, name: "next", reason: "React application framework fit", source: "npm" },
+      { bonus: 10, name: "vite", reason: "frontend build tool fit", source: "npm" }
+    ],
+    pattern: /\b(web app|web framework|server|backend|frontend|react app|api server)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "sqlalchemy", reason: "Python database ORM fit", source: "pypi" },
+      { bonus: 12, name: "psycopg", reason: "Postgres driver fit", source: "pypi" },
+      { bonus: 14, name: "prisma", reason: "TypeScript database ORM fit", source: "npm" },
+      { bonus: 12, name: "pg", reason: "Node Postgres driver fit", source: "npm" }
+    ],
+    pattern: /\b(database|postgres|postgresql|sql|orm|drizzle|prisma)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "pytest", reason: "Python test runner fit", source: "pypi" },
+      { bonus: 12, name: "ruff", reason: "Python linting fit", source: "pypi" },
+      { bonus: 14, name: "vitest", reason: "TypeScript test runner fit", source: "npm" },
+      { bonus: 12, name: "playwright", reason: "browser test automation fit", source: "npm" }
+    ],
+    pattern: /\b(test|testing|lint|linting|e2e|browser automation|quality)\b/i
+  },
+  {
+    matches: [
+      { bonus: 13, name: "typer", reason: "Python CLI framework fit", source: "pypi" },
+      { bonus: 12, name: "click", reason: "Python CLI framework fit", source: "pypi" },
+      { bonus: 13, name: "commander", reason: "Node CLI framework fit", source: "npm" },
+      { bonus: 11, name: "yargs", reason: "Node CLI parser fit", source: "npm" }
+    ],
+    pattern: /\b(cli|terminal|command line|command-line|console)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "sentence-transformers", reason: "embedding workflow fit", source: "pypi" },
+      { bonus: 12, name: "transformers", reason: "model workflow fit", source: "pypi" },
+      {
+        bonus: 14,
+        name: "sentence-transformers/all-minilm-l6-v2",
+        reason: "embedding model fit",
+        source: "huggingface-model"
+      },
+      { bonus: 12, name: "google-bert/bert-base-uncased", reason: "general NLP model fit", source: "huggingface-model" }
+    ],
+    pattern: /\b(embedding|embeddings|model|nlp|transformer|semantic search|llm)\b/i
+  },
+  {
+    matches: [
+      { bonus: 13, name: "beautifulsoup4", reason: "HTML parsing fit", source: "pypi" },
+      { bonus: 12, name: "playwright", reason: "browser automation fit", source: "pypi" },
+      { bonus: 12, name: "playwright", reason: "browser automation fit", source: "npm" }
+    ],
+    pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i
+  }
+];
 const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
   {
     _meta: {
@@ -2295,6 +2375,7 @@ function searchSelection(records: ExternalPackageRecord[], query: string): Exter
     rankSignals: [
       "trust score",
       "exact or prefix name match",
+      "query intent hints for common package tasks",
       "source and license metadata",
       "security confidence and provenance",
       "install command boundary",
@@ -2317,17 +2398,19 @@ function selectionCandidate(record: ExternalPackageRecord, query: string): Exter
   return {
     gate: blocked ? "blocked" : review ? "review" : "pass",
     id: record.id,
-    reasons: selectionReasons(record, rank),
+    reasons: selectionReasons(record, rank, query),
     rank,
     source: record.source
   };
 }
 
-function selectionReasons(record: ExternalPackageRecord, rank: ExternalRankBreakdown): string[] {
+function selectionReasons(record: ExternalPackageRecord, rank: ExternalRankBreakdown, query: string): string[] {
   const reasons: string[] = [`trust ${record.trust.score}/${record.trust.decision}`];
+  const intentMatch = queryIntentMatch(record, query);
   if (rank.exactMatch > 0) reasons.push("exact name match");
   else if (rank.prefixMatch > 0) reasons.push("prefix name match");
   else if (rank.textMatch > 0) reasons.push("text match");
+  if (intentMatch) reasons.push(`query intent match: ${intentMatch.reason}`);
   if (record.trust.dimensions.securityConfidence === "high") reasons.push("high security confidence");
   if (record.trust.dimensions.provenanceStatus !== "unknown") reasons.push(`${record.trust.dimensions.provenanceStatus} provenance`);
   if (record.license) reasons.push("license present");
@@ -2348,6 +2431,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   const metadataPenalty = (record.license ? 0 : 6) + (record.repo ? 0 : 6);
   const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
   const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
+  const intentBonus = queryIntentMatch(record, normalizedQuery)?.bonus ?? 0;
   const sourceBonus = sourceReliabilityBonus(record.source);
   const recency = record.updatedAt ? Math.min(6, Math.round(recencyBonus(record.updatedAt) / 2)) : 0;
   const metricsBonus =
@@ -2359,6 +2443,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
       exactMatch +
       prefixMatch +
       textMatch +
+      intentBonus +
       metricsBonus +
       sourceBonus +
       recency -
@@ -2379,6 +2464,36 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
     textMatch,
     trustScore: record.trust.score
   };
+}
+
+function queryIntentMatch(
+  record: ExternalPackageRecord,
+  query: string
+): { bonus: number; reason: string } | null {
+  const normalizedQuery = query.toLowerCase();
+  const recordName = record.name.toLowerCase();
+  const displayName = record.displayName.toLowerCase();
+  let best: { bonus: number; reason: string } | null = null;
+
+  for (const hint of QUERY_INTENT_RANKING_HINTS) {
+    if (!hint.pattern.test(normalizedQuery)) {
+      continue;
+    }
+    for (const match of hint.matches) {
+      const targetName = match.name.toLowerCase();
+      if (match.source && match.source !== record.source) {
+        continue;
+      }
+      if (recordName !== targetName && displayName !== targetName) {
+        continue;
+      }
+      if (!best || match.bonus > best.bonus) {
+        best = { bonus: match.bonus, reason: match.reason };
+      }
+    }
+  }
+
+  return best;
 }
 
 function sourceReliabilityBonus(source: ExternalPackageSource): number {

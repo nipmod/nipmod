@@ -22,6 +22,14 @@ const mcpCall = `curl -s https://nipmod.com/api/mcp \\
   -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
 
+const betaContract = `publicBeta: true
+apiKeyRequired: false
+rateLimited: true
+hostedWorkspaceWrites: false
+stableBetaCalls: search, inspect, install-plan, openapi
+archivePrepare: preview only
+archiveConfirm: authorized server writer only`;
+
 export default function ApiAccessPage() {
   return (
     <DocsShell
@@ -34,6 +42,21 @@ export default function ApiAccessPage() {
       ]}
       title="One package API for agents."
     >
+      <DocsSection title="Beta contract">
+        <DocsGrid>
+          <DocsCard title="Public access">
+            <p>No API key is required during public beta. Requests are rate limited and designed for agent preflight checks.</p>
+          </DocsCard>
+          <DocsCard title="Stable beta surface">
+            <p>Search, Inspect, Install Plan and OpenAPI are the public contract agents should build against first.</p>
+          </DocsCard>
+          <DocsCard title="Archive boundary">
+            <p>Archive prepare is a preview. Durable confirmation is limited to authorized server writers and re-inspects source data.</p>
+          </DocsCard>
+        </DocsGrid>
+        <DocsCode>{betaContract}</DocsCode>
+      </DocsSection>
+
       <DocsSection title="Use from any agent">
         <DocsGrid>
           <DocsCard label="1" title="Search">

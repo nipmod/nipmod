@@ -11,11 +11,25 @@ export default function Home() {
       eyebrow="Overview"
       stats={[
         { label: "Sources", value: "6 live" },
-        { label: "Hosted API", value: "read-only" },
-        { label: "Beta", value: "free, rate limited" }
+        { label: "API beta", value: "public" },
+        { label: "Hosted writes", value: "0" }
       ]}
       title="The package layer for AI agents."
     >
+      <DocsSection title="Public beta">
+        <DocsGrid>
+          <DocsCard title="One API surface">
+            <p>Agents can search supported package sources, inspect exact records and request install plans through the same hosted API.</p>
+          </DocsCard>
+          <DocsCard title="Free with limits">
+            <p>Public beta access does not require a key. Production requests are rate limited through shared buckets.</p>
+          </DocsCard>
+          <DocsCard title="No hidden execution">
+            <p>Hosted calls never read caller workspaces, run package managers or write lockfiles.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
       <DocsSection title="Agent flow">
         <DocsGrid>
           <DocsCard label="1" title="Search">

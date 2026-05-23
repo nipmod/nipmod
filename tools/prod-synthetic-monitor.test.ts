@@ -601,10 +601,10 @@ function createFixture({
     [`GET ${endpoints.externalInstallPlan}?source=github&name=vercel/next.js`]: jsonResponse(
       installPlanFixture("git clone https://github.com/vercel/next.js.git", "git")
     ),
-    [`GET ${endpoints.externalInstallPlan}?source=huggingface-model&name=bert-base-uncased`]: jsonResponse(
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-model&name=google-bert/bert-base-uncased`]: jsonResponse(
       installPlanFixture("python -m pip install huggingface_hub", "huggingface_hub")
     ),
-    [`GET ${endpoints.externalInstallPlan}?source=huggingface-dataset&name=squad`]: jsonResponse(
+    [`GET ${endpoints.externalInstallPlan}?source=huggingface-dataset&name=rajpurkar/squad`]: jsonResponse(
       installPlanFixture("python -m pip install huggingface_hub", "huggingface_hub")
     ),
     [`GET ${endpoints.externalSearch}?q=tandem&sources=mcp&limit=3`]: jsonResponse({

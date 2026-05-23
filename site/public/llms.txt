@@ -56,7 +56,8 @@ GET https://nipmod.com/api/sources/health
 External records are external_indexed. Original package owners keep ownership. verified_nipmod requires a verified claim or direct publish.
 Durable package intelligence writes require the server side archive store and an authorized server writer.
 Archive confirm rejects avoid, unknown, below-threshold or high-risk trust results and high-risk install commands.
-Public package state: no public packages are listed yet. The seed archive was cleared.
+Package intelligence archive state: durable archive is enabled. Seed v1 is operator-controlled and contains confirmed external_indexed package intelligence records only after source re-inspection.
+Public verified archive state: no verified_nipmod packages are listed by default after the seed reset. Verified claims require stronger gates.
 
 Local setup is only needed when an agent must write to a workspace.
 

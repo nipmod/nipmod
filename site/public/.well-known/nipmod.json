@@ -42,6 +42,12 @@
     "receiptType": "dev.nipmod.package-intelligence-receipt.v1",
     "prepareStores": false,
     "confirmStores": "requires authorized server writer",
+    "seed": {
+      "status": "operator-controlled",
+      "description": "Seed v1 confirms a small set of external_indexed package intelligence records across npm, PyPI, GitHub, Hugging Face and MCP after source re-inspection.",
+      "bulkMirror": false,
+      "verifiedClaim": false
+    },
     "rejects": [
       "trust.decision avoid",
       "trust.decision unknown",

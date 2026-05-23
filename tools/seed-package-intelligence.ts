@@ -4,23 +4,83 @@ import { readFileSync } from "node:fs";
 type ExternalPackageSource = "npm" | "pypi" | "github" | "huggingface-model" | "huggingface-dataset" | "mcp";
 
 interface SeedTarget {
+  category: "api-example" | "agent-runtime" | "model-workflow" | "source-context" | "tool-registry";
   name: string;
   reason: string;
   source: ExternalPackageSource;
 }
 
 const seedTargets: SeedTarget[] = [
-  { source: "npm", name: "react", reason: "Common frontend package used to verify npm search, inspect and install-plan flow." },
-  { source: "npm", name: "undici", reason: "Node HTTP client used in public API examples." },
-  { source: "pypi", name: "requests", reason: "Common Python HTTP package used to verify PyPI resolver flow." },
-  { source: "github", name: "vercel/next.js", reason: "Large public source repo used to verify GitHub resolver flow." },
-  { source: "huggingface-model", name: "bert-base-uncased", reason: "Common model record used to verify Hugging Face model resolver flow." },
-  { source: "huggingface-dataset", name: "squad", reason: "Common dataset record used to verify Hugging Face dataset resolver flow." },
-  { source: "mcp", name: "ac.tandem/docs-mcp", reason: "Public MCP server record used to verify MCP Registry resolver flow." }
+  {
+    category: "api-example",
+    source: "npm",
+    name: "undici",
+    reason: "Node HTTP client used in public API examples and canary install-plan checks."
+  },
+  {
+    category: "api-example",
+    source: "pypi",
+    name: "requests",
+    reason: "Python HTTP client used to verify PyPI search, inspect and install-plan flow."
+  },
+  {
+    category: "agent-runtime",
+    source: "npm",
+    name: "zod",
+    reason: "Schema validation package used by agents to validate tool inputs and structured API responses."
+  },
+  {
+    category: "agent-runtime",
+    source: "pypi",
+    name: "pydantic",
+    reason: "Schema validation package used by Python agents for typed request and response boundaries."
+  },
+  {
+    category: "agent-runtime",
+    source: "npm",
+    name: "playwright",
+    reason: "Browser automation package used to test install-plan risk and agent workflow tooling."
+  },
+  {
+    category: "source-context",
+    source: "github",
+    name: "vercel/next.js",
+    reason: "Large public source repository used to verify GitHub resolver source context."
+  },
+  {
+    category: "source-context",
+    source: "github",
+    name: "modelcontextprotocol/servers",
+    reason: "Public MCP server repository used to verify source context for agent tool ecosystems."
+  },
+  {
+    category: "model-workflow",
+    source: "huggingface-model",
+    name: "google-bert/bert-base-uncased",
+    reason: "Common public model record used to verify Hugging Face model source inspection."
+  },
+  {
+    category: "model-workflow",
+    source: "huggingface-model",
+    name: "sentence-transformers/all-MiniLM-L6-v2",
+    reason: "Embedding model record used to verify common agent retrieval and semantic search workflows."
+  },
+  {
+    category: "model-workflow",
+    source: "huggingface-dataset",
+    name: "rajpurkar/squad",
+    reason: "Public dataset record used to verify Hugging Face dataset source inspection."
+  },
+  {
+    category: "tool-registry",
+    source: "mcp",
+    name: "ac.tandem/docs-mcp",
+    reason: "Public MCP server record used to verify MCP Registry resolver and hosted read-only MCP planning."
+  }
 ];
 
 const write = process.argv.includes("--write");
-const envFile = valueAfter("--env-file");
+const envFile = valueAfter("--env-file-path") ?? valueAfter("--dotenv");
 if (envFile) {
   loadEnvFile(envFile);
 }
@@ -41,13 +101,14 @@ for (const target of targets) {
   const body = {
     actor: "nipmod-seed",
     dryRun: !write,
-    message: `${target.reason} Confirmed as a public beta package intelligence seed after source inspection.`,
+    message: `${target.reason} Confirmed as an API beta package intelligence seed after source inspection.`,
     name: target.name,
     source: target.source
   };
   const response = await postJson("/api/archive/confirm", body, write ? { "x-nipmod-archive-token": archiveToken } : {});
 
   results.push({
+    category: target.category,
     errors: response.validation?.errors ?? [],
     id: response.record?.id ?? null,
     name: response.record?.name ?? target.name,
@@ -66,12 +127,22 @@ console.log(JSON.stringify({
   dryRun: !write,
   results,
   summary: {
+    byCategory: groupCount(results, "category"),
+    bySource: groupCount(results, "source"),
     rejected: results.filter((result) => result.status === "rejected").length,
     stored: results.filter((result) => result.status === "stored").length,
     total: results.length
   },
   type: "dev.nipmod.package-intelligence-seed.v1"
 }, null, 2));
+
+function groupCount(items: Array<Record<string, unknown>>, key: string): Record<string, number> {
+  return items.reduce<Record<string, number>>((accumulator, item) => {
+    const value = typeof item[key] === "string" ? item[key] : "unknown";
+    accumulator[value] = (accumulator[value] ?? 0) + 1;
+    return accumulator;
+  }, {});
+}
 
 async function postJson(path: string, body: unknown, headers: Record<string, string>): Promise<Record<string, any>> {
   const response = await fetch(new URL(path, baseUrl), {
@@ -104,7 +175,7 @@ function loadEnvFile(path: string): void {
     if (!trimmed || trimmed.startsWith("#")) {
       continue;
     }
-    const match = /^([A-Z0-9_]+)\s*=\s*(.*)$/.exec(trimmed);
+    const match = /^(?:export\s+)?([A-Z0-9_]+)\s*=\s*(.*)$/.exec(trimmed);
     if (!match) {
       continue;
     }
