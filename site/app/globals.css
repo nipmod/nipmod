@@ -4127,6 +4127,11 @@ body {
   border-radius: 4px;
 }
 
+.brand-icon-button .brand-telegram-icon {
+  height: 19px;
+  width: 19px;
+}
+
 .brand-icon-button:hover {
   background: rgba(255, 255, 255, 0.05);
   opacity: 1;
