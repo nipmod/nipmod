@@ -119,6 +119,62 @@ describe("install plan canary", () => {
     expect(result.ok).toBe(false);
     expect(result.checks[0].error).toContain("must require approval");
   });
+
+  test("accepts blocked source-risk boundaries", async () => {
+    const fixture = installPlanFixture();
+    const payload = installPlanFixture({
+      package: {
+        ...fixture.package,
+        trust: {
+          ...fixture.package.trust,
+          decision: "avoid",
+          risk: "high",
+          warnings: ["Lifecycle script postinstall contains remote download or hidden background execution behavior."]
+        }
+      },
+      plan: {
+        commandDetails: [
+          {
+            blocked: true,
+            boundary: "blocked-source-risk",
+            command: "npm install undici",
+            hostedApiExecutes: false,
+            manager: "npm",
+            metadataIsInstruction: false,
+            requiresApprovalBeforeWrite: true,
+            risk: "low"
+          }
+        ],
+        commands: ["npm install undici"],
+        requiresApprovalBeforeWrite: true,
+        sourceOwnership: "external-owner-retained",
+        steps: [],
+        writes: []
+      },
+      safety: {
+        blocked: true,
+        blockReason: "Source trust signals require manual security review before installation.",
+        commandRisk: "low",
+        metadataIsInstruction: false,
+        requiresApprovalBeforeWrite: true,
+        warnings: ["Lifecycle script postinstall contains remote download or hidden background execution behavior."]
+      }
+    });
+    const fetchFn = vi.fn(async () => Response.json(payload)) as unknown as typeof fetch;
+
+    const result = await runInstallPlanCanary({
+      canaries: [{ expectBlocked: true, name: "npm install-plan source risk", path: "/api/install-plan?source=npm&name=undici", source: "npm" }],
+      fetchFn
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.checks[0].data).toMatchObject({
+      blocked: true,
+      commandRisk: "low",
+      id: "npm:undici",
+      source: "npm"
+    });
+  });
 });
 
 function installPlanFixture(overrides: Record<string, unknown> = {}) {

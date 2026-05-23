@@ -76,7 +76,7 @@ Factor categories:
 
 ## External Decision Thresholds
 
-Warnings that contain vulnerability or insecure signals force `decision: "avoid"` and `risk: "high"`.
+Warnings that contain vulnerability, insecure signals, suspicious lifecycle behavior, remote download execution, hidden background execution or high-risk shell patterns force `decision: "avoid"` and `risk: "high"`.
 
 Otherwise:
 
@@ -189,7 +189,8 @@ Selection order:
 5. Use popularity signals only as tie-breakers or ecosystem-fit signals.
 6. Request an install plan before recommending local execution.
 
-Recommended candidates can still be rejected by the install-plan boundary. A high-risk command, remote shell pattern or agent-targeted package text blocks archive confirmation even when search ranking was strong.
+Recommended candidates can still be rejected by the install-plan boundary. A high-risk command, remote shell pattern, source lifecycle risk or agent-targeted package text blocks archive confirmation even when search ranking was strong.
+Install-time lifecycle scripts are evaluated as source trust signals. A visible command such as `npm install <name>` can remain low command risk while the package is still blocked because upstream metadata declares suspicious `preinstall`, `install` or `postinstall` behavior.
 
 Human-readable result summaries should include:
 

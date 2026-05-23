@@ -215,7 +215,7 @@ function openApiDocument() {
           additionalProperties: false,
           properties: {
             blocked: { type: "boolean" },
-            boundary: { enum: ["manual-after-user-approval", "blocked-high-risk-command"], type: "string" },
+            boundary: { enum: ["manual-after-user-approval", "blocked-high-risk-command", "blocked-source-risk"], type: "string" },
             command: { type: "string" },
             hostedApiExecutes: { const: false, type: "boolean" },
             manager: { type: "string" },

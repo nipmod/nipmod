@@ -1,4 +1,13 @@
-import { cleanPlainText, commandWarnings, installCommandRisk, type InstallCommandRisk } from "./package-command-safety";
+import {
+  cleanPlainText,
+  commandWarnings,
+  installCommandRisk,
+  lifecycleScriptRisk,
+  lifecycleScriptWarnings,
+  packageLifecycleScripts,
+  type InstallCommandRisk,
+  type PackageLifecycleScript
+} from "./package-command-safety";
 
 export const EXTERNAL_PACKAGE_SOURCES = [
   "npm",
@@ -204,7 +213,7 @@ export interface ExternalInstallPlan {
 
 export interface ExternalInstallPlanCommand {
   blocked: boolean;
-  boundary: "manual-after-user-approval" | "blocked-high-risk-command";
+  boundary: "manual-after-user-approval" | "blocked-high-risk-command" | "blocked-source-risk";
   command: string;
   hostedApiExecutes: false;
   manager: string;
@@ -374,8 +383,15 @@ export async function inspectExternalPackage(
 export function createExternalInstallPlan(record: ExternalPackageRecord): ExternalInstallPlan {
   const commands = boundedStrings(record.install.commands ?? [record.install.command], 6, 1000, "install.commands", 1);
   const commandRisk = installCommandRisk(commands);
-  const blocked = commandRisk === "high";
+  const sourceBlocked = hasBlockingTrustRisk(record);
+  const blocked = commandRisk === "high" || sourceBlocked;
   const warnings = [...record.trust.warnings, ...commandWarnings(commands)];
+  const blockReason =
+    commandRisk === "high"
+      ? "High-risk shell pattern detected in the install command."
+      : sourceBlocked
+        ? "Source trust signals require manual security review before installation."
+        : null;
   return {
     generatedAt: new Date().toISOString(),
     package: {
@@ -393,9 +409,10 @@ export function createExternalInstallPlan(record: ExternalPackageRecord): Extern
     plan: {
       commandDetails: commands.map((command) => {
         const risk = installCommandRisk([command]);
+        const commandBlocked = risk === "high" || sourceBlocked;
         return {
-          blocked: risk === "high",
-          boundary: risk === "high" ? "blocked-high-risk-command" : "manual-after-user-approval",
+          blocked: commandBlocked,
+          boundary: risk === "high" ? "blocked-high-risk-command" : sourceBlocked ? "blocked-source-risk" : "manual-after-user-approval",
           command,
           hostedApiExecutes: false,
           manager: record.install.manager,
@@ -426,7 +443,7 @@ export function createExternalInstallPlan(record: ExternalPackageRecord): Extern
     },
     safety: {
       blocked,
-      blockReason: blocked ? "High-risk shell pattern detected in the install command." : null,
+      blockReason,
       commandRisk,
       metadataIsInstruction: false,
       requiresApprovalBeforeWrite: true,
@@ -703,6 +720,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const hasSignature = Array.isArray(signatures) && signatures.length > 0;
   const dependencyCount = packageDependencyCount(manifest);
   const maintainerCount = arrayLength(manifest.maintainers);
+  const lifecycleScripts = packageLifecycleScripts(manifest.scripts);
+  const lifecycleRisk = lifecycleScriptRisk(lifecycleScripts);
   const deprecated = readString(manifest.deprecated);
   const nodeEngine = readNestedString(manifest, ["engines", "node"]);
   const fundingUrl = readString(manifest.funding) ?? readNestedString(manifest, ["funding", "url"]);
@@ -710,7 +729,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const warnings = [
     ...(deprecated ? [`npm marks the latest release as deprecated: ${deprecated}`] : []),
     ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
-    ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."])
+    ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."]),
+    ...lifecycleScriptWarnings(lifecycleScripts)
   ];
   const score = clampScore(
     52 +
@@ -720,6 +740,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (hasSignature ? 8 : 0) +
       (maintainerCount ? 4 : 0) +
       (deprecated ? -28 : 0) +
+      lifecycleRiskPenalty(lifecycleRisk) +
       Math.min(12, Math.log10((downloads ?? 0) + 1) * 2)
   );
 
@@ -749,6 +770,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       repo ? "Repository link is present." : "Repository link is missing.",
       dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
       maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
+      lifecycleScriptSignal("npm latest release", lifecycleScripts),
       nodeEngine ? `npm package declares Node engine: ${nodeEngine}.` : "npm package did not declare a Node engine.",
       fundingUrl ? "npm package exposes funding metadata." : "npm package did not expose funding metadata."
     ],
@@ -909,6 +931,7 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
 type GitHubManifestSummary = {
   dependencyCount: number | null;
   files: string[];
+  lifecycleScripts: PackageLifecycleScript[];
   packageManager: string | null;
   scriptCount: number | null;
 };
@@ -931,6 +954,7 @@ async function fetchGitHubManifestSummary(
     )
   );
   const files: string[] = [];
+  let lifecycleScripts: PackageLifecycleScript[] = [];
   let packageManager: string | null = null;
   let dependencyCount: number | null = null;
   let scriptCount: number | null = null;
@@ -946,6 +970,7 @@ async function fetchGitHubManifestSummary(
         packageManager = readString(packageJson.packageManager) ?? packageManager;
         dependencyCount = packageDependencyCount(packageJson);
         scriptCount = recordKeyCount(packageJson.scripts);
+        lifecycleScripts = packageLifecycleScripts(packageJson.scripts);
       }
     }
   }
@@ -957,6 +982,7 @@ async function fetchGitHubManifestSummary(
   return {
     dependencyCount,
     files,
+    lifecycleScripts,
     packageManager,
     scriptCount
   };
@@ -994,6 +1020,8 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
   const defaultBranch = readString(item.default_branch);
   const openIssues = readNumber(item.open_issues_count);
   const forks = readNumber(item.forks_count);
+  const lifecycleScripts = manifest?.lifecycleScripts ?? [];
+  const lifecycleRisk = lifecycleScriptRisk(lifecycleScripts);
   const score = clampScore(
     42 +
       Math.min(24, Math.log10(stars + 1) * 8) +
@@ -1002,13 +1030,15 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       (updatedAt ? recencyBonus(updatedAt) : 0) -
       (archived ? 30 : 0) -
       (disabled ? 40 : 0) -
-      (fork ? 8 : 0)
+      (fork ? 8 : 0) +
+      lifecycleRiskPenalty(lifecycleRisk)
   );
   const warnings = [
     ...(license ? [] : ["No license metadata returned by GitHub."]),
     ...(archived ? ["GitHub marks this repository as archived."] : []),
     ...(disabled ? ["GitHub marks this repository as disabled."] : []),
-    ...(fork ? ["GitHub marks this repository as a fork; review the upstream repository before installing."] : [])
+    ...(fork ? ["GitHub marks this repository as a fork; review the upstream repository before installing."] : []),
+    ...lifecycleScriptWarnings(lifecycleScripts)
   ];
 
   return makeRecord({
@@ -1044,6 +1074,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       manifest?.scriptCount !== null && manifest?.scriptCount !== undefined
         ? `GitHub package.json declares ${manifest.scriptCount} script entries.`
         : "GitHub package script metadata was not returned.",
+      manifest ? lifecycleScriptSignal("GitHub package.json", lifecycleScripts) : "GitHub package lifecycle scripts were not inspected.",
       manifest?.packageManager ? `GitHub package.json package manager: ${manifest.packageManager}.` : "GitHub package manager metadata was not returned."
     ],
     trustScore: score,
@@ -1410,7 +1441,7 @@ function qualityScore(input: {
   warnings: string[];
 }): number {
   const commandRisk = installCommandRisk(input.install.commands ?? [input.install.command]);
-  const warningPenalty = input.warnings.some((warning) => /vulnerab|insecure/i.test(warning)) ? 30 : input.warnings.length * 8;
+  const warningPenalty = input.warnings.some(hasHighSeverityWarning) ? 38 : input.warnings.length * 8;
   const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
   const recency = input.updatedAt ? Math.min(8, Math.round(recencyBonus(input.updatedAt) / 2)) : 0;
   return clampScore(
@@ -1433,7 +1464,7 @@ function securityConfidence(input: {
   warnings: string[];
 }): ExternalSecurityConfidence {
   const commandRisk = installCommandRisk(input.install.commands ?? [input.install.command]);
-  if (commandRisk === "high" || input.warnings.some((warning) => /vulnerab|insecure/i.test(warning))) {
+  if (commandRisk === "high" || input.warnings.some(hasHighSeverityWarning)) {
     return "low";
   }
   if (commandRisk === "medium") {
@@ -1459,7 +1490,42 @@ function securityConfidence(input: {
 }
 
 function hasNegativeWarnings(warnings: string[]): boolean {
-  return warnings.some((warning) => /vulnerab|insecure|missing|unavailable|not returned/i.test(warning));
+  return warnings.some((warning) => /vulnerab|insecure|malicious|remote download|hidden background|lifecycle|missing|unavailable|not returned/i.test(warning));
+}
+
+function hasHighSeverityWarning(warning: string): boolean {
+  const normalized = warning.toLowerCase();
+  return (
+    normalized.includes("vulnerab") ||
+    normalized.includes("insecure") ||
+    normalized.includes("malicious") ||
+    normalized.includes("remote download") ||
+    normalized.includes("hidden background") ||
+    normalized.includes("shell patterns")
+  );
+}
+
+function lifecycleRiskPenalty(risk: InstallCommandRisk): number {
+  if (risk === "high") {
+    return -42;
+  }
+  if (risk === "medium") {
+    return -8;
+  }
+  return 0;
+}
+
+function lifecycleScriptSignal(context: string, scripts: PackageLifecycleScript[]): string {
+  if (scripts.length === 0) {
+    return `${context} did not declare install-time lifecycle scripts.`;
+  }
+  const risk = lifecycleScriptRisk(scripts);
+  const names = scripts.map((script) => script.name).join(", ");
+  return `${context} declares install-time lifecycle scripts (${names}) with ${risk} lifecycle risk.`;
+}
+
+function hasBlockingTrustRisk(record: ExternalPackageRecord): boolean {
+  return record.trust.risk === "high" || record.trust.decision === "avoid" || record.trust.warnings.some(hasHighSeverityWarning);
 }
 
 function trustFactors(input: {
@@ -2270,7 +2336,7 @@ function nullableNonNegativeNumber(value: unknown, label: string): number | null
 }
 
 function decisionFromScore(score: number, warnings: string[]): ExternalPackageDecision {
-  if (warnings.some((warning) => /vulnerab|insecure/i.test(warning))) {
+  if (warnings.some(hasHighSeverityWarning)) {
     return "avoid";
   }
   if (score >= 75) return "recommended";
@@ -2279,7 +2345,7 @@ function decisionFromScore(score: number, warnings: string[]): ExternalPackageDe
 }
 
 function riskFromScore(score: number, warnings: string[]): ExternalPackageRisk {
-  if (warnings.some((warning) => /vulnerab|insecure/i.test(warning))) {
+  if (warnings.some(hasHighSeverityWarning)) {
     return "high";
   }
   if (score >= 75) return "low";

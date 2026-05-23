@@ -49,6 +49,7 @@ Archive confirmation is allowed only when:
 - `trust.decision` is not `avoid`
 - `trust.risk` is not `high`
 - install command risk is not `high`
+- source metadata does not contain high-risk lifecycle script behavior
 - package metadata does not contain agent-targeted instructions
 - the request uses the archive writer token for durable writes
 
@@ -94,6 +95,7 @@ The confirm endpoint rejects records when:
 - `trust.decision` is `avoid`
 - `trust.risk` is `high`
 - install command risk is `high`
+- source metadata declares high-risk lifecycle script behavior
 - package metadata contains agent-targeted prompt instructions
 
 Those records can still be inspected by an agent, but they are not persisted as confirmed archive records.
