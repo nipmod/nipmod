@@ -51,6 +51,8 @@ const requiredFiles = [
   "examples/agent-workflow/mcp-host.md",
   "tools/seed-package-intelligence.ts",
   "tools/api-usage-canary.ts",
+  "tools/rate-limit-canary.ts",
+  "tools/rate-limit-canary.test.ts",
   "tools/source-depth-canary.ts",
   "tools/source-crawler-candidate-audit.ts",
   "tools/source-crawler-candidate-audit.test.ts",
@@ -91,6 +93,9 @@ check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
 check("readme:source-crawling-spec", () => readme.includes("docs/specs/source-crawling.md"));
 check("readme:api-launch-kit", () => readme.includes("docs/launch/api-beta.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
+
+const publicApiSpec = read("docs/specs/public-api.md");
+check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");
 check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));

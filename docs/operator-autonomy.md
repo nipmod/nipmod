@@ -46,8 +46,15 @@ node --experimental-strip-types tools/package-intelligence-ops.ts verify-secrets
 2. Database schema
    - Apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql` to the Supabase project.
    - If using the Supabase SQL editor, `docs/api-rate-limit-schema.sql` contains the same SQL.
+   - In Supabase Data API settings, expose the `consume_api_rate_limit` RPC function to the Data API for server-side service role calls. Some Supabase projects do not expose new functions automatically.
 
 The rate-limit bucket stores hashed client identifiers only. If the RPC is missing or temporarily unavailable, the API falls back to the local in-process limiter and marks responses with `x-ratelimit-store: memory-fallback`.
+
+Verify the RPC and the live API store with:
+
+```bash
+NIPMOD_CANARY_ENV_FILE=/tmp/nipmod-archive.env node --experimental-strip-types tools/rate-limit-canary.ts --require-configured --require-active
+```
 
 ## Required for usage ingestion checks
 

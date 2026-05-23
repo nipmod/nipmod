@@ -10,6 +10,7 @@
     "build": "pnpm --dir nipmod build && pnpm --dir site build",
     "launch:verify": "node --experimental-strip-types tools/launch-verify.ts",
     "public:check": "node --experimental-strip-types tools/open-source-readiness-check.ts",
+    "rate-limit:canary": "node --experimental-strip-types tools/rate-limit-canary.ts",
     "security": "pnpm --dir nipmod security:deps && pnpm --dir site security:deps && pnpm --dir site security:secrets && pnpm supply-chain:check",
     "crawler:audit": "node --experimental-strip-types tools/source-crawler-candidate-audit.ts",
     "source:canary": "node --experimental-strip-types tools/source-depth-canary.ts",
