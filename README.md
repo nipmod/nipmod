@@ -193,6 +193,7 @@ bash install.sh
 - [API: search, inspect, install plan](docs/api/search-inspect-install-plan.md)
 - [Trust scoring](docs/api/trust-scoring.md)
 - [Package intelligence lifecycle](docs/archive/package-intelligence-lifecycle.md)
+- [Package intelligence seed v1](docs/archive/seed-v1.md)
 - [Threat model](docs/security/threat-model.md)
 - [Data retention](docs/security/data-retention.md)
 - [Package metadata is untrusted](docs/security/package-metadata-is-untrusted.md)
@@ -201,6 +202,7 @@ bash install.sh
 - [Source crawling spec](docs/specs/source-crawling.md)
 - [Trust signals spec](docs/specs/trust-signals.md)
 - [API beta launch kit](docs/launch/api-beta.md)
+- [API beta post](docs/launch/api-beta-post.md)
 - [Agent workflow examples](examples/agent-workflow/)
 
 ## Status
@@ -210,7 +212,7 @@ bash install.sh
 | Hosted package API | Live public beta, rate limited |
 | Source resolver | Live for npm, PyPI, GitHub, Hugging Face and MCP |
 | Install plan API | Live, read-only hosted boundary |
-| Package intelligence archive | Durable production archive enabled |
+| Package intelligence archive | Durable production archive enabled, Seed v1 operator-controlled |
 | Public verified archive | Empty by design after seed reset; verified claims require gates |
 | Distributed rate limits | Live with Supabase-backed shared buckets |
 | CLI and installer | Live, release `1.2.9` |

@@ -68,6 +68,7 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 - Optional builder keys can raise limits.
 - Invalid API keys return `401`.
 - Hosted API calls never write into caller workspaces.
+- Search, Inspect, Install Plan and OpenAPI are the stable public beta calls.
 - External package owners keep ownership.
 - External records are `external_indexed`.
 - `verified_nipmod` requires a verified claim or direct publish.
@@ -76,6 +77,14 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 - Archive confirm is operator-only, re-inspects the source server-side, deduplicates durable records by stable source identity and rejects unknown, below-threshold or high-risk records before storage.
 
 Durable archive writes are not part of public beta traffic. Public agents should use search, inspect, install-plan and archive prepare unless an authorized server writer is explicitly configured.
+
+## Seed v1
+
+Seed v1 is a small operator-controlled archive seed across npm, PyPI, GitHub, Hugging Face and MCP. It exists to verify source inspection, archive confirmation, deduplication and canary behavior across source families.
+
+Seed v1 is not a bulk mirror and not a verified ownership claim. Records remain `external_indexed` until a verified claim or direct publish flow passes.
+
+Details: `docs/archive/seed-v1.md`.
 
 ## Verification
 
@@ -94,3 +103,5 @@ pnpm launch:verify
 Production archive writes are operator-only and require `NIPMOD_ARCHIVE_WRITE_TOKEN`.
 
 Production is release-ready only when GitHub CI, CodeQL, Dependency Review, Scorecard, production monitor and the live canaries are green. Production monitor passes before posting. The scheduled production monitor runs API contract, source resolver, install-plan, archive dry-run and rate-limit canaries against `https://nipmod.com` before alert delivery.
+
+Launch copy: `docs/launch/api-beta-post.md`.

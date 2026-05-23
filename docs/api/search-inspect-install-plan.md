@@ -8,6 +8,8 @@ Search -> Inspect -> Install Plan -> Approval
 
 The hosted API is read-only. It returns package intelligence and install plans, not command execution.
 
+Public beta access is free and rate limited. The stable beta calls are Search, Inspect, Install Plan and OpenAPI. Archive prepare is preview-only. Archive confirm is operator-only and requires an authorized server writer.
+
 ## Search
 
 ```bash
@@ -126,6 +128,8 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 Archive prepare previews a package intelligence record. Durable writes require explicit confirmation through an authorized archive writer token.
 
 Search alone does not create durable verified records.
+
+Seed v1 uses the same confirmation path for a small operator-controlled set of public records across npm, PyPI, GitHub, Hugging Face and MCP. See [package intelligence seed v1](../archive/seed-v1.md).
 
 ## Agent Output Checklist
 

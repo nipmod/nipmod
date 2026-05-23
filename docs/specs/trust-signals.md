@@ -168,6 +168,7 @@ trust score
 + exact name/display match bonus 18
 + prefix match bonus 10
 + text match bonus 6
++ query intent bonus up to 14 for common package tasks
 + metrics bonus
 + source reliability bonus
 + recency bonus
@@ -185,6 +186,8 @@ Metrics bonus:
 | Hugging Face likes | `4` |
 
 Popularity affects ranking through the metrics bonus and `popularitySignal`. It does not upgrade `securityConfidence`.
+
+Query intent hints are curated task matches, not safety claims. They help common requests such as HTTP clients, schema validation, test runners, database clients, CLI frameworks, browser automation and model workflows surface relevant candidates earlier. They never override blocked gates, high-risk warnings or install-plan policy.
 
 Security confidence rules:
 

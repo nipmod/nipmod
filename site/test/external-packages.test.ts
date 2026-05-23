@@ -170,6 +170,57 @@ describe("external package resolver", () => {
     expect(result.selection.candidates.length).toBeGreaterThan(0);
   });
 
+  test("adds query intent reasons for common agent package tasks", async () => {
+    const result = await searchExternalPackages("schema validation", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url.includes("registry.npmjs.org/-/v1/search")) {
+          return jsonResponse({
+            objects: [
+              {
+                dependents: "1",
+                downloads: { monthly: 10_000_000, weekly: 2_000_000 },
+                flags: { insecure: 0 },
+                package: {
+                  date: "2026-01-01T00:00:00.000Z",
+                  description: "String padding utility.",
+                  links: { npm: "https://www.npmjs.com/package/left-pad" },
+                  name: "left-pad",
+                  version: "1.3.0"
+                },
+                score: { detail: { maintenance: 0.2, popularity: 1, quality: 0.2 } }
+              },
+              {
+                dependents: "12000",
+                downloads: { monthly: 600_000, weekly: 150_000 },
+                flags: { insecure: 0 },
+                package: {
+                  date: "2026-05-01T00:00:00.000Z",
+                  description: "TypeScript-first schema validation.",
+                  license: "MIT",
+                  links: {
+                    npm: "https://www.npmjs.com/package/zod",
+                    repository: "https://github.com/colinhacks/zod"
+                  },
+                  name: "zod",
+                  version: "4.2.0"
+                },
+                score: { detail: { maintenance: 1, popularity: 0.8, quality: 1 } }
+              }
+            ]
+          });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 2,
+      sources: ["npm"]
+    });
+
+    expect(result.selection.recommendedId).toBe("npm:zod");
+    expect(result.selection.rankSignals).toContain("query intent hints for common package tasks");
+    expect(result.selection.candidates[0]?.reasons).toContain("query intent match: TypeScript schema validation fit");
+  });
+
   test("inspects exact packages and creates safe install plans", async () => {
     const record = await inspectExternalPackage("npm", "node-telegram-bot-api", { fetchImpl: mockFetch });
     const plan = createExternalInstallPlan(record);

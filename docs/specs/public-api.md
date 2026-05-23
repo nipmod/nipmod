@@ -45,6 +45,8 @@ Operators can run `pnpm install-plan:canary` to verify live install-plan boundar
 
 Operators can run `pnpm archive:canary -- --require-durable` to verify the live archive layer without writing data. The canary dry-runs archive confirmation across every declared source and fails if source reinspection, eligibility, evidence digests, trust factors, install-plan boundaries or receipt shape drift.
 
+Operators can run `pnpm archive:seed` to dry-run Seed v1 across npm, PyPI, GitHub, Hugging Face and MCP. Production seed writes require `NIPMOD_ARCHIVE_WRITE_TOKEN` and must use the archive confirm path, which re-inspects source data and deduplicates by stable source identity.
+
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
 
 The rate-limit canary includes a `nextAction` field for degraded stores. For `distributed_rpc_http_404`, the next action is to apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql` and expose `public.consume_api_rate_limit` through the Supabase Data API.
@@ -132,6 +134,8 @@ dev.nipmod.external-search.v1
 Search responses include `sourceReports[]`. Each report includes `resolverVersion: "source-resolver-v2"` metadata with endpoint host, search strategy, inspect strategy, timeout, response budget and normalization boundaries. The resolver profile contains no secrets and confirms that hosted API calls return plans only; they do not write caller workspaces.
 
 Search responses also include `selection`. It contains `policy: "agent-selection-v1"`, `recommendedId`, candidate gates and ranking breakdowns. The recommended id is a planning hint. It is not permission to execute code.
+
+Selection ranking may use curated query intent hints for common package tasks such as HTTP clients, schema validation, testing, database access, CLI tooling, browser automation and model workflows. These hints only move relevant candidates earlier. They never override blocked gates or install-plan policy.
 
 Each report also includes public circuit state and a `recovery` object. `recovery.suggestedAction` tells agents whether to use returned records, inspect an exact package, retry the source later, or fix the source/query. When a source repeatedly returns retryable failures, Nipmod opens a short per-source circuit and returns `source_circuit_open` for that source instead of blocking every request on the degraded upstream. Identical in-flight source metadata requests are coalesced internally.
 

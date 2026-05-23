@@ -50,6 +50,8 @@ const requiredFiles = [
   "supabase/migrations/20260523084500_api_rate_limit_buckets.sql",
   "docs/security/supply-chain.md",
   "docs/launch/api-beta.md",
+  "docs/launch/api-beta-post.md",
+  "docs/archive/seed-v1.md",
   "examples/http-api/README.md",
   "examples/http-api/search.ts",
   "examples/http-api/agent-flow.ts",
@@ -163,6 +165,11 @@ check("agent-example:mcp-external", () => mcpExample.includes("nipmod.external_i
 const apiBetaLaunch = read("docs/launch/api-beta.md");
 check("launch-kit:api-beta", () => apiBetaLaunch.includes("Trust Engine v2") && apiBetaLaunch.includes("Production monitor passes before posting."));
 check("launch-kit:operator-seed", () => apiBetaLaunch.includes("pnpm archive:seed") && apiBetaLaunch.includes("NIPMOD_ARCHIVE_WRITE_TOKEN"));
+const apiBetaPost = read("docs/launch/api-beta-post.md");
+check("launch-post:scoped-copy", () => apiBetaPost.includes("Hosted API calls never install or write locally.") && apiBetaPost.includes("Free public beta, rate limited."));
+const seedV1 = read("docs/archive/seed-v1.md");
+check("seed-v1:source-scope", () => seedV1.includes("not a bulk mirror") && seedV1.includes("verified ownership claim"));
+check("seed-v1:operator-command", () => seedV1.includes("pnpm archive:seed") && seedV1.includes("--env-file-path"));
 
 const sourceCrawling = read("docs/specs/source-crawling.md");
 check("source-crawling:api-first", () => sourceCrawling.includes("Prefer official APIs."));
