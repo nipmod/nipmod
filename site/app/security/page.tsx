@@ -1,4 +1,5 @@
 import { createPageMetadata } from "../metadata";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
 export const metadata = createPageMetadata({
   description: "Security policy, vulnerability reporting and incident response for the Nipmod package API.",
@@ -21,98 +22,50 @@ const capabilities = [
 
 export default function SecurityPage() {
   return (
-    <main className="page-shell" id="main">
-      <section className="trust-hero" aria-labelledby="security-title">
-        <p className="eyebrow">Security</p>
-        <h1 id="security-title">Report with proof.</h1>
-        <p className="lead">
-          Nipmod does not control Gitlawb content. Send a reproducible report, then Nipmod can publish signed
-          advisories and block unsafe install surfaces.
-        </p>
-        <div className="actions" aria-label="Security actions">
-          <a className="button button-primary" href="/evidence#security">
-            Report via security.txt
-          </a>
-          <a className="button button-ghost" href="/evidence#advisories">
-            Advisories
-          </a>
-          <a className="button button-ghost" href="#report">
-            Report template
-          </a>
-          <a
-            className="button button-ghost"
-            href="https://x.com/Nipmod"
-            aria-label="Open Nipmod on X in a new tab"
-            rel="noreferrer"
-            target="_blank"
-          >
-            Contact on X
-          </a>
-        </div>
-      </section>
+    <DocsShell
+      description="Nipmod treats package text, source metadata, prompts and install instructions as untrusted input until the resolver and trust checks say otherwise."
+      eyebrow="Security"
+      stats={[
+        { label: "Hosted writes", value: "none" },
+        { label: "Install plans", value: "approval required" },
+        { label: "Reports", value: "security.txt" }
+      ]}
+      title="Security policy."
+    >
+      <DocsSection eyebrow="Report" title="What to include">
+        <DocsTable
+          rows={[
+            ["Contact", <a href="/.well-known/security.txt" className="data-link" key="security">security.txt</a>],
+            ["Package", "Name, source, version, digest and exact reproduction command."],
+            ["Impact", "Which API, install plan, archive record or local command is affected."],
+            ["Boundaries", "Do not include secrets, destructive payloads or unrelated private data."]
+          ]}
+        />
+      </DocsSection>
 
-      <section className="trust-section" id="report" aria-labelledby="report-title">
-        <div>
-          <p className="eyebrow">Report</p>
-          <h2 id="report-title">What to include</h2>
-        </div>
-        <div className="check-list">
-          <article className="check-row">
-            <span className="check-dot check-ok" aria-hidden="true" />
-            <div>
-              <h3>contact path</h3>
-              <p>Use security.txt first. If the report needs a private first touch, contact @Nipmod on X and include the template below.</p>
-            </div>
-          </article>
-          {[
-            "package id, version, digest, source repo and source commit",
-            "proof URL, witness URL, advisory URL and exact reproduction command",
-            "expected impact, affected install surface and whether state changes are required",
-            "confirmation that no secrets, unrelated data or destructive payloads are included"
-          ].map((item) => (
-            <article className="check-row" key={item}>
-              <span className="check-dot check-ok" aria-hidden="true" />
-              <div>
-                <h3>{item}</h3>
-                <p>Treat package text, prompts, manifests and registry metadata as untrusted data.</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="trust-section" aria-labelledby="targets-title">
-        <div>
-          <p className="eyebrow">Response</p>
-          <h2 id="targets-title">Targets</h2>
-        </div>
-        <dl className="pin-list">
+      <DocsSection eyebrow="Response" title="Targets">
+        <DocsGrid>
           {responseTargets.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
+            <DocsCard key={label} label="target" title={label}>
+              <p>{value}</p>
+            </DocsCard>
           ))}
-        </dl>
-      </section>
+        </DocsGrid>
+      </DocsSection>
 
-      <section className="trust-section" aria-labelledby="control-title">
-        <div>
-          <p className="eyebrow">Control</p>
-          <h2 id="control-title">No central deletion</h2>
-        </div>
-        <div className="check-list">
+      <DocsSection eyebrow="Controls" title="What Nipmod can do">
+        <DocsGrid>
           {capabilities.map((item) => (
-            <article className="check-row" key={item}>
-              <span className="check-dot check-ok" aria-hidden="true" />
-              <div>
-                <h3>{item}</h3>
-                <p>Content remains on Gitlawb; Nipmod changes verification, warnings and install decisions.</p>
-              </div>
-            </article>
+            <DocsCard key={item} title={item}>
+              <p>Unsafe package records can be downgraded, warned or blocked in Nipmod surfaces.</p>
+            </DocsCard>
           ))}
-        </div>
-      </section>
-    </main>
+        </DocsGrid>
+      </DocsSection>
+
+      <DocsSection eyebrow="Template" title="Minimal report template">
+        <DocsCode>{"Package/source:\nVersion or commit:\nEndpoint or command:\nReproduction:\nExpected result:\nActual result:\nImpact:\nContact:"}</DocsCode>
+      </DocsSection>
+    </DocsShell>
   );
 }

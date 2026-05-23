@@ -1,44 +1,5 @@
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
-import { CommandBlock } from "../command-block";
-import registryData from "../registry-data.json";
-import type { RegistryIndex } from "../../lib/registry";
-
-const registry = registryData as RegistryIndex;
-const demoPackage = registry.packages[0];
-const packageSpecifier = demoPackage ? `${demoPackage.canonical}@${demoPackage.version}` : "<package-specifier>";
-
-const demoSteps = [
-  {
-    label: "Search",
-    text: "Find a package from the same public archive an agent reads.",
-    command: "nipmod search <query> --online --json"
-  },
-  {
-    label: "View",
-    text: "Read package metadata, source and suggested next actions.",
-    command: "nipmod view <package-name> --json"
-  },
-  {
-    label: "Inspect",
-    text: "Check digest, signer, source, transparency and permissions.",
-    command: `nipmod inspect ${packageSpecifier} --json`
-  },
-  {
-    label: "Plan",
-    text: "Create the install plan before the lockfile changes.",
-    command: `nipmod install --plan ${packageSpecifier} --json`
-  },
-  {
-    label: "Install",
-    text: "Install only after review. Nipmod writes a local install receipt.",
-    command: "mkdir -p nipmod-demo\ncd nipmod-demo\nnipmod install <package-specifier>\nls .nipmod/receipts"
-  },
-  {
-    label: "Audit",
-    text: "Check the workspace against current trust and advisory data.",
-    command: "nipmod audit --online\nnipmod sbom --json"
-  }
-];
 
 export const metadata = createPageMetadata({
   description: "Run the Nipmod flow for package search, trust inspection and safe install planning.",
@@ -48,74 +9,39 @@ export const metadata = createPageMetadata({
 
 export default function DemoPage() {
   return (
-    <main className="page-shell" id="main">
-      <section className="quickstart-hero" aria-labelledby="demo-title">
-        <p className="eyebrow">Demo</p>
-        <h1 id="demo-title">Search, inspect, plan, receipt.</h1>
-        <p className="lead">
-          One package path shows how humans and agents use the same archive without trusting package text first.
-        </p>
-        <div className="actions" aria-label="Demo actions">
-          <a className="button button-primary" href="/setup">
-            Setup agent
-          </a>
-          <a className="button button-ghost" href="/status">
-            System status
-          </a>
-          <a className="button button-ghost" href="/packages">
-            Browse packages
-          </a>
-        </div>
-      </section>
+    <DocsShell
+      description="A minimal demo of the agent path: search, inspect, request an install plan and stop before workspace writes."
+      eyebrow="Demo"
+      title="Search, inspect, plan."
+    >
+      <DocsSection eyebrow="Terminal" title="Run the read only path">
+        <DocsGrid>
+          <DocsCard label="1" title="Search">
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="2" title="Inspect">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="3" title="Plan">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
 
-      <section className="trust-grid" aria-label="Demo package state">
-        <article className="stat-tile">
-          <span>{registry.packages.length}</span>
-          <p>Archive packages</p>
-        </article>
-        <article className="stat-tile">
-          <span>{demoPackage?.trust.level ?? "none"}</span>
-          <p>Demo trust level</p>
-        </article>
-        <article className="stat-tile">
-          <span>{demoPackage?.trust.score ?? 0}</span>
-          <p>Demo trust score</p>
-        </article>
-      </section>
+      <DocsSection eyebrow="Boundary" title="What the demo proves">
+        <DocsTable
+          rows={[
+            ["Search works", "The resolver can query supported public sources."],
+            ["Trust is visible", "The response includes source context and warnings."],
+            ["No remote write", "The hosted API returns a plan only."],
+            ["Local approval", "Actual install remains a local, approved action."]
+          ]}
+        />
+      </DocsSection>
 
-      <section className="registry-section" aria-labelledby="demo-path-title">
-        <div className="section-head">
-          <p className="eyebrow">Path</p>
-          <h2 id="demo-path-title">Run it from any workspace</h2>
-          <p>Every step has a CLI form and the same flow is exposed through hosted or local MCP.</p>
-        </div>
-        <div className="quickstart-grid">
-          {demoSteps.map((step) => (
-            <article className="quickstart-card" key={step.label}>
-              <span>{step.label}</span>
-              <h2>{step.label}</h2>
-              <p>{step.text}</p>
-              <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="proof-section" aria-labelledby="agent-demo-title">
-        <div>
-          <p className="eyebrow">Agent</p>
-          <h2 id="agent-demo-title">Ask through MCP</h2>
-          <p>Use this after `nipmod setup codex` or `nipmod setup claude`.</p>
-        </div>
-        <div className="proof-panel">
-          <CommandBlock
-            command={
-              'Use Nipmod to search the public archive, inspect a package, create an install plan, and install only after I approve the lockfile write.'
-            }
-            label="Copy agent demo prompt"
-          />
-        </div>
-      </section>
-    </main>
+      <DocsSection eyebrow="Agent" title="Prompt">
+        <DocsCode>{"Use Nipmod to search for an HTTP client package. Inspect the best candidate and show me the install plan. Do not modify the workspace."}</DocsCode>
+      </DocsSection>
+    </DocsShell>
   );
 }
