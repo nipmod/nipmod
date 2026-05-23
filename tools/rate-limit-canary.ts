@@ -21,7 +21,16 @@ export async function runRateLimitCanary({
 
   const health = await fetchSourceHealth({ baseUrl, fetchFn, requestId });
   checks.push({
-    data: health.data,
+    data: {
+      ...health.data,
+      nextAction: rateLimitNextAction({
+        activeStore: health.data.activeStore,
+        configured: health.data.configured,
+        distributedActive: health.data.distributedActive,
+        fallbackReason: health.data.fallbackReason,
+        missing: health.data.missing
+      })
+    },
     name: "live_rate_limit_store",
     status:
       health.ok && (!requireActive || (health.data.activeStore === "supabase" && health.data.distributedActive === true))
@@ -51,7 +60,10 @@ export async function runRateLimitCanary({
     ok: false
   }));
   checks.push({
-    data: rpc.data,
+    data: {
+      ...rpc.data,
+      nextAction: rateLimitRpcNextAction(rpc.data)
+    },
     name: "rate_limit_rpc",
     status: rpc.ok ? "pass" : "fail"
   });
@@ -203,6 +215,47 @@ function isRateLimitRow(value) {
     typeof value.reset_at === "string" &&
     Number.isFinite(Date.parse(value.reset_at))
   );
+}
+
+function rateLimitNextAction({ activeStore, configured, distributedActive, fallbackReason, missing }) {
+  if (activeStore === "supabase" && distributedActive === true) {
+    return "none";
+  }
+  if (configured === false || (Array.isArray(missing) && missing.length > 0)) {
+    return "Set NIPMOD_ARCHIVE_SUPABASE_URL and NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY in Production, then redeploy.";
+  }
+  if (fallbackReason === "distributed_rpc_http_404") {
+    return "Apply supabase/migrations/20260523084500_api_rate_limit_buckets.sql and expose public.consume_api_rate_limit through the Supabase Data API.";
+  }
+  if (fallbackReason === "distributed_rpc_http_401" || fallbackReason === "distributed_rpc_http_403") {
+    return "Check the Production service role key and grants for public.consume_api_rate_limit.";
+  }
+  if (fallbackReason === "distributed_rpc_timeout" || fallbackReason === "distributed_rpc_network_error") {
+    return "Check Supabase network availability, project URL and the rate-limit RPC timeout path.";
+  }
+  if (fallbackReason === "distributed_rpc_invalid_json" || fallbackReason === "distributed_rpc_invalid_shape") {
+    return "Verify public.consume_api_rate_limit returns allowed, count, remaining and reset_at.";
+  }
+  return "Run with --require-configured and a local env file to perform a direct Supabase RPC probe.";
+}
+
+function rateLimitRpcNextAction(data) {
+  if (data?.exposedToDataApi === true && Array.isArray(data.responseShape) && data.responseShape.includes("allowed")) {
+    return "none";
+  }
+  if (data?.status === 404) {
+    return "Apply the rate-limit SQL migration and confirm the RPC is exposed to the Supabase Data API.";
+  }
+  if (data?.status === 401 || data?.status === 403) {
+    return "Use the server-only Supabase service role key and verify function execute grants.";
+  }
+  if (data?.status === null) {
+    return "Check local canary env values and network access to Supabase.";
+  }
+  if (Array.isArray(data?.responseShape) && !data.responseShape.includes("allowed")) {
+    return "Verify the RPC return shape matches allowed, count, remaining and reset_at.";
+  }
+  return "Inspect the Supabase RPC response code and rerun the canary after applying the schema.";
 }
 
 function hashValue(value) {
