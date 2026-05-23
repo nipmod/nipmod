@@ -131,11 +131,35 @@ describe("source health route", () => {
     expect(body.summary.liveCached).toBe(0);
     expect(
       body.sources.every(
-        (source: { live?: { cached: boolean; checkedAt: string; durationMs: number; status: string } }) =>
-          source.live?.status === "ok" && source.live.cached === false && typeof source.live.checkedAt === "string"
+        (source: { live?: { cached: boolean; checkedAt: string; degraded: boolean; durationMs: number; retryable: boolean; status: string } }) =>
+          source.live?.status === "ok" &&
+          source.live.cached === false &&
+          source.live.degraded === false &&
+          source.live.retryable === false &&
+          typeof source.live.checkedAt === "string"
       )
     ).toBe(true);
     expect(fetch).toHaveBeenCalledTimes(6);
+  });
+
+  test("marks failed live probes as degraded and retryable when upstream rejects requests", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ error: "busy" }, { status: 503 }))
+    );
+
+    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.summary.liveOk).toBe(0);
+    expect(body.summary.liveFailed).toBe(6);
+    expect(
+      body.sources.every(
+        (source: { live?: { degraded: boolean; retryable: boolean; status: string; statusCode: number } }) =>
+          source.live?.status === "failed" && source.live.degraded === true && source.live.retryable === true && source.live.statusCode === 503
+      )
+    ).toBe(true);
   });
 
   test("caches repeated live source probes within the probe TTL", async () => {

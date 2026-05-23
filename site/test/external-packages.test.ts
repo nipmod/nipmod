@@ -45,6 +45,11 @@ describe("external package resolver", () => {
       searchStrategy: "registry-ranked-search",
       sourceKind: "package-registry"
     });
+    expect(result.sourceReports[0]?.recovery).toEqual({
+      degraded: false,
+      retryable: false,
+      suggestedAction: "use-returned-records"
+    });
 
     const npmRecord = result.records.find((record) => record.id === "npm:node-telegram-bot-api");
     expect(npmRecord?.trust.dimensions).toMatchObject({
@@ -67,6 +72,11 @@ describe("external package resolver", () => {
     expect(result.sourceReports.find((report) => report.source === "github")).toMatchObject({
       error: { code: "source_not_found", retryable: false, status: 404 },
       recordCount: 0,
+      recovery: {
+        degraded: true,
+        retryable: false,
+        suggestedAction: "fix-source-or-query"
+      },
       status: "failed"
     });
   });
@@ -143,6 +153,53 @@ describe("external package resolver", () => {
     expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
     expect(record.trust.signals).toContain("npm registry signature metadata is present.");
     expect(plan.plan.commands).toEqual(["npm install react"]);
+  });
+
+  test("drops unsafe repository URLs returned by sources", async () => {
+    const record = await inspectExternalPackage("npm", "ssh-repo", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://registry.npmjs.org/ssh-repo/latest") {
+          return jsonResponse({
+            description: "SSH repo fixture.",
+            dist: {
+              integrity: "sha512-test",
+              signatures: [{ keyid: "SHA256:test", sig: "test" }]
+            },
+            license: "MIT",
+            name: "ssh-repo",
+            repository: { url: "git+ssh://git@example.com/example/ssh-repo.git" },
+            version: "1.0.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/ssh-repo") {
+          return jsonResponse({ downloads: 2000, package: "ssh-repo" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      }
+    });
+
+    expect(record.repo).toBeNull();
+    expect(record.trust.signals).toContain("Repository link is missing.");
+  });
+
+  test("quotes Hugging Face snapshot commands safely", async () => {
+    const record = await inspectExternalPackage("huggingface-model", "example/quote-model", {
+      fetchImpl: async () =>
+        jsonResponse({
+          downloads: 100,
+          id: "example/quote-model",
+          likes: 4,
+          modelId: "example/quote-model",
+          private: false,
+          sha: "abc123",
+          tags: ["license:apache-2.0"]
+        })
+    });
+
+    expect(record.install.commands?.[1]).toBe(
+      'python -c \'from huggingface_hub import snapshot_download; snapshot_download(repo_id="example/quote-model", repo_type="model")\''
+    );
   });
 
   test("blocks npm packages with suspicious install-time lifecycle scripts", async () => {

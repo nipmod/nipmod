@@ -102,7 +102,7 @@ dev.nipmod.external-search.v1
 
 Search responses include `sourceReports[]`. Each report includes `resolverVersion: "source-resolver-v2"` metadata with endpoint host, search strategy, inspect strategy, timeout, response budget and normalization boundaries. The resolver profile contains no secrets and confirms that hosted API calls return plans only; they do not write caller workspaces.
 
-Each report also includes public circuit state. When a source repeatedly returns retryable failures, Nipmod opens a short per-source circuit and returns `source_circuit_open` for that source instead of blocking every request on the degraded upstream. Identical in-flight source metadata requests are coalesced internally.
+Each report also includes public circuit state and a `recovery` object. `recovery.suggestedAction` tells agents whether to use returned records, inspect an exact package, retry the source later, or fix the source/query. When a source repeatedly returns retryable failures, Nipmod opens a short per-source circuit and returns `source_circuit_open` for that source instead of blocking every request on the degraded upstream. Identical in-flight source metadata requests are coalesced internally.
 
 ## `GET /api/search`
 
@@ -169,7 +169,7 @@ Blocked plans are still returned for review, but agents must not execute the com
 
 Prepare a durable archive record from a resolved external package.
 
-This endpoint does not persist by itself. It returns the normalized archive record, validation result, store status and a receipt preview.
+This endpoint does not persist by itself. It returns the normalized archive record, archive eligibility, validation result, store status and a receipt preview.
 
 Example:
 
@@ -240,7 +240,7 @@ Public callers can dry run the confirmation. Durable writes require server-side 
 
 Confirm responses include a receipt. Posted records are re-inspected from the original source before confirmation, so callers cannot forge higher trust by modifying `trust.score`, `trust.decision` or `trust.factors`.
 
-Records with `trust.decision: "avoid"`, `trust.risk: "high"`, high-risk install commands, stale submitted versions or agent-targeted package metadata fail validation and are not stored as confirmed archive records.
+Records with `trust.decision: "avoid"` or `"unknown"`, `trust.risk: "high"` or `"unknown"`, below-threshold trust score, blocked install plans, high-risk install commands, stale submitted versions or agent-targeted package metadata fail validation and are not stored as confirmed archive records.
 
 Durable writes use `x-nipmod-archive-token`. The public API key bearer header is not accepted as an archive writer token.
 

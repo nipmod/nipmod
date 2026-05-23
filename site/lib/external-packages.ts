@@ -37,6 +37,7 @@ export type ExternalResolverSearchStrategy =
   | "registry-server-search";
 export type ExternalResolverInspectStrategy = "exact-package-metadata" | "exact-repository-metadata" | "exact-hub-metadata" | "server-name-match";
 export type ExternalSourceCircuitStatus = "closed" | "open";
+export type ExternalSourceRecoveryAction = "use-returned-records" | "inspect-exact-package" | "retry-source-later" | "fix-source-or-query";
 
 export interface ExternalTrustFactor {
   category: ExternalTrustFactorCategory;
@@ -151,6 +152,11 @@ export interface ExternalSourceReport {
   };
   circuit: ExternalSourceCircuitReport;
   recordCount: number;
+  recovery: {
+    degraded: boolean;
+    retryable: boolean;
+    suggestedAction: ExternalSourceRecoveryAction;
+  };
   resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
   status: ExternalSourceStatus;
@@ -601,6 +607,7 @@ async function searchSourceWithReport(
         circuit: sourceCircuitReport(source),
         durationMs: Date.now() - startedAt,
         recordCount: records.length,
+        recovery: sourceRecovery(records.length > 0 ? "ok" : "empty"),
         resolver: sourceResolverProfile(source, limit, timeoutMs),
         source,
         status: records.length > 0 ? "ok" : "empty"
@@ -620,6 +627,7 @@ async function searchSourceWithReport(
           status: apiError.status
         },
         recordCount: 0,
+        recovery: sourceRecovery("failed", apiError.retryable),
         resolver: sourceResolverProfile(source, limit, timeoutMs),
         source,
         status: "failed"
@@ -1146,6 +1154,10 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     ...(gated ? [`Hugging Face marks this ${kind} as gated.`] : []),
     ...(isPrivate ? [`Hugging Face marks this ${kind} as private.`] : [])
   ];
+  const snapshotCommand = [
+    "from huggingface_hub import snapshot_download;",
+    `snapshot_download(repo_id=${pythonStringLiteral(id)}, repo_type=${pythonStringLiteral(kind)})`
+  ].join(" ");
 
   return makeRecord({
     description: [pipelineTag, libraryName].filter(Boolean).join(" / "),
@@ -1155,7 +1167,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       command: `python -m pip install huggingface_hub`,
       commands: [
         "python -m pip install huggingface_hub",
-        `python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='${id}', repo_type='${kind}')"`
+        `python -c ${shellSingleQuote(snapshotCommand)}`
       ],
       manager: "huggingface_hub",
       notes: [`Fetch the original Hugging Face ${kind}. Gated or private repos require the user's own Hugging Face access.`]
@@ -1798,7 +1810,7 @@ async function fetchJsonOnce(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(url, {
-      headers: sourceRequestHeaders(url),
+      headers: externalSourceRequestHeaders(url),
       signal: controller.signal
     });
     if (!response.ok) {
@@ -1903,12 +1915,12 @@ function responseTooLargeError(source: ExternalPackageSource | undefined): Exter
   });
 }
 
-function sourceRequestHeaders(url: string): HeadersInit {
+export function externalSourceRequestHeaders(url: string, env: Record<string, string | undefined> = process.env): HeadersInit {
   const headers: Record<string, string> = {
     accept: "application/json",
     "user-agent": SOURCE_USER_AGENT
   };
-  const auth = sourceAuthHeader(url, process.env);
+  const auth = sourceAuthHeader(url, env);
   if (auth) {
     headers.authorization = auth;
   }
@@ -1948,6 +1960,28 @@ function compareExternalRecords(left: ExternalPackageRecord, right: ExternalPack
     (right.metrics.stars ?? 0) - (left.metrics.stars ?? 0) ||
     left.displayName.localeCompare(right.displayName)
   );
+}
+
+function sourceRecovery(status: ExternalSourceStatus, retryable = false): ExternalSourceReport["recovery"] {
+  if (status === "ok") {
+    return {
+      degraded: false,
+      retryable: false,
+      suggestedAction: "use-returned-records"
+    };
+  }
+  if (status === "empty") {
+    return {
+      degraded: false,
+      retryable: false,
+      suggestedAction: "inspect-exact-package"
+    };
+  }
+  return {
+    degraded: true,
+    retryable,
+    suggestedAction: retryable ? "retry-source-later" : "fix-source-or-query"
+  };
 }
 
 function rankExternalRecord(record: ExternalPackageRecord, query: string): number {
@@ -2417,7 +2451,28 @@ function normalizeRepositoryUrl(value: string | null): string | null {
   if (!value) {
     return null;
   }
-  return value.replace(/^git\+/, "").replace(/\.git$/, "");
+  const trimmed = value.trim();
+  const githubSshMatch = /^git@github\.com:([^/\s]+\/[^/\s]+?)(?:\.git)?$/i.exec(trimmed);
+  if (githubSshMatch?.[1]) {
+    return `https://github.com/${githubSshMatch[1]}`;
+  }
+
+  const withoutGitPrefix = trimmed.replace(/^git\+/, "");
+  const githubSshUrlMatch = /^ssh:\/\/git@github\.com\/([^/\s]+\/[^/\s]+?)(?:\.git)?$/i.exec(withoutGitPrefix);
+  if (githubSshUrlMatch?.[1]) {
+    return `https://github.com/${githubSshUrlMatch[1]}`;
+  }
+
+  const withoutTrailingGit = withoutGitPrefix.replace(/\.git$/, "");
+  return isHttpUrl(withoutTrailingGit) ? withoutTrailingGit : null;
+}
+
+function pythonStringLiteral(value: string): string {
+  return JSON.stringify(value);
+}
+
+function shellSingleQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
 function encodeNpmName(name: string): string {

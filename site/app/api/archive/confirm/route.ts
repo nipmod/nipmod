@@ -2,6 +2,7 @@ import { ExternalPackageError, externalPackageApiError } from "../../../../lib/e
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
+  archiveEligibility,
   confirmPackageIntelligenceRecord,
   createPackageIntelligenceReceipt,
   createPackageIntelligenceRecord,
@@ -53,8 +54,10 @@ export async function POST(request: Request): Promise<Response> {
       message: readString(body, "message") ?? "Package usefulness confirmed before archive persistence."
     });
     const validation = validatePackageIntelligenceRecord(confirmed);
+    const eligibility = archiveEligibility(confirmed);
     if (!validation.ok) {
       return apiJsonWithUsage(request, {
+        eligibility,
         receipt: createPackageIntelligenceReceipt(confirmed, { dryRun: true, stored: false }),
         record: confirmed,
         stored: false,
@@ -71,6 +74,7 @@ export async function POST(request: Request): Promise<Response> {
     if (dryRun) {
       return apiJsonWithUsage(request, {
         dryRun: true,
+        eligibility,
         receipt: createPackageIntelligenceReceipt(confirmed, { dryRun: true, stored: false }),
         record: confirmed,
         store: archiveStoreStatus(),
@@ -83,6 +87,7 @@ export async function POST(request: Request): Promise<Response> {
     const write = await upsertPackageIntelligenceRecord(confirmed, { requireConfigured: true });
     return apiJsonWithUsage(request, {
       ...write,
+      eligibility,
       receipt: createPackageIntelligenceReceipt(write.record, { stored: write.stored }),
       store: writeStore,
       type: "dev.nipmod.archive-confirm.v1",
