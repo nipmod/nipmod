@@ -35,13 +35,19 @@ test("home page presents the API-first product", async ({ page }) => {
 test("API access page exposes one public package surface", async ({ page }) => {
   await page.goto("/api-access");
 
-  await expect(page.getByRole("heading", { name: "Package search for agents." })).toBeVisible();
-  await expect(page.getByText("Tell your agent what you need. The agent calls Nipmod")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "One package surface for agents." })).toBeVisible();
+  await expect(page.getByText("Agents call Nipmod before choosing dependencies.")).toBeVisible();
   await expect(page.getByText("Free", { exact: true })).toBeVisible();
-  await expect(page.getByText("/api/search?q=<query>")).toBeVisible();
-  await expect(page.getByText("/api/inspect?source=npm&name=<package>")).toBeVisible();
-  await expect(page.getByText("/api/install-plan?source=npm&name=<package>")).toBeVisible();
+
+  await page.getByRole("button", { name: /API calls/ }).click();
+  await expect(page.getByRole("heading", { name: "/api/search?q=<query>" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "/api/inspect?source=npm&name=<package>" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "/api/install-plan?source=npm&name=<package>" })).toBeVisible();
+  await page.getByRole("button", { name: "Close" }).click();
+
+  await page.getByRole("button", { name: /Examples/ }).click();
   await expect(page.getByText("Use Nipmod before choosing packages.")).toBeVisible();
+  await page.getByRole("button", { name: "Close" }).click();
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 });
 
@@ -50,7 +56,7 @@ test("home CTAs navigate with real clicks", async ({ page }) => {
 
   await page.getByRole("link", { name: "Get API access" }).click();
   await expect(page).toHaveURL(/\/api-access$/);
-  await expect(page.getByRole("heading", { name: "Package search for agents." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "One package surface for agents." })).toBeVisible();
 
   await page.goto("/");
   await page.getByRole("link", { name: "View sources" }).click();
@@ -65,7 +71,7 @@ test("sources page lists source registries without implying partnerships", async
   for (const source of ["npm", "PyPI", "GitHub", "Hugging Face", "MCP", "Nipmod archive"]) {
     await expect(page.getByRole("heading", { name: source })).toBeVisible();
   }
-  await expect(page.getByRole("heading", { exact: true, name: "Does not" })).toBeVisible();
+  await expect(page.getByText("Does not", { exact: true })).toBeVisible();
   await expect(page.getByText("Claim ownership of external packages.")).toBeVisible();
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 });
@@ -116,20 +122,20 @@ test("machine discovery points agents at API and MCP surfaces", async ({ request
 });
 
 test("hosted API routes answer with safe boundaries", async ({ request }) => {
-  const search = await request.get("/api/search?q=telegram%20bot&sources=npm&limit=2");
+  const search = await request.get("/api/search?q=react&sources=npm&limit=2");
   await expect(search).toBeOK();
   const searchBody = await search.json();
   expect(searchBody.archivePolicy.externalRecords).toContain("Stored as external_indexed records");
   expect(searchBody.records.length).toBeLessThanOrEqual(2);
 
-  const inspect = await request.get("/api/inspect?source=npm&name=node-telegram-bot-api");
+  const inspect = await request.get("/api/inspect?source=npm&name=undici");
   await expect(inspect).toBeOK();
   const inspectBody = await inspect.json();
   expect(inspectBody.type).toBe("dev.nipmod.external-inspect.v1");
   expect(inspectBody.record.source).toBe("npm");
-  expect(inspectBody.record.name).toBe("node-telegram-bot-api");
+  expect(inspectBody.record.name).toBe("undici");
 
-  const plan = await request.get("/api/install-plan?source=npm&name=node-telegram-bot-api");
+  const plan = await request.get("/api/install-plan?source=npm&name=undici");
   await expect(plan).toBeOK();
   const planBody = await plan.json();
   expect(planBody.type).toBe("dev.nipmod.external-install-plan.v1");

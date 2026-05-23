@@ -478,14 +478,14 @@ Definition of Done:
 
 ### 90%: Production-Ready API Surface
 
-- [ ] Trust Engine v3 fields implemented.
-- [ ] Posted trust cannot influence server trust.
+- [x] Trust Engine v3 fields implemented.
+- [x] Posted trust cannot influence server trust.
 - [x] Distributed rate-limit code path implemented with Supabase RPC and local fallback.
 - [x] MCP batch and body size caps active.
 - [x] Usage canary active.
-- [ ] Load smoke passes.
-- [ ] E2E readiness tests updated and passing.
-- [ ] Scorecard and Production Monitor enforced or documented as launch gates.
+- [x] Load smoke passes.
+- [x] E2E readiness tests updated and passing.
+- [x] Scorecard and Production Monitor enforced or documented as launch gates.
 
 ### 100%: Serious Package Intelligence Layer
 
