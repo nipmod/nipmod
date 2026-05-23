@@ -541,6 +541,14 @@ export function externalSourceCapabilities(env: Record<string, string | undefine
   ];
 }
 
+export function mcpBootstrapSourceProbe(): { name: string; recordCount: number; snapshot: string } {
+  return {
+    name: "ac.tandem/docs-mcp",
+    recordCount: MCP_REGISTRY_BOOTSTRAP_SERVERS.length,
+    snapshot: MCP_REGISTRY_BOOTSTRAP_SNAPSHOT
+  };
+}
+
 export function readExternalPackageRecord(value: unknown): ExternalPackageRecord {
   const record = unwrapExternalPackageRecord(value);
   if (!isRecord(record)) {

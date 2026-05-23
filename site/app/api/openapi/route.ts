@@ -540,11 +540,23 @@ function openApiDocument() {
             degraded: { type: "boolean" },
             durationMs: { minimum: 0, type: "integer" },
             endpointHost: { type: "string" },
+            fallback: {
+              additionalProperties: false,
+              nullable: true,
+              properties: {
+                recordCount: { minimum: 0, type: "integer" },
+                snapshot: { type: "string" },
+                type: { const: "pinned-public-registry-snapshot", type: "string" }
+              },
+              required: ["recordCount", "snapshot", "type"],
+              type: "object"
+            },
+            probePath: { enum: ["upstream-live", "resolver-fallback"], type: "string" },
             retryable: { type: "boolean" },
             status: { enum: ["ok", "failed"], type: "string" },
             statusCode: { nullable: true, type: "integer" }
           },
-          required: ["cached", "checkedAt", "degraded", "durationMs", "endpointHost", "retryable", "status", "statusCode"],
+          required: ["cached", "checkedAt", "degraded", "durationMs", "endpointHost", "fallback", "probePath", "retryable", "status", "statusCode"],
           type: "object"
         },
         SourceHealthResponse: {

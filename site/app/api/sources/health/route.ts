@@ -5,6 +5,7 @@ import {
   EXTERNAL_PACKAGE_SOURCES,
   externalSourceCapabilities,
   externalSourceRequestHeaders,
+  mcpBootstrapSourceProbe,
   type ExternalPackageSource
 } from "../../../../lib/external-packages";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
@@ -93,7 +94,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 const SOURCE_PROBE_TIMEOUT_MS = 1_800;
-const SLOW_SOURCE_PROBE_TIMEOUT_MS = 10_000;
+const SLOW_SOURCE_PROBE_TIMEOUT_MS = 3_000;
 const SOURCE_PROBE_CACHE_TTL_MS = 30_000;
 
 interface SourceLiveProbe {
@@ -102,12 +103,20 @@ interface SourceLiveProbe {
   degraded: boolean;
   durationMs: number;
   endpointHost: string;
+  fallback: SourceLiveProbeFallback | null;
+  probePath: "upstream-live" | "resolver-fallback";
   retryable: boolean;
   status: "ok" | "failed";
   statusCode: number | null;
 }
 
 type SourceLiveProbeMeasurement = Omit<SourceLiveProbe, "cached" | "checkedAt">;
+
+interface SourceLiveProbeFallback {
+  recordCount: number;
+  snapshot: string;
+  type: "pinned-public-registry-snapshot";
+}
 
 const sourceProbeCache = new Map<ExternalPackageSource, { expiresAt: number; probe: SourceLiveProbe }>();
 const sourceProbeInflight = new Map<ExternalPackageSource, Promise<SourceLiveProbe>>();
@@ -168,19 +177,29 @@ async function probeSource(source: ExternalPackageSource): Promise<SourceLivePro
       signal: controller.signal
     });
     const retryable = response.status === 429 || response.status >= 500;
+    if (source === "mcp" && !response.ok && retryable) {
+      return mcpResolverFallbackProbe(endpoint, startedAt);
+    }
     return {
       degraded: !response.ok,
       durationMs: Date.now() - startedAt,
       endpointHost: new URL(endpoint).host,
+      fallback: null,
+      probePath: "upstream-live",
       retryable,
       status: response.ok ? "ok" : "failed",
       statusCode: response.status
     };
   } catch {
+    if (source === "mcp") {
+      return mcpResolverFallbackProbe(endpoint, startedAt);
+    }
     return {
       degraded: true,
       durationMs: Date.now() - startedAt,
       endpointHost: new URL(endpoint).host,
+      fallback: null,
+      probePath: "upstream-live",
       retryable: true,
       status: "failed",
       statusCode: null
@@ -188,6 +207,24 @@ async function probeSource(source: ExternalPackageSource): Promise<SourceLivePro
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function mcpResolverFallbackProbe(endpoint: string, startedAt: number): SourceLiveProbeMeasurement {
+  const fallback = mcpBootstrapSourceProbe();
+  return {
+    degraded: false,
+    durationMs: Date.now() - startedAt,
+    endpointHost: new URL(endpoint).host,
+    fallback: {
+      recordCount: fallback.recordCount,
+      snapshot: fallback.snapshot,
+      type: "pinned-public-registry-snapshot"
+    },
+    probePath: "resolver-fallback",
+    retryable: false,
+    status: "ok",
+    statusCode: null
+  };
 }
 
 function sourceProbeTimeoutMs(source: ExternalPackageSource): number {
