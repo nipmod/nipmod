@@ -50,6 +50,7 @@ const requiredFiles = [
   "examples/agent-workflow/mcp-host.md",
   "tools/seed-package-intelligence.ts",
   "tools/api-usage-canary.ts",
+  "tools/source-depth-canary.ts",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",

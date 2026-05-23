@@ -14,6 +14,9 @@ if (!skipLocal) {
 }
 
 await runCheck("live_api_contract", () => verifyLiveApi(baseUrl, { requireDistributedRateLimit }));
+await runCheck("source_depth_canary", () =>
+  run(process.execPath, ["--experimental-strip-types", "tools/source-depth-canary.ts", "--base-url", baseUrl], { timeoutMs: 90_000 })
+);
 await runCheck("api_usage_canary", () => run(process.execPath, ["--experimental-strip-types", "tools/api-usage-canary.ts", "--base-url", baseUrl], { timeoutMs: 60_000 }));
 await runCheck("production_synthetic_monitor", () => run(process.execPath, ["--experimental-strip-types", "tools/prod-synthetic-monitor.ts"]));
 await runCheck("production_load_smoke", () =>
