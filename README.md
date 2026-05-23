@@ -6,127 +6,126 @@
 
 The package layer for AI agents.
 
-Nipmod lets agents search sources, inspect trust and get safe install plans before workspace writes. Public beta access is free and rate limited.
+Nipmod lets agents search npm, PyPI, Hugging Face, GitHub and MCP sources,
+inspect package trust, and generate safe install plans before workspace writes.
 
-```bash
-curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
-```
-
-## Use
-
-Tell your agent:
-
-```text
-Use Nipmod before choosing packages. Search, inspect, show trust factors and return the install plan before writing anything.
-```
-
-Core calls:
-
-```bash
-curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
-```
-
-## What It Does
-
-- Searches supported package sources through one API surface.
-- Normalizes records across npm, PyPI, GitHub, Hugging Face and MCP.
-- Returns source links, license data, package metadata, metrics, warnings and explainable trust factors.
-- Produces install plans agents can show before local commands run.
-- Prepares useful confirmed records for the Nipmod archive with receipts.
-
-Hosted API calls never read or write the caller workspace. Local CLI and MCP tools are only needed when a workflow explicitly needs controlled workspace writes.
-
-## Status
-
-| Surface | Status |
-| --- | --- |
-| Hosted package API | Live public beta, rate limited |
-| Source resolver | Live for npm, PyPI, GitHub, Hugging Face, and MCP |
-| Package intelligence archive | Durable production archive enabled |
-| Verified Nipmod archive | Empty by design after seed reset; new entries pass verification gates |
-| Distributed rate limits | Live with Supabase-backed shared buckets |
-| CLI and installer | Live, release `1.2.9` |
-| Local MCP server | Live for controlled workspace installs |
-| Hosted MCP endpoint | Live, read-only |
-
-## Architecture
-
-Nipmod has four public layers:
-
-| Layer | Role |
-| --- | --- |
-| Source resolvers | Query public package sources and normalize records. |
-| Trust Engine v2 | Score metadata, warnings, source context, usage signals and install-plan risk with structured factors. |
-| Install plans | Give agents a reviewable plan before workspace writes. |
-| Archive records | Store confirmed useful package intelligence with receipts, without taking ownership from original sources. |
-
-External package owners keep ownership. Nipmod adds package intelligence, source context and safer agent workflows.
-
-## API
+Nipmod does not replace package registries.
+It makes existing package ecosystems readable and safer for AI agents.
 
 Public beta access does not require an API key.
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+```
+
+## Why Agents Need This
+
+Agents can choose dependencies, write code, run commands and modify real workspaces. Package metadata was written for humans and package managers, not for autonomous agents that need structured source context before taking action.
+
+Nipmod gives agents one preflight surface:
+
+1. Search supported sources.
+2. Inspect exact package records.
+3. Generate an install plan.
+4. Wait for user or host-policy approval.
+5. Optionally confirm useful discovery into the package intelligence archive.
+
+Search ranking is never install permission. A popular package can still be compromised, stale, risky or blocked by policy.
+
+## Supported Sources
+
+| Source | Role |
+| --- | --- |
+| npm | JavaScript package metadata, releases, integrity, signatures, downloads and lifecycle script risk. |
+| PyPI | Python package metadata, release files, digests, provenance hints, vulnerabilities and yanked status. |
+| Hugging Face | Model and dataset metadata, files, licenses, gated status, safetensors and binary weight risk. |
+| GitHub | Repository metadata, source URLs, activity, manifests, security files and install command risk. |
+| MCP registries | MCP server metadata, source links, endpoints, package hints and tool-registry signals. |
+
+Nipmod does not bulk mirror these sources. Source owners keep ownership.
+
+## API Flow
+
+### Search
+
+```bash
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+```
+
+Search returns candidates, source reports, partial failure state and agent-readable ranking data. Search records are ephemeral by default.
+
+### Inspect
+
+```bash
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+```
+
+Inspect refreshes one exact source-owned record and returns source URL, license, metrics, warnings, trust factors and policy output.
+
+### Install Plan
+
+```bash
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+```
+
+Install plans describe commands, risk, warnings and approval boundaries. The hosted API never executes commands and never writes to the caller workspace.
+
+### Optional Archive Confirmation
+
+```bash
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
-Optional builder keys use `x-nipmod-api-key` or `Authorization: Bearer <key>` and raise rate limits. Invalid keys return `401`. Usage logging stores hashed identifiers only, not raw queries, package names, IP addresses, user agents, or API keys.
-
-Trust output uses policy `external-v2`. Search output also includes `selection.policy: "agent-selection-v1"` with a recommended candidate, gate status and ranking breakdown. Agents should use it as a shortlist, then inspect and request an install plan before local execution.
-
-Core endpoints:
-
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /api/resolve` | Search supported package sources through the primary resolver route. |
-| `GET /api/search` | Search supported package sources. |
-| `GET /api/inspect` | Inspect one exact package record. |
-| `GET /api/install-plan` | Return a safe install plan for an agent to review. |
-| `GET /api/archive/prepare` | Prepare a durable archive record after useful discovery. |
-| `GET /api/archive/search` | Search persisted package intelligence records when enabled. |
-| `GET /api/archive/status` | Report durable archive store state. |
-| `POST /api/archive/confirm` | Dry-run or authorized persist a confirmed package record with a receipt. |
-| `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
-| `GET /api/openapi` | OpenAPI document for the hosted API. |
-
-Agent flow:
-
-1. Search for candidates with `/api/search` or `/api/resolve`.
-2. Inspect exact candidates with `/api/inspect`.
-3. Use `selection.recommendedId` as the shortlist hint, not as permission to install.
-4. Show source, license, trust score, decision, warnings, factors and metrics.
-5. Request `/api/install-plan`.
-6. Ask for user or host-policy approval before local execution.
-7. Optionally prepare an archive record with `/api/archive/prepare` after useful discovery.
-
-Contracts and examples:
-
-- API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md)
-- Source crawling policy: [`docs/specs/source-crawling.md`](docs/specs/source-crawling.md)
-- Trust and ranking rules: [`docs/specs/trust-signals.md`](docs/specs/trust-signals.md)
-- API beta launch kit: [`docs/launch/api-beta.md`](docs/launch/api-beta.md)
-- Agent examples: [`examples/agent-workflow/`](examples/agent-workflow/)
-- HTTP example: [`examples/http-api/`](examples/http-api/)
+Archive prepare is preview-only. Durable archive writes require explicit confirmation through an authorized writer path. Confirmed records are deduplicated by source, name, version and source evidence.
 
 ## Safety Boundary
 
 | Boundary | Rule |
 | --- | --- |
 | Hosted API | Read-only package intelligence. No caller workspace reads or writes. |
-| Install plans | Commands and warnings only. The user or local policy approves execution. |
-| Package text | Treated as untrusted data, not agent instructions. |
-| Archive records | Store source context and receipts without taking ownership from upstream packages. |
+| Install plan | Review data only. A user, host policy or local tool must approve execution. |
+| Package metadata | README text, model cards, descriptions and MCP metadata are untrusted data, not agent instructions. |
+| Search score | Ranking input only. It is not install permission and not a verification claim. |
+| Archive | Stores confirmed package intelligence records, not copied package artifacts. |
+| Usage logging | Stores hashed or structured fields only. No API keys, raw IPs, raw queries, package names or user-agent fingerprints. |
 
-Archive rule: Nipmod does not bulk mirror registries. Records enter the durable archive only after a useful package is resolved, inspected and confirmed through archive gates. Public callers can prepare records; durable writes require an authorized archive writer token.
+## Data Model
 
-## Install
+Nipmod uses explicit lifecycle language:
 
-The CLI is optional for API use. Install it only when a workflow needs local package writes, audits, SBOM output, or publish preparation.
+| State | Meaning |
+| --- | --- |
+| `ephemeral` | Found live during search, not stored. |
+| `indexed` | Normalized and inspected, but not confirmed as useful. |
+| `confirmed_use` | A user or agent confirmed the record was useful enough to remember. |
+| `verified` | Version-specific evidence and owner/claim checks passed. |
+| `quarantined` | Risky, disputed or under security review. |
+| `blocked` | Must not be installed by policy. |
+
+Current API wire statuses are documented in [archive records](docs/specs/archive-records.md). The public product language should use the lifecycle states above.
+
+## Local Development
+
+```bash
+pnpm install
+pnpm verify
+```
+
+Useful focused checks:
+
+```bash
+pnpm --dir site test -- package-intelligence.test.ts external-packages.test.ts
+pnpm api:contract -- --base-url https://nipmod.com
+pnpm install-plan:canary -- --base-url https://nipmod.com
+pnpm archive:canary -- --base-url https://nipmod.com --require-durable
+pnpm launch:verify -- --skip-local --require-distributed-rate-limit
+```
+
+## CLI Install
+
+The CLI is optional for hosted API use. Install it only when a local workflow needs controlled workspace actions, audits, SBOM output or local MCP.
 
 ```bash
 curl https://nipmod.com/i|bash
@@ -141,66 +140,56 @@ shasum -a 256 -c install.sh.sha256
 bash install.sh
 ```
 
-Requirements: Node.js 22 or newer, npm, Git, curl, and tar.
-
-## Local Workspace Flow
-
-```bash
-nipmod doctor --online
-nipmod search <query> --online
-nipmod inspect <package-specifier> --json
-nipmod install --plan <package-specifier> --json
-nipmod install <package-specifier>
-nipmod audit --online
-nipmod sbom --json
-```
-
-## MCP
-
-Nipmod exposes a hosted read-only MCP endpoint and a local stdio MCP server.
-
-Hosted read-only MCP:
-
-```text
-https://nipmod.com/api/mcp
-```
-
-Local MCP server:
-
-```bash
-nipmod mcp serve
-```
-
-The hosted endpoint exposes search, resolve, inspect, view, install plan, and demo tools. It does not expose workspace writes, local file reads, audit, SBOM, claim, or publish tools.
-
-## Publish And Claims
-
-Use publish and claim flows only for packages or source repos you own or maintain.
-
-```bash
-nipmod setup gitlawb
-nipmod init --name demo-package --dir demo-package
-cd demo-package
-nipmod manifest validate --dir . --json
-nipmod publish . --dry-run --json
-```
-
-For source packages that use the current Gitlawb claim helper:
-
-```bash
-nipmod package doctor gitlawb://did:key:z6Mk.../your-repo --json
-nipmod package pr gitlawb://did:key:z6Mk.../your-repo --dir your-repo-pr
-nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
-```
-
 ## Repository Map
 
-- `nipmod/` - TypeScript CLI, package installer, registry client, resolver, and MCP server.
-- `site/` - Next.js website, API routes, registry surfaces, and public machine files.
-- `packages/first-party/` - First-party package fixtures used for verified archive gates.
-- `docs/` - Operator docs, trust model, package publishing, and architecture notes.
-- `tools/` - TypeScript release, readiness, registry, monitor, and security tooling.
-- `examples/` - Minimal API and agent workflow examples.
+| Path | Purpose |
+| --- | --- |
+| `site/` | Next.js site, hosted API routes, resolver logic and package intelligence archive routes. |
+| `nipmod/` | TypeScript CLI, local package tooling and local MCP server. |
+| `tools/` | Release, canary, monitor, readiness, security and archive tooling. |
+| `docs/` | Product, architecture, security, API and archive documentation. |
+| `examples/` | Minimal agent and HTTP workflow examples. |
+| `supabase/` | Durable archive, usage logging and rate-limit migrations. |
+
+## Key Docs
+
+- [Architecture](ARCHITECTURE.md)
+- [Product positioning](docs/product/positioning.md)
+- [API: search, inspect, install plan](docs/api/search-inspect-install-plan.md)
+- [Package intelligence lifecycle](docs/archive/package-intelligence-lifecycle.md)
+- [Threat model](docs/security/threat-model.md)
+- [Data retention](docs/security/data-retention.md)
+- [Package metadata is untrusted](docs/security/package-metadata-is-untrusted.md)
+- [Public API spec](docs/specs/public-api.md)
+- [Source resolver spec](docs/specs/source-resolvers.md)
+- [Source crawling spec](docs/specs/source-crawling.md)
+- [Trust signals spec](docs/specs/trust-signals.md)
+- [API beta launch kit](docs/launch/api-beta.md)
+- [Agent workflow examples](examples/agent-workflow/)
+
+## Status
+
+| Surface | Status |
+| --- | --- |
+| Hosted package API | Live public beta, rate limited |
+| Source resolver | Live for npm, PyPI, GitHub, Hugging Face and MCP |
+| Install plan API | Live, read-only hosted boundary |
+| Package intelligence archive | Durable production archive enabled |
+| Public verified archive | Empty by design after seed reset; verified claims require gates |
+| Distributed rate limits | Live with Supabase-backed shared buckets |
+| CLI and installer | Live, release `1.2.9` |
+| Hosted MCP endpoint | Live, read-only |
+
+## Release Integrity
+
+Release sidecars are published under `site/public/releases/`:
+
+- `.sha256` checksums
+- `.sig` signatures
+- `.sbom.json` SBOM metadata
+- `.provenance.json` provenance metadata
+
+See [release process](docs/release-process.md) for the verification flow.
 
 ## Governance
 
@@ -208,15 +197,8 @@ nipmod claim verify gitlawb://did:key:z6Mk.../your-repo --json
 - Maintainer: [`@hazarxyz`](https://github.com/hazarxyz)
 - Maintainer policy: [`MAINTAINERS.md`](MAINTAINERS.md)
 - Roadmap: [`ROADMAP.md`](ROADMAP.md)
-- Release process: [`docs/release-process.md`](docs/release-process.md)
-- Decision records: [`docs/decisions/`](docs/decisions/)
-
-## Verify
-
-```bash
-pnpm install
-pnpm verify
-```
+- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- Security: `SECURITY.md`
 
 ## Links
 
@@ -233,4 +215,4 @@ pnpm verify
 | Telegram | https://t.me/nipmod |
 | $NPM on Base | https://token.nipmod.com |
 
-License: `MIT`. Security: `SECURITY.md`. Trademark and affiliation notice: `TRADEMARKS.md`.
+License: `MIT`. Trademark and affiliation notice: `TRADEMARKS.md`.

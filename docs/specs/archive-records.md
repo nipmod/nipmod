@@ -4,7 +4,22 @@ Status: implemented preparation flow, durable writes gated
 
 The Nipmod archive stores package intelligence records after useful confirmed discovery. The archive is not a blind mirror of external registries.
 
-## Record Status
+## Public Lifecycle States
+
+Use these states in product copy and docs:
+
+| State | Meaning |
+| --- | --- |
+| `ephemeral` | Live source result, not stored. |
+| `indexed` | Normalized and inspected, but not confirmed as useful. |
+| `confirmed_use` | Confirmed useful by an agent or user workflow. |
+| `verified` | Exact version has strong evidence and owner or claim gates. |
+| `quarantined` | Risky, disputed or under security review. |
+| `blocked` | Policy says the package must not be installed. |
+
+## Current Wire Status
+
+The API keeps older status names for compatibility.
 
 | Status | Meaning |
 | --- | --- |
@@ -15,11 +30,24 @@ The Nipmod archive stores package intelligence records after useful confirmed di
 | `quarantined` | Maintainers or security checks flagged the record. |
 | `yanked` | The record is withdrawn from active recommendations. |
 
+Mapping:
+
+| Public Lifecycle | Current Wire Shape |
+| --- | --- |
+| `ephemeral` | external record `archive.persistence: "ephemeral"` |
+| `indexed` | archive record `archive.status: "external_indexed"` |
+| `confirmed_use` | archive record `archive.status: "agent_confirmed"` |
+| `verified` | archive record `archive.status: "verified_nipmod"` |
+| `quarantined` | archive record `archive.status: "quarantined"` |
+| `blocked` | blocked install plan or failed archive validation |
+
 ## Persistence Rule
 
 Public callers may prepare records.
 
 Durable writes require server-side archive credentials and an authorized writer token. This prevents public spam and keeps the archive useful.
+
+Search alone stores nothing durable as verified. Archive prepare stores nothing durable. Durable persistence starts only at confirm write after server-side reinspection and archive gates.
 
 The Supabase production schema lives in `supabase/migrations/20260522073000_package_intelligence_archive.sql`. It enables RLS, allows public reads, stores archive write tokens only as SHA-256 hashes in `nipmod_private.archive_write_tokens`, and permits writes only when the server sends the matching `x-nipmod-archive-token` header.
 
@@ -56,6 +84,8 @@ Archive confirmation is allowed only when:
 - source metadata does not contain high-risk lifecycle script behavior
 - package metadata does not contain agent-targeted instructions
 - the request uses the archive writer token for durable writes
+
+Search score is not part of this gate as standalone permission. The gate uses exact source inspection, trust decision, version freshness, install-plan safety and policy errors.
 
 ## Stored Evidence
 

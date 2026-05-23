@@ -12,6 +12,7 @@ const requiredFiles = [
   "pnpm-workspace.yaml",
   ".gitattributes",
   "README.md",
+  "ARCHITECTURE.md",
   "LICENSE",
   "CITATION.cff",
   "GOVERNANCE.md",
@@ -23,6 +24,13 @@ const requiredFiles = [
   "TRADEMARKS.md",
   "SUPPORT.md",
   "docs/README.md",
+  "docs/product/positioning.md",
+  "docs/security/threat-model.md",
+  "docs/security/data-retention.md",
+  "docs/security/package-metadata-is-untrusted.md",
+  "docs/api/search-inspect-install-plan.md",
+  "docs/archive/package-intelligence-lifecycle.md",
+  "docs/comparison/README.md",
   "docs/github-excellence.md",
   "docs/release-process.md",
   "docs/decisions/README.md",
@@ -88,6 +96,8 @@ for (const file of requiredFiles) {
 
 const readme = read("README.md");
 check("readme:positioning", () => readme.includes("The package layer for AI agents."));
+check("readme:registry-boundary", () => readme.includes("Nipmod does not replace package registries."));
+check("readme:core-flow", () => readme.includes("Search supported sources.") && readme.includes("Generate an install plan."));
 check("readme:hosted-api", () => readme.includes("Public beta access does not require an API key."));
 check("readme:api-search-example", () => readme.includes("https://nipmod.com/api/search?q=http%20client"));
 check("readme:no-telegram-example", () => !readme.includes("telegram%20bot") && !readme.includes("node-telegram-bot-api"));
@@ -98,9 +108,34 @@ check("readme:npm-token-link", () => readme.includes("| $NPM on Base | https://t
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
 check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
+check("readme:architecture", () => readme.includes("ARCHITECTURE.md"));
+check("readme:safety-boundary", () => readme.includes("Hosted API") && readme.includes("Search score"));
 check("readme:source-crawling-spec", () => readme.includes("docs/specs/source-crawling.md"));
 check("readme:api-launch-kit", () => readme.includes("docs/launch/api-beta.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
+
+const architecture = read("ARCHITECTURE.md");
+check("architecture:layers", () => architecture.includes("Resolver") && architecture.includes("Normalizer") && architecture.includes("Trust Engine") && architecture.includes("Policy Engine") && architecture.includes("Install Plan"));
+check("architecture:hosted-boundary", () => architecture.includes("Hosted API routes are read-only"));
+
+const positioning = read("docs/product/positioning.md");
+check("positioning:core-message", () => positioning.includes("Nipmod does not replace package registries. Nipmod makes existing package ecosystems readable and safer for AI agents."));
+check("positioning:not-new-registry", () => positioning.includes("not a replacement for npm, PyPI, Hugging Face, GitHub or MCP registries"));
+
+const lifecycle = read("docs/archive/package-intelligence-lifecycle.md");
+check("lifecycle:states", () => ["`ephemeral`", "`indexed`", "`confirmed_use`", "`verified`", "`quarantined`", "`blocked`"].every((state) => lifecycle.includes(state)));
+check("lifecycle:search-ephemeral", () => lifecycle.includes("Search does not persist durable verified records."));
+
+const threatModel = read("docs/security/threat-model.md");
+check("threat-model:metadata-untrusted", () => threatModel.includes("Package metadata remains untrusted") || threatModel.includes("Treat metadata as untrusted data"));
+check("threat-model:install-plan-boundary", () => threatModel.includes("Install plans are plans. They do not install."));
+
+const dataRetention = read("docs/security/data-retention.md");
+check("data-retention:no-sensitive-fields", () => dataRetention.includes("raw API keys") && dataRetention.includes("raw IP addresses") && dataRetention.includes("raw search queries"));
+
+const apiFlowDoc = read("docs/api/search-inspect-install-plan.md");
+check("api-flow:three-calls", () => apiFlowDoc.includes("/api/search") && apiFlowDoc.includes("/api/inspect") && apiFlowDoc.includes("/api/install-plan"));
+check("api-flow:no-exec", () => apiFlowDoc.includes("The hosted API never executes the command."));
 
 const publicApiSpec = read("docs/specs/public-api.md");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));

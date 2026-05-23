@@ -4,6 +4,8 @@ Status: implemented public beta, external trust policy `external-v2`, selection 
 
 Nipmod exposes trust data so agents can decide what to show before install. A trust score is not a safety guarantee and is not permission to execute code. It is a structured review signal.
 
+Search score is never install permission. A popular package can be compromised, stale, unsafe for a specific runtime or blocked by policy. Install decisions are exact-package, version-aware and policy-based.
+
 There are two score types:
 
 | Type | Applies To | Meaning |
@@ -140,6 +142,8 @@ Current source-depth additions:
 | PyPI | Release file types, file digests, signature metadata, Simple API provenance links, core metadata hashes, yanked file status, total file size, vulnerabilities and Python version bounds. |
 | GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, security files and lockfiles. |
 | Hugging Face | Repository files, README/model card, config metadata, safetensors presence for models, commit digest and gated access. |
+
+Hugging Face binary model files are treated conservatively. `safetensors` is positive evidence for model weights. Pickle or generic binary weight files without safetensors metadata are negative evidence. Any `trust_remote_code` style requirement must be surfaced as a warning or block before a local model load.
 
 GitHub recency bonus:
 
