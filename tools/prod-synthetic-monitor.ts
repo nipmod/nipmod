@@ -185,6 +185,9 @@ export async function runSyntheticMonitor({
     assertEqual(health.type, "dev.nipmod.source-health.v1", "source health type mismatch");
     assertEqual(health.summary?.workspaceWritesFromHostedApi, false, "hosted source health write boundary mismatch");
     assertEqual(health.apiAccess?.publicBeta, true, "source health API access mismatch");
+    if (!health.rateLimit?.activeStore || typeof health.rateLimit.distributedActive !== "boolean") {
+      throw new Error("source health missing rate-limit activation status");
+    }
     const sources = Array.isArray(health.sources) ? health.sources : [];
     const names = sources.map((source) => source.source).sort().join(",");
     assertEqual(names, "github,huggingface-dataset,huggingface-model,mcp,npm,pypi", "source health source list mismatch");
@@ -194,6 +197,7 @@ export async function runSyntheticMonitor({
     }
     return {
       archiveMode: health.archive?.mode,
+      rateLimitStore: health.rateLimit.activeStore,
       sources: sources.length
     };
   });

@@ -31,6 +31,8 @@ Rate-limit responses use the same public error contract as the rest of the API a
 
 Production deployments can use a Supabase-backed rate-limit bucket through `consume_api_rate_limit`. The bucket stores hashed client identifiers only. If the shared store is missing or temporarily unavailable, routes fall back to the local in-process limiter and expose `x-ratelimit-store: memory-fallback`.
 
+`GET /api/sources/health` also returns coarse rate-limit store status with `configured`, `driver`, `activeStore` and `distributedActive`. This lets operators and agents distinguish an intended Supabase-backed setup from a live fallback without exposing Supabase URLs, keys or raw client identifiers.
+
 ## Base URL
 
 ```text
@@ -193,6 +195,8 @@ curl 'https://nipmod.com/api/archive/status'
 ## `GET /api/sources/health`
 
 Return supported source capabilities, optional auth status and the hosted API write boundary.
+
+The response includes coarse archive, usage and rate-limit store status. `rateLimit.activeStore: "supabase"` means the current request consumed the shared Supabase RPC bucket. `rateLimit.activeStore: "memory-fallback"` means the route remained safe but did not use distributed rate limits for that request.
 
 Example:
 

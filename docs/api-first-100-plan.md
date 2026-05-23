@@ -74,6 +74,7 @@ Recent hardening:
 - Public API routes now use an async rate-limit path that can consume a shared Supabase bucket and falls back to local process buckets when the shared store is unavailable.
 - Usage ingestion now has an operator canary that makes a public API request and verifies its hashed usage event in Supabase.
 - Source resolvers now extract deeper source-native risk and context signals for npm, PyPI, GitHub, Hugging Face and MCP without changing the public record schema.
+- Source health now exposes the active rate-limit store and `pnpm launch:verify` can be run with `--require-distributed-rate-limit` to make shared Supabase rate limits a hard gate.
 
 ## Workstream 1: API Contract
 
@@ -325,6 +326,7 @@ Goal: allow broad free beta usage without exposing Nipmod or upstream sources to
 Tasks:
 
 - Move public/API-key rate limiting from process memory to a shared store or platform-native limiter. Done in code with Supabase RPC plus memory fallback; production requires the rate-limit migration to be applied.
+- Expose active shared-store status publicly without leaking secrets. Done through `/api/sources/health`.
 - Add per-source quotas.
 - Add circuit breakers for upstream failures. Done in-process; shared/multi-instance breaker remains future infrastructure.
 - Cap MCP batch size.
@@ -335,6 +337,7 @@ Tasks:
 Definition of Done:
 
 - Rate limits work across serverless instances.
+- Launch verification can fail explicitly when distributed rate limits are required.
 - Abuse of one source does not degrade every source.
 - MCP batch traffic cannot exhaust the API.
 - Load smoke passes against production.

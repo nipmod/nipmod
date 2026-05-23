@@ -503,6 +503,10 @@ function createFixture({
       archive: {
         mode: "durable-archive-enabled"
       },
+      rateLimit: {
+        activeStore: "supabase",
+        distributedActive: true
+      },
       sources: [
         { installPlanWritesWorkspace: false, source: "npm" },
         { installPlanWritesWorkspace: false, source: "pypi" },

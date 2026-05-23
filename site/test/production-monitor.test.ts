@@ -178,6 +178,10 @@ function fixture(url: string, init?: RequestInit): unknown {
           { source: "huggingface-dataset", status: "available" },
           { source: "mcp", status: "available" }
         ],
+        rateLimit: {
+          activeStore: "supabase",
+          distributedActive: true
+        },
         summary: {
           available: 6,
           requested: 6,

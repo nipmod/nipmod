@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
 const skipLocal = args.includes("--skip-local");
+const requireDistributedRateLimit = args.includes("--require-distributed-rate-limit");
 const baseUrl = readOption("--base-url")?.replace(/\/+$/, "") ?? "https://nipmod.com";
 const checks = [];
 
@@ -12,7 +13,7 @@ if (!skipLocal) {
   await runCheck("local_verify", () => run("pnpm", ["verify"]));
 }
 
-await runCheck("live_api_contract", () => verifyLiveApi(baseUrl));
+await runCheck("live_api_contract", () => verifyLiveApi(baseUrl, { requireDistributedRateLimit }));
 await runCheck("api_usage_canary", () => run(process.execPath, ["--experimental-strip-types", "tools/api-usage-canary.ts", "--base-url", baseUrl], { timeoutMs: 60_000 }));
 await runCheck("production_synthetic_monitor", () => run(process.execPath, ["--experimental-strip-types", "tools/prod-synthetic-monitor.ts"]));
 await runCheck("production_load_smoke", () =>
@@ -62,7 +63,7 @@ async function runCheck(name, fn) {
   }
 }
 
-async function verifyLiveApi(targetBaseUrl) {
+async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = false } = {}) {
   const openApi = await fetchJson(`${targetBaseUrl}/api/openapi`);
   assertEqual(openApi.openapi, "3.1.0", "OpenAPI version mismatch");
   assertEqual(
@@ -100,10 +101,15 @@ async function verifyLiveApi(targetBaseUrl) {
   const sourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health`);
   assertEqual(sourceHealth.type, "dev.nipmod.source-health.v1", "source health type mismatch");
   assertEqual(sourceHealth.summary?.workspaceWritesFromHostedApi, false, "source health write boundary mismatch");
+  if (requireDistributedRateLimit && sourceHealth.rateLimit?.activeStore !== "supabase") {
+    throw new Error(`distributed rate-limit store is not active: ${sourceHealth.rateLimit?.activeStore ?? "unknown"}`);
+  }
 
   return {
     installPlanCommandBoundary: firstCommand.boundary,
     openApi: `${targetBaseUrl}/api/openapi`,
+    rateLimitStore: sourceHealth.rateLimit?.activeStore ?? null,
+    requireDistributedRateLimit,
     searchSources: search.sourceReports.map((report) => report.source),
     sourceCount: sourceHealth.sources?.length ?? 0
   };
