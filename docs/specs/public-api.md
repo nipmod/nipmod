@@ -33,6 +33,8 @@ Production deployments can use a Supabase-backed rate-limit bucket through `cons
 
 `GET /api/sources/health` also returns coarse rate-limit store status with `configured`, `driver`, `activeStore` and `distributedActive`. This lets operators and agents distinguish an intended Supabase-backed setup from a live fallback without exposing Supabase URLs, keys or raw client identifiers.
 
+When the shared store is configured but unavailable, source health may include a coarse `rateLimit.fallbackReason` such as `distributed_rpc_http_404`, `distributed_rpc_timeout` or `distributed_rpc_invalid_shape`. These values are operational diagnostics only and never include upstream response bodies, URLs, keys or client identifiers.
+
 Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
 
 Operators can run `pnpm install-plan:canary` to verify live install-plan boundaries across npm, PyPI, GitHub, Hugging Face and MCP. The canary fails if a hosted response declares workspace writes, treats metadata as instruction, omits approval boundaries or allows hosted command execution.

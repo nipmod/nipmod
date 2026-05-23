@@ -131,6 +131,7 @@ async function fetchSourceHealth({ baseUrl, fetchFn, requestId }) {
         activeStore: parsed?.rateLimit?.activeStore ?? null,
         configured: parsed?.rateLimit?.configured ?? null,
         distributedActive: parsed?.rateLimit?.distributedActive ?? null,
+        fallbackReason: parsed?.rateLimit?.fallbackReason ?? null,
         missing: parsed?.rateLimit?.missing ?? null,
         status: response.status
       },
