@@ -80,12 +80,12 @@ export const mcpContent = {
     {
       label: "Resolve external",
       command:
-        '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"telegram bot","sources":["npm","pypi","github","huggingface-model","mcp"]}}}'
+        '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","huggingface-model","mcp"]}}}'
     },
     {
       label: "Plan external install",
       command:
-        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"node-telegram-bot-api"}}}'
+        '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}'
     },
     {
       label: "Plan install",

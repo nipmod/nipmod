@@ -52,7 +52,7 @@ GET https://nipmod.com/api/sources/health
 
 External records are external_indexed. Original package owners keep ownership. verified_nipmod requires a verified claim or direct publish.
 Durable package intelligence writes require the server side archive store and an authorized server writer.
-Archive confirm rejects avoid, high-risk trust results and high-risk install commands.
+Archive confirm rejects avoid, unknown, below-threshold or high-risk trust results and high-risk install commands.
 Public package state: no public packages are listed yet. The seed archive was cleared.
 
 Local setup is only needed when an agent must write to a workspace.
@@ -100,10 +100,10 @@ Hosted MCP search:
 {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"package"}}}
 
 Hosted MCP external resolve:
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"telegram bot","sources":["npm","pypi","github","huggingface-model","mcp"]}}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","huggingface-model","mcp"]}}}
 
 Hosted MCP external install plan:
-{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"node-telegram-bot-api"}}}
+{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}
 
 Hosted MCP install plan:
 {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"specifier":"<package-specifier>"}}}

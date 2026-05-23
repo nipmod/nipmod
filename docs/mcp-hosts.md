@@ -73,7 +73,7 @@ Resolve external package:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"telegram bot","sources":["npm","pypi","github","huggingface-model","mcp"]}}}'
+  -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","huggingface-model","mcp"]}}}'
 ```
 
 External install plan:
@@ -81,7 +81,7 @@ External install plan:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"node-telegram-bot-api"}}}'
+  -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}'
 ```
 
 Install plan:

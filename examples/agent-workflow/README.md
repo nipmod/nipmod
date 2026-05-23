@@ -25,6 +25,7 @@ Archive prepare is preview-only. Durable archive writes require an authorized ar
 
 ## Examples
 
+- [Generic HTTPS agent](generic-https.md)
 - [Codex](codex.md)
 - [Claude Code](claude-code.md)
 - [MCP host](mcp-host.md)

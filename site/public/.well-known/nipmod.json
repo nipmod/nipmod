@@ -40,7 +40,10 @@
     "confirmStores": "requires authorized server writer",
     "rejects": [
       "trust.decision avoid",
+      "trust.decision unknown",
       "trust.risk high",
+      "trust.risk unknown",
+      "below threshold trust score",
       "high risk install commands"
     ],
     "writeBoundary": "Prepared records are not persisted by /api/archive/prepare. Durable writes require archive confirmation and an authorized server writer."
@@ -127,8 +130,8 @@
       "inspect": "nipmod inspect <package-specifier> --json",
       "view": "nipmod view <package-name> --json",
       "installPlan": "nipmod install --plan <package-specifier> --json",
-      "mcpResolve": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.resolve\",\"arguments\":{\"query\":\"telegram bot\",\"sources\":[\"npm\",\"pypi\",\"github\",\"huggingface-model\",\"mcp\"]}}}",
-      "mcpExternalInstallPlan": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.external_install_plan\",\"arguments\":{\"source\":\"npm\",\"name\":\"node-telegram-bot-api\"}}}",
+      "mcpResolve": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.resolve\",\"arguments\":{\"query\":\"http client\",\"sources\":[\"npm\",\"pypi\",\"github\",\"huggingface-model\",\"mcp\"]}}}",
+      "mcpExternalInstallPlan": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.external_install_plan\",\"arguments\":{\"source\":\"npm\",\"name\":\"undici\"}}}",
       "mcpDemo": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.demo\",\"arguments\":{\"host\":\"Codex\",\"package\":\"<package-specifier>\"}}}",
       "mcpControlledInstall": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.install\",\"arguments\":{\"specifier\":\"<package-specifier>\",\"confirmInstall\":\"write-lockfile\"}}}",
       "installPackage": "nipmod install <package-specifier>",
@@ -273,16 +276,16 @@
     "shortCommand": "curl https://nipmod.com/i|bash",
     "verifyCommand": "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh",
     "release": {
-      "version": "1.2.5",
-      "artifact": "https://nipmod.com/releases/nipmod-1.2.5.tgz",
-      "signature": "https://nipmod.com/releases/nipmod-1.2.5.tgz.sig",
+      "version": "1.2.6",
+      "artifact": "https://nipmod.com/releases/nipmod-1.2.6.tgz",
+      "signature": "https://nipmod.com/releases/nipmod-1.2.6.tgz.sig",
       "publicKey": {
         "algorithm": "Ed25519",
         "publicKeySpkiBase64": "MCowBQYDK2VwAyEAtTumyHEstKhOe5W5FNo4nOzhxzBLGq+I7AIN9oUCELQ=",
         "spkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
       },
-      "artifactSha256": "536e85c09a44fabedbdb3151815a2a11131d5a081145e80cef2e2a2a33c3aad1"
+      "artifactSha256": "9ea67dcd7bc469da47590767d682d36a7fea6c018ce1dd060a4eda11e7849890"
     },
-    "scriptSha256": "a7f165b9d0f7d38a0ea040ad45e35df02a89b87cf9ea510fdfa19a9898dd97d2"
+    "scriptSha256": "b5e11367c35388513ced042522e3fe74c5b512a69bbf085a60486836db715703"
   }
 }

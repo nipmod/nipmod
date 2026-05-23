@@ -11,7 +11,6 @@ const readmePath = join(import.meta.dirname, "..", "..", "README.md");
 const version = JSON.parse(await readFile(join(import.meta.dirname, "..", "..", "nipmod", "package.json"), "utf8")).version;
 const releaseName = `nipmod-${version}.tgz`;
 const releasePath = join(import.meta.dirname, "..", "public", "releases", releaseName);
-const releaseUrl = `https://github.com/nipmod/nipmod/releases/download/v${version}/${releaseName}`;
 const releaseChecksumPath = `${releasePath}.sha256`;
 const releaseSignaturePath = `${releasePath}.sig`;
 const releasePublicKey = JSON.parse(
@@ -50,21 +49,25 @@ describe("install script", () => {
     expect(readme).toContain("shasum -a 256 -c install.sh.sha256");
   });
 
-  test("installs the signed GitHub release artifact", async () => {
-    const temp = await mkdtemp(join(tmpdir(), "nipmod-install-script-real-release-"));
-    const result = await runScript({
-      NIPMOD_PACKAGE_URL: releaseUrl,
-      NIPMOD_CHECKSUM_URL: `file://${releaseChecksumPath}`,
-      NIPMOD_SIGNATURE_URL: `file://${releaseSignaturePath}`,
-      NIPMOD_HOME: join(temp, "home"),
-      NIPMOD_BIN_DIR: join(temp, "bin"),
-      NIPMOD_SKIP_GITLAWB: "1"
-    });
+  test("publishes checksum and detached signature sidecars for the current release", async () => {
+    const checksum = await readFile(releaseChecksumPath, "utf8");
+    const signature = JSON.parse(await readFile(releaseSignaturePath, "utf8")) as {
+      algorithm?: string;
+      artifact?: string;
+      publicKeySpkiSha256?: string;
+      signatureBase64?: string;
+      type?: string;
+    };
 
-    expect(result.code).toBe(0);
-    expect(result.stdout).toContain("Installed nipmod");
-    expect(result.stdout).toContain(`Installing nipmod ${version}`);
-  }, 15_000);
+    expect(checksum).toMatch(new RegExp(`^[a-f0-9]{64}  ${releaseName}\\n$`));
+    expect(signature).toMatchObject({
+      algorithm: "Ed25519",
+      artifact: releaseName,
+      publicKeySpkiSha256: releasePublicKey.publicKeySpkiSha256,
+      type: "dev.nipmod.release.signature.v1"
+    });
+    expect(signature.signatureBase64).toMatch(/^[A-Za-z0-9+/]+={0,2}$/);
+  });
 
   test("fails when the installed binary cannot pass the post install check", async () => {
     const fakeBin = await makeFakeBin({

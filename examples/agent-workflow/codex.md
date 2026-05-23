@@ -19,7 +19,7 @@ Do not write durable archive records from a normal user workflow.
 Minimal check:
 
 ```bash
-curl 'https://nipmod.com/api/search?q=react&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
