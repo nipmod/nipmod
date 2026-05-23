@@ -36,6 +36,17 @@ describe("source health route", () => {
       "mcp"
     ]);
     expect(body.sources.every((source: { installPlanWritesWorkspace: boolean }) => source.installPlanWritesWorkspace === false)).toBe(true);
+    expect(body.sources[0].resolver).toMatchObject({
+      endpointHost: "registry.npmjs.org",
+      normalization: {
+        installPlanWritesWorkspace: false,
+        metadataIsInstruction: false,
+        originalUrlPreserved: true,
+        sourceOwnerRetained: true
+      },
+      resolverVersion: "source-resolver-v2",
+      searchStrategy: "registry-ranked-search"
+    });
     expect(JSON.stringify(body)).not.toMatch(/secret|service-role|bearer|publishable-key/i);
   });
 

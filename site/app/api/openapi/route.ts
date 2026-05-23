@@ -156,6 +156,107 @@ function openApiDocument() {
           required: ["popularitySignal", "provenanceStatus", "qualityScore", "securityConfidence"],
           type: "object"
         },
+        ExternalSearchResult: {
+          additionalProperties: true,
+          properties: {
+            generatedAt: { format: "date-time", type: "string" },
+            partial: { type: "boolean" },
+            query: { type: "string" },
+            records: { items: { $ref: "#/components/schemas/ExternalPackageRecord" }, type: "array" },
+            sourceReports: { items: { $ref: "#/components/schemas/ExternalSourceReport" }, type: "array" },
+            sourceSummary: {
+              additionalProperties: false,
+              properties: {
+                empty: { minimum: 0, type: "integer" },
+                failed: { minimum: 0, type: "integer" },
+                ok: { minimum: 0, type: "integer" },
+                requested: { minimum: 0, type: "integer" }
+              },
+              required: ["empty", "failed", "ok", "requested"],
+              type: "object"
+            },
+            sources: { items: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }, type: "array" },
+            total: { minimum: 0, type: "integer" },
+            type: { const: "dev.nipmod.external-search.v1", type: "string" }
+          },
+          required: ["generatedAt", "partial", "query", "records", "sourceReports", "sourceSummary", "sources", "total", "type"],
+          type: "object"
+        },
+        ExternalSourceReport: {
+          additionalProperties: false,
+          properties: {
+            durationMs: { minimum: 0, type: "integer" },
+            error: {
+              additionalProperties: false,
+              properties: {
+                code: { type: "string" },
+                message: { type: "string" },
+                retryable: { type: "boolean" },
+                status: { type: "integer" }
+              },
+              required: ["code", "message", "retryable", "status"],
+              type: "object"
+            },
+            recordCount: { minimum: 0, type: "integer" },
+            resolver: { $ref: "#/components/schemas/ExternalSourceResolverProfile" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            status: { enum: ["ok", "empty", "failed"], type: "string" }
+          },
+          required: ["durationMs", "recordCount", "resolver", "source", "status"],
+          type: "object"
+        },
+        ExternalSourceResolverProfile: {
+          additionalProperties: false,
+          description: "Source Resolver v2 metadata. It describes how a source was queried and normalized without exposing secrets.",
+          properties: {
+            endpointHost: { type: "string" },
+            inspectStrategy: {
+              enum: ["exact-package-metadata", "exact-repository-metadata", "exact-hub-metadata", "server-name-match"],
+              type: "string"
+            },
+            maxResponseBytes: { minimum: 1, type: "integer" },
+            normalization: {
+              additionalProperties: false,
+              properties: {
+                idPrefix: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+                installPlanWritesWorkspace: { const: false, type: "boolean" },
+                metadataIsInstruction: { const: false, type: "boolean" },
+                originalUrlPreserved: { const: true, type: "boolean" },
+                ownerPreserved: { const: true, type: "boolean" },
+                sourceOwnerRetained: { const: true, type: "boolean" }
+              },
+              required: [
+                "idPrefix",
+                "installPlanWritesWorkspace",
+                "metadataIsInstruction",
+                "originalUrlPreserved",
+                "ownerPreserved",
+                "sourceOwnerRetained"
+              ],
+              type: "object"
+            },
+            resolverVersion: { const: "source-resolver-v2", type: "string" },
+            resultLimit: { minimum: 1, type: "integer" },
+            searchStrategy: {
+              enum: ["registry-ranked-search", "normalized-name-candidates", "repository-search", "hub-ranked-search", "registry-server-search"],
+              type: "string"
+            },
+            sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
+            timeoutMs: { minimum: 1, type: "integer" }
+          },
+          required: [
+            "endpointHost",
+            "inspectStrategy",
+            "maxResponseBytes",
+            "normalization",
+            "resolverVersion",
+            "resultLimit",
+            "searchStrategy",
+            "sourceKind",
+            "timeoutMs"
+          ],
+          type: "object"
+        },
         PackageIntelligenceReceipt: {
           additionalProperties: false,
           description: "Receipt returned by archive prepare and confirm flows. It contains no raw API keys, IP addresses or user agent strings.",
@@ -449,6 +550,11 @@ function openApiDocument() {
           ],
           responses: {
             "200": {
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ExternalSearchResult" }
+                }
+              },
               description: "Resolved package options with source reports and partial failure status."
             },
             "400": errorResponse(),
@@ -473,6 +579,11 @@ function openApiDocument() {
           ],
           responses: {
             "200": {
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ExternalSearchResult" }
+                }
+              },
               description: "Search result with per-source reports and partial failure status."
             },
             "400": errorResponse(),

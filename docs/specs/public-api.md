@@ -68,6 +68,8 @@ Response type:
 dev.nipmod.external-search.v1
 ```
 
+Search responses include `sourceReports[]`. Each report includes `resolverVersion: "source-resolver-v2"` metadata with endpoint host, search strategy, inspect strategy, timeout, response budget and normalization boundaries. The resolver profile contains no secrets and confirms that hosted API calls return plans only; they do not write caller workspaces.
+
 ## `GET /api/search`
 
 Compatibility alias for `GET /api/resolve`.

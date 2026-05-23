@@ -31,6 +31,18 @@ describe("external package resolver", () => {
     expect(result.sourceSummary).toMatchObject({ failed: 0, ok: 2, requested: 2 });
     expect(result.sourceReports.map((report) => report.source)).toEqual(["npm", "huggingface-model"]);
     expect(result.sourceReports.every((report) => report.durationMs >= 0)).toBe(true);
+    expect(result.sourceReports[0]?.resolver).toMatchObject({
+      endpointHost: "registry.npmjs.org",
+      normalization: {
+        idPrefix: "npm",
+        installPlanWritesWorkspace: false,
+        metadataIsInstruction: false,
+        sourceOwnerRetained: true
+      },
+      resolverVersion: "source-resolver-v2",
+      searchStrategy: "registry-ranked-search",
+      sourceKind: "package-registry"
+    });
 
     const npmRecord = result.records.find((record) => record.id === "npm:node-telegram-bot-api");
     expect(npmRecord?.trust.dimensions).toMatchObject({
@@ -176,7 +188,14 @@ describe("external package resolver", () => {
       id: "npm:node-telegram-bot-api",
       source: "npm"
     });
-    expect(searchBody.sourceReports[0]).toMatchObject({ source: "npm", status: "ok" });
+    expect(searchBody.sourceReports[0]).toMatchObject({
+      resolver: {
+        inspectStrategy: "exact-package-metadata",
+        resolverVersion: "source-resolver-v2"
+      },
+      source: "npm",
+      status: "ok"
+    });
     expect(searchBody.archivePolicy.ownership).toContain("Original package owners");
 
     const resolve = await resolveGet(new Request("https://nipmod.com/api/resolve?q=telegram&sources=npm&limit=2"));

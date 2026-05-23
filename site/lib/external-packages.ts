@@ -20,6 +20,13 @@ export type ExternalTrustFactorImpact = "positive" | "negative" | "neutral";
 export type ExternalPopularitySignal = "none" | "low" | "medium" | "high";
 export type ExternalSecurityConfidence = "low" | "medium" | "high";
 export type ExternalProvenanceStatus = "unknown" | "source-only" | "integrity" | "signature" | "attested";
+export type ExternalResolverSearchStrategy =
+  | "registry-ranked-search"
+  | "normalized-name-candidates"
+  | "repository-search"
+  | "hub-ranked-search"
+  | "registry-server-search";
+export type ExternalResolverInspectStrategy = "exact-package-metadata" | "exact-repository-metadata" | "exact-hub-metadata" | "server-name-match";
 
 export interface ExternalTrustFactor {
   category: ExternalTrustFactorCategory;
@@ -42,6 +49,25 @@ export interface ExternalTrustDimensions {
   provenanceStatus: ExternalProvenanceStatus;
   qualityScore: number;
   securityConfidence: ExternalSecurityConfidence;
+}
+
+export interface ExternalSourceResolverProfile {
+  endpointHost: string;
+  inspectStrategy: ExternalResolverInspectStrategy;
+  maxResponseBytes: number;
+  normalization: {
+    idPrefix: ExternalPackageSource;
+    installPlanWritesWorkspace: false;
+    metadataIsInstruction: false;
+    originalUrlPreserved: true;
+    ownerPreserved: true;
+    sourceOwnerRetained: true;
+  };
+  resolverVersion: "source-resolver-v2";
+  resultLimit: number;
+  searchStrategy: ExternalResolverSearchStrategy;
+  sourceKind: ExternalPackageSourceKind;
+  timeoutMs: number;
 }
 
 export interface ExternalPackageRecord {
@@ -106,6 +132,7 @@ export interface ExternalSourceReport {
     status: number;
   };
   recordCount: number;
+  resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
   status: ExternalSourceStatus;
 }
@@ -133,6 +160,7 @@ export interface ExternalSourceCapability {
   capabilities: Array<"search" | "inspect" | "install-plan" | "archive-prepare">;
   endpointHost: string;
   installPlanWritesWorkspace: false;
+  resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
   sourceKind: ExternalPackageSourceKind;
   status: "available";
@@ -486,6 +514,7 @@ async function searchSourceWithReport(
       report: {
         durationMs: Date.now() - startedAt,
         recordCount: records.length,
+        resolver: sourceResolverProfile(source, limit, timeoutMs),
         source,
         status: records.length > 0 ? "ok" : "empty"
       }
@@ -503,6 +532,7 @@ async function searchSourceWithReport(
           status: apiError.status
         },
         recordCount: 0,
+        resolver: sourceResolverProfile(source, limit, timeoutMs),
         source,
         status: "failed"
       }
@@ -1600,10 +1630,94 @@ function sourceCapability(
     capabilities: ["search", "inspect", "install-plan", "archive-prepare"],
     endpointHost,
     installPlanWritesWorkspace: false,
+    resolver: sourceResolverProfile(source, MAX_LIMIT, DEFAULT_TIMEOUT_MS),
     source,
     sourceKind,
     status: "available"
   };
+}
+
+function sourceResolverProfile(source: ExternalPackageSource, resultLimit: number, timeoutMs: number): ExternalSourceResolverProfile {
+  return {
+    endpointHost: sourceEndpointHost(source),
+    inspectStrategy: sourceInspectStrategy(source),
+    maxResponseBytes: MAX_SOURCE_RESPONSE_BYTES,
+    normalization: {
+      idPrefix: source,
+      installPlanWritesWorkspace: false,
+      metadataIsInstruction: false,
+      originalUrlPreserved: true,
+      ownerPreserved: true,
+      sourceOwnerRetained: true
+    },
+    resolverVersion: "source-resolver-v2",
+    resultLimit,
+    searchStrategy: sourceSearchStrategy(source),
+    sourceKind: sourceKindForSource(source),
+    timeoutMs
+  };
+}
+
+function sourceEndpointHost(source: ExternalPackageSource): string {
+  switch (source) {
+    case "npm":
+      return "registry.npmjs.org";
+    case "pypi":
+      return "pypi.org";
+    case "github":
+      return "api.github.com";
+    case "huggingface-model":
+    case "huggingface-dataset":
+      return "huggingface.co";
+    case "mcp":
+      return "registry.modelcontextprotocol.io";
+  }
+}
+
+function sourceKindForSource(source: ExternalPackageSource): ExternalPackageSourceKind {
+  switch (source) {
+    case "npm":
+    case "pypi":
+      return "package-registry";
+    case "github":
+      return "source-repo";
+    case "huggingface-model":
+    case "huggingface-dataset":
+      return "model-hub";
+    case "mcp":
+      return "tool-registry";
+  }
+}
+
+function sourceSearchStrategy(source: ExternalPackageSource): ExternalResolverSearchStrategy {
+  switch (source) {
+    case "npm":
+      return "registry-ranked-search";
+    case "pypi":
+      return "normalized-name-candidates";
+    case "github":
+      return "repository-search";
+    case "huggingface-model":
+    case "huggingface-dataset":
+      return "hub-ranked-search";
+    case "mcp":
+      return "registry-server-search";
+  }
+}
+
+function sourceInspectStrategy(source: ExternalPackageSource): ExternalResolverInspectStrategy {
+  switch (source) {
+    case "npm":
+    case "pypi":
+      return "exact-package-metadata";
+    case "github":
+      return "exact-repository-metadata";
+    case "huggingface-model":
+    case "huggingface-dataset":
+      return "exact-hub-metadata";
+    case "mcp":
+      return "server-name-match";
+  }
 }
 
 function unwrapExternalPackageRecord(value: unknown): unknown {

@@ -18,6 +18,47 @@ Each resolver must:
 - return warnings when source metadata indicates risk
 - fail closed on invalid input
 - time out rather than block the API
+- publish resolver metadata in `sourceReports[].resolver`
+
+## Source Resolver v2 Output
+
+Search and resolve responses include one report per requested source. Each report contains `resolverVersion: "source-resolver-v2"` and a resolver profile:
+
+```json
+{
+  "source": "npm",
+  "status": "ok",
+  "recordCount": 2,
+  "resolver": {
+    "endpointHost": "registry.npmjs.org",
+    "inspectStrategy": "exact-package-metadata",
+    "maxResponseBytes": 2000000,
+    "normalization": {
+      "idPrefix": "npm",
+      "installPlanWritesWorkspace": false,
+      "metadataIsInstruction": false,
+      "originalUrlPreserved": true,
+      "ownerPreserved": true,
+      "sourceOwnerRetained": true
+    },
+    "resolverVersion": "source-resolver-v2",
+    "resultLimit": 8,
+    "searchStrategy": "registry-ranked-search",
+    "sourceKind": "package-registry",
+    "timeoutMs": 6500
+  }
+}
+```
+
+The resolver profile is public and contains no secrets. It lets clients distinguish source capability from source trust. For example, npm uses registry-ranked search, PyPI uses normalized name candidates, GitHub uses repository search, Hugging Face uses hub-ranked search and MCP uses registry server search.
+
+The normalization contract is fixed:
+
+- hosted API calls return install plans only
+- hosted API calls do not write caller workspaces
+- package metadata is treated as data, not instructions
+- original URLs and source ownership are preserved
+- package ids are source-prefixed
 
 ## Current Resolvers
 

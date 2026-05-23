@@ -41,6 +41,11 @@ describe("OpenAPI route", () => {
       "qualityScore",
       "securityConfidence"
     ]);
+    expect(body.components.schemas.ExternalSourceReport.required).toContain("resolver");
+    expect(body.components.schemas.ExternalSourceResolverProfile.required).toContain("normalization");
+    expect(body.paths["/api/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ExternalSearchResult"
+    );
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
     expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");
   });

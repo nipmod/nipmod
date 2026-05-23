@@ -266,7 +266,8 @@ Goal: keep the public beta usable without letting source outages, retries or hos
 Tasks:
 
 - Replace static source capability status with bounded live probes.
-- Track source latency, status class and last error type.
+- Track source latency, status class and last error type. Done in `sourceReports` and live source probes.
+- Publish resolver metadata for every source report. Done with `sourceReports[].resolver` using `source-resolver-v2`.
 - Add per-source circuit breakers so a degraded source does not slow every request.
 - Add shared rate limits or edge-level rate limiting for production.
 - Add query/result caching and request coalescing for hot lookups.
@@ -276,6 +277,7 @@ Tasks:
 Definition of Done:
 
 - `/api/sources/health` distinguishes configured capability from live source reachability.
+- Search and resolve reports expose endpoint host, resolver strategy, timeout, response budget and normalization boundaries.
 - Repeated identical source requests are cached or coalesced.
 - A single degraded source cannot stall all-source search.
 - Abuse controls survive multi-instance production.
