@@ -1,6 +1,6 @@
 # Nipmod API Beta Launch Kit
 
-Status: production beta
+Status: production beta, live API surface
 
 Nipmod gives agents one hosted package surface before they choose dependencies.
 
@@ -12,6 +12,14 @@ The API does four things:
 4. Return install plans before workspace writes.
 
 Hosted calls are read-only. They do not inspect local files and do not install packages.
+
+Production status:
+
+- OpenAPI is live at `https://nipmod.com/api/openapi`.
+- npm, PyPI, GitHub, Hugging Face models, Hugging Face datasets and MCP are live sources.
+- Distributed rate limiting is active through the shared Supabase bucket.
+- The durable package intelligence archive is enabled.
+- Public beta access is free and rate limited.
 
 ## Core Flow
 
@@ -34,6 +42,8 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
+The canonical agent path is search, inspect, install-plan, optional archive prepare. Durable archive confirmation is operator-only unless a caller has an archive writer token.
+
 ## Agent Prompt
 
 ```text
@@ -44,6 +54,7 @@ Use Nipmod before choosing packages. Search for candidates, inspect the best rec
 
 - No API key is required during public beta.
 - Requests are rate limited. Production can use the shared Supabase bucket; local and degraded deployments fall back to in-process limits.
+- Production beta currently reports `x-ratelimit-store: supabase` on normal public API traffic.
 - The hosted API never writes into caller workspaces.
 - Original package owners keep ownership.
 - External records are `external_indexed`.

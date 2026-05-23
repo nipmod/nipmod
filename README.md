@@ -46,6 +46,7 @@ Hosted API calls never read or write the caller workspace. Local CLI and MCP too
 | Source resolver | Live for npm, PyPI, GitHub, Hugging Face, and MCP |
 | Package intelligence archive | Durable production archive enabled |
 | Verified Nipmod archive | Empty by design after seed reset; new entries pass verification gates |
+| Distributed rate limits | Live with Supabase-backed shared buckets |
 | CLI and installer | Live, release `1.2.5` |
 | Local MCP server | Live for controlled workspace installs |
 | Hosted MCP endpoint | Live, read-only |
@@ -82,6 +83,7 @@ Core endpoints:
 
 | Endpoint | Purpose |
 | --- | --- |
+| `GET /api/resolve` | Search supported package sources through the primary resolver route. |
 | `GET /api/search` | Search supported package sources. |
 | `GET /api/inspect` | Inspect one exact package record. |
 | `GET /api/install-plan` | Return a safe install plan for an agent to review. |
@@ -91,6 +93,15 @@ Core endpoints:
 | `POST /api/archive/confirm` | Dry-run or authorized persist a confirmed package record with a receipt. |
 | `POST /api/mcp` | Read-only hosted MCP access to the same package surface. |
 | `GET /api/openapi` | OpenAPI document for the hosted API. |
+
+Agent flow:
+
+1. Search for candidates with `/api/search` or `/api/resolve`.
+2. Inspect exact candidates with `/api/inspect`.
+3. Show source, license, trust score, decision, warnings, factors and metrics.
+4. Request `/api/install-plan`.
+5. Ask for user or host-policy approval before local execution.
+6. Optionally prepare an archive record with `/api/archive/prepare` after useful discovery.
 
 Contracts and examples:
 
@@ -109,6 +120,8 @@ Contracts and examples:
 | Install plans | Commands and warnings only. The user or local policy approves execution. |
 | Package text | Treated as untrusted data, not agent instructions. |
 | Archive records | Store source context and receipts without taking ownership from upstream packages. |
+
+Archive rule: Nipmod does not bulk mirror registries. Records enter the durable archive only after a useful package is resolved, inspected and confirmed through archive gates. Public callers can prepare records; durable writes require an authorized archive writer token.
 
 ## Install
 

@@ -9,25 +9,36 @@ if (!first) {
   process.exit(0);
 }
 
-const plan = await readJson(planUrl(first.source, first.name));
+const inspect = await readJson(inspectUrl(first.source, first.name));
+const inspectedRecord = inspect.record ?? first;
+const plan = await readJson(planUrl(inspectedRecord.source, inspectedRecord.name));
+const archive = await readJson(archivePrepareUrl(inspectedRecord.source, inspectedRecord.name));
 
 console.log(
   JSON.stringify(
     {
       task,
       selected: {
-        id: first.id,
-        name: first.name,
-        source: first.source,
+        id: inspectedRecord.id,
+        name: inspectedRecord.name,
+        originalUrl: inspectedRecord.originalUrl,
+        source: inspectedRecord.source,
         trust: {
-          decision: first.trust?.decision,
-          factors: first.trust?.factors?.slice(0, 4),
-          score: first.trust?.score,
-          warnings: first.trust?.warnings
+          decision: inspectedRecord.trust?.decision,
+          dimensions: inspectedRecord.trust?.dimensions,
+          factors: inspectedRecord.trust?.factors?.slice(0, 5),
+          score: inspectedRecord.trust?.score,
+          warnings: inspectedRecord.trust?.warnings
         }
       },
       installPlan: plan.plan,
-      safety: plan.safety
+      safety: plan.safety,
+      archivePreview: {
+        status: archive.record?.status ?? archive.receipt?.archiveStatus,
+        stored: archive.receipt?.stored ?? false,
+        receiptType: archive.receipt?.type,
+        writeBoundary: "prepare-only; durable confirm requires x-nipmod-archive-token"
+      }
     },
     null,
     2
@@ -44,6 +55,20 @@ function searchUrl(query: string): URL {
 
 function planUrl(source: string, name: string): URL {
   const url = new URL("/api/install-plan", baseUrl);
+  url.searchParams.set("source", source);
+  url.searchParams.set("name", name);
+  return url;
+}
+
+function inspectUrl(source: string, name: string): URL {
+  const url = new URL("/api/inspect", baseUrl);
+  url.searchParams.set("source", source);
+  url.searchParams.set("name", name);
+  return url;
+}
+
+function archivePrepareUrl(source: string, name: string): URL {
+  const url = new URL("/api/archive/prepare", baseUrl);
   url.searchParams.set("source", source);
   url.searchParams.set("name", name);
   return url;

@@ -176,6 +176,32 @@ Penalty:
 
 Ties are resolved by downloads, then stars, then display name.
 
+## Agent Selection Policy
+
+Agents should select packages with gates before ranking. The gate prevents a popular package from winning when the safety context is weak.
+
+Selection order:
+
+1. Remove candidates with `decision: "avoid"` or `risk: "high"` unless the user explicitly asks to inspect risky options.
+2. Prefer candidates with a source URL, license metadata and no warnings.
+3. Prefer `securityConfidence: "high"` over popularity when two candidates solve the same task.
+4. Use `trust.score` and ranking bonuses to order the remaining candidates.
+5. Use popularity signals only as tie-breakers or ecosystem-fit signals.
+6. Request an install plan before recommending local execution.
+
+Recommended candidates can still be rejected by the install-plan boundary. A high-risk command, remote shell pattern or agent-targeted package text blocks archive confirmation even when search ranking was strong.
+
+Human-readable result summaries should include:
+
+- package id and source
+- original URL
+- license
+- `trust.score`
+- `trust.decision`
+- `trust.dimensions.securityConfidence`
+- warnings
+- the top trust factors that moved the decision
+
 ## Verified Nipmod Trust Score
 
 Verified Nipmod packages use evidence scoring:
