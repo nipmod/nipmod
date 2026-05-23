@@ -57,6 +57,7 @@ Use Nipmod before choosing packages. Search for candidates, inspect the best rec
 - Agent instructions live at `https://nipmod.com/llms.txt`
 - Discovery manifest live at `https://nipmod.com/.well-known/nipmod.json`
 - API contract canary passes with `pnpm api:contract`
+- Install-plan safety canary passes with `pnpm install-plan:canary`
 - Seed dry-run passes with `pnpm archive:seed`
 - Production seed write is operator-only with `NIPMOD_ARCHIVE_WRITE_TOKEN`
 - Shared rate-limit schema applied from `supabase/migrations/20260523084500_api_rate_limit_buckets.sql`

@@ -81,6 +81,7 @@ Recent hardening:
 - Source crawling now has an API-first policy, candidate audit and admission checklist so future crawler workers do not bypass official source APIs, robots rules, terms or licensing boundaries.
 - Launch verification now runs the rate-limit canary, and `--require-distributed-rate-limit` promotes Supabase RPC activation from advisory status to a hard gate.
 - Launch verification now runs the public API contract canary for success responses, structured errors, request-id echoing, CORS and rate-limit headers.
+- Launch verification now runs an install-plan safety canary across npm, PyPI, GitHub, Hugging Face and MCP so hosted responses cannot regress into workspace writes or command execution.
 
 ## Workstream 1: API Contract
 
@@ -195,6 +196,7 @@ Definition of Done:
 - Agents can render a safe install plan without executing anything.
 - High-risk commands are marked blocked, return explicit command boundary metadata and tell agents not to execute.
 - The hosted API stays read-only.
+- Live install-plan canary passes across all current public sources.
 - Tests cover common shell injection and remote-script patterns.
 
 ## Workstream 5: Source Depth
@@ -406,6 +408,7 @@ Tasks:
   - load smoke done
   - archive seed dry-run
   - OpenAPI contract tests done for live API-critical fields
+  - install-plan safety canary done
   - public proof loop or explicit empty-public-archive waiver
 - Update stale e2e and load-smoke assumptions for the API-first product.
 

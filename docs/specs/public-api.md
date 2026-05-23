@@ -35,6 +35,8 @@ Production deployments can use a Supabase-backed rate-limit bucket through `cons
 
 Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
 
+Operators can run `pnpm install-plan:canary` to verify live install-plan boundaries across npm, PyPI, GitHub, Hugging Face and MCP. The canary fails if a hosted response declares workspace writes, treats metadata as instruction, omits approval boundaries or allows hosted command execution.
+
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
 
 ## Base URL
