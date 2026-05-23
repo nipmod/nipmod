@@ -816,6 +816,7 @@ function openApiDocument() {
     paths: {
       "/api/archive/prepare": {
         get: {
+          operationId: "prepareArchiveRecord",
           parameters: [sourceParameter(), nameParameter()],
           responses: {
             "200": {
@@ -836,6 +837,7 @@ function openApiDocument() {
           summary: "Prepare an archive record from an exact external package before confirmation."
         },
         post: {
+          operationId: "prepareArchiveRecordFromBody",
           requestBody: exactPackageOrRecordBody(),
           responses: {
             "200": {
@@ -858,6 +860,7 @@ function openApiDocument() {
       },
       "/api/archive/confirm": {
         post: {
+          operationId: "confirmArchiveRecord",
           requestBody: {
             content: {
               "application/json": {
@@ -906,6 +909,7 @@ function openApiDocument() {
       },
       "/api/archive/search": {
         get: {
+          operationId: "searchArchiveRecords",
           parameters: [queryParameter(), limitParameter(100)],
           responses: {
             "200": jsonResponse(
@@ -921,6 +925,7 @@ function openApiDocument() {
       },
       "/api/archive/status": {
         get: {
+          operationId: "getArchiveStatus",
           responses: {
             "200": jsonResponse(
               { $ref: "#/components/schemas/ArchiveStatusResponse" },
@@ -934,6 +939,7 @@ function openApiDocument() {
       },
       "/api/inspect": {
         get: {
+          operationId: "inspectPackage",
           parameters: [sourceParameter(), nameParameter()],
           responses: {
             "200": jsonResponse(
@@ -952,6 +958,7 @@ function openApiDocument() {
       },
       "/api/install-plan": {
         get: {
+          operationId: "createInstallPlan",
           parameters: [sourceParameter(), nameParameter()],
           responses: {
             "200": {
@@ -972,6 +979,7 @@ function openApiDocument() {
           summary: "Create a safe install plan for one exact package."
         },
         post: {
+          operationId: "createInstallPlanFromRecord",
           requestBody: {
             content: {
               "application/json": {
@@ -1005,6 +1013,7 @@ function openApiDocument() {
       },
       "/api/mcp": {
         post: {
+          operationId: "callHostedMcp",
           responses: {
             "200": jsonResponse(
               {
@@ -1025,6 +1034,7 @@ function openApiDocument() {
       },
       "/api/resolve": {
         get: {
+          operationId: "resolvePackages",
           parameters: [
             queryParameter(),
             {
@@ -1054,6 +1064,7 @@ function openApiDocument() {
       },
       "/api/search": {
         get: {
+          operationId: "searchPackages",
           parameters: [
             queryParameter(),
             {
@@ -1083,6 +1094,7 @@ function openApiDocument() {
       },
       "/api/sources/health": {
         get: {
+          operationId: "getSourceHealth",
           responses: {
             "200": jsonResponse(
               { $ref: "#/components/schemas/SourceHealthResponse" },
