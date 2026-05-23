@@ -79,7 +79,7 @@ Current depth signals include:
 
 - npm deprecation, maintainer count, dependency count, Node engine, funding metadata, integrity and signature metadata
 - PyPI latest release files, digest metadata, `requires-python`, classifiers and vulnerability records
-- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count and fork count
+- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count and package manifest hints for exact repo inspect
 - Hugging Face gated/private flags, pipeline tag, library, repository file count and commit digest metadata
 - MCP remote endpoint count, environment requirements, package metadata, registry status and source repository
 
@@ -91,7 +91,7 @@ These signals are review context. They improve package comparison and install-pl
 | --- | --- | --- |
 | npm | Live | Search quality depends on npm search API ranking. |
 | PyPI | Live | Search uses exact and normalized name candidates. |
-| GitHub | Live | Search is repository-level, not package-manager aware yet. |
+| GitHub | Live | Search is repository-level; exact repo inspect can detect common package manifest files. |
 | Hugging Face models | Live | Gated/private repos require the user access outside Nipmod. |
 | Hugging Face datasets | Live | Gated/private datasets require the user access outside Nipmod. |
 | MCP Registry | Live | Install commands vary by host and require original server docs. |

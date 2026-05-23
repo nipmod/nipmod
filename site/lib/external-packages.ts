@@ -893,7 +893,7 @@ async function searchGitHub(query: string, limit: number, fetchImpl: typeof fetc
     { source: "github" }
   );
   const items = isRecord(payload) && Array.isArray(payload.items) ? payload.items : [];
-  return items.map(gitHubRecord).filter(isExternalPackageRecord);
+  return items.map((item) => gitHubRecord(item)).filter(isExternalPackageRecord);
 }
 
 async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -901,10 +901,82 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
     return null;
   }
   const payload = await fetchJson(`https://api.github.com/repos/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs, { source: "github" });
-  return gitHubRecord(payload);
+  const defaultBranch = isRecord(payload) ? readString(payload.default_branch) : null;
+  const manifest = await fetchGitHubManifestSummary(name, defaultBranch, fetchImpl, timeoutMs);
+  return gitHubRecord(payload, manifest);
 }
 
-function gitHubRecord(item: unknown): ExternalPackageRecord | null {
+type GitHubManifestSummary = {
+  dependencyCount: number | null;
+  files: string[];
+  packageManager: string | null;
+  scriptCount: number | null;
+};
+
+async function fetchGitHubManifestSummary(
+  fullName: string,
+  defaultBranch: string | null,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<GitHubManifestSummary | null> {
+  const manifestPaths = ["package.json", "pyproject.toml", "requirements.txt", "deno.json"] as const;
+  const settled = await Promise.allSettled(
+    manifestPaths.map((path) =>
+      fetchJson(
+        `https://api.github.com/repos/${encodeURIComponentRepo(fullName)}/contents/${path}${defaultBranch ? `?ref=${encodeURIComponent(defaultBranch)}` : ""}`,
+        fetchImpl,
+        Math.min(timeoutMs, 2200),
+        { source: "github" }
+      ).then((payload) => ({ path, payload }))
+    )
+  );
+  const files: string[] = [];
+  let packageManager: string | null = null;
+  let dependencyCount: number | null = null;
+  let scriptCount: number | null = null;
+
+  for (const result of settled) {
+    if (result.status !== "fulfilled" || !isRecord(result.value.payload)) {
+      continue;
+    }
+    files.push(result.value.path);
+    if (result.value.path === "package.json") {
+      const packageJson = decodeGitHubJsonContent(result.value.payload);
+      if (packageJson) {
+        packageManager = readString(packageJson.packageManager) ?? packageManager;
+        dependencyCount = packageDependencyCount(packageJson);
+        scriptCount = recordKeyCount(packageJson.scripts);
+      }
+    }
+  }
+
+  if (files.length === 0) {
+    return null;
+  }
+
+  return {
+    dependencyCount,
+    files,
+    packageManager,
+    scriptCount
+  };
+}
+
+function decodeGitHubJsonContent(item: UnknownRecord): UnknownRecord | null {
+  const content = readString(item.content);
+  const encoding = readString(item.encoding);
+  if (!content || encoding !== "base64") {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(Buffer.from(content.replace(/\s+/g, ""), "base64").toString("utf8")) as unknown;
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = null): ExternalPackageRecord | null {
   if (!isRecord(item)) {
     return null;
   }
@@ -964,7 +1036,15 @@ function gitHubRecord(item: unknown): ExternalPackageRecord | null {
       defaultBranch ? `Default branch: ${defaultBranch}.` : "Default branch was not returned.",
       updatedAt ? `Last pushed at: ${updatedAt}.` : "Last push timestamp was not returned.",
       typeof openIssues === "number" ? `Open issues returned by GitHub: ${openIssues}.` : "Open issue count was not returned.",
-      typeof forks === "number" ? `GitHub forks returned: ${forks}.` : "Fork count was not returned."
+      typeof forks === "number" ? `GitHub forks returned: ${forks}.` : "Fork count was not returned.",
+      manifest?.files.length ? `GitHub package manifests found: ${manifest.files.join(", ")}.` : "GitHub package manifests were not inspected for this record.",
+      manifest?.dependencyCount !== null && manifest?.dependencyCount !== undefined
+        ? `GitHub package.json declares ${manifest.dependencyCount} dependency entries.`
+        : "GitHub package dependency metadata was not returned.",
+      manifest?.scriptCount !== null && manifest?.scriptCount !== undefined
+        ? `GitHub package.json declares ${manifest.scriptCount} script entries.`
+        : "GitHub package script metadata was not returned.",
+      manifest?.packageManager ? `GitHub package.json package manager: ${manifest.packageManager}.` : "GitHub package manager metadata was not returned."
     ],
     trustScore: score,
     updatedAt,

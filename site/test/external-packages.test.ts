@@ -442,6 +442,10 @@ describe("external package resolver", () => {
     expect(github.trust.signals).toContain("Default branch: main.");
     expect(github.trust.signals).toContain("Open issues returned by GitHub: 7.");
     expect(github.trust.signals).toContain("GitHub forks returned: 12.");
+    expect(github.trust.signals).toContain("GitHub package manifests found: package.json, pyproject.toml.");
+    expect(github.trust.signals).toContain("GitHub package.json declares 1 dependency entries.");
+    expect(github.trust.signals).toContain("GitHub package.json declares 2 script entries.");
+    expect(github.trust.signals).toContain("GitHub package.json package manager: pnpm@10.30.0.");
 
     const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
     expect(model.trust.warnings).toContain("Hugging Face marks this model as gated.");
@@ -675,6 +679,29 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
       pushed_at: "2026-05-01T00:00:00.000Z",
       stargazers_count: 900,
       url: "https://api.github.com/repos/example/depth-repo"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/contents/package.json?ref=main") {
+    return jsonResponse({
+      content: Buffer.from(
+        JSON.stringify({
+          dependencies: { alpha: "1.0.0" },
+          devDependencies: { beta: "1.0.0" },
+          packageManager: "pnpm@10.30.0",
+          scripts: { build: "tsc", test: "vitest" }
+        })
+      ).toString("base64"),
+      encoding: "base64",
+      name: "package.json"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/contents/pyproject.toml?ref=main") {
+    return jsonResponse({
+      content: Buffer.from("[project]\nname = \"depth-repo\"\n").toString("base64"),
+      encoding: "base64",
+      name: "pyproject.toml"
     });
   }
 
