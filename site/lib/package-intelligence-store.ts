@@ -59,6 +59,14 @@ export function assertArchiveWriteAuthorized(request: Request, env: ArchiveEnv =
   }
 }
 
+export function assertArchiveStoreConfigured(env: ArchiveEnv = process.env): ArchiveStoreStatus {
+  const status = archiveStoreStatus(env);
+  if (!status.configured) {
+    throw new ArchiveStoreError("archive store is not configured", 503);
+  }
+  return status;
+}
+
 export async function searchPackageIntelligenceArchive(
   query: string,
   options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; limit?: number; timeoutMs?: number } = {}
@@ -109,11 +117,14 @@ export async function searchPackageIntelligenceArchive(
 
 export async function upsertPackageIntelligenceRecord(
   record: PackageIntelligenceRecord,
-  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; timeoutMs?: number } = {}
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; requireConfigured?: boolean; timeoutMs?: number } = {}
 ): Promise<ArchiveWriteResult> {
   const env = options.env ?? process.env;
   const status = archiveStoreStatus(env);
   if (!status.configured) {
+    if (options.requireConfigured) {
+      throw new ArchiveStoreError("archive store is not configured", 503);
+    }
     return {
       configured: false,
       record,

@@ -68,6 +68,7 @@ Recent hardening:
 - Install plans now include structured command boundary metadata and block high-risk shell patterns from normal execution.
 - `pnpm launch:verify` now provides a non-destructive API-beta launch gate over local verification and live production checks.
 - OpenAPI now publishes concrete response schemas for inspect, install-plan, archive prepare/search/status/confirm, source health and hosted MCP responses.
+- Archive confirmation writes must now pass the archive token and configured persistence checks before Nipmod resolves any external source metadata.
 
 ## Workstream 1: API Contract
 
@@ -465,8 +466,8 @@ Definition of Done:
 
 - [x] Complete OpenAPI response schemas.
 - [x] Contract tests for public API responses.
-- [ ] Archive write auth before source resolution.
-- [ ] Non-dry-run archive writes fail loudly when persistence is unavailable.
+- [x] Archive write auth before source resolution.
+- [x] Non-dry-run archive writes fail loudly when persistence is unavailable.
 - [ ] Source health does live cached probes.
 - [x] Install plans include structured command data.
 - [x] Launch verify command exists.

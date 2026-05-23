@@ -9,6 +9,7 @@ import {
 } from "../../../../lib/package-intelligence";
 import {
   ArchiveStoreError,
+  assertArchiveStoreConfigured,
   archiveStoreStatus,
   assertArchiveWriteAuthorized,
   upsertPackageIntelligenceRecord
@@ -42,6 +43,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const dryRun = readBoolean(body, "dryRun");
+    const writeStore = dryRun ? null : assertArchiveWriteReady(request);
     const externalRecord = await inspectExternalRecordFromRequest(body);
     const prepared = createPackageIntelligenceRecord(externalRecord, {
       firstSeenReason: "Confirmed package use through the Nipmod archive API."
@@ -78,12 +80,11 @@ export async function POST(request: Request): Promise<Response> {
       }, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
     }
 
-    assertArchiveWriteAuthorized(request);
-    const write = await upsertPackageIntelligenceRecord(confirmed);
+    const write = await upsertPackageIntelligenceRecord(confirmed, { requireConfigured: true });
     return apiJsonWithUsage(request, {
       ...write,
       receipt: createPackageIntelligenceReceipt(write.record, { stored: write.stored }),
-      store: archiveStoreStatus(),
+      store: writeStore,
       type: "dev.nipmod.archive-confirm.v1",
       validation
     }, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
@@ -100,6 +101,11 @@ function readString(value: unknown, key: string): string | null {
 
 function readBoolean(value: unknown, key: string): boolean {
   return Boolean(value && typeof value === "object" && !Array.isArray(value) && (value as Record<string, unknown>)[key] === true);
+}
+
+function assertArchiveWriteReady(request: Request): ReturnType<typeof archiveStoreStatus> {
+  assertArchiveWriteAuthorized(request);
+  return assertArchiveStoreConfigured();
 }
 
 function errorJson(

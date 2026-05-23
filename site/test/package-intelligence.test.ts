@@ -228,7 +228,8 @@ describe("package intelligence archive", () => {
   });
 
   test("does not allow unauthenticated archive writes", async () => {
-    stubArchiveRouteFetch();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
 
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
@@ -241,6 +242,26 @@ describe("package intelligence archive", () => {
 
     expect(response.status).toBe(503);
     expect(body.error).toContain("archive write token is not configured");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test("rejects archive writes when persistence is unavailable before source resolution", async () => {
+    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", "write-token");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await confirmPost(
+      new Request("https://nipmod.com/api/archive/confirm", {
+        body: JSON.stringify({ record: externalRecord }),
+        headers: { "content-type": "application/json", "x-nipmod-archive-token": "write-token" },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(body.error).toContain("archive store is not configured");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("accepts authorized archive writes through the archive token header", async () => {
