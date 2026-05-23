@@ -7,25 +7,43 @@ export const metadata = createPageMetadata({
   title: "Nipmod API"
 });
 
-const prompt = `Before adding a dependency, use Nipmod.
-Call search, inspect the selected record and return the install plan before changing the workspace.`;
+const prompt = `When choosing a package, use Nipmod first.
+Search, inspect the selected record, request the install plan and show it before changing the workspace.`;
 
 const coreCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
 
+const mcpCall = `curl -s https://nipmod.com/api/mcp \\
+  -H 'content-type: application/json' \\
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
+
 export default function ApiAccessPage() {
   return (
     <DocsShell
-      description="The hosted API is the main product surface. Agents call it before dependency selection, package installation or model/tool setup."
+      description="Agents call Nipmod before dependency selection, package installation, model setup or MCP tool selection."
       eyebrow="API"
       stats={[
         { label: "OpenAPI", value: "3.1" },
-        { label: "Access", value: "public beta" },
-        { label: "Writes", value: "none hosted" }
+        { label: "Beta", value: "free, rate limited" },
+        { label: "Hosted writes", value: "0" }
       ]}
       title="One package API for agents."
     >
+      <DocsSection title="Use from any agent">
+        <DocsGrid>
+          <DocsCard label="1" title="Search">
+            <p>Find candidates across npm, PyPI, GitHub, Hugging Face and MCP.</p>
+          </DocsCard>
+          <DocsCard label="2" title="Inspect">
+            <p>Refresh one exact source-owned record with license, warnings and trust factors.</p>
+          </DocsCard>
+          <DocsCard label="3" title="Plan">
+            <p>Return commands as review data. The hosted API never executes them.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
       <DocsSection title="Agent instruction">
         <DocsCode>{prompt}</DocsCode>
       </DocsSection>
@@ -71,6 +89,33 @@ export default function ApiAccessPage() {
         />
       </DocsSection>
 
+      <DocsSection title="What the agent should show">
+        <DocsTable
+          rows={[
+            {
+              first: "Selection",
+              second: "Recommended candidate, gate status and rank reasons.",
+              third: "Search is a shortlist, not approval."
+            },
+            {
+              first: "Trust",
+              second: "Score, decision, risk, security confidence, warnings and top factors.",
+              third: "Popularity is separated from security evidence."
+            },
+            {
+              first: "Install plan",
+              second: "Command, source, package/version, risk and approval boundary.",
+              third: "Commands are review data only."
+            },
+            {
+              first: "Archive",
+              second: "Preview a reusable record after useful discovery.",
+              third: "Durable writes require an authorized writer path."
+            }
+          ]}
+        />
+      </DocsSection>
+
       <DocsSection title="Examples">
         <DocsGrid>
           <DocsCard label="npm" title="HTTP client">
@@ -81,6 +126,9 @@ export default function ApiAccessPage() {
           </DocsCard>
           <DocsCard label="model" title="Hugging Face">
             <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'\ncurl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="MCP" title="Hosted read-only MCP">
+            <DocsCode>{mcpCall}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
@@ -97,6 +145,33 @@ export default function ApiAccessPage() {
             <p>No key is required for public beta access. Higher limits and paid keys can be added after the API is stable.</p>
           </DocsCard>
         </DocsGrid>
+      </DocsSection>
+
+      <DocsSection title="Builder links">
+        <DocsTable
+          rows={[
+            {
+              first: "OpenAPI",
+              second: <code>https://nipmod.com/api/openapi</code>,
+              third: "Use this for generated clients and agent tool schemas."
+            },
+            {
+              first: "Source health",
+              second: <code>https://nipmod.com/api/sources/health</code>,
+              third: "Check source, archive and rate-limit status."
+            },
+            {
+              first: "Examples",
+              second: <code>https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow</code>,
+              third: "Copyable prompts for Codex, Claude Code, MCP hosts and HTTPS agents."
+            },
+            {
+              first: "Trust scoring",
+              second: <code>https://github.com/nipmod/nipmod/blob/main/docs/api/trust-scoring.md</code>,
+              third: "Public explanation of scores, thresholds and policy gates."
+            }
+          ]}
+        />
       </DocsSection>
     </DocsShell>
   );

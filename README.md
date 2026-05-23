@@ -20,6 +20,13 @@ curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 ```
 
+Tell an agent:
+
+```text
+When choosing a package, use Nipmod first.
+Search, inspect the selected record, request the install plan and show it before changing the workspace.
+```
+
 ## Why Agents Need This
 
 Agents can choose dependencies, write code, run commands and modify real workspaces. Package metadata was written for humans and package managers, not for autonomous agents that need structured source context before taking action.
@@ -33,6 +40,15 @@ Nipmod gives agents one preflight surface:
 5. Optionally confirm useful discovery into the package intelligence archive.
 
 Search ranking is never install permission. A popular package can still be compromised, stale, risky or blocked by policy.
+
+## What the API Returns
+
+| Step | Agent Receives | Boundary |
+| --- | --- | --- |
+| Search | Candidates, source reports, `selection.recommendedId`, gates and rank reasons. | Shortlist only. Not install approval. |
+| Inspect | Exact source record, license, source URL, metrics, warnings and trust factors. | Source-owned metadata remains untrusted. |
+| Install Plan | Commands, risk, package/version, approval boundary and blocked state. | Review data only. Hosted API never executes. |
+| Archive Prepare | Receipt preview and reusable package intelligence shape. | Preview only unless an authorized writer confirms. |
 
 ## Supported Sources
 
@@ -90,6 +106,18 @@ Archive prepare is preview-only. Durable archive writes require explicit confirm
 | Search score | Ranking input only. It is not install permission and not a verification claim. |
 | Archive | Stores confirmed package intelligence records, not copied package artifacts. |
 | Usage logging | Stores hashed or structured fields only. No API keys, raw IPs, raw queries, package names or user-agent fingerprints. |
+
+## Trust Scoring
+
+External trust scores use the public `external-v2` policy.
+
+| Score | Decision | Agent Behavior |
+| --- | --- | --- |
+| `75-100` | `recommended` | Present the package with its install plan and approval boundary. |
+| `50-74` | `usable_with_warning` | Show warnings clearly before the user decides. |
+| `0-49` | `unknown` or `avoid` | Do not execute by default. |
+
+Popularity can affect ranking, but it never upgrades security confidence. See [trust scoring](docs/api/trust-scoring.md).
 
 ## Data Model
 
@@ -156,6 +184,7 @@ bash install.sh
 - [Architecture](ARCHITECTURE.md)
 - [Product positioning](docs/product/positioning.md)
 - [API: search, inspect, install plan](docs/api/search-inspect-install-plan.md)
+- [Trust scoring](docs/api/trust-scoring.md)
 - [Package intelligence lifecycle](docs/archive/package-intelligence-lifecycle.md)
 - [Threat model](docs/security/threat-model.md)
 - [Data retention](docs/security/data-retention.md)

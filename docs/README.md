@@ -6,6 +6,7 @@ Public docs are organized around the product surface that agents and maintainers
 
 - [Quickstart](quickstart.md)
 - [API: search, inspect, install plan](api/search-inspect-install-plan.md)
+- [Trust scoring](api/trust-scoring.md)
 - [Public API spec](specs/public-api.md)
 - [MCP hosts](mcp-hosts.md)
 - [Packages](packages.md)

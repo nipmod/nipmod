@@ -66,19 +66,46 @@ export function TrustView() {
         <DocsTable
           rows={[
             {
-              first: "90-100",
-              second: "Strong package candidate with good metadata, source context and low command risk.",
-              third: "Can be recommended with the install plan."
+              first: "75-100",
+              second: "Recommended candidate with enough source context, metadata and low-risk plan data to present.",
+              third: "Still requires an install plan and approval."
             },
             {
-              first: "70-89",
-              second: "Useful candidate, but at least one signal is weaker or less complete.",
+              first: "50-74",
+              second: "Usable with warning. One or more signals are weak, incomplete or risky.",
               third: "Show warnings before use."
             },
             {
-              first: "<70",
-              second: "Weak, risky or incomplete evidence.",
-              third: "Avoid unless the user explicitly accepts the risk."
+              first: "0-49",
+              second: "Unknown or avoid. Evidence is weak, risky, blocked or below the policy threshold.",
+              third: "Do not execute by default."
+            }
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection title="Score dimensions">
+        <DocsTable
+          rows={[
+            {
+              first: "Quality",
+              second: "Metadata completeness, source context, freshness, warnings and install-plan risk.",
+              third: "Does not use popularity as proof."
+            },
+            {
+              first: "Popularity",
+              second: "Downloads, stars, likes or public usage when the source exposes them.",
+              third: "Used for ranking, not security permission."
+            },
+            {
+              first: "Security confidence",
+              second: "Integrity, signatures, advisories, lifecycle risk, command risk and source warnings.",
+              third: "Can downgrade or block a package."
+            },
+            {
+              first: "Provenance",
+              second: "The strongest available source evidence: source-only, integrity, signature or attestation.",
+              third: "Unknown provenance caps confidence."
             }
           ]}
         />

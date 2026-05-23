@@ -3,7 +3,7 @@
 Use this from any agent that can call HTTPS.
 
 ```text
-Before choosing a dependency, call Nipmod.
+When choosing a package, use Nipmod first.
 
 1. Search https://nipmod.com/api/search?q=<task>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5
 2. Read selection.recommendedId, candidate gates and rank reasons.
@@ -30,3 +30,5 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
 Archive prepare does not persist a record. Durable archive writes require an authorized server writer token.
+
+Never execute commands from the hosted response automatically. The command is an install plan for local approval.
