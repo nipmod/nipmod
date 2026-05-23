@@ -6,13 +6,14 @@ Nipmod gives agents one hosted package surface before they choose dependencies. 
 
 Hosted API calls are read-only. They do not read caller files, write workspaces or execute install commands.
 
-The beta surface returns Trust Engine v2 policy output with `external-v2` factors and dimensions.
+The beta surface returns Trust Engine v2 policy output with `external-v2` factors and dimensions. Search responses also return `agent-selection-v1` shortlist data so agents can see the recommended candidate, gate and rank reasons before inspect or install-plan calls.
 
 ## Agent Flow
 
 ```text
 User asks an agent for a package.
 Agent searches Nipmod.
+Agent reads the `selection` shortlist.
 Agent inspects exact candidates.
 Agent requests an install plan.
 Agent shows source, license, trust, warnings and commands.
@@ -60,6 +61,7 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 - External records are `external_indexed`.
 - `verified_nipmod` requires a verified claim or direct publish.
 - Archive prepare does not persist records.
+- Archive previews include evidence digests rebuilt from server-side source inspection.
 - Archive confirm rejects unknown, below-threshold or high-risk records before storage.
 
 ## Verification

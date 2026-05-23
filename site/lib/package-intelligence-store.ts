@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { mergePackageIntelligenceRecords, type PackageIntelligenceRecord } from "./package-intelligence";
+import { ensurePackageIntelligenceEvidence, mergePackageIntelligenceRecords, type PackageIntelligenceRecord } from "./package-intelligence";
 
 type ArchiveEnv = Record<string, string | undefined>;
 
@@ -105,7 +105,7 @@ export async function searchPackageIntelligenceArchive(
     `/rest/v1/package_intelligence_records?${params.toString()}`,
     requestOptions
   );
-  const records = rows.map((row) => row.record).filter(isPackageIntelligenceRecord);
+  const records = rows.map((row) => row.record).filter(isPackageIntelligenceRecord).map(ensurePackageIntelligenceEvidence);
 
   return {
     configured: true,
@@ -181,7 +181,7 @@ export async function readPackageIntelligenceRecordById(
     requestOptions
   );
   const record = rows.at(0)?.record;
-  return isPackageIntelligenceRecord(record) ? record : null;
+  return isPackageIntelligenceRecord(record) ? ensurePackageIntelligenceEvidence(record) : null;
 }
 
 export class ArchiveStoreError extends Error {

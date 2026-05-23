@@ -14,6 +14,8 @@ const DEFAULT_CANARIES = [
     requiredSignals: [
       "Latest tarball integrity metadata is present",
       "npm registry signature metadata is present",
+      "Latest npm tarball host:",
+      "Latest npm release file count:",
       "maintainer records",
       "Node engine"
     ],
@@ -29,6 +31,8 @@ const DEFAULT_CANARIES = [
       "PyPI returned no vulnerabilities",
       "PyPI latest release files returned",
       "digest metadata",
+      "PyPI latest release file types:",
+      "PyPI latest release files are not marked yanked.",
       "requires-python"
     ],
     source: "pypi"
@@ -42,6 +46,8 @@ const DEFAULT_CANARIES = [
       "GitHub forks returned:",
       "GitHub package manifests found:",
       "GitHub package.json declares",
+      "GitHub security files",
+      "GitHub lockfiles",
       "GitHub package.json package manager:"
     ],
     source: "github"
@@ -54,6 +60,9 @@ const DEFAULT_CANARIES = [
     },
     requiredSignals: [
       "Hugging Face repository files returned:",
+      "Hugging Face README/model card file",
+      "Hugging Face config metadata file",
+      "Hugging Face safetensors weight file",
       "Hugging Face commit digest metadata is present",
       "Hugging Face gated access flag"
     ],
@@ -175,7 +184,7 @@ async function fetchJson(url, fetchFn) {
     const response = await fetchFn(url, {
       headers: {
         accept: "application/json",
-        "user-agent": "nipmod-source-depth-canary/1.2.5 (+https://nipmod.com)"
+        "user-agent": "nipmod-source-depth-canary/1.2.7 (+https://nipmod.com)"
       },
       signal: controller.signal
     });

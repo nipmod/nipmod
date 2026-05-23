@@ -31,12 +31,34 @@ describe("package intelligence archive", () => {
     expect(record.ownership.retainedByOriginalSource).toBe(true);
     expect(record.ownership.claimRequiredForVerified).toBe(true);
     expect(record.security.metadataIsInstruction).toBe(false);
+    expect(record.evidence).toMatchObject({
+      archivePolicy: "agent-confirmed-source-owned-v1",
+      generatedFrom: "server-reinspected-source"
+    });
+    expect(record.evidence.sourceRecordDigest).toMatch(/^[a-f0-9]{64}$/);
+    expect(record.evidence.trustDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(record.stableKey).toContain("npm:node-telegram-bot-api");
     expect(validatePackageIntelligenceRecord(record).ok).toBe(true);
     expect(validatePackageIntelligenceRecord(record).eligibility).toMatchObject({
       minimumTrustScore: 50,
       ok: true,
       type: "dev.nipmod.package-intelligence-eligibility.v1"
+    });
+  });
+
+  test("rejects tampered archive evidence digests", () => {
+    const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const tampered = {
+      ...record,
+      evidence: {
+        ...record.evidence,
+        trustDigest: "0".repeat(64)
+      }
+    };
+
+    expect(validatePackageIntelligenceRecord(tampered)).toMatchObject({
+      ok: false,
+      errors: expect.arrayContaining(["archive evidence digests are invalid"])
     });
   });
 
@@ -175,6 +197,7 @@ describe("package intelligence archive", () => {
       dryRun: true,
       recordId: prepared.record.id,
       stored: false,
+      evidenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/),
       type: "dev.nipmod.package-intelligence-receipt.v1"
     });
     expect(prepared.next.writeBoundary).toContain("not persisted");

@@ -109,7 +109,7 @@ async function callRateLimitRpc({ env, fetchFn, now, requestId }) {
       apikey: serviceRoleKey,
       authorization: `Bearer ${serviceRoleKey}`,
       "content-type": "application/json",
-      "user-agent": "nipmod-rate-limit-canary/1.2.5 (+https://nipmod.com)"
+      "user-agent": "nipmod-rate-limit-canary/1.2.7 (+https://nipmod.com)"
     },
     method: "POST"
   });
@@ -132,7 +132,7 @@ async function fetchSourceHealth({ baseUrl, fetchFn, requestId }) {
   try {
     const response = await fetchFn(`${normalizedBaseUrl}/api/sources/health`, {
       headers: {
-        "user-agent": "nipmod-rate-limit-canary/1.2.5 (+https://nipmod.com)",
+        "user-agent": "nipmod-rate-limit-canary/1.2.7 (+https://nipmod.com)",
         "x-request-id": requestId
       }
     });

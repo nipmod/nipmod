@@ -47,7 +47,7 @@ Hosted API calls never read or write the caller workspace. Local CLI and MCP too
 | Package intelligence archive | Durable production archive enabled |
 | Verified Nipmod archive | Empty by design after seed reset; new entries pass verification gates |
 | Distributed rate limits | Live with Supabase-backed shared buckets |
-| CLI and installer | Live, release `1.2.6` |
+| CLI and installer | Live, release `1.2.7` |
 | Local MCP server | Live for controlled workspace installs |
 | Hosted MCP endpoint | Live, read-only |
 
@@ -77,7 +77,7 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 
 Optional builder keys use `x-nipmod-api-key` or `Authorization: Bearer <key>` and raise rate limits. Invalid keys return `401`. Usage logging stores hashed identifiers only, not raw queries, package names, IP addresses, user agents, or API keys.
 
-Trust output uses policy `external-v2`. Agents get `score`, `decision`, `warnings` and structured `factors` so they can explain why a package was recommended or flagged.
+Trust output uses policy `external-v2`. Search output also includes `selection.policy: "agent-selection-v1"` with a recommended candidate, gate status and ranking breakdown. Agents should use it as a shortlist, then inspect and request an install plan before local execution.
 
 Core endpoints:
 
@@ -98,10 +98,11 @@ Agent flow:
 
 1. Search for candidates with `/api/search` or `/api/resolve`.
 2. Inspect exact candidates with `/api/inspect`.
-3. Show source, license, trust score, decision, warnings, factors and metrics.
-4. Request `/api/install-plan`.
-5. Ask for user or host-policy approval before local execution.
-6. Optionally prepare an archive record with `/api/archive/prepare` after useful discovery.
+3. Use `selection.recommendedId` as the shortlist hint, not as permission to install.
+4. Show source, license, trust score, decision, warnings, factors and metrics.
+5. Request `/api/install-plan`.
+6. Ask for user or host-policy approval before local execution.
+7. Optionally prepare an archive record with `/api/archive/prepare` after useful discovery.
 
 Contracts and examples:
 

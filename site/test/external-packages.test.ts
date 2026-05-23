@@ -30,6 +30,16 @@ describe("external package resolver", () => {
     expect(result.records.every((record) => record.archive.status === "external_indexed")).toBe(true);
     expect(result.records.every((record) => record.archive.persistence === "ephemeral")).toBe(true);
     expect(result.partial).toBe(false);
+    expect(result.selection).toMatchObject({
+      policy: "agent-selection-v1",
+      recommendedId: "npm:node-telegram-bot-api"
+    });
+    expect(result.selection.candidates[0]).toMatchObject({
+      gate: "pass",
+      id: "npm:node-telegram-bot-api",
+      source: "npm"
+    });
+    expect(result.selection.candidates[0]?.rank.trustScore).toBeGreaterThanOrEqual(75);
     expect(result.sourceSummary).toMatchObject({ failed: 0, ok: 2, requested: 2 });
     expect(result.sourceReports.map((report) => report.source)).toEqual(["npm", "huggingface-model"]);
     expect(result.sourceReports.every((report) => report.durationMs >= 0)).toBe(true);
@@ -413,7 +423,7 @@ describe("external package resolver", () => {
     const searchBody = await search.json();
     expect(search.status).toBe(200);
     expect(search.headers.get("access-control-allow-origin")).toBe("*");
-    expect(search.headers.get("x-nipmod-api-version")).toBe("2026-05-22");
+    expect(search.headers.get("x-nipmod-api-version")).toBe("2026-05-23");
     expect(search.headers.get("x-nipmod-request-id")).toBeTruthy();
     expect(searchBody.records[0]).toMatchObject({
       archive: { status: "external_indexed" },
@@ -595,10 +605,14 @@ describe("external package resolver", () => {
     expect(npm.trust.signals).toContain("Latest npm release declares 3 runtime dependencies.");
     expect(npm.trust.signals).toContain("npm returned 2 maintainer records.");
     expect(npm.trust.signals).toContain("npm package declares Node engine: >=20.");
+    expect(npm.trust.signals).toContain("Latest npm tarball host: registry.npmjs.org.");
+    expect(npm.trust.signals).toContain("Latest npm release file count: 44.");
 
     const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
     expect(pypi.trust.signals).toContain("PyPI latest release files returned: 1.");
     expect(pypi.trust.signals).toContain("PyPI latest release files with digest metadata: 1.");
+    expect(pypi.trust.signals).toContain("PyPI latest release file types: bdist_wheel.");
+    expect(pypi.trust.signals).toContain("PyPI latest release files are not marked yanked.");
     expect(pypi.trust.signals).toContain("PyPI requires-python: >=3.11.");
 
     const github = await inspectExternalPackage("github", "example/depth-repo", { fetchImpl: sourceDepthFetch });
@@ -610,11 +624,14 @@ describe("external package resolver", () => {
     expect(github.trust.signals).toContain("GitHub package manifests found: package.json, pyproject.toml.");
     expect(github.trust.signals).toContain("GitHub package.json declares 1 dependency entries.");
     expect(github.trust.signals).toContain("GitHub package.json declares 2 script entries.");
+    expect(github.trust.signals).toContain("GitHub security files found: SECURITY.md, .github/dependabot.yml.");
+    expect(github.trust.signals).toContain("GitHub lockfiles found: pnpm-lock.yaml.");
     expect(github.trust.signals).toContain("GitHub package.json package manager: pnpm@10.30.0.");
 
     const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
     expect(model.trust.warnings).toContain("Hugging Face marks this model as gated.");
     expect(model.trust.signals).toContain("Hugging Face repository files returned: 2.");
+    expect(model.trust.signals).toContain("Hugging Face safetensors weight file is present.");
     expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
 
     const mcp = await inspectExternalPackage("mcp", "example/depth-mcp", { fetchImpl: sourceDepthFetch });
@@ -787,7 +804,13 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
       dependencies: { alpha: "1.0.0" },
       deprecated: "Use depth-npm-next instead.",
       description: "Depth npm fixture.",
-      dist: { integrity: "sha512-depth", signatures: [{ keyid: "SHA256:depth", sig: "depth" }] },
+      dist: {
+        fileCount: 44,
+        integrity: "sha512-depth",
+        signatures: [{ keyid: "SHA256:depth", sig: "depth" }],
+        tarball: "https://registry.npmjs.org/depth-npm/-/depth-npm-1.0.0.tgz",
+        unpackedSize: 128000
+      },
       engines: { node: ">=20" },
       funding: { url: "https://example.com/funding" },
       license: "MIT",
@@ -820,6 +843,9 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
         {
           digests: { sha256: "abc123" },
           filename: "depth_pypi-2.0.0-py3-none-any.whl",
+          has_sig: true,
+          packagetype: "bdist_wheel",
+          size: 4096,
           upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
         }
       ],
@@ -867,6 +893,30 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
       content: Buffer.from("[project]\nname = \"depth-repo\"\n").toString("base64"),
       encoding: "base64",
       name: "pyproject.toml"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/contents/SECURITY.md?ref=main") {
+    return jsonResponse({
+      content: Buffer.from("# Security\n").toString("base64"),
+      encoding: "base64",
+      name: "SECURITY.md"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/contents/.github/dependabot.yml?ref=main") {
+    return jsonResponse({
+      content: Buffer.from("version: 2\n").toString("base64"),
+      encoding: "base64",
+      name: "dependabot.yml"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/contents/pnpm-lock.yaml?ref=main") {
+    return jsonResponse({
+      content: Buffer.from("lockfileVersion: '9.0'\n").toString("base64"),
+      encoding: "base64",
+      name: "pnpm-lock.yaml"
     });
   }
 

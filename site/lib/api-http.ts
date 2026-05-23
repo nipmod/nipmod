@@ -44,7 +44,7 @@ export function apiHeaders(context: ApiHttpContext, headers: Record<string, stri
     "access-control-allow-origin": "*",
     "cache-control": cacheControl,
     "server-timing": `app;dur=${durationMs}`,
-    "x-nipmod-api-version": "2026-05-22",
+    "x-nipmod-api-version": "2026-05-23",
     "x-nipmod-request-id": context.requestId,
     "x-nipmod-response-time-ms": String(durationMs)
   };

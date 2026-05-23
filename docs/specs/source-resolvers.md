@@ -90,10 +90,10 @@ Resolvers should expose source-native context as `trust.signals` and risk as `tr
 
 Current depth signals include:
 
-- npm deprecation, maintainer count, dependency count, Node engine, funding metadata, integrity and signature metadata
-- PyPI latest release files, digest metadata, `requires-python`, classifiers and vulnerability records
-- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count and package manifest hints for exact repo inspect
-- Hugging Face gated/private flags, pipeline tag, library, repository file count and commit digest metadata
+- npm deprecation, maintainer count, dependency count, Node engine, funding metadata, tarball host, file count, unpacked size, integrity and signature metadata
+- PyPI latest release files, file types, file size, yanked status, digest metadata, signature metadata, `requires-python`, classifiers and vulnerability records
+- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count, package manifest hints, security files and lockfiles for exact repo inspect
+- Hugging Face gated/private flags, pipeline tag, library, repository file count, README/model card, config metadata, safetensors metadata for models and commit digest metadata
 - MCP remote endpoint count, environment requirements, package metadata, registry status and source repository
 
 These signals are review context. They improve package comparison and install-plan review, but they do not guarantee that third-party code is safe.
