@@ -291,11 +291,24 @@ function openApiDocument() {
               type: "object"
             },
             recordCount: { minimum: 0, type: "integer" },
+            recovery: {
+              additionalProperties: false,
+              properties: {
+                degraded: { type: "boolean" },
+                retryable: { type: "boolean" },
+                suggestedAction: {
+                  enum: ["use-returned-records", "inspect-exact-package", "retry-source-later", "fix-source-or-query"],
+                  type: "string"
+                }
+              },
+              required: ["degraded", "retryable", "suggestedAction"],
+              type: "object"
+            },
             resolver: { $ref: "#/components/schemas/ExternalSourceResolverProfile" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
             status: { enum: ["ok", "empty", "failed"], type: "string" }
           },
-          required: ["circuit", "durationMs", "recordCount", "resolver", "source", "status"],
+          required: ["circuit", "durationMs", "recordCount", "recovery", "resolver", "source", "status"],
           type: "object"
         },
         ExternalSourceCircuitReport: {
@@ -467,12 +480,14 @@ function openApiDocument() {
           properties: {
             cached: { type: "boolean" },
             checkedAt: { format: "date-time", type: "string" },
+            degraded: { type: "boolean" },
             durationMs: { minimum: 0, type: "integer" },
             endpointHost: { type: "string" },
+            retryable: { type: "boolean" },
             status: { enum: ["ok", "failed"], type: "string" },
             statusCode: { nullable: true, type: "integer" }
           },
-          required: ["cached", "checkedAt", "durationMs", "endpointHost", "status", "statusCode"],
+          required: ["cached", "checkedAt", "degraded", "durationMs", "endpointHost", "retryable", "status", "statusCode"],
           type: "object"
         },
         SourceHealthResponse: {
@@ -510,6 +525,20 @@ function openApiDocument() {
               required: ["cacheTtlMs", "mode", "timeoutMs"],
               type: "object"
             },
+            rateLimit: {
+              additionalProperties: false,
+              properties: {
+                activeStore: { enum: ["supabase", "memory-fallback", "unknown"], type: "string" },
+                configured: { type: "boolean" },
+                distributedActive: { type: "boolean" },
+                driver: { enum: ["supabase-rpc"], type: "string" },
+                fallback: { enum: ["memory"], type: "string" },
+                fallbackReason: { nullable: true, type: "string" },
+                missing: { items: { type: "string" }, type: "array" }
+              },
+              required: ["activeStore", "configured", "distributedActive", "driver", "fallback", "fallbackReason", "missing"],
+              type: "object"
+            },
             sources: { items: { $ref: "#/components/schemas/ExternalSourceCapability" }, type: "array" },
             summary: {
               additionalProperties: false,
@@ -545,7 +574,7 @@ function openApiDocument() {
               type: "object"
             }
           },
-          required: ["apiAccess", "archive", "generatedAt", "probe", "sources", "summary", "type", "usage"],
+          required: ["apiAccess", "archive", "generatedAt", "probe", "rateLimit", "sources", "summary", "type", "usage"],
           type: "object"
         },
         PackageIntelligenceArchiveState: {
@@ -652,16 +681,30 @@ function openApiDocument() {
         PackageIntelligenceValidation: {
           additionalProperties: false,
           properties: {
+            eligibility: { $ref: "#/components/schemas/PackageIntelligenceEligibility" },
             errors: { items: { type: "string" }, type: "array" },
             ok: { type: "boolean" },
             warnings: { items: { type: "string" }, type: "array" }
           },
-          required: ["errors", "ok", "warnings"],
+          required: ["eligibility", "errors", "ok", "warnings"],
+          type: "object"
+        },
+        PackageIntelligenceEligibility: {
+          additionalProperties: false,
+          properties: {
+            errors: { items: { type: "string" }, type: "array" },
+            minimumTrustScore: { minimum: 0, maximum: 100, type: "integer" },
+            ok: { type: "boolean" },
+            type: { const: "dev.nipmod.package-intelligence-eligibility.v1", type: "string" },
+            warnings: { items: { type: "string" }, type: "array" }
+          },
+          required: ["errors", "minimumTrustScore", "ok", "type", "warnings"],
           type: "object"
         },
         ArchivePrepareResponse: {
           additionalProperties: false,
           properties: {
+            eligibility: { $ref: "#/components/schemas/PackageIntelligenceEligibility" },
             next: {
               additionalProperties: false,
               properties: {
@@ -679,7 +722,7 @@ function openApiDocument() {
             type: { const: "dev.nipmod.archive-prepare.v1", type: "string" },
             validation: { $ref: "#/components/schemas/PackageIntelligenceValidation" }
           },
-          required: ["next", "preparedOnly", "receiptPreview", "record", "store", "stored", "type", "validation"],
+          required: ["eligibility", "next", "preparedOnly", "receiptPreview", "record", "store", "stored", "type", "validation"],
           type: "object"
         },
         ArchiveConfirmResponse: {
@@ -687,6 +730,7 @@ function openApiDocument() {
           properties: {
             configured: { type: "boolean" },
             dryRun: { type: "boolean" },
+            eligibility: { $ref: "#/components/schemas/PackageIntelligenceEligibility" },
             receipt: { $ref: "#/components/schemas/PackageIntelligenceReceipt" },
             record: { $ref: "#/components/schemas/PackageIntelligenceRecord" },
             store: { $ref: "#/components/schemas/ArchiveStoreStatus" },
@@ -694,7 +738,7 @@ function openApiDocument() {
             type: { const: "dev.nipmod.archive-confirm.v1", type: "string" },
             validation: { $ref: "#/components/schemas/PackageIntelligenceValidation" }
           },
-          required: ["receipt", "record", "stored", "type", "validation"],
+          required: ["eligibility", "receipt", "record", "stored", "type", "validation"],
           type: "object"
         },
         ArchiveSearchResponse: {

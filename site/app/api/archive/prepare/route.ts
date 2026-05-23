@@ -7,6 +7,7 @@ import {
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
+  archiveEligibility,
   createPackageIntelligenceReceipt,
   createPackageIntelligenceRecord,
   validatePackageIntelligenceRecord
@@ -75,7 +76,9 @@ function archiveRecordResponse(
 ): Promise<Response> {
   const record = createPackageIntelligenceRecord(externalRecord);
   const validation = validatePackageIntelligenceRecord(record);
+  const eligibility = archiveEligibility(record);
   return apiJsonWithUsage(request, {
+    eligibility,
     next: {
       confirm: "POST /api/archive/confirm",
       writeBoundary: "Prepared records are not persisted by this endpoint. Durable writes require archive confirmation and an authorized server writer."

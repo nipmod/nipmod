@@ -1,7 +1,12 @@
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { usageStoreStatus } from "../../../../lib/api-usage";
-import { EXTERNAL_PACKAGE_SOURCES, externalSourceCapabilities, type ExternalPackageSource } from "../../../../lib/external-packages";
+import {
+  EXTERNAL_PACKAGE_SOURCES,
+  externalSourceCapabilities,
+  externalSourceRequestHeaders,
+  type ExternalPackageSource
+} from "../../../../lib/external-packages";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
 import { checkApiRateLimitAsync, rateLimitStoreStatus } from "../../../../lib/rate-limit";
 
@@ -90,8 +95,10 @@ const SOURCE_PROBE_CACHE_TTL_MS = 30_000;
 interface SourceLiveProbe {
   cached: boolean;
   checkedAt: string;
+  degraded: boolean;
   durationMs: number;
   endpointHost: string;
+  retryable: boolean;
   status: "ok" | "failed";
   statusCode: number | null;
 }
@@ -153,22 +160,24 @@ async function probeSource(source: ExternalPackageSource): Promise<SourceLivePro
   const timeout = setTimeout(() => controller.abort(), SOURCE_PROBE_TIMEOUT_MS);
   try {
     const response = await fetch(endpoint, {
-      headers: {
-        accept: "application/json",
-        "user-agent": "nipmod-source-health/1.2.5 (+https://nipmod.com)"
-      },
+      headers: externalSourceRequestHeaders(endpoint),
       signal: controller.signal
     });
+    const retryable = response.status === 429 || response.status >= 500;
     return {
+      degraded: !response.ok,
       durationMs: Date.now() - startedAt,
       endpointHost: new URL(endpoint).host,
-      status: response.status < 500 ? "ok" : "failed",
+      retryable,
+      status: response.ok ? "ok" : "failed",
       statusCode: response.status
     };
   } catch {
     return {
+      degraded: true,
       durationMs: Date.now() - startedAt,
       endpointHost: new URL(endpoint).host,
+      retryable: true,
       status: "failed",
       statusCode: null
     };

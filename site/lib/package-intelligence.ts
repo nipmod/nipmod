@@ -84,8 +84,17 @@ export interface ConfirmPackageIntelligenceOptions {
 }
 
 export interface PackageIntelligenceValidation {
+  eligibility: PackageIntelligenceArchiveEligibility;
   errors: string[];
   ok: boolean;
+  warnings: string[];
+}
+
+export interface PackageIntelligenceArchiveEligibility {
+  errors: string[];
+  minimumTrustScore: number;
+  ok: boolean;
+  type: "dev.nipmod.package-intelligence-eligibility.v1";
   warnings: string[];
 }
 
@@ -229,6 +238,7 @@ export function mergePackageIntelligenceRecords(
 export function validatePackageIntelligenceRecord(record: PackageIntelligenceRecord): PackageIntelligenceValidation {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const eligibility = archiveEligibility(record);
 
   if (record.type !== "dev.nipmod.package-intelligence-record.v1") {
     errors.push("record type is invalid");
@@ -245,6 +255,23 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
   if (record.archive.status === "verified_nipmod" && record.ownership.claimRequiredForVerified) {
     errors.push("verified_nipmod requires an owner claim workflow before persistence");
   }
+
+  return {
+    eligibility,
+    errors: [...errors, ...eligibility.errors],
+    ok: errors.length === 0 && eligibility.ok,
+    warnings: [...warnings, ...eligibility.warnings]
+  };
+}
+
+export function archiveEligibility(record: PackageIntelligenceRecord): PackageIntelligenceArchiveEligibility {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const minimumTrustScore = record.trust.policy.thresholds.usableWithWarning;
+
+  if (record.installPlan.safety.blocked) {
+    errors.push("blocked install plans cannot be stored as confirmed archive records");
+  }
   if (record.security.installCommandRisk === "high") {
     errors.push("high risk install commands cannot be stored as confirmed archive records");
   } else if (record.security.installCommandRisk === "medium") {
@@ -253,13 +280,21 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
   if (record.trust.risk === "high" || record.trust.decision === "avoid") {
     errors.push("avoid or high risk trust results cannot be stored as confirmed archive records");
   }
+  if (record.trust.risk === "unknown" || record.trust.decision === "unknown" || record.trust.score < minimumTrustScore) {
+    errors.push("unknown or below-threshold trust results cannot be stored as confirmed archive records");
+  }
   if (record.security.warnings.some((warning) => warning.includes("agent-targeted instructions"))) {
     errors.push("agent-targeted package metadata cannot be stored as a confirmed archive record");
   }
+  if (record.trust.dimensions?.securityConfidence === "low") {
+    warnings.push("security confidence is low; agents should prefer stronger source evidence when alternatives exist");
+  }
 
   return {
-    errors,
+    minimumTrustScore,
     ok: errors.length === 0,
+    type: "dev.nipmod.package-intelligence-eligibility.v1",
+    errors,
     warnings
   };
 }

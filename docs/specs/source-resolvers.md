@@ -29,6 +29,11 @@ Search and resolve responses include one report per requested source. Each repor
   "source": "npm",
   "status": "ok",
   "recordCount": 2,
+  "recovery": {
+    "degraded": false,
+    "retryable": false,
+    "suggestedAction": "use-returned-records"
+  },
   "resolver": {
     "endpointHost": "registry.npmjs.org",
     "inspectStrategy": "exact-package-metadata",
@@ -63,12 +68,20 @@ The resolver profile is public and contains no secrets. It lets clients distingu
 
 Identical in-flight source requests are coalesced. If three agents ask for the same exact upstream metadata at the same time, Nipmod performs one upstream request and shares the parsed result internally.
 
+`recovery` tells agents how to handle a source outcome:
+
+- `use-returned-records` means the source returned usable candidates.
+- `inspect-exact-package` means search was empty and the agent should try an exact source/name if it has one.
+- `retry-source-later` means the upstream failure was retryable, such as timeout, rate limit or temporary outage.
+- `fix-source-or-query` means the source rejected the request or no matching package exists.
+
 The normalization contract is fixed:
 
 - hosted API calls return install plans only
 - hosted API calls do not write caller workspaces
 - package metadata is treated as data, not instructions
 - original URLs and source ownership are preserved
+- repository URLs are normalized to safe HTTP(S) URLs or dropped
 - package ids are source-prefixed
 
 ## Source-Depth Signals

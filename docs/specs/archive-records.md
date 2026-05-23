@@ -46,8 +46,12 @@ Archive confirmation is allowed only when:
 
 - the inspected source still matches the submitted source and name
 - the submitted version is not stale against current source metadata
+- `trust.decision` is `recommended` or `usable_with_warning`
+- `trust.score` meets the current `usableWithWarning` policy threshold
 - `trust.decision` is not `avoid`
 - `trust.risk` is not `high`
+- `trust.risk` is not `unknown`
+- the generated install plan is not blocked
 - install command risk is not `high`
 - source metadata does not contain high-risk lifecycle script behavior
 - package metadata does not contain agent-targeted instructions
@@ -93,12 +97,18 @@ Confirmed archive records are meant to capture useful package intelligence, not 
 The confirm endpoint rejects records when:
 
 - `trust.decision` is `avoid`
+- `trust.decision` is `unknown`
 - `trust.risk` is `high`
+- `trust.risk` is `unknown`
+- `trust.score` is below the policy threshold for `usable_with_warning`
+- the generated install plan is blocked
 - install command risk is `high`
 - source metadata declares high-risk lifecycle script behavior
 - package metadata contains agent-targeted prompt instructions
 
 Those records can still be inspected by an agent, but they are not persisted as confirmed archive records.
+
+Prepare and confirm responses include a `dev.nipmod.package-intelligence-eligibility.v1` object. It exposes the current minimum trust score, archive eligibility warnings and archive-blocking errors without exposing API keys, raw client identifiers or upstream response bodies.
 
 ## Verification Language
 

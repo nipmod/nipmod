@@ -46,6 +46,7 @@ describe("OpenAPI route", () => {
     ]);
     expect(body.components.schemas.ExternalSourceReport.required).toContain("resolver");
     expect(body.components.schemas.ExternalSourceReport.required).toContain("circuit");
+    expect(body.components.schemas.ExternalSourceReport.required).toContain("recovery");
     expect(body.components.schemas.ExternalSourceCircuitReport.required).toEqual([
       "failureCount",
       "lastErrorCode",
@@ -60,7 +61,9 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.PackageIntelligenceRecord.required).toEqual(
       expect.arrayContaining(["archive", "installPlan", "ownership", "security", "sourceRecord", "trust"])
     );
+    expect(body.components.schemas.PackageIntelligenceValidation.required).toContain("eligibility");
     expect(body.components.schemas.ArchivePrepareResponse.required).toEqual([
+      "eligibility",
       "next",
       "preparedOnly",
       "receiptPreview",
@@ -70,12 +73,13 @@ describe("OpenAPI route", () => {
       "type",
       "validation"
     ]);
-    expect(body.components.schemas.ArchiveConfirmResponse.required).toEqual(["receipt", "record", "stored", "type", "validation"]);
+    expect(body.components.schemas.ArchiveConfirmResponse.required).toEqual(["eligibility", "receipt", "record", "stored", "type", "validation"]);
     expect(body.components.schemas.SourceHealthResponse.required).toEqual([
       "apiAccess",
       "archive",
       "generatedAt",
       "probe",
+      "rateLimit",
       "sources",
       "summary",
       "type",

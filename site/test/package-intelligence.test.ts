@@ -33,6 +33,11 @@ describe("package intelligence archive", () => {
     expect(record.security.metadataIsInstruction).toBe(false);
     expect(record.stableKey).toContain("npm:node-telegram-bot-api");
     expect(validatePackageIntelligenceRecord(record).ok).toBe(true);
+    expect(validatePackageIntelligenceRecord(record).eligibility).toMatchObject({
+      minimumTrustScore: 50,
+      ok: true,
+      type: "dev.nipmod.package-intelligence-eligibility.v1"
+    });
   });
 
   test("flags risky shell install plans without regex backtracking", () => {
@@ -48,7 +53,10 @@ describe("package intelligence archive", () => {
     expect(record.security.warnings).toContain("Install command contains shell patterns that require manual review before execution.");
     expect(validatePackageIntelligenceRecord(record)).toMatchObject({
       ok: false,
-      errors: ["high risk install commands cannot be stored as confirmed archive records"]
+      errors: expect.arrayContaining([
+        "blocked install plans cannot be stored as confirmed archive records",
+        "high risk install commands cannot be stored as confirmed archive records"
+      ])
     });
   });
 
@@ -80,7 +88,33 @@ describe("package intelligence archive", () => {
     expect(record.security.warnings).toContain("Lifecycle script postinstall contains remote download or hidden background execution behavior.");
     expect(validatePackageIntelligenceRecord(record)).toMatchObject({
       ok: false,
-      errors: ["avoid or high risk trust results cannot be stored as confirmed archive records"]
+      errors: expect.arrayContaining([
+        "blocked install plans cannot be stored as confirmed archive records",
+        "avoid or high risk trust results cannot be stored as confirmed archive records",
+        "unknown or below-threshold trust results cannot be stored as confirmed archive records"
+      ])
+    });
+  });
+
+  test("rejects archive confirmation for unknown low-evidence trust results", () => {
+    const record = createPackageIntelligenceRecord({
+      ...externalRecord,
+      trust: {
+        ...externalRecord.trust,
+        decision: "unknown",
+        risk: "unknown",
+        score: 42,
+        warnings: []
+      }
+    });
+
+    expect(validatePackageIntelligenceRecord(record)).toMatchObject({
+      eligibility: {
+        ok: false,
+        minimumTrustScore: 50
+      },
+      ok: false,
+      errors: expect.arrayContaining(["unknown or below-threshold trust results cannot be stored as confirmed archive records"])
     });
   });
 
@@ -133,6 +167,7 @@ describe("package intelligence archive", () => {
     const prepared = await prepare.json();
     expect(prepare.status).toBe(200);
     expect(prepared.record.archive.status).toBe("external_indexed");
+    expect(prepared.eligibility.ok).toBe(true);
     expect(prepared.preparedOnly).toBe(true);
     expect(prepared.store.configured).toBe(false);
     expect(prepared.stored).toBe(false);
@@ -154,6 +189,7 @@ describe("package intelligence archive", () => {
     const confirmed = await confirm.json();
     expect(confirm.status).toBe(200);
     expect(confirmed.record.archive.status).toBe("agent_confirmed");
+    expect(confirmed.eligibility.ok).toBe(true);
     expect(confirmed.receipt).toMatchObject({
       archiveStatus: "agent_confirmed",
       dryRun: true,
