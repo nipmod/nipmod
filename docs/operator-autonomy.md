@@ -62,6 +62,8 @@ Without local secrets, the live production store can still be checked with:
 pnpm rate-limit:canary -- --require-active
 ```
 
+If the live check returns `fallbackReason: "distributed_rpc_http_404"`, Production has the Supabase env names but the RPC is not reachable through the Data API. Apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql`, then confirm `public.consume_api_rate_limit` is exposed to the Data API for service role calls before redeploying.
+
 ## Required for usage ingestion checks
 
 Run the canary after Production env is available locally or through a temporary env file:

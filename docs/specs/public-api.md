@@ -41,6 +41,8 @@ Operators can run `pnpm install-plan:canary` to verify live install-plan boundar
 
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
 
+The rate-limit canary includes a `nextAction` field for degraded stores. For `distributed_rpc_http_404`, the next action is to apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql` and expose `public.consume_api_rate_limit` through the Supabase Data API.
+
 ## Base URL
 
 ```text
