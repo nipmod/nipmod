@@ -6,10 +6,16 @@ This example shows the API-first Nipmod flow an agent can use from any host that
 node --experimental-strip-types examples/http-api/search.ts "http client"
 ```
 
-For the agent-style output with inspect data, trust factors, install-plan safety and archive preview:
+For the fuller agent-style output with inspect data, source degradation, trust factors, install-plan safety and archive preview:
 
 ```bash
 node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+```
+
+The same flow using only the Python standard library:
+
+```bash
+python3 examples/http-api/agent_flow.py "http client"
 ```
 
 Flow:
@@ -21,7 +27,13 @@ Flow:
 5. Prepare an archive preview after useful discovery.
 6. Show trust factors, rank reasons and safety warnings before approval.
 
-The examples print plans only. They do not install anything and they do not persist archive records.
+The examples print plans only. They do not install anything, they do not read the caller workspace and they do not persist archive records.
+
+Environment:
+
+```bash
+NIPMOD_API_BASE_URL=https://nipmod.com
+```
 
 Known exact records used by production canaries:
 

@@ -313,6 +313,8 @@ Example:
 curl 'https://nipmod.com/api/openapi'
 ```
 
+The contract includes `x-nipmod-agent-flow` and `x-nipmod-safety-boundary` extensions so generated clients can see the intended agent sequence and hosted API write boundary.
+
 ## Error Contract
 
 Errors return:

@@ -17,6 +17,7 @@ const REQUIRED_API_HEADERS = [
   "x-nipmod-response-time-ms"
 ];
 const REQUIRED_OPENAPI_OPERATIONS = [
+  "GET /api/openapi",
   "GET /api/archive/prepare",
   "POST /api/archive/prepare",
   "POST /api/archive/confirm",
@@ -265,6 +266,24 @@ function assertOpenApiDocument(payload: unknown): asserts payload is {
   const info = document.info as Record<string, unknown>;
   if (info.title !== "Nipmod API" || typeof info.version !== "string") {
     throw new Error("OpenAPI info title or version mismatch");
+  }
+  const agentFlow = document["x-nipmod-agent-flow"];
+  if (!Array.isArray(agentFlow) || agentFlow.join(",") !== "search,inspect,install-plan,host-approval,optional-archive-confirm") {
+    throw new Error("OpenAPI agent flow extension mismatch");
+  }
+  const safetyBoundary = document["x-nipmod-safety-boundary"];
+  if (!safetyBoundary || typeof safetyBoundary !== "object" || Array.isArray(safetyBoundary)) {
+    throw new Error("OpenAPI safety boundary extension missing");
+  }
+  const boundary = safetyBoundary as Record<string, unknown>;
+  if (
+    boundary.hostedApiExecutesCommands !== false ||
+    boundary.hostedApiWritesCallerWorkspace !== false ||
+    boundary.installPlanRequiresHostApproval !== true ||
+    boundary.packageMetadataIsInstruction !== false ||
+    boundary.searchScoreIsInstallPermission !== false
+  ) {
+    throw new Error("OpenAPI safety boundary extension mismatch");
   }
   if (!document.paths || typeof document.paths !== "object" || Array.isArray(document.paths)) {
     throw new Error("OpenAPI paths must be an object");
