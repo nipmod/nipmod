@@ -295,6 +295,15 @@ const EXTERNAL_TRUST_POLICY: ExternalTrustPolicy = {
 const MCP_REGISTRY_BASE_URL = "https://registry.modelcontextprotocol.io";
 const MCP_REGISTRY_LIVE_PATHS = ["v0", "v0.1"] as const;
 const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
+const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
+  { names: ["undici", "got"], pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i },
+  { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
+  { names: ["next", "vite"], pattern: /\b(web app|web framework|frontend|react app|vite|next)\b/i },
+  { names: ["prisma", "pg"], pattern: /\b(database|postgres|postgresql|sql|orm|prisma)\b/i },
+  { names: ["vitest", "playwright"], pattern: /\b(test|testing|e2e|browser automation|quality)\b/i },
+  { names: ["commander", "yargs"], pattern: /\b(cli|terminal|command line|command-line|console)\b/i },
+  { names: ["playwright"], pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i }
+];
 const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["requests", "httpx", "aiohttp"], pattern: /\b(http|https|request|requests|client|api)\b/i },
   { names: ["fastapi", "flask", "django"], pattern: /\b(web|server|api|framework|backend)\b/i },
@@ -843,7 +852,9 @@ async function searchNpm(query: string, limit: number, fetchImpl: typeof fetch, 
     { source: "npm" }
   );
   const objects = isRecord(payload) && Array.isArray(payload.objects) ? payload.objects : [];
-  return objects.map((item) => npmSearchRecord(item)).filter(isExternalPackageRecord);
+  const records = objects.map((item) => npmSearchRecord(item)).filter(isExternalPackageRecord);
+  const hintRecords = await npmHintRecords(query, records, fetchImpl, timeoutMs);
+  return dedupeExternalRecords([...records, ...hintRecords]);
 }
 
 async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -995,6 +1006,45 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
     version: readString(pkg.version),
     warnings
   });
+}
+
+async function npmHintRecords(
+  query: string,
+  existingRecords: ExternalPackageRecord[],
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<ExternalPackageRecord[]> {
+  const existingIds = new Set(existingRecords.map((record) => record.id.toLowerCase()));
+  const names = npmCandidateNames(query).filter((name) => !existingIds.has(`npm:${name}`));
+  if (names.length === 0) {
+    return [];
+  }
+  const settled = await Promise.allSettled(names.slice(0, 6).map((name) => inspectNpm(name, fetchImpl, timeoutMs)));
+  return settled.flatMap((result) => (result.status === "fulfilled" && result.value ? [result.value] : []));
+}
+
+function npmCandidateNames(query: string): string[] {
+  const normalized = normalizeName(query);
+  const hintNames = NPM_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
+  return [...new Set(hintNames.map((name) => name.toLowerCase()).filter(isSafeNpmHintName))];
+}
+
+function isSafeNpmHintName(name: string): boolean {
+  return /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(name);
+}
+
+function dedupeExternalRecords(records: ExternalPackageRecord[]): ExternalPackageRecord[] {
+  const seen = new Set<string>();
+  const deduped: ExternalPackageRecord[] = [];
+  for (const record of records) {
+    const key = record.id.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(record);
+  }
+  return deduped;
 }
 
 async function searchPyPi(query: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {

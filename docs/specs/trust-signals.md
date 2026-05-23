@@ -187,7 +187,7 @@ Metrics bonus:
 
 Popularity affects ranking through the metrics bonus and `popularitySignal`. It does not upgrade `securityConfidence`.
 
-Query intent hints are curated task matches, not safety claims. They help common requests such as HTTP clients, schema validation, test runners, database clients, CLI frameworks, browser automation and model workflows surface relevant candidates earlier. They never override blocked gates, high-risk warnings or install-plan policy.
+Query intent hints are curated task matches, not safety claims. They help common requests such as HTTP clients, schema validation, test runners, database clients, CLI frameworks, browser automation and model workflows surface relevant candidates earlier. For sources where broad registry search can miss obvious packages, Nipmod may inspect a short curated hint list and rank those exact package records beside registry search results. Hints never override blocked gates, high-risk warnings or install-plan policy.
 
 Security confidence rules:
 

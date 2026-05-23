@@ -221,6 +221,78 @@ describe("external package resolver", () => {
     expect(result.selection.candidates[0]?.reasons).toContain("query intent match: TypeScript schema validation fit");
   });
 
+  test("adds validated npm task hints when registry search misses the obvious package", async () => {
+    const requested: string[] = [];
+    const result = await searchExternalPackages("schema validation", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        requested.push(url);
+        if (url.includes("registry.npmjs.org/-/v1/search")) {
+          return jsonResponse({
+            objects: [
+              {
+                dependents: "1",
+                downloads: { monthly: 8_000_000, weekly: 2_000_000 },
+                flags: { insecure: 0 },
+                package: {
+                  date: "2026-01-01T00:00:00.000Z",
+                  description: "String padding utility.",
+                  links: { npm: "https://www.npmjs.com/package/left-pad" },
+                  name: "left-pad",
+                  version: "1.3.0"
+                },
+                score: { detail: { maintenance: 0.2, popularity: 1, quality: 0.2 } }
+              }
+            ]
+          });
+        }
+        if (url === "https://registry.npmjs.org/zod/latest") {
+          return jsonResponse({
+            _npmUser: { name: "zod-maintainer" },
+            description: "TypeScript-first schema validation.",
+            dist: {
+              integrity: "sha512-zod",
+              signatures: [{ keyid: "SHA256:zod", sig: "zod" }]
+            },
+            license: "MIT",
+            name: "zod",
+            repository: { url: "git+https://github.com/colinhacks/zod.git" },
+            version: "4.2.0"
+          });
+        }
+        if (url === "https://registry.npmjs.org/valibot/latest") {
+          return jsonResponse({
+            _npmUser: { name: "valibot-maintainer" },
+            description: "Schema library with type-safe validation.",
+            dist: {
+              integrity: "sha512-valibot",
+              signatures: [{ keyid: "SHA256:valibot", sig: "valibot" }]
+            },
+            license: "MIT",
+            name: "valibot",
+            repository: { url: "git+https://github.com/fabian-hiller/valibot.git" },
+            version: "1.2.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/zod") {
+          return jsonResponse({ downloads: 90_000_000, package: "zod" });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/valibot") {
+          return jsonResponse({ downloads: 7_000_000, package: "valibot" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 2,
+      sources: ["npm"]
+    });
+
+    expect(requested).toContain("https://registry.npmjs.org/zod/latest");
+    expect(requested).toContain("https://registry.npmjs.org/valibot/latest");
+    expect(result.records.map((record) => record.id)).toContain("npm:zod");
+    expect(result.selection.recommendedId).toBe("npm:zod");
+    expect(result.selection.candidates[0]?.reasons).toContain("query intent match: TypeScript schema validation fit");
+  });
+
   test("inspects exact packages and creates safe install plans", async () => {
     const record = await inspectExternalPackage("npm", "node-telegram-bot-api", { fetchImpl: mockFetch });
     const plan = createExternalInstallPlan(record);
