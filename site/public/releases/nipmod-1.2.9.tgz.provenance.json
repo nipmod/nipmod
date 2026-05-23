@@ -11,7 +11,7 @@
     "target": "node22-esm-bundle"
   },
   "formatVersion": 1,
-  "generatedAt": "2026-05-23T13:07:18.387Z",
+  "generatedAt": "2026-05-23T14:01:56.536Z",
   "materials": [
     {
       "path": "pnpm-lock.yaml",
@@ -38,8 +38,8 @@
     "publicKeySpkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
   },
   "source": {
-    "commit": "eda7b0e568eae873e4b26ad21323fd30ae39bbd6",
-    "dirty": true,
+    "commit": "2831dd7ee35f90728c9847ac9131784128c6e8db",
+    "dirty": false,
     "repository": "https://github.com/nipmod/nipmod"
   },
   "type": "dev.nipmod.release.provenance.v1"
