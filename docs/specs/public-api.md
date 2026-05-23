@@ -27,6 +27,10 @@ Server-side key storage uses scrypt-derived keyed digests with a deployment secr
 
 Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, result count, error code and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
 
+Rate-limit responses use the same public error contract as the rest of the API and include `retry-after`, `x-ratelimit-limit`, `x-ratelimit-remaining`, `x-ratelimit-reset`, `x-ratelimit-policy` and `x-ratelimit-store`.
+
+Production deployments can use a Supabase-backed rate-limit bucket through `consume_api_rate_limit`. The bucket stores hashed client identifiers only. If the shared store is missing or temporarily unavailable, routes fall back to the local in-process limiter and expose `x-ratelimit-store: memory-fallback`.
+
 ## Base URL
 
 ```text

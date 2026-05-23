@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 import { publicApiAccess, readApiAccess, type ApiAccess } from "./api-auth";
 
@@ -19,11 +20,29 @@ type RateLimitResult = {
   response?: Response;
 };
 
+type RateLimitEnv = Record<string, string | undefined>;
+type RateLimitStore = "memory" | "memory-fallback" | "supabase";
+type DistributedRateLimitRow = {
+  allowed: boolean;
+  count: number;
+  remaining: number;
+  reset_at: string;
+};
+type RateLimitCheckOptions = {
+  env?: RateLimitEnv;
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+};
+
 const buckets = new Map<string, Bucket>();
 const MAX_BUCKETS = 10_000;
+const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
+const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
+const RATE_LIMIT_STORE_ENV = "NIPMOD_RATE_LIMIT_STORE";
+const DISTRIBUTED_RATE_LIMIT_TIMEOUT_MS = 700;
 
 export function checkRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
-  return checkRateLimitForAccess(request, policy, context, publicApiAccess());
+  return checkRateLimitForAccess(request, policy, context, publicApiAccess(), "memory");
 }
 
 export function checkApiRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
@@ -36,22 +55,72 @@ export function checkApiRateLimit(request: Request, policy: RateLimitPolicy, con
       response: access.response!
     };
   }
-  return checkRateLimitForAccess(request, policy, context, access.access);
+  return checkRateLimitForAccess(request, policy, context, access.access, "memory");
+}
+
+export async function checkApiRateLimitAsync(
+  request: Request,
+  policy: RateLimitPolicy,
+  context: ApiHttpContext = createApiHttpContext(request),
+  options: RateLimitCheckOptions = {}
+): Promise<RateLimitResult> {
+  const access = readApiAccess(request, context);
+  if (!access.ok) {
+    return {
+      access: access.access,
+      headers: access.access.headers,
+      ok: false,
+      response: access.response!
+    };
+  }
+
+  const effectivePolicy = effectiveRateLimitPolicy(policy, access.access);
+  const distributed = await consumeDistributedRateLimit(request, effectivePolicy, access.access, options);
+  if (distributed) {
+    return rateLimitResultFromBucket({
+      access: access.access,
+      allowed: distributed.allowed,
+      context,
+      count: distributed.count,
+      policy,
+      effectivePolicy,
+      remaining: distributed.remaining,
+      resetAt: Date.parse(distributed.reset_at),
+      store: "supabase"
+    });
+  }
+
+  return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback");
+}
+
+export function rateLimitStoreStatus(env: RateLimitEnv = process.env): {
+  configured: boolean;
+  driver: "supabase-rpc";
+  fallback: "memory";
+  missing: string[];
+  type: "dev.nipmod.rate-limit-store-status.v1";
+} {
+  const missing = [SUPABASE_URL_ENV, SUPABASE_SERVICE_ROLE_KEY_ENV].filter((key) => !env[key]);
+  return {
+    configured: missing.length === 0 && env[RATE_LIMIT_STORE_ENV] !== "memory",
+    driver: "supabase-rpc",
+    fallback: "memory",
+    missing,
+    type: "dev.nipmod.rate-limit-store-status.v1"
+  };
 }
 
 function checkRateLimitForAccess(
   request: Request,
   policy: RateLimitPolicy,
   context: ApiHttpContext,
-  access: ApiAccess
+  access: ApiAccess,
+  store: RateLimitStore
 ): RateLimitResult {
   const now = Date.now();
   pruneBuckets(now);
 
-  const effectivePolicy = {
-    ...policy,
-    limit: Math.min(50_000, Math.max(policy.limit, Math.floor(policy.limit * access.limitMultiplier)))
-  };
+  const effectivePolicy = effectiveRateLimitPolicy(policy, access);
   const client = access.keyId ?? clientKey(request);
   const key = `${effectivePolicy.name}:${client}`;
   const existing = buckets.get(key);
@@ -60,25 +129,48 @@ function checkRateLimitForAccess(
   buckets.set(key, bucket);
 
   const remaining = Math.max(0, effectivePolicy.limit - bucket.count);
-  const resetSeconds = Math.ceil((bucket.resetAt - now) / 1000);
-  const headers = { ...rateLimitHeaders(effectivePolicy, remaining, bucket.resetAt), ...access.headers };
+  return rateLimitResultFromBucket({
+    access,
+    context,
+    count: bucket.count,
+    policy,
+    effectivePolicy,
+    remaining,
+    resetAt: bucket.resetAt,
+    store
+  });
+}
 
-  if (bucket.count > effectivePolicy.limit) {
+function rateLimitResultFromBucket(input: {
+  access: ApiAccess;
+  allowed?: boolean;
+  context: ApiHttpContext;
+  count: number;
+  effectivePolicy: RateLimitPolicy;
+  policy: RateLimitPolicy;
+  remaining: number;
+  resetAt: number;
+  store: RateLimitStore;
+}): RateLimitResult {
+  const resetSeconds = Math.max(1, Math.ceil((input.resetAt - Date.now()) / 1000));
+  const headers = { ...rateLimitHeaders(input.effectivePolicy, input.remaining, input.resetAt, input.store), ...input.access.headers };
+
+  if (input.allowed === false || input.count > input.effectivePolicy.limit) {
     return {
-      access,
+      access: input.access,
       headers,
       ok: false,
       response: apiJson(
         {
           code: "rate_limited",
-          error: `rate limit exceeded for ${policy.name}`,
+          error: `rate limit exceeded for ${input.policy.name}`,
           retryable: true,
           source: null,
           status: 429,
           type: "dev.nipmod.api-error.v1"
         },
         {
-          context,
+          context: input.context,
           headers: {
             ...headers,
             "retry-after": String(resetSeconds)
@@ -89,16 +181,73 @@ function checkRateLimitForAccess(
     };
   }
 
-  return { access, headers, ok: true };
+  return { access: input.access, headers, ok: true };
 }
 
-function rateLimitHeaders(policy: RateLimitPolicy, remaining: number, resetAt: number): Record<string, string> {
+function effectiveRateLimitPolicy(policy: RateLimitPolicy, access: ApiAccess): RateLimitPolicy {
+  return {
+    ...policy,
+    limit: Math.min(50_000, Math.max(policy.limit, Math.floor(policy.limit * access.limitMultiplier)))
+  };
+}
+
+function rateLimitHeaders(policy: RateLimitPolicy, remaining: number, resetAt: number, store: RateLimitStore): Record<string, string> {
   return {
     "x-ratelimit-limit": String(policy.limit),
     "x-ratelimit-policy": policy.name,
     "x-ratelimit-remaining": String(remaining),
-    "x-ratelimit-reset": new Date(resetAt).toISOString()
+    "x-ratelimit-reset": new Date(resetAt).toISOString(),
+    "x-ratelimit-store": store
   };
+}
+
+async function consumeDistributedRateLimit(
+  request: Request,
+  policy: RateLimitPolicy,
+  access: ApiAccess,
+  options: RateLimitCheckOptions
+): Promise<DistributedRateLimitRow | null> {
+  const env = options.env ?? process.env;
+  const status = rateLimitStoreStatus(env);
+  if (!status.configured) {
+    return null;
+  }
+  const baseUrl = env[SUPABASE_URL_ENV]!;
+  const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV]!;
+
+  const clientHash = access.keyId ? hashValue(`key:${access.keyId}`) : hashValue(`public:${clientKey(request)}`);
+  const bucketKey = hashValue(`v1:${policy.name}:${clientHash}`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DISTRIBUTED_RATE_LIMIT_TIMEOUT_MS);
+  try {
+    const response = await (options.fetchImpl ?? fetch)(`${baseUrl.replace(/\/$/, "")}/rest/v1/rpc/consume_api_rate_limit`, {
+      body: JSON.stringify({
+        p_bucket_key: bucketKey,
+        p_client_hash: clientHash,
+        p_limit_count: policy.limit,
+        p_policy: policy.name,
+        p_window_ms: policy.windowMs
+      }),
+      headers: {
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${serviceRoleKey}`,
+        "content-type": "application/json"
+      },
+      method: "POST",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const text = await response.text();
+    const parsed = text ? (JSON.parse(text) as unknown) : null;
+    const row = Array.isArray(parsed) ? parsed.at(0) : parsed;
+    return isDistributedRateLimitRow(row) ? row : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function clientKey(request: Request): string {
@@ -106,6 +255,24 @@ function clientKey(request: Request): string {
   const realIp = request.headers.get("x-real-ip")?.trim();
   const userAgent = request.headers.get("user-agent")?.trim() ?? "unknown-agent";
   return `${forwarded || realIp || "anonymous"}:${userAgent}`.slice(0, 220);
+}
+
+function hashValue(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function isDistributedRateLimitRow(value: unknown): value is DistributedRateLimitRow {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const row = value as Partial<DistributedRateLimitRow>;
+  return (
+    typeof row.allowed === "boolean" &&
+    typeof row.count === "number" &&
+    typeof row.remaining === "number" &&
+    typeof row.reset_at === "string" &&
+    Number.isFinite(Date.parse(row.reset_at))
+  );
 }
 
 function pruneBuckets(now: number): void {

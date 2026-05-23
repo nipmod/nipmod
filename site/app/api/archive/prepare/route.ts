@@ -12,7 +12,7 @@ import {
   validatePackageIntelligenceRecord
 } from "../../../../lib/package-intelligence";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
-import { checkApiRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 import { inspectExternalRecordFromRequest, parseSource } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -43,7 +43,7 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -69,7 +69,7 @@ export async function POST(request: Request): Promise<Response> {
 function archiveRecordResponse(
   request: Request,
   externalRecord: ExternalPackageRecord,
-  access: ReturnType<typeof checkApiRateLimit>["access"],
+  access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext()
 ): Promise<Response> {
@@ -98,7 +98,7 @@ function readString(value: unknown, key: string): string | null {
 
 function errorJson(
   error: unknown,
-  access: ReturnType<typeof checkApiRateLimit>["access"],
+  access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext(),
   request = new Request("https://nipmod.com/api/archive/prepare")

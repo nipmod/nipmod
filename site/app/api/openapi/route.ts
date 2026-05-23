@@ -1,7 +1,7 @@
 import { PUBLIC_READ_CACHE, apiOptions, createApiHttpContext } from "../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../lib/api-response";
 import { EXTERNAL_PACKAGE_SOURCES } from "../../../lib/external-packages";
-import { checkApiRateLimit } from "../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "openapi", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "openapi", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -373,6 +373,17 @@ function openApiDocument() {
           required: ["configured", "driver"],
           type: "object"
         },
+        RateLimitStoreStatus: {
+          additionalProperties: false,
+          description: "Distributed rate-limit status without secrets or raw client identifiers.",
+          properties: {
+            configured: { type: "boolean" },
+            driver: { enum: ["supabase-rpc"], type: "string" },
+            fallback: { enum: ["memory"], type: "string" }
+          },
+          required: ["configured", "driver", "fallback"],
+          type: "object"
+        },
         ArchiveStoreStatus: {
           additionalProperties: false,
           description: "Archive persistence status without secrets.",
@@ -393,11 +404,12 @@ function openApiDocument() {
             driver: { enum: ["supabase-rest"], type: "string" },
             missing: { items: { type: "string" }, type: "array" },
             mode: { enum: ["durable-archive-enabled", "resolver-only-safe-mode"], type: "string" },
+            rateLimits: { $ref: "#/components/schemas/RateLimitStoreStatus" },
             type: { const: "dev.nipmod.archive-status.v1", type: "string" },
             usage: { $ref: "#/components/schemas/ApiUsageStoreStatus" },
             writeBoundary: { type: "string" }
           },
-          required: ["configured", "driver", "missing", "mode", "type", "usage", "writeBoundary"],
+          required: ["configured", "driver", "missing", "mode", "rateLimits", "type", "usage", "writeBoundary"],
           type: "object"
         },
         ExternalInspectResponse: {

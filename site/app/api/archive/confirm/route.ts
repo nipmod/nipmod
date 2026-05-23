@@ -14,7 +14,7 @@ import {
   assertArchiveWriteAuthorized,
   upsertPackageIntelligenceRecord
 } from "../../../../lib/package-intelligence-store";
-import { checkApiRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 import { inspectExternalRecordFromRequest } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -110,7 +110,7 @@ function assertArchiveWriteReady(request: Request): ReturnType<typeof archiveSto
 
 function errorJson(
   error: unknown,
-  access: ReturnType<typeof checkApiRateLimit>["access"],
+  access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext(),
   request = new Request("https://nipmod.com/api/archive/confirm")

@@ -37,6 +37,18 @@ select nipmod_private.set_archive_write_token('<NIPMOD_ARCHIVE_WRITE_TOKEN>', 'p
 node --experimental-strip-types tools/package-intelligence-ops.ts verify-secrets --env-file /tmp/nipmod-archive.env
 ```
 
+## Required for distributed API rate limits
+
+1. Supabase service role key
+   - Vercel env: `NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY`
+   - Server-only. Never expose it to browser code or public logs.
+
+2. Database schema
+   - Apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql` to the Supabase project.
+   - If using the Supabase SQL editor, `docs/api-rate-limit-schema.sql` contains the same SQL.
+
+The rate-limit bucket stores hashed client identifiers only. If the RPC is missing or temporarily unavailable, the API falls back to the local in-process limiter and marks responses with `x-ratelimit-store: memory-fallback`.
+
 ## Local secret file template
 
 Create this outside the repo or under a gitignored path:

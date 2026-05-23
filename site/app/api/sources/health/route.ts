@@ -3,7 +3,7 @@ import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { usageStoreStatus } from "../../../../lib/api-usage";
 import { EXTERNAL_PACKAGE_SOURCES, externalSourceCapabilities, type ExternalPackageSource } from "../../../../lib/external-packages";
 import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
-import { checkApiRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "source-health", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "source-health", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }

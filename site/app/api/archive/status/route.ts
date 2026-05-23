@@ -2,7 +2,7 @@ import { archiveStoreStatus } from "../../../../lib/package-intelligence-store";
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { usageStoreStatus } from "../../../../lib/api-usage";
-import { checkApiRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync, rateLimitStoreStatus } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,13 +13,14 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request = new Request("https://nipmod.com/api/archive/status")): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "archive-status", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "archive-status", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
 
   const store = archiveStoreStatus();
   const usage = usageStoreStatus();
+  const rateLimits = rateLimitStoreStatus();
   return apiJsonWithUsage(
     request,
     {
@@ -31,6 +32,11 @@ export async function GET(request: Request = new Request("https://nipmod.com/api
       usage: {
         configured: usage.configured,
         driver: usage.driver
+      },
+      rateLimits: {
+        configured: rateLimits.configured,
+        driver: rateLimits.driver,
+        fallback: rateLimits.fallback
       },
       writeBoundary: "Durable package intelligence writes require the configured server-side archive store and an authorized server writer."
     },

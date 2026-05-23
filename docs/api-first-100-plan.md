@@ -71,6 +71,7 @@ Recent hardening:
 - Archive confirmation writes must now pass the archive token and configured persistence checks before Nipmod resolves any external source metadata.
 - Source health live probes now use a bounded in-process cache and expose whether each source result was freshly checked or served from cache.
 - Hosted MCP now rejects oversized JSON-RPC bodies and batches before tool handling.
+- Public API routes now use an async rate-limit path that can consume a shared Supabase bucket and falls back to local process buckets when the shared store is unavailable.
 
 ## Workstream 1: API Contract
 
@@ -321,7 +322,7 @@ Goal: allow broad free beta usage without exposing Nipmod or upstream sources to
 
 Tasks:
 
-- Move public/API-key rate limiting from process memory to a shared store or platform-native limiter.
+- Move public/API-key rate limiting from process memory to a shared store or platform-native limiter. Done in code with Supabase RPC plus memory fallback; production requires the rate-limit migration to be applied.
 - Add per-source quotas.
 - Add circuit breakers for upstream failures. Done in-process; shared/multi-instance breaker remains future infrastructure.
 - Cap MCP batch size.
@@ -478,7 +479,7 @@ Definition of Done:
 
 - [ ] Trust Engine v3 fields implemented.
 - [ ] Posted trust cannot influence server trust.
-- [ ] Distributed rate limits active.
+- [x] Distributed rate-limit code path implemented with Supabase RPC and local fallback.
 - [x] MCP batch and body size caps active.
 - [ ] Usage canary active.
 - [ ] Load smoke passes.

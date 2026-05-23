@@ -43,7 +43,7 @@ Use Nipmod before choosing packages. Search for candidates, inspect the best rec
 ## Beta Claims
 
 - No API key is required during public beta.
-- Requests are rate limited.
+- Requests are rate limited. Production can use the shared Supabase bucket; local and degraded deployments fall back to in-process limits.
 - The hosted API never writes into caller workspaces.
 - Original package owners keep ownership.
 - External records are `external_indexed`.
@@ -58,4 +58,5 @@ Use Nipmod before choosing packages. Search for candidates, inspect the best rec
 - Discovery manifest live at `https://nipmod.com/.well-known/nipmod.json`
 - Seed dry-run passes with `pnpm archive:seed`
 - Production seed write is operator-only with `NIPMOD_ARCHIVE_WRITE_TOKEN`
+- Shared rate-limit schema applied from `supabase/migrations/20260523084500_api_rate_limit_buckets.sql`
 - Production monitor passes before posting.

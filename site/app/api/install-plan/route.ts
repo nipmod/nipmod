@@ -10,7 +10,7 @@ import {
 } from "../../../lib/external-packages";
 import { PUBLIC_READ_CACHE, apiOptions, createApiHttpContext } from "../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../lib/api-response";
-import { checkApiRateLimit } from "../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,7 +21,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 90, name: "external-install-plan", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 90, name: "external-install-plan", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -46,7 +46,7 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 90, name: "external-install-plan", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 90, name: "external-install-plan", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -88,7 +88,7 @@ function readRecord(value: unknown): ExternalPackageRecord {
 
 function errorJson(
   error: unknown,
-  access: ReturnType<typeof checkApiRateLimit>["access"],
+  access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext(),
   request = new Request("https://nipmod.com/api/install-plan")

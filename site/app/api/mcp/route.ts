@@ -9,7 +9,7 @@ import {
 } from "../../../lib/external-packages";
 import { apiOptions, createApiHttpContext } from "../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../lib/api-response";
-import { checkApiRateLimit } from "../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../lib/rate-limit";
 import { searchPackages, type RegistryIndex, type RegistryPackage } from "../../../lib/registry";
 
 export const dynamic = "force-dynamic";
@@ -200,7 +200,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request = new Request(REMOTE_ENDPOINT)): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -209,7 +209,7 @@ export async function GET(request: Request = new Request(REMOTE_ENDPOINT)): Prom
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "remote-mcp", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -794,14 +794,14 @@ function json(
   request: Request,
   value: JsonValue | JsonRpcResponse | JsonRpcResponse[],
   options: {
-    access: ReturnType<typeof checkApiRateLimit>["access"];
+    access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"];
     context: ReturnType<typeof createApiHttpContext>;
     headers?: Record<string, string>;
     status?: number;
   }
 ): Promise<Response> {
   const responseOptions: {
-    access: ReturnType<typeof checkApiRateLimit>["access"];
+    access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"];
     context: ReturnType<typeof createApiHttpContext>;
     headers?: Record<string, string>;
     status?: number;

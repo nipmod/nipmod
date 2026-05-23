@@ -2,7 +2,7 @@ import { ArchiveStoreError, archiveStoreStatus, searchPackageIntelligenceArchive
 import { ExternalPackageError, externalPackageApiError } from "../../../../lib/external-packages";
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
-import { checkApiRateLimit } from "../../../../lib/rate-limit";
+import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 import { readLimit } from "../shared";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = checkApiRateLimit(request, { limit: 120, name: "archive-search", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 120, name: "archive-search", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -37,7 +37,7 @@ export async function GET(request: Request): Promise<Response> {
 
 function errorJson(
   error: unknown,
-  access: ReturnType<typeof checkApiRateLimit>["access"],
+  access: Awaited<ReturnType<typeof checkApiRateLimitAsync>>["access"],
   headers: Record<string, string> = {},
   context = createApiHttpContext(),
   request = new Request("https://nipmod.com/api/archive/search")
