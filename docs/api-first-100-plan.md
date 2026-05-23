@@ -73,6 +73,7 @@ Recent hardening:
 - Hosted MCP now rejects oversized JSON-RPC bodies and batches before tool handling.
 - Public API routes now use an async rate-limit path that can consume a shared Supabase bucket and falls back to local process buckets when the shared store is unavailable.
 - Usage ingestion now has an operator canary that makes a public API request and verifies its hashed usage event in Supabase.
+- Source resolvers now extract deeper source-native risk and context signals for npm, PyPI, GitHub, Hugging Face and MCP without changing the public record schema.
 
 ## Workstream 1: API Contract
 

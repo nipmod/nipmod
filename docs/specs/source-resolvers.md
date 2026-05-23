@@ -71,6 +71,20 @@ The normalization contract is fixed:
 - original URLs and source ownership are preserved
 - package ids are source-prefixed
 
+## Source-Depth Signals
+
+Resolvers should expose source-native context as `trust.signals` and risk as `trust.warnings` before adding new public schema fields.
+
+Current depth signals include:
+
+- npm deprecation, maintainer count, dependency count, Node engine, funding metadata, integrity and signature metadata
+- PyPI latest release files, digest metadata, `requires-python`, classifiers and vulnerability records
+- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count and fork count
+- Hugging Face gated/private flags, pipeline tag, library, repository file count and commit digest metadata
+- MCP remote endpoint count, environment requirements, package metadata, registry status and source repository
+
+These signals are review context. They improve package comparison and install-plan review, but they do not guarantee that third-party code is safe.
+
 ## Current Resolvers
 
 | Resolver | Status | Main Limit |

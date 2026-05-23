@@ -701,8 +701,14 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const integrity = readNestedString(manifest, ["dist", "integrity"]);
   const signatures = readRecord(manifest.dist)?.signatures;
   const hasSignature = Array.isArray(signatures) && signatures.length > 0;
+  const dependencyCount = packageDependencyCount(manifest);
+  const maintainerCount = arrayLength(manifest.maintainers);
+  const deprecated = readString(manifest.deprecated);
+  const nodeEngine = readNestedString(manifest, ["engines", "node"]);
+  const fundingUrl = readString(manifest.funding) ?? readNestedString(manifest, ["funding", "url"]);
   const downloads = await npmMonthlyDownloads(packageName, fetchImpl, timeoutMs);
   const warnings = [
+    ...(deprecated ? [`npm marks the latest release as deprecated: ${deprecated}`] : []),
     ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
     ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."])
   ];
@@ -712,6 +718,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (repo ? 8 : 0) +
       (integrity ? 10 : 0) +
       (hasSignature ? 8 : 0) +
+      (maintainerCount ? 4 : 0) +
+      (deprecated ? -28 : 0) +
       Math.min(12, Math.log10((downloads ?? 0) + 1) * 2)
   );
 
@@ -738,7 +746,11 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       downloads ? `npm monthly downloads: ${downloads.toLocaleString("en-US")}` : "npm download data was not returned.",
       integrity ? "Latest tarball integrity metadata is present." : "Latest tarball integrity metadata is missing.",
       hasSignature ? "npm registry signature metadata is present." : "npm registry signature metadata is missing.",
-      repo ? "Repository link is present." : "Repository link is missing."
+      repo ? "Repository link is present." : "Repository link is missing.",
+      dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
+      maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
+      nodeEngine ? `npm package declares Node engine: ${nodeEngine}.` : "npm package did not declare a Node engine.",
+      fundingUrl ? "npm package exposes funding metadata." : "npm package did not expose funding metadata."
     ],
     trustScore: score,
     updatedAt: null,
@@ -828,8 +840,16 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const repo =
     normalizeRepositoryUrl(readString(projectUrls?.Source) ?? readString(projectUrls?.Homepage) ?? readString(info.home_page)) ?? null;
   const license = readString(info.license) || licenseFromClassifiers(info.classifiers);
-  const warnings = vulnerabilities.length > 0 ? [`PyPI reports ${vulnerabilities.length} known vulnerabilities for the latest release.`] : [];
-  const score = clampScore(58 + (license ? 10 : 0) + (repo ? 12 : 0) - vulnerabilities.length * 24);
+  const releaseFiles = latestPyPiReleaseFiles(payload, readString(info.version));
+  const fileHashCount = releaseFiles.filter(pyPiFileHasHash).length;
+  const requiresPython = readString(info.requires_python);
+  const classifierCount = arrayLength(info.classifiers);
+  const warnings = [
+    ...(vulnerabilities.length > 0 ? [`PyPI reports ${vulnerabilities.length} known vulnerabilities for the latest release.`] : []),
+    ...(releaseFiles.length === 0 ? ["PyPI did not return latest release file metadata."] : []),
+    ...(releaseFiles.length > 0 && fileHashCount < releaseFiles.length ? ["Some PyPI latest release files are missing digest metadata."] : [])
+  ];
+  const score = clampScore(58 + (license ? 10 : 0) + (repo ? 12 : 0) + (fileHashCount ? 6 : 0) + (requiresPython ? 4 : 0) - vulnerabilities.length * 24);
 
   return makeRecord({
     description: readString(info.summary) ?? "",
@@ -852,7 +872,11 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     signals: [
       "Resolved from the PyPI JSON API.",
       vulnerabilities.length === 0 ? "PyPI returned no vulnerabilities for the latest release." : "PyPI returned vulnerability records.",
-      repo ? "Project source/homepage link is present." : "Project source link is missing."
+      repo ? "Project source/homepage link is present." : "Project source link is missing.",
+      releaseFiles.length ? `PyPI latest release files returned: ${releaseFiles.length}.` : "PyPI latest release files were not returned.",
+      fileHashCount ? `PyPI latest release files with digest metadata: ${fileHashCount}.` : "PyPI did not return latest release file digests.",
+      requiresPython ? `PyPI requires-python: ${requiresPython}.` : "PyPI did not return requires-python metadata.",
+      classifierCount ? `PyPI classifiers returned: ${classifierCount}.` : "PyPI classifiers were not returned."
     ],
     trustScore: score,
     updatedAt: latestPyPiUploadTime(payload.releases),
@@ -892,7 +916,28 @@ function gitHubRecord(item: unknown): ExternalPackageRecord | null {
   const updatedAt = readString(item.pushed_at) ?? readString(item.updated_at);
   const license = readNestedString(item, ["license", "spdx_id"]);
   const owner = readNestedString(item, ["owner", "login"]);
-  const score = clampScore(42 + Math.min(24, Math.log10(stars + 1) * 8) + (license ? 10 : 0) + (updatedAt ? recencyBonus(updatedAt) : 0));
+  const archived = readBoolean(item.archived);
+  const disabled = readBoolean(item.disabled);
+  const fork = readBoolean(item.fork);
+  const defaultBranch = readString(item.default_branch);
+  const openIssues = readNumber(item.open_issues_count);
+  const forks = readNumber(item.forks_count);
+  const score = clampScore(
+    42 +
+      Math.min(24, Math.log10(stars + 1) * 8) +
+      (license ? 10 : 0) +
+      (defaultBranch ? 4 : 0) +
+      (updatedAt ? recencyBonus(updatedAt) : 0) -
+      (archived ? 30 : 0) -
+      (disabled ? 40 : 0) -
+      (fork ? 8 : 0)
+  );
+  const warnings = [
+    ...(license ? [] : ["No license metadata returned by GitHub."]),
+    ...(archived ? ["GitHub marks this repository as archived."] : []),
+    ...(disabled ? ["GitHub marks this repository as disabled."] : []),
+    ...(fork ? ["GitHub marks this repository as a fork; review the upstream repository before installing."] : [])
+  ];
 
   return makeRecord({
     description: readString(item.description) ?? "",
@@ -915,12 +960,16 @@ function gitHubRecord(item: unknown): ExternalPackageRecord | null {
     signals: [
       "Resolved from GitHub repository search.",
       `${stars.toLocaleString("en-US")} GitHub stars.`,
-      license ? "License metadata is present." : "License metadata is missing."
+      license ? "License metadata is present." : "License metadata is missing.",
+      defaultBranch ? `Default branch: ${defaultBranch}.` : "Default branch was not returned.",
+      updatedAt ? `Last pushed at: ${updatedAt}.` : "Last push timestamp was not returned.",
+      typeof openIssues === "number" ? `Open issues returned by GitHub: ${openIssues}.` : "Open issue count was not returned.",
+      typeof forks === "number" ? `GitHub forks returned: ${forks}.` : "Fork count was not returned."
     ],
     trustScore: score,
     updatedAt,
     version: null,
-    warnings: license ? [] : ["No license metadata returned by GitHub."]
+    warnings
   });
 }
 
@@ -965,11 +1014,30 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const license = tags.find((tag) => tag.startsWith("license:"))?.replace(/^license:/, "") ?? null;
   const downloads = readNumber(item.downloads);
   const likes = readNumber(item.likes);
-  const score = clampScore(46 + Math.min(22, Math.log10((downloads ?? 0) + 1) * 6) + Math.min(12, Math.log10((likes ?? 0) + 1) * 5) + (license ? 8 : 0));
+  const gated = readHubBoolean(item.gated);
+  const isPrivate = readBoolean(item.private);
+  const siblingCount = arrayLength(item.siblings);
+  const sha = readString(item.sha);
+  const libraryName = readString(item.library_name);
+  const pipelineTag = readString(item.pipeline_tag);
+  const score = clampScore(
+    46 +
+      Math.min(22, Math.log10((downloads ?? 0) + 1) * 6) +
+      Math.min(12, Math.log10((likes ?? 0) + 1) * 5) +
+      (license ? 8 : 0) +
+      (sha ? 4 : 0) -
+      (gated ? 12 : 0) -
+      (isPrivate ? 30 : 0)
+  );
   const kind = source === "huggingface-model" ? "model" : "dataset";
+  const warnings = [
+    ...(license ? [] : ["No license tag returned by Hugging Face."]),
+    ...(gated ? [`Hugging Face marks this ${kind} as gated.`] : []),
+    ...(isPrivate ? [`Hugging Face marks this ${kind} as private.`] : [])
+  ];
 
   return makeRecord({
-    description: [readString(item.pipeline_tag), readString(item.library_name)].filter(Boolean).join(" / "),
+    description: [pipelineTag, libraryName].filter(Boolean).join(" / "),
     displayName: id,
     id: `${source}:${id}`,
     install: {
@@ -993,12 +1061,17 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     signals: [
       `Resolved from Hugging Face ${kind} search.`,
       downloads ? `${downloads.toLocaleString("en-US")} downloads.` : "Download count was not returned.",
-      license ? "License tag is present." : "License tag is missing."
+      license ? "License tag is present." : "License tag is missing.",
+      pipelineTag ? `Hugging Face pipeline tag: ${pipelineTag}.` : "Hugging Face pipeline tag was not returned.",
+      libraryName ? `Hugging Face library: ${libraryName}.` : "Hugging Face library metadata was not returned.",
+      siblingCount ? `Hugging Face repository files returned: ${siblingCount}.` : "Hugging Face repository file list was not returned.",
+      sha ? "Hugging Face commit digest metadata is present." : "Hugging Face commit digest metadata is missing.",
+      gated ? `Hugging Face gated access flag is enabled for this ${kind}.` : `Hugging Face gated access flag is not enabled for this ${kind}.`
     ],
     trustScore: score,
     updatedAt: readString(item.lastModified) ?? readString(item.createdAt),
     version: null,
-    warnings: license ? [] : ["No license tag returned by Hugging Face."]
+    warnings
   });
 }
 
@@ -1091,6 +1164,8 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   }
   const remotes = Array.isArray(server.remotes) ? server.remotes.filter(isRecord) : [];
   const remoteUrl = remotes.map((remote) => readString(remote.url)).find(Boolean) ?? null;
+  const envRequirementCount = mcpEnvironmentRequirementCount(server);
+  const packageCount = arrayLength(server.packages);
   const repo = normalizeRepositoryUrl(
     readNestedString(server, ["repository", "url"]) ?? readString(server.repository) ?? readNestedString(server, ["source", "url"])
   );
@@ -1126,7 +1201,9 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
       "Resolved from the MCP Registry.",
       ...(snapshot ? [`Pinned from public MCP Registry snapshot: ${snapshot}.`] : []),
       status ? `MCP Registry status: ${status}.` : "MCP Registry status was not returned.",
-      remoteUrl ? "Remote MCP endpoint metadata is present." : "Remote MCP endpoint metadata is missing.",
+      remotes.length ? `Remote MCP endpoints returned: ${remotes.length}.` : "Remote MCP endpoint metadata is missing.",
+      envRequirementCount ? `MCP server declares ${envRequirementCount} environment requirements.` : "MCP server did not declare environment requirements.",
+      packageCount ? `MCP registry packages returned: ${packageCount}.` : "MCP registry package metadata was not returned.",
       repo ? "Source repository is present." : "Source repository was not returned."
     ],
     trustScore: clampScore(52 + (repo ? 12 : 0) + (remoteUrl ? 8 : 0) + (license ? 8 : 0) + (status === "active" ? 8 : 0)),
@@ -2154,6 +2231,30 @@ function licenseFromClassifiers(value: unknown): string | null {
   return licenseClassifier?.split("::").at(-1)?.trim() ?? null;
 }
 
+function packageDependencyCount(manifest: UnknownRecord): number {
+  return (
+    recordKeyCount(manifest.dependencies) +
+    recordKeyCount(manifest.peerDependencies) +
+    recordKeyCount(manifest.optionalDependencies)
+  );
+}
+
+function latestPyPiReleaseFiles(payload: UnknownRecord, version: string | null): UnknownRecord[] {
+  if (Array.isArray(payload.urls)) {
+    return payload.urls.filter(isRecord);
+  }
+  if (!version || !isRecord(payload.releases)) {
+    return [];
+  }
+  const release = payload.releases[version];
+  return Array.isArray(release) ? release.filter(isRecord) : [];
+}
+
+function pyPiFileHasHash(file: UnknownRecord): boolean {
+  const digests = readRecord(file.digests);
+  return Boolean(readString(digests?.sha256) ?? readString(digests?.blake2b_256) ?? readString(file.md5_digest));
+}
+
 function latestPyPiUploadTime(value: unknown): string | null {
   if (!isRecord(value)) {
     return null;
@@ -2191,6 +2292,37 @@ function readString(value: unknown): string | null {
 
 function readNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function readBoolean(value: unknown): boolean {
+  return value === true;
+}
+
+function readHubBoolean(value: unknown): boolean {
+  return value === true || (typeof value === "string" && value !== "false" && value !== "none" && value !== "null");
+}
+
+function arrayLength(value: unknown): number {
+  return Array.isArray(value) ? value.length : 0;
+}
+
+function recordKeyCount(value: unknown): number {
+  return isRecord(value) ? Object.keys(value).length : 0;
+}
+
+function mcpEnvironmentRequirementCount(server: UnknownRecord): number {
+  return Math.max(
+    arrayLength(server.env),
+    arrayLength(server.envs),
+    arrayLength(server.environmentVariables),
+    arrayLength(server.environment_variables),
+    arrayLength(server.envVars),
+    recordKeyCount(server.env),
+    recordKeyCount(server.envs),
+    recordKeyCount(server.environmentVariables),
+    recordKeyCount(server.environment_variables),
+    recordKeyCount(server.envVars)
+  );
 }
 
 function readNumericString(value: unknown): number | null {

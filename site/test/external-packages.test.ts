@@ -424,6 +424,36 @@ describe("external package resolver", () => {
     );
   });
 
+  test("extracts source-specific depth signals without changing the public record schema", async () => {
+    const npm = await inspectExternalPackage("npm", "depth-npm", { fetchImpl: sourceDepthFetch });
+    expect(npm.trust.warnings).toContain("npm marks the latest release as deprecated: Use depth-npm-next instead.");
+    expect(npm.trust.signals).toContain("Latest npm release declares 3 runtime dependencies.");
+    expect(npm.trust.signals).toContain("npm returned 2 maintainer records.");
+    expect(npm.trust.signals).toContain("npm package declares Node engine: >=20.");
+
+    const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
+    expect(pypi.trust.signals).toContain("PyPI latest release files returned: 1.");
+    expect(pypi.trust.signals).toContain("PyPI latest release files with digest metadata: 1.");
+    expect(pypi.trust.signals).toContain("PyPI requires-python: >=3.11.");
+
+    const github = await inspectExternalPackage("github", "example/depth-repo", { fetchImpl: sourceDepthFetch });
+    expect(github.trust.warnings).toContain("GitHub marks this repository as archived.");
+    expect(github.trust.warnings).toContain("GitHub marks this repository as a fork; review the upstream repository before installing.");
+    expect(github.trust.signals).toContain("Default branch: main.");
+    expect(github.trust.signals).toContain("Open issues returned by GitHub: 7.");
+    expect(github.trust.signals).toContain("GitHub forks returned: 12.");
+
+    const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
+    expect(model.trust.warnings).toContain("Hugging Face marks this model as gated.");
+    expect(model.trust.signals).toContain("Hugging Face repository files returned: 2.");
+    expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
+
+    const mcp = await inspectExternalPackage("mcp", "example/depth-mcp", { fetchImpl: sourceDepthFetch });
+    expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
+    expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
+    expect(mcp.trust.signals).toContain("MCP registry packages returned: 1.");
+  });
+
   test("aborts oversized source bodies before full buffering", async () => {
     const chunk = new Uint8Array(1_100_000).fill(120);
     const error = await inspectExternalPackage("npm", "oversized", {
@@ -571,6 +601,119 @@ async function mockFetch(input: string | URL | Request): Promise<Response> {
             repository: { source: "github", url: "https://github.com/frumu-ai/tandem" },
             title: "Tandem docs",
             version: "0.3.1"
+          }
+        }
+      ]
+    });
+  }
+
+  return jsonResponse({ error: "not found" }, 404);
+}
+
+async function sourceDepthFetch(input: string | URL | Request): Promise<Response> {
+  const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+
+  if (url === "https://registry.npmjs.org/depth-npm/latest") {
+    return jsonResponse({
+      dependencies: { alpha: "1.0.0" },
+      deprecated: "Use depth-npm-next instead.",
+      description: "Depth npm fixture.",
+      dist: { integrity: "sha512-depth", signatures: [{ keyid: "SHA256:depth", sig: "depth" }] },
+      engines: { node: ">=20" },
+      funding: { url: "https://example.com/funding" },
+      license: "MIT",
+      maintainers: [{ name: "one" }, { name: "two" }],
+      name: "depth-npm",
+      optionalDependencies: { beta: "1.0.0" },
+      peerDependencies: { gamma: "1.0.0" },
+      repository: { url: "git+https://github.com/example/depth-npm.git" },
+      version: "1.0.0"
+    });
+  }
+
+  if (url === "https://api.npmjs.org/downloads/point/last-month/depth-npm") {
+    return jsonResponse({ downloads: 25_000, package: "depth-npm" });
+  }
+
+  if (url === "https://pypi.org/pypi/depth-pypi/json") {
+    return jsonResponse({
+      info: {
+        classifiers: ["Programming Language :: Python :: 3"],
+        license: "MIT",
+        name: "depth-pypi",
+        package_url: "https://pypi.org/project/depth-pypi/",
+        project_urls: { Source: "https://github.com/example/depth-pypi" },
+        requires_python: ">=3.11",
+        summary: "Depth PyPI fixture.",
+        version: "2.0.0"
+      },
+      urls: [
+        {
+          digests: { sha256: "abc123" },
+          filename: "depth_pypi-2.0.0-py3-none-any.whl",
+          upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
+        }
+      ],
+      vulnerabilities: []
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo") {
+    return jsonResponse({
+      archived: true,
+      clone_url: "https://github.com/example/depth-repo.git",
+      default_branch: "main",
+      description: "Depth GitHub fixture.",
+      disabled: false,
+      fork: true,
+      forks_count: 12,
+      full_name: "example/depth-repo",
+      html_url: "https://github.com/example/depth-repo",
+      license: { spdx_id: "Apache-2.0" },
+      open_issues_count: 7,
+      owner: { login: "example" },
+      pushed_at: "2026-05-01T00:00:00.000Z",
+      stargazers_count: 900,
+      url: "https://api.github.com/repos/example/depth-repo"
+    });
+  }
+
+  if (url === "https://huggingface.co/api/models/example/depth-model") {
+    return jsonResponse({
+      downloads: 1000,
+      gated: true,
+      id: "example/depth-model",
+      library_name: "transformers",
+      likes: 42,
+      modelId: "example/depth-model",
+      pipeline_tag: "text-generation",
+      private: false,
+      sha: "0123456789abcdef",
+      siblings: [{ rfilename: "config.json" }, { rfilename: "model.safetensors" }],
+      tags: ["transformers", "license:apache-2.0"]
+    });
+  }
+
+  if (url.startsWith("https://registry.modelcontextprotocol.io/")) {
+    return jsonResponse({
+      servers: [
+        {
+          _meta: {
+            "io.modelcontextprotocol.registry/official": {
+              isLatest: true,
+              status: "active",
+              updatedAt: "2026-05-01T00:00:00.000Z"
+            }
+          },
+          server: {
+            description: "Depth MCP fixture.",
+            env: [{ name: "API_KEY" }, { name: "WORKSPACE_ID" }],
+            name: "example/depth-mcp",
+            packages: [{ registryType: "npm", name: "@example/depth-mcp" }],
+            remotes: [{ type: "streamable-http", url: "https://example.com/mcp" }],
+            repository: { source: "github", url: "https://github.com/example/depth-mcp" },
+            title: "Depth MCP",
+            version: "1.0.0"
           }
         }
       ]
