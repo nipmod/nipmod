@@ -108,16 +108,16 @@ Goal: make package scoring explainable, conservative and defensible.
 Tasks:
 
 - Split external package assessment into separate fields:
-  - `qualityScore`
-  - `popularitySignal`
-  - `securityConfidence`
-  - `provenanceStatus`
+  - `qualityScore` done in `trust.dimensions`
+  - `popularitySignal` done in `trust.dimensions`
+  - `securityConfidence` done in `trust.dimensions`
+  - `provenanceStatus` done in `trust.dimensions`
 - Keep `trust.score` as a compatibility field during transition.
-- Prevent downloads, stars or likes from being treated as security proof.
+- Prevent downloads, stars or likes from being treated as security proof. Done by keeping popularity separate from `securityConfidence`.
 - Prevent vulnerability signals from being counted as positive security evidence. Done for current PyPI signal text.
-- Reserve strongest labels for packages with stronger provenance, integrity and advisory signals.
-- Add golden fixtures for npm, PyPI, GitHub, Hugging Face and MCP.
-- Update trust docs and API examples.
+- Reserve strongest labels for packages with stronger provenance, integrity and advisory signals. Done for current npm integrity/signature path.
+- Add golden fixtures for npm, PyPI, GitHub, Hugging Face and MCP. Partially done for npm search, npm inspect and PyPI vulnerability fixtures.
+- Update trust docs and API examples. Done for trust dimensions.
 
 Definition of Done:
 

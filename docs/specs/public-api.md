@@ -6,7 +6,9 @@ Nipmod exposes a hosted package intelligence API for agents. The API searches su
 
 Hosted API calls do not read or write caller workspaces.
 
-Trust output uses policy `external-v2`. Agents should display `trust.score`, `trust.decision`, `trust.warnings` and structured `trust.factors` before asking for install approval.
+Trust output uses policy `external-v2`. Agents should display `trust.score`, `trust.decision`, `trust.dimensions`, `trust.warnings` and structured `trust.factors` before asking for install approval.
+
+`trust.dimensions` separates `qualityScore`, `popularitySignal`, `securityConfidence` and `provenanceStatus`. Popularity helps ranking, but it is not treated as security proof.
 
 ## Access
 

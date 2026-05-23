@@ -31,6 +31,13 @@ describe("external package resolver", () => {
     expect(result.sourceSummary).toMatchObject({ failed: 0, ok: 2, requested: 2 });
     expect(result.sourceReports.map((report) => report.source)).toEqual(["npm", "huggingface-model"]);
     expect(result.sourceReports.every((report) => report.durationMs >= 0)).toBe(true);
+
+    const npmRecord = result.records.find((record) => record.id === "npm:node-telegram-bot-api");
+    expect(npmRecord?.trust.dimensions).toMatchObject({
+      popularitySignal: "high",
+      provenanceStatus: "source-only",
+      securityConfidence: "medium"
+    });
   });
 
   test("reports partial source failures without hiding successful records", async () => {
@@ -101,6 +108,12 @@ describe("external package resolver", () => {
     expect(record.id).toBe("npm:react");
     expect(record.metrics.downloads).toBe(561_906_819);
     expect(record.trust.policy.version).toBe("external-v2");
+    expect(record.trust.dimensions).toMatchObject({
+      popularitySignal: "high",
+      provenanceStatus: "signature",
+      securityConfidence: "high"
+    });
+    expect(record.trust.dimensions.qualityScore).toBeGreaterThanOrEqual(70);
     expect(record.trust.factors.map((factor) => factor.label)).toContain("Install plan boundary");
     expect(record.trust.factors.some((factor) => factor.category === "security" && factor.evidence.includes("integrity"))).toBe(true);
     expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
@@ -280,6 +293,11 @@ describe("external package resolver", () => {
     });
 
     expect(record.trust.warnings).toContain("PyPI reports 1 known vulnerabilities for the latest release.");
+    expect(record.trust.dimensions).toMatchObject({
+      popularitySignal: "none",
+      provenanceStatus: "source-only",
+      securityConfidence: "low"
+    });
     expect(record.trust.factors).toContainEqual(
       expect.objectContaining({
         category: "security",

@@ -17,6 +17,9 @@ export type ExternalSourceStatus = "ok" | "empty" | "failed";
 export type ExternalPackageSourceKind = "package-registry" | "source-repo" | "model-hub" | "tool-registry";
 export type ExternalTrustFactorCategory = "source" | "metadata" | "security" | "usage" | "maintenance" | "install";
 export type ExternalTrustFactorImpact = "positive" | "negative" | "neutral";
+export type ExternalPopularitySignal = "none" | "low" | "medium" | "high";
+export type ExternalSecurityConfidence = "low" | "medium" | "high";
+export type ExternalProvenanceStatus = "unknown" | "source-only" | "integrity" | "signature" | "attested";
 
 export interface ExternalTrustFactor {
   category: ExternalTrustFactorCategory;
@@ -32,6 +35,13 @@ export interface ExternalTrustPolicy {
     usableWithWarning: number;
   };
   version: "external-v2";
+}
+
+export interface ExternalTrustDimensions {
+  popularitySignal: ExternalPopularitySignal;
+  provenanceStatus: ExternalProvenanceStatus;
+  qualityScore: number;
+  securityConfidence: ExternalSecurityConfidence;
 }
 
 export interface ExternalPackageRecord {
@@ -67,6 +77,7 @@ export interface ExternalPackageRecord {
   trust: {
     checkedAt: string;
     decision: ExternalPackageDecision;
+    dimensions: ExternalTrustDimensions;
     factors: ExternalTrustFactor[];
     policy: ExternalTrustPolicy;
     risk: ExternalPackageRisk;
@@ -167,6 +178,9 @@ const EXTERNAL_ARCHIVE_PERSISTENCE = ["ephemeral", "static", "database"] as cons
 const EXTERNAL_ARCHIVE_STATUS = ["external_indexed", "claimed", "verified_nipmod"] as const;
 const EXTERNAL_TRUST_FACTOR_CATEGORIES = ["source", "metadata", "security", "usage", "maintenance", "install"] as const;
 const EXTERNAL_TRUST_FACTOR_IMPACTS = ["positive", "negative", "neutral"] as const;
+const EXTERNAL_POPULARITY_SIGNALS = ["none", "low", "medium", "high"] as const;
+const EXTERNAL_SECURITY_CONFIDENCE = ["low", "medium", "high"] as const;
+const EXTERNAL_PROVENANCE_STATUS = ["unknown", "source-only", "integrity", "signature", "attested"] as const;
 const EXTERNAL_TRUST_POLICY: ExternalTrustPolicy = {
   summary: "External scores combine source metadata, package health signals, public usage context, warnings and install-plan risk. A score is review context, not permission to execute code.",
   thresholds: {
@@ -1064,6 +1078,7 @@ function makeRecord(input: {
     trust: {
       checkedAt: new Date().toISOString(),
       decision: decisionFromScore(input.trustScore, input.warnings),
+      dimensions: trustDimensions(input),
       factors: trustFactors(input),
       policy: EXTERNAL_TRUST_POLICY,
       risk: riskFromScore(input.trustScore, input.warnings),
@@ -1075,6 +1090,118 @@ function makeRecord(input: {
     updatedAt: input.updatedAt,
     version: input.version
   };
+}
+
+function trustDimensions(input: {
+  install: ExternalPackageRecord["install"];
+  license: string | null;
+  metrics: ExternalPackageRecord["metrics"];
+  repo: string | null;
+  signals: string[];
+  source: ExternalPackageSource;
+  trustScore: number;
+  updatedAt: string | null;
+  warnings: string[];
+}): ExternalTrustDimensions {
+  return {
+    popularitySignal: popularitySignal(input.metrics),
+    provenanceStatus: provenanceStatus(input.signals, input.repo),
+    qualityScore: qualityScore(input),
+    securityConfidence: securityConfidence(input)
+  };
+}
+
+function popularitySignal(metrics: ExternalPackageRecord["metrics"]): ExternalPopularitySignal {
+  const downloads = metrics.downloads ?? 0;
+  const stars = metrics.stars ?? 0;
+  const likes = metrics.likes ?? 0;
+  const dependents = metrics.dependents ?? 0;
+
+  if (downloads >= 1_000_000 || stars >= 10_000 || likes >= 1_000 || dependents >= 1_000) {
+    return "high";
+  }
+  if (downloads >= 10_000 || stars >= 500 || likes >= 50 || dependents >= 100) {
+    return "medium";
+  }
+  if (downloads > 0 || stars > 0 || likes > 0 || dependents > 0) {
+    return "low";
+  }
+  return "none";
+}
+
+function provenanceStatus(signals: string[], repo: string | null): ExternalProvenanceStatus {
+  const text = signals.join(" ").toLowerCase();
+  if (/\battestation\b|\bprovenance\b/.test(text)) {
+    return "attested";
+  }
+  if (/\bsignature\b.{0,80}\bpresent\b|\bsigned\b|\bverified signature\b/.test(text)) {
+    return "signature";
+  }
+  if (/\bintegrity\b.{0,80}\bpresent\b|\bdigest\b|\bchecksum\b/.test(text)) {
+    return "integrity";
+  }
+  return repo ? "source-only" : "unknown";
+}
+
+function qualityScore(input: {
+  install: ExternalPackageRecord["install"];
+  license: string | null;
+  repo: string | null;
+  source: ExternalPackageSource;
+  updatedAt: string | null;
+  warnings: string[];
+}): number {
+  const commandRisk = installCommandRisk(input.install.commands ?? [input.install.command]);
+  const warningPenalty = input.warnings.some((warning) => /vulnerab|insecure/i.test(warning)) ? 30 : input.warnings.length * 8;
+  const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
+  const recency = input.updatedAt ? Math.min(8, Math.round(recencyBonus(input.updatedAt) / 2)) : 0;
+  return clampScore(
+    44 +
+      sourceReliabilityBonus(input.source) +
+      (input.license ? 12 : -6) +
+      (input.repo ? 14 : -8) +
+      recency -
+      warningPenalty -
+      commandPenalty
+  );
+}
+
+function securityConfidence(input: {
+  install: ExternalPackageRecord["install"];
+  license: string | null;
+  repo: string | null;
+  signals: string[];
+  source: ExternalPackageSource;
+  warnings: string[];
+}): ExternalSecurityConfidence {
+  const commandRisk = installCommandRisk(input.install.commands ?? [input.install.command]);
+  if (commandRisk === "high" || input.warnings.some((warning) => /vulnerab|insecure/i.test(warning))) {
+    return "low";
+  }
+  if (commandRisk === "medium") {
+    return "medium";
+  }
+
+  const text = input.signals.join(" ").toLowerCase();
+  const hasSignature = /\bsignature\b.{0,80}\bpresent\b|\bsigned\b|\bverified signature\b/.test(text);
+  const hasIntegrity = /\bintegrity\b.{0,80}\bpresent\b|\bdigest\b|\bchecksum\b/.test(text);
+  const hasNoVulnerabilitySignal = /\bno\b.{0,40}\bvulnerabilit/.test(text);
+  const hasActiveRegistryStatus = input.source === "mcp" && /\bmcp registry status:\s*active\b/.test(text);
+
+  if (hasSignature && hasIntegrity && input.warnings.length === 0) {
+    return "high";
+  }
+  if ((hasIntegrity || hasSignature || hasNoVulnerabilitySignal || hasActiveRegistryStatus) && !hasNegativeWarnings(input.warnings)) {
+    return "medium";
+  }
+  if (input.license && input.repo && input.warnings.length === 0) {
+    return "medium";
+  }
+  return "low";
+}
+
+function hasNegativeWarnings(warnings: string[]): boolean {
+  return warnings.some((warning) => /vulnerab|insecure|missing|unavailable|not returned/i.test(warning));
 }
 
 function trustFactors(input: {
@@ -1519,12 +1646,35 @@ function readTrust(value: unknown): ExternalPackageRecord["trust"] {
   return {
     checkedAt: requiredCleanString(value.checkedAt, "trust.checkedAt", 80),
     decision: readEnum(value.decision, EXTERNAL_PACKAGE_DECISIONS, "trust.decision"),
+    dimensions: readTrustDimensions(value.dimensions, value.score, value.risk),
     factors: readTrustFactors(value.factors),
     policy: readTrustPolicy(value.policy),
     risk: readEnum(value.risk, EXTERNAL_PACKAGE_RISKS, "trust.risk"),
     score: readBoundedInteger(value.score, "trust.score", 0, 100),
     signals: boundedStrings(value.signals, 16, 300, "trust.signals", 1),
     warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
+  };
+}
+
+function readTrustDimensions(value: unknown, scoreValue: unknown, riskValue: unknown): ExternalTrustDimensions {
+  if (value === undefined) {
+    const score = typeof scoreValue === "number" && Number.isFinite(scoreValue) ? clampScore(scoreValue) : 0;
+    const risk = typeof riskValue === "string" ? riskValue : "unknown";
+    return {
+      popularitySignal: "none",
+      provenanceStatus: "unknown",
+      qualityScore: score,
+      securityConfidence: risk === "high" ? "low" : score >= 75 ? "medium" : "low"
+    };
+  }
+  if (!isRecord(value)) {
+    throw new ExternalPackageError("trust.dimensions must be an object", { code: "invalid_record", status: 400 });
+  }
+  return {
+    popularitySignal: readEnum(value.popularitySignal, EXTERNAL_POPULARITY_SIGNALS, "trust.dimensions.popularitySignal"),
+    provenanceStatus: readEnum(value.provenanceStatus, EXTERNAL_PROVENANCE_STATUS, "trust.dimensions.provenanceStatus"),
+    qualityScore: readBoundedInteger(value.qualityScore, "trust.dimensions.qualityScore", 0, 100),
+    securityConfidence: readEnum(value.securityConfidence, EXTERNAL_SECURITY_CONFIDENCE, "trust.dimensions.securityConfidence")
   };
 }
 

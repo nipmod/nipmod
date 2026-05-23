@@ -22,6 +22,12 @@ Every external package record includes:
   "trust": {
     "checkedAt": "2026-05-22T00:00:00.000Z",
     "decision": "recommended",
+    "dimensions": {
+      "popularitySignal": "high",
+      "provenanceStatus": "signature",
+      "qualityScore": 82,
+      "securityConfidence": "high"
+    },
     "factors": [
       {
         "category": "metadata",
@@ -47,6 +53,15 @@ Every external package record includes:
 ```
 
 `signals` and `warnings` remain short human-readable strings. `factors` are the structured explanation layer for agents. They let clients render why the score moved without scraping prose.
+
+`dimensions` are the Trust Engine v3 fields. They separate package popularity from security evidence so agents do not treat downloads, stars or likes as proof that code is safe.
+
+| Dimension | Values | Meaning |
+| --- | --- | --- |
+| `qualityScore` | `0-100` | Metadata quality, source context, freshness, warnings and install-plan risk. It does not use popularity metrics. |
+| `popularitySignal` | `none`, `low`, `medium`, `high` | Public usage signal from downloads, stars, likes or dependents. This can help ranking, but it is not security proof. |
+| `securityConfidence` | `low`, `medium`, `high` | Conservative confidence based on warnings, install command risk, integrity, signatures, advisory signals and source status. |
+| `provenanceStatus` | `unknown`, `source-only`, `integrity`, `signature`, `attested` | The strongest provenance evidence visible from the upstream source response. |
 
 Factor categories:
 
@@ -117,6 +132,19 @@ Metrics bonus:
 | downloads | `10` |
 | GitHub stars | `8` |
 | Hugging Face likes | `4` |
+
+Popularity affects ranking through the metrics bonus and `popularitySignal`. It does not upgrade `securityConfidence`.
+
+Security confidence rules:
+
+| Evidence | Result |
+| --- | --- |
+| Vulnerability or insecure warning, or high-risk install command | `low` |
+| Medium-risk install command | `medium` |
+| npm integrity plus registry signature with no warnings | `high` |
+| Integrity, signature, no-vulnerability advisory signal or active MCP registry status | `medium` unless stronger evidence is present |
+| License and source link present with no warnings | `medium` |
+| Missing evidence or warnings | `low` |
 
 Source reliability bonus:
 

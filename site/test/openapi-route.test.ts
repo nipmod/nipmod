@@ -34,6 +34,13 @@ describe("OpenAPI route", () => {
       expect.arrayContaining(["formatVersion", "displayName", "registryUrl", "sourceKind", "metrics"])
     );
     expect(body.components.schemas.ExternalPackageRecord.properties.trust.required).toContain("checkedAt");
+    expect(body.components.schemas.ExternalPackageRecord.properties.trust.required).toContain("dimensions");
+    expect(body.components.schemas.ExternalTrustDimensions.required).toEqual([
+      "popularitySignal",
+      "provenanceStatus",
+      "qualityScore",
+      "securityConfidence"
+    ]);
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
     expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");
   });

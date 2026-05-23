@@ -102,6 +102,7 @@ function openApiDocument() {
               properties: {
                 checkedAt: { format: "date-time", type: "string" },
                 decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+                dimensions: { $ref: "#/components/schemas/ExternalTrustDimensions" },
                 factors: {
                   items: { $ref: "#/components/schemas/TrustFactor" },
                   type: "array"
@@ -112,7 +113,7 @@ function openApiDocument() {
                 signals: { items: { type: "string" }, type: "array" },
                 warnings: { items: { type: "string" }, type: "array" }
               },
-              required: ["checkedAt", "decision", "factors", "policy", "risk", "score", "signals", "warnings"],
+              required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
               type: "object"
             },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
@@ -140,6 +141,19 @@ function openApiDocument() {
             "updatedAt",
             "version"
           ],
+          type: "object"
+        },
+        ExternalTrustDimensions: {
+          additionalProperties: false,
+          description:
+            "Trust Engine v3 dimensions. Popularity is not security proof; security confidence is based on warnings, command risk and available provenance or advisory evidence.",
+          properties: {
+            popularitySignal: { enum: ["none", "low", "medium", "high"], type: "string" },
+            provenanceStatus: { enum: ["unknown", "source-only", "integrity", "signature", "attested"], type: "string" },
+            qualityScore: { maximum: 100, minimum: 0, type: "integer" },
+            securityConfidence: { enum: ["low", "medium", "high"], type: "string" }
+          },
+          required: ["popularitySignal", "provenanceStatus", "qualityScore", "securityConfidence"],
           type: "object"
         },
         PackageIntelligenceReceipt: {
