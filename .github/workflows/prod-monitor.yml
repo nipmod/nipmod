@@ -29,6 +29,16 @@ jobs:
       - run: corepack prepare pnpm@10.30.0 --activate
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm --dir nipmod build
+      - name: API contract canary
+        run: pnpm api:contract -- --base-url https://nipmod.com
+      - name: Source resolver canary
+        run: pnpm source:canary -- --base-url https://nipmod.com
+      - name: Install plan canary
+        run: pnpm install-plan:canary -- --base-url https://nipmod.com
+      - name: Archive dry-run canary
+        run: pnpm archive:canary -- --base-url https://nipmod.com
+      - name: Rate limit health canary
+        run: pnpm rate-limit:canary -- --base-url https://nipmod.com
       - name: Production alert runner
         env:
           NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN }}

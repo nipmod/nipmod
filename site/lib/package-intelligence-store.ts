@@ -133,8 +133,11 @@ export async function upsertPackageIntelligenceRecord(
     };
   }
 
-  const existing = await readPackageIntelligenceRecordById(record.id, options);
-  const recordToStore = existing ? mergePackageIntelligenceRecords(existing, record) : record;
+  const existing =
+    (await readPackageIntelligenceRecordById(record.id, options)) ??
+    (await readPackageIntelligenceRecordByStableKey(record.stableKey, options));
+  const mergedRecord = existing ? mergePackageIntelligenceRecords(existing, record) : record;
+  const recordToStore = existing && existing.id !== mergedRecord.id ? { ...mergedRecord, id: existing.id } : mergedRecord;
   const requestOptions: SupabaseRequestOptions = {
     body: JSON.stringify([toSupabaseRow(recordToStore)]),
     headers: {
@@ -148,7 +151,7 @@ export async function upsertPackageIntelligenceRecord(
   if (options.timeoutMs !== undefined) {
     requestOptions.timeoutMs = options.timeoutMs;
   }
-  await supabaseJson(env, "/rest/v1/package_intelligence_records?on_conflict=id", requestOptions);
+  await supabaseJson(env, "/rest/v1/package_intelligence_records?on_conflict=stable_key", requestOptions);
 
   return {
     configured: true,
@@ -178,6 +181,32 @@ export async function readPackageIntelligenceRecordById(
   const rows = await supabaseJson<Array<{ record: PackageIntelligenceRecord }>>(
     env,
     `/rest/v1/package_intelligence_records?id=eq.${encodeURIComponent(id)}&select=record&limit=1`,
+    requestOptions
+  );
+  const record = rows.at(0)?.record;
+  return isPackageIntelligenceRecord(record) ? ensurePackageIntelligenceEvidence(record) : null;
+}
+
+export async function readPackageIntelligenceRecordByStableKey(
+  stableKey: string,
+  options: { env?: ArchiveEnv; fetchImpl?: typeof fetch; timeoutMs?: number } = {}
+): Promise<PackageIntelligenceRecord | null> {
+  const env = options.env ?? process.env;
+  const status = archiveStoreStatus(env);
+  if (!status.configured) {
+    return null;
+  }
+
+  const requestOptions: SupabaseRequestOptions = { method: "GET" };
+  if (options.fetchImpl) {
+    requestOptions.fetchImpl = options.fetchImpl;
+  }
+  if (options.timeoutMs !== undefined) {
+    requestOptions.timeoutMs = options.timeoutMs;
+  }
+  const rows = await supabaseJson<Array<{ record: PackageIntelligenceRecord }>>(
+    env,
+    `/rest/v1/package_intelligence_records?stable_key=eq.${encodeURIComponent(stableKey)}&select=record&limit=1`,
     requestOptions
   );
   const record = rows.at(0)?.record;

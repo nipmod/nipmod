@@ -142,8 +142,13 @@ Current source-depth additions:
 | PyPI | Release file types, file digests, signature metadata, Simple API provenance links, core metadata hashes, yanked file status, total file size, vulnerabilities and Python version bounds. |
 | GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, security files and lockfiles. |
 | Hugging Face | Repository files, README/model card, config metadata, safetensors presence for models, commit digest and gated access. |
+| MCP Registry | Registry status, remote endpoint metadata, source repository link, package metadata and environment requirements. |
+
+npm and GitHub `package.json` lifecycle scripts are treated as install-time execution. Remote downloads, hidden background execution, encoded payloads, inline interpreter execution with `eval`, or script patterns that fetch and execute code force high risk. This keeps the visible install command separate from hidden package behavior.
 
 Hugging Face binary model files are treated conservatively. `safetensors` is positive evidence for model weights. Pickle or generic binary weight files without safetensors metadata are negative evidence. Any `trust_remote_code` style requirement must be surfaced as a warning or block before a local model load.
+
+MCP environment requirements are review signals, especially when a server asks for secrets. Agents should show required environment keys before enabling an MCP server and hosts should scope secrets per server.
 
 GitHub recency bonus:
 

@@ -23,6 +23,9 @@ export function installCommandRisk(commands: string[]): InstallCommandRisk {
   if (normalizedCommands.some(hasPrivilegedOrDestructiveCommand)) {
     return "high";
   }
+  if (normalizedCommands.some(hasEncodedOrInlineExecutionPattern)) {
+    return "high";
+  }
   if (normalizedCommands.some(hasCompoundShellSyntax)) {
     return "medium";
   }
@@ -58,7 +61,10 @@ export function lifecycleScriptRisk(scripts: PackageLifecycleScript[]): InstallC
     return "low";
   }
   const commandRisk = installCommandRisk(scripts.map((script) => script.command));
-  if (commandRisk === "high" || scripts.some((script) => hasRemoteLifecycleExecutionPattern(script.command))) {
+  if (
+    commandRisk === "high" ||
+    scripts.some((script) => hasRemoteLifecycleExecutionPattern(script.command) || hasEncodedOrInlineExecutionPattern(script.command))
+  ) {
     return "high";
   }
   return "medium";
@@ -72,12 +78,16 @@ export function lifecycleScriptWarnings(scripts: PackageLifecycleScript[]): stri
   const names = scripts.map((script) => script.name).join(", ");
   const warnings = [`Package declares install-time lifecycle scripts: ${names}.`];
   const suspicious = scripts.filter((script) => hasRemoteLifecycleExecutionPattern(script.command));
+  const encodedOrInline = scripts.filter((script) => !hasRemoteLifecycleExecutionPattern(script.command) && hasEncodedOrInlineExecutionPattern(script.command));
 
   for (const script of suspicious) {
     warnings.push(`Lifecycle script ${script.name} contains remote download or hidden background execution behavior.`);
   }
+  for (const script of encodedOrInline) {
+    warnings.push(`Lifecycle script ${script.name} contains encoded or inline interpreter execution behavior.`);
+  }
 
-  if (suspicious.length === 0 && lifecycleScriptRisk(scripts) === "high") {
+  if (suspicious.length === 0 && encodedOrInline.length === 0 && lifecycleScriptRisk(scripts) === "high") {
     warnings.push("Lifecycle script command contains shell patterns that require manual review before execution.");
   }
 
@@ -132,6 +142,52 @@ function hasRemoteLifecycleExecutionPattern(command: string): boolean {
     (tokens.has("chmod") && normalized.includes("+x")) ||
     hasBackgroundExecutionOutsideQuotes(normalized)
   );
+}
+
+function hasEncodedOrInlineExecutionPattern(command: string): boolean {
+  const normalized = normalizeCommandForRisk(command);
+  const tokens = new Set(commandTokens(normalized));
+  const hasInlineInterpreter =
+    (tokens.has("node") && (tokens.has("-e") || tokens.has("--eval"))) ||
+    (tokens.has("python") && tokens.has("-c")) ||
+    (tokens.has("python3") && tokens.has("-c")) ||
+    (tokens.has("perl") && tokens.has("-e")) ||
+    (tokens.has("ruby") && tokens.has("-e")) ||
+    (tokens.has("php") && tokens.has("-r")) ||
+    tokens.has("powershell") ||
+    tokens.has("pwsh");
+  const hasEncodedPayload =
+    tokens.has("base64") ||
+    tokens.has("-enc") ||
+    tokens.has("-encodedcommand") ||
+    normalized.includes("buffer.from") ||
+    normalized.includes("atob(") ||
+    normalized.includes("frombase64");
+  const hasDynamicEval =
+    tokens.has("eval") ||
+    tokens.has("exec") ||
+    tokens.has("iex") ||
+    normalized.includes("invoke-expression") ||
+    normalized.includes("child_process") ||
+    normalized.includes("subprocess") ||
+    normalized.includes("os.system") ||
+    normalized.includes("process.spawn") ||
+    normalized.includes("spawn(") ||
+    normalized.includes("exec(");
+  const hasNetworkFetch =
+    normalized.includes("http://") ||
+    normalized.includes("https://") ||
+    normalized.includes("urllib.request") ||
+    normalized.includes("requests.get") ||
+    normalized.includes("fetch(") ||
+    normalized.includes("http.get") ||
+    normalized.includes("https.get") ||
+    tokens.has("curl") ||
+    tokens.has("wget") ||
+    tokens.has("iwr") ||
+    normalized.includes("invoke-webrequest");
+
+  return (hasInlineInterpreter && (hasEncodedPayload || hasDynamicEval || hasNetworkFetch)) || (hasEncodedPayload && hasDynamicEval);
 }
 
 function hasBackgroundExecutionOutsideQuotes(command: string): boolean {

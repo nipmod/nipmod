@@ -41,4 +41,16 @@ describe("package command safety", () => {
       "Lifecycle script postinstall contains remote download or hidden background execution behavior."
     );
   });
+
+  test("blocks encoded or inline interpreter lifecycle payloads without blocking harmless snippets", () => {
+    const scripts = packageLifecycleScripts({
+      postinstall: "node -e \"eval(Buffer.from(process.env.NPM_POSTINSTALL_PAYLOAD || '', 'base64').toString())\""
+    });
+
+    expect(installCommandRisk(["python -c \"import json; print(json.dumps({'ok': True}))\""])).toBe("low");
+    expect(lifecycleScriptRisk(scripts)).toBe("high");
+    expect(lifecycleScriptWarnings(scripts)).toContain(
+      "Lifecycle script postinstall contains encoded or inline interpreter execution behavior."
+    );
+  });
 });

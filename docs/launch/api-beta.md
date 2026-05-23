@@ -51,7 +51,8 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 | `https://nipmod.com/api-access` | Human-readable API beta page. |
 | `https://nipmod.com/api/openapi` | Machine-readable OpenAPI contract. |
 | `https://nipmod.com/api/sources/health` | Source, archive and rate-limit health. |
-| `https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow` | Copyable agent workflow examples. |
+| `https://github.com/nipmod/nipmod/tree/main/examples/http-api` | Copyable TypeScript and Python HTTPS examples. |
+| `https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow` | Copyable agent prompts for host setup. |
 | `docs/api/trust-scoring.md` | Trust score thresholds, dimensions and boundaries. |
 
 ## Agent Prompt
@@ -72,7 +73,9 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 - `verified_nipmod` requires a verified claim or direct publish.
 - Archive prepare does not persist records.
 - Archive previews include evidence digests rebuilt from server-side source inspection.
-- Archive confirm rejects unknown, below-threshold or high-risk records before storage.
+- Archive confirm is operator-only, re-inspects the source server-side, deduplicates durable records by stable source identity and rejects unknown, below-threshold or high-risk records before storage.
+
+Durable archive writes are not part of public beta traffic. Public agents should use search, inspect, install-plan and archive prepare unless an authorized server writer is explicitly configured.
 
 ## Verification
 
@@ -90,4 +93,4 @@ pnpm launch:verify
 
 Production archive writes are operator-only and require `NIPMOD_ARCHIVE_WRITE_TOKEN`.
 
-Production is release-ready only when GitHub CI, CodeQL, Dependency Review, Scorecard, production monitor and the live canaries are green. Production monitor passes before posting.
+Production is release-ready only when GitHub CI, CodeQL, Dependency Review, Scorecard, production monitor and the live canaries are green. Production monitor passes before posting. The scheduled production monitor runs API contract, source resolver, install-plan, archive dry-run and rate-limit canaries against `https://nipmod.com` before alert delivery.
