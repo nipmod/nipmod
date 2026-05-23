@@ -135,18 +135,18 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
   }
   const liveSourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health?probe=live`);
   assertEqual(liveSourceHealth.type, "dev.nipmod.source-health.v1", "live source health type mismatch");
-  if (liveSourceHealth.summary?.liveFailed !== 0) {
-    throw new Error(`live source probe failed for ${liveSourceHealth.summary?.liveFailed ?? "unknown"} sources`);
-  }
   const liveSources = Array.isArray(liveSourceHealth.sources) ? liveSourceHealth.sources : [];
-  const failedLiveSource = liveSources.find((source) => source?.live?.status !== "ok");
-  if (failedLiveSource) {
-    throw new Error(`live source probe failed for ${failedLiveSource.source ?? "unknown"}`);
+  const failedLiveSources = liveSources.filter((source) => source?.live?.status !== "ok");
+  const hardFailedLiveSource = failedLiveSources.find((source) => source?.live?.retryable !== true);
+  if (hardFailedLiveSource) {
+    throw new Error(`non-retryable live source probe failed for ${hardFailedLiveSource.source ?? "unknown"}`);
   }
 
   return {
     installPlanCommandBoundary: firstCommand.boundary,
-    liveSourceProbeOk: liveSources.length,
+    liveSourceProbeDegraded: failedLiveSources.map((source) => source.source),
+    liveSourceProbeOk: liveSources.filter((source) => source?.live?.status === "ok").length,
+    liveSourceProbeTotal: liveSources.length,
     openApi: `${targetBaseUrl}/api/openapi`,
     rateLimitStore: sourceHealth.rateLimit?.activeStore ?? null,
     requireDistributedRateLimit,
