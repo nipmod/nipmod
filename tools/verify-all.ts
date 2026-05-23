@@ -15,6 +15,8 @@ const root = resolve(import.meta.dirname, "..");
 const version = JSON.parse(await readFile(join(root, "nipmod", "package.json"), "utf8")).version;
 const releaseName = `nipmod-${version}.tgz`;
 const releasePath = join(root, "site", "public", "releases", releaseName);
+const releaseSbomPath = `${releasePath}.sbom.json`;
+const releaseProvenancePath = `${releasePath}.provenance.json`;
 const advisoriesPath = join(root, "site", "public", "advisories.json");
 const runProdChecks = process.argv.includes("--prod");
 const HEX_SHA256 = /^[a-f0-9]{64}$/;
@@ -98,6 +100,7 @@ async function verifyLocalArtifacts() {
     publicKeyInfo: await readReleasePublicKeyInfo(join(root, "tools", "release-signing-public-key.json")),
     signature: JSON.parse(await readFile(`${releasePath}.sig`, "utf8"))
   });
+  await verifyLocalReleaseMetadata();
   await verifyAdvisorySignature({
     feedPath: advisoriesPath,
     publicKeyInfo: await readAdvisoryPublicKeyInfo(join(root, "tools", "advisory-signing-public-key.json")),
@@ -157,6 +160,8 @@ async function verifyProduction() {
 	      payload.install?.release?.artifact === `https://nipmod.com/releases/${releaseName}` &&
 	      payload.install?.release?.artifactSha256 === expectedDigestFromShaFileSync(`${releasePath}.sha256`) &&
 	      payload.install?.release?.signature === `https://nipmod.com/releases/${releaseName}.sig` &&
+	      payload.install?.release?.sbom === `https://nipmod.com/releases/${releaseName}.sbom.json` &&
+	      payload.install?.release?.provenance === `https://nipmod.com/releases/${releaseName}.provenance.json` &&
 	      payload.transparency?.logId === localTransparencyLogIdSync() &&
 	      (localHasPublicPackagesSync()
 	        ? payload.transparency?.checkpoint === "https://nipmod.com/transparency/checkpoint.json"
@@ -210,10 +215,56 @@ async function verifyProduction() {
   if (actualReleaseDigest !== expectedReleaseDigest) {
     throw new Error(`live release digest mismatch: ${actualReleaseDigest}`);
   }
+  await assertJson(
+    `https://nipmod.com/releases/${releaseName}.sbom.json`,
+    (payload) =>
+      payload?.type === "dev.nipmod.release.sbom.v1" &&
+      payload?.artifact?.name === releaseName &&
+      payload?.artifact?.sha256 === expectedReleaseDigest &&
+      Array.isArray(payload?.components) &&
+      payload.components.some((component) => component.name === "dist/cli.js"),
+    "live release SBOM failed"
+  );
+  await assertJson(
+    `https://nipmod.com/releases/${releaseName}.provenance.json`,
+    (payload) =>
+      payload?.type === "dev.nipmod.release.provenance.v1" &&
+      payload?.artifact?.name === releaseName &&
+      payload?.artifact?.sha256 === expectedReleaseDigest &&
+      payload?.signing?.publicKeySpkiSha256 === localReleaseKeySync().publicKeySpkiSha256 &&
+      Array.isArray(payload?.materials) &&
+      payload.materials.some((material) => material.path === "package.json"),
+    "live release provenance failed"
+  );
   await verifyLiveAdvisorySignature();
   await smokeLiveInstalledAudit();
   await run(process.execPath, ["--experimental-strip-types", "tools/public-proof-loop.ts", "--registry", "https://nipmod.com/registry/packages.json", "--quiet"]);
   await runAdvisoryDrillWithEphemeralKey();
+}
+
+async function verifyLocalReleaseMetadata() {
+  const expectedReleaseDigest = await expectedDigestFromShaFile(`${releasePath}.sha256`);
+  const sbom = JSON.parse(await readFile(releaseSbomPath, "utf8"));
+  if (
+    sbom?.type !== "dev.nipmod.release.sbom.v1" ||
+    sbom?.artifact?.name !== releaseName ||
+    sbom?.artifact?.sha256 !== expectedReleaseDigest ||
+    !Array.isArray(sbom?.components) ||
+    !sbom.components.some((component) => component.name === "dist/cli.js")
+  ) {
+    throw new Error("local release SBOM is invalid");
+  }
+  const provenance = JSON.parse(await readFile(releaseProvenancePath, "utf8"));
+  if (
+    provenance?.type !== "dev.nipmod.release.provenance.v1" ||
+    provenance?.artifact?.name !== releaseName ||
+    provenance?.artifact?.sha256 !== expectedReleaseDigest ||
+    provenance?.signing?.publicKeySpkiSha256 !== localReleaseKeySync().publicKeySpkiSha256 ||
+    !Array.isArray(provenance?.materials) ||
+    !provenance.materials.some((material) => material.path === "package.json")
+  ) {
+    throw new Error("local release provenance is invalid");
+  }
 }
 
 async function runAdvisoryDrillWithEphemeralKey() {

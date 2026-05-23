@@ -1,0 +1,35 @@
+{
+  "artifact": {
+    "mediaType": "application/gzip",
+    "name": "nipmod-1.2.9.tgz",
+    "sha256": "44b684fa6f4828d9abe2ce4cf491cb09f7f080d7144eda219fef0a285f9ee51d"
+  },
+  "components": [
+    {
+      "executable": true,
+      "name": "dist/cli.js",
+      "sha256": "ee2e572a3652f3e184e9d4c0a4d9478eb99acd55e5205a3071ca01452d322be1",
+      "size": 540377,
+      "type": "executable"
+    },
+    {
+      "executable": false,
+      "name": "package.json",
+      "sha256": "300976424f73557f51681ea424a3cc44eb651463a41adc55b03da2d148d811b2",
+      "size": 184,
+      "type": "package-manifest"
+    }
+  ],
+  "formatVersion": 1,
+  "generatedAt": "2026-05-23T13:07:18.387Z",
+  "generator": "tools/build-nipmod-release.ts",
+  "package": {
+    "name": "nipmod",
+    "version": "1.2.9"
+  },
+  "summary": {
+    "components": 2,
+    "executableComponents": 1
+  },
+  "type": "dev.nipmod.release.sbom.v1"
+}

@@ -1,0 +1,46 @@
+{
+  "artifact": {
+    "mediaType": "application/gzip",
+    "name": "nipmod-1.2.9.tgz",
+    "sha256": "44b684fa6f4828d9abe2ce4cf491cb09f7f080d7144eda219fef0a285f9ee51d"
+  },
+  "build": {
+    "builder": "tools/build-nipmod-release.ts",
+    "entrypoint": "nipmod/src/cli.ts",
+    "packageManager": "pnpm@10.30.0",
+    "target": "node22-esm-bundle"
+  },
+  "formatVersion": 1,
+  "generatedAt": "2026-05-23T13:07:18.387Z",
+  "materials": [
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "a481104919af6dfe513ee2ea12981da2f7998a813a4153ab1e49a3f86af25196",
+      "type": "lockfile"
+    },
+    {
+      "path": "dist/cli.js",
+      "sha256": "ee2e572a3652f3e184e9d4c0a4d9478eb99acd55e5205a3071ca01452d322be1",
+      "type": "release-file"
+    },
+    {
+      "path": "package.json",
+      "sha256": "300976424f73557f51681ea424a3cc44eb651463a41adc55b03da2d148d811b2",
+      "type": "release-manifest"
+    }
+  ],
+  "package": {
+    "name": "nipmod",
+    "version": "1.2.9"
+  },
+  "signing": {
+    "algorithm": "Ed25519",
+    "publicKeySpkiSha256": "30a866f4074e4d1a7bbb807df7a52bdecc16fb72326869a8de38f740788cd242"
+  },
+  "source": {
+    "commit": "eda7b0e568eae873e4b26ad21323fd30ae39bbd6",
+    "dirty": true,
+    "repository": "https://github.com/nipmod/nipmod"
+  },
+  "type": "dev.nipmod.release.provenance.v1"
+}

@@ -137,7 +137,7 @@ async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch) {
   const response = await fetchFn(`${baseUrl}/api/openapi`, {
     headers: {
       accept: "application/openapi+json, application/json",
-      "user-agent": "nipmod-api-contract-canary/1.2.8 (+https://nipmod.com)"
+      "user-agent": "nipmod-api-contract-canary/1.2.9 (+https://nipmod.com)"
     },
     method: "GET"
   });
@@ -171,7 +171,7 @@ async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)
     body: "body" in check ? check.body : undefined,
     headers: {
       accept: "application/json",
-      "user-agent": "nipmod-api-contract-canary/1.2.8 (+https://nipmod.com)",
+      "user-agent": "nipmod-api-contract-canary/1.2.9 (+https://nipmod.com)",
       "x-request-id": requestId,
       ...("headers" in check ? check.headers : {})
     },
