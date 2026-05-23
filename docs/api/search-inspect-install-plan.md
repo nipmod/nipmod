@@ -34,6 +34,13 @@ Production canary search:
 curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'
 ```
 
+Copyable client examples:
+
+```bash
+node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+python3 examples/http-api/agent_flow.py "http client"
+```
+
 ## Inspect
 
 ```bash

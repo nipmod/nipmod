@@ -18,6 +18,21 @@ console.log(
   JSON.stringify(
     {
       task,
+      agentInstruction: "Search Nipmod, inspect the selected package and show the install plan before any workspace write.",
+      sourceHealth: {
+        partial: search.partial,
+        summary: search.sourceSummary,
+        degraded: Array.isArray(search.sourceReports)
+          ? search.sourceReports
+              .filter((report: Record<string, any>) => report.status === "failed")
+              .map((report: Record<string, any>) => ({
+                source: report.source,
+                code: report.error?.code,
+                retryable: report.recovery?.retryable,
+                suggestedAction: report.recovery?.suggestedAction
+              }))
+          : []
+      },
       selection: {
         policy: search.selection?.policy,
         recommendedId: search.selection?.recommendedId,
@@ -38,6 +53,11 @@ console.log(
       },
       installPlan: plan.plan,
       safety: plan.safety,
+      approvalBoundary: {
+        hostedApiExecutesCommands: false,
+        hostedApiWritesCallerWorkspace: false,
+        localHostMustApproveBeforeWrite: plan.plan?.requiresApprovalBeforeWrite === true
+      },
       archivePreview: {
         status: archive.record?.status ?? archive.receipt?.archiveStatus,
         stored: archive.receipt?.stored ?? false,

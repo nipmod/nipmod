@@ -84,6 +84,23 @@ The normalization contract is fixed:
 - repository URLs are normalized to safe HTTP(S) URLs or dropped
 - package ids are source-prefixed
 
+## Source Quality Contract
+
+Source degradation must stay visible to the caller. Nipmod can return useful records when one source is down, but it must not hide the failed source or manufacture records for it.
+
+Rules:
+
+- a failed source returns `sourceReports[].status: "failed"` with a structured error
+- retryable upstream failures use `recovery.suggestedAction: "retry-source-later"`
+- non-retryable source/query failures use `recovery.suggestedAction: "fix-source-or-query"`
+- partial success returns `partial: true` and recommends only records from successful sources
+- all-source failure returns a structured API error instead of an empty success
+- source circuits are per source; one degraded source does not disable the whole API
+- search results are not install approval, even when a source is healthy
+- install plans never run commands and never write the caller workspace
+
+This matters because source uptime is not the same as package safety. Agents should treat `sourceReports`, `selection.candidates`, trust factors and the install plan as separate review surfaces.
+
 ## Source-Depth Signals
 
 Resolvers should expose source-native context as `trust.signals` and risk as `trust.warnings` before adding new public schema fields.

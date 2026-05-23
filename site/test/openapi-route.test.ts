@@ -13,7 +13,16 @@ describe("OpenAPI route", () => {
     expect(body.info.title).toBe("Nipmod API");
     expect(body.components.securitySchemes.NipmodApiKey.name).toBe("x-nipmod-api-key");
     expect(body.security).toContainEqual({});
+    expect(body["x-nipmod-agent-flow"]).toEqual(["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"]);
+    expect(body["x-nipmod-safety-boundary"]).toMatchObject({
+      hostedApiExecutesCommands: false,
+      hostedApiWritesCallerWorkspace: false,
+      installPlanRequiresHostApproval: true,
+      packageMetadataIsInstruction: false,
+      searchScoreIsInstallPermission: false
+    });
     expect(Object.keys(body.paths)).toEqual([
+      "/api/openapi",
       "/api/archive/prepare",
       "/api/archive/confirm",
       "/api/archive/search",
@@ -25,7 +34,14 @@ describe("OpenAPI route", () => {
       "/api/search",
       "/api/sources/health"
     ]);
+    expect(body.paths["/api/openapi"].get.operationId).toBe("getOpenApiContract");
+    expect(body.paths["/api/openapi"].get.responses["200"].content["application/openapi+json"].schema.$ref).toBe(
+      "#/components/schemas/OpenApiDocument"
+    );
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
+    expect(body.paths["/api/search"].get["x-nipmod-agent-step"]).toBe("search");
+    expect(body.paths["/api/inspect"].get["x-nipmod-agent-step"]).toBe("inspect");
+    expect(body.paths["/api/install-plan"].get["x-nipmod-agent-step"]).toBe("install-plan");
     expect(body.paths["/api/archive/prepare"].get.responses["200"].description).toContain("does not persist");
     expect(body.paths["/api/archive/prepare"].post.summary).toContain("posted external package");
     expect(body.paths["/api/archive/confirm"].post.summary).toContain("authorized archive writer");

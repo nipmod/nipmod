@@ -6,6 +6,16 @@ import { checkApiRateLimitAsync } from "../../../lib/rate-limit";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const AGENT_FLOW = ["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"] as const;
+const SAFETY_BOUNDARY = {
+  hostedApiExecutesCommands: false,
+  hostedApiReadsCallerWorkspace: false,
+  hostedApiWritesCallerWorkspace: false,
+  installPlanRequiresHostApproval: true,
+  packageMetadataIsInstruction: false,
+  searchScoreIsInstallPermission: false
+} as const;
+
 export function OPTIONS(request: Request): Response {
   return apiOptions(createApiHttpContext(request));
 }
@@ -30,6 +40,8 @@ export async function GET(request: Request): Promise<Response> {
 
 function openApiDocument() {
   return {
+    "x-nipmod-agent-flow": [...AGENT_FLOW],
+    "x-nipmod-safety-boundary": SAFETY_BOUNDARY,
     components: {
       schemas: {
         ApiAccess: {
@@ -52,6 +64,16 @@ function openApiDocument() {
             type: { const: "dev.nipmod.api-error.v1", type: "string" }
           },
           required: ["code", "error", "retryable", "source", "status", "type"],
+          type: "object"
+        },
+        OpenApiDocument: {
+          additionalProperties: true,
+          properties: {
+            info: { additionalProperties: true, type: "object" },
+            openapi: { const: "3.1.0", type: "string" },
+            paths: { additionalProperties: true, type: "object" }
+          },
+          required: ["info", "openapi", "paths"],
           type: "object"
         },
         ExternalPackageMetrics: {
@@ -952,6 +974,17 @@ function openApiDocument() {
     },
     openapi: "3.1.0",
     paths: {
+      "/api/openapi": {
+        get: {
+          operationId: "getOpenApiContract",
+          responses: {
+            "200": openApiEndpointResponse(),
+            "401": errorResponse(),
+            "429": errorResponse()
+          },
+          summary: "Return the public Nipmod API contract."
+        }
+      },
       "/api/archive/prepare": {
         get: {
           operationId: "prepareArchiveRecord",
@@ -1077,6 +1110,7 @@ function openApiDocument() {
       },
       "/api/inspect": {
         get: {
+          "x-nipmod-agent-step": "inspect",
           operationId: "inspectPackage",
           parameters: [sourceParameter(), nameParameter()],
           responses: {
@@ -1096,6 +1130,7 @@ function openApiDocument() {
       },
       "/api/install-plan": {
         get: {
+          "x-nipmod-agent-step": "install-plan",
           operationId: "createInstallPlan",
           parameters: [sourceParameter(), nameParameter()],
           responses: {
@@ -1117,6 +1152,7 @@ function openApiDocument() {
           summary: "Create a safe install plan for one exact package."
         },
         post: {
+          "x-nipmod-agent-step": "install-plan",
           operationId: "createInstallPlanFromRecord",
           requestBody: {
             content: {
@@ -1202,6 +1238,7 @@ function openApiDocument() {
       },
       "/api/search": {
         get: {
+          "x-nipmod-agent-step": "search",
           operationId: "searchPackages",
           parameters: [
             queryParameter(),
@@ -1245,6 +1282,12 @@ function openApiDocument() {
         }
       }
     },
+    tags: [
+      { description: "Search, inspect and install-plan flow for agents.", name: "agent-flow" },
+      { description: "Durable package intelligence records after explicit confirmation.", name: "archive" },
+      { description: "Hosted read-only MCP and API contract surfaces.", name: "contract" },
+      { description: "Source capability and degradation reporting.", name: "source-health" }
+    ],
     security: [{}, { NipmodApiKey: [] }, { BearerAuth: [] }],
     servers: [{ url: "https://nipmod.com" }]
   };
@@ -1293,6 +1336,21 @@ function errorResponse() {
       }
     },
     description: "Structured API error."
+  };
+}
+
+function openApiEndpointResponse() {
+  const schema = { $ref: "#/components/schemas/OpenApiDocument" };
+  return {
+    content: {
+      "application/json": {
+        schema
+      },
+      "application/openapi+json": {
+        schema
+      }
+    },
+    description: "OpenAPI 3.1 contract for the hosted public beta API."
   };
 }
 

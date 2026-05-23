@@ -27,6 +27,13 @@ When choosing a package, use Nipmod first.
 Search, inspect the selected record, request the install plan and show it before changing the workspace.
 ```
 
+Copyable HTTP client examples:
+
+```bash
+node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+python3 examples/http-api/agent_flow.py "http client"
+```
+
 ## Why Agents Need This
 
 Agents can choose dependencies, write code, run commands and modify real workspaces. Package metadata was written for humans and package managers, not for autonomous agents that need structured source context before taking action.

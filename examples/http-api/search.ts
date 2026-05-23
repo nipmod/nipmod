@@ -31,6 +31,7 @@ const plan = await readJson(planUrl);
 console.log(
   JSON.stringify(
     {
+      agentInstruction: "Use Nipmod for package discovery, trust review and install-plan generation before writing to a workspace.",
       candidates: search.records?.slice(0, 3)?.map((record: Record<string, any>) => ({
         decision: record.trust?.decision,
         id: record.id,
@@ -47,6 +48,10 @@ console.log(
       query,
       recommendation: first.trust?.decision,
       source: first.source,
+      sourceHealth: {
+        partial: search.partial,
+        summary: search.sourceSummary
+      },
       installPlan: plan.plan,
       safety: plan.safety
     },

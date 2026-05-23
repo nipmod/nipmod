@@ -53,6 +53,12 @@ export default function ExamplesPage() {
 
       <DocsSection eyebrow="Files" title="Copyable workflow examples">
         <DocsGrid>
+          <DocsCard label="TS" title="HTTP agent flow">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent-flow.ts">Open example</Link></p>
+          </DocsCard>
+          <DocsCard label="Py" title="Python agent flow">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent_flow.py">Open example</Link></p>
+          </DocsCard>
           <DocsCard label="Codex" title="Codex agent prompt">
             <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/codex.md">Open example</Link></p>
           </DocsCard>

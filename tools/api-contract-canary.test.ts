@@ -38,8 +38,8 @@ describe("api contract canary", () => {
     expect(result.checks[0]).toMatchObject({
       data: {
         openapi: "3.1.0",
-        operationCount: 12,
-        pathCount: 10,
+        operationCount: 13,
+        pathCount: 11,
         title: "Nipmod API"
       },
       name: "openapi_contract",
@@ -211,12 +211,24 @@ function searchFixture() {
 
 function openApiFixture() {
   return {
+    "x-nipmod-agent-flow": ["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"],
+    "x-nipmod-safety-boundary": {
+      hostedApiExecutesCommands: false,
+      hostedApiReadsCallerWorkspace: false,
+      hostedApiWritesCallerWorkspace: false,
+      installPlanRequiresHostApproval: true,
+      packageMetadataIsInstruction: false,
+      searchScoreIsInstallPermission: false
+    },
     info: {
       title: "Nipmod API",
       version: "2026-05-23"
     },
     openapi: "3.1.0",
     paths: {
+      "/api/openapi": {
+        get: operation("getOpenApiContract")
+      },
       "/api/archive/prepare": {
         get: operation("prepareArchiveRecord"),
         post: operation("prepareArchiveRecordFromBody")

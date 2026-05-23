@@ -92,6 +92,55 @@ describe("external package resolver", () => {
     });
   });
 
+  test("keeps retryable source outages visible while recommending only successful source records", async () => {
+    const result = await searchExternalPackages("http client", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url.startsWith("https://registry.npmjs.org/-/v1/search")) {
+          return jsonResponse({ error: "temporary npm outage" }, 503);
+        }
+        if (url === "https://pypi.org/pypi/requests/json") {
+          return pyPiProjectResponse("requests", "2.34.2", "https://github.com/psf/requests");
+        }
+        if (url === "https://pypi.org/pypi/httpx/json") {
+          return pyPiProjectResponse("httpx", "0.28.2", "https://github.com/encode/httpx");
+        }
+        if (url === "https://pypi.org/simple/requests/" || url === "https://pypi.org/simple/httpx/") {
+          const project = url.includes("/httpx/") ? "httpx" : "requests";
+          return pyPiSimpleResponse(project);
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 3,
+      sources: ["npm", "pypi"]
+    });
+
+    expect(result.partial).toBe(true);
+    expect(result.records.length).toBeGreaterThan(0);
+    expect(result.records.every((record) => record.source === "pypi")).toBe(true);
+    expect(result.selection.candidates.every((candidate) => candidate.source === "pypi")).toBe(true);
+    expect(result.selection.recommendedId).toMatch(/^pypi:/);
+    expect(result.sourceSummary).toEqual({ empty: 0, failed: 1, ok: 1, requested: 2 });
+    expect(result.sourceReports.find((report) => report.source === "npm")).toMatchObject({
+      error: { code: "source_unavailable", retryable: true, status: 502 },
+      recordCount: 0,
+      recovery: {
+        degraded: true,
+        retryable: true,
+        suggestedAction: "retry-source-later"
+      },
+      status: "failed"
+    });
+    expect(result.sourceReports.find((report) => report.source === "pypi")).toMatchObject({
+      recovery: {
+        degraded: false,
+        retryable: false,
+        suggestedAction: "use-returned-records"
+      },
+      status: "ok"
+    });
+  });
+
   test("uses validated PyPI task hints for broad package searches", async () => {
     const requested: string[] = [];
     const result = await searchExternalPackages("http client", {
