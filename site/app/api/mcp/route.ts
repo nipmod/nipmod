@@ -54,6 +54,8 @@ const SERVER_VERSION = "1.0.0";
 const REMOTE_ENDPOINT = "https://nipmod.com/api/mcp";
 const LOCAL_SERVER_COMMAND = "nipmod mcp serve";
 const LOCAL_INSTALL_COMMAND = "curl https://nipmod.com/i|bash";
+const MCP_MAX_BODY_BYTES = 64 * 1024;
+const MCP_MAX_BATCH_SIZE = 12;
 const REMOTE_TOOL_NAMES = [
   "nipmod.search",
   "nipmod.resolve",
@@ -214,12 +216,36 @@ export async function POST(request: Request): Promise<Response> {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = JSON.parse(await readLimitedRequestText(request));
+  } catch (error) {
+    if (error instanceof RemoteMcpHttpError) {
+      return json(request, errorResponse(null, error.code, error.message), {
+        access: rateLimit.access,
+        context,
+        headers: rateLimit.headers,
+        status: error.status
+      });
+    }
     return json(request, errorResponse(null, -32700, "invalid JSON"), { access: rateLimit.access, context, headers: rateLimit.headers, status: 400 });
   }
 
   if (Array.isArray(body)) {
+    if (body.length === 0) {
+      return json(request, errorResponse(null, -32600, "empty MCP batches are not accepted"), {
+        access: rateLimit.access,
+        context,
+        headers: rateLimit.headers,
+        status: 400
+      });
+    }
+    if (body.length > MCP_MAX_BATCH_SIZE) {
+      return json(request, errorResponse(null, -32014, `MCP batch size exceeds ${MCP_MAX_BATCH_SIZE}`), {
+        access: rateLimit.access,
+        context,
+        headers: rateLimit.headers,
+        status: 413
+      });
+    }
     const responses = await Promise.all(body.map((message) => handleJsonRpc(message)));
     return json(request, responses, { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
   }
@@ -461,6 +487,10 @@ function demoTool(args: Record<string, unknown>): JsonValue {
 function remoteServerInfo(): JsonValue {
   return {
     endpoint: REMOTE_ENDPOINT,
+    limits: {
+      maxBatchSize: MCP_MAX_BATCH_SIZE,
+      maxBodyBytes: MCP_MAX_BODY_BYTES
+    },
     localServerCommand: LOCAL_SERVER_COMMAND,
     mode: "remote-read-only",
     notExposed: [...NOT_EXPOSED_REMOTE_TOOLS],
@@ -470,6 +500,43 @@ function remoteServerInfo(): JsonValue {
     type: "dev.nipmod.remote-mcp.v1",
     writeBoundary: "No hosted remote tool reads or writes the caller workspace. Use the local stdio MCP server for controlled installs."
   };
+}
+
+async function readLimitedRequestText(request: Request): Promise<string> {
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength) {
+    const bytes = Number(declaredLength);
+    if (Number.isFinite(bytes) && bytes > MCP_MAX_BODY_BYTES) {
+      throw new RemoteMcpHttpError(413, -32013, `MCP request body exceeds ${MCP_MAX_BODY_BYTES} bytes`);
+    }
+  }
+
+  if (!request.body) {
+    return "";
+  }
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    total += value.byteLength;
+    if (total > MCP_MAX_BODY_BYTES) {
+      throw new RemoteMcpHttpError(413, -32013, `MCP request body exceeds ${MCP_MAX_BODY_BYTES} bytes`);
+    }
+    chunks.push(value);
+  }
+
+  const body = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(body);
 }
 
 function initializeResult(): JsonValue {
@@ -757,6 +824,16 @@ function toJsonValue(value: unknown): JsonValue {
 
 class RemoteMcpError extends Error {
   constructor(
+    readonly code: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+class RemoteMcpHttpError extends Error {
+  constructor(
+    readonly status: number,
     readonly code: number,
     message: string
   ) {

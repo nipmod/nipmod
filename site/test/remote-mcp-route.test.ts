@@ -29,6 +29,10 @@ describe("hosted read-only MCP route", () => {
     expect(response.headers.get("x-nipmod-request-id")).toBe("mcp-route-test");
     expect(body).toMatchObject({
       endpoint: "https://nipmod.com/api/mcp",
+      limits: {
+        maxBatchSize: 12,
+        maxBodyBytes: 65_536
+      },
       localServerCommand: "nipmod mcp serve",
       mode: "remote-read-only",
       type: "dev.nipmod.remote-mcp.v1"
@@ -81,6 +85,43 @@ describe("hosted read-only MCP route", () => {
       "nipmod.demo"
     ]);
     expect(body[1].result.tools.every((tool: { annotations: { readOnlyHint: boolean } }) => tool.annotations.readOnlyHint)).toBe(true);
+  });
+
+  test("rejects oversized JSON-RPC request bodies before tool handling", async () => {
+    const payload = `${" ".repeat(65_537)}`;
+    const response = await POST(
+      new Request("https://nipmod.com/api/mcp", {
+        body: payload,
+        headers: {
+          "content-length": String(payload.length),
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(body.error).toMatchObject({
+      code: -32013,
+      message: "MCP request body exceeds 65536 bytes"
+    });
+  });
+
+  test("rejects oversized JSON-RPC batches", async () => {
+    const { body, response } = await postJson(
+      Array.from({ length: 13 }, (_value, index) => ({
+        id: index + 1,
+        jsonrpc: "2.0",
+        method: "ping"
+      }))
+    );
+
+    expect(response.status).toBe(413);
+    expect(body.error).toMatchObject({
+      code: -32014,
+      message: "MCP batch size exceeds 12"
+    });
   });
 
   test("searches the empty public registry without local project args", async () => {

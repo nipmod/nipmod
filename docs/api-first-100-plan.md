@@ -70,6 +70,7 @@ Recent hardening:
 - OpenAPI now publishes concrete response schemas for inspect, install-plan, archive prepare/search/status/confirm, source health and hosted MCP responses.
 - Archive confirmation writes must now pass the archive token and configured persistence checks before Nipmod resolves any external source metadata.
 - Source health live probes now use a bounded in-process cache and expose whether each source result was freshly checked or served from cache.
+- Hosted MCP now rejects oversized JSON-RPC bodies and batches before tool handling.
 
 ## Workstream 1: API Contract
 
@@ -478,7 +479,7 @@ Definition of Done:
 - [ ] Trust Engine v3 fields implemented.
 - [ ] Posted trust cannot influence server trust.
 - [ ] Distributed rate limits active.
-- [ ] MCP batch and body size caps active.
+- [x] MCP batch and body size caps active.
 - [ ] Usage canary active.
 - [ ] Load smoke passes.
 - [ ] E2E readiness tests updated and passing.

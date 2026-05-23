@@ -1005,6 +1005,7 @@ function openApiDocument() {
             ),
             "400": errorResponse(),
             "401": errorResponse(),
+            "413": jsonResponse({ $ref: "#/components/schemas/JsonRpcResponse" }, "MCP JSON-RPC payload limit error."),
             "429": errorResponse()
           },
           summary: "Hosted read-only MCP JSON-RPC endpoint."
