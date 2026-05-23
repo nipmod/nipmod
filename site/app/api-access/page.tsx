@@ -7,13 +7,17 @@ export const metadata = createPageMetadata({
   title: "Nipmod API"
 });
 
-const prompt = `When a package is needed, ask Nipmod first.
-Call search, inspect the selected package, then show the install plan before any local command runs.`;
+const prompt = `Before adding a dependency, use Nipmod.
+Call search, inspect the selected record and return the install plan before changing the workspace.`;
+
+const coreCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
 
 export default function ApiAccessPage() {
   return (
     <DocsShell
-      description="The hosted API is the main product surface. It is built for agents first: search, inspect, plan and return evidence before local execution."
+      description="The hosted API is the main product surface. Agents call it before dependency selection, package installation or model/tool setup."
       eyebrow="API"
       stats={[
         { label: "OpenAPI", value: "3.1" },
@@ -26,12 +30,16 @@ export default function ApiAccessPage() {
         <DocsCode>{prompt}</DocsCode>
       </DocsSection>
 
+      <DocsSection title="Three calls">
+        <DocsCode>{coreCalls}</DocsCode>
+      </DocsSection>
+
       <DocsSection title="Endpoints">
         <DocsTable
           rows={[
             {
               first: "Search",
-              second: <code>GET /api/search?q=&lt;query&gt;&amp;sources=npm,pypi,github,huggingface-model,mcp&amp;limit=5</code>,
+              second: <code>GET /api/search?q=&lt;query&gt;&amp;sources=&lt;sources&gt;&amp;limit=5</code>,
               third: "Returns ranked candidates."
             },
             {
@@ -47,7 +55,7 @@ export default function ApiAccessPage() {
             {
               first: "Archive prepare",
               second: <code>GET /api/archive/prepare?source=npm&amp;name=undici</code>,
-              third: "Prepares a durable record after useful confirmed discovery."
+              third: "Previews a reusable record after useful discovery."
             },
             {
               first: "MCP",
@@ -65,19 +73,19 @@ export default function ApiAccessPage() {
 
       <DocsSection title="Examples">
         <DocsGrid>
-          <DocsCard label="Search" title="Find a package">
-            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi&limit=5'"}</DocsCode>
+          <DocsCard label="npm" title="HTTP client">
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi&limit=3'\ncurl 'https://nipmod.com/api/inspect?source=npm&name=undici'\ncurl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
           </DocsCard>
-          <DocsCard label="Inspect" title="Check one result">
-            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          <DocsCard label="PyPI" title="Python requests">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'\ncurl 'https://nipmod.com/api/install-plan?source=pypi&name=requests'"}</DocsCode>
           </DocsCard>
-          <DocsCard label="Plan" title="Request install steps">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          <DocsCard label="model" title="Hugging Face">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'\ncurl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'"}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection title="Safety model">
+      <DocsSection title="Safety boundary">
         <DocsGrid>
           <DocsCard title="Read-only by default">
             <p>The hosted API can search and plan. It cannot read local files, mutate lockfiles or execute install commands.</p>

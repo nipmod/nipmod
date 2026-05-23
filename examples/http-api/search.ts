@@ -1,8 +1,9 @@
-const query = process.argv.slice(2).join(" ").trim() || "react";
+const query = process.argv.slice(2).join(" ").trim() || "http client";
 const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
 
 const searchUrl = new URL("/api/search", baseUrl);
 searchUrl.searchParams.set("q", query);
+searchUrl.searchParams.set("sources", "npm,pypi,github,huggingface-model,huggingface-dataset,mcp");
 searchUrl.searchParams.set("limit", "3");
 
 const search = await readJson(searchUrl);

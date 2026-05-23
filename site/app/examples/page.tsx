@@ -17,7 +17,7 @@ export default function ExamplesPage() {
       <DocsSection eyebrow="Flow" title="Search, inspect, plan">
         <DocsGrid>
           <DocsCard label="Search" title="Find candidates across sources">
-            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github&limit=3'"}</DocsCode>
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'"}</DocsCode>
           </DocsCard>
           <DocsCard label="Inspect" title="Inspect the selected package">
             <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
@@ -30,6 +30,20 @@ export default function ExamplesPage() {
 
       <DocsSection eyebrow="Agent prompt" title="Use from an agent">
         <DocsCode>{"Find a package for HTTP requests. Use Nipmod search first, inspect the best candidate, then show me the install plan before changing the workspace."}</DocsCode>
+      </DocsSection>
+
+      <DocsSection eyebrow="Exact records" title="Canary examples">
+        <DocsGrid>
+          <DocsCard label="PyPI" title="requests">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=pypi&name=requests'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="GitHub" title="vercel/next.js">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=github&name=vercel/next.js'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Hugging Face" title="bert-base-uncased">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
       </DocsSection>
     </DocsShell>
   );

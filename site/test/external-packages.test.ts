@@ -223,6 +223,96 @@ describe("external package resolver", () => {
     expect(record.trust.signals).toContain("Repository link is missing.");
   });
 
+  test("quotes source package names before returning install commands", async () => {
+    const record = await inspectExternalPackage("npm", "semi;colon", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://registry.npmjs.org/semi%3Bcolon/latest") {
+          return jsonResponse({
+            description: "Quoted package fixture.",
+            dist: {
+              integrity: "sha512-quoted",
+              signatures: [{ keyid: "SHA256:quoted", sig: "quoted" }]
+            },
+            license: "MIT",
+            name: "semi;colon",
+            repository: { url: "git+https://github.com/example/semi-colon.git" },
+            version: "1.0.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/semi%3Bcolon") {
+          return jsonResponse({ downloads: 1000, package: "semi;colon" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      }
+    });
+    const plan = createExternalInstallPlan(record);
+
+    expect(record.install.command).toBe("npm install 'semi;colon'");
+    expect(plan.safety.commandRisk).toBe("low");
+    expect(plan.plan.commandDetails[0]).toMatchObject({
+      command: "npm install 'semi;colon'",
+      hostedApiExecutes: false,
+      risk: "low"
+    });
+  });
+
+  test("surfaces PyPI source-only release build risk", async () => {
+    const record = await inspectExternalPackage("pypi", "source-only", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://pypi.org/pypi/source-only/json") {
+          return jsonResponse({
+            info: {
+              classifiers: ["License :: OSI Approved :: MIT License"],
+              name: "source-only",
+              package_url: "https://pypi.org/project/source-only/",
+              project_urls: { Source: "https://github.com/example/source-only" },
+              requires_python: ">=3.10",
+              summary: "Source only fixture.",
+              version: "1.0.0"
+            },
+            urls: [
+              {
+                digests: { sha256: "sourceonlysha256" },
+                filename: "source_only-1.0.0.tar.gz",
+                has_sig: false,
+                packagetype: "sdist",
+                size: 2048,
+                upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
+              }
+            ],
+            vulnerabilities: []
+          });
+        }
+        if (url === "https://pypi.org/simple/source-only/") {
+          return jsonResponse({
+            files: [
+              {
+                "core-metadata": { sha256: "sourceonlycore" },
+                filename: "source_only-1.0.0.tar.gz",
+                hashes: { sha256: "sourceonlysha256" },
+                url: "https://files.pythonhosted.org/packages/source-only/source_only-1.0.0.tar.gz"
+              }
+            ],
+            name: "source-only"
+          });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      }
+    });
+
+    expect(record.trust.warnings).toContain("PyPI latest release has only source distribution files; local install may execute build backend code.");
+    expect(record.trust.signals).toContain("PyPI latest release is source-only and may run local build backend code during installation.");
+    expect(record.trust.factors).toContainEqual(
+      expect.objectContaining({
+        category: "security",
+        impact: "negative",
+        label: "Warning"
+      })
+    );
+  });
+
   test("quotes Hugging Face snapshot commands safely", async () => {
     const record = await inspectExternalPackage("huggingface-model", "example/quote-model", {
       fetchImpl: async () =>
