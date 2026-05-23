@@ -50,7 +50,10 @@ export async function GET(request: Request): Promise<Response> {
       probe: {
         cacheTtlMs: SOURCE_PROBE_CACHE_TTL_MS,
         mode: shouldProbe ? "live" : "capability",
-        timeoutMs: SOURCE_PROBE_TIMEOUT_MS
+        timeoutMs: SOURCE_PROBE_TIMEOUT_MS,
+        timeoutMsBySource: {
+          mcp: SLOW_SOURCE_PROBE_TIMEOUT_MS
+        }
       },
       rateLimit: {
         activeStore: activeRateLimitStore,
@@ -90,6 +93,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 const SOURCE_PROBE_TIMEOUT_MS = 1_800;
+const SLOW_SOURCE_PROBE_TIMEOUT_MS = 6_500;
 const SOURCE_PROBE_CACHE_TTL_MS = 30_000;
 
 interface SourceLiveProbe {
@@ -157,7 +161,7 @@ async function probeSource(source: ExternalPackageSource): Promise<SourceLivePro
   const endpoint = probeEndpoint(source);
   const startedAt = Date.now();
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), SOURCE_PROBE_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), sourceProbeTimeoutMs(source));
   try {
     const response = await fetch(endpoint, {
       headers: externalSourceRequestHeaders(endpoint),
@@ -184,6 +188,10 @@ async function probeSource(source: ExternalPackageSource): Promise<SourceLivePro
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function sourceProbeTimeoutMs(source: ExternalPackageSource): number {
+  return source === "mcp" ? SLOW_SOURCE_PROBE_TIMEOUT_MS : SOURCE_PROBE_TIMEOUT_MS;
 }
 
 function probeEndpoint(source: ExternalPackageSource): string {

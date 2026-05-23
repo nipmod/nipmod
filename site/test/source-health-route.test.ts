@@ -126,6 +126,7 @@ describe("source health route", () => {
     expect(response.status).toBe(200);
     expect(body.probe.mode).toBe("live");
     expect(body.probe.cacheTtlMs).toBeGreaterThan(0);
+    expect(body.probe.timeoutMsBySource.mcp).toBeGreaterThan(body.probe.timeoutMs);
     expect(body.summary.liveOk).toBe(6);
     expect(body.summary.liveFailed).toBe(0);
     expect(body.summary.liveCached).toBe(0);
