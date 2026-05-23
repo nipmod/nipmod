@@ -74,7 +74,7 @@ export const CANDIDATES: CandidateDefinition[] = [
   { repo: "browserless/browserless", role: "headless-browser-service", stack: "service" }
 ];
 
-const USER_AGENT = "nipmod-source-crawler-candidate-audit/1.2.7 (+https://nipmod.com)";
+const USER_AGENT = "nipmod-source-crawler-candidate-audit/1.2.8 (+https://nipmod.com)";
 const PERMISSIVE_LICENSES = new Set(["Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause", "ISC"]);
 const DIRECT_BLOCK_LICENSES = new Set(["AGPL-3.0", "GPL-3.0", "GPL-2.0"]);
 

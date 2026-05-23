@@ -5,6 +5,7 @@ import { GET as resolveGet } from "../app/api/resolve/route";
 import { GET as searchGet } from "../app/api/search/route";
 import {
   createExternalInstallPlan,
+  externalSourceRequestHeaders,
   inspectExternalPackage,
   resetExternalSourceRuntimeStateForTests,
   searchExternalPackages,
@@ -89,6 +90,35 @@ describe("external package resolver", () => {
       },
       status: "failed"
     });
+  });
+
+  test("uses validated PyPI task hints for broad package searches", async () => {
+    const requested: string[] = [];
+    const result = await searchExternalPackages("http client", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        requested.push(url);
+        if (url === "https://pypi.org/pypi/requests/json") {
+          return pyPiProjectResponse("requests", "2.34.2", "https://github.com/psf/requests");
+        }
+        if (url === "https://pypi.org/pypi/httpx/json") {
+          return pyPiProjectResponse("httpx", "0.28.2", "https://github.com/encode/httpx");
+        }
+        if (url === "https://pypi.org/simple/requests/" || url === "https://pypi.org/simple/httpx/") {
+          const project = url.includes("/httpx/") ? "httpx" : "requests";
+          return pyPiSimpleResponse(project);
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 3,
+      sources: ["pypi"]
+    });
+
+    expect(requested).toContain("https://pypi.org/pypi/requests/json");
+    expect(requested).toContain("https://pypi.org/pypi/httpx/json");
+    expect(result.records.map((record) => record.id)).toEqual(expect.arrayContaining(["pypi:requests", "pypi:httpx"]));
+    expect(result.records.every((record) => record.source === "pypi")).toBe(true);
+    expect(result.selection.candidates.length).toBeGreaterThan(0);
   });
 
   test("inspects exact packages and creates safe install plans", async () => {
@@ -611,9 +641,13 @@ describe("external package resolver", () => {
     const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
     expect(pypi.trust.signals).toContain("PyPI latest release files returned: 1.");
     expect(pypi.trust.signals).toContain("PyPI latest release files with digest metadata: 1.");
+    expect(pypi.trust.signals).toContain("PyPI simple API provenance links returned for 1 latest release file(s).");
+    expect(pypi.trust.signals).toContain("PyPI simple API core metadata hashes returned for 1 latest release file(s).");
+    expect(pypi.trust.signals).toContain("PyPI simple API dist-info metadata hashes returned for 1 latest release file(s).");
     expect(pypi.trust.signals).toContain("PyPI latest release file types: bdist_wheel.");
     expect(pypi.trust.signals).toContain("PyPI latest release files are not marked yanked.");
     expect(pypi.trust.signals).toContain("PyPI requires-python: >=3.11.");
+    expect(pypi.trust.dimensions.provenanceStatus).toBe("attested");
 
     const github = await inspectExternalPackage("github", "example/depth-repo", { fetchImpl: sourceDepthFetch });
     expect(github.trust.warnings).toContain("GitHub marks this repository as archived.");
@@ -687,6 +721,15 @@ describe("external package resolver", () => {
     const tooLargeLimitBody = await tooLargeLimit.json();
     expect(tooLargeLimit.status).toBe(400);
     expect(tooLargeLimitBody.code).toBe("invalid_limit");
+  });
+
+  test("requests PyPI Simple API JSON for provenance depth", () => {
+    expect(externalSourceRequestHeaders("https://pypi.org/simple/requests/")).toMatchObject({
+      accept: "application/vnd.pypi.simple.v1+json"
+    });
+    expect(externalSourceRequestHeaders("https://pypi.org/pypi/requests/json")).toMatchObject({
+      accept: "application/json"
+    });
   });
 });
 
@@ -796,6 +839,53 @@ async function mockFetch(input: string | URL | Request): Promise<Response> {
   return jsonResponse({ error: "not found" }, 404);
 }
 
+function pyPiProjectResponse(name: string, version: string, sourceUrl: string): Response {
+  return jsonResponse({
+    info: {
+      classifiers: ["License :: OSI Approved :: Apache Software License"],
+      name,
+      package_url: `https://pypi.org/project/${name}/`,
+      project_urls: { Source: sourceUrl },
+      requires_python: ">=3.10",
+      summary: `${name} fixture.`,
+      version
+    },
+    urls: [
+      {
+        digests: { sha256: `${name}sha256` },
+        filename: `${name.replace(/-/g, "_")}-${version}-py3-none-any.whl`,
+        has_sig: false,
+        packagetype: "bdist_wheel",
+        size: 1024,
+        upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
+      }
+    ],
+    vulnerabilities: []
+  });
+}
+
+function pyPiSimpleResponse(name: string): Response {
+  return jsonResponse({
+    files: [
+      {
+        "core-metadata": { sha256: `${name}core` },
+        filename: `${name.replace(/-/g, "_")}-2.34.2-py3-none-any.whl`,
+        hashes: { sha256: `${name}sha256` },
+        provenance: `https://pypi.org/integrity/${name}/2.34.2/${name}-2.34.2-py3-none-any.whl/provenance`,
+        url: `https://files.pythonhosted.org/packages/${name}/${name}-2.34.2-py3-none-any.whl`
+      },
+      {
+        "core-metadata": { sha256: `${name}core` },
+        filename: `${name.replace(/-/g, "_")}-0.28.2-py3-none-any.whl`,
+        hashes: { sha256: `${name}sha256` },
+        provenance: `https://pypi.org/integrity/${name}/0.28.2/${name}-0.28.2-py3-none-any.whl/provenance`,
+        url: `https://files.pythonhosted.org/packages/${name}/${name}-0.28.2-py3-none-any.whl`
+      }
+    ],
+    name
+  });
+}
+
 async function sourceDepthFetch(input: string | URL | Request): Promise<Response> {
   const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
 
@@ -850,6 +940,22 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
         }
       ],
       vulnerabilities: []
+    });
+  }
+
+  if (url === "https://pypi.org/simple/depth-pypi/") {
+    return jsonResponse({
+      files: [
+        {
+          "core-metadata": { sha256: "core123" },
+          "data-dist-info-metadata": { sha256: "dist123" },
+          filename: "depth_pypi-2.0.0-py3-none-any.whl",
+          hashes: { sha256: "abc123" },
+          provenance: "https://pypi.org/integrity/depth-pypi/2.0.0/depth_pypi-2.0.0-py3-none-any.whl/provenance",
+          url: "https://files.pythonhosted.org/packages/depth/depth_pypi-2.0.0-py3-none-any.whl"
+        }
+      ],
+      name: "depth-pypi"
     });
   }
 

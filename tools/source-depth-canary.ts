@@ -25,12 +25,14 @@ const DEFAULT_CANARIES = [
     name: "PyPI package depth",
     path: "/api/inspect?source=pypi&name=requests",
     requiredDimensions: {
-      provenanceStatus: "integrity"
+      provenanceStatus: "attested"
     },
     requiredSignals: [
       "PyPI returned no vulnerabilities",
       "PyPI latest release files returned",
       "digest metadata",
+      "PyPI simple API provenance links returned",
+      "PyPI simple API core metadata hashes returned",
       "PyPI latest release file types:",
       "PyPI latest release files are not marked yanked.",
       "requires-python"
@@ -184,7 +186,7 @@ async function fetchJson(url, fetchFn) {
     const response = await fetchFn(url, {
       headers: {
         accept: "application/json",
-        "user-agent": "nipmod-source-depth-canary/1.2.7 (+https://nipmod.com)"
+        "user-agent": "nipmod-source-depth-canary/1.2.8 (+https://nipmod.com)"
       },
       signal: controller.signal
     });

@@ -216,8 +216,8 @@ npm:
 
 PyPI:
 
-- Replace exact-name-only lookup with real broad search or a durable searchable index.
-- Capture release files, hashes, classifiers, requires-python and vulnerabilities.
+- Replace exact-name-only lookup with real broad search or a durable searchable index. Interim done: validated task hints expand common agent queries, but every returned result is still re-inspected against PyPI before it enters the response.
+- Capture release files, hashes, Simple API provenance links, core metadata hashes, classifiers, requires-python and vulnerabilities.
 - Normalize project URLs and dependency metadata.
 
 GitHub:

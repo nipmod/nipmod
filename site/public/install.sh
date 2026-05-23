@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${NIPMOD_VERSION:-1.2.7}"
+VERSION="${NIPMOD_VERSION:-1.2.8}"
 BASE_URL="${NIPMOD_BASE_URL:-https://nipmod.com}"
 PACKAGE_NAME="${NIPMOD_PACKAGE_NAME:-nipmod-${VERSION}.tgz}"
 PACKAGE_URL="${NIPMOD_PACKAGE_URL:-${BASE_URL}/releases/${PACKAGE_NAME}}"

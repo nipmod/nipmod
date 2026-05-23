@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.8 - 2026-05-23
+
+### Added
+
+- PyPI task-search hints for common agent queries such as HTTP clients, web frameworks, Telegram bots, data tools, testing tools, CLI tools, crawlers, databases and ML packages.
+- PyPI Simple API enrichment for provenance links, core metadata hashes and dist-info metadata hashes.
+
+### Verified
+
+- PyPI hint candidates are still re-inspected against PyPI before they can appear in API responses.
+- Source-depth canaries now require PyPI attestation-level provenance when the upstream source exposes it.
+
 ## 1.2.7 - 2026-05-23
 
 ### Added
