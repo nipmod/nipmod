@@ -2,7 +2,9 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
-const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const projectRoot = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = dirname(projectRoot);
+const tracingRoot = projectRoot.startsWith("/vercel/") ? projectRoot : workspaceRoot;
 const isDevelopment = process.env.NODE_ENV === "development";
 const scriptSrc = isDevelopment ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'";
 const connectSrc = isDevelopment
@@ -86,7 +88,7 @@ const nextConfig: NextConfig = {
       }
     ];
   },
-  outputFileTracingRoot: workspaceRoot,
+  outputFileTracingRoot: tracingRoot,
   reactStrictMode: true
 };
 
