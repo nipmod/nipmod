@@ -79,6 +79,7 @@ Recent hardening:
 - Launch verification now performs a live source probe through `/api/sources/health?probe=live` and fails if any configured source is unreachable.
 - GitHub exact repo inspect now detects common package manifest files and package.json dependency/script metadata when GitHub exposes them.
 - Source crawling now has an API-first policy, candidate audit and admission checklist so future crawler workers do not bypass official source APIs, robots rules, terms or licensing boundaries.
+- Launch verification now runs the rate-limit canary, and `--require-distributed-rate-limit` promotes Supabase RPC activation from advisory status to a hard gate.
 
 ## Workstream 1: API Contract
 
@@ -377,6 +378,7 @@ Tasks:
 - Require a production hash salt when usage logging is enabled.
 - Use HMAC-style hashes for query, package and client hashes.
 - Add a usage-ingestion canary. Done as `pnpm usage:canary`; launch verify runs it in skip/pass mode depending on available env.
+- Add a distributed rate-limit canary. Done as `pnpm rate-limit:canary`; launch verify runs it in skip/pass mode by default and hard-fails it with `--require-distributed-rate-limit`.
 - Record route, status, source, result count, latency and error code.
 - Do not store raw queries, raw package names, raw IPs, raw user agents or raw API keys.
 - Add dashboards later only after the underlying events are correct.
