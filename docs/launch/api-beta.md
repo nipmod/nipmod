@@ -44,6 +44,16 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
 ```
 
+## Public Builder Links
+
+| Link | Use |
+| --- | --- |
+| `https://nipmod.com/api-access` | Human-readable API beta page. |
+| `https://nipmod.com/api/openapi` | Machine-readable OpenAPI contract. |
+| `https://nipmod.com/api/sources/health` | Source, archive and rate-limit health. |
+| `https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow` | Copyable agent workflow examples. |
+| `docs/api/trust-scoring.md` | Trust score thresholds, dimensions and boundaries. |
+
 ## Agent Prompt
 
 ```text

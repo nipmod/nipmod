@@ -12,6 +12,8 @@ Trust output uses policy `external-v2`. Search output includes `selection.policy
 
 `trust.dimensions` separates `qualityScore`, `popularitySignal`, `securityConfidence` and `provenanceStatus`. Popularity helps ranking, but it is not treated as security proof.
 
+The public scoring explanation lives in [trust scoring](../api/trust-scoring.md).
+
 ## Access
 
 Public beta requests can be made without a key. Optional keys increase rate limits for builders and partners.

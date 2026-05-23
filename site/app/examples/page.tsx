@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createPageMetadata } from "../metadata";
 import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell } from "../docs-shell";
 
@@ -29,7 +30,11 @@ export default function ExamplesPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Agent prompt" title="Use from an agent">
-        <DocsCode>{"Find a package for HTTP requests. Use Nipmod search first, inspect the best candidate, then show me the install plan before changing the workspace."}</DocsCode>
+        <DocsCode>{"Find a package for HTTP requests. Use Nipmod first: search, inspect the selected record and show the install plan before changing the workspace."}</DocsCode>
+      </DocsSection>
+
+      <DocsSection eyebrow="Output" title="What the agent should return">
+        <DocsCode>{"Package: <source>:<name>\nSource: <original URL>\nLicense: <license or unknown>\nTrust: <score> / <decision> / <risk>\nWarnings: <warnings or none>\nInstall plan: <command as review data>\nBoundary: approval required before workspace write"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Exact records" title="Canary examples">
@@ -42,6 +47,20 @@ export default function ExamplesPage() {
           </DocsCard>
           <DocsCard label="Hugging Face" title="bert-base-uncased">
             <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
+      <DocsSection eyebrow="Files" title="Copyable workflow examples">
+        <DocsGrid>
+          <DocsCard label="Codex" title="Codex agent prompt">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/codex.md">Open example</Link></p>
+          </DocsCard>
+          <DocsCard label="Claude Code" title="Claude Code prompt">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/claude-code.md">Open example</Link></p>
+          </DocsCard>
+          <DocsCard label="MCP" title="Hosted MCP example">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/mcp-host.md">Open example</Link></p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

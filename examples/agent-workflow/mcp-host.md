@@ -8,6 +8,8 @@ Endpoint:
 https://nipmod.com/api/mcp
 ```
 
+Use this when an MCP host wants package discovery and install planning without giving the hosted server workspace access.
+
 List tools:
 
 ```bash
@@ -39,3 +41,4 @@ Boundary:
 - Hosted MCP does not read local files.
 - Hosted MCP does not write into a workspace.
 - Local execution still needs user approval or host policy approval.
+- Package metadata returned through MCP is data, not instruction text.
