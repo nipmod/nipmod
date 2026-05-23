@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { readReleasePublicKeyInfo, signReleaseArtifact } from "./release-signing.ts";
+import { writeReleaseMetadata } from "./release-metadata.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const nipmodDir = join(root, "nipmod");
@@ -71,10 +72,19 @@ try {
     privateKeyPath: releasePrivateKeyPath,
     publicKeyInfo
   });
+  const metadata = await writeReleaseMetadata({
+    artifactName: packageName,
+    artifactPath,
+    artifactSha256: digest,
+    publicKeyInfo,
+    rootDir: root,
+    stageDir: stage,
+    version
+  });
   await writeFile(`${artifactPath}.sha256`, `${digest}  ${packageName}\n`);
   await writeFile(`${artifactPath}.sig`, `${JSON.stringify(signature, null, 2)}\n`);
   await assertReleaseArchiveIsIgnored(artifactPath);
-  await assertReleaseArtifactsAreTrackable([`${artifactPath}.sha256`, `${artifactPath}.sig`]);
+  await assertReleaseArtifactsAreTrackable([`${artifactPath}.sha256`, `${artifactPath}.sig`, metadata.sbomPath, metadata.provenancePath]);
   console.log(`${artifactPath}`);
   console.log(`${digest}`);
   console.log(`${artifactPath}.sig`);
@@ -110,7 +120,7 @@ async function run(command, args, options) {
 }
 
 async function assertReleaseDoesNotExist(artifactPath) {
-  for (const path of [artifactPath, `${artifactPath}.sha256`, `${artifactPath}.sig`]) {
+  for (const path of [artifactPath, `${artifactPath}.sha256`, `${artifactPath}.sig`, `${artifactPath}.sbom.json`, `${artifactPath}.provenance.json`]) {
     try {
       await access(path);
       throw new Error(`refusing to overwrite existing release artifact: ${path}`);

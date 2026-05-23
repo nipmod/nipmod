@@ -286,6 +286,53 @@ function createFixture({
   };
   const installerBytes = Buffer.from("#!/bin/sh\necho install\n");
   const releaseBytes = Buffer.from("release artifact");
+  const releaseSha256 = createHash("sha256").update(releaseBytes).digest("hex");
+  const releaseSbom = {
+    artifact: {
+      mediaType: "application/gzip",
+      name: "nipmod-0.1.13.tgz",
+      sha256: releaseSha256
+    },
+    components: [
+      { executable: true, name: "dist/cli.js", sha256: "a".repeat(64), size: 123, type: "executable" },
+      { executable: false, name: "package.json", sha256: "b".repeat(64), size: 80, type: "package-manifest" }
+    ],
+    formatVersion: 1,
+    generatedAt: "2026-05-16T12:40:00.000Z",
+    package: { name: "nipmod", version: "0.1.13" },
+    summary: { components: 2, executableComponents: 1 },
+    type: "dev.nipmod.release.sbom.v1"
+  };
+  const releaseProvenance = {
+    artifact: {
+      mediaType: "application/gzip",
+      name: "nipmod-0.1.13.tgz",
+      sha256: releaseSha256
+    },
+    build: {
+      builder: "tools/build-nipmod-release.ts",
+      entrypoint: "nipmod/src/cli.ts",
+      packageManager: "pnpm@10.30.0",
+      target: "node22-esm-bundle"
+    },
+    formatVersion: 1,
+    generatedAt: "2026-05-16T12:40:00.000Z",
+    materials: [
+      { path: "package.json", sha256: "b".repeat(64), type: "release-manifest" },
+      { path: "dist/cli.js", sha256: "a".repeat(64), type: "release-file" }
+    ],
+    package: { name: "nipmod", version: "0.1.13" },
+    signing: {
+      algorithm: "Ed25519",
+      publicKeySpkiSha256: releasePublicKey.publicKeySpkiSha256
+    },
+    source: {
+      commit: "1".repeat(40),
+      dirty: false,
+      repository: "https://github.com/nipmod/nipmod"
+    },
+    type: "dev.nipmod.release.provenance.v1"
+  };
   const releaseSignature = {
     algorithm: "Ed25519",
     artifact: "nipmod-0.1.13.tgz",
@@ -300,7 +347,7 @@ function createFixture({
     logId: "did:key:z6Mklog",
     releaseName: "nipmod-0.1.13.tgz",
     releasePublicKey,
-    releaseSha256: createHash("sha256").update(releaseBytes).digest("hex"),
+    releaseSha256,
     version: "0.1.13",
     witnessDid: "did:key:z6Mkwitness",
     witnessMaxAgeMs: 15 * 60 * 1000
@@ -367,6 +414,8 @@ function createFixture({
             publicKeySpkiBase64: releasePublicKey.publicKeySpkiBase64,
             spkiSha256: releasePublicKey.publicKeySpkiSha256
           },
+          provenance: `https://nipmod.test/releases/${expected.releaseName}.provenance.json`,
+          sbom: `https://nipmod.test/releases/${expected.releaseName}.sbom.json`,
           signature: `https://nipmod.test/releases/${expected.releaseName}.sig`,
           version: expected.version
         },
@@ -660,6 +709,8 @@ function createFixture({
     [`GET ${endpoints.advisoriesSignature}`]: jsonResponse(advisorySignature),
     "GET https://nipmod.test/install.sh": bytesResponse(installerBytes),
     "GET https://nipmod.test/releases/nipmod-0.1.13.tgz": bytesResponse(releaseBytes),
+    "GET https://nipmod.test/releases/nipmod-0.1.13.tgz.provenance.json": jsonResponse(releaseProvenance),
+    "GET https://nipmod.test/releases/nipmod-0.1.13.tgz.sbom.json": jsonResponse(releaseSbom),
     "GET https://nipmod.test/releases/nipmod-0.1.13.tgz.sig": jsonResponse(releaseSignature),
     [`GET ${endpoints.checkpoint}`]: jsonResponse(checkpoint),
     [`GET ${endpoints.witnessHealth}`]: jsonResponse({

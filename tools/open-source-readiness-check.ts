@@ -60,6 +60,8 @@ const requiredFiles = [
   "tools/source-depth-canary.ts",
   "tools/source-crawler-candidate-audit.ts",
   "tools/source-crawler-candidate-audit.test.ts",
+  "tools/release-metadata.ts",
+  "tools/release-metadata.test.ts",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",
@@ -143,6 +145,8 @@ check(
 const gitignore = read(".gitignore");
 check("gitignore:release-archives-ignored", () => gitignore.includes("site/public/releases/*.tgz"));
 check("gitignore:release-sidecars-trackable", () => gitignore.includes("!site/public/releases/*.tgz.sha256"));
+check("gitignore:release-sbom-trackable", () => !gitignore.includes("site/public/releases/*.sbom.json"));
+check("gitignore:release-provenance-trackable", () => !gitignore.includes("site/public/releases/*.provenance.json"));
 const siteNpmrc = read("site/.npmrc");
 check("site-npmrc:sharp-build-policy", () => siteNpmrc.includes("only-built-dependencies[]=sharp"));
 

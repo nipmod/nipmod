@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.9 - 2026-05-23
+
+### Added
+
+- Release SBOM sidecars for CLI tarballs.
+- Release provenance sidecars with artifact digest, build material digests, source state and signing key fingerprint.
+
+### Verified
+
+- Production monitor now verifies release SBOM and provenance URLs, artifact digests and required materials.
+- `verify-all` now fails when local or live release metadata is missing or inconsistent.
+
 ## 1.2.8 - 2026-05-23
 
 ### Added

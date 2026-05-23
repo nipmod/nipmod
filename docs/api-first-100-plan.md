@@ -429,8 +429,8 @@ Tasks:
 - Add Scorecard as a required branch check.
 - Enable CODEOWNER review for critical paths.
 - Confirm Dependabot security updates and secret scanning settings.
-- Generate SBOM for release artifacts.
-- Add release provenance or artifact attestations.
+- Generate SBOM for release artifacts. Done for CLI release tarballs with `.sbom.json` sidecars.
+- Add release provenance or artifact attestations. Done for CLI release tarballs with `.provenance.json` sidecars; hosted platform attestations can be added later as an additional channel.
 - Keep CodeQL clean.
 - Keep signed commits and linear history.
 
@@ -446,7 +446,7 @@ Critical paths:
 Definition of Done:
 
 - Security-sensitive changes require the right checks and reviews.
-- Release artifacts have digest, SBOM and provenance.
+- Release artifacts have digest, detached signature, SBOM and provenance sidecars.
 - GitHub security posture is visible and enforceable.
 
 ## Workstream 12: Public Docs and Agent Examples
@@ -515,7 +515,7 @@ Definition of Done:
 - [ ] Archive has 100k+ refreshed public records.
 - [ ] Source freshness and archive counts are accurate.
 - [ ] Trust v3 includes provenance, advisory, dependency and maintainer/repo health signals.
-- [ ] Release artifacts have SBOM and provenance.
+- [x] Release artifacts have SBOM and provenance.
 - [ ] All launch gates pass from a clean checkout.
 
 ## Release Rule

@@ -311,6 +311,12 @@ export async function runSyntheticMonitor({
     assertEqual(discovery.install?.release?.version, config.version, "live release version drifted");
     assertEqual(discovery.install?.release?.artifactSha256, config.releaseSha256, "live release hash drifted");
     assertEqual(discovery.install?.release?.artifact, `${endpoints.home}/releases/${config.releaseName}`, "live release artifact URL drifted");
+    assertEqual(discovery.install?.release?.sbom, `${endpoints.home}/releases/${config.releaseName}.sbom.json`, "live release SBOM URL drifted");
+    assertEqual(
+      discovery.install?.release?.provenance,
+      `${endpoints.home}/releases/${config.releaseName}.provenance.json`,
+      "live release provenance URL drifted"
+    );
     assertPublicKeyMatches(discovery.install?.release?.publicKey, config.releasePublicKey, "live release key");
     assertPublicKeyMatches(discovery.advisoriesPublicKey, config.advisoryPublicKey, "live advisory key");
     assertEqual(discovery.transparency?.logId, config.logId, "live transparency log ID drifted");
@@ -333,8 +339,24 @@ export async function runSyntheticMonitor({
       releaseBytes,
       signature: await fetchJson(discovery.install?.release?.signature, timedFetch)
     });
+    const sbom = await fetchJson(discovery.install?.release?.sbom, timedFetch);
+    assertEqual(sbom.type, "dev.nipmod.release.sbom.v1", "release SBOM type mismatch");
+    assertEqual(sbom.artifact?.name, config.releaseName, "release SBOM artifact mismatch");
+    assertEqual(sbom.artifact?.sha256, config.releaseSha256, "release SBOM digest mismatch");
+    if (!Array.isArray(sbom.components) || !sbom.components.some((component) => component.name === "dist/cli.js")) {
+      throw new Error("release SBOM missing CLI component");
+    }
+    const provenance = await fetchJson(discovery.install?.release?.provenance, timedFetch);
+    assertEqual(provenance.type, "dev.nipmod.release.provenance.v1", "release provenance type mismatch");
+    assertEqual(provenance.artifact?.name, config.releaseName, "release provenance artifact mismatch");
+    assertEqual(provenance.artifact?.sha256, config.releaseSha256, "release provenance digest mismatch");
+    assertEqual(provenance.signing?.publicKeySpkiSha256, config.releasePublicKey.publicKeySpkiSha256, "release provenance signing key mismatch");
+    if (!Array.isArray(provenance.materials) || !provenance.materials.some((material) => material.path === "package.json")) {
+      throw new Error("release provenance missing package manifest material");
+    }
     return {
-      release: config.releaseName
+      release: config.releaseName,
+      releaseMetadata: ["sbom", "provenance"]
     };
   });
 

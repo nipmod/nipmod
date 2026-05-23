@@ -108,6 +108,8 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.install.release).toMatchObject({
       artifact: `https://nipmod.com/releases/nipmod-${version}.tgz`,
       artifactSha256: sha256FromChecksum(join(siteRoot, "public", "releases", `nipmod-${version}.tgz.sha256`)),
+      provenance: `https://nipmod.com/releases/nipmod-${version}.tgz.provenance.json`,
+      sbom: `https://nipmod.com/releases/nipmod-${version}.tgz.sbom.json`,
       signature: `https://nipmod.com/releases/nipmod-${version}.tgz.sig`,
       version
     });

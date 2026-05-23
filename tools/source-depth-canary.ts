@@ -186,7 +186,7 @@ async function fetchJson(url, fetchFn) {
     const response = await fetchFn(url, {
       headers: {
         accept: "application/json",
-        "user-agent": "nipmod-source-depth-canary/1.2.8 (+https://nipmod.com)"
+        "user-agent": "nipmod-source-depth-canary/1.2.9 (+https://nipmod.com)"
       },
       signal: controller.signal
     });
