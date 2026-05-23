@@ -31,6 +31,7 @@ const requiredFiles = [
   "docs/decisions/0003-durable-archive-gating.md",
   "docs/specs/public-api.md",
   "docs/specs/source-resolvers.md",
+  "docs/specs/source-crawling.md",
   "docs/specs/trust-signals.md",
   "docs/specs/archive-records.md",
   "docs/package-intelligence-schema.sql",
@@ -51,6 +52,8 @@ const requiredFiles = [
   "tools/seed-package-intelligence.ts",
   "tools/api-usage-canary.ts",
   "tools/source-depth-canary.ts",
+  "tools/source-crawler-candidate-audit.ts",
+  "tools/source-crawler-candidate-audit.test.ts",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
   ".github/workflows/codeql.yml",
@@ -85,6 +88,7 @@ check("readme:npm-token-link", () => readme.includes("| $NPM on Base | https://t
 check("readme:security", () => readme.includes("Security: `SECURITY.md`"));
 check("readme:governance", () => readme.includes("Governance: [`GOVERNANCE.md`](GOVERNANCE.md)"));
 check("readme:api-spec", () => readme.includes("docs/specs/public-api.md"));
+check("readme:source-crawling-spec", () => readme.includes("docs/specs/source-crawling.md"));
 check("readme:api-launch-kit", () => readme.includes("docs/launch/api-beta.md"));
 check("readme:no-banned-launch-copy", () => !/the goal is simple|this is exactly|next step is simple/i.test(readme));
 
@@ -108,6 +112,13 @@ check("agent-example:mcp-external", () => mcpExample.includes("nipmod.external_i
 const apiBetaLaunch = read("docs/launch/api-beta.md");
 check("launch-kit:api-beta", () => apiBetaLaunch.includes("Trust Engine v2") && apiBetaLaunch.includes("Production monitor passes before posting."));
 check("launch-kit:operator-seed", () => apiBetaLaunch.includes("pnpm archive:seed") && apiBetaLaunch.includes("NIPMOD_ARCHIVE_WRITE_TOKEN"));
+
+const sourceCrawling = read("docs/specs/source-crawling.md");
+check("source-crawling:api-first", () => sourceCrawling.includes("Prefer official APIs."));
+check("source-crawling:robots-terms", () => sourceCrawling.includes("robots") && sourceCrawling.includes("terms"));
+check("source-crawling:candidate-crawlee", () => sourceCrawling.includes("`apify/crawlee`") && sourceCrawling.includes("Preferred future crawler worker candidate"));
+check("source-crawling:candidate-agpl-boundary", () => sourceCrawling.includes("`firecrawl/firecrawl`") && sourceCrawling.includes("AGPL"));
+check("source-crawling:audit-command", () => sourceCrawling.includes("pnpm crawler:audit"));
 
 const gitattributes = read(".gitattributes");
 check("linguist:public-html-generated", () => gitattributes.includes("site/public/*.html linguist-generated=true"));

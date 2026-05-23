@@ -127,3 +127,5 @@ A new source resolver needs:
 6. Tests with source fixtures.
 7. Public docs update.
 8. Monitor coverage before marketing claims.
+
+Crawler-backed enrichment must also pass the [source crawling policy](source-crawling.md). Source-native APIs stay primary; crawling is only a bounded fallback or enrichment path when the source allows it.

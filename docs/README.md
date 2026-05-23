@@ -16,6 +16,7 @@ Public docs are organized around the product surface that agents and maintainers
 - [Package intelligence architecture](package-intelligence-architecture.md)
 - [Trust model](trust-model.md)
 - [Source resolver spec](specs/source-resolvers.md)
+- [Source crawling spec](specs/source-crawling.md)
 - [Trust signals spec](specs/trust-signals.md)
 - [Archive records spec](specs/archive-records.md)
 - [CLI contract](cli-contract.md)

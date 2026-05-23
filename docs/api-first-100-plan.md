@@ -78,6 +78,7 @@ Recent hardening:
 - Source-depth canary now checks live npm, PyPI, GitHub, Hugging Face and MCP inspect responses for concrete source-native trust signals.
 - Launch verification now performs a live source probe through `/api/sources/health?probe=live` and fails if any configured source is unreachable.
 - GitHub exact repo inspect now detects common package manifest files and package.json dependency/script metadata when GitHub exposes them.
+- Source crawling now has an API-first policy, candidate audit and admission checklist so future crawler workers do not bypass official source APIs, robots rules, terms or licensing boundaries.
 
 ## Workstream 1: API Contract
 
@@ -249,6 +250,7 @@ Goal: move from request-time federation to a real package intelligence archive.
 Architecture:
 
 - Source adapters with cursors, rate limits, retry/backoff and terms metadata.
+- Crawler candidates audited before adoption for license, stack fit, maintenance and direct-dependency risk.
 - Raw source snapshots with fetched time, response hash, source id and schema version.
 - Normalization workers that create canonical package intelligence records.
 - Enrichment workers for vulnerabilities, dependency risk, licenses, repo health, provenance and prompt-injection scan signals.
@@ -269,6 +271,7 @@ Later targets:
 
 Definition of Done:
 
+- Source crawling policy and candidate audit are present. Done in `docs/specs/source-crawling.md` and `pnpm crawler:audit`.
 - Archive records are no longer only manually seeded.
 - Search can return useful persisted records even when an upstream source is degraded.
 - Archive counts are accurate.
