@@ -27,11 +27,19 @@ const plan = await readJson(planUrl);
 console.log(
   JSON.stringify(
     {
+      candidates: search.records?.slice(0, 3)?.map((record: Record<string, any>) => ({
+        decision: record.trust?.decision,
+        id: record.id,
+        name: record.name,
+        score: record.trust?.score,
+        source: record.source
+      })),
       inspected: inspect.record?.id,
       query,
       recommendation: first.trust?.decision,
       source: first.source,
-      installPlan: plan.plan
+      installPlan: plan.plan,
+      safety: plan.safety
     },
     null,
     2
