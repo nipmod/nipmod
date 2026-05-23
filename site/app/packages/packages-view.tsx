@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { packageQuality } from "../../lib/package-quality";
 import { homepagePackages, type RegistryIndex, type RegistryPackage } from "../../lib/registry";
+import { DocsCard, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import registryData from "../registry-data.json";
 import { packageEvidenceHref, packagePageHref } from "./content";
 
@@ -43,143 +44,129 @@ export function PackagesView() {
   const showFeatured = hasPackages && query.trim() === "" && type === "all" && trust === "all";
 
   return (
-    <main className="package-archive-shell" id="main">
-      <section className="package-archive-top" aria-labelledby="archive-title">
-        <div className="archive-title-block">
-          <p className="eyebrow">Nipmod archive</p>
-          <h1 id="archive-title">Packages</h1>
-          <p className="archive-lead">Confirmed package records. Empty until a package passes the public gates.</p>
-        </div>
-
-        <dl className="archive-live-strip" aria-label="Archive status">
-          <div>
-            <dt>Packages</dt>
-            <dd>{stats.total}</dd>
-          </div>
-          <div>
-            <dt>Verified</dt>
-            <dd>{stats.verified}</dd>
-          </div>
-          <div>
-            <dt>Quorum</dt>
-            <dd>{stats.quorum}</dd>
-          </div>
-          <div>
-            <dt>Updated</dt>
-            <dd>{formatRegistryDate(registry.generatedAt)}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="archive-control-panel" aria-label="Package filters">
-        <label className="archive-search">
-          <span>Search</span>
-          <input
-            autoComplete="off"
-            inputMode="search"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="package, policy, skill, mcp..."
-            type="search"
-            value={query}
-          />
-        </label>
-
-        <div className="archive-control-row" aria-label="Trust filter">
-          {[
-            ["all", "All"],
-            ["verified", "Verified"],
-            ["review", "Review"]
-          ].map(([value, label]) => (
-            <button
-              aria-pressed={trust === value}
-              className="archive-segment"
-              data-active={trust === value}
-              key={value}
-              onClick={() => setTrust(value as TrustFilter)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="archive-control-row" aria-label="Sort packages">
-          {[
-            ["relevance", "Relevant"],
-            ["quality", "Quality"],
-            ["newest", "Newest"],
-            ["name", "Name"]
-          ].map(([value, label]) => (
-            <button
-              aria-pressed={sort === value}
-              className="archive-segment"
-              data-active={sort === value}
-              key={value}
-              onClick={() => setSort(value as SortKey)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <label className="archive-type-select">
-          <span>Type</span>
-          <select onChange={(event) => setType(event.target.value)} value={type}>
-            <option value="all">All types</option>
-            {types.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
-      </section>
-
-      {showFeatured ? (
-        <section className="archive-featured" aria-labelledby="featured-title">
-          <div className="archive-section-head">
-            <div>
-              <p className="eyebrow">Start here</p>
-              <h2 id="featured-title">Highest signal packages</h2>
-            </div>
-            <span>{topPackages.length} strong packages from the current registry</span>
-          </div>
-          <div className="archive-featured-grid">
-            {topPackages.map((pkg) => (
-              <FeaturedPackageCard key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <section className="archive-results" aria-labelledby="results-title">
-        <div className="archive-section-head">
-          <div>
-            <p className="eyebrow">Archive</p>
-            <h2 id="results-title">{filtered.length} packages</h2>
-          </div>
-          <span>{activeFilterLabel(query, type, trust, sort)}</span>
-        </div>
-
-        {filtered.length > 0 ? (
-          <div className="archive-card-grid">
-            {filtered.map((pkg, index) => (
-              <PackageCard index={index + 1} key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
-            ))}
-          </div>
-        ) : (
-          <div className="archive-empty">
-            <h3>{hasPackages ? "No packages match" : "No public packages yet"}</h3>
+    <DocsShell
+      description="The archive contains confirmed package records saved after public gates. Search still works through live external sources even when the public archive is empty."
+      eyebrow="Archive"
+      stats={[
+        { label: "Packages", value: stats.total },
+        { label: "Verified", value: stats.verified },
+        { label: "Quorum", value: stats.quorum },
+        { label: "Updated", value: formatRegistryDate(registry.generatedAt) }
+      ]}
+      title="Confirmed package records."
+    >
+      <DocsSection title="Archive status">
+        <DocsGrid>
+          <DocsCard title={hasPackages ? "Records available" : "No public packages yet"}>
             <p>
-              {hasPackages && hasActiveFilters
-                ? "Try a different package name, type or trust filter."
-                : "The seed archive has been cleared. New packages appear here only after passing the publish and verification gates."}
+              {hasPackages
+                ? "The records below passed the public package gates and can be inspected with source and trust context."
+                : "The public archive is intentionally clean. New records appear only after a useful package discovery is confirmed and passes the archive gates."}
             </p>
-          </div>
-        )}
-      </section>
-    </main>
+          </DocsCard>
+          <DocsCard title="Live source search">
+            <p>Agents do not need the archive to be populated before using Nipmod. They can search npm, PyPI, GitHub, Hugging Face and MCP through the API.</p>
+          </DocsCard>
+          <DocsCard title="Durable records">
+            <p>Archive records are for reuse and receipts. They should not be confused with ownership of external source packages.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
+      {hasPackages ? (
+        <>
+          <DocsSection title="Filter records">
+            <div className="docs-filter-panel" aria-label="Package filters">
+              <label>
+                <span>Search</span>
+                <input
+                  autoComplete="off"
+                  inputMode="search"
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="package, policy, skill, mcp..."
+                  type="search"
+                  value={query}
+                />
+              </label>
+              <label>
+                <span>Trust</span>
+                <select onChange={(event) => setTrust(event.target.value as TrustFilter)} value={trust}>
+                  <option value="all">All</option>
+                  <option value="verified">Verified</option>
+                  <option value="review">Review</option>
+                </select>
+              </label>
+              <label>
+                <span>Type</span>
+                <select onChange={(event) => setType(event.target.value)} value={type}>
+                  <option value="all">All types</option>
+                  {types.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Sort</span>
+                <select onChange={(event) => setSort(event.target.value as SortKey)} value={sort}>
+                  <option value="relevance">Relevant</option>
+                  <option value="quality">Quality</option>
+                  <option value="newest">Newest</option>
+                  <option value="name">Name</option>
+                </select>
+              </label>
+            </div>
+          </DocsSection>
+
+          {showFeatured ? (
+            <DocsSection title="Highest signal packages">
+              <DocsGrid>
+                {topPackages.map((pkg) => (
+                  <FeaturedPackageCard key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
+                ))}
+              </DocsGrid>
+            </DocsSection>
+          ) : null}
+
+          <DocsSection title={`${filtered.length} package records`}>
+            {filtered.length > 0 ? (
+              <div className="docs-package-list">
+                {filtered.map((pkg, index) => (
+                  <PackageCard index={index + 1} key={`${pkg.canonical}@${pkg.version}`} pkg={pkg} />
+                ))}
+              </div>
+            ) : (
+              <DocsCard title="No packages match">
+                <p>{hasActiveFilters ? "Try a different package name, type or trust filter." : activeFilterLabel(query, type, trust, sort)}</p>
+              </DocsCard>
+            )}
+          </DocsSection>
+        </>
+      ) : (
+        <DocsSection title="Use live search instead">
+          <DocsTable
+            rows={[
+              {
+                first: "Search",
+                second: <code>GET /api/search?q=http%20client&amp;sources=npm,pypi&amp;limit=5</code>,
+                third: "Find live candidates."
+              },
+              {
+                first: "Inspect",
+                second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
+                third: "Read trust factors."
+              },
+              {
+                first: "Plan",
+                second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
+                third: "Return approved install steps."
+              }
+            ]}
+          />
+        </DocsSection>
+      )}
+    </DocsShell>
   );
 }
 

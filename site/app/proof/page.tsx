@@ -1,88 +1,35 @@
+import { DocsCode, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
-import { proofContent } from "./content";
 
 export const metadata = createPageMetadata({
-  description: "Run the public Nipmod proof loop for install planning, audit checks and unsafe package blocking.",
+  description: "Run the public Nipmod proof loop for package discovery, install planning and source health checks.",
   path: "/proof",
   title: "Nipmod proof"
 });
 
 export default function ProofPage() {
   return (
-    <main className="page-shell" id="main">
-      <section className="proof-hero" aria-labelledby="proof-title">
-        <p className="eyebrow">Proof</p>
-        <h1 id="proof-title">{proofContent.headline}</h1>
-        <p className="lead">{proofContent.lead}</p>
-        <div className="actions" aria-label="Proof actions">
-          <a className="button button-primary" href="/quickstart#install">
-            Install
-          </a>
-          <a className="button button-ghost" href="/trust">
-            Trust
-          </a>
-          <a className="button button-ghost" href="/evidence#transcript">
-            Transcript
-          </a>
-        </div>
-      </section>
+    <DocsShell
+      description="Proof is the repeatable path that shows the API and resolver are reachable, structured and bounded."
+      eyebrow="Proof"
+      title="Public proof loop."
+    >
+      <DocsSection eyebrow="Run" title="Read only proof commands">
+        <DocsCode>{"curl 'https://nipmod.com/api/openapi'\ncurl 'https://nipmod.com/api/search?q=http%20client&limit=3'\ncurl 'https://nipmod.com/api/inspect?source=npm&name=undici'\ncurl 'https://nipmod.com/api/install-plan?source=npm&name=undici'\ncurl 'https://nipmod.com/api/sources/health'\ncurl 'https://nipmod.com/api/archive/status'"}</DocsCode>
+      </DocsSection>
 
-      <section className="trust-grid" aria-label="Proof state">
-        <article className="stat-tile">
-          <span>{proofContent.registry.count}</span>
-          <p>Verified packages</p>
-        </article>
-        <article className="stat-tile">
-          <span>{proofContent.registry.treeSize}</span>
-          <p>Transparency leaves</p>
-        </article>
-        <article className="stat-tile">
-          <span>{proofContent.registry.trust}</span>
-          <p>Registry trust</p>
-        </article>
-      </section>
-
-      <section className="proof-section" aria-labelledby="safe-title">
-        <div>
-          <p className="eyebrow">Safe path</p>
-          <h2 id="safe-title">Install one package. Verify every step.</h2>
-        </div>
-        <div className="proof-panel">
-          <pre className="install-command">
-            <code>{proofContent.safeCommands.join("\n")}</code>
-          </pre>
-          <dl className="proof-facts">
-            <div>
-              <dt>Package</dt>
-              <dd>{proofContent.packageName}</dd>
-            </div>
-            <div>
-              <dt>Expected trust</dt>
-              <dd>{proofContent.registry.trust}</dd>
-            </div>
-            <div>
-              <dt>Checkpoint</dt>
-              <dd>{proofContent.registry.rootHash}</dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="proof-section" aria-labelledby="blocked-title">
-        <div>
-          <p className="eyebrow">Blocks</p>
-          <h2 id="blocked-title">Unsafe manifests fail before release.</h2>
-        </div>
-        <div className="block-grid">
-          {proofContent.blockedCases.map((item) => (
-            <article className="block-card" key={item.label}>
-              <h3>{item.label}</h3>
-              <p>{item.expected}</p>
-              <span>{item.blockedBy}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <DocsSection eyebrow="Expected" title="What a clean proof shows">
+        <DocsTable
+          rows={[
+            ["OpenAPI", "The public contract returns a valid schema."],
+            ["Search", "The resolver returns normalized candidate records."],
+            ["Inspect", "An exact package record includes source and trust context."],
+            ["Install plan", "The response requires approval before workspace writes."],
+            ["Source health", "Supported source resolvers report status."],
+            ["Archive status", "Archive mode is explicit."]
+          ]}
+        />
+      </DocsSection>
+    </DocsShell>
   );
 }

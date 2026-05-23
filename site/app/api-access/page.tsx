@@ -1,170 +1,95 @@
 import { createPageMetadata } from "../metadata";
-import { OnePagePanelDeck, type OnePagePanel } from "../one-page-panels";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
 export const metadata = createPageMetadata({
-  description: "One hosted API agents can call for package discovery, trust checks and safe install plans.",
+  description: "Nipmod API endpoints for agent package search, inspection, install planning and MCP access.",
   path: "/api-access",
   title: "Nipmod API"
 });
 
-const endpoints = [
-  {
-    method: "GET",
-    path: "/api/search?q=<query>",
-    text: "Find candidates across supported package sources."
-  },
-  {
-    method: "GET",
-    path: "/api/inspect?source=npm&name=<package>",
-    text: "Inspect source, license, metrics, warnings and trust factors."
-  },
-  {
-    method: "GET",
-    path: "/api/install-plan?source=npm&name=<package>",
-    text: "Return a plan an agent can show before local execution."
-  },
-  {
-    method: "GET",
-    path: "/api/archive/prepare?source=npm&name=<package>",
-    text: "Prepare a confirmed-use archive record and receipt preview."
-  },
-  {
-    method: "POST",
-    path: "/api/mcp",
-    text: "Use the same read-only package surface through MCP."
-  }
-] as const;
-
-const examples = [
-  {
-    label: "Agent prompt",
-    command:
-      "Use Nipmod before choosing packages. Search, inspect, show trust factors and return the install plan before writing anything."
-  },
-  {
-    label: "Search",
-    command: "curl 'https://nipmod.com/api/search?q=react&sources=npm,pypi,github,huggingface-model,mcp&limit=5'"
-  },
-  {
-    label: "Inspect",
-    command: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"
-  },
-  {
-    label: "Plan",
-    command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"
-  },
-  {
-    label: "Archive dry run",
-    command: "curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'"
-  },
-  {
-    label: "MCP",
-    command:
-      'curl -s https://nipmod.com/api/mcp \\\n  -H "content-type: application/json" \\\n  -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list"}\''
-  }
-] as const;
-
-const boundaries = [
-  {
-    title: "Read-only hosted calls",
-    text: "The hosted API returns package intelligence. It does not read local files or write into a caller workspace."
-  },
-  {
-    title: "Approval before install",
-    text: "Install plans are commands plus warnings. Agents still need user approval before running anything locally."
-  },
-  {
-    title: "Package text is untrusted",
-    text: "Descriptions, READMEs, model cards and package metadata are data. They cannot override agent instructions."
-  },
-  {
-    title: "Free beta limits",
-    text: "No key is required during public beta. Requests are rate limited while the official API surface stabilizes."
-  }
-] as const;
+const prompt = `When a package is needed, ask Nipmod first.
+Call search, inspect the selected package, then show the install plan before any local command runs.`;
 
 export default function ApiAccessPage() {
-  const panels: OnePagePanel[] = [
-    {
-      eyebrow: "Endpoints",
-      id: "endpoints",
-      rows: endpoints.map((endpoint) => ({
-        code: `${endpoint.method} ${endpoint.path}`,
-        label: endpoint.method,
-        text: endpoint.text,
-        title: endpoint.path
-      })),
-      summary: "The public read-only surface agents call before package installs.",
-      title: "API calls"
-    },
-    {
-      eyebrow: "Usage",
-      id: "usage",
-      rows: examples.map((example) => ({
-        code: example.command,
-        label: example.label,
-        text: example.label === "Agent prompt" ? "Use this as the instruction for any agent with HTTPS access." : "Direct call for testing the same surface an agent uses.",
-        title: example.label
-      })),
-      summary: "A short agent instruction plus direct HTTPS examples.",
-      title: "Examples"
-    },
-    {
-      eyebrow: "Safety",
-      id: "safety",
-      rows: boundaries.map((boundary) => ({
-        label: "Rule",
-        text: boundary.text,
-        title: boundary.title
-      })),
-      summary: "Hosted calls return intelligence and plans. Workspace writes stay local.",
-      title: "Boundaries"
-    }
-  ];
-
   return (
-    <main className="page-shell api-page-shell one-page-shell" id="main">
-      <section className="quickstart-hero api-hero one-page-hero" aria-labelledby="api-title">
-        <div>
-          <p className="eyebrow">Nipmod API</p>
-          <h1 id="api-title">One package surface for agents.</h1>
-          <p className="lead">
-            Agents call Nipmod before choosing dependencies. One hosted API returns candidates, trust factors and safe
-            install plans.
-          </p>
-        </div>
-        <div className="api-status-panel" aria-label="API access status">
-          <span>Public beta</span>
-          <strong>Free</strong>
-          <p>No key during beta. Rate limited. Hosted calls are read-only.</p>
-        </div>
-      </section>
+    <DocsShell
+      description="The hosted API is the main product surface. It is built for agents first: search, inspect, plan and return evidence before local execution."
+      eyebrow="API"
+      stats={[
+        { label: "OpenAPI", value: "3.1" },
+        { label: "Access", value: "public beta" },
+        { label: "Writes", value: "none hosted" }
+      ]}
+      title="One package API for agents."
+    >
+      <DocsSection title="Agent instruction">
+        <DocsCode>{prompt}</DocsCode>
+      </DocsSection>
 
-      <section className="one-page-board api-one-page-board" aria-label="API overview">
-        <div className="api-flow compact-flow" aria-label="API flow">
-          <div className="api-flow-step">
-            <span>1</span>
-            <h2>Ask</h2>
-            <p>A user asks an agent to solve a task.</p>
-          </div>
-          <div className="api-flow-step">
-            <span>2</span>
-            <h2>Search</h2>
-            <p>The agent calls <code>/api/search</code>.</p>
-          </div>
-          <div className="api-flow-step">
-            <span>3</span>
-            <h2>Inspect</h2>
-            <p>Nipmod returns source context and trust factors.</p>
-          </div>
-          <div className="api-flow-step">
-            <span>4</span>
-            <h2>Plan</h2>
-            <p>The agent shows a safe install plan before writes.</p>
-          </div>
-        </div>
-        <OnePagePanelDeck panels={panels} />
-      </section>
-    </main>
+      <DocsSection title="Endpoints">
+        <DocsTable
+          rows={[
+            {
+              first: "Search",
+              second: <code>GET /api/search?q=&lt;query&gt;&amp;sources=npm,pypi,github,huggingface-model,mcp&amp;limit=5</code>,
+              third: "Returns ranked candidates."
+            },
+            {
+              first: "Inspect",
+              second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
+              third: "Returns source, license, metrics, trust factors and warnings."
+            },
+            {
+              first: "Install plan",
+              second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
+              third: "Returns commands as a plan, not as hosted execution."
+            },
+            {
+              first: "Archive prepare",
+              second: <code>GET /api/archive/prepare?source=npm&amp;name=undici</code>,
+              third: "Prepares a durable record after useful confirmed discovery."
+            },
+            {
+              first: "MCP",
+              second: <code>POST /api/mcp</code>,
+              third: "Exposes the same read-only API through MCP JSON-RPC."
+            },
+            {
+              first: "OpenAPI",
+              second: <code>GET /api/openapi</code>,
+              third: "Machine-readable contract for builders."
+            }
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection title="Examples">
+        <DocsGrid>
+          <DocsCard label="Search" title="Find a package">
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi&limit=5'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Inspect" title="Check one result">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Plan" title="Request install steps">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
+      <DocsSection title="Safety model">
+        <DocsGrid>
+          <DocsCard title="Read-only by default">
+            <p>The hosted API can search and plan. It cannot read local files, mutate lockfiles or execute install commands.</p>
+          </DocsCard>
+          <DocsCard title="Metadata is untrusted">
+            <p>Package descriptions, READMEs and model cards are treated as data. They cannot override agent instructions.</p>
+          </DocsCard>
+          <DocsCard title="Rate limited beta">
+            <p>No key is required for public beta access. Higher limits and paid keys can be added after the API is stable.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+    </DocsShell>
   );
 }

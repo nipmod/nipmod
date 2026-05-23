@@ -7,7 +7,7 @@ import { homeContent } from "./content";
 import { NipmodMark } from "./editorial-mark";
 
 const navItems = [
-  { href: "/", label: "Home", match: (path: string) => path === "/" },
+  { href: "/", label: "Overview", match: (path: string) => path === "/" },
   { href: "/api-access", label: "API", match: (path: string) => path.startsWith("/api-access") },
   { href: "/sources", label: "Sources", match: (path: string) => path.startsWith("/sources") },
   { href: "/packages", label: "Archive", match: (path: string) => path.startsWith("/packages") },

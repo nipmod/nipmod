@@ -1,194 +1,46 @@
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
-import { CommandBlock } from "../command-block";
-import { homeContent } from "../content";
 
 export const metadata = createPageMetadata({
-  description: "Nipmod docs for API access, package search, trust checks, install plans, MCP and security.",
+  description: "Nipmod quickstart for API access, package search, trust checks, install plans and optional local setup.",
   path: "/quickstart",
   title: "Nipmod docs"
 });
 
-const docSections = [
-  {
-    href: "#install",
-    label: "Install",
-    text: "Set up the CLI in one command."
-  },
-  {
-    href: "#find",
-    label: "Find",
-    text: "Search the package registry without an account."
-  },
-  {
-    href: "#inspect",
-    label: "Inspect",
-    text: "Check signer, source, digest and permissions before install."
-  },
-  {
-    href: "#publish",
-    label: "Publish",
-    text: "Run the safe author preflight before any public write."
-  },
-  {
-    href: "#agents",
-    label: "Agents",
-    text: "Give agent hosts one machine runbook."
-  },
-  {
-    href: "/mcp",
-    label: "MCP",
-    text: "Connect Nipmod to agent hosts."
-  },
-  {
-    href: "/trust",
-    label: "Trust",
-    text: "Read the public registry roots and witness path."
-  }
-] as const;
-
-const stepIds: Record<string, string> = {
-  "Add package": "add-package",
-  Audit: "audit",
-  "Add alias": "add-alias",
-  Check: "doctor",
-  Explain: "explain",
-  Find: "find",
-  Inspect: "inspect",
-  "Install CLI": "install",
-  "Install package": "install-package",
-  "Plan install": "install-plan",
-  Publish: "publish",
-  Restore: "restore",
-  SBOM: "sbom",
-  "Setup publish": "setup-publish",
-  Update: "update",
-};
-
-const firstRunLabels = new Set(["Install CLI", "Find", "Inspect", "Plan install", "Install package", "Audit"]);
-
 export default function QuickstartPage() {
-  const firstRunSteps = homeContent.quickstartSteps.filter((step) => firstRunLabels.has(step.label));
-  const advancedSteps = homeContent.quickstartSteps.filter((step) => !firstRunLabels.has(step.label));
-
   return (
-    <main className="page-shell" id="main">
-      <section className="quickstart-hero" id="docs" aria-labelledby="docs-title">
-        <p className="eyebrow">Docs</p>
-        <h1 id="docs-title">Docs</h1>
-        <p className="lead">Install, search, inspect and audit from one terminal path.</p>
-        <div className="actions" aria-label="Quickstart actions">
-          <a className="button button-primary" href="#install">
-            Install CLI
-          </a>
-          <a className="button button-ghost" href="/packages">
-            Packages
-          </a>
-          <a className="button button-ghost" href="/package">
-            Create package
-          </a>
-        </div>
-      </section>
+    <DocsShell
+      description="The shortest path is the hosted API. Local install is optional and only needed after a user approves workspace writes."
+      eyebrow="Quickstart"
+      title="Start with the API."
+    >
+      <DocsSection eyebrow="Agent" title="Tell your agent this">
+        <DocsCode>{"Use Nipmod before choosing a package. Search sources, inspect the selected package, then show me the install plan before writing anything to the workspace."}</DocsCode>
+      </DocsSection>
 
-      <section className="ecosystem-section" aria-labelledby="docs-overview-title">
-        <div className="section-head">
-          <p className="eyebrow">Guide</p>
-          <h2 id="docs-overview-title">Choose the right path.</h2>
-        </div>
-        <nav className="filter-row" aria-label="Docs sections">
-          {docSections.map((section) => (
-            <a className="filter-pill" href={section.href} key={section.label}>
-              {section.label}
-            </a>
-          ))}
-        </nav>
-        <div className="usage-strip">
-          {docSections.slice(0, 3).map((section) => (
-            <article className="usage-item" key={section.label}>
-              <h2>{section.label === "Install" ? "Install the CLI" : section.label}</h2>
-              <p>{section.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <DocsSection eyebrow="Calls" title="Three calls">
+        <DocsGrid>
+          <DocsCard label="1" title="Search">
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="2" title="Inspect">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="3" title="Install plan">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
 
-      <section className="proof-section" aria-labelledby="flow-title">
-        <div>
-          <p className="eyebrow">Flow</p>
-          <h2 id="flow-title">Install in one line.</h2>
-        </div>
-        <div className="proof-panel">
-          <p className="panel-copy">Paste one command, then connect the agent you use.</p>
-          <pre className="install-command">
-            <code>{"curl https://nipmod.com/i|bash"}</code>
-          </pre>
-        </div>
-      </section>
-
-      <section className="proof-section" id="agents" aria-labelledby="agents-title">
-        <div>
-          <p className="eyebrow">Agents</p>
-          <h2 id="agents-title">Give agents one link.</h2>
-        </div>
-        <div className="proof-panel">
-          <p className="panel-copy">
-            Agents should fetch the text runbook, then the JSON manifest for exact endpoints, commands, trust roots and MCP tools.
-          </p>
-          <pre className="install-command">
-            <code>{"https://nipmod.com/llms.txt\nhttps://nipmod.com/.well-known/nipmod.json\nnipmod mcp serve"}</code>
-          </pre>
-          <div className="actions">
-            <a className="button button-primary" href="/mcp">
-              MCP
-            </a>
-            <a className="button button-ghost" href="/trust">
-              Trust
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section className="quickstart-grid" aria-label="First run steps">
-        {firstRunSteps.map((step, index) => (
-          <article className="quickstart-card" id={stepIds[step.label]} key={step.label}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <h2>{step.label}</h2>
-            <p>{step.text}</p>
-            <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
-          </article>
-        ))}
-      </section>
-
-      <section className="ecosystem-section" aria-labelledby="advanced-title">
-        <div className="section-head">
-          <p className="eyebrow">Advanced</p>
-          <h2 id="advanced-title">Use these when the workspace needs them.</h2>
-        </div>
-        <div className="quickstart-grid" aria-label="Advanced steps">
-          {advancedSteps.map((step) => (
-            <article className="quickstart-card" id={stepIds[step.label]} key={step.label}>
-              <span>{step.label}</span>
-              <h2>{step.label}</h2>
-              <p>{step.text}</p>
-              <CommandBlock command={step.command} label={`Copy ${step.label} command`} />
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="ecosystem-section" aria-labelledby="ops-title">
-        <div className="section-head">
-          <p className="eyebrow">Ops</p>
-          <h2 id="ops-title">What is already watched.</h2>
-        </div>
-        <div className="usage-strip">
-          {homeContent.operatorChecks.map((item) => (
-            <article className="usage-item" key={item.label}>
-              <h2>{item.label}</h2>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
+      <DocsSection eyebrow="Optional" title="Local setup">
+        <DocsTable
+          rows={[
+            ["Install CLI", <DocsCode key="install">{"curl https://nipmod.com/i|bash"}</DocsCode>],
+            ["Check", <DocsCode key="doctor">{"nipmod doctor --online"}</DocsCode>],
+            ["Local MCP", <DocsCode key="mcp">{"nipmod mcp serve"}</DocsCode>]
+          ]}
+        />
+      </DocsSection>
+    </DocsShell>
   );
 }

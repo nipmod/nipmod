@@ -1,21 +1,5 @@
 import { createPageMetadata } from "../metadata";
-import { CommandBlock } from "../command-block";
-import registryData from "../registry-data.json";
-import { packagePageHref } from "../packages/content";
-import type { RegistryIndex } from "../../lib/registry";
-
-const registry = registryData as RegistryIndex;
-const exampleNames = [
-  "gitlawb-repo-reader",
-  "prompt-injection-scan",
-  "dependency-risk-review",
-  "github-issue-triage",
-  "mcp-server-import-example",
-  "package-migration-planner"
-];
-const examples = exampleNames
-  .map((name) => registry.packages.find((pkg) => pkg.name === name))
-  .filter((pkg): pkg is RegistryIndex["packages"][number] => Boolean(pkg));
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell } from "../docs-shell";
 
 export const metadata = createPageMetadata({
   description: "Example package records agents can search, inspect and turn into safe install plans through Nipmod.",
@@ -25,54 +9,28 @@ export const metadata = createPageMetadata({
 
 export default function ExamplesPage() {
   return (
-    <main className="page-shell" id="main">
-      <section className="quickstart-hero" aria-labelledby="examples-title">
-        <p className="eyebrow">Examples</p>
-        <h1 id="examples-title">Useful first packages</h1>
-        <p className="lead">
-          Public examples appear here after the first verified package publish.
-        </p>
-        <div className="actions" aria-label="Examples actions">
-          <a className="button button-primary" href="/demo">
-            Run demo
-          </a>
-          <a className="button button-ghost" href="/packages">
-            All packages
-          </a>
-          <a className="button button-ghost" href="/setup">
-            Setup agent
-          </a>
-        </div>
-      </section>
+    <DocsShell
+      description="Small calls that show the public agent flow: search sources, inspect one package and request a safe install plan."
+      eyebrow="Examples"
+      title="API examples."
+    >
+      <DocsSection eyebrow="Flow" title="Search, inspect, plan">
+        <DocsGrid>
+          <DocsCard label="Search" title="Find candidates across sources">
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github&limit=3'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Inspect" title="Inspect the selected package">
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Plan" title="Return a plan before writing">
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
 
-      <section className="registry-section" aria-labelledby="examples-grid-title">
-        <div className="section-head">
-          <p className="eyebrow">Packages</p>
-          <h2 id="examples-grid-title">Search, inspect, then plan</h2>
-          <p>Every example uses the same safe path: view metadata, inspect proof, plan install, then write only after approval.</p>
-        </div>
-        <div className="package-grid">
-          {examples.length > 0 ? examples.map((pkg) => (
-            <article className="package-card" key={pkg.canonical}>
-              <div className="package-card-top">
-                <div>
-                  <h3>
-                    <a href={packagePageHref(pkg)}>{pkg.name}</a>
-                  </h3>
-                  <p>{pkg.description}</p>
-                </div>
-                <span className="trust-badge trust-verified">{pkg.trust.level}</span>
-              </div>
-              <CommandBlock command={`nipmod inspect ${pkg.canonical}@${pkg.version}\nnipmod install --plan ${pkg.name}`} label={`Copy ${pkg.name} commands`} />
-            </article>
-          )) : (
-            <div className="archive-empty">
-              <h3>No public examples yet</h3>
-              <p>The seed examples were removed from the public archive. New examples will be listed only after the verified publish flow.</p>
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+      <DocsSection eyebrow="Agent prompt" title="Use from an agent">
+        <DocsCode>{"Find a package for HTTP requests. Use Nipmod search first, inspect the best candidate, then show me the install plan before changing the workspace."}</DocsCode>
+      </DocsSection>
+    </DocsShell>
   );
 }
