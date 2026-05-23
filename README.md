@@ -95,6 +95,7 @@ Core endpoints:
 Contracts and examples:
 
 - API contract: [`docs/specs/public-api.md`](docs/specs/public-api.md)
+- Source crawling policy: [`docs/specs/source-crawling.md`](docs/specs/source-crawling.md)
 - Trust and ranking rules: [`docs/specs/trust-signals.md`](docs/specs/trust-signals.md)
 - API beta launch kit: [`docs/launch/api-beta.md`](docs/launch/api-beta.md)
 - Agent examples: [`examples/agent-workflow/`](examples/agent-workflow/)
