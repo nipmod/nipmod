@@ -76,6 +76,7 @@ Recent hardening:
 - Source resolvers now extract deeper source-native risk and context signals for npm, PyPI, GitHub, Hugging Face and MCP without changing the public record schema.
 - Source health now exposes the active rate-limit store and `pnpm launch:verify` can be run with `--require-distributed-rate-limit` to make shared Supabase rate limits a hard gate.
 - Source-depth canary now checks live npm, PyPI, GitHub, Hugging Face and MCP inspect responses for concrete source-native trust signals.
+- Launch verification now performs a live source probe through `/api/sources/health?probe=live` and fails if any configured source is unreachable.
 - GitHub exact repo inspect now detects common package manifest files and package.json dependency/script metadata when GitHub exposes them.
 
 ## Workstream 1: API Contract
@@ -237,6 +238,7 @@ Definition of Done:
 
 - Each current source supports search, inspect and install-plan with source-specific tests.
 - Production launch verification now fails if representative live source records lose depth signals such as npm signatures, PyPI digests, GitHub manifests, Hugging Face commit digests or MCP endpoint metadata.
+- Production launch verification now checks live source reachability for every configured public resolver before release.
 - Source records include version, owner, license, source URL, metrics and risk metadata when available.
 - Source failures degrade cleanly without breaking all-source search.
 

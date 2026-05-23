@@ -107,9 +107,20 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
   if (requireDistributedRateLimit && sourceHealth.rateLimit?.activeStore !== "supabase") {
     throw new Error(`distributed rate-limit store is not active: ${sourceHealth.rateLimit?.activeStore ?? "unknown"}`);
   }
+  const liveSourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health?probe=live`);
+  assertEqual(liveSourceHealth.type, "dev.nipmod.source-health.v1", "live source health type mismatch");
+  if (liveSourceHealth.summary?.liveFailed !== 0) {
+    throw new Error(`live source probe failed for ${liveSourceHealth.summary?.liveFailed ?? "unknown"} sources`);
+  }
+  const liveSources = Array.isArray(liveSourceHealth.sources) ? liveSourceHealth.sources : [];
+  const failedLiveSource = liveSources.find((source) => source?.live?.status !== "ok");
+  if (failedLiveSource) {
+    throw new Error(`live source probe failed for ${failedLiveSource.source ?? "unknown"}`);
+  }
 
   return {
     installPlanCommandBoundary: firstCommand.boundary,
+    liveSourceProbeOk: liveSources.length,
     openApi: `${targetBaseUrl}/api/openapi`,
     rateLimitStore: sourceHealth.rateLimit?.activeStore ?? null,
     requireDistributedRateLimit,
