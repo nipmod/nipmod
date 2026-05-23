@@ -86,6 +86,25 @@ Otherwise:
 | `50-74` | `usable_with_warning` | `medium` |
 | `0-49` | `unknown` | `unknown` |
 
+Agents should treat `recommended` as "reasonable to present", not "safe to run". A package can be recommended by source metadata and still be blocked by an install plan.
+
+## Archive Eligibility Gates
+
+External search results do not automatically become durable Nipmod archive records.
+
+Archive prepare returns an eligibility object. Archive confirm refuses durable storage when any of these gates fail:
+
+| Gate | Blocked Case |
+| --- | --- |
+| Decision | `avoid` or `unknown` |
+| Risk | `high` or `unknown` |
+| Score | below `usableWithWarning` threshold |
+| Install plan | blocked or high-risk command |
+| Metadata | agent-targeted instruction text in package metadata |
+| Freshness | submitted record version is stale against source inspection |
+
+Records that pass gates remain `external_indexed` unless the owner completes a verified claim or direct publish flow.
+
 ## External Source Scoring
 
 Scores are clamped to `0-100`.

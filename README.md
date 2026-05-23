@@ -47,7 +47,7 @@ Hosted API calls never read or write the caller workspace. Local CLI and MCP too
 | Package intelligence archive | Durable production archive enabled |
 | Verified Nipmod archive | Empty by design after seed reset; new entries pass verification gates |
 | Distributed rate limits | Live with Supabase-backed shared buckets |
-| CLI and installer | Live, release `1.2.5` |
+| CLI and installer | Live, release `1.2.6` |
 | Local MCP server | Live for controlled workspace installs |
 | Hosted MCP endpoint | Live, read-only |
 

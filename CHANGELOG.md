@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.2.6 - 2026-05-23
+
+### Added
+
+- Official API beta release pack for agents and builders.
+- Clear agent examples for generic HTTPS, Codex, Claude Code and hosted MCP workflows.
+- Finalized public trust and archive gate documentation for `external-v2`.
+- Source report recovery guidance for degraded, empty or failed upstream package sources.
+
+### Verified
+
+- GitHub CI, CodeQL, Dependency Review, Scorecard and production monitor pass on `main`.
+- Live API contract canary passes on `https://nipmod.com`.
+- Live source-depth, install-plan and rate-limit canaries pass on `https://nipmod.com`.
+
+### Security
+
+- Archive confirmation rejects unknown, below-threshold or high-risk trust decisions.
+- Hosted API calls remain read-only and never execute install commands.
+- Package metadata, READMEs, model cards and registry text remain untrusted data.
+
 ## 1.2.5 - 2026-05-21
 
 ### Added
