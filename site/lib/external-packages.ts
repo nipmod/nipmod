@@ -27,6 +27,7 @@ export type ExternalResolverSearchStrategy =
   | "hub-ranked-search"
   | "registry-server-search";
 export type ExternalResolverInspectStrategy = "exact-package-metadata" | "exact-repository-metadata" | "exact-hub-metadata" | "server-name-match";
+export type ExternalSourceCircuitStatus = "closed" | "open";
 
 export interface ExternalTrustFactor {
   category: ExternalTrustFactorCategory;
@@ -68,6 +69,14 @@ export interface ExternalSourceResolverProfile {
   searchStrategy: ExternalResolverSearchStrategy;
   sourceKind: ExternalPackageSourceKind;
   timeoutMs: number;
+}
+
+export interface ExternalSourceCircuitReport {
+  failureCount: number;
+  lastErrorCode: string | null;
+  lastFailureAt: string | null;
+  openedUntil: string | null;
+  status: ExternalSourceCircuitStatus;
 }
 
 export interface ExternalPackageRecord {
@@ -131,6 +140,7 @@ export interface ExternalSourceReport {
     retryable: boolean;
     status: number;
   };
+  circuit: ExternalSourceCircuitReport;
   recordCount: number;
   resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
@@ -160,6 +170,7 @@ export interface ExternalSourceCapability {
   capabilities: Array<"search" | "inspect" | "install-plan" | "archive-prepare">;
   endpointHost: string;
   installPlanWritesWorkspace: false;
+  circuit: ExternalSourceCircuitReport;
   resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
   sourceKind: ExternalPackageSourceKind;
@@ -199,6 +210,9 @@ const MAX_SOURCE_RESPONSE_BYTES = 2_000_000;
 const SOURCE_USER_AGENT = "nipmod-package-api/1.2.5 (+https://nipmod.com)";
 const FETCH_CACHE_TTL_MS = 30_000;
 const FETCH_CACHE_MAX_ITEMS = 500;
+const SOURCE_CIRCUIT_FAILURE_THRESHOLD = 3;
+const SOURCE_CIRCUIT_FAILURE_WINDOW_MS = 60_000;
+const SOURCE_CIRCUIT_OPEN_MS = 20_000;
 const EXTERNAL_PACKAGE_DECISIONS = ["recommended", "usable_with_warning", "avoid", "unknown"] as const;
 const EXTERNAL_PACKAGE_RISKS = ["low", "medium", "high", "unknown"] as const;
 const EXTERNAL_PACKAGE_SOURCE_KINDS = ["package-registry", "source-repo", "model-hub", "tool-registry"] as const;
@@ -245,6 +259,22 @@ const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
 ];
 
 const fetchCache = new Map<string, { expiresAt: number; value: UnknownRecord | UnknownRecord[] }>();
+const inflightFetches = new Map<string, Promise<UnknownRecord | UnknownRecord[]>>();
+const sourceCircuitStates = new Map<
+  ExternalPackageSource,
+  {
+    failureCount: number;
+    lastErrorCode: string | null;
+    lastFailureAt: number | null;
+    openedUntil: number | null;
+  }
+>();
+
+export function resetExternalSourceRuntimeStateForTests(): void {
+  fetchCache.clear();
+  inflightFetches.clear();
+  sourceCircuitStates.clear();
+}
 
 export async function searchExternalPackages(query: string, options: ExternalSearchOptions = {}): Promise<ExternalSearchResult> {
   const normalized = normalizeQuery(query);
@@ -512,6 +542,7 @@ async function searchSourceWithReport(
     return {
       records,
       report: {
+        circuit: sourceCircuitReport(source),
         durationMs: Date.now() - startedAt,
         recordCount: records.length,
         resolver: sourceResolverProfile(source, limit, timeoutMs),
@@ -524,6 +555,7 @@ async function searchSourceWithReport(
     return {
       records: [],
       report: {
+        circuit: sourceCircuitReport(source),
         durationMs: Date.now() - startedAt,
         error: {
           code: apiError.code,
@@ -682,7 +714,7 @@ async function npmMonthlyDownloads(name: string, fetchImpl: typeof fetch, timeou
       `https://api.npmjs.org/downloads/point/last-month/${encodeNpmName(name)}`,
       fetchImpl,
       Math.min(timeoutMs, 3500),
-      { source: "npm" }
+      { circuitBreaker: false, source: "npm" }
     );
     return isRecord(payload) ? readNumber(payload.downloads) : null;
   } catch {
@@ -1336,9 +1368,11 @@ async function fetchJson(
   url: string,
   fetchImpl: typeof fetch,
   timeoutMs: number,
-  options: { source?: ExternalPackageSource } = {}
+  options: { circuitBreaker?: boolean; source?: ExternalPackageSource } = {}
 ): Promise<UnknownRecord | UnknownRecord[]> {
   const canCache = fetchImpl === fetch;
+  const source = options.source;
+  const useRuntimeGuards = canCache && Boolean(source);
   const now = Date.now();
   if (canCache) {
     const cached = fetchCache.get(url);
@@ -1350,14 +1384,53 @@ async function fetchJson(
     }
   }
 
+  const cacheKey = `${source ?? "unknown"}:${url}`;
+  if (useRuntimeGuards && source) {
+    if (options.circuitBreaker !== false) {
+      assertSourceCircuitClosed(source);
+    }
+    const pending = inflightFetches.get(cacheKey);
+    if (pending) {
+      return structuredClone(await pending);
+    }
+    const request = fetchJsonWithRetry(url, fetchImpl, timeoutMs, source)
+      .then((value) => {
+        rememberFetchCache(url, value);
+        if (options.circuitBreaker !== false) {
+          noteSourceSuccess(source);
+        }
+        return value;
+      })
+      .catch((error) => {
+        if (options.circuitBreaker !== false) {
+          noteSourceFailure(source, error);
+        }
+        throw error;
+      })
+      .finally(() => {
+        inflightFetches.delete(cacheKey);
+      });
+    inflightFetches.set(cacheKey, request);
+    return structuredClone(await request);
+  }
+
+  const value = await fetchJsonWithRetry(url, fetchImpl, timeoutMs, source);
+  if (canCache) {
+    rememberFetchCache(url, value);
+  }
+  return structuredClone(value);
+}
+
+async function fetchJsonWithRetry(
+  url: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number,
+  source: ExternalPackageSource | undefined
+): Promise<UnknownRecord | UnknownRecord[]> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      const value = await fetchJsonOnce(url, fetchImpl, timeoutMs, options.source);
-      if (canCache) {
-        rememberFetchCache(url, value);
-      }
-      return structuredClone(value);
+      return await fetchJsonOnce(url, fetchImpl, timeoutMs, source);
     } catch (error) {
       lastError = error;
       if (!(error instanceof ExternalPackageError) || !error.retryable || attempt === 1) {
@@ -1368,7 +1441,7 @@ async function fetchJson(
   }
   throw lastError instanceof Error
     ? lastError
-    : new ExternalPackageError("source request failed", { source: options.source ?? null, status: 502 });
+    : new ExternalPackageError("source request failed", { source: source ?? null, status: 502 });
 }
 
 function rememberFetchCache(url: string, value: UnknownRecord | UnknownRecord[]): void {
@@ -1382,6 +1455,75 @@ function rememberFetchCache(url: string, value: UnknownRecord | UnknownRecord[])
     expiresAt: Date.now() + FETCH_CACHE_TTL_MS,
     value: structuredClone(value)
   });
+}
+
+function assertSourceCircuitClosed(source: ExternalPackageSource): void {
+  const state = sourceCircuitStates.get(source);
+  if (!state) {
+    return;
+  }
+  const now = Date.now();
+  if (state.openedUntil && state.openedUntil > now) {
+    throw new ExternalPackageError(`${sourceDisplayName(source)} source circuit is open`, {
+      code: "source_circuit_open",
+      retryable: true,
+      source,
+      status: 503
+    });
+  }
+  if (state.lastFailureAt && now - state.lastFailureAt > SOURCE_CIRCUIT_FAILURE_WINDOW_MS) {
+    sourceCircuitStates.delete(source);
+  }
+}
+
+function noteSourceSuccess(source: ExternalPackageSource): void {
+  sourceCircuitStates.delete(source);
+}
+
+function noteSourceFailure(source: ExternalPackageSource, error: unknown): void {
+  if (!(error instanceof ExternalPackageError) || !error.retryable) {
+    return;
+  }
+  const now = Date.now();
+  const previous = sourceCircuitStates.get(source);
+  const failureCount =
+    previous?.lastFailureAt && now - previous.lastFailureAt <= SOURCE_CIRCUIT_FAILURE_WINDOW_MS ? previous.failureCount + 1 : 1;
+  sourceCircuitStates.set(source, {
+    failureCount,
+    lastErrorCode: error.code,
+    lastFailureAt: now,
+    openedUntil: failureCount >= SOURCE_CIRCUIT_FAILURE_THRESHOLD ? now + SOURCE_CIRCUIT_OPEN_MS : null
+  });
+}
+
+function sourceCircuitReport(source: ExternalPackageSource): ExternalSourceCircuitReport {
+  const state = sourceCircuitStates.get(source);
+  if (!state) {
+    return closedSourceCircuitReport();
+  }
+  const now = Date.now();
+  const isOpen = Boolean(state.openedUntil && state.openedUntil > now);
+  if (!isOpen && state.lastFailureAt && now - state.lastFailureAt > SOURCE_CIRCUIT_FAILURE_WINDOW_MS) {
+    sourceCircuitStates.delete(source);
+    return closedSourceCircuitReport();
+  }
+  return {
+    failureCount: state.failureCount,
+    lastErrorCode: state.lastErrorCode,
+    lastFailureAt: state.lastFailureAt ? new Date(state.lastFailureAt).toISOString() : null,
+    openedUntil: isOpen && state.openedUntil ? new Date(state.openedUntil).toISOString() : null,
+    status: isOpen ? "open" : "closed"
+  };
+}
+
+function closedSourceCircuitReport(): ExternalSourceCircuitReport {
+  return {
+    failureCount: 0,
+    lastErrorCode: null,
+    lastFailureAt: null,
+    openedUntil: null,
+    status: "closed"
+  };
 }
 
 async function fetchJsonOnce(
@@ -1628,6 +1770,7 @@ function sourceCapability(
     access: authConfigured ? "public-with-optional-token" : "public",
     authConfigured,
     capabilities: ["search", "inspect", "install-plan", "archive-prepare"],
+    circuit: sourceCircuitReport(source),
     endpointHost,
     installPlanWritesWorkspace: false,
     resolver: sourceResolverProfile(source, MAX_LIMIT, DEFAULT_TIMEOUT_MS),

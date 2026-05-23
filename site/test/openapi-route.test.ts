@@ -42,6 +42,14 @@ describe("OpenAPI route", () => {
       "securityConfidence"
     ]);
     expect(body.components.schemas.ExternalSourceReport.required).toContain("resolver");
+    expect(body.components.schemas.ExternalSourceReport.required).toContain("circuit");
+    expect(body.components.schemas.ExternalSourceCircuitReport.required).toEqual([
+      "failureCount",
+      "lastErrorCode",
+      "lastFailureAt",
+      "openedUntil",
+      "status"
+    ]);
     expect(body.components.schemas.ExternalSourceResolverProfile.required).toContain("normalization");
     expect(body.paths["/api/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ExternalSearchResult"

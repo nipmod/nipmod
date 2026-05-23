@@ -268,9 +268,9 @@ Tasks:
 - Replace static source capability status with bounded live probes.
 - Track source latency, status class and last error type. Done in `sourceReports` and live source probes.
 - Publish resolver metadata for every source report. Done with `sourceReports[].resolver` using `source-resolver-v2`.
-- Add per-source circuit breakers so a degraded source does not slow every request.
+- Add per-source circuit breakers so a degraded source does not slow every request. Done for in-process source fetches.
 - Add shared rate limits or edge-level rate limiting for production.
-- Add query/result caching and request coalescing for hot lookups.
+- Add query/result caching and request coalescing for hot lookups. Done for in-process source JSON fetches.
 - Add source-specific budgets for npm, PyPI, GitHub, Hugging Face and MCP.
 - Keep hosted API read-only and never execute install commands.
 
@@ -278,8 +278,8 @@ Definition of Done:
 
 - `/api/sources/health` distinguishes configured capability from live source reachability.
 - Search and resolve reports expose endpoint host, resolver strategy, timeout, response budget and normalization boundaries.
-- Repeated identical source requests are cached or coalesced.
-- A single degraded source cannot stall all-source search.
+- Repeated identical source requests are cached or coalesced. Done in-process.
+- A single degraded source cannot stall all-source search. Improved with per-source partial failures and circuit-open fast failures.
 - Abuse controls survive multi-instance production.
 
 ## Workstream 8: Agent-Specific Threat Model
@@ -317,7 +317,7 @@ Tasks:
 
 - Move public/API-key rate limiting from process memory to a shared store or platform-native limiter.
 - Add per-source quotas.
-- Add circuit breakers for upstream failures.
+- Add circuit breakers for upstream failures. Done in-process; shared/multi-instance breaker remains future infrastructure.
 - Cap MCP batch size.
 - Cap JSON body size.
 - Track rate-limited requests.

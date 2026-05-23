@@ -36,6 +36,12 @@ describe("source health route", () => {
       "mcp"
     ]);
     expect(body.sources.every((source: { installPlanWritesWorkspace: boolean }) => source.installPlanWritesWorkspace === false)).toBe(true);
+    expect(body.sources[0].circuit).toMatchObject({
+      failureCount: 0,
+      lastErrorCode: null,
+      openedUntil: null,
+      status: "closed"
+    });
     expect(body.sources[0].resolver).toMatchObject({
       endpointHost: "registry.npmjs.org",
       normalization: {

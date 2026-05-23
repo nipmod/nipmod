@@ -46,11 +46,22 @@ Search and resolve responses include one report per requested source. Each repor
     "searchStrategy": "registry-ranked-search",
     "sourceKind": "package-registry",
     "timeoutMs": 6500
+  },
+  "circuit": {
+    "failureCount": 0,
+    "lastErrorCode": null,
+    "lastFailureAt": null,
+    "openedUntil": null,
+    "status": "closed"
   }
 }
 ```
 
 The resolver profile is public and contains no secrets. It lets clients distinguish source capability from source trust. For example, npm uses registry-ranked search, PyPI uses normalized name candidates, GitHub uses repository search, Hugging Face uses hub-ranked search and MCP uses registry server search.
+
+`circuit` exposes the public per-source circuit breaker state. Repeated retryable failures open the source circuit for a short window and future requests fail fast with `source_circuit_open` instead of repeatedly waiting on the same degraded upstream.
+
+Identical in-flight source requests are coalesced. If three agents ask for the same exact upstream metadata at the same time, Nipmod performs one upstream request and shares the parsed result internally.
 
 The normalization contract is fixed:
 

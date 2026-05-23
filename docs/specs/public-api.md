@@ -70,6 +70,8 @@ dev.nipmod.external-search.v1
 
 Search responses include `sourceReports[]`. Each report includes `resolverVersion: "source-resolver-v2"` metadata with endpoint host, search strategy, inspect strategy, timeout, response budget and normalization boundaries. The resolver profile contains no secrets and confirms that hosted API calls return plans only; they do not write caller workspaces.
 
+Each report also includes public circuit state. When a source repeatedly returns retryable failures, Nipmod opens a short per-source circuit and returns `source_circuit_open` for that source instead of blocking every request on the degraded upstream. Identical in-flight source metadata requests are coalesced internally.
+
 ## `GET /api/search`
 
 Compatibility alias for `GET /api/resolve`.

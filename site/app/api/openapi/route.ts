@@ -185,6 +185,7 @@ function openApiDocument() {
         ExternalSourceReport: {
           additionalProperties: false,
           properties: {
+            circuit: { $ref: "#/components/schemas/ExternalSourceCircuitReport" },
             durationMs: { minimum: 0, type: "integer" },
             error: {
               additionalProperties: false,
@@ -202,7 +203,20 @@ function openApiDocument() {
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
             status: { enum: ["ok", "empty", "failed"], type: "string" }
           },
-          required: ["durationMs", "recordCount", "resolver", "source", "status"],
+          required: ["circuit", "durationMs", "recordCount", "resolver", "source", "status"],
+          type: "object"
+        },
+        ExternalSourceCircuitReport: {
+          additionalProperties: false,
+          description: "Per-source in-process circuit breaker state. Open circuits fail fast with source_circuit_open.",
+          properties: {
+            failureCount: { minimum: 0, type: "integer" },
+            lastErrorCode: { nullable: true, type: "string" },
+            lastFailureAt: { format: "date-time", nullable: true, type: "string" },
+            openedUntil: { format: "date-time", nullable: true, type: "string" },
+            status: { enum: ["closed", "open"], type: "string" }
+          },
+          required: ["failureCount", "lastErrorCode", "lastFailureAt", "openedUntil", "status"],
           type: "object"
         },
         ExternalSourceResolverProfile: {

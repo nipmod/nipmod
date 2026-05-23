@@ -6,12 +6,14 @@ import { GET as searchGet } from "../app/api/search/route";
 import {
   createExternalInstallPlan,
   inspectExternalPackage,
+  resetExternalSourceRuntimeStateForTests,
   searchExternalPackages,
   type ExternalPackageRecord
 } from "../lib/external-packages";
 
 describe("external package resolver", () => {
   afterEach(() => {
+    resetExternalSourceRuntimeStateForTests();
     vi.unstubAllGlobals();
   });
 
@@ -131,6 +133,61 @@ describe("external package resolver", () => {
     expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
     expect(record.trust.signals).toContain("npm registry signature metadata is present.");
     expect(plan.plan.commands).toEqual(["npm install react"]);
+  });
+
+  test("coalesces concurrent identical source requests", async () => {
+    const requestedUrls: string[] = [];
+    const fetchImpl = vi.fn(async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      requestedUrls.push(url);
+      if (url === "https://registry.npmjs.org/coalesce/latest") {
+        return jsonResponse({
+          description: "Coalescing fixture.",
+          dist: { integrity: "sha512-test", signatures: [{ keyid: "SHA256:test", sig: "test" }] },
+          license: "MIT",
+          name: "coalesce",
+          repository: { url: "git+https://github.com/example/coalesce.git" },
+          version: "1.0.0"
+        });
+      }
+      if (url === "https://api.npmjs.org/downloads/point/last-month/coalesce") {
+        return jsonResponse({ downloads: 1234, package: "coalesce" });
+      }
+      return jsonResponse({ error: "not found" }, 404);
+    });
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const records = await Promise.all([
+      inspectExternalPackage("npm", "coalesce"),
+      inspectExternalPackage("npm", "coalesce"),
+      inspectExternalPackage("npm", "coalesce")
+    ]);
+
+    expect(records.map((record) => record.id)).toEqual(["npm:coalesce", "npm:coalesce", "npm:coalesce"]);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(requestedUrls.filter((url) => url === "https://registry.npmjs.org/coalesce/latest")).toHaveLength(1);
+    expect(requestedUrls.filter((url) => url === "https://api.npmjs.org/downloads/point/last-month/coalesce")).toHaveLength(1);
+  });
+
+  test("opens a per-source circuit after repeated retryable failures", async () => {
+    const fetchImpl = vi.fn(async () => jsonResponse({ error: "temporary outage" }, 503));
+    vi.stubGlobal("fetch", fetchImpl);
+
+    for (let index = 0; index < 3; index += 1) {
+      const error = await searchExternalPackages("broken", { sources: ["npm"] }).catch((caught) => caught);
+      expect(error).toMatchObject({ code: "source_unavailable", retryable: true, status: 502 });
+    }
+
+    const requestCountBeforeOpenCircuit = fetchImpl.mock.calls.length;
+    const circuitError = await searchExternalPackages("broken", { sources: ["npm"] }).catch((caught) => caught);
+
+    expect(circuitError).toMatchObject({
+      code: "source_circuit_open",
+      retryable: true,
+      source: "npm",
+      status: 503
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(requestCountBeforeOpenCircuit);
   });
 
   test("normalizes current MCP registry server records", async () => {
