@@ -15,6 +15,7 @@
     "test": "pnpm --dir nipmod test && pnpm --dir site test && pnpm tools:test",
     "tools:test": "pnpm --dir nipmod build && NIPMOD_SKIP_QUORUM_RECEIPTS=1 node --experimental-strip-types --test tools/telegram-bot.test.ts && NIPMOD_SKIP_QUORUM_RECEIPTS=1 vitest run --config tools/vitest.config.ts --testTimeout 20000",
     "typecheck": "pnpm --dir nipmod typecheck && pnpm --dir site typecheck",
+    "usage:canary": "node --experimental-strip-types tools/api-usage-canary.ts",
     "verify": "pnpm test && pnpm typecheck && pnpm build && pnpm security && pnpm public:check"
   },
   "devDependencies": {

@@ -72,6 +72,7 @@ Recent hardening:
 - Source health live probes now use a bounded in-process cache and expose whether each source result was freshly checked or served from cache.
 - Hosted MCP now rejects oversized JSON-RPC bodies and batches before tool handling.
 - Public API routes now use an async rate-limit path that can consume a shared Supabase bucket and falls back to local process buckets when the shared store is unavailable.
+- Usage ingestion now has an operator canary that makes a public API request and verifies its hashed usage event in Supabase.
 
 ## Workstream 1: API Contract
 
@@ -363,7 +364,7 @@ Tasks:
 
 - Require a production hash salt when usage logging is enabled.
 - Use HMAC-style hashes for query, package and client hashes.
-- Add a usage-ingestion canary.
+- Add a usage-ingestion canary. Done as `pnpm usage:canary`; launch verify runs it in skip/pass mode depending on available env.
 - Record route, status, source, result count, latency and error code.
 - Do not store raw queries, raw package names, raw IPs, raw user agents or raw API keys.
 - Add dashboards later only after the underlying events are correct.
@@ -481,7 +482,7 @@ Definition of Done:
 - [ ] Posted trust cannot influence server trust.
 - [x] Distributed rate-limit code path implemented with Supabase RPC and local fallback.
 - [x] MCP batch and body size caps active.
-- [ ] Usage canary active.
+- [x] Usage canary active.
 - [ ] Load smoke passes.
 - [ ] E2E readiness tests updated and passing.
 - [ ] Scorecard and Production Monitor enforced or documented as launch gates.

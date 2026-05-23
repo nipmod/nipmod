@@ -49,6 +49,16 @@ node --experimental-strip-types tools/package-intelligence-ops.ts verify-secrets
 
 The rate-limit bucket stores hashed client identifiers only. If the RPC is missing or temporarily unavailable, the API falls back to the local in-process limiter and marks responses with `x-ratelimit-store: memory-fallback`.
 
+## Required for usage ingestion checks
+
+Run the canary after Production env is available locally or through a temporary env file:
+
+```bash
+NIPMOD_CANARY_ENV_FILE=/tmp/nipmod-archive.env node --experimental-strip-types tools/api-usage-canary.ts --require-configured
+```
+
+The canary creates one public API request with a unique request id, then checks `api_usage_events` for that id through the service role key. It returns only route, status, count and timestamps; it does not print Supabase secrets or raw user query data.
+
 ## Local secret file template
 
 Create this outside the repo or under a gitignored path:
