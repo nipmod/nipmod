@@ -8,8 +8,14 @@ export function SiteHeader() {
     <header className="topbar" aria-label="Primary">
       <Link className="brand" href="/" aria-label="Nipmod home" prefetch>
         <NipmodMark size={54} />
-        <span className="sr-only">{homeContent.brand}</span>
+        <span className="brand-word" aria-hidden="true">{homeContent.brand}</span>
       </Link>
+
+      <nav className="topbar-links" aria-label="Primary links">
+        <Link href="/#principle">Philosophy</Link>
+        <Link href="/api-access">API</Link>
+        <Link href="/status">Status</Link>
+      </nav>
 
       <div className="brand-socials" aria-label="Nipmod links">
         <SocialIcon href={homeContent.links.github} label="Open Nipmod GitHub repository in a new tab" title="GitHub">
