@@ -174,63 +174,16 @@ export function DocsCode({ children }: { children: string }) {
 }
 
 export function ArchitectureDiagram() {
-  const sources = ["npm", "PyPI", "GitHub", "Hugging Face", "MCP"];
-
   return (
-    <div
+    <figure
       className="docs-architecture"
       aria-label="Nipmod architecture flow: agent asks Nipmod for a package, Nipmod searches existing sources, normalizes results, checks trust, creates a safe install plan, waits for user approval before workspace writes, and saves confirmed useful package intelligence for future reuse."
     >
-      <svg className="architecture-lines" viewBox="0 0 1000 560" aria-hidden="true" preserveAspectRatio="none">
-        <defs>
-          <marker id="architecture-arrow" markerHeight="10" markerWidth="10" orient="auto" refX="8" refY="5">
-            <path d="M 0 0 L 10 5 L 0 10 z" />
-          </marker>
-          <marker id="architecture-arrow-start" markerHeight="10" markerWidth="10" orient="auto-start-reverse" refX="2" refY="5">
-            <path d="M 10 0 L 0 5 L 10 10 z" />
-          </marker>
-        </defs>
-        <path d="M 230 198 H 390" markerEnd="url(#architecture-arrow)" />
-        <path d="M 390 286 H 230" markerEnd="url(#architecture-arrow)" />
-        <path d="M 680 248 H 730" markerStart="url(#architecture-arrow-start)" markerEnd="url(#architecture-arrow)" />
-        <path d="M 420 342 V 386 H 260 V 415" markerEnd="url(#architecture-arrow)" />
-        <path d="M 535 342 V 415" markerEnd="url(#architecture-arrow)" />
-      </svg>
-
-      <div className="architecture-card architecture-agent">
-        <strong>Agent</strong>
-      </div>
-
-      <p className="architecture-label architecture-label-request">asks Nipmod for a package</p>
-      <p className="architecture-label architecture-label-response">receives package, risks and install plan</p>
-
-      <div className="architecture-card architecture-api">
-        <strong>Nipmod API</strong>
-        <span>searches existing sources</span>
-        <span>normalizes results</span>
-        <span>checks trust</span>
-        <span>creates safe install plan</span>
-      </div>
-
-      <div className="architecture-card architecture-sources">
-        <strong>Sources</strong>
-        <div>
-          {sources.map((source) => (
-            <span key={source}>{source}</span>
-          ))}
-        </div>
-      </div>
-
-      <div className="architecture-card architecture-approval">
-        <strong>User approval</strong>
-      </div>
-      <p className="architecture-caption architecture-caption-approval">required before workspace writes</p>
-
-      <div className="architecture-card architecture-archive">
-        <strong>Nipmod Archive</strong>
-      </div>
-      <p className="architecture-caption architecture-caption-archive">saves confirmed useful package intelligence for future reuse</p>
-    </div>
+      <img
+        src="/Benutzeranhang.png"
+        alt="Nipmod architecture: agent, Nipmod API, sources, user approval, and Nipmod Archive."
+      />
+    </figure>
   );
 }
 
