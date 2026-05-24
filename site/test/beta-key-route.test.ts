@@ -38,7 +38,7 @@ describe("beta key route", () => {
 
     const response = await POST(
       new Request("https://nipmod.com/api/keys/beta", {
-        body: JSON.stringify({ label: "agent-ci" }),
+        body: JSON.stringify({ label: "agent-ci-private-build-name" }),
         headers: {
           "content-type": "application/json",
           "user-agent": "beta-key-route-test",
@@ -54,7 +54,7 @@ describe("beta key route", () => {
     expect(response.headers.get("x-nipmod-access-tier")).toBe("beta");
     expect(body).toMatchObject({
       auth: { bearer: true, header: "x-nipmod-api-key" },
-      label: "self-serve/agent-ci",
+      label: "self-serve/agent",
       rateLimitMultiplier: 10,
       storage: {
         rawKeyReturnedOnce: true,
@@ -68,13 +68,15 @@ describe("beta key route", () => {
     expect(body.keyId).toMatch(/^key_[a-f0-9]{16}$/);
     expect(storedRow).toMatchObject({
       id: body.keyId,
-      label: "self-serve/agent-ci",
+      label: "self-serve/agent",
       rate_limit_multiplier: 10,
       status: "active",
       tier: "beta"
     });
     expect(storedRow?.key_hash).toBe(deriveApiKeyDigestForStorage(body.key, env.NIPMOD_API_KEY_HASH_SECRET));
     expect(JSON.stringify(storedRow)).not.toContain(body.key);
+    expect(JSON.stringify(storedRow)).not.toContain("agent-ci-private-build-name");
+    expect(JSON.stringify(body)).not.toContain("agent-ci-private-build-name");
 
     const keyedRequest = new Request("https://nipmod.com/api/search?q=http%20client", {
       headers: {

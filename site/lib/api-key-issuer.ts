@@ -49,10 +49,11 @@ const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const BETA_KEY_TTL_DAYS = 90;
 const BETA_KEY_RATE_LIMIT_MULTIPLIER = 10;
+const BETA_KEY_LABEL = "self-serve/agent";
 const ISSUE_TIMEOUT_MS = 1_000;
 
 export async function issueSelfServeBetaApiKey(
-  input: { label?: unknown },
+  _input: { label?: unknown },
   env: ApiKeyIssuerEnv = process.env,
   fetchImpl: typeof fetch = fetch
 ): Promise<BetaApiKeyIssueResult> {
@@ -69,7 +70,7 @@ export async function issueSelfServeBetaApiKey(
     };
   }
 
-  const label = normalizeBetaKeyLabel(input.label);
+  const label = BETA_KEY_LABEL;
   const createdAt = new Date();
   const expiresAt = new Date(createdAt.getTime() + BETA_KEY_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
@@ -133,16 +134,6 @@ export async function issueSelfServeBetaApiKey(
 
 function generateBetaApiKey(): string {
   return `nka_beta_${randomBytes(32).toString("base64url")}`;
-}
-
-function normalizeBetaKeyLabel(value: unknown): string {
-  const raw = typeof value === "string" ? value : "";
-  const cleaned = raw
-    .replace(/[^\w./-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 60);
-  return `self-serve/${cleaned || "agent"}`.slice(0, 80);
 }
 
 async function insertApiKeyRow(input: {

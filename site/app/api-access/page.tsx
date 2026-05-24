@@ -26,16 +26,15 @@ curl 'https://nipmod.com/api/usage/stats?hours=24' \\
   -H 'authorization: Bearer <admin-key>'`;
 
 const betaKeyCall = `curl -s -X POST 'https://nipmod.com/api/keys/beta' \\
-  -H 'content-type: application/json' \\
-  -d '{"label":"my-agent"}'
+  -H 'content-type: application/json'
 
 curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
   -H 'x-nipmod-api-key: <returned-key>'`;
 
 const betaKeyAgentPrompt = `Read https://nipmod.com/api/openapi.
-If you need a higher beta limit, POST https://nipmod.com/api/keys/beta with a non-private label.
+If you need a higher beta limit, POST https://nipmod.com/api/keys/beta.
 Store the returned key in local secrets and use it as x-nipmod-api-key.
-Do not send prompts, user data, API keys or workspace paths as the label.`;
+Do not send prompts, user data, API keys or workspace paths.`;
 
 const searchShape = `{
   "id": "npm:undici",

@@ -275,16 +275,15 @@ curl 'https://nipmod.com/api/sources/health'
 
 Issue a free beta API key without human approval.
 
-The endpoint is public and rate limited. It returns the raw key once. Nipmod stores only a keyed hash, key id, tier, non-private label, multiplier and expiry.
+The endpoint is public and rate limited. It returns the raw key once. Nipmod stores only a keyed hash, key id, tier, generic self-serve label, multiplier and expiry. Request labels are accepted for compatibility but are not stored.
 
-Request body is optional. If a label is provided, it should be a non-private agent or project label.
+Request body is optional. Legacy label fields are ignored and never persisted.
 
 Example:
 
 ```bash
 curl -s -X POST 'https://nipmod.com/api/keys/beta' \
-  -H 'content-type: application/json' \
-  -d '{"label":"my-agent"}'
+  -H 'content-type: application/json'
 ```
 
 Response type:

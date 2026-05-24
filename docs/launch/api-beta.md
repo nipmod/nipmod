@@ -69,6 +69,7 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 - No API key is required for public beta access.
 - Requests are rate limited through the shared Supabase bucket in production.
 - Free beta keys are self-service through `POST /api/keys/beta`.
+- Public self-serve labels are generic and do not store caller-provided project names, prompts or workspace paths.
 - Partner keys can raise limits for integrations and agent hosts.
 - Admin keys can read aggregate usage metrics.
 - Invalid API keys return `401`.
