@@ -22,18 +22,10 @@ const mcpCall = `curl -s https://nipmod.com/api/mcp \\
   -H 'content-type: application/json' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
 
-const betaContract = `publicBeta: true
-apiKeyRequired: false
-rateLimited: true
-hostedWorkspaceWrites: false
-stableBetaCalls: search, inspect, install-plan, openapi
-archivePrepare: preview only
-archiveConfirm: authorized server writer only`;
-
 export default function ApiAccessPage() {
   return (
     <DocsShell
-      description="Agents call Nipmod before dependency selection, package installation, model setup or MCP tool selection."
+      description="Agents call Nipmod before they choose dependencies, install packages, select models or add MCP tools."
       eyebrow="API"
       stats={[
         { label: "OpenAPI", value: "3.1" },
@@ -52,16 +44,15 @@ export default function ApiAccessPage() {
       <DocsSection title="Beta contract">
         <DocsGrid>
           <DocsCard title="Public access">
-            <p>No API key is required during public beta. Requests are rate limited and designed for agent preflight checks.</p>
+            <p>No API key is required during public beta. Requests are limited to keep the public service reliable.</p>
           </DocsCard>
-          <DocsCard title="Stable beta surface">
-            <p>Search, Inspect, Install Plan and OpenAPI are the public contract agents should build against first.</p>
+          <DocsCard title="Public contract">
+            <p>Search, Inspect, Install Plan and OpenAPI are the calls agents should build against first.</p>
           </DocsCard>
           <DocsCard title="Archive boundary">
-            <p>Archive prepare is a preview. Durable confirmation is limited to authorized server writers and re-inspects source data.</p>
+            <p>Archive prepare is a preview. Durable confirmation is limited to authorized server writers and checks source data again.</p>
           </DocsCard>
         </DocsGrid>
-        <DocsCode>{betaContract}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Use from any agent">
@@ -70,10 +61,10 @@ export default function ApiAccessPage() {
             <p>Find candidates across npm, PyPI, GitHub, Hugging Face and MCP.</p>
           </DocsCard>
           <DocsCard label="2" title="Inspect">
-            <p>Refresh one exact source-owned record with license, warnings and trust factors.</p>
+            <p>Read one exact record with source context, license, warnings and trust factors.</p>
           </DocsCard>
           <DocsCard label="3" title="Plan">
-            <p>Return commands as review data. The hosted API never executes them.</p>
+            <p>Return commands for review. The hosted API never executes them.</p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
@@ -107,17 +98,17 @@ export default function ApiAccessPage() {
             {
               first: "Search",
               second: <code>GET /api/search?q=&lt;query&gt;&amp;sources=&lt;sources&gt;&amp;limit=5</code>,
-              third: "Returns ranked candidates."
+              third: "Returns ranked candidates from supported sources."
             },
             {
               first: "Inspect",
               second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
-              third: "Returns source, license, metrics, trust factors and warnings."
+              third: "Returns source context, license, metrics, trust factors and warnings."
             },
             {
               first: "Install plan",
               second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
-              third: "Returns commands as a plan, not as hosted execution."
+              third: "Returns commands for approval, not hosted execution."
             },
             {
               first: "Archive prepare",
@@ -132,7 +123,7 @@ export default function ApiAccessPage() {
             {
               first: "OpenAPI",
               second: <code>GET /api/openapi</code>,
-              third: "Machine-readable contract for builders."
+              third: "API contract for builders and agent hosts."
             }
           ]}
         />
@@ -144,7 +135,7 @@ export default function ApiAccessPage() {
             {
               first: "Selection",
               second: "Recommended candidate, gate status and rank reasons.",
-              third: "Search is a shortlist, not approval."
+              third: "Search is a shortlist, not approval to install."
             },
             {
               first: "Trust",
@@ -154,12 +145,12 @@ export default function ApiAccessPage() {
             {
               first: "Install plan",
               second: "Command, source, package/version, risk and approval boundary.",
-              third: "Commands are review data only."
+              third: "Commands are shown for review only."
             },
             {
               first: "Archive",
               second: "Preview a reusable record after useful discovery.",
-              third: "Durable writes require an authorized writer path."
+              third: "Durable writes require an authorized server path."
             }
           ]}
         />
@@ -184,8 +175,8 @@ export default function ApiAccessPage() {
 
       <DocsSection title="Safety boundary">
         <DocsGrid>
-          <DocsCard title="Read-only by default">
-            <p>The hosted API can search and plan. It cannot read local files, mutate lockfiles or execute install commands.</p>
+          <DocsCard title="Read only by default">
+            <p>The hosted API can search and plan. It cannot read local files, change lockfiles or execute install commands.</p>
           </DocsCard>
           <DocsCard title="Metadata is untrusted">
             <p>Package descriptions, READMEs and model cards are treated as data. They cannot override agent instructions.</p>
