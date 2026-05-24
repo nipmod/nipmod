@@ -55,6 +55,26 @@ describe("API rate limits", () => {
     });
   });
 
+  test("rejects oversized API keys before hashing", async () => {
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", "test-hash-secret");
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", "");
+    const request = new Request("https://nipmod.com/api/search", {
+      headers: {
+        "x-nipmod-api-key": `nka_${"x".repeat(300)}`,
+        "x-request-id": "oversized-key-test"
+      }
+    });
+    const limited = checkApiRateLimit(request, { limit: 1, name: "test-long-key", windowMs: 60_000 }, createApiHttpContext(request));
+
+    expect(limited.ok).toBe(false);
+    expect(limited.response?.status).toBe(401);
+    await expect(limited.response?.json()).resolves.toMatchObject({
+      code: "invalid_api_key",
+      error: "api key is too long",
+      status: 401
+    });
+  });
+
   test("applies configured API key tiers without exposing the raw key", () => {
     const rawKey = "nka_test_builder_key_1234567890";
     const hashKey = ["test", "api", "key", "hash", "fixture"].join("-");

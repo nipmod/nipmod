@@ -675,10 +675,10 @@ function openApiDocument() {
         BetaApiKeyIssueRequest: {
           additionalProperties: false,
           properties: {
-            agent: { description: "Optional non-private agent label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
-            client: { description: "Optional non-private client label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
-            label: { description: "Optional non-private key label.", maxLength: 80, type: "string" },
-            name: { description: "Optional non-private key label alias.", maxLength: 80, type: "string" }
+            agent: { description: "Optional legacy field accepted for compatibility; request labels are not stored.", maxLength: 80, type: "string" },
+            client: { description: "Optional legacy field accepted for compatibility; request labels are not stored.", maxLength: 80, type: "string" },
+            label: { description: "Optional legacy field accepted for compatibility; request labels are not stored.", maxLength: 80, type: "string" },
+            name: { description: "Optional legacy field accepted for compatibility; request labels are not stored.", maxLength: 80, type: "string" }
           },
           type: "object"
         },

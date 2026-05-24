@@ -25,6 +25,7 @@ const API_KEY_HASH_SECRET_ENV = "NIPMOD_API_KEY_HASH_SECRET";
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const API_KEY_MIN_LENGTH = 24;
+const API_KEY_MAX_LENGTH = 256;
 const API_KEY_REGISTRY_TIMEOUT_MS = 700;
 
 const PUBLIC_ACCESS: ApiAccess = {
@@ -50,6 +51,9 @@ export function readApiAccess(
 
   if (provided.length < API_KEY_MIN_LENGTH) {
     return unauthorized(context, "api key is too short");
+  }
+  if (provided.length > API_KEY_MAX_LENGTH) {
+    return unauthorized(context, "api key is too long");
   }
 
   const configured = readConfiguredKeys(env);
@@ -83,6 +87,9 @@ export async function readApiAccessAsync(
 
   if (provided.length < API_KEY_MIN_LENGTH) {
     return unauthorized(context, "api key is too short");
+  }
+  if (provided.length > API_KEY_MAX_LENGTH) {
+    return unauthorized(context, "api key is too long");
   }
 
   const configured = readConfiguredKeys(env);

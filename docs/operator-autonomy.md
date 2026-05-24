@@ -86,11 +86,10 @@ Free beta keys can be issued by the API once the registry table is live:
 
 ```bash
 curl -s -X POST 'https://nipmod.com/api/keys/beta' \
-  -H 'content-type: application/json' \
-  -d '{"label":"self-serve-agent"}'
+  -H 'content-type: application/json'
 ```
 
-The response returns the raw key once. The server inserts only the keyed hash, key id, beta tier, non-private label, multiplier and expiry.
+The response returns the raw key once. The server inserts only the keyed hash, key id, beta tier, a generic self-serve label, multiplier and expiry. Public self-serve labels are not stored from request input, so agents do not accidentally persist private project names, prompts, workspace paths or user data.
 
 Create a key hash locally:
 
