@@ -34,6 +34,9 @@
   --docs-muted: rgba(243, 243, 244, 0.66);
   --docs-faint: rgba(243, 243, 244, 0.42);
   --docs-code: #d7d7da;
+  --docs-serif: Georgia, "Times New Roman", Times, serif;
+  --docs-ui: Geist, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --docs-mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
   --topbar-height: 66px;
 }
 
@@ -84,74 +87,43 @@ body {
 }
 
 .docs-shell {
+  align-items: start;
   display: grid;
-  grid-template-columns: 236px minmax(0, 860px);
-  gap: 48px;
+  grid-template-columns: 220px minmax(0, 840px);
+  gap: 56px;
   margin: 0 auto;
   max-width: 1220px;
   min-height: calc(100svh - var(--topbar-height));
-  padding: 42px 32px 88px;
+  padding: 26px 32px 88px;
   width: 100%;
 }
 
 .docs-shell-with-toc {
-  grid-template-columns: 224px minmax(0, 820px) 172px;
+  grid-template-columns: 220px minmax(0, 800px) 176px;
   max-width: 1360px;
 }
 
 .docs-sidebar {
   align-self: start;
   display: grid;
-  gap: 18px;
+  gap: 20px;
+  max-height: calc(100svh - var(--topbar-height) - 52px);
+  overflow-y: auto;
+  padding-right: 4px;
   position: sticky;
-  top: calc(var(--topbar-height) + 30px);
+  scrollbar-width: none;
+  top: calc(var(--topbar-height) + 26px);
+}
+
+.docs-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .docs-sidebar-title {
   color: var(--docs-text);
+  font-family: var(--docs-ui);
   font-size: 13px;
-  font-weight: 700;
-}
-
-.docs-search {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid var(--docs-line);
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 36px;
-  padding: 0 8px 0 10px;
-}
-
-.docs-search:focus-within {
-  border-color: rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.052);
-}
-
-.docs-search input {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  color: var(--docs-text);
-  font: inherit;
-  font-size: 13px;
-  min-width: 0;
-  outline: 0;
-}
-
-.docs-search input::placeholder {
-  color: var(--docs-faint);
-}
-
-.docs-search kbd {
-  border: 1px solid var(--docs-line-soft);
-  border-radius: 5px;
-  color: var(--docs-faint);
-  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
-  line-height: 1;
-  padding: 4px 5px;
+  font-weight: 650;
 }
 
 .docs-sidebar-nav {
@@ -168,6 +140,7 @@ body {
 
 .docs-sidebar-group > p {
   color: var(--docs-faint);
+  font-family: var(--docs-ui);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
@@ -183,6 +156,7 @@ body {
 .docs-sidebar-nav a {
   border-radius: 6px;
   color: var(--docs-muted);
+  font-family: var(--docs-ui);
   font-size: 13px;
   line-height: 1.2;
   padding: 7px 9px;
@@ -199,14 +173,6 @@ body {
   color: var(--docs-text);
 }
 
-.docs-sidebar-empty {
-  color: var(--docs-faint);
-  font-size: 12.5px;
-  line-height: 1.45;
-  margin: 0;
-  padding: 7px 9px;
-}
-
 .docs-main {
   min-width: 0;
 }
@@ -220,6 +186,7 @@ body {
 
 .docs-eyebrow {
   color: var(--docs-faint);
+  font-family: var(--docs-ui);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
@@ -229,21 +196,22 @@ body {
 
 .docs-hero h1 {
   color: var(--docs-text);
-  font-family: Geist, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(38px, 5.2vw, 56px);
-  font-weight: 650;
+  font-family: var(--docs-serif);
+  font-size: clamp(42px, 5.1vw, 62px);
+  font-weight: 500;
   letter-spacing: 0;
-  line-height: 1.02;
+  line-height: 1.04;
   margin: 0;
   max-width: 820px;
 }
 
 .docs-hero > p {
   color: var(--docs-muted);
-  font-size: 17px;
-  line-height: 1.65;
+  font-family: var(--docs-serif);
+  font-size: 18px;
+  line-height: 1.72;
   margin: 0;
-  max-width: 760px;
+  max-width: 720px;
 }
 
 .docs-stat-strip {
@@ -269,12 +237,14 @@ body {
 
 .docs-stat-strip dt {
   color: var(--docs-faint);
+  font-family: var(--docs-ui);
   font-size: 12px;
   font-weight: 650;
 }
 
 .docs-stat-strip dd {
   color: var(--docs-text);
+  font-family: var(--docs-ui);
   font-size: 15px;
   font-weight: 700;
   margin: 0;
@@ -291,11 +261,12 @@ body {
   display: grid;
   gap: 10px;
   position: sticky;
-  top: calc(var(--topbar-height) + 30px);
+  top: calc(var(--topbar-height) + 26px);
 }
 
 .docs-toc p {
   color: var(--docs-faint);
+  font-family: var(--docs-ui);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
@@ -313,6 +284,7 @@ body {
 .docs-toc a {
   border-radius: 6px;
   color: var(--docs-muted);
+  font-family: var(--docs-ui);
   font-size: 12.5px;
   line-height: 1.25;
   padding: 6px 8px;
@@ -336,8 +308,9 @@ body {
 
 .docs-section h2 {
   color: var(--docs-text);
-  font-size: 24px;
-  font-weight: 650;
+  font-family: var(--docs-serif);
+  font-size: 27px;
+  font-weight: 500;
   letter-spacing: 0;
   line-height: 1.22;
   margin: 0;
@@ -361,6 +334,7 @@ body {
 
 .docs-card > span {
   color: var(--docs-faint);
+  font-family: var(--docs-ui);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -368,8 +342,9 @@ body {
 
 .docs-card h3 {
   color: var(--docs-text);
-  font-size: 16px;
-  font-weight: 650;
+  font-family: var(--docs-serif);
+  font-size: 18px;
+  font-weight: 500;
   line-height: 1.3;
   margin: 0;
 }
@@ -377,8 +352,9 @@ body {
 .docs-card p,
 .docs-note {
   color: var(--docs-muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-family: var(--docs-serif);
+  font-size: 15.5px;
+  line-height: 1.68;
   margin: 0;
 }
 
@@ -395,7 +371,7 @@ body {
 .docs-code code,
 .docs-table code {
   color: var(--docs-code);
-  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--docs-mono);
   font-size: 12.5px;
   line-height: 1.55;
 }
@@ -419,14 +395,16 @@ body {
 
 .docs-table-row strong {
   color: var(--docs-text);
+  font-family: var(--docs-ui);
   font-size: 14px;
   font-weight: 650;
 }
 
 .docs-table-row div {
   color: var(--docs-muted);
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--docs-serif);
+  font-size: 15px;
+  line-height: 1.62;
   min-width: 0;
 }
 
@@ -442,6 +420,7 @@ body {
   border: 1px solid var(--docs-line);
   border-radius: 8px;
   color: var(--docs-text);
+  font-family: var(--docs-ui);
   font-size: 14px;
   font-weight: 650;
   min-height: 40px;
@@ -508,12 +487,10 @@ body {
   .docs-sidebar {
     border-bottom: 1px solid var(--docs-line);
     gap: 12px;
+    max-height: none;
+    overflow: visible;
     padding-bottom: 14px;
     position: static;
-  }
-
-  .docs-search {
-    max-width: 320px;
   }
 
   .docs-sidebar-nav {
@@ -5715,6 +5692,17 @@ body {
   .one-page-modal-row {
     grid-template-columns: 1fr;
   }
+}
+
+.topbar {
+  grid-template-columns: auto minmax(0, 1fr);
+  height: var(--topbar-height);
+  min-height: var(--topbar-height);
+  padding: 0 32px;
+}
+
+.brand {
+  min-height: var(--topbar-height);
 }
 
 @media (max-width: 980px) {
