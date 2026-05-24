@@ -55,10 +55,11 @@ const sources = [
 export default function SourcesPage() {
   return (
     <DocsShell
-      description="Nipmod resolves public sources into one agent-readable response format. Source ownership stays external."
+      description="Nipmod resolves public sources into one agent-readable response format. The archive is separate: it stores confirmed useful records, not every search."
       eyebrow="Sources"
       stats={[
-        { label: "Live sources", value: "6" },
+        { label: "Public sources", value: "5" },
+        { label: "Archive", value: "confirmed records" },
         { label: "Ownership", value: "external retained" },
         { label: "Hosted writes", value: "none" }
       ]}
@@ -66,12 +67,26 @@ export default function SourcesPage() {
     >
       <DocsSection title="Supported sources">
         <DocsTable
-          rows={sources.map((source) => ({
+          rows={sources.slice(0, 5).map((source) => ({
             first: source.name,
             second: source.use,
             third: `${source.kind} / ${source.access}`
           }))}
         />
+      </DocsSection>
+
+      <DocsSection title="Archive source">
+        <DocsGrid>
+          <DocsCard title="Confirmed records">
+            <p>The Nipmod archive is not a public package host like npm or PyPI. It stores useful package intelligence after confirmation.</p>
+          </DocsCard>
+          <DocsCard title="No bulk copying">
+            <p>Search can read external sources, but a package becomes durable only through an explicit archive flow.</p>
+          </DocsCard>
+          <DocsCard title="Reusable context">
+            <p>Archived records keep source context, trust checks and receipts so later agents can reuse known decisions.</p>
+          </DocsCard>
+        </DocsGrid>
       </DocsSection>
 
       <DocsSection title="Exact examples">

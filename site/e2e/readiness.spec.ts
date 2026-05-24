@@ -11,22 +11,11 @@ test("home page presents the API-first product", async ({ page }) => {
   await expect(page.locator('head link[rel="alternate"][type="application/json"][href="/.well-known/nipmod.json"]')).toHaveCount(1);
 
   await expect(page.getByRole("heading", { name: /The package layer\s+for AI agents\./ })).toBeVisible();
-  await expect(page.getByText("One hosted API for agents to search package sources")).toBeVisible();
+  await expect(page.getByText("Nipmod makes existing package ecosystems readable for agents")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Read architecture" })).toHaveAttribute("href", "/architecture");
   await expect(page.getByRole("link", { name: "Open API docs" })).toHaveAttribute("href", "/api-access");
-  await expect(page.getByRole("link", { name: "View sources" })).toHaveAttribute("href", "/sources");
+  await expect(page.getByRole("link", { name: "Start quickstart" })).toHaveAttribute("href", "/quickstart");
 
-  const siteNav = page.getByRole("navigation", { name: "Site" });
-  await expect(siteNav.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
-  await expect(siteNav.getByRole("link", { name: "API" })).toHaveAttribute("href", "/api-access");
-  await expect(siteNav.getByRole("link", { name: "Sources" })).toHaveAttribute("href", "/sources");
-  const archiveNav = siteNav.getByRole("link", { name: "Archive" });
-  const trustNav = siteNav.getByRole("link", { name: "Trust" });
-  if (await archiveNav.count()) {
-    await expect(archiveNav).toHaveAttribute("href", "/packages");
-  }
-  if (await trustNav.count()) {
-    await expect(trustNav).toHaveAttribute("href", "/trust");
-  }
   if (await page.locator(".brand-socials").isVisible()) {
     await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Open Nipmod token page in a new tab" })).toHaveAttribute(
@@ -42,7 +31,7 @@ test("API access page exposes one public package surface", async ({ page }) => {
   await page.goto("/api-access");
 
   await expect(page.getByRole("heading", { name: "One package API for agents." })).toBeVisible();
-  await expect(page.getByText("The hosted API is the main product surface.")).toBeVisible();
+  await expect(page.getByText("Agents call Nipmod before choosing dependencies")).toBeVisible();
   await expect(page.getByText("GET /api/search?q=<query>")).toBeVisible();
   await expect(page.getByText("GET /api/inspect?source=npm&name=undici")).toBeVisible();
   await expect(page.getByText("GET /api/install-plan?source=npm&name=undici")).toBeVisible();
@@ -52,14 +41,19 @@ test("API access page exposes one public package surface", async ({ page }) => {
 test("home CTAs navigate with real clicks", async ({ page }) => {
   await page.goto("/");
 
+  await page.getByRole("link", { name: "Read architecture" }).click();
+  await expect(page).toHaveURL(/\/architecture$/);
+  await expect(page.getByRole("heading", { name: "How Nipmod works." })).toBeVisible();
+
+  await page.goto("/");
   await page.getByRole("link", { name: "Open API docs" }).click();
   await expect(page).toHaveURL(/\/api-access$/);
   await expect(page.getByRole("heading", { name: "One package API for agents." })).toBeVisible();
 
   await page.goto("/");
-  await page.getByRole("link", { name: "View sources" }).click();
-  await expect(page).toHaveURL(/\/sources$/);
-  await expect(page.getByRole("heading", { name: "Sources agents can search." })).toBeVisible();
+  await page.getByRole("link", { name: "Start quickstart" }).click();
+  await expect(page).toHaveURL(/\/quickstart$/);
+  await expect(page.getByRole("heading", { name: "Start with your agent." })).toBeVisible();
 });
 
 test("sources page lists source registries without implying partnerships", async ({ page }) => {
@@ -69,7 +63,7 @@ test("sources page lists source registries without implying partnerships", async
   for (const source of ["npm", "PyPI", "GitHub", "Hugging Face", "MCP"]) {
     await expect(page.getByRole("heading", { name: source })).toBeVisible();
   }
-  await expect(page.getByText("Nipmod archive")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Confirmed records" })).toBeVisible();
   await expect(page.getByText("external retained")).toBeVisible();
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 });
@@ -156,9 +150,8 @@ test("status and platform pages expose current proof paths only", async ({ page 
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 
   await page.goto("/platforms");
-  await expect(page.getByRole("heading", { name: "Source and access paths." })).toBeVisible();
-  await expect(page.getByText("The public product surface is source coverage plus one agent API.")).toBeVisible();
-  await expect(page.getByText("Native integrations", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/sources$/);
+  await expect(page.getByRole("heading", { name: "Sources agents can search." })).toBeVisible();
   await expect(page.locator("body")).not.toContainText(/Aeon|OpenHuman|OpenHume|Bankr skill|integrations\/bankr/i);
 });
 
@@ -174,7 +167,7 @@ test("optional local setup stays available but is not the core integration story
 test("trust and security pages keep public proof readable", async ({ page, request }) => {
   await page.goto("/trust");
   await expect(page.getByRole("heading", { name: "Trust signals for package decisions." })).toBeVisible();
-  await expect(page.getByText("Do not trust package text")).toBeVisible();
+  await expect(page.getByText("Treat package text as data")).toBeVisible();
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 
   await page.goto("/security");
@@ -191,6 +184,7 @@ test("internal public links resolve", async ({ page, request }) => {
 
   const routes = [
     "/",
+    "/architecture",
     "/api-access",
     "/sources",
     "/packages",
@@ -236,12 +230,10 @@ test("internal public links resolve", async ({ page, request }) => {
 
 test("mobile header stays compact and API-first", async ({ page }) => {
   await page.setViewportSize({ height: 844, width: 390 });
-  await page.goto("/");
+  await page.goto("/architecture");
 
-  const siteNav = page.getByRole("navigation", { name: "Site" });
-  await expect(siteNav.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/");
-  await expect(siteNav.getByRole("link", { name: "API" })).toHaveAttribute("href", "/api-access");
-  await expect(siteNav.getByRole("link", { name: "Sources" })).toHaveAttribute("href", "/sources");
-  await expect(siteNav.getByRole("link", { name: "Archive" })).toHaveCount(0);
-  await expect(siteNav.getByRole("link", { name: "Trust" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Nipmod home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Architecture" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How Nipmod works." })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
 });

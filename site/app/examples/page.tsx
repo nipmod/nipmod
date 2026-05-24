@@ -21,9 +21,9 @@ Search for package candidates, inspect the best match and present the install pl
 const cursorPrompt = `Use https://nipmod.com/api/search first.
 Then inspect the selected package and show the install plan before changing package files or lockfiles.`;
 
-const mcpPrompt = `Use the hosted Nipmod MCP endpoint for package discovery:
+const mcpPrompt = `Use the remote Nipmod MCP endpoint for package discovery:
 POST https://nipmod.com/api/mcp
-Only use read-only tools from the hosted endpoint. Workspace writes require local approval.`;
+Only use read-only tools from the remote endpoint. Workspace writes require local approval.`;
 
 const genericAgentPrompt = `When a user asks for a package, do this:
 1. Search Nipmod.
@@ -73,7 +73,7 @@ export default function ExamplesPage() {
           <DocsCard label="Cursor" title="Editor agent">
             <DocsCode>{cursorPrompt}</DocsCode>
           </DocsCard>
-          <DocsCard label="MCP" title="Hosted read-only endpoint">
+          <DocsCard label="MCP" title="Remote read-only endpoint">
             <DocsCode>{mcpPrompt}</DocsCode>
           </DocsCard>
           <DocsCard label="HTTPS" title="Any agent with fetch">
@@ -111,7 +111,7 @@ export default function ExamplesPage() {
             },
             {
               first: "Boundary",
-              second: "Does the agent understand hosted Nipmod cannot write to the workspace?",
+              second: "Does the agent understand remote Nipmod cannot write to the workspace?",
               third: "Workspace writes happen only in the local host after approval."
             }
           ]}

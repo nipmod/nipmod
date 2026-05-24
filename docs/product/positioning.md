@@ -34,6 +34,8 @@ Nipmod does not replace package registries. Nipmod makes existing package ecosys
 4. User or host approval.
 5. Optional archive confirmation after useful discovery.
 
+Search, Inspect and Install Plan are read-only hosted actions. They do not download packages, run package managers or edit local files.
+
 ## Public Claims Standard
 
 Use precise language:
@@ -62,3 +64,9 @@ Agents need another step before that:
 - Should the user approve it?
 
 Nipmod owns that preflight decision layer.
+
+## Current Rollout
+
+Public beta access is free and rate limited while the API, trust model and archive loop improve from real usage.
+
+The first collaboration surface is the Base ecosystem because the project, token and early community are already there. The product itself remains broader than Base: the same API can serve any agent host that can call HTTPS or MCP.

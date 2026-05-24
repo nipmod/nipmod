@@ -7,8 +7,9 @@ It sits above existing package ecosystems and turns source-owned package metadat
 ## System Flow
 
 ```text
-agent request
-  -> source resolver
+agent or host
+  -> Nipmod API
+  -> source adapters: npm, PyPI, GitHub, Hugging Face, MCP
   -> normalizer
   -> trust engine
   -> policy engine
@@ -16,6 +17,8 @@ agent request
   -> user or host approval
   -> optional archive confirmation
 ```
+
+Search, Inspect and Install Plan do not download packages, run package managers or edit local files. They return review data. Local execution happens only after the user or host approves a plan.
 
 ## Layers
 
@@ -61,6 +64,10 @@ Local workspace writes belong to the user's package manager, local MCP server or
 The package intelligence archive is not a registry mirror.
 
 Records enter the durable archive only after a useful discovery is confirmed. Confirm uses server-side reinspection and gates the record through trust, install plan and metadata checks. Confirm deduplicates by stable source evidence instead of allowing public spam.
+
+## Beta Rollout
+
+Public beta access is free and rate limited. The first collaboration surface is the Base ecosystem because the project, token and early community already live there. The architecture is not Base-specific: once the API, trust model and archive loop are stable, the same package intelligence layer can support agent builders outside crypto.
 
 ## Operational Gates
 

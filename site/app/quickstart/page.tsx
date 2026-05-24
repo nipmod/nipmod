@@ -21,15 +21,29 @@ nipmod mcp serve`;
 export default function QuickstartPage() {
   return (
     <DocsShell
-      description="The fastest path is the hosted API. Local setup is optional and only needed when a user wants controlled workspace operations after approval."
+      description="Most users do not install Nipmod first. They tell their agent to call the hosted API, review the result and approve only when a local command should run."
       eyebrow="Quickstart"
       stats={[
-        { label: "Start", value: "1 prompt" },
+        { label: "Start", value: "tell your agent" },
         { label: "Core calls", value: "3" },
         { label: "Local install", value: "optional" }
       ]}
-      title="Start with the API."
+      title="Start with your agent."
     >
+      <DocsSection title="Before anything installs">
+        <DocsGrid>
+          <DocsCard title="No package is downloaded">
+            <p>Search and Inspect only read public package metadata. They do not download a package into your project.</p>
+          </DocsCard>
+          <DocsCard title="No file is changed">
+            <p>Install Plan returns a command as text. It does not edit files, lockfiles or workspace settings.</p>
+          </DocsCard>
+          <DocsCard title="Approval comes first">
+            <p>Your agent should show the plan and wait. The local tool or terminal runs the command only after approval.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
       <DocsSection title="Tell your agent this">
         <DocsCode>{agentPrompt}</DocsCode>
       </DocsSection>
@@ -84,10 +98,13 @@ export default function QuickstartPage() {
       <DocsSection title="Optional local setup">
         <DocsGrid>
           <DocsCard title="CLI">
-            <p>Use the CLI when the local host needs controlled commands, checks or MCP tools after approval.</p>
+            <p>Install the CLI only when you want local checks or a local MCP server. The hosted API does not require it.</p>
           </DocsCard>
           <DocsCard title="Hosted API first">
             <p>Most agents can start with HTTPS calls. No native platform integration is required for the basic flow.</p>
+          </DocsCard>
+          <DocsCard title="Local execution">
+            <p>If you approve an install plan, your own workspace tool runs the command. Nipmod does not run it remotely.</p>
           </DocsCard>
         </DocsGrid>
         <DocsCode>{localSetup}</DocsCode>

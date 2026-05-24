@@ -1,28 +1,33 @@
 import Link from "next/link";
-import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "./docs-shell";
+import { ArchitectureDiagram, DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "./docs-shell";
 
-const agentInstruction = `Before choosing a package, call Nipmod.
-Search first, inspect the selected record, then present the install plan before changing the workspace.`;
+const agentInstruction = `Use Nipmod before choosing a package.
+Search sources, inspect the selected record and show the install plan.
+Do not install or edit files until I approve.`;
 
 export default function Home() {
   return (
     <DocsShell
-      description="Nipmod gives agents one place to search package sources, read trust context and prepare install plans before changing a workspace."
+      description="Nipmod makes existing package ecosystems readable for agents. It searches sources, explains trust and returns install plans before anything touches a workspace."
       eyebrow="Home"
       stats={[
-        { label: "Sources", value: "6 live" },
+        { label: "Public sources", value: "5 live" },
         { label: "API beta", value: "public" },
         { label: "Hosted writes", value: "0" }
       ]}
       title="The package layer for AI agents."
     >
+      <DocsSection title="Current architecture">
+        <ArchitectureDiagram />
+      </DocsSection>
+
       <DocsSection title="Public beta">
         <DocsGrid>
           <DocsCard title="One API">
             <p>Agents can search supported sources, inspect exact records and request install plans through the same public API.</p>
           </DocsCard>
           <DocsCard title="Free with limits">
-            <p>Public beta access does not require a key. Requests are limited so the shared service remains reliable.</p>
+            <p>Public beta access does not require a key. Requests are rate limited while we improve resolver quality and collect real usage.</p>
           </DocsCard>
           <DocsCard title="No hidden execution">
             <p>Hosted calls do not read local files, run package managers or write lockfiles.</p>
@@ -30,7 +35,7 @@ export default function Home() {
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection title="Agent flow">
+      <DocsSection title="How it works">
         <DocsGrid>
           <DocsCard label="1" title="Search">
             <p>The agent asks Nipmod for candidates across supported package sources.</p>
@@ -41,10 +46,16 @@ export default function Home() {
           <DocsCard label="3" title="Plan">
             <p>The API returns install steps for review. Execution stays outside the hosted API.</p>
           </DocsCard>
+          <DocsCard label="4" title="Approve">
+            <p>The user or local host decides whether the command is allowed to run.</p>
+          </DocsCard>
+          <DocsCard label="5" title="Archive">
+            <p>Useful confirmed discoveries can become reusable Nipmod archive records.</p>
+          </DocsCard>
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection title="Agent instruction">
+      <DocsSection title="What to tell your agent">
         <DocsCode>{agentInstruction}</DocsCode>
       </DocsSection>
 
@@ -89,9 +100,35 @@ export default function Home() {
         </DocsGrid>
       </DocsSection>
 
+      <DocsSection title="Ecosystem phase">
+        <DocsGrid>
+          <DocsCard title="Base first">
+            <p>We are starting collaboration work around the Base ecosystem because early community, token and builder attention are already there.</p>
+          </DocsCard>
+          <DocsCard title="Broader after the beta">
+            <p>Once the API, trust model and archive loops are stable, the same package layer can be taken to agent builders outside crypto.</p>
+          </DocsCard>
+          <DocsCard title="Public links">
+            <p>GitHub, X, Telegram and the $NPM token link stay visible from the header so builders can review the project quickly.</p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
+      <DocsSection title="Official links">
+        <DocsTable
+          rows={[
+            ["GitHub", <a className="data-link" href="https://github.com/nipmod/nipmod" key="github" rel="noreferrer" target="_blank">github.com/nipmod/nipmod</a>],
+            ["X", <a className="data-link" href="https://x.com/Nipmod" key="x" rel="noreferrer" target="_blank">x.com/Nipmod</a>],
+            ["Telegram", <a className="data-link" href="https://t.me/nipmod" key="telegram" rel="noreferrer" target="_blank">t.me/nipmod</a>],
+            ["$NPM on Base", <a className="data-link" href="https://token.nipmod.com" key="token" rel="noreferrer" target="_blank">token.nipmod.com</a>]
+          ]}
+        />
+      </DocsSection>
+
       <div className="docs-next">
+        <Link href="/architecture">Read architecture</Link>
         <Link href="/api-access">Open API docs</Link>
-        <Link href="/examples">View examples</Link>
+        <Link href="/quickstart">Start quickstart</Link>
       </div>
     </DocsShell>
   );
