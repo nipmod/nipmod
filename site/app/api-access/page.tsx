@@ -25,6 +25,18 @@ const keyedCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/usage/stats?hours=24' \\
   -H 'authorization: Bearer <admin-key>'`;
 
+const betaKeyCall = `curl -s -X POST 'https://nipmod.com/api/keys/beta' \\
+  -H 'content-type: application/json' \\
+  -d '{"label":"my-agent"}'
+
+curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
+  -H 'x-nipmod-api-key: <returned-key>'`;
+
+const betaKeyAgentPrompt = `Read https://nipmod.com/api/openapi.
+If you need a higher beta limit, POST https://nipmod.com/api/keys/beta with a non-private label.
+Store the returned key in local secrets and use it as x-nipmod-api-key.
+Do not send prompts, user data, API keys or workspace paths as the label.`;
+
 const searchShape = `{
   "id": "npm:undici",
   "source": "npm",
@@ -154,6 +166,11 @@ export default function ApiAccessPage() {
               third: "Admin-only aggregate route, source, tier and package-hash metrics."
             },
             {
+              first: "Beta Key",
+              second: <code>POST /api/keys/beta</code>,
+              third: "Self-service beta API key. The raw key is returned once and stored only as a keyed hash."
+            },
+            {
               first: "MCP",
               second: <code>POST /api/mcp</code>,
               third: "Read-only MCP JSON-RPC surface over the same hosted API."
@@ -177,8 +194,8 @@ export default function ApiAccessPage() {
             },
             {
               first: "Free beta keys",
-              second: <code>x-nipmod-api-key</code>,
-              third: "Manually issued during beta for higher shared limits. They do not unlock private sources."
+              second: <code>POST /api/keys/beta</code>,
+              third: "Issued directly by the API for higher shared beta limits. They do not unlock private sources."
             },
             {
               first: "Partner keys",
@@ -196,13 +213,24 @@ export default function ApiAccessPage() {
               third: "Issued keys are verified against server-side hashes and exposed only as a key id in usage events."
             },
             {
-              first: "Self-service keys",
-              second: "Not part of the public beta yet.",
-              third: "The current launch path is public access plus manually issued beta, partner and admin keys."
+              first: "Private data",
+              second: "Do not send secrets in labels.",
+              third: "The self-service endpoint stores a non-private label, tier, key id, hash and expiry only."
             }
           ]}
         />
         <DocsCode>{keyedCalls}</DocsCode>
+      </DocsSection>
+
+      <DocsSection title="Self-service beta keys">
+        <DocsProse>
+          <p>
+            Agents can issue a beta key without a human handoff. The endpoint is public and rate limited. It returns the
+            raw key once, then Nipmod keeps only a keyed hash for verification.
+          </p>
+        </DocsProse>
+        <DocsCode>{betaKeyCall}</DocsCode>
+        <DocsCode>{betaKeyAgentPrompt}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Usage and statistics">

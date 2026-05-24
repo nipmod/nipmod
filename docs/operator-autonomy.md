@@ -82,13 +82,23 @@ If the live check returns `fallbackReason: "distributed_rpc_http_404"`, Producti
 
 Raw API keys are never inserted. Store only `key_hash` values derived with `NIPMOD_API_KEY_HASH_SECRET`.
 
+Free beta keys can be issued by the API once the registry table is live:
+
+```bash
+curl -s -X POST 'https://nipmod.com/api/keys/beta' \
+  -H 'content-type: application/json' \
+  -d '{"label":"self-serve-agent"}'
+```
+
+The response returns the raw key once. The server inserts only the keyed hash, key id, beta tier, non-private label, multiplier and expiry.
+
 Create a key hash locally:
 
 ```bash
 node --input-type=module -e "import { scryptSync } from 'node:crypto'; const [key, secret] = process.argv.slice(1); console.log(scryptSync(key, secret, 32).toString('hex'))" '<raw-api-key>' '<NIPMOD_API_KEY_HASH_SECRET>'
 ```
 
-Insert a free beta key:
+Insert a key manually only for operator-created partner, admin or recovery beta keys:
 
 ```sql
 insert into public.api_keys (id, key_hash, label, tier, status, rate_limit_multiplier)

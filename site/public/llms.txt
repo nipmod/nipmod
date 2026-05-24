@@ -46,6 +46,10 @@ GET https://nipmod.com/api/sources/health
 OpenAPI:
 GET https://nipmod.com/api/openapi
 
+Beta key:
+POST https://nipmod.com/api/keys/beta
+{"label":"my-agent"}
+
 ## MCP
 
 Hosted MCP is read-only and uses the same API boundary.
@@ -69,7 +73,12 @@ Hosted MCP does not expose workspace write tools.
 Public beta access is free and rate limited.
 No API key is required today.
 
-Optional higher-limit keys can be issued separately.
+Agents can issue a free beta key without a human handoff:
+
+POST https://nipmod.com/api/keys/beta
+
+Use a non-private label. Do not send prompts, personal data, workspace paths or other API keys as labels.
+
 Agents may send an issued key as:
 
 x-nipmod-api-key: <key>

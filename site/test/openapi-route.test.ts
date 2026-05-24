@@ -23,6 +23,7 @@ describe("OpenAPI route", () => {
     });
     expect(Object.keys(body.paths)).toEqual([
       "/api/openapi",
+      "/api/keys/beta",
       "/api/archive/prepare",
       "/api/archive/confirm",
       "/api/archive/search",
@@ -38,6 +39,11 @@ describe("OpenAPI route", () => {
     expect(body.paths["/api/openapi"].get.operationId).toBe("getOpenApiContract");
     expect(body.paths["/api/openapi"].get.responses["200"].content["application/openapi+json"].schema.$ref).toBe(
       "#/components/schemas/OpenApiDocument"
+    );
+    expect(body.paths["/api/keys/beta"].post.operationId).toBe("issueBetaApiKey");
+    expect(body.paths["/api/keys/beta"].post.security).toEqual([{}]);
+    expect(body.paths["/api/keys/beta"].post.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/BetaApiKeyIssueResponse"
     );
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
     expect(body.paths["/api/search"].get["x-nipmod-agent-step"]).toBe("search");

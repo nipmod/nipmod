@@ -16,7 +16,7 @@ The public scoring explanation lives in [trust scoring](../api/trust-scoring.md)
 
 ## Access
 
-Public beta requests can be made without a key. Free beta keys and partner keys increase rate limits for approved callers. Admin keys are reserved for operational endpoints.
+Public beta requests can be made without a key. Agents can issue free beta keys through `POST /api/keys/beta` for higher shared beta limits. Partner keys are reserved for integrations and agent hosts. Admin keys are reserved for operational endpoints.
 
 Supported key headers:
 
@@ -28,6 +28,8 @@ Authorization: Bearer <key>
 Invalid keys return `401`. Requests without a key stay on the public rate limit.
 
 Server-side key storage uses scrypt-derived keyed digests with a deployment secret. Keys can be bootstrapped from server env or stored in the Supabase-backed `api_keys` registry. Raw API keys are never stored in repo files, Vercel config output, Supabase usage events or analytics responses.
+
+Self-service beta keys are generated server-side and returned once. The registry stores only key id, keyed hash, tier, non-private label, rate-limit multiplier and expiry. Agents should not send prompts, user data, workspace paths or other private content as key labels.
 
 Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, result count, error code and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
 
@@ -267,6 +269,35 @@ Example:
 
 ```bash
 curl 'https://nipmod.com/api/sources/health'
+```
+
+## `POST /api/keys/beta`
+
+Issue a free beta API key without human approval.
+
+The endpoint is public and rate limited. It returns the raw key once. Nipmod stores only a keyed hash, key id, tier, non-private label, multiplier and expiry.
+
+Request body is optional. If a label is provided, it should be a non-private agent or project label.
+
+Example:
+
+```bash
+curl -s -X POST 'https://nipmod.com/api/keys/beta' \
+  -H 'content-type: application/json' \
+  -d '{"label":"my-agent"}'
+```
+
+Response type:
+
+```text
+dev.nipmod.beta-api-key.v1
+```
+
+Use the returned key as either:
+
+```text
+x-nipmod-api-key: <key>
+Authorization: Bearer <key>
 ```
 
 ## `GET /api/usage/stats`

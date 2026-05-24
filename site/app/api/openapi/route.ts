@@ -557,6 +557,73 @@ function openApiDocument() {
           required: ["code", "requestCount"],
           type: "object"
         },
+        BetaApiKeyIssueRequest: {
+          additionalProperties: false,
+          properties: {
+            agent: { description: "Optional non-private agent label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
+            client: { description: "Optional non-private client label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
+            label: { description: "Optional non-private key label.", maxLength: 80, type: "string" },
+            name: { description: "Optional non-private key label alias.", maxLength: 80, type: "string" }
+          },
+          type: "object"
+        },
+        BetaApiKeyIssueResponse: {
+          additionalProperties: false,
+          description: "Self-service beta key response. The raw key is returned once; the server stores only a keyed hash.",
+          properties: {
+            auth: {
+              additionalProperties: false,
+              properties: {
+                bearer: { const: true, type: "boolean" },
+                header: { const: "x-nipmod-api-key", type: "string" }
+              },
+              required: ["bearer", "header"],
+              type: "object"
+            },
+            createdAt: { format: "date-time", type: "string" },
+            expiresAt: { format: "date-time", type: "string" },
+            key: { description: "Raw API key. Store it locally; Nipmod will not return it again.", pattern: "^nka_beta_", type: "string" },
+            keyId: { pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            label: { type: "string" },
+            next: {
+              additionalProperties: false,
+              properties: {
+                docs: { format: "uri", type: "string" },
+                openapi: { format: "uri", type: "string" },
+                search: { format: "uri", type: "string" }
+              },
+              required: ["docs", "openapi", "search"],
+              type: "object"
+            },
+            rateLimitMultiplier: { minimum: 1, type: "integer" },
+            storage: {
+              additionalProperties: false,
+              properties: {
+                rawKeyReturnedOnce: { const: true, type: "boolean" },
+                serverStoresHashOnly: { const: true, type: "boolean" },
+                serverStoresRawKey: { const: false, type: "boolean" }
+              },
+              required: ["rawKeyReturnedOnce", "serverStoresHashOnly", "serverStoresRawKey"],
+              type: "object"
+            },
+            tier: { const: "beta", type: "string" },
+            type: { const: "dev.nipmod.beta-api-key.v1", type: "string" }
+          },
+          required: [
+            "auth",
+            "createdAt",
+            "expiresAt",
+            "key",
+            "keyId",
+            "label",
+            "next",
+            "rateLimitMultiplier",
+            "storage",
+            "tier",
+            "type"
+          ],
+          type: "object"
+        },
         RateLimitStoreStatus: {
           additionalProperties: false,
           description: "Distributed rate-limit status without secrets or raw client identifiers.",
@@ -1076,6 +1143,33 @@ function openApiDocument() {
             "429": errorResponse()
           },
           summary: "Return the public Nipmod API contract."
+        }
+      },
+      "/api/keys/beta": {
+        post: {
+          "x-nipmod-agent-step": "api-access",
+          description: "Issues a public beta API key without human approval. The endpoint is rate limited and stores only a keyed hash of the generated key.",
+          operationId: "issueBetaApiKey",
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/BetaApiKeyIssueRequest" }
+              }
+            },
+            required: false
+          },
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/BetaApiKeyIssueResponse" },
+              "Self-service beta key. The raw key is returned once."
+            ),
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "429": errorResponse(),
+            "503": errorResponse()
+          },
+          security: [{}],
+          summary: "Issue a self-service beta API key for an agent or client."
         }
       },
       "/api/archive/prepare": {

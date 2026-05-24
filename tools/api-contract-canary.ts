@@ -18,6 +18,7 @@ const REQUIRED_API_HEADERS = [
 ];
 const REQUIRED_OPENAPI_OPERATIONS = [
   "GET /api/openapi",
+  "POST /api/keys/beta",
   "GET /api/archive/prepare",
   "POST /api/archive/prepare",
   "POST /api/archive/confirm",
