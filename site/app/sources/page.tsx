@@ -62,11 +62,6 @@ export default function SourcesPage() {
         { label: "Ownership", value: "external retained" },
         { label: "Hosted writes", value: "none" }
       ]}
-      toc={[
-        { href: "#supported-sources", label: "Supported sources" },
-        { href: "#exact-examples", label: "Exact examples" },
-        { href: "#health-and-limits", label: "Health and limits" }
-      ]}
       title="Sources agents can search."
     >
       <DocsSection title="Supported sources">

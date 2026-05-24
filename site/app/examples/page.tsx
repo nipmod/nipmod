@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createPageMetadata } from "../metadata";
-import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell } from "../docs-shell";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
 export const metadata = createPageMetadata({
   description: "Example package records agents can search, inspect and turn into safe install plans through Nipmod.",
@@ -8,72 +8,132 @@ export const metadata = createPageMetadata({
   title: "Nipmod examples"
 });
 
+const coreFlow = `curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
+
+const codexPrompt = `Use Nipmod before adding a dependency.
+Find a package for HTTP requests, inspect the selected record, show the trust result and install plan, then wait for my approval before editing files.`;
+
+const claudePrompt = `Before choosing a dependency, call the Nipmod API.
+Search for package candidates, inspect the best match and present the install plan. Do not run install commands until I approve.`;
+
+const cursorPrompt = `Use https://nipmod.com/api/search first.
+Then inspect the selected package and show the install plan before changing package files or lockfiles.`;
+
+const mcpPrompt = `Use the hosted Nipmod MCP endpoint for package discovery:
+POST https://nipmod.com/api/mcp
+Only use read-only tools from the hosted endpoint. Workspace writes require local approval.`;
+
+const genericAgentPrompt = `When a user asks for a package, do this:
+1. Search Nipmod.
+2. Inspect the selected package.
+3. Request the install plan.
+4. Show source, license, trust score, warnings and command.
+5. Wait for approval before writing to the workspace.`;
+
+const expectedOutput = `Package: npm:undici
+Source: https://www.npmjs.com/package/undici
+License: MIT
+Trust: 100 / recommended / low
+Warnings: none
+Install plan: npm install undici
+Boundary: manual approval required before workspace write`;
+
+const sourceExamples = `curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=pypi&name=requests'
+curl 'https://nipmod.com/api/install-plan?source=github&name=vercel/next.js'
+curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'
+curl 'https://nipmod.com/api/install-plan?source=mcp&name=ac.tandem/docs-mcp'`;
+
 export default function ExamplesPage() {
   return (
     <DocsShell
-      description="Small calls that show the public agent flow: search sources, inspect one package and request a safe install plan."
+      description="Copyable examples for the public agent flow: search sources, inspect one record and request a safe install plan before any workspace write."
       eyebrow="Examples"
-      toc={[
-        { href: "#search-inspect-plan", label: "Search, inspect, plan" },
-        { href: "#use-from-an-agent", label: "Agent prompt" },
-        { href: "#what-the-agent-should-return", label: "Agent output" },
-        { href: "#canary-examples", label: "Canary examples" },
-        { href: "#copyable-workflow-examples", label: "Workflow files" }
+      stats={[
+        { label: "Flow", value: "Search, Inspect, Plan" },
+        { label: "Execution", value: "user approved" },
+        { label: "Hosted API", value: "read only" }
       ]}
-      title="API examples."
+      title="Agent workflow examples."
     >
-      <DocsSection eyebrow="Flow" title="Search, inspect, plan">
+      <DocsSection title="Complete API flow">
+        <DocsCode>{coreFlow}</DocsCode>
+      </DocsSection>
+
+      <DocsSection title="Prompts for agent hosts">
         <DocsGrid>
-          <DocsCard label="Search" title="Find candidates across sources">
-            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'"}</DocsCode>
+          <DocsCard label="Codex" title="Coding workspace">
+            <DocsCode>{codexPrompt}</DocsCode>
           </DocsCard>
-          <DocsCard label="Inspect" title="Inspect the selected package">
-            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+          <DocsCard label="Claude Code" title="Coding assistant">
+            <DocsCode>{claudePrompt}</DocsCode>
           </DocsCard>
-          <DocsCard label="Plan" title="Return a plan before writing">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+          <DocsCard label="Cursor" title="Editor agent">
+            <DocsCode>{cursorPrompt}</DocsCode>
+          </DocsCard>
+          <DocsCard label="MCP" title="Hosted read-only endpoint">
+            <DocsCode>{mcpPrompt}</DocsCode>
+          </DocsCard>
+          <DocsCard label="HTTPS" title="Any agent with fetch">
+            <DocsCode>{genericAgentPrompt}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection eyebrow="Agent prompt" title="Use from an agent">
-        <DocsCode>{"Find a package for HTTP requests. Use Nipmod first: search, inspect the selected record and show the install plan before changing the workspace."}</DocsCode>
+      <DocsSection title="Expected agent answer">
+        <DocsCode>{expectedOutput}</DocsCode>
       </DocsSection>
 
-      <DocsSection eyebrow="Output" title="What the agent should return">
-        <DocsCode>{"Package: <source>:<name>\nSource: <original URL>\nLicense: <license or unknown>\nTrust: <score> / <decision> / <risk>\nWarnings: <warnings or none>\nInstall plan: <command as review data>\nBoundary: approval required before workspace write"}</DocsCode>
+      <DocsSection title="Source canaries">
+        <p className="docs-note">These are simple public checks across the sources Nipmod resolves today. They are examples, not package endorsements.</p>
+        <DocsCode>{sourceExamples}</DocsCode>
       </DocsSection>
 
-      <DocsSection eyebrow="Exact records" title="Canary examples">
-        <DocsGrid>
-          <DocsCard label="PyPI" title="requests">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=pypi&name=requests'"}</DocsCode>
-          </DocsCard>
-          <DocsCard label="GitHub" title="vercel/next.js">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=github&name=vercel/next.js'"}</DocsCode>
-          </DocsCard>
-          <DocsCard label="Hugging Face" title="bert-base-uncased">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'"}</DocsCode>
-          </DocsCard>
-        </DocsGrid>
+      <DocsSection title="What to test">
+        <DocsTable
+          rows={[
+            {
+              first: "Search",
+              second: "Does the agent compare candidates instead of guessing one package?",
+              third: "Good agents explain why the selected package won."
+            },
+            {
+              first: "Inspect",
+              second: "Does the agent show source, license, version, warnings and trust fields?",
+              third: "The answer should cite the exact record."
+            },
+            {
+              first: "Install Plan",
+              second: "Does the agent show the command as review data?",
+              third: "It should not run the command without approval."
+            },
+            {
+              first: "Boundary",
+              second: "Does the agent understand hosted Nipmod cannot write to the workspace?",
+              third: "Workspace writes happen only in the local host after approval."
+            }
+          ]}
+        />
       </DocsSection>
 
-      <DocsSection eyebrow="Files" title="Copyable workflow examples">
+      <DocsSection title="Reference files">
         <DocsGrid>
           <DocsCard label="TS" title="HTTP agent flow">
-            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent-flow.ts">Open example</Link></p>
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent-flow.ts">Open TypeScript example</Link></p>
           </DocsCard>
           <DocsCard label="Py" title="Python agent flow">
-            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent_flow.py">Open example</Link></p>
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/http-api/agent_flow.py">Open Python example</Link></p>
           </DocsCard>
-          <DocsCard label="Codex" title="Codex agent prompt">
-            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/codex.md">Open example</Link></p>
+          <DocsCard label="Codex" title="Prompt file">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/codex.md">Open Codex prompt</Link></p>
           </DocsCard>
-          <DocsCard label="Claude Code" title="Claude Code prompt">
-            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/claude-code.md">Open example</Link></p>
+          <DocsCard label="Claude Code" title="Prompt file">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/claude-code.md">Open Claude Code prompt</Link></p>
           </DocsCard>
-          <DocsCard label="MCP" title="Hosted MCP example">
-            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/mcp-host.md">Open example</Link></p>
+          <DocsCard label="MCP" title="Host prompt">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/mcp-host.md">Open MCP example</Link></p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

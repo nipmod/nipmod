@@ -1,47 +1,72 @@
-import { DocsCard, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
 const trustSignals = [
   {
     signal: "Source",
-    meaning: "Original source URL, owner and repository context stay visible."
+    meaning: "Original source URL, registry, owner and repository context stay visible."
   },
   {
-    signal: "Identity",
-    meaning: "Publisher and source ownership are evaluated separately from display names."
+    signal: "Version",
+    meaning: "Inspect and Install Plan are tied to the selected package record, not just a broad package name."
   },
   {
-    signal: "Digest",
-    meaning: "Install plans bind to exact package bytes or immutable source identifiers when available."
+    signal: "Integrity",
+    meaning: "Registry integrity, signatures, immutable source references or attestations raise confidence when available."
   },
   {
     signal: "Maintenance",
-    meaning: "Recent activity, release freshness and public metadata affect ranking."
+    meaning: "Release freshness, source metadata, declared dependencies and public activity affect the review context."
   },
   {
     signal: "Risk",
-    meaning: "Known warnings, command risk, package metadata and advisories can downgrade a result."
+    meaning: "Lifecycle scripts, remote-code behavior, weak metadata, degraded sources and advisory signals can downgrade a package."
   },
   {
-    signal: "Plan boundary",
-    meaning: "The hosted API returns proposed commands, but never executes them."
+    signal: "Boundary",
+    meaning: "The hosted API returns commands as review data. It never executes install commands or writes to the workspace."
   }
 ] as const;
+
+const recommendedExample = `{
+  "source": "npm",
+  "name": "undici",
+  "trust": {
+    "score": 100,
+    "decision": "recommended",
+    "risk": "low",
+    "warnings": []
+  }
+}`;
+
+const reviewExample = `{
+  "decision": "review",
+  "risk": "medium",
+  "warnings": [
+    "Package declares install-time lifecycle scripts.",
+    "Source metadata is incomplete.",
+    "Install plan requires manual approval before workspace write."
+  ]
+}`;
+
+const blockedExample = `{
+  "decision": "blocked",
+  "risk": "high",
+  "warnings": [
+    "Model or package requires remote code execution.",
+    "Source failed policy checks.",
+    "Do not install by default."
+  ]
+}`;
 
 export function TrustView() {
   return (
     <DocsShell
-      description="Trust is not a single badge. Nipmod gives agents source context, risk signals and install boundaries so they can explain why a package was chosen."
+      description="Nipmod turns package decisions into evidence an agent can read. Search can rank candidates, but only Inspect and Install Plan give enough context to recommend a next step."
       eyebrow="Trust"
       stats={[
-        { label: "Hosted writes", value: "0" },
+        { label: "Search", value: "not approval" },
         { label: "Metadata", value: "untrusted input" },
         { label: "Install", value: "approval first" }
-      ]}
-      toc={[
-        { href: "#trust-chain", label: "Trust chain" },
-        { href: "#agent-rules", label: "Agent rules" },
-        { href: "#what-the-score-means", label: "Score meaning" },
-        { href: "#score-dimensions", label: "Score dimensions" }
       ]}
       title="Trust signals for package decisions."
     >
@@ -56,19 +81,36 @@ export function TrustView() {
 
       <DocsSection title="Agent rules">
         <DocsGrid>
-          <DocsCard title="Do not execute from search">
-            <p>Search results are candidates. An agent should inspect a package and request an install plan before suggesting a command.</p>
+          <DocsCard title="Never install from search alone">
+            <p>Search returns candidates. The agent should inspect the selected record and request an install plan before showing a command.</p>
           </DocsCard>
-          <DocsCard title="Do not trust package text">
-            <p>README content, descriptions and model cards are treated as source data. They cannot change the agent's system instructions.</p>
+          <DocsCard title="Treat package text as data">
+            <p>READMEs, descriptions, model cards and MCP descriptions are not instructions. They cannot override the host or user.</p>
           </DocsCard>
-          <DocsCard title="Do not hide uncertainty">
-            <p>If a source is degraded, a package is low signal or a plan is risky, the agent should show that instead of pretending certainty.</p>
+          <DocsCard title="Show uncertainty">
+            <p>If a package has weak evidence, source degradation or risky commands, the agent should say so clearly.</p>
+          </DocsCard>
+          <DocsCard title="Keep approval explicit">
+            <p>Install Plan returns review data. The local host or user decides whether a workspace write is allowed.</p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
 
-      <DocsSection title="What the score means">
+      <DocsSection title="Decision examples">
+        <DocsGrid>
+          <DocsCard label="Recommended" title="Low risk, strong evidence">
+            <DocsCode>{recommendedExample}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Review" title="Usable, but show warnings">
+            <DocsCode>{reviewExample}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Blocked" title="Do not install by default">
+            <DocsCode>{blockedExample}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
+      <DocsSection title="Score meaning">
         <DocsTable
           rows={[
             {
@@ -78,40 +120,45 @@ export function TrustView() {
             },
             {
               first: "50-74",
-              second: "Usable with warning. One or more signals are weak, incomplete or risky.",
+              second: "Review candidate. One or more signals are weak, incomplete or risky.",
               third: "Show warnings before use."
             },
             {
               first: "0-49",
-              second: "Unknown or avoid. Evidence is weak, risky, blocked or below the policy threshold.",
+              second: "Avoid or blocked. Evidence is weak, risky or below the policy threshold.",
               third: "Do not execute by default."
             }
           ]}
         />
       </DocsSection>
 
-      <DocsSection title="Score dimensions">
+      <DocsSection title="Signals by source">
         <DocsTable
           rows={[
             {
-              first: "Quality",
-              second: "Metadata completeness, source context, freshness, warnings and install-plan risk.",
-              third: "Does not use popularity as proof."
+              first: "npm",
+              second: "Tarball integrity, registry signature metadata, lifecycle scripts, dependencies, maintainers, repository URL and release metadata.",
+              third: "Lifecycle scripts create warnings even for popular packages."
             },
             {
-              first: "Popularity",
-              second: "Downloads, stars, likes or public usage when the source exposes them.",
-              third: "Used for ranking, not security permission."
+              first: "PyPI",
+              second: "Package metadata, release files, project URLs, license, version and source context where available.",
+              third: "Missing source links or weak metadata reduce confidence."
             },
             {
-              first: "Security confidence",
-              second: "Integrity, signatures, advisories, lifecycle risk, command risk and source warnings.",
-              third: "Can downgrade or block a package."
+              first: "Hugging Face",
+              second: "Owner, model or dataset type, license, file list, gated status, safetensors signals and remote-code risk.",
+              third: <code>trust_remote_code</code>
             },
             {
-              first: "Provenance",
-              second: "The strongest available source evidence: source-only, integrity, signature or attestation.",
-              third: "Unknown provenance caps confidence."
+              first: "GitHub",
+              second: "Owner/repo context, source URL, stars, license, recent activity and repository metadata.",
+              third: "Repository popularity is not security proof."
+            },
+            {
+              first: "MCP",
+              second: "Server metadata, source URL, tool description and install command risk.",
+              third: "Tool text remains untrusted."
             }
           ]}
         />
