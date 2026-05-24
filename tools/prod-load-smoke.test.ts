@@ -83,7 +83,7 @@ function responseFor(url) {
     return Response.json({ status: "ok" });
   }
   if (url.endsWith("/trust")) {
-    return new Response("<main>Trust signals for package decisions Do not trust package text Source</main>", {
+    return new Response("<main>Trust signals for package decisions Treat package text as data Source</main>", {
       headers: { "content-type": "text/html" }
     });
   }

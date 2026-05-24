@@ -44,7 +44,7 @@ export async function runLoadSmoke({
       throw new Error("crawler did not discover trust page");
     }
     const trust = await fetchText(targets.trust, timedFetch);
-    for (const marker of ["Trust signals for package decisions", "Do not trust package text", "Source"]) {
+    for (const marker of ["Trust signals for package decisions", "Treat package text as data", "Source"]) {
       assertIncludes(trust, marker, `trust page missing ${marker}`);
     }
     const security = await fetchText(targets.security, timedFetch);

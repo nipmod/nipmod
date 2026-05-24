@@ -22,7 +22,7 @@ const DEFAULT_ENDPOINTS = {
   nodeHealth: "https://node.nipmod.com/health",
   nodeUrl: "https://node.nipmod.com",
   openApi: "https://nipmod.com/api/openapi",
-  platforms: "https://nipmod.com/platforms",
+  platforms: "https://nipmod.com/sources",
   platformConnections: "https://nipmod.com/compatibility/platform-connections.json",
   quorumPolicy: "https://nipmod.com/quorum/policy.json",
   quorumReceipts: "https://nipmod.com/quorum/receipts.json",
@@ -63,7 +63,7 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "trust_page", async () => {
     const text = await fetchText(endpoints.trust, timedFetch);
-    for (const marker of ["Trust signals for package decisions", "Do not trust package text", "Source", "Digest", "Plan boundary"]) {
+    for (const marker of ["Trust signals for package decisions", "Treat package text as data", "Source", "Integrity", "Boundary"]) {
       assertIncludes(text, marker, `trust page missing ${marker}`);
     }
     return { url: endpoints.trust };
@@ -71,8 +71,8 @@ export async function runSyntheticMonitor({
 
   await runCheck(checks, "platform_connections", async () => {
     const page = await fetchText(endpoints.platforms, timedFetch);
-    assertIncludes(page, "Source and access paths", "platform page missing source access title");
-    assertIncludes(page, "Native integrations", "platform page missing API scope");
+    assertIncludes(page, "Sources agents can search", "sources page missing source access title");
+    assertIncludes(page, "Supported sources", "sources page missing source list");
     const matrix = await fetchJson(endpoints.platformConnections, timedFetch);
     assertEqual(matrix.type, "dev.nipmod.platform-connections.v1", "platform connection type mismatch");
     assertIncludes(JSON.stringify(matrix), "api", "platform matrix missing API path");
@@ -107,7 +107,7 @@ export async function runSyntheticMonitor({
     if (state.discovery.transparency?.checkpoint) {
       assertEqual(state.discovery.transparency.checkpoint, endpoints.checkpoint, "discovery checkpoint URL mismatch");
     }
-    assertEqual(state.discovery.docs?.platforms, endpoints.platforms, "discovery platforms URL mismatch");
+    assertEqual(state.discovery.docs?.sources, endpoints.platforms, "discovery sources URL mismatch");
     assertEqual(state.discovery.docs?.apiSpec, endpoints.openApi, "discovery OpenAPI URL mismatch");
     assertEqual(
       state.discovery.review?.platformConnections,
