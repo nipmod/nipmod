@@ -12,7 +12,7 @@ export default function Home() {
       eyebrow="Home"
       stats={[
         { label: "Public sources", value: "5 live" },
-        { label: "API beta", value: "public" },
+        { label: "API beta", value: "no key" },
         { label: "Hosted writes", value: "0" }
       ]}
       title="The package layer for AI agents."
@@ -24,6 +24,9 @@ export default function Home() {
           </DocsCard>
           <DocsCard title="Free with limits">
             <p>Public beta access does not require a key. Requests are rate limited while we improve resolver quality and collect real usage.</p>
+          </DocsCard>
+          <DocsCard title="Agent-readable">
+            <p>Agents can read <code>/llms.txt</code>, the discovery manifest and OpenAPI before calling the hosted API.</p>
           </DocsCard>
           <DocsCard title="No hidden execution">
             <p>Hosted calls do not read local files, run package managers or write lockfiles.</p>

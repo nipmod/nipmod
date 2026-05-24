@@ -762,7 +762,8 @@ body {
   }
 
   .brand-socials {
-    display: none;
+    display: flex;
+    gap: 3px;
   }
 
   .nav-actions {
@@ -3562,7 +3563,8 @@ h1 {
   }
 
   .brand-socials {
-    display: none;
+    display: flex;
+    gap: 3px;
   }
 
   .brand {
@@ -4466,8 +4468,8 @@ body {
 }
 
 .brand-icon-button .brand-telegram-icon {
-  height: 20px;
-  width: 20px;
+  height: 22px;
+  width: 22px;
 }
 
 .brand-icon-button:hover {
@@ -5329,7 +5331,8 @@ body {
   }
 
   .brand-socials {
-    display: none;
+    display: flex;
+    gap: 3px;
   }
 
   .nipmod-mark {
