@@ -17,6 +17,19 @@ export default function Home() {
       ]}
       title="The package layer for AI agents."
     >
+      <DocsSection id="principle" title="Why Nipmod exists">
+        <DocsProse>
+          <p>
+            Agents are starting to choose dependencies, models and tools on their own. Nipmod gives that decision a readable
+            layer before anything is installed: source context, trust signals, warnings and a plan the user can approve.
+          </p>
+          <p>
+            The goal is not to replace package ecosystems. The goal is to make them safer and easier for agents to reason
+            about while the original sources keep ownership.
+          </p>
+        </DocsProse>
+      </DocsSection>
+
       <DocsSection title="Public beta is open">
         <DocsProse>
           <p>
