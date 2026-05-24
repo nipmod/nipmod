@@ -32,6 +32,7 @@ Useful discoveries can be prepared for the archive.
 | `GET /api/archive/prepare` | Build an archive preview and receipt preview. |
 | `GET /api/archive/search` | Search confirmed package intelligence records. |
 | `GET /api/sources/health` | Check source, archive and rate-limit health. |
+| `GET /api/usage/stats` | Admin-only aggregate usage metrics. |
 | `POST /api/mcp` | Use the same surface through hosted read-only MCP. |
 | `GET /api/openapi` | Machine-readable API contract. |
 
@@ -65,7 +66,8 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 
 - No API key is required for public beta access.
 - Requests are rate limited through the shared Supabase bucket in production.
-- Optional builder keys can raise limits.
+- Free beta and partner keys can raise limits.
+- Admin keys can read aggregate usage metrics.
 - Invalid API keys return `401`.
 - Hosted API calls never write into caller workspaces.
 - Search, Inspect, Install Plan and OpenAPI are the stable public beta calls.

@@ -19,6 +19,12 @@ const threeCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
 
+const keyedCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
+  -H 'x-nipmod-api-key: <key>'
+
+curl 'https://nipmod.com/api/usage/stats?hours=24' \\
+  -H 'authorization: Bearer <admin-key>'`;
+
 const searchShape = `{
   "id": "npm:undici",
   "source": "npm",
@@ -143,6 +149,11 @@ export default function ApiAccessPage() {
               third: "Configured source capabilities and bounded source checks."
             },
             {
+              first: "Usage Stats",
+              second: <code>GET /api/usage/stats?hours=24</code>,
+              third: "Admin-only aggregate route, source, tier and package-hash metrics."
+            },
+            {
               first: "MCP",
               second: <code>POST /api/mcp</code>,
               third: "Read-only MCP JSON-RPC surface over the same hosted API."
@@ -165,22 +176,33 @@ export default function ApiAccessPage() {
               third: "Every public request is rate limited."
             },
             {
-              first: "Optional keys",
+              first: "Free beta keys",
               second: <code>x-nipmod-api-key</code>,
-              third: "The API also accepts bearer keys for manually issued higher-limit access."
+              third: "Manually issued during beta for higher shared limits. They do not unlock private sources."
+            },
+            {
+              first: "Partner keys",
+              second: <code>Authorization: Bearer &lt;key&gt;</code>,
+              third: "Higher limits for integrations and agent hosts. Usage is grouped by key id."
+            },
+            {
+              first: "Admin keys",
+              second: <code>GET /api/usage/stats</code>,
+              third: "Operational metrics only: routes, sources, tiers and package hashes."
             },
             {
               first: "Key storage",
               second: "Raw keys are not stored.",
-              third: "Issued keys are verified against server-side hashes and exposed only as a key id in usage logs."
+              third: "Issued keys are verified against server-side hashes and exposed only as a key id in usage events."
             },
             {
               first: "Self-service keys",
               second: "Not part of the public beta yet.",
-              third: "The current launch path is free public access first, then individual keys when higher limits are needed."
+              third: "The current launch path is public access plus manually issued beta, partner and admin keys."
             }
           ]}
         />
+        <DocsCode>{keyedCalls}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Usage and statistics">
@@ -194,12 +216,17 @@ export default function ApiAccessPage() {
             {
               first: "With a key",
               second: "Usage is grouped by API key id and access tier.",
-              third: "Useful for counting builders, projects and agent hosts."
+              third: "Useful for counting beta callers, projects and agent hosts."
             },
             {
               first: "Stored fields",
               second: "Route, status, source, result count, duration, hashed query and hashed package.",
               third: "Enough for product metrics without exposing user prompts."
+            },
+            {
+              first: "Metrics endpoint",
+              second: "Admin key required.",
+              third: "Returns aggregate route, source, access tier and package-hash counts."
             },
             {
               first: "Not stored",

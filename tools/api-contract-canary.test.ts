@@ -38,8 +38,8 @@ describe("api contract canary", () => {
     expect(result.checks[0]).toMatchObject({
       data: {
         openapi: "3.1.0",
-        operationCount: 13,
-        pathCount: 11,
+        operationCount: 14,
+        pathCount: 12,
         title: "Nipmod API"
       },
       name: "openapi_contract",
@@ -260,6 +260,9 @@ function openApiFixture() {
       },
       "/api/sources/health": {
         get: operation("getSourceHealth")
+      },
+      "/api/usage/stats": {
+        get: operation("getUsageStats")
       }
     }
   };

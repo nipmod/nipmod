@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { createApiHttpContext } from "../lib/api-http";
 import { publicApiAccess } from "../lib/api-auth";
-import { recordApiUsage, usageStoreStatus } from "../lib/api-usage";
+import { readApiUsageMetrics, recordApiUsage, usageStoreStatus } from "../lib/api-usage";
 
 describe("API usage logging", () => {
   test("stores hashed usage fields without raw query, package, client or key data", async () => {
@@ -63,5 +63,105 @@ describe("API usage logging", () => {
       driver: "supabase-rest",
       type: "dev.nipmod.usage-store-status.v1"
     });
+  });
+
+  test("reads aggregate metrics without raw usage details or secrets", async () => {
+    const calls: Array<{ body: string; url: string }> = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      calls.push({ body: String(init?.body), url: String(input) });
+      return Response.json({
+        accessTiers: [{ requestCount: 3, tier: "beta" }],
+        errors: [],
+        generatedAt: "2026-05-24T00:00:00.000Z",
+        packages: [{ packageHash: "a".repeat(64), requestCount: 2 }],
+        privacy: "aggregated metrics only",
+        routes: [{ avgDurationMs: 10, errorCount: 0, requestCount: 3, route: "/api/search" }],
+        since: "2026-05-23T00:00:00.000Z",
+        sources: [{ requestCount: 3, source: "npm" }],
+        totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
+        type: "dev.nipmod.api-usage-metrics.v1"
+      });
+    }) as unknown as typeof fetch;
+
+    const result = await readApiUsageMetrics(
+      { limit: 20, since: new Date("2026-05-23T00:00:00.000Z") },
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test"
+      },
+      fetchMock
+    );
+
+    expect(result.ok).toBe(true);
+    expect(calls[0]?.url).toBe("https://db.example.test/rest/v1/rpc/read_api_usage_metrics");
+    expect(calls[0]?.body).toContain("2026-05-23T00:00:00.000Z");
+    expect(JSON.stringify(result)).not.toContain("service-role-key");
+    expect(JSON.stringify(result)).not.toContain("secret package");
+    expect(JSON.stringify(result)).not.toContain("raw-user-agent");
+  });
+
+  test("falls back to aggregating usage events when the metrics RPC is not deployed", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      calls.push(String(input));
+      if (String(input).includes("/rpc/read_api_usage_metrics")) {
+        return Response.json({ code: "missing_function" }, { status: 404 });
+      }
+      return Response.json([
+        {
+          access_tier: "beta",
+          api_key_id: "key_test",
+          client_hash: "client_hash",
+          duration_ms: 12,
+          error_code: null,
+          package_hash: "c".repeat(64),
+          route: "/api/search",
+          source: null,
+          sources: ["npm"],
+          status: 200
+        },
+        {
+          access_tier: "public",
+          api_key_id: null,
+          client_hash: "client_hash_2",
+          duration_ms: 20,
+          error_code: "invalid_source",
+          package_hash: null,
+          route: "/api/inspect",
+          source: "npm",
+          sources: [],
+          status: 400
+        }
+      ]);
+    }) as unknown as typeof fetch;
+
+    const result = await readApiUsageMetrics(
+      { limit: 10, since: new Date("2026-05-23T00:00:00.000Z") },
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test"
+      },
+      fetchMock
+    );
+
+    expect(result.ok).toBe(true);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toContain("/rest/v1/api_usage_events?");
+    expect(result.ok && result.metrics).toMatchObject({
+      accessTiers: [
+        { requestCount: 1, tier: "beta" },
+        { requestCount: 1, tier: "public" }
+      ],
+      errors: [{ code: "invalid_source", requestCount: 1 }],
+      sources: [{ requestCount: 2, source: "npm" }],
+      totals: {
+        clientCount: 2,
+        errorCount: 1,
+        keyCount: 1,
+        requestCount: 2
+      },
+      type: "dev.nipmod.api-usage-metrics.v1"
+    });
+    expect(JSON.stringify(result)).not.toContain("service-role-key");
   });
 });

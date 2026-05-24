@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
+import { webcrypto } from "node:crypto";
 import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
-import { publicApiAccess, readApiAccess, type ApiAccess } from "./api-auth";
+import { publicApiAccess, readApiAccess, readApiAccessAsync, type ApiAccess } from "./api-auth";
 
 type RateLimitPolicy = {
   limit: number;
@@ -84,7 +84,7 @@ export async function checkApiRateLimitAsync(
   context: ApiHttpContext = createApiHttpContext(request),
   options: RateLimitCheckOptions = {}
 ): Promise<RateLimitResult> {
-  const access = readApiAccess(request, context);
+  const access = await readApiAccessAsync(request, context, options.env, options.fetchImpl);
   if (!access.ok) {
     return {
       access: access.access,
@@ -249,8 +249,8 @@ async function consumeDistributedRateLimit(
   const baseUrl = env[SUPABASE_URL_ENV]!;
   const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV]!;
 
-  const clientHash = access.keyId ? hashValue(`key:${access.keyId}`) : hashValue(`public:${clientKey(request)}`);
-  const bucketKey = hashValue(`v1:${policy.name}:${clientHash}`);
+  const clientHash = await keyedDigest(`key-or-client:${access.keyId ?? clientKey(request)}`, serviceRoleKey);
+  const bucketKey = await keyedDigest(`bucket:${policy.name}:${clientHash}`, serviceRoleKey);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DISTRIBUTED_RATE_LIMIT_TIMEOUT_MS);
   try {
@@ -317,8 +317,10 @@ function clientKey(request: Request): string {
   return `${forwarded || realIp || "anonymous"}:${userAgent}`.slice(0, 220);
 }
 
-function hashValue(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
+async function keyedDigest(value: string, secret: string): Promise<string> {
+  const key = await webcrypto.subtle.importKey("raw", new TextEncoder().encode(secret), { hash: "SHA-256", name: "HMAC" }, false, ["sign"]);
+  const signature = await webcrypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  return Buffer.from(signature).toString("hex");
 }
 
 function isDistributedRateLimitRow(value: unknown): value is DistributedRateLimitRow {

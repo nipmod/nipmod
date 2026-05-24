@@ -64,6 +64,39 @@ pnpm rate-limit:canary -- --require-active
 
 If the live check returns `fallbackReason: "distributed_rpc_http_404"`, Production has the Supabase env names but the RPC is not reachable through the Data API. Apply `supabase/migrations/20260523084500_api_rate_limit_buckets.sql`, then confirm `public.consume_api_rate_limit` is exposed to the Data API for service role calls before redeploying.
 
+## Required for API keys and usage metrics
+
+1. API key hash secret
+   - Vercel env: `NIPMOD_API_KEY_HASH_SECRET`
+   - Server-only. Use the same secret when deriving key hashes for storage.
+
+2. Optional env bootstrap keys
+   - Vercel env: `NIPMOD_API_KEY_HASHES`
+   - Format: `label:tier:hash` or `label:tier:hash:multiplier`.
+   - Supported tiers: `beta`, `partner`, `admin`. `builder` remains accepted as a legacy beta-tier alias.
+
+3. Supabase key registry and metrics RPC
+   - Apply `supabase/migrations/20260524103142_api_keys_and_usage_metrics.sql` to the Supabase project.
+   - If using the Supabase SQL editor, use `docs/api-key-schema.sql` and `docs/api-usage-metrics-schema.sql` for the new key registry and metrics RPC.
+   - In Supabase Data API settings, expose `api_keys` and `read_api_usage_metrics` for server-side service role calls only.
+
+Raw API keys are never inserted. Store only `key_hash` values derived with `NIPMOD_API_KEY_HASH_SECRET`.
+
+Create a key hash locally:
+
+```bash
+node --input-type=module -e "import { scryptSync } from 'node:crypto'; const [key, secret] = process.argv.slice(1); console.log(scryptSync(key, secret, 32).toString('hex'))" '<raw-api-key>' '<NIPMOD_API_KEY_HASH_SECRET>'
+```
+
+Insert a free beta key:
+
+```sql
+insert into public.api_keys (id, key_hash, label, tier, status, rate_limit_multiplier)
+values ('key_<first_16_to_32_hash_chars>', '<64_hex_hash>', 'beta-caller', 'beta', 'active', 10);
+```
+
+Partner keys should use `tier = 'partner'`. Admin keys are for operational endpoints such as `GET /api/usage/stats`.
+
 ## Required for usage ingestion checks
 
 Run the canary after Production env is available locally or through a temporary env file:
