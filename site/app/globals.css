@@ -5940,6 +5940,240 @@ body {
   width: 24px;
 }
 
+.admin-shell {
+  background: var(--docs-bg);
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  min-height: 100vh;
+  padding: 72px clamp(20px, 4vw, 56px);
+}
+
+.admin-hero {
+  border-bottom: 1px solid var(--docs-line);
+  display: grid;
+  gap: 16px;
+  max-width: 1240px;
+  padding-bottom: 28px;
+}
+
+.admin-eyebrow,
+.admin-generated {
+  color: var(--docs-faint);
+  font-size: 12px;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.admin-hero h1 {
+  font-family: var(--docs-serif);
+  font-size: clamp(42px, 6vw, 82px);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 0.95;
+  margin: 0;
+  max-width: 900px;
+}
+
+.admin-hero > p:not(.admin-eyebrow):not(.admin-generated):not(.admin-error) {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 760px;
+}
+
+.admin-controls {
+  align-items: end;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(240px, 520px) minmax(130px, 180px) auto;
+  max-width: 900px;
+}
+
+.admin-controls label {
+  display: grid;
+  gap: 7px;
+}
+
+.admin-controls span {
+  color: var(--docs-faint);
+  font-size: 12px;
+  font-weight: 680;
+  text-transform: uppercase;
+}
+
+.admin-controls input,
+.admin-controls select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--docs-line);
+  border-radius: 6px;
+  color: var(--docs-text);
+  font: inherit;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-error {
+  color: #ffb4a8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-content {
+  display: grid;
+  gap: 28px;
+  margin-top: 28px;
+  max-width: 1440px;
+}
+
+.admin-stat-grid {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-metric {
+  background: rgba(255, 255, 255, 0.035);
+  border-top: 1px solid var(--docs-line);
+  min-height: 104px;
+  padding: 16px;
+}
+
+.admin-metric span {
+  color: var(--docs-faint);
+  display: block;
+  font-size: 12px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.admin-metric strong {
+  font-family: var(--docs-serif);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.admin-metric em {
+  color: var(--docs-muted);
+  font-style: normal;
+  margin-left: 6px;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 26px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-wide {
+  display: grid;
+  gap: 26px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-panel {
+  border-top: 1px solid var(--docs-line);
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 14px;
+}
+
+.admin-panel h2 {
+  font-family: var(--docs-serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid var(--docs-line-soft);
+  overflow-wrap: anywhere;
+  padding: 9px 8px 9px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: var(--docs-faint);
+  font-size: 11px;
+  font-weight: 680;
+  text-transform: uppercase;
+}
+
+.admin-table td {
+  color: var(--docs-muted);
+}
+
+.admin-empty {
+  color: var(--docs-faint);
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-kv {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.admin-kv div {
+  align-items: center;
+  border-bottom: 1px solid var(--docs-line-soft);
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.admin-kv dt {
+  color: var(--docs-muted);
+}
+
+.admin-kv dd {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 22px;
+  margin: 0;
+}
+
+.admin-notes {
+  border-top: 1px solid var(--docs-line);
+  color: var(--docs-muted);
+  display: grid;
+  font-family: var(--docs-serif);
+  font-size: 15px;
+  gap: 8px;
+  line-height: 1.55;
+  padding-top: 16px;
+}
+
+.admin-notes p {
+  margin: 0;
+}
+
 @media (max-width: 760px) {
   .docs-stat-strip {
     border-bottom: 0;
@@ -5971,5 +6205,24 @@ body {
 
   .docs-prose {
     font-size: 16px;
+  }
+
+  .admin-shell {
+    padding: 42px 18px;
+  }
+
+  .admin-controls,
+  .admin-grid,
+  .admin-wide,
+  .admin-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-actions {
+    width: 100%;
+  }
+
+  .admin-actions .button {
+    flex: 1;
   }
 }

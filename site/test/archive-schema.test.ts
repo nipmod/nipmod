@@ -6,6 +6,10 @@ const root = join(import.meta.dirname, "..", "..");
 const migration = readFileSync(join(root, "supabase", "migrations", "20260522073000_package_intelligence_archive.sql"), "utf8");
 const manualSql = readFileSync(join(root, "docs", "package-intelligence-schema.sql"), "utf8");
 const usageMigration = readFileSync(join(root, "supabase", "migrations", "20260522151945_api_usage_events.sql"), "utf8");
+const usageDecisionMetricsMigration = readFileSync(
+  join(root, "supabase", "migrations", "20260524124159_api_usage_decision_metrics.sql"),
+  "utf8"
+);
 const usageManualSql = readFileSync(join(root, "docs", "api-usage-schema.sql"), "utf8");
 const rateLimitMigration = readFileSync(join(root, "supabase", "migrations", "20260523084500_api_rate_limit_buckets.sql"), "utf8");
 const rateLimitManualSql = readFileSync(join(root, "docs", "api-rate-limit-schema.sql"), "utf8");
@@ -29,7 +33,11 @@ describe("package intelligence Supabase schema", () => {
   });
 
   test("keeps private API usage logging aligned with the migration", () => {
-    expect(usageManualSql).toBe(usageMigration);
+    expect(usageManualSql).toContain("create table if not exists public.api_usage_events");
+    expect(usageManualSql).toContain("trust_decision text");
+    expect(usageManualSql).toContain("install_blocked boolean");
+    expect(usageDecisionMetricsMigration).toContain("add column if not exists trust_decision");
+    expect(usageDecisionMetricsMigration).toContain("create or replace function public.read_api_usage_metrics");
     expect(usageMigration).toContain("create table if not exists public.api_usage_events");
     expect(usageMigration).toContain("alter table public.api_usage_events enable row level security");
     expect(usageMigration).toContain("revoke all on table public.api_usage_events from public, anon, authenticated");

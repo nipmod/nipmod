@@ -23,6 +23,7 @@ describe("OpenAPI route", () => {
     });
     expect(Object.keys(body.paths)).toEqual([
       "/api/openapi",
+      "/api/admin/summary",
       "/api/keys/beta",
       "/api/archive/prepare",
       "/api/archive/confirm",
@@ -40,6 +41,7 @@ describe("OpenAPI route", () => {
     expect(body.paths["/api/openapi"].get.responses["200"].content["application/openapi+json"].schema.$ref).toBe(
       "#/components/schemas/OpenApiDocument"
     );
+    expect(body.paths["/api/admin/summary"].get.operationId).toBe("getAdminSummary");
     expect(body.paths["/api/keys/beta"].post.operationId).toBe("issueBetaApiKey");
     expect(body.paths["/api/keys/beta"].post.security).toEqual([{}]);
     expect(body.paths["/api/keys/beta"].post.responses["200"].content["application/json"].schema.$ref).toBe(
@@ -129,6 +131,9 @@ describe("OpenAPI route", () => {
     expect(body.paths["/api/usage/stats"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ApiUsageMetrics"
     );
+    expect(body.components.schemas.ApiUsageMetrics.required).toContain("trustDecisions");
+    expect(body.components.schemas.ApiUsageMetrics.required).toContain("installPlans");
+    expect(body.components.schemas.ApiUsageMetrics.required).toContain("archiveWrites");
     expect(body.paths["/api/usage/stats"].get.responses["403"].description).toBe("Structured API error.");
     expect(body.paths["/api/mcp"].post.responses["200"].content["application/json"].schema.oneOf).toHaveLength(2);
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);

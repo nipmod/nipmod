@@ -1,11 +1,4 @@
 alter table public.api_usage_events
-  drop constraint if exists api_usage_events_access_tier_check;
-
-alter table public.api_usage_events
-  add constraint api_usage_events_access_tier_check
-  check (access_tier in ('public', 'beta', 'builder', 'partner', 'admin'));
-
-alter table public.api_usage_events
   add column if not exists trust_decision text check (
     trust_decision is null or trust_decision in ('recommended', 'usable_with_warning', 'avoid', 'unknown')
   ),
@@ -14,6 +7,22 @@ alter table public.api_usage_events
   ),
   add column if not exists install_blocked boolean,
   add column if not exists archive_stored boolean;
+
+create index if not exists api_usage_events_trust_decision_idx
+  on public.api_usage_events (trust_decision)
+  where trust_decision is not null;
+
+create index if not exists api_usage_events_trust_risk_idx
+  on public.api_usage_events (trust_risk)
+  where trust_risk is not null;
+
+create index if not exists api_usage_events_install_blocked_idx
+  on public.api_usage_events (install_blocked)
+  where install_blocked is not null;
+
+create index if not exists api_usage_events_archive_stored_idx
+  on public.api_usage_events (archive_stored)
+  where archive_stored is not null;
 
 create or replace function public.read_api_usage_metrics(
   p_since timestamptz default now() - interval '24 hours',

@@ -485,17 +485,36 @@ function openApiDocument() {
           description: "Admin-only aggregate usage metrics. Package values are hashes and raw queries, package names, keys, IPs and user agents are not returned.",
           properties: {
             accessTiers: { items: { $ref: "#/components/schemas/ApiUsageTierMetric" }, type: "array" },
+            archiveWrites: { $ref: "#/components/schemas/ApiUsageArchiveWriteMetrics" },
             errors: { items: { $ref: "#/components/schemas/ApiUsageErrorMetric" }, type: "array" },
             generatedAt: { format: "date-time", type: "string" },
+            installPlans: { $ref: "#/components/schemas/ApiUsageInstallPlanMetrics" },
             packages: { items: { $ref: "#/components/schemas/ApiUsagePackageMetric" }, type: "array" },
             privacy: { type: "string" },
             routes: { items: { $ref: "#/components/schemas/ApiUsageRouteMetric" }, type: "array" },
             since: { format: "date-time", type: "string" },
             sources: { items: { $ref: "#/components/schemas/ApiUsageSourceMetric" }, type: "array" },
             totals: { $ref: "#/components/schemas/ApiUsageTotals" },
+            trustDecisions: { items: { $ref: "#/components/schemas/ApiUsageTrustDecisionMetric" }, type: "array" },
+            trustRisks: { items: { $ref: "#/components/schemas/ApiUsageTrustRiskMetric" }, type: "array" },
             type: { const: "dev.nipmod.api-usage-metrics.v1", type: "string" }
           },
-          required: ["accessTiers", "errors", "generatedAt", "packages", "privacy", "routes", "since", "sources", "totals", "type"],
+          required: [
+            "accessTiers",
+            "archiveWrites",
+            "errors",
+            "generatedAt",
+            "installPlans",
+            "packages",
+            "privacy",
+            "routes",
+            "since",
+            "sources",
+            "totals",
+            "trustDecisions",
+            "trustRisks",
+            "type"
+          ],
           type: "object"
         },
         ApiUsageTotals: {
@@ -555,6 +574,59 @@ function openApiDocument() {
             requestCount: { minimum: 0, type: "integer" }
           },
           required: ["code", "requestCount"],
+          type: "object"
+        },
+        ApiUsageTrustDecisionMetric: {
+          additionalProperties: false,
+          properties: {
+            decision: { enum: ["recommended", "usable_with_warning", "avoid", "unknown"], type: "string" },
+            requestCount: { minimum: 0, type: "integer" }
+          },
+          required: ["decision", "requestCount"],
+          type: "object"
+        },
+        ApiUsageTrustRiskMetric: {
+          additionalProperties: false,
+          properties: {
+            requestCount: { minimum: 0, type: "integer" },
+            risk: { enum: ["low", "medium", "high", "unknown"], type: "string" }
+          },
+          required: ["requestCount", "risk"],
+          type: "object"
+        },
+        ApiUsageInstallPlanMetrics: {
+          additionalProperties: false,
+          properties: {
+            allowedCount: { minimum: 0, type: "integer" },
+            blockedCount: { minimum: 0, type: "integer" },
+            observedCount: { minimum: 0, type: "integer" }
+          },
+          required: ["allowedCount", "blockedCount", "observedCount"],
+          type: "object"
+        },
+        ApiUsageArchiveWriteMetrics: {
+          additionalProperties: false,
+          properties: {
+            observedCount: { minimum: 0, type: "integer" },
+            previewCount: { minimum: 0, type: "integer" },
+            storedCount: { minimum: 0, type: "integer" }
+          },
+          required: ["observedCount", "previewCount", "storedCount"],
+          type: "object"
+        },
+        AdminSummary: {
+          additionalProperties: true,
+          description: "Admin-only launch dashboard summary. Contains aggregate usage, archive and key metrics without raw keys, IPs, prompts or workspace data.",
+          properties: {
+            archive: { additionalProperties: true, type: "object" },
+            generatedAt: { format: "date-time", type: "string" },
+            keys: { additionalProperties: true, type: "object" },
+            privacy: { type: "string" },
+            since: { format: "date-time", type: "string" },
+            type: { const: "dev.nipmod.admin-summary.v1", type: "string" },
+            usage: { $ref: "#/components/schemas/ApiUsageMetrics" }
+          },
+          required: ["archive", "generatedAt", "keys", "privacy", "since", "type", "usage"],
           type: "object"
         },
         BetaApiKeyIssueRequest: {
@@ -1143,6 +1215,31 @@ function openApiDocument() {
             "429": errorResponse()
           },
           summary: "Return the public Nipmod API contract."
+        }
+      },
+      "/api/admin/summary": {
+        get: {
+          description: "Requires an admin API key. Returns aggregate launch metrics for the private operator dashboard.",
+          operationId: "getAdminSummary",
+          parameters: [
+            {
+              description: "Lookback window in hours. Invalid values fall back to 24 hours.",
+              in: "query",
+              name: "hours",
+              schema: { default: 24, maximum: 168, minimum: 1, type: "integer" }
+            },
+            limitParameter(100)
+          ],
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/AdminSummary" },
+              "Admin-only aggregate API, archive and key metrics."
+            ),
+            "401": errorResponse(),
+            "403": errorResponse(),
+            "429": errorResponse()
+          },
+          summary: "Return private admin dashboard metrics."
         }
       },
       "/api/keys/beta": {

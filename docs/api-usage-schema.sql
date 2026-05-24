@@ -13,6 +13,14 @@ create table if not exists public.api_usage_events (
   sources text[] not null default '{}',
   result_count integer check (result_count is null or result_count >= 0),
   error_code text,
+  trust_decision text check (
+    trust_decision is null or trust_decision in ('recommended', 'usable_with_warning', 'avoid', 'unknown')
+  ),
+  trust_risk text check (
+    trust_risk is null or trust_risk in ('low', 'medium', 'high', 'unknown')
+  ),
+  install_blocked boolean,
+  archive_stored boolean,
   duration_ms integer not null check (duration_ms >= 0),
   created_at timestamptz not null default now()
 );
@@ -37,6 +45,22 @@ create index if not exists api_usage_events_source_idx
 create index if not exists api_usage_events_error_code_idx
   on public.api_usage_events (error_code)
   where error_code is not null;
+
+create index if not exists api_usage_events_trust_decision_idx
+  on public.api_usage_events (trust_decision)
+  where trust_decision is not null;
+
+create index if not exists api_usage_events_trust_risk_idx
+  on public.api_usage_events (trust_risk)
+  where trust_risk is not null;
+
+create index if not exists api_usage_events_install_blocked_idx
+  on public.api_usage_events (install_blocked)
+  where install_blocked is not null;
+
+create index if not exists api_usage_events_archive_stored_idx
+  on public.api_usage_events (archive_stored)
+  where archive_stored is not null;
 
 alter table public.api_usage_events enable row level security;
 

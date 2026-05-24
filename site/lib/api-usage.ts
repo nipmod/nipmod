@@ -14,12 +14,16 @@ interface ApiUsageInput {
 }
 
 interface UsageSummary {
+  archiveStored: boolean | null;
   errorCode: string | null;
+  installBlocked: boolean | null;
   packageHash: string | null;
   queryHash: string | null;
   resultCount: number | null;
   source: string | null;
   sources: string[];
+  trustDecision: string | null;
+  trustRisk: string | null;
 }
 
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
@@ -43,6 +47,8 @@ export async function recordApiUsage(input: ApiUsageInput, env: UsageEnv = proce
     client_hash: hashClient(input.request, env),
     duration_ms: Math.max(0, Date.now() - input.context.startedAt),
     error_code: summary.errorCode,
+    archive_stored: summary.archiveStored,
+    install_blocked: summary.installBlocked,
     method: input.request.method,
     package_hash: summary.packageHash,
     query_hash: summary.queryHash,
@@ -51,7 +57,9 @@ export async function recordApiUsage(input: ApiUsageInput, env: UsageEnv = proce
     route: input.route,
     source: summary.source,
     sources: summary.sources,
-    status: input.status
+    status: input.status,
+    trust_decision: summary.trustDecision,
+    trust_risk: summary.trustRisk
   };
 
   try {
@@ -186,11 +194,15 @@ type UsageMetricsEventRow = {
   client_hash: string;
   duration_ms: number;
   error_code: string | null;
+  archive_stored?: boolean | null;
+  install_blocked?: boolean | null;
   package_hash: string | null;
   route: string;
   source: string | null;
   sources: string[] | null;
   status: number;
+  trust_decision?: string | null;
+  trust_risk?: string | null;
 };
 
 async function readApiUsageMetricsFromEvents(
@@ -215,7 +227,8 @@ async function readApiUsageMetricsFromEvents(
     created_at: `gte.${input.since.toISOString()}`,
     limit: String(USAGE_METRICS_EVENT_LIMIT),
     order: "created_at.desc",
-    select: "route,status,access_tier,api_key_id,client_hash,package_hash,source,sources,error_code,duration_ms"
+    select:
+      "route,status,access_tier,api_key_id,client_hash,package_hash,source,sources,error_code,duration_ms,trust_decision,trust_risk,install_blocked,archive_stored"
   });
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), USAGE_METRICS_TIMEOUT_MS);
@@ -270,10 +283,16 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
   const packages = new Map<string, number>();
   const tiers = new Map<string, number>();
   const errors = new Map<string, number>();
+  const trustDecisions = new Map<string, number>();
+  const trustRisks = new Map<string, number>();
   const keyIds = new Set<string>();
   const clients = new Set<string>();
   let duration = 0;
   let errorCount = 0;
+  let installPlanAllowed = 0;
+  let installPlanBlocked = 0;
+  let archivePreviewed = 0;
+  let archiveStored = 0;
 
   for (const row of rows) {
     duration += row.duration_ms;
@@ -304,12 +323,38 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
     if (row.error_code) {
       errors.set(row.error_code, (errors.get(row.error_code) ?? 0) + 1);
     }
+    if (row.trust_decision) {
+      trustDecisions.set(row.trust_decision, (trustDecisions.get(row.trust_decision) ?? 0) + 1);
+    }
+    if (row.trust_risk) {
+      trustRisks.set(row.trust_risk, (trustRisks.get(row.trust_risk) ?? 0) + 1);
+    }
+    if (row.install_blocked === true) {
+      installPlanBlocked += 1;
+    } else if (row.install_blocked === false) {
+      installPlanAllowed += 1;
+    }
+    if (row.archive_stored === true) {
+      archiveStored += 1;
+    } else if (row.archive_stored === false) {
+      archivePreviewed += 1;
+    }
   }
 
   return {
     accessTiers: sortedCounts(tiers, "tier", limit),
+    archiveWrites: {
+      observedCount: archiveStored + archivePreviewed,
+      previewCount: archivePreviewed,
+      storedCount: archiveStored
+    },
     errors: sortedCounts(errors, "code", limit),
     generatedAt: new Date().toISOString(),
+    installPlans: {
+      allowedCount: installPlanAllowed,
+      blockedCount: installPlanBlocked,
+      observedCount: installPlanAllowed + installPlanBlocked
+    },
     packages: sortedCounts(packages, "packageHash", limit),
     privacy: "aggregated metrics only; package values are hashes; raw keys, IPs, user agents, queries and package names are not returned",
     routes: [...routes.entries()]
@@ -330,7 +375,9 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
       keyCount: keyIds.size,
       requestCount: rows.length
     },
-    type: "dev.nipmod.api-usage-metrics.v1"
+    type: "dev.nipmod.api-usage-metrics.v1",
+    trustDecisions: sortedCounts(trustDecisions, "decision", limit),
+    trustRisks: sortedCounts(trustRisks, "risk", limit)
   };
 }
 
@@ -359,11 +406,15 @@ function isUsageMetricsEventRow(value: unknown): value is UsageMetricsEventRow {
     typeof row.client_hash === "string" &&
     typeof row.duration_ms === "number" &&
     (typeof row.error_code === "string" || row.error_code === null) &&
+    (typeof row.archive_stored === "boolean" || row.archive_stored === null || row.archive_stored === undefined) &&
+    (typeof row.install_blocked === "boolean" || row.install_blocked === null || row.install_blocked === undefined) &&
     (typeof row.package_hash === "string" || row.package_hash === null) &&
     typeof row.route === "string" &&
     (typeof row.source === "string" || row.source === null) &&
     (Array.isArray(row.sources) || row.sources === null) &&
-    typeof row.status === "number"
+    typeof row.status === "number" &&
+    (typeof row.trust_decision === "string" || row.trust_decision === null || row.trust_decision === undefined) &&
+    (typeof row.trust_risk === "string" || row.trust_risk === null || row.trust_risk === undefined)
   );
 }
 
@@ -372,12 +423,16 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
   const query = url.searchParams.get("q");
   const name = url.searchParams.get("name");
   const base: UsageSummary = {
+    archiveStored: null,
     errorCode: null,
+    installBlocked: null,
     packageHash: name ? hashValue(name) : null,
     queryHash: query ? hashValue(query) : null,
     resultCount: null,
     source: url.searchParams.get("source"),
-    sources: readSources(url.searchParams.get("sources"))
+    sources: readSources(url.searchParams.get("sources")),
+    trustDecision: null,
+    trustRisk: null
   };
 
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -387,20 +442,29 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
   if (typeof record.code === "string" && record.type === "dev.nipmod.api-error.v1") {
     return { ...base, errorCode: record.code };
   }
+  const responseRecord = readRecord(record.record) ?? readRecord(record.package) ?? readRecord(record.archiveRecord) ?? readRecommendedSearchRecord(record);
   if (typeof record.total === "number") {
+    const trust = readRecord(responseRecord?.trust);
     return {
       ...base,
       resultCount: record.total,
-      sources: Array.isArray(record.sources) ? record.sources.filter((source): source is string => typeof source === "string") : base.sources
+      sources: Array.isArray(record.sources) ? record.sources.filter((source): source is string => typeof source === "string") : base.sources,
+      trustDecision: readTrustDecision(trust?.decision),
+      trustRisk: readTrustRisk(trust?.risk)
     };
   }
-  const responseRecord = readRecord(record.record) ?? readRecord(record.package) ?? readRecord(record.archiveRecord);
   const source = readString(responseRecord?.source) ?? base.source;
   const packageName = readString(responseRecord?.name) ?? readString(responseRecord?.displayName) ?? name;
+  const trust = readRecord(responseRecord?.trust);
+  const safety = readRecord(record.safety);
   return {
     ...base,
+    archiveStored: typeof record.stored === "boolean" ? record.stored : base.archiveStored,
+    installBlocked: typeof safety?.blocked === "boolean" ? safety.blocked : base.installBlocked,
     packageHash: packageName ? hashValue(packageName) : base.packageHash,
-    source
+    source,
+    trustDecision: readTrustDecision(trust?.decision),
+    trustRisk: readTrustRisk(trust?.risk)
   };
 }
 
@@ -433,4 +497,22 @@ function readRecord(value: unknown): Record<string, unknown> | null {
 
 function readString(value: unknown): string | null {
   return typeof value === "string" && value ? value : null;
+}
+
+function readRecommendedSearchRecord(value: Record<string, unknown>): Record<string, unknown> | null {
+  const records = Array.isArray(value.records) ? value.records.filter((record): record is Record<string, unknown> => Boolean(readRecord(record))) : [];
+  if (records.length === 0) {
+    return null;
+  }
+  const selection = readRecord(value.selection);
+  const recommendedId = readString(selection?.recommendedId);
+  return records.find((record) => readString(record.id) === recommendedId) ?? records[0] ?? null;
+}
+
+function readTrustDecision(value: unknown): string | null {
+  return value === "recommended" || value === "usable_with_warning" || value === "avoid" || value === "unknown" ? value : null;
+}
+
+function readTrustRisk(value: unknown): string | null {
+  return value === "low" || value === "medium" || value === "high" || value === "unknown" ? value : null;
 }
