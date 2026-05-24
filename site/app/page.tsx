@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArchitectureDiagram, DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "./docs-shell";
+import { ArchitectureDiagram, DocsCode, DocsProse, DocsSection, DocsSequence, DocsShell, DocsTable } from "./docs-shell";
 
 const agentInstruction = `Use Nipmod before choosing a package.
 Search sources, inspect the selected record and show the install plan.
@@ -18,40 +18,53 @@ export default function Home() {
       title="The package layer for AI agents."
     >
       <DocsSection title="Public beta is open">
-        <DocsGrid>
-          <DocsCard title="Use it now">
-            <p>Agents can search supported sources, inspect exact records and request install plans through the same public API.</p>
-          </DocsCard>
-          <DocsCard title="Free with limits">
-            <p>Public beta access does not require a key. Requests are rate limited while we improve resolver quality and collect real usage.</p>
-          </DocsCard>
-          <DocsCard title="Agent-readable">
-            <p>Agents can read <code>/llms.txt</code>, the discovery manifest and OpenAPI before calling the hosted API.</p>
-          </DocsCard>
-          <DocsCard title="No hidden execution">
-            <p>Hosted calls do not read local files, run package managers or write lockfiles.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            Nipmod is live as a public beta. An agent can call the hosted API, search supported sources, inspect one exact
+            package record and request an install plan before changing a workspace.
+          </p>
+          <p>
+            Access is free and rate limited during the beta. We use this phase to improve resolver quality, watch real
+            package demand and turn confirmed useful discoveries into better package intelligence. The hosted API does not
+            read local files, run package managers or write lockfiles.
+          </p>
+          <p>
+            Agents can read <code>/llms.txt</code>, the discovery manifest and the OpenAPI contract before making calls. The
+            human page and the machine-readable surfaces describe the same boundary.
+          </p>
+        </DocsProse>
       </DocsSection>
 
       <DocsSection title="How it works">
-        <DocsGrid>
-          <DocsCard label="1" title="Search">
-            <p>The agent asks Nipmod for candidates across supported package sources.</p>
-          </DocsCard>
-          <DocsCard label="2" title="Inspect">
-            <p>The agent checks one exact record for source context, license, warnings and trust factors.</p>
-          </DocsCard>
-          <DocsCard label="3" title="Plan">
-            <p>The API returns install steps for review. Execution stays outside the hosted API.</p>
-          </DocsCard>
-          <DocsCard label="4" title="Approve">
-            <p>The user or local host decides whether the command is allowed to run.</p>
-          </DocsCard>
-          <DocsCard label="5" title="Archive">
-            <p>Useful confirmed discoveries can become reusable Nipmod archive records.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsSequence
+          items={[
+            {
+              body: "The agent asks Nipmod for candidates across supported package sources.",
+              label: "1",
+              title: "Search"
+            },
+            {
+              body: "The agent checks one exact record for source context, license, warnings and trust factors.",
+              label: "2",
+              title: "Inspect"
+            },
+            {
+              body: "The API returns install steps for review. Execution stays outside the hosted API.",
+              label: "3",
+              title: "Plan"
+            },
+            {
+              body: "The user or local host decides whether the command is allowed to run.",
+              label: "4",
+              title: "Approve"
+            },
+            {
+              body: "Useful confirmed discoveries can become reusable Nipmod archive records.",
+              label: "5",
+              title: "Archive"
+            }
+          ]}
+        />
       </DocsSection>
 
       <DocsSection title="Current architecture">
@@ -90,31 +103,33 @@ export default function Home() {
       </DocsSection>
 
       <DocsSection title="Boundaries">
-        <DocsGrid>
-          <DocsCard title="Not a mirror">
-            <p>Nipmod does not claim ownership of npm, PyPI, GitHub, Hugging Face or MCP packages. Source ownership remains with the original publisher.</p>
-          </DocsCard>
-          <DocsCard title="Not an executor">
-            <p>The hosted API returns package context and install plans. Local changes still require approval and happen outside the hosted service.</p>
-          </DocsCard>
-          <DocsCard title="Not a shortcut around trust">
-            <p>Search ranking is not permission to install. Exact package inspection and policy checks come first.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            Nipmod does not mirror or take ownership of npm, PyPI, GitHub, Hugging Face or MCP packages. The original
+            publisher remains the source owner. Nipmod adds context, trust checks and install plans around those records.
+          </p>
+          <p>
+            The hosted API is not an executor. It returns package context and commands as review data, while local changes
+            still require approval and happen inside the user&apos;s own host or workspace.
+          </p>
+          <p>
+            Search ranking is never permission to install. Exact package inspection, policy checks and user approval remain
+            the safe path.
+          </p>
+        </DocsProse>
       </DocsSection>
 
       <DocsSection title="Ecosystem phase">
-        <DocsGrid>
-          <DocsCard title="Base first">
-            <p>We are starting collaboration work around the Base ecosystem because early community, token and builder attention are already there.</p>
-          </DocsCard>
-          <DocsCard title="Broader after the beta">
-            <p>Once the API, trust model and archive loops are stable, the same package layer can be taken to agent builders outside crypto.</p>
-          </DocsCard>
-          <DocsCard title="Public links">
-            <p>GitHub, X, Telegram and the $NPM token link stay visible from the header so builders can review the project quickly.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            We are starting collaboration work around the Base ecosystem because the early community, token and builder
+            attention are already there. That gives the beta a practical first market instead of a vague launch surface.
+          </p>
+          <p>
+            Once the API, trust model and archive loop are stable, the same package layer can move outward to agent builders,
+            tooling teams and package-heavy workflows outside crypto.
+          </p>
+        </DocsProse>
       </DocsSection>
 
       <DocsSection title="Official links">

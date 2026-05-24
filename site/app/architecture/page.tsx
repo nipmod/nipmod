@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArchitectureDiagram, DocsCard, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
+import { ArchitectureDiagram, DocsProse, DocsSection, DocsSequence, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
 
 export const metadata = createPageMetadata({
@@ -67,51 +67,72 @@ export default function ArchitecturePage() {
       </DocsSection>
 
       <DocsSection title="Lifecycle">
-        <DocsGrid>
-          <DocsCard label="1" title="Ephemeral search">
-            <p>The agent searches. Nipmod returns candidates from live sources without treating the result as verified.</p>
-          </DocsCard>
-          <DocsCard label="2" title="Exact inspect">
-            <p>The agent selects one record and reads source, version, license, warnings and trust fields.</p>
-          </DocsCard>
-          <DocsCard label="3" title="Install plan">
-            <p>Nipmod returns a safe plan for review. This is still not execution.</p>
-          </DocsCard>
-          <DocsCard label="4" title="Approval">
-            <p>The user or local host decides if the command can run in the workspace.</p>
-          </DocsCard>
-          <DocsCard label="5" title="Confirmed archive">
-            <p>If the result is useful, it can become a reusable record with source context, trust checks and receipts.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsSequence
+          items={[
+            {
+              body: "The agent searches live sources. Nipmod returns candidates without treating them as verified archive entries.",
+              label: "1",
+              title: "Ephemeral search"
+            },
+            {
+              body: "The agent selects one record and reads source, version, license, warnings and trust fields.",
+              label: "2",
+              title: "Exact inspect"
+            },
+            {
+              body: "Nipmod returns commands and risk context for review. This is still not execution.",
+              label: "3",
+              title: "Install plan"
+            },
+            {
+              body: "The user or local host decides whether the command can run in the workspace.",
+              label: "4",
+              title: "Approval"
+            },
+            {
+              body: "If the result is useful, it can become a reusable record with source context, trust checks and receipts.",
+              label: "5",
+              title: "Confirmed archive"
+            }
+          ]}
+        />
       </DocsSection>
 
       <DocsSection title="What is not happening">
-        <DocsGrid>
-          <DocsCard title="No hidden install">
-            <p>Search, Inspect and Install Plan do not download packages, run package managers or change lockfiles.</p>
-          </DocsCard>
-          <DocsCard title="No source takeover">
-            <p>Nipmod does not claim ownership of npm, PyPI, GitHub, Hugging Face or MCP records.</p>
-          </DocsCard>
-          <DocsCard title="No blind trust">
-            <p>Package descriptions, READMEs, model cards and MCP descriptions are treated as untrusted data.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            Search, Inspect and Install Plan do not download packages, run package managers or change lockfiles. The hosted
+            API gives the agent package intelligence, not local execution power.
+          </p>
+          <p>
+            Nipmod does not claim ownership of npm, PyPI, GitHub, Hugging Face or MCP records. Source ownership remains with
+            the original publisher, and Nipmod records only the context needed for agents to make safer decisions.
+          </p>
+          <p>
+            Package descriptions, READMEs, model cards and MCP descriptions are always treated as untrusted data. They can be
+            summarized and inspected, but they cannot override the user, the host or the safety boundary.
+          </p>
+        </DocsProse>
       </DocsSection>
 
       <DocsSection title="Beta rollout">
-        <DocsGrid>
-          <DocsCard title="Public beta">
-            <p>The API starts free and rate limited so real agents can test the flow while the trust model improves.</p>
-          </DocsCard>
-          <DocsCard title="Base ecosystem first">
-            <p>We are using the Base ecosystem as the first collaboration surface because the project, token and early community are already there.</p>
-          </DocsCard>
-          <DocsCard title="Wider agent market next">
-            <p>After the API and archive loops are stable, the same structure applies to agent builders beyond Base.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            The API starts free and rate limited so real agents can test the flow while the trust model improves. This phase is
+            about observing real package searches, improving source quality and learning which package records are useful
+            enough to become durable intelligence.
+          </p>
+          <p>
+            We are using the Base ecosystem as the first collaboration surface because the project, token and early community
+            are already there. After the API and archive loop are stable, the same structure applies to agent builders beyond
+            Base.
+          </p>
+          <p>
+            Premium access and higher usage tiers can come later, after the public beta proves the package layer with real
+            usage. The product boundary stays the same: search, inspect, install plan, approval, then optional archive
+            confirmation.
+          </p>
+        </DocsProse>
       </DocsSection>
 
       <div className="docs-next">

@@ -471,6 +471,8 @@ body {
 
 .architecture-label,
 .architecture-caption {
+  background: rgba(20, 20, 21, 0.84);
+  border-radius: 4px;
   color: rgba(243, 243, 244, 0.9);
   font-family: var(--docs-ui);
   font-size: clamp(14px, 1.9vw, 20px);
@@ -478,6 +480,7 @@ body {
   letter-spacing: 0;
   line-height: 1.28;
   margin: 0;
+  padding: 2px 6px;
   position: absolute;
   text-align: center;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.92);
@@ -556,15 +559,15 @@ body {
 }
 
 .architecture-label-request {
-  left: 24%;
-  top: 30%;
-  width: 14%;
+  left: 24.5%;
+  top: 29.5%;
+  width: 15%;
 }
 
 .architecture-label-response {
-  left: 24%;
-  top: 45%;
-  width: 15%;
+  left: 24.5%;
+  top: 45.5%;
+  width: 17%;
 }
 
 .architecture-caption-approval {
@@ -6005,4 +6008,203 @@ body {
     width: 42px;
   }
 
+}
+
+/* Editorial docs pass: keep the product surface closer to a whitepaper than a dashboard. */
+.docs-main {
+  font-family: var(--docs-serif);
+}
+
+.docs-section {
+  gap: 18px;
+}
+
+.docs-prose {
+  color: var(--docs-muted);
+  display: grid;
+  font-family: var(--docs-serif);
+  font-size: 17px;
+  gap: 15px;
+  line-height: 1.76;
+  max-width: 820px;
+  text-wrap: pretty;
+}
+
+.docs-prose p {
+  margin: 0;
+}
+
+.docs-prose code {
+  color: var(--docs-code);
+  font-family: var(--docs-mono);
+  font-size: 0.82em;
+}
+
+.docs-stat-strip {
+  border: 0;
+  border-bottom: 1px solid var(--docs-line);
+  border-radius: 0;
+  border-top: 1px solid var(--docs-line);
+  margin-top: 14px;
+  overflow: visible;
+}
+
+.docs-stat-strip div {
+  background: transparent;
+  border-right: 1px solid var(--docs-line-soft);
+  padding: 13px 18px 13px 0;
+}
+
+.docs-stat-strip dt {
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+.docs-stat-strip dd {
+  font-size: 14px;
+}
+
+.docs-grid {
+  gap: 0 34px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+}
+
+.docs-card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--docs-line);
+  border-radius: 0;
+  box-shadow: none;
+  gap: 8px;
+  padding: 18px 0 20px;
+}
+
+.docs-card > span {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 11px;
+  font-weight: 680;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.docs-card h3 {
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.docs-card p,
+.docs-note {
+  font-size: 16px;
+  line-height: 1.72;
+}
+
+.docs-sequence {
+  border-top: 1px solid var(--docs-line);
+  counter-reset: docs-sequence;
+  display: grid;
+  list-style: none;
+  margin: 0;
+  max-width: 860px;
+  padding: 0;
+}
+
+.docs-sequence li {
+  align-items: baseline;
+  border-bottom: 1px solid var(--docs-line-soft);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  padding: 17px 0 19px;
+}
+
+.docs-sequence li > span {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.docs-sequence h3 {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 5px;
+  text-wrap: balance;
+}
+
+.docs-sequence p {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 16px;
+  line-height: 1.72;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.docs-next {
+  gap: 22px;
+}
+
+.docs-next a {
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0;
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 400;
+  min-height: 0;
+  padding: 0 0 3px;
+}
+
+.docs-next a:hover {
+  background: transparent;
+  border-bottom-color: rgba(255, 255, 255, 0.72);
+}
+
+.brand-socials {
+  gap: 10px;
+}
+
+.brand-icon-button .brand-telegram-icon {
+  height: 24px;
+  width: 24px;
+}
+
+@media (max-width: 760px) {
+  .docs-stat-strip {
+    border-bottom: 0;
+  }
+
+  .docs-stat-strip div {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  .docs-sidebar-nav a {
+    border: 0;
+    border-bottom: 1px solid var(--docs-line);
+    border-radius: 0;
+    padding: 8px 0;
+  }
+
+  .docs-sidebar-nav a[aria-current="page"],
+  .docs-sidebar-nav a.docs-sidebar-active,
+  .docs-sidebar-nav a:hover {
+    background: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .docs-sequence li {
+    gap: 14px;
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .docs-prose {
+    font-size: 16px;
+  }
 }

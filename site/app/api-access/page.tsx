@@ -1,5 +1,5 @@
 import { createPageMetadata } from "../metadata";
-import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
+import { DocsCard, DocsCode, DocsGrid, DocsProse, DocsSection, DocsSequence, DocsShell, DocsTable } from "../docs-shell";
 
 export const metadata = createPageMetadata({
   description: "Nipmod API endpoints for agent package search, inspection, install planning and MCP access.",
@@ -77,32 +77,40 @@ export default function ApiAccessPage() {
       </DocsSection>
 
       <DocsSection title="Agent-readable entrypoints">
-        <DocsGrid>
-          <DocsCard title="Human page">
-            <p>This page explains the beta surface, access rules and safety boundary.</p>
-          </DocsCard>
-          <DocsCard title="Machine text">
-            <p><code>/llms.txt</code> gives agents the exact workflow and safety rules without layout or marketing copy.</p>
-          </DocsCard>
-          <DocsCard title="OpenAPI">
-            <p><code>/api/openapi</code> is the contract for generated clients, tests and agent tools.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            The human page explains the beta surface, access rules and safety boundary. Agents should read the machine
+            surfaces first, then call the API only after they understand the flow.
+          </p>
+          <p>
+            <code>/llms.txt</code> gives agents the workflow and safety rules without layout copy. The discovery manifest
+            describes the public surfaces. <code>/api/openapi</code> is the contract for generated clients, tests and agent
+            tools.
+          </p>
+        </DocsProse>
         <DocsCode>{agentDiscovery}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Three calls">
-        <DocsGrid>
-          <DocsCard label="1" title="Search">
-            <p>Find candidates across supported public sources. Search returns a shortlist, not install permission.</p>
-          </DocsCard>
-          <DocsCard label="2" title="Inspect">
-            <p>Read one exact package record with source links, version, license, warnings and trust factors.</p>
-          </DocsCard>
-          <DocsCard label="3" title="Install Plan">
-            <p>Return commands and risk context for user review. Hosted API calls never execute commands.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsSequence
+          items={[
+            {
+              body: "Find candidates across supported public sources. Search returns a shortlist, not install permission.",
+              label: "1",
+              title: "Search"
+            },
+            {
+              body: "Read one exact package record with source links, version, license, warnings and trust factors.",
+              label: "2",
+              title: "Inspect"
+            },
+            {
+              body: "Return commands and risk context for user review. Hosted API calls never execute commands.",
+              label: "3",
+              title: "Install Plan"
+            }
+          ]}
+        />
         <DocsCode>{threeCalls}</DocsCode>
       </DocsSection>
 
@@ -246,14 +254,12 @@ export default function ApiAccessPage() {
       </DocsSection>
 
       <DocsSection title="Errors">
-        <DocsGrid>
-          <DocsCard title="Structured response">
-            <p>Errors should be handled as data. Agents should not retry blindly or hide the cause from the user.</p>
-          </DocsCard>
-          <DocsCard title="Common cases">
-            <p>Invalid source, missing package name, upstream timeout, source unavailable, rate limit and malformed MCP request.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            Errors are structured data. Agents should not retry blindly or hide the cause from the user. Common cases include
+            invalid source, missing package name, upstream timeout, source unavailable, rate limit and malformed MCP request.
+          </p>
+        </DocsProse>
         <DocsCode>{errorShape}</DocsCode>
       </DocsSection>
 
@@ -285,17 +291,12 @@ export default function ApiAccessPage() {
       </DocsSection>
 
       <DocsSection title="Client examples">
-        <DocsGrid>
-          <DocsCard label="TS" title="TypeScript">
-            <p>Reference flow for agent hosts that call Nipmod through HTTPS.</p>
-          </DocsCard>
-          <DocsCard label="PY" title="Python">
-            <p>Same flow for Python-based workers, bots or local agent wrappers.</p>
-          </DocsCard>
-          <DocsCard label="MCP" title="MCP endpoint">
-            <p>Read-only JSON-RPC surface for hosts that prefer MCP-style tools.</p>
-          </DocsCard>
-        </DocsGrid>
+        <DocsProse>
+          <p>
+            Use the TypeScript and Python examples for agent hosts that call Nipmod through HTTPS. Use the MCP endpoint when
+            the host prefers JSON-RPC tools over direct HTTP calls. Both paths keep the same safety boundary.
+          </p>
+        </DocsProse>
         <DocsCode>{clientExamples}</DocsCode>
         <DocsCode>{mcpCall}</DocsCode>
       </DocsSection>

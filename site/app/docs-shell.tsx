@@ -123,6 +123,34 @@ export function DocsGrid({ children }: { children: ReactNode }) {
   return <div className="docs-grid">{children}</div>;
 }
 
+export function DocsProse({ children }: { children: ReactNode }) {
+  return <div className="docs-prose">{children}</div>;
+}
+
+export function DocsSequence({
+  items
+}: {
+  items: Array<{
+    body: ReactNode;
+    label: string;
+    title: string;
+  }>;
+}) {
+  return (
+    <ol className="docs-sequence">
+      {items.map((item) => (
+        <li key={item.label}>
+          <span>{item.label}</span>
+          <div>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function DocsCard({
   children,
   label,
@@ -174,7 +202,7 @@ export function ArchitectureDiagram() {
       </div>
 
       <p className="architecture-label architecture-label-request">asks Nipmod for a package</p>
-      <p className="architecture-label architecture-label-response">receives recommended package + risks + install plan</p>
+      <p className="architecture-label architecture-label-response">receives package, risks and install plan</p>
 
       <div className="architecture-card architecture-api">
         <strong>Nipmod API</strong>
