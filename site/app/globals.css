@@ -92,7 +92,7 @@ body {
 .docs-shell {
   align-items: start;
   display: grid;
-  grid-template-columns: 220px minmax(0, 800px) 176px;
+  grid-template-columns: 220px minmax(0, 800px);
   gap: 56px;
   margin: 0 auto;
   max-width: var(--docs-frame-width);
@@ -102,7 +102,7 @@ body {
 }
 
 .docs-shell-with-toc {
-  grid-template-columns: 220px minmax(0, 800px) 176px;
+  grid-template-columns: 220px minmax(0, 800px);
   max-width: var(--docs-frame-width);
 }
 
@@ -258,45 +258,6 @@ body {
   display: grid;
   gap: 44px;
   padding-top: 40px;
-}
-
-.docs-toc {
-  align-self: start;
-  display: grid;
-  gap: 10px;
-  position: sticky;
-  top: calc(var(--topbar-height) + 26px);
-}
-
-.docs-toc p {
-  color: var(--docs-faint);
-  font-family: var(--docs-ui);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.docs-toc nav {
-  border-left: 1px solid var(--docs-line);
-  display: grid;
-  gap: 2px;
-  padding-left: 12px;
-}
-
-.docs-toc a {
-  border-radius: 6px;
-  color: var(--docs-muted);
-  font-family: var(--docs-ui);
-  font-size: 12.5px;
-  line-height: 1.25;
-  padding: 6px 8px;
-}
-
-.docs-toc a:hover {
-  background: rgba(255, 255, 255, 0.055);
-  color: var(--docs-text);
 }
 
 .docs-section {
@@ -480,7 +441,19 @@ body {
   box-shadow: none;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1100px) {
+  .docs-shell,
+  .docs-shell-with-toc {
+    gap: 32px;
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .docs-sidebar {
+    width: 190px;
+  }
+}
+
+@media (max-width: 760px) {
   .docs-shell,
   .docs-shell-with-toc {
     grid-template-columns: 1fr;
@@ -495,40 +468,31 @@ body {
     overflow: visible;
     padding-bottom: 14px;
     position: static;
+    width: 100%;
   }
 
   .docs-sidebar-nav {
-    border-left: 0;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 0;
-    scrollbar-width: none;
-  }
-
-  .docs-sidebar-nav::-webkit-scrollbar {
-    display: none;
+    border-left: 1px solid var(--docs-line);
+    display: grid;
+    gap: 14px;
+    overflow: visible;
+    padding-left: 14px;
   }
 
   .docs-sidebar-nav a {
-    border: 1px solid var(--docs-line);
-    flex: 0 0 auto;
+    border: 0;
   }
 
   .docs-sidebar-group {
-    display: contents;
+    display: grid;
   }
 
   .docs-sidebar-group > p {
-    display: none;
+    display: block;
   }
 
   .docs-sidebar-group > div {
-    display: contents;
-  }
-
-  .docs-toc {
-    display: none;
+    display: grid;
   }
 
   .docs-table-row,

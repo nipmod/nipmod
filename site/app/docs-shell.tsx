@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { CommandBlock } from "./command-block";
 import { DocsSidebar } from "./docs-sidebar";
 
 export type DocsNavItem = {
@@ -53,7 +53,6 @@ export function DocsShell({
   eyebrow,
   nav = docsNavGroups,
   stats = [],
-  toc = [],
   title
 }: {
   children: ReactNode;
@@ -65,7 +64,7 @@ export function DocsShell({
   title: string;
 }) {
   return (
-    <main className={toc.length > 0 ? "docs-shell docs-shell-with-toc" : "docs-shell"} id="main">
+    <main className="docs-shell" id="main">
       <DocsSidebar nav={nav} />
 
       <article className="docs-main">
@@ -86,19 +85,6 @@ export function DocsShell({
         </header>
         <div className="docs-content">{children}</div>
       </article>
-
-      {toc.length > 0 ? (
-        <aside className="docs-toc" aria-label="On this page">
-          <p>On this page</p>
-          <nav>
-            {toc.map((item) => (
-              <Link href={item.href} key={item.href}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-      ) : null}
     </main>
   );
 }
@@ -156,11 +142,7 @@ export function DocsCard({
 }
 
 export function DocsCode({ children }: { children: string }) {
-  return (
-    <pre className="docs-code">
-      <code>{children}</code>
-    </pre>
-  );
+  return <CommandBlock command={children} label="Copy" variant="compact" />;
 }
 
 export function DocsTable({
