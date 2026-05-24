@@ -10,8 +10,6 @@ const releaseKey = JSON.parse(readFileSync(join(root, "tools", "release-signing-
 const advisoryKey = JSON.parse(readFileSync(join(root, "tools", "advisory-signing-public-key.json"), "utf8"));
 const version = JSON.parse(readFileSync(join(root, "nipmod", "package.json"), "utf8")).version;
 const shortInstallerCommand = "curl https://nipmod.com/i|bash";
-const verifyInstallerCommand =
-  "curl -fLO https://nipmod.com/install.sh\ncurl -fLO https://nipmod.com/install.sh.sha256\nshasum -a 256 -c install.sh.sha256\nbash install.sh";
 
 describe("nipmod discovery manifest", () => {
   test("publishes a stable API first discovery document", () => {
@@ -31,7 +29,6 @@ describe("nipmod discovery manifest", () => {
       "agent",
       "api",
       "archive",
-      "claims",
       "description",
       "docs",
       "externalIndex",
@@ -56,49 +53,58 @@ describe("nipmod discovery manifest", () => {
 
   test("keeps docs and agent commands focused on API access", () => {
     expect(manifest.docs).toEqual({
+      architecture: "https://nipmod.com/architecture",
       api: "https://nipmod.com/api-access",
       apiSpec: "https://nipmod.com/api/openapi",
-      audit: "https://nipmod.com/audit",
-      createPackage: "https://nipmod.com/package",
-      demo: "https://nipmod.com/demo",
-      docs: "https://nipmod.com/quickstart#docs",
       examples: "https://nipmod.com/examples",
       externalInspectApi: "https://nipmod.com/api/inspect",
       externalInstallPlanApi: "https://nipmod.com/api/install-plan",
       externalResolveApi: "https://nipmod.com/api/resolve",
       externalSearchApi: "https://nipmod.com/api/search",
-      install: "https://nipmod.com/quickstart#install",
       mcp: "https://nipmod.com/mcp",
       packageIntelligenceConfirmApi: "https://nipmod.com/api/archive/confirm",
       packageIntelligencePrepareApi: "https://nipmod.com/api/archive/prepare",
       packageIntelligenceSearchApi: "https://nipmod.com/api/archive/search",
       packageIntelligenceStatusApi: "https://nipmod.com/api/archive/status",
       packages: "https://nipmod.com/packages",
-      platforms: "https://nipmod.com/platforms",
+      quickstart: "https://nipmod.com/quickstart",
       security: "https://nipmod.com/security",
       sourceHealthApi: "https://nipmod.com/api/sources/health",
-      setup: "https://nipmod.com/setup",
       sources: "https://nipmod.com/sources",
       status: "https://nipmod.com/status",
+      home: "https://nipmod.com",
       trust: "https://nipmod.com/trust"
     });
     expect(manifest.agent.runbook).toBe("https://nipmod.com/api-access");
     expect(manifest.agent.workflow).not.toContain("setupCursorOneClick");
+    expect(manifest.agent.workflow).not.toContain("setupPublish");
+    expect(manifest.agent.workflow).not.toContain("publishDryRun");
+    expect(manifest.agent.workflow).not.toContain("claimVerify");
+    expect(manifest.agent.workflow).toContain("externalSearch");
     expect(manifest.agent.workflow).toContain("externalResolve");
     expect(manifest.agent.workflow).toContain("externalInstallPlan");
     expect(manifest.agent.commands).toMatchObject({
+      access: "No API key is required for public beta. Optional higher-limit keys may be sent as x-nipmod-api-key or Authorization: Bearer <key>.",
       externalInspect: "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       externalInstallPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
       externalResolve: "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       externalSearch: "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
-      install: shortInstallerCommand,
       packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       packageIntelligenceStatus: "GET https://nipmod.com/api/archive/status",
-      sourceHealth: "GET https://nipmod.com/api/sources/health",
-      verifyInstaller: verifyInstallerCommand
+      readLlms: "GET https://nipmod.com/llms.txt",
+      readOpenApi: "GET https://nipmod.com/api/openapi",
+      sourceHealth: "GET https://nipmod.com/api/sources/health"
+    });
+    expect(manifest.api.access).toMatchObject({
+      keyRequired: false,
+      publicBeta: true,
+      rateLimited: true
     });
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();
     expect(manifest.agent.commands.setupHermesBundle).toBeUndefined();
+    expect(manifest.agent.commands.setupPublish).toBeUndefined();
+    expect(manifest.agent.commands.publishDryRun).toBeUndefined();
+    expect(manifest.agent.commands.claimVerify).toBeUndefined();
   });
 
   test("pins release artifacts to committed files", () => {

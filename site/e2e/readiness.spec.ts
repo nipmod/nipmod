@@ -93,8 +93,8 @@ test("machine discovery points agents at API and MCP surfaces", async ({ request
   const llms = await request.get("/llms.txt");
   await expect(llms).toBeOK();
   const llmsText = await llms.text();
-  expect(llmsText).toContain("API access: https://nipmod.com/api-access");
-  expect(llmsText).toContain("Public package archive registry: https://nipmod.com/registry/packages.json");
+  expect(llmsText).toContain("API reference: https://nipmod.com/api-access");
+  expect(llmsText).toContain("No API key is required today.");
   expect(llmsText).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");
   expect(llmsText).not.toMatch(removedIntegrationCopy);
 
@@ -103,6 +103,7 @@ test("machine discovery points agents at API and MCP surfaces", async ({ request
   const body = await manifest.json();
   expect(body.docs.api).toBe("https://nipmod.com/api-access");
   expect(body.docs.sources).toBe("https://nipmod.com/sources");
+  expect(body.api.access.keyRequired).toBe(false);
   expect(body.agent.commands.externalSearch).toBe(
     "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp"
   );

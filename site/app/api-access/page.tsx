@@ -10,6 +10,11 @@ export const metadata = createPageMetadata({
 const agentPrompt = `Use Nipmod before choosing a package.
 Search for candidates, inspect the selected record, then show me the install plan before changing the workspace.`;
 
+const agentDiscovery = `Read these first:
+https://nipmod.com/llms.txt
+https://nipmod.com/.well-known/nipmod.json
+https://nipmod.com/api/openapi`;
+
 const threeCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
@@ -71,6 +76,21 @@ export default function ApiAccessPage() {
         <DocsCode>{agentPrompt}</DocsCode>
       </DocsSection>
 
+      <DocsSection title="Agent-readable entrypoints">
+        <DocsGrid>
+          <DocsCard title="Human page">
+            <p>This page explains the beta surface, access rules and safety boundary.</p>
+          </DocsCard>
+          <DocsCard title="Machine text">
+            <p><code>/llms.txt</code> gives agents the exact workflow and safety rules without layout or marketing copy.</p>
+          </DocsCard>
+          <DocsCard title="OpenAPI">
+            <p><code>/api/openapi</code> is the contract for generated clients, tests and agent tools.</p>
+          </DocsCard>
+        </DocsGrid>
+        <DocsCode>{agentDiscovery}</DocsCode>
+      </DocsSection>
+
       <DocsSection title="Three calls">
         <DocsGrid>
           <DocsCard label="1" title="Search">
@@ -123,6 +143,60 @@ export default function ApiAccessPage() {
               first: "OpenAPI",
               second: <code>GET /api/openapi</code>,
               third: "Contract for generated clients, tests and agent tool schemas."
+            }
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection title="Access and API keys">
+        <DocsTable
+          rows={[
+            {
+              first: "Public beta",
+              second: "No API key is required today.",
+              third: "Every public request is rate limited."
+            },
+            {
+              first: "Optional keys",
+              second: <code>x-nipmod-api-key</code>,
+              third: "The API also accepts bearer keys for manually issued higher-limit access."
+            },
+            {
+              first: "Key storage",
+              second: "Raw keys are not stored.",
+              third: "Issued keys are verified against server-side hashes and exposed only as a key id in usage logs."
+            },
+            {
+              first: "Self-service keys",
+              second: "Not part of the public beta yet.",
+              third: "The current launch path is free public access first, then individual keys when higher limits are needed."
+            }
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection title="Usage and statistics">
+        <DocsTable
+          rows={[
+            {
+              first: "Without a key",
+              second: "Nipmod counts requests by a privacy-safe client hash.",
+              third: "Useful for public beta traffic and source usage."
+            },
+            {
+              first: "With a key",
+              second: "Usage is grouped by API key id and access tier.",
+              third: "Useful for counting builders, projects and agent hosts."
+            },
+            {
+              first: "Stored fields",
+              second: "Route, status, source, result count, duration, hashed query and hashed package.",
+              third: "Enough for product metrics without exposing user prompts."
+            },
+            {
+              first: "Not stored",
+              second: "No raw API keys, raw IPs, raw queries, package names or user-agent fingerprints.",
+              third: "The analytics layer is intentionally privacy limited."
             }
           ]}
         />
