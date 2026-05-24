@@ -8,18 +8,11 @@ export default function Home() {
   return (
     <DocsShell
       description="Nipmod gives agents one place to search package sources, read trust context and prepare install plans before changing a workspace."
-      eyebrow="Overview"
+      eyebrow="Home"
       stats={[
         { label: "Sources", value: "6 live" },
         { label: "API beta", value: "public" },
         { label: "Hosted writes", value: "0" }
-      ]}
-      toc={[
-        { href: "#public-beta", label: "Public beta" },
-        { href: "#agent-flow", label: "Agent flow" },
-        { href: "#agent-instruction", label: "Agent instruction" },
-        { href: "#core-endpoints", label: "Core endpoints" },
-        { href: "#boundaries", label: "Boundaries" }
       ]}
       title="The package layer for AI agents."
     >

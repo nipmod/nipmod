@@ -85,8 +85,8 @@ body {
 }
 
 .brand-icon-button {
-  height: 28px;
-  width: 18px;
+  height: 34px;
+  width: 34px;
 }
 
 .docs-shell {
@@ -99,11 +99,6 @@ body {
   min-height: calc(100svh - var(--topbar-height));
   padding: var(--docs-shell-top-gap) var(--docs-page-pad) 88px;
   width: 100%;
-}
-
-.docs-shell-with-toc {
-  grid-template-columns: 220px minmax(0, 800px);
-  max-width: var(--docs-frame-width);
 }
 
 .docs-sidebar {
@@ -284,11 +279,11 @@ body {
 .docs-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
 
 .docs-card {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.018);
   border: 1px solid var(--docs-line);
   border-radius: 8px;
   display: grid;
@@ -323,17 +318,19 @@ body {
   margin: 0;
 }
 
-.docs-code {
-  background: #09090a;
-  border: 1px solid var(--docs-line);
-  border-radius: 8px;
-  color: var(--docs-code);
-  margin: 0;
-  overflow-x: auto;
-  padding: 15px;
+.docs-card a {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 14px;
+  font-weight: 650;
+  padding-bottom: 1px;
 }
 
-.docs-code code,
+.docs-card a:hover {
+  border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
 .docs-table code {
   color: var(--docs-code);
   font-family: var(--docs-mono);
@@ -351,7 +348,11 @@ body {
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(120px, 0.28fr) minmax(0, 1fr) minmax(140px, 0.45fr);
-  padding: 15px;
+  padding: 16px;
+}
+
+.docs-table-row-two {
+  grid-template-columns: minmax(120px, 0.28fr) minmax(0, 1fr);
 }
 
 .docs-table-row + .docs-table-row {
@@ -371,6 +372,10 @@ body {
   font-size: 15px;
   line-height: 1.62;
   min-width: 0;
+}
+
+.docs-table-row div:empty {
+  display: none;
 }
 
 .docs-next {
@@ -442,8 +447,7 @@ body {
 }
 
 @media (max-width: 1100px) {
-  .docs-shell,
-  .docs-shell-with-toc {
+  .docs-shell {
     gap: 32px;
     grid-template-columns: 190px minmax(0, 1fr);
   }
@@ -454,8 +458,7 @@ body {
 }
 
 @media (max-width: 760px) {
-  .docs-shell,
-  .docs-shell-with-toc {
+  .docs-shell {
     grid-template-columns: 1fr;
     gap: 24px;
     padding: 28px 20px 70px;
@@ -4201,10 +4204,10 @@ body {
 .brand-icon-button svg {
   display: block;
   filter: brightness(0) invert(1);
-  height: 17px;
+  height: 20px;
   object-fit: contain;
   opacity: 1;
-  width: 17px;
+  width: 20px;
 }
 
 .brand-icon-button .brand-base-icon {
@@ -4212,8 +4215,8 @@ body {
 }
 
 .brand-icon-button .brand-telegram-icon {
-  height: 22px;
-  width: 22px;
+  height: 20px;
+  width: 20px;
 }
 
 .brand-icon-button:hover {
@@ -4783,45 +4786,66 @@ body {
 
 .command-block {
   background: #0a0a0c;
-  border: 1px solid var(--editorial-border);
-  border-radius: 0;
+  border: 1px solid var(--editorial-border-soft);
+  border-radius: 8px;
   color: #d4d4d6;
   display: grid;
   gap: 10px;
   grid-template-columns: minmax(0, 1fr) auto;
-  padding: 10px 12px 10px 16px;
+  padding: 12px 12px 12px 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .install-command {
   margin: 0;
+  min-width: 0;
   overflow: auto;
+  padding: 2px 0;
 }
 
 .install-command code {
   color: #d4d4d6;
   font-family: var(--editorial-mono);
   font-size: 12.5px;
+  line-height: 1.55;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .copy-command {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0;
-  color: rgba(212, 212, 214, 0.7);
+  align-self: start;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.105);
+  border-radius: 6px;
+  color: rgba(237, 237, 239, 0.76);
   cursor: pointer;
   font-family: var(--editorial-mono);
   font-size: 10.5px;
-  padding: 5px 9px;
+  min-height: 30px;
+  padding: 5px 10px;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.copy-command:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #f2f2f3;
 }
 
 .command-block[data-status="copied"] .copy-command {
+  background: rgba(115, 176, 123, 0.14);
+  border-color: rgba(115, 176, 123, 0.28);
   color: var(--editorial-ok);
 }
 
 .copy-status {
   grid-column: 1 / -1;
   min-height: 0;
+}
+
+.docs-main .command-block-compact .install-command code {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .archive-list .archive-package-row,
@@ -5696,7 +5720,4 @@ body {
     width: 42px;
   }
 
-  .brand-socials {
-    display: none;
-  }
 }

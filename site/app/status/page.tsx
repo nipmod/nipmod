@@ -41,7 +41,7 @@ export default function StatusPage() {
             <p>The public archive can stay empty until a package passes the gates. Search still works through live sources.</p>
           </DocsCard>
           <DocsCard label="MCP" title="Read only hosted boundary">
-            <p>Hosted MCP exposes package intelligence only. Local writes stay outside the hosted boundary.</p>
+            <p>Remote MCP exposes package intelligence only. Local writes stay outside the hosted boundary.</p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

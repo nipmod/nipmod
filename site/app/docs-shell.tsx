@@ -20,7 +20,7 @@ export type DocsStat = {
 export const docsNavGroups: DocsNavGroup[] = [
   {
     items: [
-      { href: "/", label: "Overview" },
+      { href: "/", label: "Home" },
       { href: "/quickstart", label: "Quickstart" },
       { href: "/api-access", label: "API reference" }
     ],
@@ -60,7 +60,6 @@ export function DocsShell({
   eyebrow?: string;
   nav?: DocsNavGroup[];
   stats?: DocsStat[];
-  toc?: DocsNavItem[];
   title: string;
 }) {
   return (
@@ -165,7 +164,7 @@ export function DocsTable({
         const third = Array.isArray(row) ? row[2] : row.third;
 
         return (
-          <div className="docs-table-row" key={first} role="row">
+          <div className={third ? "docs-table-row" : "docs-table-row docs-table-row-two"} key={first} role="row">
             <strong role="cell">{first}</strong>
             <div role="cell">{second}</div>
             {third ? <div role="cell">{third}</div> : null}

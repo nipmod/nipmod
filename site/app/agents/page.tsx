@@ -38,7 +38,7 @@ export default function AgentsPage() {
             <DocsCode>{"GET https://nipmod.com/api/search?q=<query>\nGET https://nipmod.com/api/inspect?source=npm&name=undici\nGET https://nipmod.com/api/install-plan?source=npm&name=undici"}</DocsCode>
           </DocsCard>
           <DocsCard label="Hosted" title="Read only MCP">
-            <p>Use the same package surface through MCP JSON RPC. Hosted MCP never reads or writes the caller workspace.</p>
+            <p>Use the same package surface through MCP JSON-RPC. Remote MCP calls never read or write the caller workspace.</p>
             <DocsCode>{"POST https://nipmod.com/api/mcp"}</DocsCode>
           </DocsCard>
           <DocsCard label="Optional" title="Local CLI">
