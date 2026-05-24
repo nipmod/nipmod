@@ -4,7 +4,7 @@ import { siteDescription, siteName } from "../metadata";
 
 export const metadata: Metadata = {
   alternates: {
-    canonical: "https://nipmod.com/package"
+    canonical: "https://nipmod.com/packages"
   },
   description: siteDescription,
   robots: {
@@ -15,5 +15,5 @@ export const metadata: Metadata = {
 };
 
 export default function CandidatesPage() {
-  redirect("/package");
+  redirect("/packages");
 }
