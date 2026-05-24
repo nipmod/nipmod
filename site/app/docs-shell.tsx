@@ -1,9 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { DocsSidebar } from "./docs-sidebar";
 
 export type DocsNavItem = {
   href: string;
   label: string;
+};
+
+export type DocsNavGroup = {
+  items: DocsNavItem[];
+  title: string;
 };
 
 export type DocsStat = {
@@ -11,46 +17,56 @@ export type DocsStat = {
   value: string;
 };
 
-export const docsNavItems: DocsNavItem[] = [
-  { href: "/", label: "Overview" },
-  { href: "/api-access", label: "API" },
-  { href: "/sources", label: "Sources" },
-  { href: "/packages", label: "Archive" },
-  { href: "/trust", label: "Trust" },
-  { href: "/security", label: "Security" },
-  { href: "/examples", label: "Examples" },
-  { href: "/status", label: "Status" }
+export const docsNavGroups: DocsNavGroup[] = [
+  {
+    items: [
+      { href: "/", label: "Overview" },
+      { href: "/quickstart", label: "Quickstart" },
+      { href: "/api-access", label: "API reference" }
+    ],
+    title: "Start"
+  },
+  {
+    items: [
+      { href: "/sources", label: "Sources" },
+      { href: "/trust", label: "Trust and safety" },
+      { href: "/mcp", label: "MCP" },
+      { href: "/examples", label: "Examples" }
+    ],
+    title: "Build"
+  },
+  {
+    items: [
+      { href: "/packages", label: "Archive" },
+      { href: "/security", label: "Security" },
+      { href: "/status", label: "Status" }
+    ],
+    title: "Reference"
+  }
 ];
+
+export const docsNavItems: DocsNavItem[] = docsNavGroups.flatMap((group) => group.items);
 
 export function DocsShell({
   children,
   description,
   eyebrow,
-  nav = docsNavItems,
+  nav = docsNavGroups,
   stats = [],
+  toc = [],
   title
 }: {
   children: ReactNode;
   description: string;
   eyebrow?: string;
-  nav?: DocsNavItem[];
+  nav?: DocsNavGroup[];
   stats?: DocsStat[];
+  toc?: DocsNavItem[];
   title: string;
 }) {
   return (
-    <main className="docs-shell" id="main">
-      <aside className="docs-sidebar" aria-label="Documentation">
-        <Link className="docs-sidebar-title" href="/">
-          Nipmod docs
-        </Link>
-        <nav className="docs-sidebar-nav">
-          {nav.map((item) => (
-            <Link href={item.href} key={item.href} prefetch>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
+    <main className={toc.length > 0 ? "docs-shell docs-shell-with-toc" : "docs-shell"} id="main">
+      <DocsSidebar nav={nav} />
 
       <article className="docs-main">
         <header className="docs-hero">
@@ -70,6 +86,19 @@ export function DocsShell({
         </header>
         <div className="docs-content">{children}</div>
       </article>
+
+      {toc.length > 0 ? (
+        <aside className="docs-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            {toc.map((item) => (
+              <Link href={item.href} key={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </aside>
+      ) : null}
     </main>
   );
 }
@@ -77,14 +106,16 @@ export function DocsShell({
 export function DocsSection({
   children,
   eyebrow,
+  id,
   title
 }: {
   children: ReactNode;
   eyebrow?: string;
+  id?: string;
   title: string;
 }) {
   return (
-    <section className="docs-section">
+    <section className="docs-section" id={id ?? toAnchorId(title)}>
       <div className="docs-section-head">
         {eyebrow ? <p className="docs-eyebrow">{eyebrow}</p> : null}
         <h2>{title}</h2>
@@ -92,6 +123,14 @@ export function DocsSection({
       {children}
     </section>
   );
+}
+
+function toAnchorId(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export function DocsGrid({ children }: { children: ReactNode }) {

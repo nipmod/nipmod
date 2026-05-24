@@ -12,6 +12,11 @@ export default function QuickstartPage() {
     <DocsShell
       description="The shortest path is the hosted API. Local install is optional and only needed after a user approves workspace writes."
       eyebrow="Quickstart"
+      toc={[
+        { href: "#tell-your-agent-this", label: "Agent prompt" },
+        { href: "#three-calls", label: "Three calls" },
+        { href: "#local-setup", label: "Local setup" }
+      ]}
       title="Start with the API."
     >
       <DocsSection eyebrow="Agent" title="Tell your agent this">

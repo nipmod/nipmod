@@ -94,6 +94,11 @@ body {
   width: 100%;
 }
 
+.docs-shell-with-toc {
+  grid-template-columns: 224px minmax(0, 820px) 172px;
+  max-width: 1360px;
+}
+
 .docs-sidebar {
   align-self: start;
   display: grid;
@@ -108,11 +113,71 @@ body {
   font-weight: 700;
 }
 
+.docs-search {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--docs-line);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 36px;
+  padding: 0 8px 0 10px;
+}
+
+.docs-search:focus-within {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.052);
+}
+
+.docs-search input {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--docs-text);
+  font: inherit;
+  font-size: 13px;
+  min-width: 0;
+  outline: 0;
+}
+
+.docs-search input::placeholder {
+  color: var(--docs-faint);
+}
+
+.docs-search kbd {
+  border: 1px solid var(--docs-line-soft);
+  border-radius: 5px;
+  color: var(--docs-faint);
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 5px;
+}
+
 .docs-sidebar-nav {
   border-left: 1px solid var(--docs-line);
   display: grid;
-  gap: 2px;
+  gap: 18px;
   padding-left: 14px;
+}
+
+.docs-sidebar-group {
+  display: grid;
+  gap: 7px;
+}
+
+.docs-sidebar-group > p {
+  color: var(--docs-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.docs-sidebar-group > div {
+  display: grid;
+  gap: 2px;
 }
 
 .docs-sidebar-nav a {
@@ -123,9 +188,23 @@ body {
   padding: 7px 9px;
 }
 
+.docs-sidebar-nav a[aria-current="page"],
+.docs-sidebar-nav a.docs-sidebar-active {
+  background: rgba(255, 255, 255, 0.075);
+  color: var(--docs-text);
+}
+
 .docs-sidebar-nav a:hover {
   background: rgba(255, 255, 255, 0.055);
   color: var(--docs-text);
+}
+
+.docs-sidebar-empty {
+  color: var(--docs-faint);
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 7px 9px;
 }
 
 .docs-main {
@@ -151,7 +230,7 @@ body {
 .docs-hero h1 {
   color: var(--docs-text);
   font-family: Geist, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(42px, 6vw, 68px);
+  font-size: clamp(38px, 5.2vw, 56px);
   font-weight: 650;
   letter-spacing: 0;
   line-height: 1.02;
@@ -207,9 +286,47 @@ body {
   padding-top: 40px;
 }
 
+.docs-toc {
+  align-self: start;
+  display: grid;
+  gap: 10px;
+  position: sticky;
+  top: calc(var(--topbar-height) + 30px);
+}
+
+.docs-toc p {
+  color: var(--docs-faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.docs-toc nav {
+  border-left: 1px solid var(--docs-line);
+  display: grid;
+  gap: 2px;
+  padding-left: 12px;
+}
+
+.docs-toc a {
+  border-radius: 6px;
+  color: var(--docs-muted);
+  font-size: 12.5px;
+  line-height: 1.25;
+  padding: 6px 8px;
+}
+
+.docs-toc a:hover {
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--docs-text);
+}
+
 .docs-section {
   display: grid;
   gap: 16px;
+  scroll-margin-top: calc(var(--topbar-height) + 24px);
 }
 
 .docs-section-head {
@@ -381,7 +498,8 @@ body {
 }
 
 @media (max-width: 920px) {
-  .docs-shell {
+  .docs-shell,
+  .docs-shell-with-toc {
     grid-template-columns: 1fr;
     gap: 24px;
     padding: 28px 20px 70px;
@@ -389,8 +507,13 @@ body {
 
   .docs-sidebar {
     border-bottom: 1px solid var(--docs-line);
+    gap: 12px;
     padding-bottom: 14px;
     position: static;
+  }
+
+  .docs-search {
+    max-width: 320px;
   }
 
   .docs-sidebar-nav {
@@ -409,6 +532,22 @@ body {
   .docs-sidebar-nav a {
     border: 1px solid var(--docs-line);
     flex: 0 0 auto;
+  }
+
+  .docs-sidebar-group {
+    display: contents;
+  }
+
+  .docs-sidebar-group > p {
+    display: none;
+  }
+
+  .docs-sidebar-group > div {
+    display: contents;
+  }
+
+  .docs-toc {
+    display: none;
   }
 
   .docs-table-row,
@@ -436,7 +575,7 @@ body {
   }
 
   .docs-hero h1 {
-    font-size: clamp(34px, 10vw, 46px);
+    font-size: clamp(32px, 9vw, 42px);
   }
 }
 
@@ -5575,5 +5714,31 @@ body {
 
   .one-page-modal-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  :root {
+    --topbar-height: 66px;
+  }
+
+  .topbar {
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
+    padding: 0 20px;
+  }
+
+  .brand {
+    min-height: var(--topbar-height);
+  }
+
+  .brand-mark,
+  .brand-mark img {
+    height: 42px;
+    width: 42px;
+  }
+
+  .brand-socials {
+    display: none;
   }
 }

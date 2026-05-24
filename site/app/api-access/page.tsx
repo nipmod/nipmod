@@ -40,6 +40,13 @@ export default function ApiAccessPage() {
         { label: "Beta", value: "free, rate limited" },
         { label: "Hosted writes", value: "0" }
       ]}
+      toc={[
+        { href: "#beta-contract", label: "Beta contract" },
+        { href: "#use-from-any-agent", label: "Use from any agent" },
+        { href: "#three-calls", label: "Three calls" },
+        { href: "#endpoints", label: "Endpoints" },
+        { href: "#safety-boundary", label: "Safety boundary" }
+      ]}
       title="One package API for agents."
     >
       <DocsSection title="Beta contract">

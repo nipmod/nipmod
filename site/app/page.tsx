@@ -14,6 +14,13 @@ export default function Home() {
         { label: "API beta", value: "public" },
         { label: "Hosted writes", value: "0" }
       ]}
+      toc={[
+        { href: "#public-beta", label: "Public beta" },
+        { href: "#agent-flow", label: "Agent flow" },
+        { href: "#agent-instruction", label: "Agent instruction" },
+        { href: "#core-endpoints", label: "Core endpoints" },
+        { href: "#boundaries", label: "Boundaries" }
+      ]}
       title="The package layer for AI agents."
     >
       <DocsSection title="Public beta">

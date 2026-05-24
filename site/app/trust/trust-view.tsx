@@ -37,6 +37,12 @@ export function TrustView() {
         { label: "Metadata", value: "untrusted input" },
         { label: "Install", value: "approval first" }
       ]}
+      toc={[
+        { href: "#trust-chain", label: "Trust chain" },
+        { href: "#agent-rules", label: "Agent rules" },
+        { href: "#what-the-score-means", label: "Score meaning" },
+        { href: "#score-dimensions", label: "Score dimensions" }
+      ]}
       title="Trust signals for package decisions."
     >
       <DocsSection title="Trust chain">

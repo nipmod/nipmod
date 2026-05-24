@@ -82,6 +82,41 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        destination: "/api-access",
+        permanent: false,
+        source: "/launch"
+      },
+      {
+        destination: "/api-access",
+        permanent: false,
+        source: "/launch-kit"
+      },
+      {
+        destination: "/examples",
+        permanent: false,
+        source: "/demo"
+      },
+      {
+        destination: "/sources",
+        permanent: false,
+        source: "/platforms"
+      },
+      {
+        destination: "/mcp",
+        permanent: false,
+        source: "/cursor"
+      },
+      {
+        destination: "/status",
+        permanent: false,
+        source: "/proof"
+      },
+      {
+        destination: "/packages",
+        permanent: false,
+        source: "/package"
+      },
+      {
         destination: "/agents/mcp-hosts",
         permanent: true,
         source: "/agents/codex-claude"

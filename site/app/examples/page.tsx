@@ -13,6 +13,13 @@ export default function ExamplesPage() {
     <DocsShell
       description="Small calls that show the public agent flow: search sources, inspect one package and request a safe install plan."
       eyebrow="Examples"
+      toc={[
+        { href: "#search-inspect-plan", label: "Search, inspect, plan" },
+        { href: "#use-from-an-agent", label: "Agent prompt" },
+        { href: "#what-the-agent-should-return", label: "Agent output" },
+        { href: "#canary-examples", label: "Canary examples" },
+        { href: "#copyable-workflow-examples", label: "Workflow files" }
+      ]}
       title="API examples."
     >
       <DocsSection eyebrow="Flow" title="Search, inspect, plan">
