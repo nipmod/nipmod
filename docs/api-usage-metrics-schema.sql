@@ -94,21 +94,33 @@ route_rows as (
   limit (select result_limit from bounds)
 ),
 source_events as (
-  select unnest(
+  select
+    lower(
+      split_part(
+        split_part(
+          replace(replace(trim(raw_source), '\u0026', '&'), 'u0026', '&'),
+          '&',
+          1
+        ),
+        '?',
+        1
+      )
+    ) as source
+  from events
+  cross join lateral unnest(
     case
       when cardinality(sources) > 0 then sources
       when source is not null then array[source]
       else '{}'::text[]
     end
-  ) as source
-  from events
+  ) as raw_sources(raw_source)
 ),
 source_rows as (
   select
     source,
     count(*)::integer as request_count
   from source_events
-  where source is not null and source <> ''
+  where source in ('npm', 'pypi', 'github', 'huggingface-model', 'huggingface-dataset', 'mcp')
   group by source
   order by request_count desc, source asc
   limit (select result_limit from bounds)

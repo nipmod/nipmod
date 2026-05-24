@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { ApiAccess } from "./api-auth";
 import type { ApiHttpContext } from "./api-http";
+import { EXTERNAL_PACKAGE_SOURCES } from "./external-packages";
 
 type UsageEnv = Record<string, string | undefined>;
 
@@ -42,6 +43,7 @@ const USAGE_HASH_SALT_ENV = "NIPMOD_USAGE_HASH_SALT";
 const USAGE_WRITE_TIMEOUT_MS = 700;
 const USAGE_METRICS_TIMEOUT_MS = 1_200;
 const USAGE_METRICS_EVENT_LIMIT = 5_000;
+const USAGE_SOURCE_SET = new Set<string>(EXTERNAL_PACKAGE_SOURCES);
 
 export async function recordApiUsage(input: ApiUsageInput, env: UsageEnv = process.env, fetchImpl: typeof fetch = fetch): Promise<void> {
   const baseUrl = env[SUPABASE_URL_ENV];
@@ -185,7 +187,7 @@ export async function readApiUsageMetrics(
         status: 503
       };
     }
-    return { metrics, ok: true };
+    return { metrics: normalizeUsageMetrics(metrics), ok: true };
   } catch (error) {
     return {
       code: error instanceof DOMException && error.name === "AbortError" ? "usage_metrics_timeout" : "usage_metrics_network_error",
@@ -430,11 +432,39 @@ function sortedCounts<Key extends string>(map: Map<Key, number>, keyName: string
     .slice(0, limit);
 }
 
+function normalizeUsageMetrics(metrics: unknown): unknown {
+  const record = readRecord(metrics);
+  if (!record) {
+    return metrics;
+  }
+  return {
+    ...record,
+    sources: normalizeUsageMetricSourceRows(record.sources)
+  };
+}
+
+function normalizeUsageMetricSourceRows(value: unknown): Array<Record<string, number | string>> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const sources = new Map<string, number>();
+  for (const item of value) {
+    const row = readRecord(item);
+    const source = normalizeMetricSource(row?.source);
+    const requestCount = typeof row?.requestCount === "number" && Number.isFinite(row.requestCount) ? Math.max(0, row.requestCount) : 0;
+    if (source && requestCount > 0) {
+      sources.set(source, (sources.get(source) ?? 0) + requestCount);
+    }
+  }
+  return sortedCounts(sources, "source", EXTERNAL_PACKAGE_SOURCES.length);
+}
+
 function metricSources(row: UsageMetricsEventRow): string[] {
   if (Array.isArray(row.sources) && row.sources.length > 0) {
-    return row.sources.filter((source) => typeof source === "string" && source.length > 0);
+    return [...new Set(row.sources.flatMap((source) => splitMetricSourceList(source).map(normalizeMetricSource)).filter(isMetricSource))];
   }
-  return row.source ? [row.source] : [];
+  const source = normalizeMetricSource(row.source);
+  return source ? [source] : [];
 }
 
 function isUsageMetricsEventRow(value: unknown): value is UsageMetricsEventRow {
@@ -472,7 +502,7 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
     packageHash: name ? hashValue(name) : null,
     queryHash: query ? hashValue(query) : null,
     resultCount: null,
-    source: url.searchParams.get("source"),
+    source: normalizeMetricSource(url.searchParams.get("source")),
     sources: readSources(url.searchParams.get("sources")),
     trustDecision: null,
     trustRisk: null
@@ -491,12 +521,14 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
     return {
       ...base,
       resultCount: record.total,
-      sources: Array.isArray(record.sources) ? record.sources.filter((source): source is string => typeof source === "string") : base.sources,
+      sources: Array.isArray(record.sources)
+        ? [...new Set(record.sources.flatMap((source) => splitMetricSourceList(source).map(normalizeMetricSource)).filter(isMetricSource))]
+        : base.sources,
       trustDecision: readTrustDecision(trust?.decision),
       trustRisk: readTrustRisk(trust?.risk)
     };
   }
-  const source = readString(responseRecord?.source) ?? base.source;
+  const source = normalizeMetricSource(readString(responseRecord?.source)) ?? base.source;
   const packageName = readString(responseRecord?.name) ?? readString(responseRecord?.displayName) ?? name;
   const trust = readRecord(responseRecord?.trust);
   const safety = readRecord(record.safety);
@@ -515,11 +547,32 @@ function readSources(value: string | null): string[] {
   if (!value) {
     return [];
   }
+  return [...new Set(splitMetricSourceList(value).map(normalizeMetricSource).filter(isMetricSource))].slice(0, 12);
+}
+
+function splitMetricSourceList(value: unknown): string[] {
+  if (typeof value !== "string") {
+    return [];
+  }
   return value
-    .split(",")
+    .replace(/\\u0026/gi, "&")
+    .replace(/u0026/gi, "&")
+    .split(/[,&?]/)
     .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 12);
+    .filter(Boolean);
+}
+
+function normalizeMetricSource(value: unknown): string | null {
+  const [candidate] = splitMetricSourceList(value);
+  if (!candidate) {
+    return null;
+  }
+  const normalized = candidate.toLowerCase();
+  return USAGE_SOURCE_SET.has(normalized) ? normalized : null;
+}
+
+function isMetricSource(value: string | null): value is string {
+  return typeof value === "string" && value.length > 0;
 }
 
 function hashClient(request: Request, env: UsageEnv): string {

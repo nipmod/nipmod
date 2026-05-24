@@ -163,7 +163,7 @@ export default function ApiAccessPage() {
             {
               first: "Usage Stats",
               second: <code>GET /api/usage/stats?hours=24</code>,
-              third: "Admin-only aggregate route, source, tier and package-hash metrics."
+              third: "Admin-only aggregate route, source, traffic-origin, trust, install-plan and archive metrics."
             },
             {
               first: "Beta Key",
@@ -205,7 +205,7 @@ export default function ApiAccessPage() {
             {
               first: "Admin keys",
               second: <code>GET /api/usage/stats</code>,
-              third: "Operational metrics only: routes, sources, tiers and package hashes."
+              third: "Operational metrics only: routes, sources, traffic origins, trust decisions, install plans and archive writes."
             },
             {
               first: "Key storage",
@@ -248,13 +248,13 @@ export default function ApiAccessPage() {
             },
             {
               first: "Stored fields",
-              second: "Route, status, source, result count, duration, hashed query and hashed package.",
-              third: "Enough for product metrics without exposing user prompts."
+              second: "Route, status, source, traffic origin, result count, duration, trust decision, install-plan boundary and archive outcome.",
+              third: "Queries and package names are hashed before storage."
             },
             {
               first: "Metrics endpoint",
               second: "Admin key required.",
-              third: "Returns aggregate route, source, access tier and package-hash counts."
+              third: "Returns aggregate counts for routes, sources, access tiers, traffic origins, install plans, archive writes and trust outcomes."
             },
             {
               first: "Not stored",

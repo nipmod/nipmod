@@ -1,6 +1,8 @@
 # Package ecosystem
 
-The public catalog is useful because every package is verified and every launch manifest type is represented. The goal is proof and coverage, not raw volume.
+Status: historical first-party launch catalog.
+
+This document describes the original first-party proof catalog. It is not the current public archive state. The public API now resolves live external sources first, and durable archive records are stored only after explicit confirmation.
 
 ## Launch Catalog Matrix
 
