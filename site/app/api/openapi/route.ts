@@ -1631,7 +1631,7 @@ function openApiDocument() {
             "429": errorResponse(),
             "503": errorResponse()
           },
-          summary: "Return admin-only traffic-origin, route, source, package-hash and tier usage metrics."
+          summary: "Return admin-only traffic-origin, route, source, trust, install-plan, archive and tier usage metrics."
         }
       }
     },

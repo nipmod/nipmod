@@ -31,7 +31,7 @@ Server-side key storage uses scrypt-derived keyed digests with a deployment secr
 
 Self-service beta keys are generated server-side and returned once. The registry stores only key id, keyed hash, tier, non-private label, rate-limit multiplier and expiry. Agents should not send prompts, user data, workspace paths or other private content as key labels.
 
-Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, result count, error code and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
+Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, traffic origin, result count, error code, trust decision, install-plan boundary, archive outcome and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
 
 Rate-limit responses use the same public error contract as the rest of the API and include `retry-after`, `x-ratelimit-limit`, `x-ratelimit-remaining`, `x-ratelimit-reset`, `x-ratelimit-policy` and `x-ratelimit-store`.
 
@@ -41,7 +41,7 @@ Production deployments use a Supabase-backed shared rate-limit bucket through `c
 
 When the shared store is configured but unavailable, source health may include a coarse `rateLimit.fallbackReason` such as `distributed_rpc_http_404`, `distributed_rpc_timeout` or `distributed_rpc_invalid_shape`. These values are operational diagnostics only and never include upstream response bodies, URLs, keys or client identifiers.
 
-`GET /api/usage/stats` requires an admin API key. It returns aggregate route, source, access tier and package-hash counts. It does not return raw queries, raw package names, raw API keys, raw IPs, raw user agents or source response bodies.
+`GET /api/usage/stats` requires an admin API key. It returns aggregate route, source, access tier, traffic-origin, trust, install-plan, archive and package-hash counts. It does not return raw queries, raw package names, raw API keys, raw IPs, raw user agents or source response bodies.
 
 Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
 

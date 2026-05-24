@@ -115,6 +115,49 @@ describe("API usage logging", () => {
     expect(JSON.stringify(rows[0])).not.toContain("unsafe-package");
   });
 
+  test("normalizes malformed source query fragments before storing usage rows", async () => {
+    const rows: unknown[] = [];
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      rows.push(JSON.parse(String(init?.body))[0]);
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/inspect?source=npmu0026name=undici", {
+      headers: {
+        "user-agent": "usage-source-test",
+        "x-forwarded-for": "203.0.113.22"
+      }
+    });
+
+    await recordApiUsage(
+      {
+        access: publicApiAccess(),
+        context: createApiHttpContext(request),
+        request,
+        responseBody: {
+          code: "invalid_source",
+          error: "invalid source",
+          type: "dev.nipmod.api-error.v1"
+        },
+        route: "/api/inspect",
+        status: 400
+      },
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+        NIPMOD_USAGE_HASH_SALT: "test-salt"
+      },
+      fetchMock
+    );
+
+    expect(rows[0]).toMatchObject({
+      error_code: "invalid_source",
+      route: "/api/inspect",
+      source: "npm",
+      sources: []
+    });
+    expect(JSON.stringify(rows[0])).not.toContain("u0026name");
+  });
+
   test("marks Nipmod canary traffic without storing raw user agents", async () => {
     const rows: unknown[] = [];
     const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
@@ -181,7 +224,12 @@ describe("API usage logging", () => {
         privacy: "aggregated metrics only",
         routes: [{ avgDurationMs: 10, errorCount: 0, requestCount: 3, route: "/api/search" }],
         since: "2026-05-23T00:00:00.000Z",
-        sources: [{ requestCount: 3, source: "npm" }],
+        sources: [
+          { requestCount: 3, source: "npm" },
+          { requestCount: 2, source: "npmu0026name=undici" },
+          { requestCount: 1, source: "pypi?name=requests" },
+          { requestCount: 7, source: "invalid-source" }
+        ],
         totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
         trafficOrigins: [{ origin: "authenticated_beta", requestCount: 3 }],
         trafficSummary: {
@@ -209,9 +257,17 @@ describe("API usage logging", () => {
     expect(result.ok).toBe(true);
     expect(calls[0]?.url).toBe("https://db.example.test/rest/v1/rpc/read_api_usage_metrics");
     expect(calls[0]?.body).toContain("2026-05-23T00:00:00.000Z");
+    expect(result.ok && result.metrics).toMatchObject({
+      sources: [
+        { requestCount: 5, source: "npm" },
+        { requestCount: 1, source: "pypi" }
+      ]
+    });
     expect(JSON.stringify(result)).not.toContain("service-role-key");
     expect(JSON.stringify(result)).not.toContain("secret package");
     expect(JSON.stringify(result)).not.toContain("raw-user-agent");
+    expect(JSON.stringify(result)).not.toContain("invalid-source");
+    expect(JSON.stringify(result)).not.toContain("u0026name");
   });
 
   test("falls back to aggregating usage events when the metrics RPC is not deployed", async () => {
@@ -247,7 +303,7 @@ describe("API usage logging", () => {
           error_code: "invalid_source",
           package_hash: null,
           route: "/api/inspect",
-          source: "npm",
+          source: "npmu0026name=undici",
           sources: [],
           status: 400,
           traffic_origin: null

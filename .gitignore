@@ -37,6 +37,7 @@ task_plan.md
 !site/public/claude-logo.png
 !site/public/codex-logo.png
 !site/public/hermes-logo.png
+!site/public/architecture.png
 !site/public/agents/*.png
 
 # Release tarballs are shipped through GitHub Releases. Keep only small

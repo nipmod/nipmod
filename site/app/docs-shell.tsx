@@ -180,7 +180,7 @@ export function ArchitectureDiagram() {
       aria-label="Nipmod architecture flow: agent asks Nipmod for a package, Nipmod searches existing sources, normalizes results, checks trust, creates a safe install plan, waits for user approval before workspace writes, and saves confirmed useful package intelligence for future reuse."
     >
       <img
-        src="/Benutzeranhang.png"
+        src="/architecture.png"
         alt="Nipmod architecture: agent, Nipmod API, sources, user approval, and Nipmod Archive."
       />
     </figure>

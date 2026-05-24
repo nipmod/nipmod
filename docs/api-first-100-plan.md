@@ -48,10 +48,10 @@ Known limits:
 - The current API is mostly request-time federation plus a small durable archive.
 - The public verified registry is intentionally empty after reset.
 - Trust scores are useful review signals, but external records are not yet cryptographic provenance.
-- Rate limits are not yet distributed across all server instances.
-- Source health is mostly capability status and should become real dependency health.
+- Production rate limits use the shared Supabase bucket when configured, with a memory fallback for degraded environments.
+- Source health has capability status, bounded live probes and source-depth canaries. It is not a full upstream SLA.
 - OpenAPI describes the main runtime fields and implemented POST routes, but still needs full response-schema contract validation.
-- Launch gates are not yet unified into one non-destructive release command.
+- `pnpm launch:verify` is the non-destructive launch gate. Release and deployment orchestration still needs operator discipline around env and production aliases.
 
 Recent hardening:
 
