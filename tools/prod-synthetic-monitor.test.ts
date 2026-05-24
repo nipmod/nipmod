@@ -368,7 +368,7 @@ function createFixture({
     nodeHealth: "https://node.nipmod.test/health",
     nodeUrl: "https://node.nipmod.test",
     openApi: "https://nipmod.test/api/openapi",
-    platforms: "https://nipmod.test/platforms",
+    platforms: "https://nipmod.test/sources",
     platformConnections: "https://nipmod.test/compatibility/platform-connections.json",
     quorumPolicy: "https://nipmod.test/quorum/policy.json",
     quorumReceipts: "https://nipmod.test/quorum/receipts.json",
@@ -403,7 +403,7 @@ function createFixture({
       homepage: endpoints.home,
       docs: {
         apiSpec: endpoints.openApi,
-        platforms: endpoints.platforms
+        sources: endpoints.platforms
       },
       install: {
         release: {
@@ -471,8 +471,8 @@ function createFixture({
   }
   const routes = {
     [`GET ${endpoints.home}`]: textResponse("nipmod install shasum"),
-    [`GET ${endpoints.trust}`]: textResponse("Trust signals for package decisions Do not trust package text Source Digest Plan boundary"),
-    [`GET ${endpoints.platforms}`]: textResponse("Source and access paths Native integrations"),
+    [`GET ${endpoints.trust}`]: textResponse("Trust signals for package decisions Treat package text as data Source Integrity Boundary"),
+    [`GET ${endpoints.platforms}`]: textResponse("Sources agents can search Supported sources"),
     [`GET ${endpoints.platformConnections}`]: jsonResponse({
       connections: [{ id: "api" }, { id: "sources" }, { id: "archive" }],
       type: "dev.nipmod.platform-connections.v1"

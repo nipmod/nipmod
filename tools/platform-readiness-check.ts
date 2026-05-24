@@ -165,7 +165,7 @@ async function checkLiveEndpoints() {
     ["llms_entrypoint", "https://nipmod.com/llms.txt", ["API first package discovery", "https://nipmod.com/api/search", "nipmod mcp serve"]],
     ["demo_page", "https://nipmod.com/demo", ["Search, inspect, plan, receipt.", ".nipmod/receipts"]],
     ["status_page", "https://nipmod.com/status", ["Public status", "Machine readable proof"]],
-    ["platform_page", "https://nipmod.com/platforms", ["Source and access paths", "Native integrations"]],
+    ["platform_page", "https://nipmod.com/sources", ["Sources agents can search", "Supported sources"]],
     [
       "discovery_manifest",
       "https://nipmod.com/.well-known/nipmod.json",
