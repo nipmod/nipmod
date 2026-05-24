@@ -495,6 +495,8 @@ function openApiDocument() {
             since: { format: "date-time", type: "string" },
             sources: { items: { $ref: "#/components/schemas/ApiUsageSourceMetric" }, type: "array" },
             totals: { $ref: "#/components/schemas/ApiUsageTotals" },
+            trafficOrigins: { items: { $ref: "#/components/schemas/ApiUsageTrafficOriginMetric" }, type: "array" },
+            trafficSummary: { $ref: "#/components/schemas/ApiUsageTrafficSummary" },
             trustDecisions: { items: { $ref: "#/components/schemas/ApiUsageTrustDecisionMetric" }, type: "array" },
             trustRisks: { items: { $ref: "#/components/schemas/ApiUsageTrustRiskMetric" }, type: "array" },
             type: { const: "dev.nipmod.api-usage-metrics.v1", type: "string" }
@@ -511,6 +513,8 @@ function openApiDocument() {
             "since",
             "sources",
             "totals",
+            "trafficOrigins",
+            "trafficSummary",
             "trustDecisions",
             "trustRisks",
             "type"
@@ -565,6 +569,45 @@ function openApiDocument() {
             tier: { enum: ["public", "beta", "builder", "partner", "admin"], type: "string" }
           },
           required: ["requestCount", "tier"],
+          type: "object"
+        },
+        ApiUsageTrafficOriginMetric: {
+          additionalProperties: false,
+          properties: {
+            origin: {
+              enum: [
+                "public",
+                "authenticated_beta",
+                "authenticated_partner",
+                "authenticated_admin",
+                "internal_canary",
+                "internal_monitor",
+                "internal_operator",
+                "unknown_legacy"
+              ],
+              type: "string"
+            },
+            requestCount: { minimum: 0, type: "integer" }
+          },
+          required: ["origin", "requestCount"],
+          type: "object"
+        },
+        ApiUsageTrafficSummary: {
+          additionalProperties: false,
+          properties: {
+            authenticatedRequestCount: { minimum: 0, type: "integer" },
+            externalRequestCount: { minimum: 0, type: "integer" },
+            internalRequestCount: { minimum: 0, type: "integer" },
+            publicRequestCount: { minimum: 0, type: "integer" },
+            unknownLegacyRequestCount: { minimum: 0, type: "integer" }
+          },
+          required: [
+            "authenticatedRequestCount",
+            "externalRequestCount",
+            "internalRequestCount",
+            "publicRequestCount",
+            "unknownLegacyRequestCount"
+          ],
           type: "object"
         },
         ApiUsageErrorMetric: {
@@ -1567,7 +1610,7 @@ function openApiDocument() {
       },
       "/api/usage/stats": {
         get: {
-          description: "Requires an admin API key. Returns aggregated usage metrics only; package values are hashes and raw keys, IPs, user agents, queries and package names are not returned.",
+          description: "Requires an admin API key. Returns aggregated usage metrics only; traffic origins are coarse categories, package values are hashes and raw keys, IPs, user agents, queries and package names are not returned.",
           operationId: "getUsageStats",
           parameters: [
             {
@@ -1588,7 +1631,7 @@ function openApiDocument() {
             "429": errorResponse(),
             "503": errorResponse()
           },
-          summary: "Return admin-only route, source, package-hash and tier usage metrics."
+          summary: "Return admin-only traffic-origin, route, source, package-hash and tier usage metrics."
         }
       }
     },

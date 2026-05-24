@@ -134,6 +134,9 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.ApiUsageMetrics.required).toContain("trustDecisions");
     expect(body.components.schemas.ApiUsageMetrics.required).toContain("installPlans");
     expect(body.components.schemas.ApiUsageMetrics.required).toContain("archiveWrites");
+    expect(body.components.schemas.ApiUsageMetrics.required).toContain("trafficOrigins");
+    expect(body.components.schemas.ApiUsageMetrics.required).toContain("trafficSummary");
+    expect(body.components.schemas.ApiUsageTrafficSummary.required).toContain("externalRequestCount");
     expect(body.paths["/api/usage/stats"].get.responses["403"].description).toBe("Structured API error.");
     expect(body.paths["/api/mcp"].post.responses["200"].content["application/json"].schema.oneOf).toHaveLength(2);
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);

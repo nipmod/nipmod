@@ -8,6 +8,7 @@ const skipLocal = args.includes("--skip-local");
 const requireDistributedRateLimit = args.includes("--require-distributed-rate-limit");
 const baseUrl = readOption("--base-url")?.replace(/\/+$/, "") ?? "https://nipmod.com";
 const checks = [];
+const USER_AGENT = "nipmod-launch-verify/1.2.9 (+https://nipmod.com)";
 
 if (!skipLocal) {
   await runCheck("local_verify", () => run("pnpm", ["verify"]));
@@ -159,7 +160,12 @@ async function fetchJson(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, {
+      headers: {
+        "user-agent": USER_AGENT
+      },
+      signal: controller.signal
+    });
     if (!response.ok) {
       throw new Error(`${url} returned ${response.status}`);
     }

@@ -78,6 +78,7 @@ const DEFAULT_ENDPOINTS: MonitorEndpointConfig = {
 };
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const MONITOR_USER_AGENT = "nipmod-production-monitor/1.2.9 (+https://nipmod.com)";
 
 export async function runProductionMonitor({
   destinations = readMonitorDestinationsFromEnv(process.env),
@@ -417,7 +418,7 @@ async function deliverOne({
 }): Promise<MonitorDelivery> {
   const headers: Record<string, string> = {
     "content-type": "application/json",
-    "user-agent": "nipmod-production-monitor"
+    "user-agent": MONITOR_USER_AGENT
   };
   if (destination.bearerToken) {
     headers.authorization = `Bearer ${destination.bearerToken}`;
@@ -471,7 +472,7 @@ function createTimedFetch(fetchFn: typeof fetch, timeoutMs: number): typeof fetc
 }
 
 async function fetchText(url: string, fetchFn: typeof fetch): Promise<string> {
-  const response = await fetchFn(url, { headers: { accept: "text/html,text/plain" } });
+  const response = await fetchFn(url, { headers: { accept: "text/html,text/plain", "user-agent": MONITOR_USER_AGENT } });
   if (!response.ok) {
     throw new Error(`failed to fetch ${url}: ${response.status}`);
   }
@@ -479,7 +480,7 @@ async function fetchText(url: string, fetchFn: typeof fetch): Promise<string> {
 }
 
 async function fetchJson(url: string, fetchFn: typeof fetch): Promise<unknown> {
-  const response = await fetchFn(url, { headers: { accept: "application/json" } });
+  const response = await fetchFn(url, { headers: { accept: "application/json", "user-agent": MONITOR_USER_AGENT } });
   if (!response.ok) {
     throw new Error(`failed to fetch ${url}: ${response.status}`);
   }
@@ -489,7 +490,7 @@ async function fetchJson(url: string, fetchFn: typeof fetch): Promise<unknown> {
 async function fetchJsonPost(url: string, body: unknown, fetchFn: typeof fetch): Promise<unknown> {
   const response = await fetchFn(url, {
     body: JSON.stringify(body),
-    headers: { accept: "application/json", "content-type": "application/json" },
+    headers: { accept: "application/json", "content-type": "application/json", "user-agent": MONITOR_USER_AGENT },
     method: "POST"
   });
   if (!response.ok) {

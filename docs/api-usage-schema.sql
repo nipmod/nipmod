@@ -21,6 +21,17 @@ create table if not exists public.api_usage_events (
   ),
   install_blocked boolean,
   archive_stored boolean,
+  traffic_origin text check (
+    traffic_origin is null or traffic_origin in (
+      'public',
+      'authenticated_beta',
+      'authenticated_partner',
+      'authenticated_admin',
+      'internal_canary',
+      'internal_monitor',
+      'internal_operator'
+    )
+  ),
   duration_ms integer not null check (duration_ms >= 0),
   created_at timestamptz not null default now()
 );
@@ -61,6 +72,10 @@ create index if not exists api_usage_events_install_blocked_idx
 create index if not exists api_usage_events_archive_stored_idx
   on public.api_usage_events (archive_stored)
   where archive_stored is not null;
+
+create index if not exists api_usage_events_traffic_origin_idx
+  on public.api_usage_events (traffic_origin)
+  where traffic_origin is not null;
 
 alter table public.api_usage_events enable row level security;
 

@@ -10,6 +10,7 @@ const REQUIRED_ARCHIVE_ENV = ["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_WRI
 const ARCHIVE_KEY_ENV = ["NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY"];
 const VERCEL_ARCHIVE_ENV = [...REQUIRED_ARCHIVE_ENV, ...ARCHIVE_KEY_ENV];
 const DEFAULT_BASE_URL = "https://nipmod.com";
+const USER_AGENT = "nipmod-package-intelligence-ops/1.2.9 (+https://nipmod.com)";
 
 async function main() {
   const command = process.argv[2] ?? "help";
@@ -262,12 +263,18 @@ function requiredOption(options, key) {
 }
 
 async function fetchJson(url, init) {
-  const response = await fetch(url, init);
+  const response = await fetch(url, withInternalHeaders(init));
   const text = await response.text();
   if (!response.ok) {
     throw new Error(`${url} failed with ${response.status}: ${text.slice(0, 300)}`);
   }
   return text ? JSON.parse(text) : null;
+}
+
+function withInternalHeaders(init) {
+  const headers = new Headers(init?.headers);
+  headers.set("user-agent", USER_AGENT);
+  return { ...init, headers };
 }
 
 function run(command, args, { allowFailure = false, cwd = ROOT, input } = {}) {

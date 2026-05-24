@@ -39,6 +39,7 @@ const DEFAULT_ENDPOINTS = {
 const DEFAULT_CHECKPOINT_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 const DEFAULT_WITNESS_MAX_AGE_MS = 15 * 60 * 1000;
 const DEFAULT_FETCH_TIMEOUT_MS = 10_000;
+const USER_AGENT = "nipmod-prod-synthetic-monitor/1.2.9 (+https://nipmod.com)";
 const HEX_SHA256 = /^[a-f0-9]{64}$/;
 const SOURCE_COMMIT = /^[a-f0-9]{40}$/;
 const SOURCE_TAG = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
@@ -551,7 +552,7 @@ async function runCheck(checks, name, fn) {
 }
 
 async function fetchJson(url, fetchFn, init) {
-  const response = await fetchFn(url, init);
+  const response = await fetchFn(url, withInternalHeaders(init, "application/json"));
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}`);
   }
@@ -559,7 +560,7 @@ async function fetchJson(url, fetchFn, init) {
 }
 
 async function fetchText(url, fetchFn) {
-  const response = await fetchFn(url);
+  const response = await fetchFn(url, withInternalHeaders(undefined, "text/html,text/plain"));
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}`);
   }
@@ -567,11 +568,20 @@ async function fetchText(url, fetchFn) {
 }
 
 async function fetchBytes(url, fetchFn) {
-  const response = await fetchFn(url);
+  const response = await fetchFn(url, withInternalHeaders());
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}`);
   }
   return Buffer.from(await response.arrayBuffer());
+}
+
+function withInternalHeaders(init, accept) {
+  const headers = new Headers(init?.headers);
+  headers.set("user-agent", USER_AGENT);
+  if (accept && !headers.has("accept")) {
+    headers.set("accept", accept);
+  }
+  return { ...init, headers };
 }
 
 async function readSha(path) {
