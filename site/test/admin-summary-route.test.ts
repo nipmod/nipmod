@@ -120,6 +120,14 @@ function usageFixture() {
     since: "2026-05-23T00:00:00.000Z",
     sources: [{ requestCount: 3, source: "npm" }],
     totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
+    trafficOrigins: [{ origin: "authenticated_beta", requestCount: 3 }],
+    trafficSummary: {
+      authenticatedRequestCount: 3,
+      externalRequestCount: 3,
+      internalRequestCount: 0,
+      publicRequestCount: 0,
+      unknownLegacyRequestCount: 0
+    },
     trustDecisions: [{ decision: "recommended", requestCount: 3 }],
     trustRisks: [{ requestCount: 3, risk: "low" }],
     type: "dev.nipmod.api-usage-metrics.v1"

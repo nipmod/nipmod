@@ -26,6 +26,16 @@ interface UsageSummary {
   trustRisk: string | null;
 }
 
+type TrafficOrigin =
+  | "public"
+  | "authenticated_beta"
+  | "authenticated_partner"
+  | "authenticated_admin"
+  | "internal_canary"
+  | "internal_monitor"
+  | "internal_operator"
+  | "unknown_legacy";
+
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const USAGE_HASH_SALT_ENV = "NIPMOD_USAGE_HASH_SALT";
@@ -58,6 +68,7 @@ export async function recordApiUsage(input: ApiUsageInput, env: UsageEnv = proce
     source: summary.source,
     sources: summary.sources,
     status: input.status,
+    traffic_origin: classifyTrafficOrigin(input),
     trust_decision: summary.trustDecision,
     trust_risk: summary.trustRisk
   };
@@ -201,6 +212,7 @@ type UsageMetricsEventRow = {
   source: string | null;
   sources: string[] | null;
   status: number;
+  traffic_origin?: string | null;
   trust_decision?: string | null;
   trust_risk?: string | null;
 };
@@ -228,7 +240,7 @@ async function readApiUsageMetricsFromEvents(
     limit: String(USAGE_METRICS_EVENT_LIMIT),
     order: "created_at.desc",
     select:
-      "route,status,access_tier,api_key_id,client_hash,package_hash,source,sources,error_code,duration_ms,trust_decision,trust_risk,install_blocked,archive_stored"
+      "route,status,access_tier,api_key_id,client_hash,package_hash,source,sources,error_code,duration_ms,traffic_origin,trust_decision,trust_risk,install_blocked,archive_stored"
   });
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), USAGE_METRICS_TIMEOUT_MS);
@@ -282,6 +294,7 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
   const sources = new Map<string, number>();
   const packages = new Map<string, number>();
   const tiers = new Map<string, number>();
+  const trafficOrigins = new Map<TrafficOrigin, number>();
   const errors = new Map<string, number>();
   const trustDecisions = new Map<string, number>();
   const trustRisks = new Map<string, number>();
@@ -293,8 +306,14 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
   let installPlanBlocked = 0;
   let archivePreviewed = 0;
   let archiveStored = 0;
+  let publicRequests = 0;
+  let authenticatedRequests = 0;
+  let externalRequests = 0;
+  let internalRequests = 0;
+  let unknownLegacyRequests = 0;
 
   for (const row of rows) {
+    const trafficOrigin = readTrafficOrigin(row.traffic_origin);
     duration += row.duration_ms;
     if (row.status >= 400) {
       errorCount += 1;
@@ -319,6 +338,21 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
     }
     if (row.access_tier) {
       tiers.set(row.access_tier, (tiers.get(row.access_tier) ?? 0) + 1);
+    }
+    trafficOrigins.set(trafficOrigin, (trafficOrigins.get(trafficOrigin) ?? 0) + 1);
+    if (trafficOrigin === "public") {
+      publicRequests += 1;
+      externalRequests += 1;
+    } else if (trafficOrigin === "authenticated_beta" || trafficOrigin === "authenticated_partner") {
+      authenticatedRequests += 1;
+      externalRequests += 1;
+    } else if (trafficOrigin === "authenticated_admin") {
+      authenticatedRequests += 1;
+      internalRequests += 1;
+    } else if (trafficOrigin === "unknown_legacy") {
+      unknownLegacyRequests += 1;
+    } else {
+      internalRequests += 1;
     }
     if (row.error_code) {
       errors.set(row.error_code, (errors.get(row.error_code) ?? 0) + 1);
@@ -356,7 +390,7 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
       observedCount: installPlanAllowed + installPlanBlocked
     },
     packages: sortedCounts(packages, "packageHash", limit),
-    privacy: "aggregated metrics only; package values are hashes; raw keys, IPs, user agents, queries and package names are not returned",
+    privacy: "aggregated metrics only; traffic origins are coarse categories; package values are hashes; raw keys, IPs, user agents, queries and package names are not returned",
     routes: [...routes.entries()]
       .map(([route, value]) => ({
         avgDurationMs: value.requests > 0 ? Math.round(value.duration / value.requests) : 0,
@@ -375,13 +409,21 @@ function buildUsageMetrics(rows: UsageMetricsEventRow[], input: { limit: number;
       keyCount: keyIds.size,
       requestCount: rows.length
     },
+    trafficOrigins: sortedCounts(trafficOrigins, "origin", limit),
+    trafficSummary: {
+      authenticatedRequestCount: authenticatedRequests,
+      externalRequestCount: externalRequests,
+      internalRequestCount: internalRequests,
+      publicRequestCount: publicRequests,
+      unknownLegacyRequestCount: unknownLegacyRequests
+    },
     type: "dev.nipmod.api-usage-metrics.v1",
     trustDecisions: sortedCounts(trustDecisions, "decision", limit),
     trustRisks: sortedCounts(trustRisks, "risk", limit)
   };
 }
 
-function sortedCounts(map: Map<string, number>, keyName: string, limit: number): Array<Record<string, number | string>> {
+function sortedCounts<Key extends string>(map: Map<Key, number>, keyName: string, limit: number): Array<Record<string, number | string>> {
   return [...map.entries()]
     .map(([key, requestCount]) => ({ [keyName]: key, requestCount }))
     .sort((left, right) => Number(right.requestCount) - Number(left.requestCount) || String(left[keyName]).localeCompare(String(right[keyName])))
@@ -413,6 +455,7 @@ function isUsageMetricsEventRow(value: unknown): value is UsageMetricsEventRow {
     (typeof row.source === "string" || row.source === null) &&
     (Array.isArray(row.sources) || row.sources === null) &&
     typeof row.status === "number" &&
+    (isTrafficOrigin(row.traffic_origin) || row.traffic_origin === null || row.traffic_origin === undefined) &&
     (typeof row.trust_decision === "string" || row.trust_decision === null || row.trust_decision === undefined) &&
     (typeof row.trust_risk === "string" || row.trust_risk === null || row.trust_risk === undefined)
   );
@@ -485,6 +528,76 @@ function hashClient(request: Request, env: UsageEnv): string {
   const userAgent = request.headers.get("user-agent")?.trim() ?? "unknown-agent";
   const salt = env[USAGE_HASH_SALT_ENV] ?? "nipmod-public-api";
   return hashValue(`${salt}:${forwarded || realIp || "anonymous"}:${userAgent}`).slice(0, 32);
+}
+
+function classifyTrafficOrigin(input: ApiUsageInput): Exclude<TrafficOrigin, "unknown_legacy"> {
+  const userAgent = input.request.headers.get("user-agent")?.toLowerCase() ?? "";
+  const requestId = input.context.requestId.toLowerCase();
+  if (isInternalMonitorTraffic(userAgent, requestId)) {
+    return "internal_monitor";
+  }
+  if (isInternalCanaryTraffic(userAgent, requestId)) {
+    return "internal_canary";
+  }
+  if (isInternalOperatorTraffic(userAgent, requestId)) {
+    return "internal_operator";
+  }
+  if (input.access.tier === "admin") {
+    return "authenticated_admin";
+  }
+  if (input.access.tier === "partner") {
+    return "authenticated_partner";
+  }
+  if (input.access.tier === "beta" || input.access.tier === "builder") {
+    return "authenticated_beta";
+  }
+  return "public";
+}
+
+function isInternalCanaryTraffic(userAgent: string, requestId: string): boolean {
+  return (
+    requestId.includes("canary") ||
+    userAgent.includes("nipmod-api-contract-canary") ||
+    userAgent.includes("nipmod-archive-depth-canary") ||
+    userAgent.includes("nipmod-install-plan-canary") ||
+    userAgent.includes("nipmod-rate-limit-canary") ||
+    userAgent.includes("nipmod-source-depth-canary") ||
+    userAgent.includes("nipmod-usage-canary") ||
+    userAgent.includes("nipmod-launch-verify") ||
+    userAgent.includes("nipmod-prod-load-smoke") ||
+    userAgent.includes("nipmod-prod-synthetic-monitor") ||
+    userAgent.includes("nipmod-node-edge-resilience-smoke")
+  );
+}
+
+function isInternalMonitorTraffic(userAgent: string, requestId: string): boolean {
+  return requestId.includes("monitor") || userAgent.includes("nipmod-production-monitor") || userAgent.includes("nipmod-alert-runner");
+}
+
+function isInternalOperatorTraffic(userAgent: string, requestId: string): boolean {
+  return (
+    requestId.includes("launch-verify") ||
+    userAgent.includes("nipmod-package-intelligence-ops") ||
+    userAgent.includes("nipmod-seed") ||
+    userAgent.includes("nipmod-system-readiness-check")
+  );
+}
+
+function readTrafficOrigin(value: string | null | undefined): TrafficOrigin {
+  return isTrafficOrigin(value) ? value : "unknown_legacy";
+}
+
+function isTrafficOrigin(value: unknown): value is TrafficOrigin {
+  return (
+    value === "public" ||
+    value === "authenticated_beta" ||
+    value === "authenticated_partner" ||
+    value === "authenticated_admin" ||
+    value === "internal_canary" ||
+    value === "internal_monitor" ||
+    value === "internal_operator" ||
+    value === "unknown_legacy"
+  );
 }
 
 function hashValue(value: string): string {

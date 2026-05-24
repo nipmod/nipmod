@@ -24,6 +24,7 @@ const DEFAULT_ITERATIONS = PROFILES.default.iterations;
 const DEFAULT_CONCURRENCY = PROFILES.default.concurrency;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_P95_MS = 2_500;
+const USER_AGENT = "nipmod-prod-load-smoke/1.2.9 (+https://nipmod.com)";
 
 export async function runLoadSmoke({
   concurrency = DEFAULT_CONCURRENCY,
@@ -227,6 +228,10 @@ function createTimedFetch(fetchFn, timeoutMs) {
   return (url, options = {}) =>
     fetchFn(url, {
       ...options,
+      headers: {
+        ...options.headers,
+        "user-agent": USER_AGENT
+      },
       signal: options.signal ?? AbortSignal.timeout(timeoutMs)
     });
 }

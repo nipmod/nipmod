@@ -23,6 +23,7 @@ const receiptPath = join(root, "site", "public", "compatibility", "system-readin
 const encodedProofPackage = "cGtnOmRpZDprZXk6ejZNa3FEQWtLTnRXSDY5WllvRml0RXJrMUNDS29mRlA1QWFGalZYeTViVlE0ZmJEL2dpdGxhd2ItcmVwby1yZWFkZXI";
 const proofPackage = "pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0";
 const proofPackageName = "gitlawb-repo-reader";
+const USER_AGENT = "nipmod-system-readiness-check/1.2.9 (+https://nipmod.com)";
 const hasVerifiedArchivePackages = () => (state.registry?.packages?.length ?? 0) > 0;
 const expectedTools = [
   "nipmod.search",
@@ -619,7 +620,11 @@ async function remoteMcpRequest(message) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: {
+      "user-agent": USER_AGENT
+    }
+  });
   if (!response.ok) {
     throw new Error(`${url} returned HTTP ${response.status}`);
   }

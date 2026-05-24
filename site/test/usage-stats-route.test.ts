@@ -39,6 +39,14 @@ describe("usage stats route", () => {
           since: "2026-05-23T00:00:00.000Z",
           sources: [{ requestCount: 2, source: "npm" }],
           totals: { avgDurationMs: 12, clientCount: 1, errorCount: 0, keyCount: 1, requestCount: 2 },
+          trafficOrigins: [{ origin: "authenticated_admin", requestCount: 2 }],
+          trafficSummary: {
+            authenticatedRequestCount: 2,
+            externalRequestCount: 0,
+            internalRequestCount: 2,
+            publicRequestCount: 0,
+            unknownLegacyRequestCount: 0
+          },
           trustDecisions: [],
           trustRisks: [],
           type: "dev.nipmod.api-usage-metrics.v1"

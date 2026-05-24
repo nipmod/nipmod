@@ -19,6 +19,7 @@ export function AdminDashboard() {
 
   const usage = summary?.usage ?? {};
   const totals = usage?.totals ?? {};
+  const traffic = usage?.trafficSummary ?? {};
   const archive = summary?.archive ?? {};
   const keys = summary?.keys ?? {};
   const generatedAt = useMemo(() => formatDate(summary?.generatedAt), [summary?.generatedAt]);
@@ -99,10 +100,13 @@ export function AdminDashboard() {
         <div className="admin-content">
           <section className="admin-stat-grid" aria-label="Usage summary">
             <Metric label="Requests" value={totals.requestCount} />
+            <Metric label="External requests" value={traffic.externalRequestCount} />
+            <Metric label="Internal checks" value={traffic.internalRequestCount} />
             <Metric label="Errors" value={totals.errorCount} />
             <Metric label="Clients" value={totals.clientCount} />
             <Metric label="Keyed callers" value={totals.keyCount} />
             <Metric label="Avg duration" suffix="ms" value={totals.avgDurationMs} />
+            <Metric label="Legacy unknown" value={traffic.unknownLegacyRequestCount} />
             <Metric label="Archive records" value={archive.totalRecords} />
             <Metric label="Active keys" value={keys.activeCount} />
             <Metric label="Self serve beta keys" value={keys.selfServeBetaCount} />
@@ -114,6 +118,20 @@ export function AdminDashboard() {
             </Panel>
             <Panel title="Sources">
               <DataTable rows={usage.sources} columns={[["source", "Source"], ["requestCount", "Requests"]]} />
+            </Panel>
+            <Panel title="Traffic origin">
+              <DataTable rows={usage.trafficOrigins} columns={[["origin", "Origin"], ["requestCount", "Requests"]]} />
+            </Panel>
+            <Panel title="Traffic summary">
+              <KeyValueRows
+                rows={[
+                  ["External", traffic.externalRequestCount],
+                  ["Public", traffic.publicRequestCount],
+                  ["Authenticated", traffic.authenticatedRequestCount],
+                  ["Internal", traffic.internalRequestCount],
+                  ["Legacy unknown", traffic.unknownLegacyRequestCount]
+                ]}
+              />
             </Panel>
             <Panel title="Trust decisions">
               <DataTable rows={usage.trustDecisions} columns={[["decision", "Decision"], ["requestCount", "Requests"]]} />
@@ -233,7 +251,7 @@ function DataTable({ columns, rows }: { columns: Array<[string, string]>; rows: 
         </thead>
         <tbody>
           {safeRows.map((row, index) => (
-            <tr key={row.id ?? row.label ?? row.route ?? row.source ?? index}>
+            <tr key={row.id ?? row.label ?? row.route ?? row.source ?? row.origin ?? row.tier ?? index}>
               {columns.map(([key]) => (
                 <td key={key}>{formatCell(row[key])}</td>
               ))}

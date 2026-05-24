@@ -52,6 +52,7 @@ describe("API usage logging", () => {
       route: "/api/search",
       sources: ["npm", "pypi"],
       status: 200,
+      traffic_origin: "public",
       trust_decision: null,
       trust_risk: null
     });
@@ -114,6 +115,50 @@ describe("API usage logging", () => {
     expect(JSON.stringify(rows[0])).not.toContain("unsafe-package");
   });
 
+  test("marks Nipmod canary traffic without storing raw user agents", async () => {
+    const rows: unknown[] = [];
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      rows.push(JSON.parse(String(init?.body))[0]);
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/search?q=react&sources=npm&limit=1", {
+      headers: {
+        "user-agent": "nipmod-source-depth-canary/1.2.9 (+https://nipmod.com)",
+        "x-forwarded-for": "203.0.113.30",
+        "x-request-id": "source-depth-canary-test"
+      }
+    });
+
+    await recordApiUsage(
+      {
+        access: publicApiAccess(),
+        context: createApiHttpContext(request),
+        request,
+        responseBody: {
+          records: [],
+          sources: ["npm"],
+          total: 0,
+          type: "dev.nipmod.external-search.v1"
+        },
+        route: "/api/search",
+        status: 200
+      },
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+        NIPMOD_USAGE_HASH_SALT: "test-salt"
+      },
+      fetchMock
+    );
+
+    expect(rows[0]).toMatchObject({
+      request_id: "source-depth-canary-test",
+      route: "/api/search",
+      traffic_origin: "internal_canary"
+    });
+    expect(JSON.stringify(rows[0])).not.toContain("nipmod-source-depth-canary");
+  });
+
   test("reports usage store status without secrets", () => {
     expect(usageStoreStatus({})).toMatchObject({
       configured: false,
@@ -138,6 +183,14 @@ describe("API usage logging", () => {
         since: "2026-05-23T00:00:00.000Z",
         sources: [{ requestCount: 3, source: "npm" }],
         totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
+        trafficOrigins: [{ origin: "authenticated_beta", requestCount: 3 }],
+        trafficSummary: {
+          authenticatedRequestCount: 3,
+          externalRequestCount: 3,
+          internalRequestCount: 0,
+          publicRequestCount: 0,
+          unknownLegacyRequestCount: 0
+        },
         trustDecisions: [],
         trustRisks: [],
         type: "dev.nipmod.api-usage-metrics.v1"
@@ -182,6 +235,7 @@ describe("API usage logging", () => {
           source: null,
           sources: ["npm"],
           status: 200,
+          traffic_origin: "authenticated_beta",
           trust_decision: "recommended",
           trust_risk: "low"
         },
@@ -195,7 +249,8 @@ describe("API usage logging", () => {
           route: "/api/inspect",
           source: "npm",
           sources: [],
-          status: 400
+          status: 400,
+          traffic_origin: null
         }
       ]);
     }) as unknown as typeof fetch;
@@ -225,6 +280,17 @@ describe("API usage logging", () => {
         errorCount: 1,
         keyCount: 1,
         requestCount: 2
+      },
+      trafficOrigins: [
+        { origin: "authenticated_beta", requestCount: 1 },
+        { origin: "unknown_legacy", requestCount: 1 }
+      ],
+      trafficSummary: {
+        authenticatedRequestCount: 1,
+        externalRequestCount: 1,
+        internalRequestCount: 0,
+        publicRequestCount: 0,
+        unknownLegacyRequestCount: 1
       },
       trustDecisions: [{ decision: "recommended", requestCount: 1 }],
       trustRisks: [{ requestCount: 1, risk: "low" }],

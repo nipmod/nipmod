@@ -1,19 +1,4 @@
 alter table public.api_usage_events
-  drop constraint if exists api_usage_events_access_tier_check;
-
-alter table public.api_usage_events
-  add constraint api_usage_events_access_tier_check
-  check (access_tier in ('public', 'beta', 'builder', 'partner', 'admin'));
-
-alter table public.api_usage_events
-  add column if not exists trust_decision text check (
-    trust_decision is null or trust_decision in ('recommended', 'usable_with_warning', 'avoid', 'unknown')
-  ),
-  add column if not exists trust_risk text check (
-    trust_risk is null or trust_risk in ('low', 'medium', 'high', 'unknown')
-  ),
-  add column if not exists install_blocked boolean,
-  add column if not exists archive_stored boolean,
   add column if not exists traffic_origin text;
 
 alter table public.api_usage_events
