@@ -37,6 +37,9 @@
   --docs-serif: Georgia, "Times New Roman", Times, serif;
   --docs-ui: Geist, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   --docs-mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+  --docs-frame-width: 1360px;
+  --docs-page-pad: 32px;
+  --docs-shell-top-gap: 26px;
   --topbar-height: 66px;
 }
 
@@ -49,7 +52,7 @@ body {
   backdrop-filter: blur(22px) saturate(150%);
   grid-template-columns: auto minmax(120px, 1fr);
   height: var(--topbar-height);
-  padding: 0 32px;
+  padding: 0 max(32px, calc((100vw - var(--docs-frame-width)) / 2 + var(--docs-page-pad)));
 }
 
 .brand {
@@ -89,18 +92,18 @@ body {
 .docs-shell {
   align-items: start;
   display: grid;
-  grid-template-columns: 220px minmax(0, 840px);
+  grid-template-columns: 220px minmax(0, 800px) 176px;
   gap: 56px;
   margin: 0 auto;
-  max-width: 1220px;
+  max-width: var(--docs-frame-width);
   min-height: calc(100svh - var(--topbar-height));
-  padding: 26px 32px 88px;
+  padding: var(--docs-shell-top-gap) var(--docs-page-pad) 88px;
   width: 100%;
 }
 
 .docs-shell-with-toc {
   grid-template-columns: 220px minmax(0, 800px) 176px;
-  max-width: 1360px;
+  max-width: var(--docs-frame-width);
 }
 
 .docs-sidebar {
@@ -112,7 +115,8 @@ body {
   padding-right: 4px;
   position: sticky;
   scrollbar-width: none;
-  top: calc(var(--topbar-height) + 26px);
+  top: calc(var(--topbar-height) + var(--docs-shell-top-gap));
+  width: 220px;
 }
 
 .docs-sidebar::-webkit-scrollbar {
@@ -4244,8 +4248,8 @@ body {
 }
 
 .brand-icon-button .brand-telegram-icon {
-  height: 19px;
-  width: 19px;
+  height: 22px;
+  width: 22px;
 }
 
 .brand-icon-button:hover {
@@ -5698,7 +5702,7 @@ body {
   grid-template-columns: auto minmax(0, 1fr);
   height: var(--topbar-height);
   min-height: var(--topbar-height);
-  padding: 0 32px;
+  padding: 0 max(32px, calc((100vw - var(--docs-frame-width)) / 2 + var(--docs-page-pad)));
 }
 
 .brand {
@@ -5708,12 +5712,14 @@ body {
 @media (max-width: 980px) {
   :root {
     --topbar-height: 66px;
+    --docs-page-pad: 20px;
+    --docs-shell-top-gap: 28px;
   }
 
   .topbar {
     height: var(--topbar-height);
     min-height: var(--topbar-height);
-    padding: 0 20px;
+    padding: 0 var(--docs-page-pad);
   }
 
   .brand {
