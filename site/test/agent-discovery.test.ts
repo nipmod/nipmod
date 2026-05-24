@@ -15,6 +15,7 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");
     expect(llmsText).toContain("Public beta access is free and rate limited.");
     expect(llmsText).toContain("No API key is required today.");
+    expect(llmsText).toContain("Agents can issue a free beta key without a human handoff:");
     expect(llmsText).not.toContain("/integrations/");
   });
 
@@ -26,6 +27,7 @@ describe("agent discovery text", () => {
       "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       "GET https://nipmod.com/api/sources/health",
       "GET https://nipmod.com/api/openapi",
+      "POST https://nipmod.com/api/keys/beta",
       "\"name\":\"nipmod.external_install_plan\"",
       "Hosted MCP does not expose workspace write tools."
     ]) {

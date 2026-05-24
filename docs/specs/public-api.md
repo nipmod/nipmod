@@ -16,7 +16,7 @@ The public scoring explanation lives in [trust scoring](../api/trust-scoring.md)
 
 ## Access
 
-Public beta requests can be made without a key. Optional keys increase rate limits for builders and partners.
+Public beta requests can be made without a key. Agents can issue free beta keys through `POST /api/keys/beta` for higher shared beta limits. Partner keys are reserved for integrations and agent hosts. Admin keys are reserved for operational endpoints.
 
 Supported key headers:
 
@@ -27,7 +27,9 @@ Authorization: Bearer <key>
 
 Invalid keys return `401`. Requests without a key stay on the public rate limit.
 
-Server-side key storage uses scrypt-derived keyed digests with a deployment secret. Raw API keys are never stored in repo files, Vercel config output or usage events.
+Server-side key storage uses scrypt-derived keyed digests with a deployment secret. Keys can be bootstrapped from server env or stored in the Supabase-backed `api_keys` registry. Raw API keys are never stored in repo files, Vercel config output, Supabase usage events or analytics responses.
+
+Self-service beta keys are generated server-side and returned once. The registry stores only key id, keyed hash, tier, non-private label, rate-limit multiplier and expiry. Agents should not send prompts, user data, workspace paths or other private content as key labels.
 
 Usage events are logged only as hashed or structured fields: route, method, status, request id, access tier, key id, source, result count, error code and timing. Nipmod does not store raw queries, raw package names, raw API keys, IP addresses or user agent strings in usage events.
 
@@ -35,9 +37,11 @@ Rate-limit responses use the same public error contract as the rest of the API a
 
 Production deployments use a Supabase-backed shared rate-limit bucket through `consume_api_rate_limit`. The bucket stores hashed client identifiers only. If the shared store is missing or temporarily unavailable, routes fall back to the local in-process limiter and expose `x-ratelimit-store: memory-fallback`.
 
-`GET /api/sources/health` also returns coarse rate-limit store status with `configured`, `driver`, `activeStore` and `distributedActive`. This lets operators and agents distinguish an intended Supabase-backed setup from a live fallback without exposing Supabase URLs, keys or raw client identifiers.
+`GET /api/sources/health` also returns coarse API key, rate-limit and usage-store status. This lets operators and agents distinguish an intended Supabase-backed setup from a live fallback without exposing Supabase URLs, keys or raw client identifiers.
 
 When the shared store is configured but unavailable, source health may include a coarse `rateLimit.fallbackReason` such as `distributed_rpc_http_404`, `distributed_rpc_timeout` or `distributed_rpc_invalid_shape`. These values are operational diagnostics only and never include upstream response bodies, URLs, keys or client identifiers.
+
+`GET /api/usage/stats` requires an admin API key. It returns aggregate route, source, access tier and package-hash counts. It does not return raw queries, raw package names, raw API keys, raw IPs, raw user agents or source response bodies.
 
 Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
 
@@ -259,13 +263,73 @@ curl 'https://nipmod.com/api/archive/status'
 
 Return supported source capabilities, optional auth status and the hosted API write boundary.
 
-The response includes coarse archive, usage and rate-limit store status. `rateLimit.activeStore: "supabase"` means the current request consumed the shared Supabase RPC bucket. `rateLimit.activeStore: "memory-fallback"` means the route remained safe but did not use distributed rate limits for that request.
+The response includes coarse API key, archive, usage and rate-limit store status. `apiAccess.keyRegistry` reports whether server env keys or the Supabase key registry are configured without exposing raw keys or Supabase secrets. `rateLimit.activeStore: "supabase"` means the current request consumed the shared Supabase RPC bucket. `rateLimit.activeStore: "memory-fallback"` means the route remained safe but did not use distributed rate limits for that request.
 
 Example:
 
 ```bash
 curl 'https://nipmod.com/api/sources/health'
 ```
+
+## `POST /api/keys/beta`
+
+Issue a free beta API key without human approval.
+
+The endpoint is public and rate limited. It returns the raw key once. Nipmod stores only a keyed hash, key id, tier, non-private label, multiplier and expiry.
+
+Request body is optional. If a label is provided, it should be a non-private agent or project label.
+
+Example:
+
+```bash
+curl -s -X POST 'https://nipmod.com/api/keys/beta' \
+  -H 'content-type: application/json' \
+  -d '{"label":"my-agent"}'
+```
+
+Response type:
+
+```text
+dev.nipmod.beta-api-key.v1
+```
+
+Use the returned key as either:
+
+```text
+x-nipmod-api-key: <key>
+Authorization: Bearer <key>
+```
+
+## `GET /api/usage/stats`
+
+Return privacy-limited API usage metrics for operators.
+
+This endpoint requires an admin API key through `x-nipmod-api-key` or `Authorization: Bearer`.
+
+Query parameters:
+
+| Name | Required | Notes |
+| --- | --- | --- |
+| `hours` | no | Lookback window from `1` to `168`. Defaults to `24`. |
+| `limit` | no | Maximum rows per metric list from `1` to `100`. Defaults to `20`. |
+
+Example:
+
+```bash
+curl 'https://nipmod.com/api/usage/stats?hours=24' \
+  -H 'authorization: Bearer <admin-key>'
+```
+
+Returned metrics include:
+
+- total requests, errors, keyed callers and hashed clients
+- route counts and route error counts
+- source counts
+- access tier counts
+- package counts by `packageHash`
+- error counts by code
+
+Package metrics use hashes only. The endpoint does not return package names.
 
 ## `POST /api/archive/confirm`
 

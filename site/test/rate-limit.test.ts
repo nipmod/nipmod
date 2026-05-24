@@ -80,6 +80,59 @@ describe("API rate limits", () => {
     expect(JSON.stringify(result)).not.toContain(rawKey);
   });
 
+  test("applies Supabase-backed beta keys without exposing the raw key", async () => {
+    const rawKey = "nka_test_beta_key_1234567890";
+    const hashKey = ["test", "api", "key", "registry"].join("-");
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashKey);
+    const keyId = `key_${hash.slice(0, 16)}`;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      expect(String(input)).toContain("/rest/v1/api_keys?");
+      expect(String(input)).not.toContain(rawKey);
+      return Response.json([
+        {
+          expires_at: null,
+          id: keyId,
+          label: "free-beta",
+          rate_limit_multiplier: 12,
+          tier: "beta"
+        }
+      ]);
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/search", {
+      headers: {
+        "user-agent": "key-registry-test",
+        "x-nipmod-api-key": rawKey
+      }
+    });
+
+    const result = await checkApiRateLimitAsync(
+      request,
+      { limit: 1, name: "test-key-registry", windowMs: 60_000 },
+      createApiHttpContext(request),
+      {
+        env: {
+          NIPMOD_API_KEY_HASH_SECRET: hashKey,
+          NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+          NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+          NIPMOD_RATE_LIMIT_STORE: "memory"
+        },
+        fetchImpl: fetchMock
+      }
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.access).toMatchObject({
+      authenticated: true,
+      keyId,
+      tier: "beta"
+    });
+    expect(result.headers["x-ratelimit-limit"]).toBe("12");
+    expect(result.headers["x-nipmod-key-id"]).toBe(keyId);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(result)).not.toContain(rawKey);
+    expect(JSON.stringify(result)).not.toContain("service-role-key");
+  });
+
   test("uses the distributed Supabase bucket when configured", async () => {
     const resetAt = new Date(Date.now() + 60_000).toISOString();
     const fetchMock = vi.fn(async () =>

@@ -465,6 +465,165 @@ function openApiDocument() {
           required: ["configured", "driver"],
           type: "object"
         },
+        ApiKeyStoreStatus: {
+          additionalProperties: false,
+          description: "API key registry status without raw keys, Supabase secrets or private client identifiers.",
+          properties: {
+            configured: { type: "boolean" },
+            driver: { enum: ["env-or-supabase-rest"], type: "string" },
+            envKeysConfigured: { type: "boolean" },
+            hashingConfigured: { type: "boolean" },
+            missing: { items: { type: "string" }, type: "array" },
+            privacy: { type: "string" },
+            registryConfigured: { type: "boolean" }
+          },
+          required: ["configured", "driver", "envKeysConfigured", "hashingConfigured", "missing", "privacy", "registryConfigured"],
+          type: "object"
+        },
+        ApiUsageMetrics: {
+          additionalProperties: false,
+          description: "Admin-only aggregate usage metrics. Package values are hashes and raw queries, package names, keys, IPs and user agents are not returned.",
+          properties: {
+            accessTiers: { items: { $ref: "#/components/schemas/ApiUsageTierMetric" }, type: "array" },
+            errors: { items: { $ref: "#/components/schemas/ApiUsageErrorMetric" }, type: "array" },
+            generatedAt: { format: "date-time", type: "string" },
+            packages: { items: { $ref: "#/components/schemas/ApiUsagePackageMetric" }, type: "array" },
+            privacy: { type: "string" },
+            routes: { items: { $ref: "#/components/schemas/ApiUsageRouteMetric" }, type: "array" },
+            since: { format: "date-time", type: "string" },
+            sources: { items: { $ref: "#/components/schemas/ApiUsageSourceMetric" }, type: "array" },
+            totals: { $ref: "#/components/schemas/ApiUsageTotals" },
+            type: { const: "dev.nipmod.api-usage-metrics.v1", type: "string" }
+          },
+          required: ["accessTiers", "errors", "generatedAt", "packages", "privacy", "routes", "since", "sources", "totals", "type"],
+          type: "object"
+        },
+        ApiUsageTotals: {
+          additionalProperties: false,
+          properties: {
+            avgDurationMs: { minimum: 0, type: "integer" },
+            clientCount: { minimum: 0, type: "integer" },
+            errorCount: { minimum: 0, type: "integer" },
+            keyCount: { minimum: 0, type: "integer" },
+            requestCount: { minimum: 0, type: "integer" }
+          },
+          required: ["avgDurationMs", "clientCount", "errorCount", "keyCount", "requestCount"],
+          type: "object"
+        },
+        ApiUsageRouteMetric: {
+          additionalProperties: false,
+          properties: {
+            avgDurationMs: { minimum: 0, type: "integer" },
+            errorCount: { minimum: 0, type: "integer" },
+            requestCount: { minimum: 0, type: "integer" },
+            route: { type: "string" }
+          },
+          required: ["avgDurationMs", "errorCount", "requestCount", "route"],
+          type: "object"
+        },
+        ApiUsageSourceMetric: {
+          additionalProperties: false,
+          properties: {
+            requestCount: { minimum: 0, type: "integer" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
+          },
+          required: ["requestCount", "source"],
+          type: "object"
+        },
+        ApiUsagePackageMetric: {
+          additionalProperties: false,
+          properties: {
+            packageHash: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            requestCount: { minimum: 0, type: "integer" }
+          },
+          required: ["packageHash", "requestCount"],
+          type: "object"
+        },
+        ApiUsageTierMetric: {
+          additionalProperties: false,
+          properties: {
+            requestCount: { minimum: 0, type: "integer" },
+            tier: { enum: ["public", "beta", "builder", "partner", "admin"], type: "string" }
+          },
+          required: ["requestCount", "tier"],
+          type: "object"
+        },
+        ApiUsageErrorMetric: {
+          additionalProperties: false,
+          properties: {
+            code: { type: "string" },
+            requestCount: { minimum: 0, type: "integer" }
+          },
+          required: ["code", "requestCount"],
+          type: "object"
+        },
+        BetaApiKeyIssueRequest: {
+          additionalProperties: false,
+          properties: {
+            agent: { description: "Optional non-private agent label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
+            client: { description: "Optional non-private client label. Do not send secrets, prompts or personal data.", maxLength: 80, type: "string" },
+            label: { description: "Optional non-private key label.", maxLength: 80, type: "string" },
+            name: { description: "Optional non-private key label alias.", maxLength: 80, type: "string" }
+          },
+          type: "object"
+        },
+        BetaApiKeyIssueResponse: {
+          additionalProperties: false,
+          description: "Self-service beta key response. The raw key is returned once; the server stores only a keyed hash.",
+          properties: {
+            auth: {
+              additionalProperties: false,
+              properties: {
+                bearer: { const: true, type: "boolean" },
+                header: { const: "x-nipmod-api-key", type: "string" }
+              },
+              required: ["bearer", "header"],
+              type: "object"
+            },
+            createdAt: { format: "date-time", type: "string" },
+            expiresAt: { format: "date-time", type: "string" },
+            key: { description: "Raw API key. Store it locally; Nipmod will not return it again.", pattern: "^nka_beta_", type: "string" },
+            keyId: { pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            label: { type: "string" },
+            next: {
+              additionalProperties: false,
+              properties: {
+                docs: { format: "uri", type: "string" },
+                openapi: { format: "uri", type: "string" },
+                search: { format: "uri", type: "string" }
+              },
+              required: ["docs", "openapi", "search"],
+              type: "object"
+            },
+            rateLimitMultiplier: { minimum: 1, type: "integer" },
+            storage: {
+              additionalProperties: false,
+              properties: {
+                rawKeyReturnedOnce: { const: true, type: "boolean" },
+                serverStoresHashOnly: { const: true, type: "boolean" },
+                serverStoresRawKey: { const: false, type: "boolean" }
+              },
+              required: ["rawKeyReturnedOnce", "serverStoresHashOnly", "serverStoresRawKey"],
+              type: "object"
+            },
+            tier: { const: "beta", type: "string" },
+            type: { const: "dev.nipmod.beta-api-key.v1", type: "string" }
+          },
+          required: [
+            "auth",
+            "createdAt",
+            "expiresAt",
+            "key",
+            "keyId",
+            "label",
+            "next",
+            "rateLimitMultiplier",
+            "storage",
+            "tier",
+            "type"
+          ],
+          type: "object"
+        },
         RateLimitStoreStatus: {
           additionalProperties: false,
           description: "Distributed rate-limit status without secrets or raw client identifiers.",
@@ -588,11 +747,12 @@ function openApiDocument() {
               additionalProperties: false,
               properties: {
                 authorizationHeaderSupported: { const: true, type: "boolean" },
+                keyRegistry: { $ref: "#/components/schemas/ApiKeyStoreStatus" },
                 keyHeaders: { items: { type: "string" }, type: "array" },
                 publicBeta: { const: true, type: "boolean" },
-                tiers: { items: { enum: ["public", "builder", "partner", "admin"], type: "string" }, type: "array" }
+                tiers: { items: { enum: ["public", "beta", "builder", "partner", "admin"], type: "string" }, type: "array" }
               },
-              required: ["authorizationHeaderSupported", "keyHeaders", "publicBeta", "tiers"],
+              required: ["authorizationHeaderSupported", "keyRegistry", "keyHeaders", "publicBeta", "tiers"],
               type: "object"
             },
             archive: {
@@ -955,12 +1115,12 @@ function openApiDocument() {
       },
       securitySchemes: {
         BearerAuth: {
-          description: "Optional Nipmod API key as an Authorization bearer token. Public beta requests can omit it.",
+          description: "Optional Nipmod API key as an Authorization bearer token. Public beta requests can omit it; beta, partner and admin keys increase or restrict access by tier.",
           scheme: "bearer",
           type: "http"
         },
         NipmodApiKey: {
-          description: "Optional Nipmod API key. Public beta requests can omit it.",
+          description: "Optional Nipmod API key. Public beta requests can omit it; beta, partner and admin keys increase or restrict access by tier.",
           in: "header",
           name: "x-nipmod-api-key",
           type: "apiKey"
@@ -983,6 +1143,33 @@ function openApiDocument() {
             "429": errorResponse()
           },
           summary: "Return the public Nipmod API contract."
+        }
+      },
+      "/api/keys/beta": {
+        post: {
+          "x-nipmod-agent-step": "api-access",
+          description: "Issues a public beta API key without human approval. The endpoint is rate limited and stores only a keyed hash of the generated key.",
+          operationId: "issueBetaApiKey",
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/BetaApiKeyIssueRequest" }
+              }
+            },
+            required: false
+          },
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/BetaApiKeyIssueResponse" },
+              "Self-service beta key. The raw key is returned once."
+            ),
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "429": errorResponse(),
+            "503": errorResponse()
+          },
+          security: [{}],
+          summary: "Issue a self-service beta API key for an agent or client."
         }
       },
       "/api/archive/prepare": {
@@ -1280,12 +1467,39 @@ function openApiDocument() {
           },
           summary: "Return source capabilities and hosted API write boundaries."
         }
+      },
+      "/api/usage/stats": {
+        get: {
+          description: "Requires an admin API key. Returns aggregated usage metrics only; package values are hashes and raw keys, IPs, user agents, queries and package names are not returned.",
+          operationId: "getUsageStats",
+          parameters: [
+            {
+              description: "Lookback window in hours. Invalid values fall back to 24 hours.",
+              in: "query",
+              name: "hours",
+              schema: { default: 24, maximum: 168, minimum: 1, type: "integer" }
+            },
+            limitParameter(100)
+          ],
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/ApiUsageMetrics" },
+              "Aggregate usage metrics for operators."
+            ),
+            "401": errorResponse(),
+            "403": errorResponse(),
+            "429": errorResponse(),
+            "503": errorResponse()
+          },
+          summary: "Return admin-only route, source, package-hash and tier usage metrics."
+        }
       }
     },
     tags: [
       { description: "Search, inspect and install-plan flow for agents.", name: "agent-flow" },
       { description: "Durable package intelligence records after explicit confirmation.", name: "archive" },
       { description: "Hosted read-only MCP and API contract surfaces.", name: "contract" },
+      { description: "Privacy-limited API access, rate limits and usage metrics.", name: "operations" },
       { description: "Source capability and degradation reporting.", name: "source-health" }
     ],
     security: [{}, { NipmodApiKey: [] }, { BearerAuth: [] }],

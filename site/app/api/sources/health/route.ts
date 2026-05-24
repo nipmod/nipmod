@@ -1,5 +1,6 @@
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
+import { apiKeyStoreStatus } from "../../../../lib/api-auth";
 import { usageStoreStatus } from "../../../../lib/api-usage";
 import {
   EXTERNAL_PACKAGE_SOURCES,
@@ -28,6 +29,7 @@ export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const shouldProbe = url.searchParams.get("probe") === "live";
   const archive = archiveStoreStatus();
+  const apiKeys = apiKeyStoreStatus();
   const usage = usageStoreStatus();
   const rateLimitStore = rateLimitStoreStatus();
   const activeRateLimitStore = rateLimit.headers["x-ratelimit-store"] ?? "unknown";
@@ -38,9 +40,18 @@ export async function GET(request: Request): Promise<Response> {
     {
       apiAccess: {
         authorizationHeaderSupported: true,
+        keyRegistry: {
+          configured: apiKeys.configured,
+          driver: apiKeys.driver,
+          envKeysConfigured: apiKeys.envKeysConfigured,
+          hashingConfigured: apiKeys.hashingConfigured,
+          registryConfigured: apiKeys.registryConfigured,
+          missing: apiKeys.missing,
+          privacy: apiKeys.privacy
+        },
         keyHeaders: ["x-nipmod-api-key"],
         publicBeta: true,
-        tiers: ["public", "builder", "partner", "admin"]
+        tiers: apiKeys.tiers
       },
       archive: {
         configured: archive.configured,

@@ -17,6 +17,8 @@ Usage logging stores structured or hashed operational fields:
 - error code
 - timing
 
+Aggregate usage metrics may return route, source, access tier, error code and package-hash counts to admin-key callers. They must not return raw package names.
+
 Usage logging must not store:
 
 - raw API keys
@@ -27,6 +29,27 @@ Usage logging must not store:
 - private prompts
 - workspace file paths
 - source response bodies
+
+## API Keys
+
+API key storage may store:
+
+- key id
+- keyed hash of the raw key
+- access tier
+- label
+- status
+- rate-limit multiplier
+- creation, expiry and revocation timestamps
+
+API key storage must not store:
+
+- raw API keys
+- private prompts
+- raw IP addresses
+- raw user agents
+- workspace identifiers
+- private source credentials
 
 ## Rate Limits
 

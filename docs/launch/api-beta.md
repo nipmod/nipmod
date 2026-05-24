@@ -32,6 +32,8 @@ Useful discoveries can be prepared for the archive.
 | `GET /api/archive/prepare` | Build an archive preview and receipt preview. |
 | `GET /api/archive/search` | Search confirmed package intelligence records. |
 | `GET /api/sources/health` | Check source, archive and rate-limit health. |
+| `POST /api/keys/beta` | Issue a self-service beta key. |
+| `GET /api/usage/stats` | Admin-only aggregate usage metrics. |
 | `POST /api/mcp` | Use the same surface through hosted read-only MCP. |
 | `GET /api/openapi` | Machine-readable API contract. |
 
@@ -42,6 +44,7 @@ curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,hugg
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
+curl -s -X POST 'https://nipmod.com/api/keys/beta'
 ```
 
 ## Public Builder Links
@@ -65,7 +68,9 @@ Use Nipmod before choosing packages. Search, inspect exact candidates, show sour
 
 - No API key is required for public beta access.
 - Requests are rate limited through the shared Supabase bucket in production.
-- Optional builder keys can raise limits.
+- Free beta keys are self-service through `POST /api/keys/beta`.
+- Partner keys can raise limits for integrations and agent hosts.
+- Admin keys can read aggregate usage metrics.
 - Invalid API keys return `401`.
 - Hosted API calls never write into caller workspaces.
 - Search, Inspect, Install Plan and OpenAPI are the stable public beta calls.

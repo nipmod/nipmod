@@ -18,6 +18,7 @@ const REQUIRED_API_HEADERS = [
 ];
 const REQUIRED_OPENAPI_OPERATIONS = [
   "GET /api/openapi",
+  "POST /api/keys/beta",
   "GET /api/archive/prepare",
   "POST /api/archive/prepare",
   "POST /api/archive/confirm",
@@ -29,7 +30,8 @@ const REQUIRED_OPENAPI_OPERATIONS = [
   "POST /api/mcp",
   "GET /api/resolve",
   "GET /api/search",
-  "GET /api/sources/health"
+  "GET /api/sources/health",
+  "GET /api/usage/stats"
 ] as const;
 
 const CONTRACT_CHECKS = [

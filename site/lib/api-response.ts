@@ -1,5 +1,5 @@
 import type { ApiAccess } from "./api-auth";
-import { apiJson, type ApiHttpContext } from "./api-http";
+import { apiJson, NO_STORE, type ApiHttpContext } from "./api-http";
 import { recordApiUsage } from "./api-usage";
 
 export async function apiJsonWithUsage(
@@ -30,9 +30,10 @@ export async function apiJsonWithUsage(
     status?: number;
   } = {
     context: options.context,
+    cacheControl: hasRequestScopedHeaders(options.headers) ? NO_STORE : undefined,
     status
   };
-  if (options.cacheControl !== undefined) {
+  if (responseOptions.cacheControl === undefined && options.cacheControl !== undefined) {
     responseOptions.cacheControl = options.cacheControl;
   }
   if (options.headers !== undefined) {
@@ -40,5 +41,15 @@ export async function apiJsonWithUsage(
   }
   return apiJson(value, {
     ...responseOptions
+  });
+}
+
+function hasRequestScopedHeaders(headers: Record<string, string> | undefined): boolean {
+  if (!headers) {
+    return false;
+  }
+  return Object.keys(headers).some((name) => {
+    const lower = name.toLowerCase();
+    return lower.startsWith("x-ratelimit-") || lower === "x-nipmod-key-id" || lower === "x-nipmod-access-tier";
   });
 }

@@ -17,6 +17,12 @@ describe("source health route", () => {
     expect(response.headers.get("x-nipmod-request-id")).toBe("source-health-test");
     expect(body).toMatchObject({
       apiAccess: {
+        keyRegistry: {
+          configured: false,
+          driver: "env-or-supabase-rest",
+          hashingConfigured: false,
+          registryConfigured: false
+        },
         publicBeta: true
       },
       probe: {

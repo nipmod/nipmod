@@ -15,16 +15,18 @@
     "inspect": "https://nipmod.com/api/inspect",
     "installPlan": "https://nipmod.com/api/install-plan",
     "sourceHealth": "https://nipmod.com/api/sources/health",
+    "betaKey": "https://nipmod.com/api/keys/beta",
     "mcp": "https://nipmod.com/api/mcp",
     "access": {
       "publicBeta": true,
       "keyRequired": false,
       "rateLimited": true,
+      "selfServiceBetaKey": "https://nipmod.com/api/keys/beta",
       "optionalHeaders": [
         "x-nipmod-api-key",
         "Authorization: Bearer <key>"
       ],
-      "keyStatus": "Public beta requests do not need a key. Optional higher-limit keys can be issued separately and are verified against server-side hashes.",
+      "keyStatus": "Public beta requests do not need a key. Free beta keys can be issued by POST /api/keys/beta and are verified against server-side hashes.",
       "usageLogging": "Usage events store route, status, source, result count, duration and hashed identifiers. They do not store raw API keys, raw IP addresses, raw queries, package names or user-agent fingerprints."
     },
     "trustPolicy": {
@@ -77,6 +79,7 @@
     "apiSpec": "https://nipmod.com/api/openapi",
     "sources": "https://nipmod.com/sources",
     "sourceHealthApi": "https://nipmod.com/api/sources/health",
+    "betaKeyApi": "https://nipmod.com/api/keys/beta",
     "status": "https://nipmod.com/status",
     "examples": "https://nipmod.com/examples",
     "packages": "https://nipmod.com/packages",
@@ -99,6 +102,7 @@
     "workflow": [
       "readLlms",
       "readOpenApi",
+      "issueBetaKey",
       "externalSearch",
       "externalResolve",
       "externalInspect",
@@ -113,6 +117,7 @@
     "commands": {
       "readLlms": "GET https://nipmod.com/llms.txt",
       "readOpenApi": "GET https://nipmod.com/api/openapi",
+      "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
       "externalResolve": "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
@@ -121,7 +126,7 @@
       "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query>",
       "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status",
       "sourceHealth": "GET https://nipmod.com/api/sources/health",
-      "access": "No API key is required for public beta. Optional higher-limit keys may be sent as x-nipmod-api-key or Authorization: Bearer <key>.",
+      "access": "No API key is required for public beta. Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>.",
       "mcpResolve": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.resolve\",\"arguments\":{\"query\":\"http client\",\"sources\":[\"npm\",\"pypi\",\"github\",\"huggingface-model\",\"mcp\"]}}}",
       "mcpExternalInstallPlan": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.external_install_plan\",\"arguments\":{\"source\":\"npm\",\"name\":\"undici\"}}}",
       "approval": "Show the install plan to the user or host policy. Do not run package commands until approved."

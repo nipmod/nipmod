@@ -56,6 +56,7 @@ describe("nipmod discovery manifest", () => {
       architecture: "https://nipmod.com/architecture",
       api: "https://nipmod.com/api-access",
       apiSpec: "https://nipmod.com/api/openapi",
+      betaKeyApi: "https://nipmod.com/api/keys/beta",
       examples: "https://nipmod.com/examples",
       externalInspectApi: "https://nipmod.com/api/inspect",
       externalInstallPlanApi: "https://nipmod.com/api/install-plan",
@@ -83,12 +84,14 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.agent.workflow).toContain("externalSearch");
     expect(manifest.agent.workflow).toContain("externalResolve");
     expect(manifest.agent.workflow).toContain("externalInstallPlan");
+    expect(manifest.agent.workflow).toContain("issueBetaKey");
     expect(manifest.agent.commands).toMatchObject({
-      access: "No API key is required for public beta. Optional higher-limit keys may be sent as x-nipmod-api-key or Authorization: Bearer <key>.",
+      access: "No API key is required for public beta. Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>.",
       externalInspect: "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       externalInstallPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
       externalResolve: "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       externalSearch: "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
+      issueBetaKey: "POST https://nipmod.com/api/keys/beta",
       packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       packageIntelligenceStatus: "GET https://nipmod.com/api/archive/status",
       readLlms: "GET https://nipmod.com/llms.txt",
@@ -182,6 +185,7 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.api).toMatchObject({
       baseUrl: "https://nipmod.com",
       description: "Hosted package discovery, trust checks and safe install plans for agents.",
+      betaKey: "https://nipmod.com/api/keys/beta",
       installPlan: "https://nipmod.com/api/install-plan",
       openapi: "https://nipmod.com/api/openapi",
       search: "https://nipmod.com/api/search",

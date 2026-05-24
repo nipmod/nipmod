@@ -23,6 +23,7 @@ describe("OpenAPI route", () => {
     });
     expect(Object.keys(body.paths)).toEqual([
       "/api/openapi",
+      "/api/keys/beta",
       "/api/archive/prepare",
       "/api/archive/confirm",
       "/api/archive/search",
@@ -32,11 +33,17 @@ describe("OpenAPI route", () => {
       "/api/mcp",
       "/api/resolve",
       "/api/search",
-      "/api/sources/health"
+      "/api/sources/health",
+      "/api/usage/stats"
     ]);
     expect(body.paths["/api/openapi"].get.operationId).toBe("getOpenApiContract");
     expect(body.paths["/api/openapi"].get.responses["200"].content["application/openapi+json"].schema.$ref).toBe(
       "#/components/schemas/OpenApiDocument"
+    );
+    expect(body.paths["/api/keys/beta"].post.operationId).toBe("issueBetaApiKey");
+    expect(body.paths["/api/keys/beta"].post.security).toEqual([{}]);
+    expect(body.paths["/api/keys/beta"].post.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/BetaApiKeyIssueResponse"
     );
     expect(body.paths["/api/search"].get.summary).toContain("Search external package sources");
     expect(body.paths["/api/search"].get["x-nipmod-agent-step"]).toBe("search");
@@ -119,6 +126,10 @@ describe("OpenAPI route", () => {
     expect(body.paths["/api/sources/health"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/SourceHealthResponse"
     );
+    expect(body.paths["/api/usage/stats"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/ApiUsageMetrics"
+    );
+    expect(body.paths["/api/usage/stats"].get.responses["403"].description).toBe("Structured API error.");
     expect(body.paths["/api/mcp"].post.responses["200"].content["application/json"].schema.oneOf).toHaveLength(2);
     expect(body.paths["/api/archive/search"].get.parameters[1].schema.maximum).toBe(100);
     expect(body.paths["/api/archive/confirm"].post.responses["422"].description).toContain("validation failed");
