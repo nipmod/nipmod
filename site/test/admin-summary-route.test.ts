@@ -1,0 +1,127 @@
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { GET } from "../app/api/admin/summary/route";
+import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+describe("admin summary route", () => {
+  test("requires an admin API key", async () => {
+    const response = await GET(new Request("https://nipmod.com/api/admin/summary"));
+    const body = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(body).toMatchObject({
+      code: "insufficient_api_access",
+      status: 403,
+      type: "dev.nipmod.api-error.v1"
+    });
+  });
+
+  test("returns private aggregate launch metrics without raw keys or hashes", async () => {
+    const rawKey = "nka_test_admin_key_for_summary_123456";
+    const hashSecret = "test-admin-summary-secret";
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/rest/v1/rpc/read_api_usage_metrics")) {
+        return Response.json(usageFixture());
+      }
+      if (url.includes("/rest/v1/package_intelligence_records?")) {
+        return Response.json([
+          {
+            display_name: "undici",
+            name: "undici",
+            original_url: "https://www.npmjs.com/package/undici",
+            source: "npm",
+            status: "external_indexed",
+            trust_score: 100,
+            updated_at: "2026-05-24T00:00:00.000Z",
+            version: "8.3.0"
+          }
+        ], { headers: { "content-range": "0-0/1" } });
+      }
+      if (url.includes("/rest/v1/api_keys?")) {
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: "self-serve/test-agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ], { headers: { "content-range": "0-0/1" } });
+      }
+      if (url.endsWith("/rest/v1/api_usage_events")) {
+        const row = JSON.parse(String(init?.body))[0];
+        expect(row.route).toBe("/api/admin/summary");
+        return new Response(null, { status: 204 });
+      }
+      return Response.json({ error: "unexpected test URL" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashSecret);
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", `ops:admin:${hash}`);
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await GET(
+      new Request("https://nipmod.com/api/admin/summary?hours=24&limit=5", {
+        headers: {
+          authorization: `Bearer ${rawKey}`,
+          "x-request-id": "admin-summary-test"
+        }
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      archive: {
+        totalRecords: 1
+      },
+      keys: {
+        activeCount: 1,
+        selfServeBetaCount: 1,
+        totalKeys: 1
+      },
+      type: "dev.nipmod.admin-summary.v1",
+      usage: {
+        totals: {
+          requestCount: 3
+        },
+        type: "dev.nipmod.api-usage-metrics.v1"
+      }
+    });
+    expect(JSON.stringify(body)).not.toContain(rawKey);
+    expect(JSON.stringify(body)).not.toContain(hash);
+    expect(JSON.stringify(body)).not.toContain("service-role-key");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+});
+
+function usageFixture() {
+  return {
+    accessTiers: [{ requestCount: 3, tier: "beta" }],
+    archiveWrites: { observedCount: 1, previewCount: 0, storedCount: 1 },
+    errors: [],
+    generatedAt: "2026-05-24T00:00:00.000Z",
+    installPlans: { allowedCount: 2, blockedCount: 0, observedCount: 2 },
+    packages: [{ packageHash: "a".repeat(64), requestCount: 2 }],
+    privacy: "aggregated metrics only",
+    routes: [{ avgDurationMs: 10, errorCount: 0, requestCount: 3, route: "/api/search" }],
+    since: "2026-05-23T00:00:00.000Z",
+    sources: [{ requestCount: 3, source: "npm" }],
+    totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
+    trustDecisions: [{ decision: "recommended", requestCount: 3 }],
+    trustRisks: [{ requestCount: 3, risk: "low" }],
+    type: "dev.nipmod.api-usage-metrics.v1"
+  };
+}

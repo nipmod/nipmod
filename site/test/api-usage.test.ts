@@ -44,17 +44,74 @@ describe("API usage logging", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       access_tier: "public",
+      archive_stored: null,
+      install_blocked: null,
       method: "GET",
       request_id: "usage-test",
       result_count: 0,
       route: "/api/search",
       sources: ["npm", "pypi"],
-      status: 200
+      status: 200,
+      trust_decision: null,
+      trust_risk: null
     });
     expect(JSON.stringify(rows[0])).not.toContain("secret package");
     expect(JSON.stringify(rows[0])).not.toContain("raw-user-agent");
     expect(JSON.stringify(rows[0])).not.toContain("203.0.113.20");
     expect(JSON.stringify(rows[0])).not.toContain("service-role-key");
+  });
+
+  test("stores decision, risk and blocked plan signals for recap metrics", async () => {
+    const rows: unknown[] = [];
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      rows.push(JSON.parse(String(init?.body))[0]);
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/install-plan?source=npm&name=unsafe-package", {
+      headers: {
+        "user-agent": "usage-plan-test",
+        "x-forwarded-for": "203.0.113.21"
+      }
+    });
+
+    await recordApiUsage(
+      {
+        access: publicApiAccess(),
+        context: createApiHttpContext(request),
+        request,
+        responseBody: {
+          package: {
+            name: "unsafe-package",
+            source: "npm",
+            trust: {
+              decision: "avoid",
+              risk: "high"
+            }
+          },
+          safety: {
+            blocked: true
+          },
+          type: "dev.nipmod.external-install-plan.v1"
+        },
+        route: "/api/install-plan",
+        status: 200
+      },
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+        NIPMOD_USAGE_HASH_SALT: "test-salt"
+      },
+      fetchMock
+    );
+
+    expect(rows[0]).toMatchObject({
+      install_blocked: true,
+      route: "/api/install-plan",
+      source: "npm",
+      trust_decision: "avoid",
+      trust_risk: "high"
+    });
+    expect(JSON.stringify(rows[0])).not.toContain("unsafe-package");
   });
 
   test("reports usage store status without secrets", () => {
@@ -71,14 +128,18 @@ describe("API usage logging", () => {
       calls.push({ body: String(init?.body), url: String(input) });
       return Response.json({
         accessTiers: [{ requestCount: 3, tier: "beta" }],
+        archiveWrites: { observedCount: 0, previewCount: 0, storedCount: 0 },
         errors: [],
         generatedAt: "2026-05-24T00:00:00.000Z",
+        installPlans: { allowedCount: 0, blockedCount: 0, observedCount: 0 },
         packages: [{ packageHash: "a".repeat(64), requestCount: 2 }],
         privacy: "aggregated metrics only",
         routes: [{ avgDurationMs: 10, errorCount: 0, requestCount: 3, route: "/api/search" }],
         since: "2026-05-23T00:00:00.000Z",
         sources: [{ requestCount: 3, source: "npm" }],
         totals: { avgDurationMs: 10, clientCount: 2, errorCount: 0, keyCount: 1, requestCount: 3 },
+        trustDecisions: [],
+        trustRisks: [],
         type: "dev.nipmod.api-usage-metrics.v1"
       });
     }) as unknown as typeof fetch;
@@ -114,11 +175,15 @@ describe("API usage logging", () => {
           client_hash: "client_hash",
           duration_ms: 12,
           error_code: null,
+          archive_stored: true,
+          install_blocked: false,
           package_hash: "c".repeat(64),
           route: "/api/search",
           source: null,
           sources: ["npm"],
-          status: 200
+          status: 200,
+          trust_decision: "recommended",
+          trust_risk: "low"
         },
         {
           access_tier: "public",
@@ -153,6 +218,7 @@ describe("API usage logging", () => {
         { requestCount: 1, tier: "public" }
       ],
       errors: [{ code: "invalid_source", requestCount: 1 }],
+      installPlans: { allowedCount: 1, blockedCount: 0, observedCount: 1 },
       sources: [{ requestCount: 2, source: "npm" }],
       totals: {
         clientCount: 2,
@@ -160,6 +226,8 @@ describe("API usage logging", () => {
         keyCount: 1,
         requestCount: 2
       },
+      trustDecisions: [{ decision: "recommended", requestCount: 1 }],
+      trustRisks: [{ requestCount: 1, risk: "low" }],
       type: "dev.nipmod.api-usage-metrics.v1"
     });
     expect(JSON.stringify(result)).not.toContain("service-role-key");

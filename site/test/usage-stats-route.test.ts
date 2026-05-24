@@ -29,14 +29,18 @@ describe("usage stats route", () => {
       if (url.endsWith("/rest/v1/rpc/read_api_usage_metrics")) {
         return Response.json({
           accessTiers: [{ requestCount: 2, tier: "admin" }],
+          archiveWrites: { observedCount: 0, previewCount: 0, storedCount: 0 },
           errors: [],
           generatedAt: "2026-05-24T00:00:00.000Z",
+          installPlans: { allowedCount: 0, blockedCount: 0, observedCount: 0 },
           packages: [{ packageHash: "b".repeat(64), requestCount: 1 }],
           privacy: "aggregated metrics only",
           routes: [{ avgDurationMs: 12, errorCount: 0, requestCount: 2, route: "/api/search" }],
           since: "2026-05-23T00:00:00.000Z",
           sources: [{ requestCount: 2, source: "npm" }],
           totals: { avgDurationMs: 12, clientCount: 1, errorCount: 0, keyCount: 1, requestCount: 2 },
+          trustDecisions: [],
+          trustRisks: [],
           type: "dev.nipmod.api-usage-metrics.v1"
         });
       }
