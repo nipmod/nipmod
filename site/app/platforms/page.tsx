@@ -13,7 +13,7 @@ export default function PlatformsPage() {
       description="The public product surface is source coverage plus one agent API. Native partner listings are not required for the core product path."
       eyebrow="Access"
       stats={[
-        { label: "Sources", value: "6" },
+        { label: "Public sources", value: "5" },
         { label: "API", value: "one surface" },
         { label: "Native integrations", value: "not required" }
       ]}
@@ -22,12 +22,12 @@ export default function PlatformsPage() {
       <DocsSection eyebrow="Current" title="What is live">
         <DocsGrid>
           <DocsCard label="Sources" title="Public package sources">
-            <p>npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive are queried through the source resolver.</p>
+            <p>npm, PyPI, GitHub, Hugging Face and MCP are queried through the source resolver. The Nipmod archive stores confirmed records separately.</p>
           </DocsCard>
           <DocsCard label="Access" title="Hosted API">
             <p>Agents use search, inspect and install plan endpoints instead of a custom integration for each agent host.</p>
           </DocsCard>
-          <DocsCard label="MCP" title="Read only hosted MCP">
+          <DocsCard label="MCP" title="Remote read-only MCP">
             <p>MCP hosts can use the same surface through JSON RPC without granting workspace write access.</p>
           </DocsCard>
         </DocsGrid>

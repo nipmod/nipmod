@@ -22,6 +22,7 @@ export const docsNavGroups: DocsNavGroup[] = [
     items: [
       { href: "/", label: "Home" },
       { href: "/quickstart", label: "Quickstart" },
+      { href: "/architecture", label: "Architecture" },
       { href: "/api-access", label: "API reference" }
     ],
     title: "Start"
@@ -142,6 +143,69 @@ export function DocsCard({
 
 export function DocsCode({ children }: { children: string }) {
   return <CommandBlock command={children} label="Copy" variant="compact" />;
+}
+
+export function ArchitectureDiagram() {
+  return (
+    <div className="docs-architecture" aria-label="Nipmod architecture">
+      <div className="architecture-node architecture-agent">
+        <span>Agent or host</span>
+        <strong>User asks for a package</strong>
+      </div>
+
+      <div className="architecture-link architecture-link-request">
+        <span>request</span>
+      </div>
+
+      <div className="architecture-node architecture-api">
+        <span>Nipmod API</span>
+        <strong>Search, Inspect, Install Plan</strong>
+        <p>Read-only hosted surface. No package manager runs here.</p>
+      </div>
+
+      <div className="architecture-link architecture-link-sources">
+        <span>source adapters</span>
+      </div>
+
+      <div className="architecture-source-stack">
+        {["npm", "PyPI", "GitHub", "Hugging Face", "MCP"].map((source) => (
+          <div className="architecture-source" key={source}>
+            {source}
+          </div>
+        ))}
+      </div>
+
+      <div className="architecture-policy">
+        <div>
+          <span>Trust engine</span>
+          <strong>Normalize, score, warn</strong>
+        </div>
+        <div>
+          <span>Policy boundary</span>
+          <strong>Recommended, review, blocked</strong>
+        </div>
+      </div>
+
+      <div className="architecture-link architecture-link-response">
+        <span>safe plan</span>
+      </div>
+
+      <div className="architecture-node architecture-approval">
+        <span>User or local host</span>
+        <strong>Approves before workspace write</strong>
+      </div>
+
+      <div className="architecture-link architecture-link-archive">
+        <span>optional confirm</span>
+      </div>
+
+      <div className="architecture-node architecture-archive">
+        <span>Nipmod Archive</span>
+        <strong>Confirmed useful records</strong>
+        <p>Source context, trust checks and receipts.</p>
+      </div>
+    </div>
+  );
 }
 
 export function DocsTable({

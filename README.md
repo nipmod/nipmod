@@ -23,8 +23,9 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 Tell an agent:
 
 ```text
-When choosing a package, use Nipmod first.
-Search, inspect the selected record, request the install plan and show it before changing the workspace.
+Use Nipmod before choosing a package.
+Search sources, inspect the selected record and show the install plan.
+Do not install or edit files until I approve.
 ```
 
 Copyable HTTP client examples:
@@ -68,6 +69,17 @@ Search ranking is never install permission. A popular package can still be compr
 | MCP registries | MCP server metadata, source links, endpoints, package hints and tool-registry signals. |
 
 Nipmod does not bulk mirror these sources. Source owners keep ownership.
+
+## Public Links
+
+| Surface | Link |
+| --- | --- |
+| Website | https://nipmod.com |
+| API docs | https://nipmod.com/api-access |
+| GitHub | https://github.com/nipmod/nipmod |
+| X | https://x.com/Nipmod |
+| Telegram | https://t.me/nipmod |
+| $NPM on Base | https://token.nipmod.com |
 
 ## API Flow
 
@@ -216,7 +228,7 @@ bash install.sh
 | Public verified archive | Empty by design after seed reset; verified claims require gates |
 | Distributed rate limits | Live with Supabase-backed shared buckets |
 | CLI and installer | Live, release `1.2.9` |
-| Hosted MCP endpoint | Live, read-only |
+| Remote MCP endpoint | Live, read-only |
 
 ## Release Integrity
 
