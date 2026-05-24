@@ -17,13 +17,9 @@ export default function Home() {
       ]}
       title="The package layer for AI agents."
     >
-      <DocsSection title="Current architecture">
-        <ArchitectureDiagram />
-      </DocsSection>
-
-      <DocsSection title="Public beta">
+      <DocsSection title="Public beta is open">
         <DocsGrid>
-          <DocsCard title="One API">
+          <DocsCard title="Use it now">
             <p>Agents can search supported sources, inspect exact records and request install plans through the same public API.</p>
           </DocsCard>
           <DocsCard title="Free with limits">
@@ -53,6 +49,10 @@ export default function Home() {
             <p>Useful confirmed discoveries can become reusable Nipmod archive records.</p>
           </DocsCard>
         </DocsGrid>
+      </DocsSection>
+
+      <DocsSection title="Current architecture">
+        <ArchitectureDiagram />
       </DocsSection>
 
       <DocsSection title="What to tell your agent">
@@ -126,9 +126,9 @@ export default function Home() {
       </DocsSection>
 
       <div className="docs-next">
-        <Link href="/architecture">Read architecture</Link>
-        <Link href="/api-access">Open API docs</Link>
         <Link href="/quickstart">Start quickstart</Link>
+        <Link href="/api-access">Open API docs</Link>
+        <Link href="/architecture">Read architecture</Link>
       </div>
     </DocsShell>
   );
