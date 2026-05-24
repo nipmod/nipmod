@@ -232,7 +232,7 @@ See [release process](docs/release-process.md) for the verification flow.
 ## Governance
 
 - Governance: [`GOVERNANCE.md`](GOVERNANCE.md)
-- Maintainer: [`@hazarxyz`](https://github.com/hazarxyz)
+- Maintainer: [Hazar Kemal Okur](https://github.com/hazarxyz)
 - Maintainer policy: [`MAINTAINERS.md`](MAINTAINERS.md)
 - Roadmap: [`ROADMAP.md`](ROADMAP.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
