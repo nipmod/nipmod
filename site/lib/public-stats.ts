@@ -294,7 +294,7 @@ function storeStatus(env: PublicStatsEnv) {
 type PublicStatsEventRow = {
   api_key_id: string | null;
   archive_stored: boolean | null;
-  client_hash: string;
+  client_hash: string | null;
   created_at: string;
   error_code: string | null;
   install_blocked: boolean | null;
@@ -321,7 +321,7 @@ function isPublicStatsEventRow(value: unknown): value is PublicStatsEventRow {
   return (
     (typeof row.api_key_id === "string" || row.api_key_id === null) &&
     (typeof row.archive_stored === "boolean" || row.archive_stored === null) &&
-    typeof row.client_hash === "string" &&
+    (typeof row.client_hash === "string" || row.client_hash === null) &&
     typeof row.created_at === "string" &&
     (typeof row.error_code === "string" || row.error_code === null) &&
     (typeof row.install_blocked === "boolean" || row.install_blocked === null) &&
