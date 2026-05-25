@@ -60,7 +60,11 @@ async function readKeyActivityMetrics(input: AdminSummaryInput, env: AdminSummar
 
   try {
     const [keyResponse, eventResponse] = await Promise.all([
-      supabaseFetch(env, "/rest/v1/api_keys?select=id,label,tier,status,created_at&limit=" + KEY_ROW_LIMIT, fetchImpl),
+      supabaseFetch(
+        env,
+        "/rest/v1/api_keys?select=id,label,tier,status,rate_limit_multiplier,created_at,expires_at,revoked_at&limit=" + KEY_ROW_LIMIT,
+        fetchImpl
+      ),
       supabaseFetch(env, keyActivityEventsPath(input.since), fetchImpl)
     ]);
     if (!keyResponse.ok || !eventResponse.ok) {

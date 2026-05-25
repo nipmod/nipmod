@@ -128,9 +128,12 @@ describe("admin summary route", () => {
         rows: [
           {
             keyId: "key_1234567890abcdef",
+            label: "self-serve/test-agent",
             requestCount: 1,
             routeSummary: "/api/install-plan 1",
-            sourceSummary: "npm 1"
+            sourceSummary: "npm 1",
+            status: "active",
+            tier: "beta"
           }
         ]
       },
