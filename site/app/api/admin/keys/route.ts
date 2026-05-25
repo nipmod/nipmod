@@ -37,7 +37,8 @@ export async function POST(request: Request): Promise<Response> {
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: 403
+        status: 403,
+        usageBody: adminKeysUsageError("insufficient_api_access")
       }
     );
   }
@@ -60,7 +61,8 @@ export async function POST(request: Request): Promise<Response> {
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: 400
+        status: 400,
+        usageBody: adminKeysUsageError("admin_key_action_rejected")
       }
     );
   }
@@ -91,7 +93,8 @@ export async function POST(request: Request): Promise<Response> {
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: result.status
+        status: result.status,
+        usageBody: adminKeysUsageError("admin_key_action_failed")
       }
     );
   }
@@ -100,7 +103,11 @@ export async function POST(request: Request): Promise<Response> {
     access: rateLimit.access,
     context,
     corsPolicy,
-    headers: rateLimit.headers
+    headers: rateLimit.headers,
+    usageBody: {
+      action: result.action,
+      type: "dev.nipmod.admin-key-action.v1"
+    }
   });
 }
 
@@ -155,4 +162,11 @@ function readOptionalInteger(value: unknown): number | null {
   }
   const parsed = typeof value === "number" ? value : typeof value === "string" ? Number.parseInt(value, 10) : NaN;
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function adminKeysUsageError(code: string) {
+  return {
+    code,
+    type: "dev.nipmod.api-error.v1"
+  };
 }

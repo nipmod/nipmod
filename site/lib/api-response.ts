@@ -13,6 +13,7 @@ export async function apiJsonWithUsage(
     headers?: Record<string, string>;
     route?: string;
     status?: number;
+    usageBody?: unknown;
   }
 ): Promise<Response> {
   const status = options.status ?? 200;
@@ -20,7 +21,7 @@ export async function apiJsonWithUsage(
     access: options.access,
     context: options.context,
     request,
-    responseBody: value,
+    responseBody: options.usageBody ?? value,
     route: options.route ?? new URL(request.url).pathname,
     status
   });
