@@ -6166,7 +6166,7 @@ body {
 }
 
 .admin-key-table {
-  min-width: 760px;
+  min-width: 1040px;
 }
 
 .admin-key-actions {
@@ -6178,6 +6178,24 @@ body {
 .admin-key-actions .button {
   min-height: 32px;
   padding: 0 10px;
+}
+
+.admin-key-label-input {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--docs-line-soft);
+  color: var(--docs-text);
+  font: inherit;
+  min-height: 32px;
+  padding: 6px 8px;
+  width: min(240px, 100%);
+}
+
+.admin-key-label-input:disabled {
+  color: var(--docs-faint);
+}
+
+.admin-key-stale-row td {
+  color: var(--docs-text);
 }
 
 .admin-empty {

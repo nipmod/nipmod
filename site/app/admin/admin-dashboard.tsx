@@ -3,6 +3,7 @@
 import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 
 type AdminSummary = Record<string, any>;
+type KeyManagementAction = "cleanup-stale-beta" | "pause" | "resume" | "revoke" | "update-label";
 
 const SESSION_KEY = "nipmod.admin.key";
 
@@ -14,6 +15,7 @@ export function AdminDashboard() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [keyActionLoading, setKeyActionLoading] = useState<string | null>(null);
+  const [labelDrafts, setLabelDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setAdminKey(sessionStorage.getItem(SESSION_KEY) ?? "");
@@ -26,6 +28,20 @@ export function AdminDashboard() {
   const keys = summary?.keys ?? {};
   const keyActivity = summary?.keyActivity ?? {};
   const generatedAt = useMemo(() => formatDate(summary?.generatedAt), [summary?.generatedAt]);
+
+  useEffect(() => {
+    const recentKeys = Array.isArray(keys.recentKeys) ? keys.recentKeys : [];
+    const staleKeys = Array.isArray(keys.staleKeys) ? keys.staleKeys : [];
+    setLabelDrafts((current) => {
+      const next = { ...current };
+      for (const key of [...recentKeys, ...staleKeys]) {
+        if (typeof key?.id === "string" && typeof key?.label === "string") {
+          next[key.id] = key.label;
+        }
+      }
+      return next;
+    });
+  }, [keys.recentKeys, keys.staleKeys]);
 
   async function loadDashboard(event?: FormEvent) {
     event?.preventDefault();
@@ -59,19 +75,26 @@ export function AdminDashboard() {
     setAdminKey("");
     setNotice(null);
     setSummary(null);
+    setLabelDrafts({});
   }
 
-  async function manageKey(action: "cleanup-stale-beta" | "pause" | "revoke", keyId?: string) {
+  async function manageKey(action: KeyManagementAction, keyId?: string, label?: string) {
     if (!adminKey.trim()) {
       setError("Admin credential required.");
       return;
     }
-    const confirmed = window.confirm(
-      action === "cleanup-stale-beta"
-        ? "Disable active self-serve beta keys older than 30 days?"
-        : `${action === "pause" ? "Pause" : "Revoke"} ${keyId}?`
-    );
-    if (!confirmed) {
+    if (action !== "update-label") {
+      const confirmed = window.confirm(
+        action === "cleanup-stale-beta"
+          ? "Revoke active self-serve beta keys older than 30 days?"
+          : `${action === "pause" ? "Pause" : action === "resume" ? "Resume" : "Revoke"} ${keyId}?`
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+    if (action === "update-label" && !label?.trim()) {
+      setError("Key label required.");
       return;
     }
     const loadingKey = `${action}:${keyId ?? "all"}`;
@@ -80,7 +103,13 @@ export function AdminDashboard() {
     setNotice(null);
     try {
       const response = await fetch("/api/admin/keys", {
-        body: JSON.stringify(action === "cleanup-stale-beta" ? { action, olderThanHours: 720 } : { action, keyId }),
+        body: JSON.stringify(
+          action === "cleanup-stale-beta"
+            ? { action, olderThanHours: 720 }
+            : action === "update-label"
+              ? { action, keyId, label: label?.trim() }
+              : { action, keyId }
+        ),
         headers: {
           authorization: `Bearer ${adminKey.trim()}`,
           "content-type": "application/json"
@@ -91,7 +120,7 @@ export function AdminDashboard() {
       if (!response.ok) {
         throw new Error(body?.error ?? `Request failed with ${response.status}`);
       }
-      setNotice(`${body.affectedCount ?? 0} key${body.affectedCount === 1 ? "" : "s"} updated.`);
+      setNotice(`${body.affectedCount ?? 0} key${body.affectedCount === 1 ? "" : "s"} updated by ${body.action ?? action}.`);
       await loadDashboard();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Key management request failed.");
@@ -154,6 +183,7 @@ export function AdminDashboard() {
             <Metric label="Archive records" value={archive.totalRecords} />
             <Metric label="Active keys" value={keys.activeCount} />
             <Metric label="Self serve beta keys" value={keys.selfServeBetaCount} />
+            <Metric label="Stale beta keys" value={keys.staleBetaCount} />
             <Metric label="External active keys" value={keyActivity.externalKeyCount} />
           </section>
 
@@ -224,7 +254,8 @@ export function AdminDashboard() {
               <KeyValueRows
                 rows={[
                   ["Active external keys", keyActivity.externalKeyCount],
-                  ["Admin key requests excluded", keyActivity.excludedAdminKeyRequestCount]
+                  ["Admin key requests excluded", keyActivity.excludedAdminKeyRequestCount],
+                  ["Stale beta keys", keys.staleBetaCount]
                 ]}
               />
             </Panel>
@@ -273,8 +304,19 @@ export function AdminDashboard() {
               </div>
               <KeyManagementTable
                 actionLoading={keyActionLoading}
+                labelDrafts={labelDrafts}
+                onLabelChange={(keyId, label) => setLabelDrafts((current) => ({ ...current, [keyId]: label }))}
                 onAction={manageKey}
                 rows={keys.recentKeys}
+              />
+            </Panel>
+            <Panel title="Stale beta keys">
+              <KeyManagementTable
+                actionLoading={keyActionLoading}
+                labelDrafts={labelDrafts}
+                onLabelChange={(keyId, label) => setLabelDrafts((current) => ({ ...current, [keyId]: label }))}
+                onAction={manageKey}
+                rows={keys.staleKeys}
               />
             </Panel>
           </section>
@@ -292,11 +334,15 @@ export function AdminDashboard() {
 
 function KeyManagementTable({
   actionLoading,
+  labelDrafts,
   onAction,
+  onLabelChange,
   rows
 }: {
   actionLoading: string | null;
-  onAction: (action: "pause" | "revoke", keyId: string) => void;
+  labelDrafts: Record<string, string>;
+  onAction: (action: KeyManagementAction, keyId?: string, label?: string) => void;
+  onLabelChange: (keyId: string, label: string) => void;
   rows: any[] | undefined;
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
@@ -312,6 +358,8 @@ function KeyManagementTable({
             <th>Label</th>
             <th>Tier</th>
             <th>Status</th>
+            <th>Age</th>
+            <th>Stale</th>
             <th>Created</th>
             <th>Manage</th>
           </tr>
@@ -320,15 +368,36 @@ function KeyManagementTable({
           {safeRows.map((row, index) => {
             const id = typeof row.id === "string" ? row.id : "";
             const active = row.status === "active";
+            const paused = row.status === "paused";
+            const labelDraft = id ? (labelDrafts[id] ?? row.label ?? "") : "";
+            const labelChanged = id && typeof row.label === "string" && labelDraft !== row.label;
             return (
-              <tr key={id || index}>
+              <tr className={row.stale ? "admin-key-stale-row" : undefined} key={id || index}>
                 <td>{formatCell(row.id)}</td>
-                <td>{formatCell(row.label)}</td>
+                <td>
+                  <input
+                    aria-label={`Label for ${id || "key"}`}
+                    className="admin-key-label-input"
+                    disabled={!id || actionLoading !== null}
+                    onChange={(event) => onLabelChange(id, event.target.value)}
+                    value={labelDraft}
+                  />
+                </td>
                 <td>{formatCell(row.tier)}</td>
                 <td>{formatCell(row.status)}</td>
+                <td>{row.ageDays === null || row.ageDays === undefined ? "0" : `${formatNumber(row.ageDays)}d`}</td>
+                <td>{row.stale ? "yes" : ""}</td>
                 <td>{formatCell(row.createdAt)}</td>
                 <td>
                   <div className="admin-key-actions">
+                    <button
+                      className="button button-ghost button-small"
+                      disabled={!labelChanged || actionLoading !== null || !id}
+                      onClick={() => onAction("update-label", id, labelDraft)}
+                      type="button"
+                    >
+                      {actionLoading === `update-label:${id}` ? "Saving" : "Save"}
+                    </button>
                     <button
                       className="button button-ghost button-small"
                       disabled={!active || actionLoading !== null || !id}
@@ -339,7 +408,15 @@ function KeyManagementTable({
                     </button>
                     <button
                       className="button button-ghost button-small"
-                      disabled={!active || actionLoading !== null || !id}
+                      disabled={!paused || actionLoading !== null || !id}
+                      onClick={() => onAction("resume", id)}
+                      type="button"
+                    >
+                      {actionLoading === `resume:${id}` ? "Resuming" : "Resume"}
+                    </button>
+                    <button
+                      className="button button-ghost button-small"
+                      disabled={row.status === "revoked" || actionLoading !== null || !id}
                       onClick={() => onAction("revoke", id)}
                       type="button"
                     >

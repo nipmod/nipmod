@@ -7,7 +7,7 @@ const KEY_SELECT = "id,label,tier,status,rate_limit_multiplier,created_at,expire
 const DEFAULT_STALE_BETA_HOURS = 720;
 const MAX_STALE_BETA_HOURS = 8_760;
 
-export type AdminKeyAction = "cleanup-stale-beta" | "pause" | "revoke";
+export type AdminKeyAction = "cleanup-stale-beta" | "pause" | "resume" | "revoke" | "update-label";
 
 export type AdminKeyRecord = {
   createdAt: string;
@@ -39,9 +39,9 @@ export type AdminKeyActionResult =
       status: number;
     };
 
-export async function revokeAdminKey(
+export async function updateAdminKeyStatus(
   input: {
-    action: "pause" | "revoke";
+    action: "pause" | "resume" | "revoke";
     currentKeyId?: string | null;
     keyId: string;
   },
@@ -64,9 +64,15 @@ export async function revokeAdminKey(
   const params = new URLSearchParams({
     id: `eq.${input.keyId}`,
     select: KEY_SELECT,
-    status: "eq.active"
+    status: input.action === "resume" ? "eq.paused" : "eq.active"
   });
-  const response = await patchApiKeys(env, params, { revoked_at: now, status: "revoked" }, fetchImpl);
+  const patch =
+    input.action === "pause"
+      ? { revoked_at: null, status: "paused" }
+      : input.action === "resume"
+        ? { revoked_at: null, status: "active" }
+        : { revoked_at: now, status: "revoked" };
+  const response = await patchApiKeys(env, params, patch, fetchImpl);
   if (!response.ok) {
     return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
   }
@@ -75,6 +81,42 @@ export async function revokeAdminKey(
     return actionFailure("api_key_not_found_or_inactive", "API key was not found or is already inactive", 404, false);
   }
   return adminKeyAction(input.action, keys, status);
+}
+
+export async function updateAdminKeyLabel(
+  input: {
+    keyId: string;
+    label: string;
+  },
+  env: AdminKeyEnv = process.env,
+  fetchImpl: typeof fetch = fetch
+): Promise<AdminKeyActionResult> {
+  if (!isKeyId(input.keyId)) {
+    return actionFailure("invalid_key_id", "keyId must be a Nipmod API key id", 400, false);
+  }
+  const label = sanitizeEditableLabel(input.label);
+  if (!label) {
+    return actionFailure("invalid_key_label", "label must contain 1 to 80 safe characters", 400, false);
+  }
+
+  const status = keyStoreStatus(env);
+  if (!status.configured) {
+    return actionFailure("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
+  }
+
+  const params = new URLSearchParams({
+    id: `eq.${input.keyId}`,
+    select: KEY_SELECT
+  });
+  const response = await patchApiKeys(env, params, { label }, fetchImpl);
+  if (!response.ok) {
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+  }
+  const keys = await readKeyRows(response);
+  if (keys.length === 0) {
+    return actionFailure("api_key_not_found", "API key was not found", 404, false);
+  }
+  return adminKeyAction("update-label", keys, status);
 }
 
 export async function cleanupStaleBetaKeys(
@@ -221,4 +263,8 @@ function clampStaleHours(value: number | null | undefined): number {
 
 function isKeyId(value: string): boolean {
   return /^key_[a-f0-9]{16,32}$/.test(value);
+}
+
+function sanitizeEditableLabel(value: string): string {
+  return value.replace(/[^\w./-]/g, "").slice(0, 80);
 }
