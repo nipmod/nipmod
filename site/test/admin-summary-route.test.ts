@@ -57,6 +57,36 @@ describe("admin summary route", () => {
           }
         ], { headers: { "content-range": "0-0/1" } });
       }
+      if (url.includes("/rest/v1/api_usage_events?")) {
+        return Response.json([
+          {
+            access_tier: "beta",
+            api_key_id: "key_1234567890abcdef",
+            archive_stored: false,
+            created_at: "2026-05-24T01:00:00.000Z",
+            error_code: null,
+            install_blocked: false,
+            route: "/api/install-plan",
+            source: "npm",
+            sources: ["npm"],
+            status: 200,
+            traffic_origin: "authenticated_beta"
+          },
+          {
+            access_tier: "admin",
+            api_key_id: "admin_password",
+            archive_stored: null,
+            created_at: "2026-05-24T01:05:00.000Z",
+            error_code: null,
+            install_blocked: null,
+            route: "/api/admin/summary",
+            source: null,
+            sources: null,
+            status: 200,
+            traffic_origin: "authenticated_admin"
+          }
+        ]);
+      }
       if (url.endsWith("/rest/v1/api_usage_events")) {
         const row = JSON.parse(String(init?.body))[0];
         expect(row.route).toBe("/api/admin/summary");
@@ -92,6 +122,18 @@ describe("admin summary route", () => {
         selfServeBetaCount: 1,
         totalKeys: 1
       },
+      keyActivity: {
+        excludedAdminKeyRequestCount: 1,
+        externalKeyCount: 1,
+        rows: [
+          {
+            keyId: "key_1234567890abcdef",
+            requestCount: 1,
+            routeSummary: "/api/install-plan 1",
+            sourceSummary: "npm 1"
+          }
+        ]
+      },
       type: "dev.nipmod.admin-summary.v1",
       usage: {
         totals: {
@@ -103,7 +145,7 @@ describe("admin summary route", () => {
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
     expect(JSON.stringify(body)).not.toContain("service-role-key");
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
   });
 });
 
