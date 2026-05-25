@@ -6,6 +6,8 @@ const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const PUBLIC_STATS_EVENT_LIMIT = 5_000;
 const PUBLIC_STATS_TIMEOUT_MS = 1_500;
+const PUBLIC_STATS_EVENT_SELECT =
+  "created_at,api_key_id,client_hash,route,status,source,sources,error_code,traffic_origin,trust_decision,trust_risk,install_blocked,archive_stored";
 
 export interface PublicStatsInput {
   hours: number;
@@ -77,12 +79,20 @@ async function readUsageEvents(
   env: PublicStatsEnv,
   fetchImpl: typeof fetch
 ): Promise<{ ok: true; rows: PublicStatsEventRow[] } | { ok: false; rows: [] }> {
-  const response = await supabaseFetch(env, publicStatsEventsPath(since), fetchImpl);
-  if (!response.ok) {
+  const responses = await Promise.all([
+    supabaseFetch(env, publicStatsEventsPath(since, "external"), fetchImpl),
+    supabaseFetch(env, publicStatsEventsPath(since, "internal"), fetchImpl),
+    supabaseFetch(env, publicStatsEventsPath(since, "unknown-null"), fetchImpl),
+    supabaseFetch(env, publicStatsEventsPath(since, "unknown-legacy"), fetchImpl)
+  ]);
+  if (responses.some((response) => !response.ok)) {
     return { ok: false, rows: [] };
   }
-  const rows = await response.json();
-  return { ok: true, rows: Array.isArray(rows) ? rows.filter(isPublicStatsEventRow) : [] };
+  const groups = await Promise.all(responses.map((response) => response.json()));
+  return {
+    ok: true,
+    rows: groups.flatMap((rows) => (Array.isArray(rows) ? rows.filter(isPublicStatsEventRow) : []))
+  };
 }
 
 async function readArchiveStats(env: PublicStatsEnv, fetchImpl: typeof fetch) {
@@ -250,14 +260,22 @@ function emptyArchiveStats() {
   };
 }
 
-function publicStatsEventsPath(since: Date): string {
+function publicStatsEventsPath(since: Date, bucket: "external" | "internal" | "unknown-null" | "unknown-legacy"): string {
   const params = new URLSearchParams({
     created_at: `gte.${since.toISOString()}`,
     limit: String(PUBLIC_STATS_EVENT_LIMIT),
     order: "created_at.desc",
-    select:
-      "created_at,api_key_id,client_hash,route,status,source,sources,error_code,traffic_origin,trust_decision,trust_risk,install_blocked,archive_stored"
+    select: PUBLIC_STATS_EVENT_SELECT
   });
+  if (bucket === "external") {
+    params.set("traffic_origin", "in.(public,authenticated_beta,authenticated_partner)");
+  } else if (bucket === "internal") {
+    params.set("traffic_origin", "in.(authenticated_admin,internal_canary,internal_monitor,internal_operator)");
+  } else if (bucket === "unknown-null") {
+    params.set("traffic_origin", "is.null");
+  } else {
+    params.set("traffic_origin", "eq.unknown_legacy");
+  }
   return `/rest/v1/api_usage_events?${params.toString()}`;
 }
 
