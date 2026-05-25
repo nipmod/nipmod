@@ -24,6 +24,7 @@ describe("OpenAPI route", () => {
     expect(Object.keys(body.paths)).toEqual([
       "/api/openapi",
       "/api/admin/summary",
+      "/api/admin/keys",
       "/api/keys/beta",
       "/api/archive/prepare",
       "/api/archive/confirm",
@@ -42,6 +43,10 @@ describe("OpenAPI route", () => {
       "#/components/schemas/OpenApiDocument"
     );
     expect(body.paths["/api/admin/summary"].get.operationId).toBe("getAdminSummary");
+    expect(body.paths["/api/admin/keys"].post.operationId).toBe("manageAdminApiKeys");
+    expect(body.paths["/api/admin/keys"].post.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/AdminKeyActionResponse"
+    );
     expect(body.paths["/api/keys/beta"].post.operationId).toBe("issueBetaApiKey");
     expect(body.paths["/api/keys/beta"].post.security).toEqual([{}]);
     expect(body.paths["/api/keys/beta"].post.responses["200"].content["application/json"].schema.$ref).toBe(

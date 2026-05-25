@@ -11,7 +11,9 @@ export function AdminDashboard() {
   const [hours, setHours] = useState("24");
   const [summary, setSummary] = useState<AdminSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [keyActionLoading, setKeyActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     setAdminKey(sessionStorage.getItem(SESSION_KEY) ?? "");
@@ -54,7 +56,47 @@ export function AdminDashboard() {
   function clearKey() {
     sessionStorage.removeItem(SESSION_KEY);
     setAdminKey("");
+    setNotice(null);
     setSummary(null);
+  }
+
+  async function manageKey(action: "cleanup-stale-beta" | "pause" | "revoke", keyId?: string) {
+    if (!adminKey.trim()) {
+      setError("Admin key required.");
+      return;
+    }
+    const confirmed = window.confirm(
+      action === "cleanup-stale-beta"
+        ? "Disable active self-serve beta keys older than 30 days?"
+        : `${action === "pause" ? "Pause" : "Revoke"} ${keyId}?`
+    );
+    if (!confirmed) {
+      return;
+    }
+    const loadingKey = `${action}:${keyId ?? "all"}`;
+    setKeyActionLoading(loadingKey);
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await fetch("/api/admin/keys", {
+        body: JSON.stringify(action === "cleanup-stale-beta" ? { action, olderThanHours: 720 } : { action, keyId }),
+        headers: {
+          authorization: `Bearer ${adminKey.trim()}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body?.error ?? `Request failed with ${response.status}`);
+      }
+      setNotice(`${body.affectedCount ?? 0} key${body.affectedCount === 1 ? "" : "s"} updated.`);
+      await loadDashboard();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Key management request failed.");
+    } finally {
+      setKeyActionLoading(null);
+    }
   }
 
   return (
@@ -93,6 +135,7 @@ export function AdminDashboard() {
           </div>
         </form>
         {error ? <p className="admin-error">{error}</p> : null}
+        {notice ? <p className="admin-notice">{notice}</p> : null}
         {generatedAt ? <p className="admin-generated">Generated {generatedAt}</p> : null}
       </section>
 
@@ -191,15 +234,20 @@ export function AdminDashboard() {
               />
             </Panel>
             <Panel title="Recent keys">
-              <DataTable
+              <div className="admin-panel-toolbar">
+                <button
+                  className="button button-ghost button-small"
+                  disabled={keyActionLoading !== null}
+                  onClick={() => manageKey("cleanup-stale-beta")}
+                  type="button"
+                >
+                  {keyActionLoading === "cleanup-stale-beta:all" ? "Cleaning" : "Cleanup beta 30d"}
+                </button>
+              </div>
+              <KeyManagementTable
+                actionLoading={keyActionLoading}
+                onAction={manageKey}
                 rows={keys.recentKeys}
-                columns={[
-                  ["id", "Key ID"],
-                  ["label", "Label"],
-                  ["tier", "Tier"],
-                  ["status", "Status"],
-                  ["createdAt", "Created"]
-                ]}
               />
             </Panel>
           </section>
@@ -212,6 +260,72 @@ export function AdminDashboard() {
         </div>
       ) : null}
     </main>
+  );
+}
+
+function KeyManagementTable({
+  actionLoading,
+  onAction,
+  rows
+}: {
+  actionLoading: string | null;
+  onAction: (action: "pause" | "revoke", keyId: string) => void;
+  rows: any[] | undefined;
+}) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  if (safeRows.length === 0) {
+    return <p className="admin-empty">No data yet.</p>;
+  }
+  return (
+    <div className="admin-table-wrap">
+      <table className="admin-table admin-key-table">
+        <thead>
+          <tr>
+            <th>Key ID</th>
+            <th>Label</th>
+            <th>Tier</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Manage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {safeRows.map((row, index) => {
+            const id = typeof row.id === "string" ? row.id : "";
+            const active = row.status === "active";
+            return (
+              <tr key={id || index}>
+                <td>{formatCell(row.id)}</td>
+                <td>{formatCell(row.label)}</td>
+                <td>{formatCell(row.tier)}</td>
+                <td>{formatCell(row.status)}</td>
+                <td>{formatCell(row.createdAt)}</td>
+                <td>
+                  <div className="admin-key-actions">
+                    <button
+                      className="button button-ghost button-small"
+                      disabled={!active || actionLoading !== null || !id}
+                      onClick={() => onAction("pause", id)}
+                      type="button"
+                    >
+                      {actionLoading === `pause:${id}` ? "Pausing" : "Pause"}
+                    </button>
+                    <button
+                      className="button button-ghost button-small"
+                      disabled={!active || actionLoading !== null || !id}
+                      onClick={() => onAction("revoke", id)}
+                      type="button"
+                    >
+                      {actionLoading === `revoke:${id}` ? "Revoking" : "Revoke"}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

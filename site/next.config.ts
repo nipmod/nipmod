@@ -21,10 +21,17 @@ const csp = [
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   scriptSrc,
+  "script-src-attr 'none'",
+  "upgrade-insecure-requests",
   connectSrc
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    sri: {
+      algorithm: "sha256"
+    }
+  },
   async headers() {
     return [
       {

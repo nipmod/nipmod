@@ -1,5 +1,5 @@
 import { hasApiAccessTier } from "../../../../lib/api-auth";
-import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { adminCorsPolicy, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import { readAdminSummary } from "../../../../lib/admin-summary";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
@@ -8,12 +8,13 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export function OPTIONS(request: Request): Response {
-  return apiOptions(createApiHttpContext(request));
+  return apiOptions(createApiHttpContext(request), { corsPolicy: adminCorsPolicy(request) });
 }
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "admin-summary", windowMs: 60_000 }, context);
+  const corsPolicy = adminCorsPolicy(request);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "admin-summary", windowMs: 60_000 }, context, { corsPolicy });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -32,6 +33,7 @@ export async function GET(request: Request): Promise<Response> {
       {
         access: rateLimit.access,
         context,
+        corsPolicy,
         headers: rateLimit.headers,
         status: 403
       }
@@ -45,6 +47,7 @@ export async function GET(request: Request): Promise<Response> {
   return apiJsonWithUsage(request, summary, {
     access: rateLimit.access,
     context,
+    corsPolicy,
     headers: rateLimit.headers
   });
 }

@@ -6001,7 +6001,7 @@ body {
   max-width: 900px;
 }
 
-.admin-hero > p:not(.admin-eyebrow):not(.admin-generated):not(.admin-error) {
+.admin-hero > p:not(.admin-eyebrow):not(.admin-generated):not(.admin-error):not(.admin-notice) {
   color: var(--docs-muted);
   font-family: var(--docs-serif);
   font-size: 18px;
@@ -6048,6 +6048,12 @@ body {
 
 .admin-error {
   color: #ffb4a8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-notice {
+  color: #a8e6c0;
   font-size: 14px;
   margin: 0;
 }
@@ -6123,6 +6129,11 @@ body {
   margin: 0;
 }
 
+.admin-panel-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .admin-table-wrap {
   overflow-x: auto;
 }
@@ -6152,6 +6163,21 @@ body {
 
 .admin-table td {
   color: var(--docs-muted);
+}
+
+.admin-key-table {
+  min-width: 760px;
+}
+
+.admin-key-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-key-actions .button {
+  min-height: 32px;
+  padding: 0 10px;
 }
 
 .admin-empty {

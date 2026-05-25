@@ -1,5 +1,5 @@
 import { webcrypto } from "node:crypto";
-import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
+import { type ApiCorsPolicy, type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 import { publicApiAccess, readApiAccess, readApiAccessAsync, type ApiAccess } from "./api-auth";
 
 type RateLimitPolicy = {
@@ -49,6 +49,7 @@ type DistributedRateLimitResult =
       fallbackReason: RateLimitFallbackReason | null;
     };
 type RateLimitCheckOptions = {
+  corsPolicy?: ApiCorsPolicy | undefined;
   env?: RateLimitEnv;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
@@ -84,7 +85,9 @@ export async function checkApiRateLimitAsync(
   context: ApiHttpContext = createApiHttpContext(request),
   options: RateLimitCheckOptions = {}
 ): Promise<RateLimitResult> {
-  const access = await readApiAccessAsync(request, context, options.env, options.fetchImpl);
+  const access = await readApiAccessAsync(request, context, options.env, options.fetchImpl, options.timeoutMs, {
+    corsPolicy: options.corsPolicy
+  });
   if (!access.ok) {
     return {
       access: access.access,
@@ -106,11 +109,12 @@ export async function checkApiRateLimitAsync(
       effectivePolicy,
       remaining: distributed.row.remaining,
       resetAt: Date.parse(distributed.row.reset_at),
-      store: "supabase"
+      store: "supabase",
+      corsPolicy: options.corsPolicy
     });
   }
 
-  return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback", distributed.fallbackReason);
+  return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback", distributed.fallbackReason, options.corsPolicy);
 }
 
 export function rateLimitStoreStatus(env: RateLimitEnv = process.env): {
@@ -136,7 +140,8 @@ function checkRateLimitForAccess(
   context: ApiHttpContext,
   access: ApiAccess,
   store: RateLimitStore,
-  fallbackReason: RateLimitFallbackReason | null = null
+  fallbackReason: RateLimitFallbackReason | null = null,
+  corsPolicy?: ApiCorsPolicy
 ): RateLimitResult {
   const now = Date.now();
   pruneBuckets(now);
@@ -159,7 +164,8 @@ function checkRateLimitForAccess(
     remaining,
     resetAt: bucket.resetAt,
     store,
-    fallbackReason
+    fallbackReason,
+    corsPolicy
   });
 }
 
@@ -173,6 +179,7 @@ function rateLimitResultFromBucket(input: {
   remaining: number;
   resetAt: number;
   store: RateLimitStore;
+  corsPolicy?: ApiCorsPolicy | undefined;
   fallbackReason?: RateLimitFallbackReason | null;
 }): RateLimitResult {
   const resetSeconds = Math.max(1, Math.ceil((input.resetAt - Date.now()) / 1000));
@@ -198,6 +205,7 @@ function rateLimitResultFromBucket(input: {
         },
         {
           context: input.context,
+          corsPolicy: input.corsPolicy,
           headers: {
             ...headers,
             "retry-after": String(resetSeconds)
