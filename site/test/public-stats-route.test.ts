@@ -11,7 +11,7 @@ describe("public stats route", () => {
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/rest/v1/api_usage_events?")) {
-        return Response.json([
+        const events = [
           {
             api_key_id: "key_external_beta",
             archive_stored: false,
@@ -87,7 +87,18 @@ describe("public stats route", () => {
             trust_decision: null,
             trust_risk: null
           }
-        ]);
+        ];
+        const trafficOrigin = new URL(url).searchParams.get("traffic_origin");
+        if (trafficOrigin === "in.(public,authenticated_beta,authenticated_partner)") {
+          return Response.json(events.filter((event) => event.traffic_origin === "public" || event.traffic_origin === "authenticated_beta" || event.traffic_origin === "authenticated_partner"));
+        }
+        if (trafficOrigin === "in.(authenticated_admin,internal_canary,internal_monitor,internal_operator)") {
+          return Response.json(events.filter((event) => event.traffic_origin === "authenticated_admin"));
+        }
+        if (trafficOrigin === "is.null" || trafficOrigin === "eq.unknown_legacy") {
+          return Response.json([]);
+        }
+        return Response.json({ error: "unexpected traffic origin filter" }, { status: 500 });
       }
       if (url.includes("/rest/v1/package_intelligence_records?")) {
         return Response.json([
@@ -145,6 +156,6 @@ describe("public stats route", () => {
     expect(JSON.stringify(body)).not.toContain("service-role-key");
     expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/usage/stats" }));
     expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/admin/summary" }));
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(7);
   });
 });
