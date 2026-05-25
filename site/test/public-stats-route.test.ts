@@ -56,6 +56,21 @@ describe("public stats route", () => {
             traffic_origin: "authenticated_admin",
             trust_decision: null,
             trust_risk: null
+          },
+          {
+            api_key_id: null,
+            archive_stored: null,
+            client_hash: "client-admin-public",
+            created_at: "2026-05-25T00:03:00.000Z",
+            error_code: "insufficient_api_access",
+            install_blocked: null,
+            route: "/api/usage/stats",
+            source: null,
+            sources: null,
+            status: 403,
+            traffic_origin: "public",
+            trust_decision: null,
+            trust_risk: null
           }
         ]);
       }
@@ -94,7 +109,8 @@ describe("public stats route", () => {
         activeCount: 1
       },
       excluded: {
-        internalRequestCount: 1,
+        controlPlaneRequestCount: 2,
+        internalRequestCount: 0,
         unknownLegacyRequestCount: 0
       },
       external: {
@@ -111,6 +127,8 @@ describe("public stats route", () => {
     expect(JSON.stringify(body)).not.toContain("key_external_beta");
     expect(JSON.stringify(body)).not.toContain("admin_password");
     expect(JSON.stringify(body)).not.toContain("service-role-key");
+    expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/usage/stats" }));
+    expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/admin/summary" }));
     expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 });
