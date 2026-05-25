@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, type CSSProperties, type ReactNode, useEffect, useMemo, useState } from "react";
 
 type AdminSummary = Record<string, any>;
 type KeyManagementAction = "cleanup-stale-beta" | "pause" | "resume" | "revoke" | "update-label";
@@ -187,12 +187,79 @@ export function AdminDashboard() {
             <Metric label="External active keys" value={keyActivity.externalKeyCount} />
           </section>
 
+          <section className="admin-analytics-grid" aria-label="Visual analysis">
+            <Panel
+              description="HTTP requests received by Nipmod API routes in the selected window. This is the closest count to agent or client calls into Nipmod."
+              title="Traffic mix"
+            >
+              <SplitBar
+                segments={[
+                  { label: "External", value: traffic.externalRequestCount },
+                  { label: "Internal", value: traffic.internalRequestCount },
+                  { label: "Legacy", value: traffic.unknownLegacyRequestCount }
+                ]}
+              />
+              <RatioGrid
+                rows={[
+                  ["External share", percentLabel(traffic.externalRequestCount, totals.requestCount)],
+                  ["Error rate", percentLabel(totals.errorCount, totals.requestCount)],
+                  ["Keyed share", percentLabel(traffic.authenticatedRequestCount, traffic.externalRequestCount)],
+                  ["Avg response", `${formatNumber(totals.avgDurationMs)}ms`]
+                ]}
+              />
+            </Panel>
+            <Panel description="Top API routes by received request count. One /api/search call is one route request." title="Route volume">
+              <BarList labelKey="route" rows={usage.routes} valueKey="requestCount" />
+            </Panel>
+            <Panel
+              description="Source touches are source-tagged API events, not unique users. One search can touch npm, PyPI, GitHub and more in the same request."
+              title="Source touches"
+            >
+              <BarList labelKey="source" rows={usage.sources} valueKey="requestCount" valueLabel="touches" />
+            </Panel>
+            <Panel description="Install-plan and archive outcomes from events that emitted those safety signals." title="Safety outcomes">
+              <OutcomeBars
+                rows={[
+                  ["Install allowed", usage.installPlans?.allowedCount],
+                  ["Install blocked", usage.installPlans?.blockedCount],
+                  ["Archive stored", usage.archiveWrites?.storedCount],
+                  ["Archive preview", usage.archiveWrites?.previewCount]
+                ]}
+              />
+            </Panel>
+            <Panel description="Trust decisions and risk bands emitted by inspect/search/install-plan flows." title="Trust signal mix">
+              <BarList labelKey="decision" rows={usage.trustDecisions} valueKey="requestCount" />
+              <BarList labelKey="risk" rows={usage.trustRisks} valueKey="requestCount" />
+            </Panel>
+            <Panel description="Operational key state. Stale beta means active self-serve beta key older than 30 days." title="Key health">
+              <RatioGrid
+                rows={[
+                  ["Active keys", keys.activeCount],
+                  ["Self serve beta", keys.selfServeBetaCount],
+                  ["Stale beta", keys.staleBetaCount],
+                  ["External active", keyActivity.externalKeyCount]
+                ]}
+              />
+            </Panel>
+            <Panel title="How to read these numbers">
+              <DefinitionRows
+                rows={[
+                  ["Request", "One HTTP call to a Nipmod API route, for example /api/search or /api/install-plan."],
+                  ["External request", "A public, beta or partner call. Admin, monitors and canaries are separated."],
+                  ["Source touch", "A request tagged with a source. One request can count against several sources."],
+                  ["Keyed caller", "Distinct key ids seen in usage events, not raw keys and not guaranteed unique humans."],
+                  ["Client", "Privacy-limited client hash count. Raw IPs and user agents are not returned."]
+                ]}
+              />
+            </Panel>
+          </section>
+
           <section className="admin-grid">
             <Panel title="Routes">
               <DataTable rows={usage.routes} columns={[["route", "Route"], ["requestCount", "Requests"], ["errorCount", "Errors"], ["avgDurationMs", "Avg ms"]]} />
             </Panel>
-            <Panel title="Sources">
-              <DataTable rows={usage.sources} columns={[["source", "Source"], ["requestCount", "Requests"]]} />
+            <Panel description="Counted as source touches. This can be higher than total requests because multi-source searches touch multiple sources." title="Sources">
+              <DataTable rows={usage.sources} columns={[["source", "Source"], ["requestCount", "Touches"]]} />
             </Panel>
             <Panel title="Traffic origin">
               <DataTable rows={usage.trafficOrigins} columns={[["origin", "Origin"], ["requestCount", "Requests"]]} />
@@ -443,12 +510,133 @@ function Metric({ label, suffix, value }: { label: string; suffix?: string; valu
   );
 }
 
-function Panel({ children, title }: { children: ReactNode; title: string }) {
+function Panel({ children, description, title }: { children: ReactNode; description?: string; title: string }) {
   return (
     <section className="admin-panel">
       <h2>{title}</h2>
+      {description ? <p className="admin-panel-description">{description}</p> : null}
       {children}
     </section>
+  );
+}
+
+function BarList({
+  labelKey,
+  rows,
+  valueKey,
+  valueLabel = "requests"
+}: {
+  labelKey: string;
+  rows: any[] | undefined;
+  valueKey: string;
+  valueLabel?: string;
+}) {
+  const safeRows = Array.isArray(rows) ? rows.slice(0, 8) : [];
+  const max = Math.max(...safeRows.map((row) => asNumber(row?.[valueKey])), 0);
+  if (safeRows.length === 0 || max === 0) {
+    return <p className="admin-empty">No data yet.</p>;
+  }
+  return (
+    <div className="admin-bar-list">
+      {safeRows.map((row, index) => {
+        const label = formatCell(row?.[labelKey]);
+        const value = asNumber(row?.[valueKey]);
+        return (
+          <div className="admin-bar-row" key={`${label}-${index}`}>
+            <div className="admin-bar-row-head">
+              <span>{label}</span>
+              <strong>
+                {formatNumber(value)} {valueLabel}
+              </strong>
+            </div>
+            <div className="admin-bar-track" aria-hidden="true">
+              <span style={{ "--bar-width": `${Math.max(4, Math.round((value / max) * 100))}%` } as CSSProperties} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SplitBar({ segments }: { segments: Array<{ label: string; value: unknown }> }) {
+  const safeSegments = segments.map((segment) => ({ ...segment, value: asNumber(segment.value) })).filter((segment) => segment.value > 0);
+  const total = safeSegments.reduce((sum, segment) => sum + segment.value, 0);
+  if (total === 0) {
+    return <p className="admin-empty">No data yet.</p>;
+  }
+  return (
+    <div className="admin-split-chart">
+      <div className="admin-split-bar" aria-hidden="true">
+        {safeSegments.map((segment, index) => (
+          <span
+            className={`admin-split-segment admin-split-segment-${index % 4}`}
+            key={segment.label}
+            style={{ "--segment-width": `${(segment.value / total) * 100}%` } as CSSProperties}
+          />
+        ))}
+      </div>
+      <div className="admin-split-legend">
+        {safeSegments.map((segment, index) => (
+          <div key={segment.label}>
+            <span className={`admin-split-dot admin-split-segment-${index % 4}`} />
+            <strong>{segment.label}</strong>
+            <em>
+              {formatNumber(segment.value)} · {percentLabel(segment.value, total)}
+            </em>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OutcomeBars({ rows }: { rows: Array<[string, unknown]> }) {
+  const max = Math.max(...rows.map(([, value]) => asNumber(value)), 0);
+  if (max === 0) {
+    return <p className="admin-empty">No data yet.</p>;
+  }
+  return (
+    <div className="admin-outcome-bars">
+      {rows.map(([label, value]) => {
+        const number = asNumber(value);
+        return (
+          <div className="admin-outcome-row" key={label}>
+            <span>{label}</span>
+            <div className="admin-outcome-track" aria-hidden="true">
+              <span style={{ "--bar-width": `${Math.max(4, Math.round((number / max) * 100))}%` } as CSSProperties} />
+            </div>
+            <strong>{formatNumber(number)}</strong>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RatioGrid({ rows }: { rows: Array<[string, unknown]> }) {
+  return (
+    <dl className="admin-ratio-grid">
+      {rows.map(([label, value]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{formatNumber(value)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function DefinitionRows({ rows }: { rows: Array<[string, string]> }) {
+  return (
+    <dl className="admin-definition-list">
+      {rows.map(([term, definition]) => (
+        <div key={term}>
+          <dt>{term}</dt>
+          <dd>{definition}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -509,6 +697,18 @@ function formatDate(value: unknown): string {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(value));
+}
+
+function asNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function percentLabel(part: unknown, total: unknown): string {
+  const denominator = asNumber(total);
+  if (denominator <= 0) {
+    return "0%";
+  }
+  return `${Math.round((asNumber(part) / denominator) * 100)}%`;
 }
 
 function formatNumber(value: unknown): string {
