@@ -281,6 +281,7 @@ const MAX_LIMIT = 50;
 const MAX_QUERY_LENGTH = 200;
 const MAX_NAME_LENGTH = 220;
 const MAX_SOURCE_RESPONSE_BYTES = 2_000_000;
+const MAX_NPM_PACKUMENT_RESPONSE_BYTES = 8_000_000;
 const SOURCE_USER_AGENT = "nipmod-package-api/1.2.9 (+https://nipmod.com)";
 const FETCH_CACHE_TTL_MS = 30_000;
 const FETCH_CACHE_MAX_ITEMS = 500;
@@ -890,6 +891,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   }
   const packageName = readString(manifest.name) ?? name;
   const version = readString(manifest.version);
+  const packument = await fetchNpmPackumentSummary(packageName, version, fetchImpl, timeoutMs);
   const repo = normalizeRepositoryUrl(readNestedString(manifest, ["repository", "url"]) ?? readString(manifest.repository));
   const license = readString(manifest.license);
   const integrity = readNestedString(manifest, ["dist", "integrity"]);
@@ -924,6 +926,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (tarballIsHttps ? 2 : 0) +
       (fileCount ? 2 : 0) +
       (unpackedSize ? 1 : 0) +
+      (packument.available ? 3 : 0) +
+      (packument.latestDistTagMatches ? 2 : 0) +
       (maintainerCount ? 4 : 0) +
       (deprecated ? -28 : 0) +
       (tarball && !tarballIsHttps ? -10 : 0) +
@@ -957,6 +961,15 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       tarballHost ? `Latest npm tarball host: ${tarballHost}.` : "Latest npm tarball URL was not returned.",
       fileCount ? `Latest npm release file count: ${fileCount}.` : "Latest npm release file count was not returned.",
       unpackedSize ? `Latest npm unpacked size bytes: ${unpackedSize}.` : "Latest npm unpacked size was not returned.",
+      packument.available ? `npm packument versions returned: ${packument.versionCount}.` : "npm packument summary was not returned.",
+      packument.distTags.length ? `npm dist-tags returned: ${packument.distTags.join(", ")}.` : "npm dist-tags were not returned.",
+      packument.latestDistTagMatches === null
+        ? "npm latest dist-tag could not be compared with the latest manifest version."
+        : packument.latestDistTagMatches
+          ? "npm latest dist-tag matches the latest manifest version."
+          : "npm latest dist-tag does not match the latest manifest version.",
+      packument.modifiedAt ? `npm package modified at: ${packument.modifiedAt}.` : "npm package modified timestamp was not returned.",
+      packument.createdAt ? `npm package created at: ${packument.createdAt}.` : "npm package created timestamp was not returned.",
       repo ? "Repository link is present." : "Repository link is missing.",
       dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
       maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
@@ -969,6 +982,57 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     version,
     warnings
   });
+}
+
+interface NpmPackumentSummary {
+  available: boolean;
+  createdAt: string | null;
+  distTags: string[];
+  latestDistTagMatches: boolean | null;
+  modifiedAt: string | null;
+  versionCount: number;
+}
+
+async function fetchNpmPackumentSummary(
+  packageName: string,
+  latestVersion: string | null,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<NpmPackumentSummary> {
+  try {
+    const payload = await fetchJson(
+      `https://registry.npmjs.org/${encodeNpmName(packageName)}`,
+      fetchImpl,
+      Math.min(timeoutMs, 2800),
+      { circuitBreaker: false, maxResponseBytes: MAX_NPM_PACKUMENT_RESPONSE_BYTES, source: "npm" }
+    );
+    if (!isRecord(payload)) {
+      return emptyNpmPackumentSummary();
+    }
+    const distTags = Object.keys(readRecord(payload["dist-tags"]) ?? {}).slice(0, 12);
+    const latestDistTag = readNestedString(payload, ["dist-tags", "latest"]);
+    return {
+      available: true,
+      createdAt: readNestedString(payload, ["time", "created"]),
+      distTags,
+      latestDistTagMatches: latestVersion && latestDistTag ? latestDistTag === latestVersion : null,
+      modifiedAt: readNestedString(payload, ["time", "modified"]),
+      versionCount: recordKeyCount(payload.versions)
+    };
+  } catch {
+    return emptyNpmPackumentSummary();
+  }
+}
+
+function emptyNpmPackumentSummary(): NpmPackumentSummary {
+  return {
+    available: false,
+    createdAt: null,
+    distTags: [],
+    latestDistTagMatches: null,
+    modifiedAt: null,
+    versionCount: 0
+  };
 }
 
 async function npmMonthlyDownloads(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<number | null> {
@@ -1235,8 +1299,11 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
 }
 
 type GitHubManifestSummary = {
+  communityHealthPercentage: number | null;
   dependencyCount: number | null;
   files: string[];
+  latestCommitSha: string | null;
+  latestReleaseTag: string | null;
   lifecycleScripts: PackageLifecycleScript[];
   lockfiles: string[];
   packageManager: string | null;
@@ -1278,6 +1345,9 @@ async function fetchGitHubManifestSummary(
   let packageManager: string | null = null;
   let dependencyCount: number | null = null;
   let scriptCount: number | null = null;
+  let latestReleaseTag: string | null = null;
+  let latestCommitSha: string | null = null;
+  let communityHealthPercentage: number | null = null;
 
   for (const result of settled) {
     if (result.status !== "fulfilled" || !isRecord(result.value.payload)) {
@@ -1303,13 +1373,46 @@ async function fetchGitHubManifestSummary(
     }
   }
 
+  const [releaseResult, commitResult, communityResult] = await Promise.allSettled([
+    fetchJson(`https://api.github.com/repos/${encodeURIComponentRepo(fullName)}/releases/latest`, fetchImpl, Math.min(timeoutMs, 2200), {
+      circuitBreaker: false,
+      source: "github"
+    }),
+    fetchJson(
+      `https://api.github.com/repos/${encodeURIComponentRepo(fullName)}/commits?per_page=1${defaultBranch ? `&sha=${encodeURIComponent(defaultBranch)}` : ""}`,
+      fetchImpl,
+      Math.min(timeoutMs, 2200),
+      { circuitBreaker: false, source: "github" }
+    ),
+    fetchJson(`https://api.github.com/repos/${encodeURIComponentRepo(fullName)}/community/profile`, fetchImpl, Math.min(timeoutMs, 2200), {
+      circuitBreaker: false,
+      source: "github"
+    })
+  ]);
+
+  if (releaseResult.status === "fulfilled" && isRecord(releaseResult.value)) {
+    latestReleaseTag = readString(releaseResult.value.tag_name) ?? readString(releaseResult.value.name);
+  }
+  if (commitResult.status === "fulfilled") {
+    const commits = Array.isArray(commitResult.value) ? commitResult.value : [];
+    latestCommitSha = readString(readRecord(commits[0])?.sha);
+  }
+  if (communityResult.status === "fulfilled" && isRecord(communityResult.value)) {
+    communityHealthPercentage = readNumber(communityResult.value.health_percentage);
+  }
+
   if (files.length === 0) {
-    return null;
+    if (!latestReleaseTag && !latestCommitSha && communityHealthPercentage === null) {
+      return null;
+    }
   }
 
   return {
+    communityHealthPercentage,
     dependencyCount,
     files,
+    latestCommitSha,
+    latestReleaseTag,
     lifecycleScripts,
     lockfiles,
     packageManager,
@@ -1371,6 +1474,9 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       (fork ? 8 : 0) +
       (manifest?.securityFiles.length ? 4 : 0) +
       (manifest?.lockfiles.length ? 3 : 0) +
+      (manifest?.latestReleaseTag ? 3 : 0) +
+      (manifest?.latestCommitSha ? 2 : 0) +
+      (typeof manifest?.communityHealthPercentage === "number" ? Math.min(4, Math.round(manifest.communityHealthPercentage / 25)) : 0) +
       lifecycleRiskPenalty(lifecycleRisk)
   );
   const warnings = [
@@ -1418,6 +1524,11 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
         ? `GitHub security files found: ${manifest.securityFiles.join(", ")}.`
         : "GitHub security files were not returned.",
       manifest?.lockfiles.length ? `GitHub lockfiles found: ${manifest.lockfiles.join(", ")}.` : "GitHub lockfiles were not returned.",
+      manifest?.latestReleaseTag ? `GitHub latest release tag: ${manifest.latestReleaseTag}.` : "GitHub latest release tag was not returned.",
+      manifest?.latestCommitSha ? `GitHub latest default-branch commit returned: ${manifest.latestCommitSha}.` : "GitHub latest commit metadata was not returned.",
+      typeof manifest?.communityHealthPercentage === "number"
+        ? `GitHub community profile health: ${manifest.communityHealthPercentage}.`
+        : "GitHub community profile health was not returned.",
       manifest ? lifecycleScriptSignal("GitHub package.json", lifecycleScripts) : "GitHub package lifecycle scripts were not inspected.",
       manifest?.packageManager ? `GitHub package.json package manager: ${manifest.packageManager}.` : "GitHub package manager metadata was not returned."
     ],
@@ -1437,7 +1548,7 @@ async function searchHuggingFace(
 ): Promise<ExternalPackageRecord[]> {
   const endpoint = source === "huggingface-model" ? "models" : "datasets";
   const payload = await fetchJson(
-    `https://huggingface.co/api/${endpoint}?search=${encodeURIComponent(query)}&limit=${limit}&sort=downloads&direction=-1`,
+    `https://huggingface.co/api/${endpoint}?search=${encodeURIComponent(query)}&limit=${limit}&sort=downloads&direction=-1&full=true`,
     fetchImpl,
     timeoutMs,
     { source }
@@ -1453,7 +1564,13 @@ async function inspectHuggingFace(
   timeoutMs: number
 ): Promise<ExternalPackageRecord | null> {
   const endpoint = source === "huggingface-model" ? "models" : "datasets";
-  const payload = await fetchJson(`https://huggingface.co/api/${endpoint}/${encodeURIComponentRepo(name)}`, fetchImpl, timeoutMs, { source });
+  const params = new URLSearchParams();
+  for (const field of ["siblings", "cardData", "tags", "downloads", "likes", "sha", "lastModified", "pipeline_tag", "library_name"]) {
+    params.append("expand[]", field);
+  }
+  const payload = await fetchJson(`https://huggingface.co/api/${endpoint}/${encodeURIComponentRepo(name)}?${params.toString()}`, fetchImpl, timeoutMs, {
+    source
+  });
   return huggingFaceRecord(source, payload);
 }
 
@@ -1466,7 +1583,9 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     return null;
   }
   const tags = Array.isArray(item.tags) ? item.tags.filter((tag): tag is string => typeof tag === "string") : [];
-  const license = tags.find((tag) => tag.startsWith("license:"))?.replace(/^license:/, "") ?? null;
+  const cardData = readRecord(item.cardData);
+  const license =
+    tags.find((tag) => tag.startsWith("license:"))?.replace(/^license:/, "") ?? readString(cardData?.license) ?? null;
   const downloads = readNumber(item.downloads);
   const likes = readNumber(item.likes);
   const gated = readHubBoolean(item.gated);
@@ -1481,6 +1600,10 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const sha = readString(item.sha);
   const libraryName = readString(item.library_name);
   const pipelineTag = readString(item.pipeline_tag);
+  const baseModel = readCardDataString(cardData?.base_model);
+  const datasetRefs = readCardDataStringList(cardData?.datasets);
+  const languageRefs = readCardDataStringList(cardData?.language);
+  const taskRefs = readCardDataStringList(cardData?.tags ?? cardData?.task_categories);
   const score = clampScore(
     46 +
       Math.min(22, Math.log10((downloads ?? 0) + 1) * 6) +
@@ -1488,6 +1611,8 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       (license ? 8 : 0) +
       (sha ? 4 : 0) +
       (hasSafetensors ? 4 : 0) +
+      (cardData ? 3 : 0) +
+      (baseModel ? 2 : 0) +
       (hasReadme ? 2 : 0) +
       (hasConfig ? 2 : 0) +
       (gated ? 12 : 0) -
@@ -1538,6 +1663,11 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       license ? "License tag is present." : "License tag is missing.",
       pipelineTag ? `Hugging Face pipeline tag: ${pipelineTag}.` : "Hugging Face pipeline tag was not returned.",
       libraryName ? `Hugging Face library: ${libraryName}.` : "Hugging Face library metadata was not returned.",
+      cardData ? "Hugging Face cardData metadata is present." : "Hugging Face cardData metadata was not returned.",
+      baseModel ? `Hugging Face base model metadata: ${baseModel}.` : "Hugging Face base model metadata was not returned.",
+      datasetRefs.length ? `Hugging Face dataset references returned: ${datasetRefs.slice(0, 5).join(", ")}.` : "Hugging Face dataset references were not returned.",
+      languageRefs.length ? `Hugging Face language metadata returned: ${languageRefs.slice(0, 5).join(", ")}.` : "Hugging Face language metadata was not returned.",
+      taskRefs.length ? `Hugging Face task/card tags returned: ${taskRefs.slice(0, 5).join(", ")}.` : "Hugging Face task/card tags were not returned.",
       siblingCount ? `Hugging Face repository files returned: ${siblingCount}.` : "Hugging Face repository file list was not returned.",
       hasReadme ? "Hugging Face README/model card file is present." : "Hugging Face README/model card file was not returned.",
       hasConfig ? "Hugging Face config metadata file is present." : "Hugging Face config metadata file was not returned.",
@@ -1559,6 +1689,26 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     version: null,
     warnings
   });
+}
+
+function readCardDataString(value: unknown): string | null {
+  if (typeof value === "string") {
+    return cleanPlainText(value, 160);
+  }
+  if (Array.isArray(value)) {
+    return value.find((item): item is string => typeof item === "string") ?? null;
+  }
+  return null;
+}
+
+function readCardDataStringList(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [cleanPlainText(value, 120)].filter(Boolean);
+  }
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string").map((item) => cleanPlainText(item, 120)).filter(Boolean).slice(0, 20);
 }
 
 async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
@@ -2084,10 +2234,11 @@ async function fetchJson(
   url: string,
   fetchImpl: typeof fetch,
   timeoutMs: number,
-  options: { circuitBreaker?: boolean; source?: ExternalPackageSource } = {}
+  options: { circuitBreaker?: boolean; maxResponseBytes?: number; source?: ExternalPackageSource } = {}
 ): Promise<UnknownRecord | UnknownRecord[]> {
   const canCache = fetchImpl === fetch;
   const source = options.source;
+  const maxResponseBytes = options.maxResponseBytes ?? MAX_SOURCE_RESPONSE_BYTES;
   const useRuntimeGuards = canCache && Boolean(source);
   const now = Date.now();
   if (canCache) {
@@ -2109,7 +2260,7 @@ async function fetchJson(
     if (pending) {
       return structuredClone(await pending);
     }
-    const request = fetchJsonWithRetry(url, fetchImpl, timeoutMs, source)
+    const request = fetchJsonWithRetry(url, fetchImpl, timeoutMs, source, maxResponseBytes)
       .then((value) => {
         rememberFetchCache(url, value);
         if (options.circuitBreaker !== false) {
@@ -2130,7 +2281,7 @@ async function fetchJson(
     return structuredClone(await request);
   }
 
-  const value = await fetchJsonWithRetry(url, fetchImpl, timeoutMs, source);
+  const value = await fetchJsonWithRetry(url, fetchImpl, timeoutMs, source, maxResponseBytes);
   if (canCache) {
     rememberFetchCache(url, value);
   }
@@ -2141,12 +2292,13 @@ async function fetchJsonWithRetry(
   url: string,
   fetchImpl: typeof fetch,
   timeoutMs: number,
-  source: ExternalPackageSource | undefined
+  source: ExternalPackageSource | undefined,
+  maxResponseBytes: number
 ): Promise<UnknownRecord | UnknownRecord[]> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      return await fetchJsonOnce(url, fetchImpl, timeoutMs, source);
+      return await fetchJsonOnce(url, fetchImpl, timeoutMs, source, maxResponseBytes);
     } catch (error) {
       lastError = error;
       if (!(error instanceof ExternalPackageError) || !error.retryable || attempt === 1) {
@@ -2246,7 +2398,8 @@ async function fetchJsonOnce(
   url: string,
   fetchImpl: typeof fetch,
   timeoutMs: number,
-  source: ExternalPackageSource | undefined
+  source: ExternalPackageSource | undefined,
+  maxResponseBytes: number
 ): Promise<UnknownRecord | UnknownRecord[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -2265,7 +2418,7 @@ async function fetchJsonOnce(
       });
     }
     const contentLength = response.headers.get("content-length");
-    if (contentLength && Number.parseInt(contentLength, 10) > MAX_SOURCE_RESPONSE_BYTES) {
+    if (contentLength && Number.parseInt(contentLength, 10) > maxResponseBytes) {
       throw new ExternalPackageError("source response is too large", {
         code: "source_response_too_large",
         retryable: true,
@@ -2273,7 +2426,7 @@ async function fetchJsonOnce(
         status: 502
       });
     }
-    const text = await readLimitedResponseText(response, MAX_SOURCE_RESPONSE_BYTES, source);
+    const text = await readLimitedResponseText(response, maxResponseBytes, source);
     try {
       return JSON.parse(text) as UnknownRecord | UnknownRecord[];
     } catch {
@@ -2856,7 +3009,7 @@ function readTrust(value: unknown): ExternalPackageRecord["trust"] {
     policy: readTrustPolicy(value.policy),
     risk: readEnum(value.risk, EXTERNAL_PACKAGE_RISKS, "trust.risk"),
     score: readBoundedInteger(value.score, "trust.score", 0, 100),
-    signals: boundedStrings(value.signals, 16, 300, "trust.signals", 1),
+    signals: boundedStrings(value.signals, 32, 300, "trust.signals", 1),
     warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
   };
 }
