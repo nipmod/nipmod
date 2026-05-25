@@ -521,6 +521,26 @@ function openApiDocument() {
           ],
           type: "object"
         },
+        PublicStatsResponse: {
+          additionalProperties: true,
+          description:
+            "Public aggregate stats. Internal monitors, canaries and unknown legacy events are separated from external usage counts. Raw keys, IPs, user agents, queries and package names are not returned.",
+          properties: {
+            archive: { additionalProperties: true, type: "object" },
+            betaKeys: { additionalProperties: true, type: "object" },
+            excluded: { additionalProperties: true, type: "object" },
+            external: { additionalProperties: true, type: "object" },
+            generatedAt: { format: "date-time", type: "string" },
+            health: { additionalProperties: true, type: "object" },
+            privacy: { type: "string" },
+            since: { format: "date-time", type: "string" },
+            store: { additionalProperties: true, type: "object" },
+            type: { const: "dev.nipmod.public-stats.v1", type: "string" },
+            windowHours: { maximum: 168, minimum: 1, type: "integer" }
+          },
+          required: ["archive", "betaKeys", "excluded", "external", "generatedAt", "health", "privacy", "since", "store", "type", "windowHours"],
+          type: "object"
+        },
         ApiUsageTotals: {
           additionalProperties: false,
           properties: {
@@ -1667,6 +1687,30 @@ function openApiDocument() {
             "502": errorResponse()
           },
           summary: "Search external package sources through one API."
+        }
+      },
+      "/api/stats": {
+        get: {
+          description:
+            "Returns public aggregate product stats. External usage excludes internal monitors, canaries, admin requests and unknown legacy traffic.",
+          operationId: "getPublicStats",
+          parameters: [
+            {
+              description: "Lookback window in hours. Invalid values fall back to 24 hours.",
+              in: "query",
+              name: "hours",
+              schema: { default: 24, maximum: 168, minimum: 1, type: "integer" }
+            }
+          ],
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/PublicStatsResponse" },
+              "Public aggregate stats without private usage data."
+            ),
+            "401": errorResponse(),
+            "429": errorResponse()
+          },
+          summary: "Return public usage, key, archive and source stats."
         }
       },
       "/api/sources/health": {

@@ -35,6 +35,7 @@ describe("OpenAPI route", () => {
       "/api/mcp",
       "/api/resolve",
       "/api/search",
+      "/api/stats",
       "/api/sources/health",
       "/api/usage/stats"
     ]);
@@ -133,6 +134,11 @@ describe("OpenAPI route", () => {
     expect(body.paths["/api/sources/health"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/SourceHealthResponse"
     );
+    expect(body.paths["/api/stats"].get.operationId).toBe("getPublicStats");
+    expect(body.paths["/api/stats"].get.responses["200"].content["application/json"].schema.$ref).toBe(
+      "#/components/schemas/PublicStatsResponse"
+    );
+    expect(body.components.schemas.PublicStatsResponse.required).toContain("external");
     expect(body.paths["/api/usage/stats"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ApiUsageMetrics"
     );

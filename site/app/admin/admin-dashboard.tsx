@@ -24,6 +24,7 @@ export function AdminDashboard() {
   const traffic = usage?.trafficSummary ?? {};
   const archive = summary?.archive ?? {};
   const keys = summary?.keys ?? {};
+  const keyActivity = summary?.keyActivity ?? {};
   const generatedAt = useMemo(() => formatDate(summary?.generatedAt), [summary?.generatedAt]);
 
   async function loadDashboard(event?: FormEvent) {
@@ -153,6 +154,7 @@ export function AdminDashboard() {
             <Metric label="Archive records" value={archive.totalRecords} />
             <Metric label="Active keys" value={keys.activeCount} />
             <Metric label="Self serve beta keys" value={keys.selfServeBetaCount} />
+            <Metric label="External active keys" value={keyActivity.externalKeyCount} />
           </section>
 
           <section className="admin-grid">
@@ -218,9 +220,34 @@ export function AdminDashboard() {
             <Panel title="Errors">
               <DataTable rows={usage.errors} columns={[["code", "Code"], ["requestCount", "Requests"]]} />
             </Panel>
+            <Panel title="External key activity">
+              <KeyValueRows
+                rows={[
+                  ["Active external keys", keyActivity.externalKeyCount],
+                  ["Admin key requests excluded", keyActivity.excludedAdminKeyRequestCount]
+                ]}
+              />
+            </Panel>
           </section>
 
           <section className="admin-wide">
+            <Panel title="External key activity">
+              <DataTable
+                rows={keyActivity.rows}
+                columns={[
+                  ["keyId", "Key"],
+                  ["label", "Label"],
+                  ["tier", "Tier"],
+                  ["status", "Status"],
+                  ["requestCount", "Requests"],
+                  ["successCount", "OK"],
+                  ["errorCount", "Errors"],
+                  ["lastSeenAt", "Last seen"],
+                  ["routeSummary", "Routes"],
+                  ["sourceSummary", "Sources"]
+                ]}
+              />
+            </Panel>
             <Panel title="Recent archive records">
               <DataTable
                 rows={archive.recentRecords}
