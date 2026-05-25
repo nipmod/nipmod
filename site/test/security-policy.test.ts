@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import nextConfig from "../next.config";
+import { adminContentSecurityPolicy } from "../proxy";
 
 const root = resolve(import.meta.dirname, "../..");
 const siteRoot = join(root, "site");
@@ -33,11 +34,23 @@ describe("public security policy", () => {
     expect(globalHeaders["Strict-Transport-Security"]).toContain("max-age=63072000");
     expect(globalHeaders["Content-Security-Policy"]).toContain("frame-ancestors 'none'");
     expect(globalHeaders["Content-Security-Policy"]).not.toContain("'unsafe-eval'");
+    expect(globalHeaders["Content-Security-Policy"]).toContain("script-src 'self' 'unsafe-inline'");
+    expect(globalHeaders["Content-Security-Policy"]).toContain("script-src-attr 'none'");
     expect(globalHeaders["Content-Security-Policy"]).toContain(
       "connect-src 'self' https://node.nipmod.com https://nipmod-witness.fly.dev"
     );
+    expect(nextConfig.experimental?.sri?.algorithm).toBe("sha256");
     expect(globalHeaders["X-Content-Type-Options"]).toBe("nosniff");
     expect(globalHeaders["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
     expect(globalHeaders["Permissions-Policy"]).toContain("camera=()");
+  });
+
+  test("admin CSP is nonce based and does not allow inline scripts by default", () => {
+    const policy = adminContentSecurityPolicy("test-nonce", false);
+
+    expect(policy).toContain("script-src 'self' 'nonce-test-nonce' 'strict-dynamic'");
+    expect(policy).not.toContain("script-src 'self' 'unsafe-inline'");
+    expect(policy).toContain("script-src-attr 'none'");
+    expect(policy).toContain("frame-ancestors 'none'");
   });
 });

@@ -1,5 +1,5 @@
 import { scryptSync, timingSafeEqual } from "node:crypto";
-import { type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
+import { type ApiCorsPolicy, type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 
 type ApiAuthEnv = Record<string, string | undefined>;
 
@@ -42,7 +42,8 @@ const PUBLIC_ACCESS: ApiAccess = {
 export function readApiAccess(
   request: Request,
   context: ApiHttpContext = createApiHttpContext(request),
-  env: ApiAuthEnv = process.env
+  env: ApiAuthEnv = process.env,
+  responseOptions: { corsPolicy?: ApiCorsPolicy | undefined } = {}
 ): ApiAccessResult {
   const provided = readProvidedKey(request);
   if (!provided) {
@@ -50,24 +51,24 @@ export function readApiAccess(
   }
 
   if (provided.length < API_KEY_MIN_LENGTH) {
-    return unauthorized(context, "api key is too short");
+    return unauthorized(context, "api key is too short", responseOptions.corsPolicy);
   }
   if (provided.length > API_KEY_MAX_LENGTH) {
-    return unauthorized(context, "api key is too long");
+    return unauthorized(context, "api key is too long", responseOptions.corsPolicy);
   }
 
   const configured = readConfiguredKeys(env);
   if (configured.length === 0) {
-    return unauthorized(context, "api keys are not enabled on this deployment");
+    return unauthorized(context, "api keys are not enabled on this deployment", responseOptions.corsPolicy);
   }
 
   const providedHash = digestApiKey(provided, env);
   if (!providedHash) {
-    return unauthorized(context, "api key hashing is not configured on this deployment");
+    return unauthorized(context, "api key hashing is not configured on this deployment", responseOptions.corsPolicy);
   }
   const match = configured.find((candidate) => constantTimeEqual(candidate.hash, providedHash));
   if (!match) {
-    return unauthorized(context, "api key is invalid");
+    return unauthorized(context, "api key is invalid", responseOptions.corsPolicy);
   }
 
   return { access: apiAccessFromKey(match), ok: true };
@@ -78,7 +79,8 @@ export async function readApiAccessAsync(
   context: ApiHttpContext = createApiHttpContext(request),
   env: ApiAuthEnv = process.env,
   fetchImpl: typeof fetch = fetch,
-  timeoutMs = API_KEY_REGISTRY_TIMEOUT_MS
+  timeoutMs = API_KEY_REGISTRY_TIMEOUT_MS,
+  responseOptions: { corsPolicy?: ApiCorsPolicy | undefined } = {}
 ): Promise<ApiAccessResult> {
   const provided = readProvidedKey(request);
   if (!provided) {
@@ -86,17 +88,17 @@ export async function readApiAccessAsync(
   }
 
   if (provided.length < API_KEY_MIN_LENGTH) {
-    return unauthorized(context, "api key is too short");
+    return unauthorized(context, "api key is too short", responseOptions.corsPolicy);
   }
   if (provided.length > API_KEY_MAX_LENGTH) {
-    return unauthorized(context, "api key is too long");
+    return unauthorized(context, "api key is too long", responseOptions.corsPolicy);
   }
 
   const configured = readConfiguredKeys(env);
   const providedHash = digestApiKey(provided, env);
   if (configured.length > 0) {
     if (!providedHash) {
-      return unauthorized(context, "api key hashing is not configured on this deployment");
+      return unauthorized(context, "api key hashing is not configured on this deployment", responseOptions.corsPolicy);
     }
     const match = configured.find((candidate) => constantTimeEqual(candidate.hash, providedHash));
     if (match) {
@@ -107,21 +109,21 @@ export async function readApiAccessAsync(
   const store = apiKeyStoreStatus(env);
   if (store.registryConfigured) {
     if (!providedHash) {
-      return unauthorized(context, "api key hashing is not configured on this deployment");
+      return unauthorized(context, "api key hashing is not configured on this deployment", responseOptions.corsPolicy);
     }
     const stored = await readStoredApiKey(providedHash, env, fetchImpl, timeoutMs);
     if (stored.status === "ok") {
       return { access: apiAccessFromKey(stored.key), ok: true };
     }
     if (stored.status === "unavailable") {
-      return apiKeyStoreUnavailable(context);
+      return apiKeyStoreUnavailable(context, responseOptions.corsPolicy);
     }
   }
 
   if (configured.length === 0 && !store.registryConfigured) {
-    return unauthorized(context, "api keys are not enabled on this deployment");
+    return unauthorized(context, "api keys are not enabled on this deployment", responseOptions.corsPolicy);
   }
-  return unauthorized(context, "api key is invalid");
+  return unauthorized(context, "api key is invalid", responseOptions.corsPolicy);
 }
 
 export function publicApiAccess(): ApiAccess {
@@ -182,7 +184,7 @@ function readProvidedKey(request: Request): string | null {
   return authorization.slice(7).trim() || null;
 }
 
-function unauthorized(context: ApiHttpContext, message: string): ApiAccessResult {
+function unauthorized(context: ApiHttpContext, message: string, corsPolicy?: ApiCorsPolicy): ApiAccessResult {
   return {
     access: PUBLIC_ACCESS,
     ok: false,
@@ -197,6 +199,7 @@ function unauthorized(context: ApiHttpContext, message: string): ApiAccessResult
       },
       {
         context,
+        corsPolicy,
         headers: PUBLIC_ACCESS.headers,
         status: 401
       }
@@ -396,7 +399,7 @@ function readLimitMultiplier(value: unknown): number | undefined {
   return Math.min(50_000, parsed);
 }
 
-function apiKeyStoreUnavailable(context: ApiHttpContext): ApiAccessResult {
+function apiKeyStoreUnavailable(context: ApiHttpContext, corsPolicy?: ApiCorsPolicy): ApiAccessResult {
   return {
     access: PUBLIC_ACCESS,
     ok: false,
@@ -411,6 +414,7 @@ function apiKeyStoreUnavailable(context: ApiHttpContext): ApiAccessResult {
       },
       {
         context,
+        corsPolicy,
         headers: PUBLIC_ACCESS.headers,
         status: 503
       }

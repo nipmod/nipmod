@@ -1,5 +1,5 @@
 import type { ApiAccess } from "./api-auth";
-import { apiJson, NO_STORE, type ApiHttpContext } from "./api-http";
+import { apiJson, NO_STORE, type ApiCorsPolicy, type ApiHttpContext } from "./api-http";
 import { recordApiUsage } from "./api-usage";
 
 export async function apiJsonWithUsage(
@@ -9,6 +9,7 @@ export async function apiJsonWithUsage(
     access: ApiAccess;
     cacheControl?: string | undefined;
     context: ApiHttpContext;
+    corsPolicy?: ApiCorsPolicy | undefined;
     headers?: Record<string, string>;
     route?: string;
     status?: number;
@@ -26,11 +27,13 @@ export async function apiJsonWithUsage(
   const responseOptions: {
     cacheControl?: string | undefined;
     context: ApiHttpContext;
+    corsPolicy?: ApiCorsPolicy | undefined;
     headers?: Record<string, string>;
     status?: number;
   } = {
     context: options.context,
     cacheControl: hasRequestScopedHeaders(options.headers) ? NO_STORE : undefined,
+    corsPolicy: options.corsPolicy,
     status
   };
   if (responseOptions.cacheControl === undefined && options.cacheControl !== undefined) {

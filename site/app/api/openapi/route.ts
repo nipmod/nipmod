@@ -672,6 +672,53 @@ function openApiDocument() {
           required: ["archive", "generatedAt", "keys", "privacy", "since", "type", "usage"],
           type: "object"
         },
+        AdminKeyActionRequest: {
+          additionalProperties: false,
+          properties: {
+            action: { enum: ["revoke", "pause", "cleanup-stale-beta"], type: "string" },
+            keyId: { description: "Required for revoke and pause actions.", pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            olderThanHours: {
+              default: 720,
+              description: "Only used by cleanup-stale-beta. Active self-serve beta keys older than this window are disabled.",
+              maximum: 8760,
+              minimum: 1,
+              type: "integer"
+            }
+          },
+          required: ["action"],
+          type: "object"
+        },
+        AdminKeyRecord: {
+          additionalProperties: false,
+          description: "Admin key metadata. Raw API keys and key hashes are never returned.",
+          properties: {
+            createdAt: { format: "date-time", type: "string" },
+            expiresAt: { format: "date-time", nullable: true, type: "string" },
+            id: { pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            label: { type: "string" },
+            rateLimitMultiplier: { minimum: 1, type: "integer" },
+            revokedAt: { format: "date-time", nullable: true, type: "string" },
+            status: { enum: ["active", "revoked"], type: "string" },
+            tier: { enum: ["beta", "builder", "partner", "admin"], type: "string" }
+          },
+          required: ["createdAt", "expiresAt", "id", "label", "rateLimitMultiplier", "revokedAt", "status", "tier"],
+          type: "object"
+        },
+        AdminKeyActionResponse: {
+          additionalProperties: false,
+          description: "Result of an admin key management action without raw keys, hashes or private client data.",
+          properties: {
+            action: { enum: ["revoke", "pause", "cleanup-stale-beta"], type: "string" },
+            affectedCount: { minimum: 0, type: "integer" },
+            keys: { items: { $ref: "#/components/schemas/AdminKeyRecord" }, type: "array" },
+            ok: { const: true, type: "boolean" },
+            privacy: { type: "string" },
+            store: { additionalProperties: true, type: "object" },
+            type: { const: "dev.nipmod.admin-key-action.v1", type: "string" }
+          },
+          required: ["action", "affectedCount", "keys", "ok", "privacy", "store", "type"],
+          type: "object"
+        },
         BetaApiKeyIssueRequest: {
           additionalProperties: false,
           properties: {
@@ -1283,6 +1330,34 @@ function openApiDocument() {
             "429": errorResponse()
           },
           summary: "Return private admin dashboard metrics."
+        }
+      },
+      "/api/admin/keys": {
+        post: {
+          description: "Requires an admin API key. Disables individual API keys or cleans up stale self-serve beta keys without returning raw keys or hashes.",
+          operationId: "manageAdminApiKeys",
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AdminKeyActionRequest" }
+              }
+            },
+            required: true
+          },
+          responses: {
+            "200": jsonResponse(
+              { $ref: "#/components/schemas/AdminKeyActionResponse" },
+              "Admin key management action result without raw keys or key hashes."
+            ),
+            "400": errorResponse(),
+            "401": errorResponse(),
+            "403": errorResponse(),
+            "404": errorResponse(),
+            "429": errorResponse(),
+            "503": errorResponse()
+          },
+          security: [{ NipmodBearer: [] }, { NipmodApiKey: [] }],
+          summary: "Manage beta, partner and admin API keys."
         }
       },
       "/api/keys/beta": {

@@ -7,6 +7,8 @@ export const metadata = createPageMetadata({
   title: "Nipmod Admin"
 });
 
+export const dynamic = "force-dynamic";
+
 export default function AdminPage() {
   return <AdminDashboard />;
 }
