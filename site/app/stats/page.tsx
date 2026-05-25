@@ -5,7 +5,7 @@ import { readPublicStats } from "../../lib/public-stats";
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  description: "Public Nipmod usage snapshot with internal monitors and canaries excluded from external usage counts.",
+  description: "Public Nipmod usage snapshot with control-plane routes, internal monitors and canaries excluded from external usage counts.",
   path: "/stats",
   title: "Nipmod public stats"
 });
@@ -16,7 +16,7 @@ export default async function StatsPage() {
   const archive = stats.archive;
   return (
     <DocsShell
-      description="A public usage snapshot for the API beta. Internal monitors, canaries and unknown legacy events are separated from external usage counts."
+      description="A public usage snapshot for the API beta. Control-plane routes, internal monitors, canaries and unknown legacy events are separated from external usage counts."
       eyebrow="Stats"
       stats={[
         { label: "External requests", value: formatNumber(external.requestCount) },
@@ -61,6 +61,7 @@ export default async function StatsPage() {
       <DocsSection eyebrow="Boundary" title="What is excluded">
         <DocsTable
           rows={[
+            ["Control plane", formatNumber(stats.excluded.controlPlaneRequestCount), "Admin and stats routes are excluded from external usage."],
             ["Internal monitors", formatNumber(stats.excluded.internalRequestCount), "Not counted as external usage."],
             ["Unknown legacy events", formatNumber(stats.excluded.unknownLegacyRequestCount), "Tracked before traffic-origin separation."],
             ["Hosted workspace writes", stats.health.workspaceWritesFromHostedApi ? "yes" : "0", "Hosted API does not write to user workspaces."]

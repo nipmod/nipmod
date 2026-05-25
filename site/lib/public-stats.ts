@@ -27,7 +27,7 @@ export async function readPublicStats(input: PublicStatsInput, env: PublicStatsE
       workspaceWritesFromHostedApi: false
     },
     privacy:
-      "public aggregate metrics only; internal monitors, canaries and unknown legacy events are excluded from external usage counts",
+      "public aggregate metrics only; control-plane routes, internal monitors, canaries and unknown legacy events are excluded from external usage counts",
     since: since.toISOString(),
     store: {
       configured: store.configured,
@@ -43,7 +43,7 @@ export async function readPublicStats(input: PublicStatsInput, env: PublicStatsE
       ...base,
       archive: emptyArchiveStats(),
       betaKeys: { activeCount: 0 },
-      excluded: { internalRequestCount: 0, unknownLegacyRequestCount: 0 },
+      excluded: emptyExcludedStats(),
       external: emptyExternalStats()
     };
   }
@@ -126,7 +126,7 @@ async function readActiveBetaKeyCount(env: PublicStatsEnv, fetchImpl: typeof fet
 }
 
 function buildExternalStats(rows: PublicStatsEventRow[]) {
-  const externalRows = rows.filter((row) => isExternalOrigin(row.traffic_origin));
+  const externalRows = rows.filter((row) => isExternalOrigin(row.traffic_origin) && !isControlPlaneRoute(row.route));
   const clients = new Set<string>();
   const keys = new Set<string>();
   const routes = new Map<string, number>();
@@ -201,8 +201,17 @@ function buildExternalStats(rows: PublicStatsEventRow[]) {
 
 function buildExcludedStats(rows: PublicStatsEventRow[]) {
   return {
-    internalRequestCount: rows.filter((row) => isInternalOrigin(row.traffic_origin)).length,
-    unknownLegacyRequestCount: rows.filter((row) => row.traffic_origin === null || row.traffic_origin === "unknown_legacy").length
+    controlPlaneRequestCount: rows.filter((row) => isControlPlaneRoute(row.route)).length,
+    internalRequestCount: rows.filter((row) => isInternalOrigin(row.traffic_origin) && !isControlPlaneRoute(row.route)).length,
+    unknownLegacyRequestCount: rows.filter((row) => (row.traffic_origin === null || row.traffic_origin === "unknown_legacy") && !isControlPlaneRoute(row.route)).length
+  };
+}
+
+function emptyExcludedStats() {
+  return {
+    controlPlaneRequestCount: 0,
+    internalRequestCount: 0,
+    unknownLegacyRequestCount: 0
   };
 }
 
@@ -340,6 +349,10 @@ function isExternalOrigin(value: string | null): boolean {
 
 function isInternalOrigin(value: string | null): boolean {
   return value === "authenticated_admin" || value === "internal_canary" || value === "internal_monitor" || value === "internal_operator";
+}
+
+function isControlPlaneRoute(route: string): boolean {
+  return route === "/api/stats" || route === "/api/usage/stats" || route.startsWith("/api/admin/");
 }
 
 function metricSources(row: PublicStatsEventRow): string[] {
