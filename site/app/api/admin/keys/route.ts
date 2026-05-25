@@ -14,6 +14,7 @@ export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
   const corsPolicy = adminCorsPolicy(request);
   const rateLimit = await checkApiRateLimitAsync(request, { limit: 20, name: "admin-keys", windowMs: 60_000 }, context, {
+    allowAdminPassword: true,
     corsPolicy
   });
   if (!rateLimit.ok) {
@@ -24,7 +25,7 @@ export async function POST(request: Request): Promise<Response> {
     return apiJson(
       {
         code: "insufficient_api_access",
-        error: "admin key management requires an admin API key",
+        error: "admin key management requires an admin key or password",
         retryable: false,
         source: null,
         status: 403,

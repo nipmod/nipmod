@@ -29,7 +29,7 @@ export function AdminDashboard() {
   async function loadDashboard(event?: FormEvent) {
     event?.preventDefault();
     if (!adminKey.trim()) {
-      setError("Admin key required.");
+      setError("Admin credential required.");
       return;
     }
     setLoading(true);
@@ -62,7 +62,7 @@ export function AdminDashboard() {
 
   async function manageKey(action: "cleanup-stale-beta" | "pause" | "revoke", keyId?: string) {
     if (!adminKey.trim()) {
-      setError("Admin key required.");
+      setError("Admin credential required.");
       return;
     }
     const confirmed = window.confirm(
@@ -107,11 +107,11 @@ export function AdminDashboard() {
         <p>API usage, archive growth, beta key activity and safety signals for internal launch monitoring.</p>
         <form className="admin-controls" onSubmit={loadDashboard}>
           <label>
-            <span>Admin key</span>
+            <span>Admin key or password</span>
             <input
               autoComplete="off"
               onChange={(event) => setAdminKey(event.target.value)}
-              placeholder="nka_live_admin..."
+              placeholder="Admin password or nka_admin..."
               type="password"
               value={adminKey}
             />

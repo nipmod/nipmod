@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { OPTIONS, POST } from "../app/api/admin/keys/route";
+import { deriveAdminPasswordHash } from "../lib/admin-access";
 import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
 
 afterEach(() => {
@@ -42,6 +43,47 @@ describe("admin keys route", () => {
       status: 403,
       type: "dev.nipmod.api-error.v1"
     });
+  });
+
+  test("accepts configured admin password for key management", async () => {
+    const password = "test-admin";
+    const salt = "test-admin-password-salt";
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
+        return Response.json([]);
+      }
+      return Response.json({ error: "unexpected test URL" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    vi.stubEnv("NIPMOD_ADMIN_PASSWORD_HASH", deriveAdminPasswordHash(password, salt));
+    vi.stubEnv("NIPMOD_ADMIN_PASSWORD_SALT", salt);
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("https://nipmod.com/api/admin/keys", {
+        body: JSON.stringify({ action: "cleanup-stale-beta", olderThanHours: 24 }),
+        headers: {
+          authorization: `Bearer ${password}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-nipmod-access-tier")).toBe("admin");
+    expect(body).toMatchObject({
+      action: "cleanup-stale-beta",
+      affectedCount: 0,
+      ok: true
+    });
+    expect(JSON.stringify(body)).not.toContain(password);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   test("revokes a key without returning raw key material", async () => {

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { deriveAdminPasswordHash } from "../lib/admin-access";
 import { createApiHttpContext } from "../lib/api-http";
 import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
 import { checkApiRateLimit, checkApiRateLimitAsync, checkRateLimit, rateLimitStoreStatus } from "../lib/rate-limit";
@@ -53,6 +54,38 @@ describe("API rate limits", () => {
       status: 401,
       type: "dev.nipmod.api-error.v1"
     });
+  });
+
+  test("accepts configured admin passwords only when explicitly enabled", async () => {
+    const password = "test-admin";
+    const salt = "test-admin-password-salt";
+    const hash = deriveAdminPasswordHash(password, salt);
+    vi.stubEnv("NIPMOD_ADMIN_PASSWORD_HASH", hash);
+    vi.stubEnv("NIPMOD_ADMIN_PASSWORD_SALT", salt);
+
+    const request = new Request("https://nipmod.com/api/admin/summary", {
+      headers: {
+        authorization: `Bearer ${password}`,
+        "x-request-id": "admin-password-test"
+      }
+    });
+    const context = createApiHttpContext(request);
+    const disabled = await checkApiRateLimitAsync(request, { limit: 1, name: "admin-password-disabled", windowMs: 60_000 }, context);
+    const enabled = await checkApiRateLimitAsync(request, { limit: 1, name: "admin-password-enabled", windowMs: 60_000 }, context, {
+      allowAdminPassword: true
+    });
+
+    expect(disabled.ok).toBe(false);
+    expect(disabled.response?.status).toBe(401);
+    expect(enabled.ok).toBe(true);
+    expect(enabled.access).toMatchObject({
+      authenticated: true,
+      keyId: "admin_password",
+      tier: "admin"
+    });
+    expect(enabled.headers["x-ratelimit-limit"]).toBe("200");
+    expect(JSON.stringify(enabled)).not.toContain(password);
+    expect(JSON.stringify(enabled)).not.toContain(hash);
   });
 
   test("rejects oversized API keys before hashing", async () => {

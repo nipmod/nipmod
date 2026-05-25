@@ -1,4 +1,5 @@
 import { webcrypto } from "node:crypto";
+import { readAdminPasswordAccess } from "./admin-access";
 import { type ApiCorsPolicy, type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 import { publicApiAccess, readApiAccess, readApiAccessAsync, type ApiAccess } from "./api-auth";
 
@@ -49,6 +50,7 @@ type DistributedRateLimitResult =
       fallbackReason: RateLimitFallbackReason | null;
     };
 type RateLimitCheckOptions = {
+  allowAdminPassword?: boolean;
   corsPolicy?: ApiCorsPolicy | undefined;
   env?: RateLimitEnv;
   fetchImpl?: typeof fetch;
@@ -85,9 +87,12 @@ export async function checkApiRateLimitAsync(
   context: ApiHttpContext = createApiHttpContext(request),
   options: RateLimitCheckOptions = {}
 ): Promise<RateLimitResult> {
-  const access = await readApiAccessAsync(request, context, options.env, options.fetchImpl, options.timeoutMs, {
-    corsPolicy: options.corsPolicy
-  });
+  const adminPasswordAccess = options.allowAdminPassword ? readAdminPasswordAccess(request, options.env) : null;
+  const access = adminPasswordAccess
+    ? { access: adminPasswordAccess, ok: true }
+    : await readApiAccessAsync(request, context, options.env, options.fetchImpl, options.timeoutMs, {
+        corsPolicy: options.corsPolicy
+      });
   if (!access.ok) {
     return {
       access: access.access,
