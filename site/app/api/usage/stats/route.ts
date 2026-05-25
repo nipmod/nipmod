@@ -14,7 +14,10 @@ export function OPTIONS(request: Request): Response {
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
   const corsPolicy = adminCorsPolicy(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "usage-stats", windowMs: 60_000 }, context, { corsPolicy });
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "usage-stats", windowMs: 60_000 }, context, {
+    allowAdminPassword: true,
+    corsPolicy
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -24,7 +27,7 @@ export async function GET(request: Request): Promise<Response> {
       request,
       {
         code: "insufficient_api_access",
-        error: "usage stats require an admin API key",
+        error: "usage stats require an admin key or password",
         retryable: false,
         source: null,
         status: 403,
