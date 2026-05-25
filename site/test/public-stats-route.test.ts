@@ -43,6 +43,21 @@ describe("public stats route", () => {
             trust_risk: null
           },
           {
+            api_key_id: "key_external_beta_2",
+            archive_stored: null,
+            client_hash: null,
+            created_at: "2026-05-25T00:01:30.000Z",
+            error_code: null,
+            install_blocked: false,
+            route: "/api/install-plan",
+            source: "pypi",
+            sources: ["pypi"],
+            status: 200,
+            traffic_origin: "authenticated_beta",
+            trust_decision: "recommended",
+            trust_risk: "low"
+          },
+          {
             api_key_id: "admin_password",
             archive_stored: null,
             client_hash: "client-admin",
@@ -114,17 +129,18 @@ describe("public stats route", () => {
         unknownLegacyRequestCount: 0
       },
       external: {
-        activeKeyCount: 1,
+        activeKeyCount: 2,
         errorCount: 1,
-        installPlanCount: 1,
+        installPlanCount: 2,
         publicRequestCount: 1,
-        requestCount: 2,
-        successCount: 1,
+        requestCount: 3,
+        successCount: 2,
         uniqueClientCount: 2
       },
       type: "dev.nipmod.public-stats.v1"
     });
     expect(JSON.stringify(body)).not.toContain("key_external_beta");
+    expect(JSON.stringify(body)).not.toContain("key_external_beta_2");
     expect(JSON.stringify(body)).not.toContain("admin_password");
     expect(JSON.stringify(body)).not.toContain("service-role-key");
     expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/usage/stats" }));
