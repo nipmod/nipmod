@@ -1,6 +1,6 @@
 import { hasApiAccessTier } from "../../../../lib/api-auth";
 import { adminCorsPolicy, apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
-import { cleanupStaleBetaKeys, revokeAdminKey, type AdminKeyAction } from "../../../../lib/admin-keys";
+import { cleanupStaleBetaKeys, updateAdminKeyLabel, updateAdminKeyStatus } from "../../../../lib/admin-keys";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +64,12 @@ export async function POST(request: Request): Promise<Response> {
   const result =
     parsed.action === "cleanup-stale-beta"
       ? await cleanupStaleBetaKeys({ olderThanHours: parsed.olderThanHours })
-      : await revokeAdminKey({
+      : parsed.action === "update-label"
+        ? await updateAdminKeyLabel({
+            keyId: parsed.keyId,
+            label: parsed.label
+          })
+      : await updateAdminKeyStatus({
           action: parsed.action,
           currentKeyId: rateLimit.access.keyId,
           keyId: parsed.keyId
@@ -112,8 +117,14 @@ type ParsedAdminKeyAction =
       olderThanHours: number | null;
     }
   | {
-      action: Exclude<AdminKeyAction, "cleanup-stale-beta">;
+      action: "pause" | "resume" | "revoke";
       keyId: string;
+      ok: true;
+    }
+  | {
+      action: "update-label";
+      keyId: string;
+      label: string;
       ok: true;
     }
   | {
@@ -132,14 +143,25 @@ function parseAdminKeyAction(body: unknown): ParsedAdminKeyAction {
     const olderThanHours = readOptionalInteger(record.olderThanHours);
     return { action, ok: true, olderThanHours };
   }
-  if (action === "pause" || action === "revoke") {
+  if (action === "pause" || action === "resume" || action === "revoke") {
     const keyId = typeof record.keyId === "string" ? record.keyId.trim() : "";
     if (!keyId) {
       return { code: "missing_key_id", error: "keyId is required", ok: false };
     }
     return { action, keyId, ok: true };
   }
-  return { code: "unsupported_admin_key_action", error: "action must be revoke, pause or cleanup-stale-beta", ok: false };
+  if (action === "update-label") {
+    const keyId = typeof record.keyId === "string" ? record.keyId.trim() : "";
+    const label = typeof record.label === "string" ? record.label.trim() : "";
+    if (!keyId) {
+      return { code: "missing_key_id", error: "keyId is required", ok: false };
+    }
+    if (!label) {
+      return { code: "missing_key_label", error: "label is required", ok: false };
+    }
+    return { action, keyId, label, ok: true };
+  }
+  return { code: "unsupported_admin_key_action", error: "action must be revoke, pause, resume, update-label or cleanup-stale-beta", ok: false };
 }
 
 function readOptionalInteger(value: unknown): number | null {

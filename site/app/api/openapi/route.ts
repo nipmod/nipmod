@@ -695,8 +695,15 @@ function openApiDocument() {
         AdminKeyActionRequest: {
           additionalProperties: false,
           properties: {
-            action: { enum: ["revoke", "pause", "cleanup-stale-beta"], type: "string" },
-            keyId: { description: "Required for revoke and pause actions.", pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            action: { enum: ["revoke", "pause", "resume", "update-label", "cleanup-stale-beta"], type: "string" },
+            keyId: { description: "Required for revoke, pause, resume and update-label actions.", pattern: "^key_[a-f0-9]{16,32}$", type: "string" },
+            label: {
+              description: "Required for update-label. Stored label, not raw key material.",
+              maxLength: 80,
+              minLength: 1,
+              pattern: "^[A-Za-z0-9_./-]+$",
+              type: "string"
+            },
             olderThanHours: {
               default: 720,
               description: "Only used by cleanup-stale-beta. Active self-serve beta keys older than this window are disabled.",
@@ -718,7 +725,7 @@ function openApiDocument() {
             label: { type: "string" },
             rateLimitMultiplier: { minimum: 1, type: "integer" },
             revokedAt: { format: "date-time", nullable: true, type: "string" },
-            status: { enum: ["active", "revoked"], type: "string" },
+            status: { enum: ["active", "paused", "revoked"], type: "string" },
             tier: { enum: ["beta", "builder", "partner", "admin"], type: "string" }
           },
           required: ["createdAt", "expiresAt", "id", "label", "rateLimitMultiplier", "revokedAt", "status", "tier"],
@@ -728,7 +735,7 @@ function openApiDocument() {
           additionalProperties: false,
           description: "Result of an admin key management action without raw keys, hashes or private client data.",
           properties: {
-            action: { enum: ["revoke", "pause", "cleanup-stale-beta"], type: "string" },
+            action: { enum: ["revoke", "pause", "resume", "update-label", "cleanup-stale-beta"], type: "string" },
             affectedCount: { minimum: 0, type: "integer" },
             keys: { items: { $ref: "#/components/schemas/AdminKeyRecord" }, type: "array" },
             ok: { const: true, type: "boolean" },

@@ -153,6 +153,158 @@ describe("admin keys route", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  test("pauses and resumes active keys without revoking them", async () => {
+    const rawKey = "nka_test_admin_key_for_pause_resume_123456";
+    const hashSecret = "test-admin-pause-resume-secret";
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
+        const parsed = new URL(url);
+        const body = JSON.parse(String(init.body));
+        expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
+        if (body.status === "paused") {
+          expect(parsed.searchParams.get("status")).toBe("eq.active");
+          expect(body.revoked_at).toBeNull();
+          return Response.json([
+            {
+              created_at: "2026-05-24T00:00:00.000Z",
+              expires_at: "2026-08-22T00:00:00.000Z",
+              id: "key_1234567890abcdef",
+              label: "self-serve/agent",
+              rate_limit_multiplier: 10,
+              revoked_at: null,
+              status: "paused",
+              tier: "beta"
+            }
+          ]);
+        }
+        expect(parsed.searchParams.get("status")).toBe("eq.paused");
+        expect(body).toMatchObject({ revoked_at: null, status: "active" });
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: "self-serve/agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ]);
+      }
+      return Response.json({ error: "unexpected test URL" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashSecret);
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", `ops:admin:${hash}`);
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const pauseResponse = await POST(
+      new Request("https://nipmod.com/api/admin/keys", {
+        body: JSON.stringify({ action: "pause", keyId: "key_1234567890abcdef" }),
+        headers: {
+          authorization: `Bearer ${rawKey}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const pauseBody = await pauseResponse.json();
+
+    const resumeResponse = await POST(
+      new Request("https://nipmod.com/api/admin/keys", {
+        body: JSON.stringify({ action: "resume", keyId: "key_1234567890abcdef" }),
+        headers: {
+          authorization: `Bearer ${rawKey}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const resumeBody = await resumeResponse.json();
+
+    expect(pauseResponse.status).toBe(200);
+    expect(pauseBody).toMatchObject({
+      action: "pause",
+      affectedCount: 1,
+      keys: [{ id: "key_1234567890abcdef", status: "paused" }],
+      ok: true
+    });
+    expect(resumeResponse.status).toBe(200);
+    expect(resumeBody).toMatchObject({
+      action: "resume",
+      affectedCount: 1,
+      keys: [{ id: "key_1234567890abcdef", status: "active" }],
+      ok: true
+    });
+    expect(JSON.stringify(pauseBody)).not.toContain(rawKey);
+    expect(JSON.stringify(resumeBody)).not.toContain(rawKey);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("updates key labels without returning raw key material", async () => {
+    const rawKey = "nka_test_admin_key_for_label_update_123456";
+    const hashSecret = "test-admin-label-secret";
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
+        const parsed = new URL(url);
+        expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
+        expect(parsed.searchParams.get("status")).toBeNull();
+        expect(JSON.parse(String(init.body))).toMatchObject({ label: "partner/aeon" });
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: "partner/aeon",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ]);
+      }
+      return Response.json({ error: "unexpected test URL" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashSecret);
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", `ops:admin:${hash}`);
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("https://nipmod.com/api/admin/keys", {
+        body: JSON.stringify({ action: "update-label", keyId: "key_1234567890abcdef", label: "partner/aeon" }),
+        headers: {
+          authorization: `Bearer ${rawKey}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      action: "update-label",
+      affectedCount: 1,
+      keys: [{ id: "key_1234567890abcdef", label: "partner/aeon" }],
+      ok: true
+    });
+    expect(JSON.stringify(body)).not.toContain(rawKey);
+    expect(JSON.stringify(body)).not.toContain(hash);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   test("cleans stale self-serve beta keys only", async () => {
     const rawKey = "nka_test_admin_key_for_cleanup_123456";
     const hashSecret = "test-admin-cleanup-secret";

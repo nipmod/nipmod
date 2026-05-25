@@ -10,6 +10,7 @@ const ADMIN_SUMMARY_TIMEOUT_MS = 1_500;
 const ARCHIVE_ROW_LIMIT = 5_000;
 const KEY_ACTIVITY_EVENT_LIMIT = 5_000;
 const KEY_ROW_LIMIT = 500;
+const STALE_BETA_HOURS = 720;
 
 export interface AdminSummaryInput {
   limit: number;
@@ -215,21 +216,15 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
     }
     const rows = await response.json();
     const keys = Array.isArray(rows) ? rows.filter(isKeyMetricRow) : [];
+    const staleBetaKeys = keys.filter(isStaleBetaKey);
     return {
       ...status,
       activeCount: keys.filter((key) => key.status === "active").length,
-      recentKeys: keys.slice(0, input.limit).map((key) => ({
-        createdAt: key.created_at,
-        expiresAt: key.expires_at,
-        id: key.id,
-        label: key.label,
-        rateLimitMultiplier: key.rate_limit_multiplier,
-        revokedAt: key.revoked_at,
-        status: key.status,
-        tier: key.tier
-      })),
+      recentKeys: keys.slice(0, input.limit).map(keySummaryRow),
       revokedCount: keys.filter((key) => key.status === "revoked").length,
       selfServeBetaCount: keys.filter((key) => key.tier === "beta" && key.label.startsWith("self-serve/")).length,
+      staleBetaCount: staleBetaKeys.length,
+      staleKeys: staleBetaKeys.slice(0, input.limit).map(keySummaryRow),
       tiers: sortedCounts(keys, (key) => key.tier, "tier", input.limit),
       totalKeys: countFromHeader(response.headers.get("content-range")) ?? keys.length
     };
@@ -241,6 +236,8 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
       recentKeys: [],
       revokedCount: null,
       selfServeBetaCount: null,
+      staleBetaCount: null,
+      staleKeys: [],
       tiers: [],
       totalKeys: null
     };
@@ -466,6 +463,39 @@ function trustBands(rows: ArchiveMetricRow[]) {
 function countFromHeader(value: string | null): number | null {
   const match = value?.match(/\/(\d+)$/);
   return match ? Number.parseInt(match[1]!, 10) : null;
+}
+
+function isStaleBetaKey(key: KeyMetricRow): boolean {
+  if (key.status !== "active" || key.tier !== "beta" || !key.label.startsWith("self-serve/")) {
+    return false;
+  }
+  const createdAt = Date.parse(key.created_at);
+  return Number.isFinite(createdAt) && Date.now() - createdAt > STALE_BETA_HOURS * 60 * 60 * 1000;
+}
+
+function keyAgeDays(value: string): number | null {
+  const createdAt = Date.parse(value);
+  if (!Number.isFinite(createdAt)) {
+    return null;
+  }
+  return Math.max(0, Math.floor((Date.now() - createdAt) / (24 * 60 * 60 * 1000)));
+}
+
+function keySummaryRow(key: KeyMetricRow) {
+  const stale = isStaleBetaKey(key);
+  return {
+    ageDays: keyAgeDays(key.created_at),
+    createdAt: key.created_at,
+    expiresAt: key.expires_at,
+    id: key.id,
+    label: key.label,
+    rateLimitMultiplier: key.rate_limit_multiplier,
+    revokedAt: key.revoked_at,
+    stale,
+    staleReason: stale ? "active self-serve beta key older than 30 days" : "",
+    status: key.status,
+    tier: key.tier
+  };
 }
 
 type ArchiveMetricRow = {
