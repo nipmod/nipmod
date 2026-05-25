@@ -1,4 +1,5 @@
 import { readApiUsageMetrics } from "./api-usage";
+import { externalSourceCapabilities } from "./external-packages";
 
 type AdminSummaryEnv = Record<string, string | undefined>;
 
@@ -22,6 +23,7 @@ export async function readAdminSummary(
   env: AdminSummaryEnv = process.env,
   fetchImpl: typeof fetch = fetch
 ): Promise<Record<string, unknown>> {
+  const sourceCapabilities = externalSourceCapabilities(env);
   const [usage, archive, keys, keyActivity] = await Promise.all([
     readApiUsageMetrics(input, env, fetchImpl),
     readArchiveMetrics(input, env, fetchImpl),
@@ -38,10 +40,32 @@ export async function readAdminSummary(
       "Archive records are stored in public.package_intelligence_records on Supabase.",
       "Usage metrics are aggregated and privacy limited. Raw keys, raw IPs, raw queries, prompts and workspace paths are not returned.",
       "Traffic origin separates public/keyed usage from Nipmod canaries and monitors for events recorded after the traffic-origin schema is live.",
-      "Trust-decision and blocked-install metrics are populated for events recorded after the decision-metrics schema is live."
+      "Trust-decision and blocked-install metrics are populated for events recorded after the decision-metrics schema is live.",
+      "Source quality profiles describe resolver depth and known limits. They are review context, not a claim that external packages are safe to execute."
     ],
     privacy: "admin-only aggregated metrics; no raw keys, IPs, queries, prompts, package names from usage events, user agents or workspace data",
     since: input.since.toISOString(),
+    sourceQuality: {
+      profiles: sourceCapabilities.map(({ access, authConfigured, endpointHost, quality, resolver, source, sourceKind }) => ({
+        access,
+        authConfigured,
+        coverage: quality.coverage,
+        endpointHost,
+        inspectDepth: quality.inspectDepth,
+        limitations: quality.limitations,
+        resolverVersion: resolver.resolverVersion,
+        searchDepth: quality.searchDepth,
+        source,
+        sourceKind,
+        strengths: quality.strengths
+      })),
+      summary: {
+        moderateOrBetter: sourceCapabilities.filter((source) => source.quality.coverage === "strong" || source.quality.coverage === "moderate").length,
+        strong: sourceCapabilities.filter((source) => source.quality.coverage === "strong").length,
+        total: sourceCapabilities.length
+      },
+      type: "dev.nipmod.admin-source-quality.v1"
+    },
     type: "dev.nipmod.admin-summary.v1",
     usage: usage.ok ? usage.metrics : { error: usage.error, ok: false, status: usage.status }
   };

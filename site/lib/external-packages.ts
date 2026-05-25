@@ -29,6 +29,7 @@ export type ExternalTrustFactorImpact = "positive" | "negative" | "neutral";
 export type ExternalPopularitySignal = "none" | "low" | "medium" | "high";
 export type ExternalSecurityConfidence = "low" | "medium" | "high";
 export type ExternalProvenanceStatus = "unknown" | "source-only" | "integrity" | "signature" | "attested";
+export type ExternalSourceCoverage = "strong" | "moderate" | "limited";
 export type ExternalResolverSearchStrategy =
   | "registry-ranked-search"
   | "normalized-name-candidates"
@@ -218,10 +219,22 @@ export interface ExternalSourceCapability {
   endpointHost: string;
   installPlanWritesWorkspace: false;
   circuit: ExternalSourceCircuitReport;
+  quality: ExternalSourceQualityProfile;
   resolver: ExternalSourceResolverProfile;
   source: ExternalPackageSource;
   sourceKind: ExternalPackageSourceKind;
   status: "available";
+}
+
+export interface ExternalSourceQualityProfile {
+  assessmentVersion: "source-quality-v1";
+  bestFor: string[];
+  coverage: ExternalSourceCoverage;
+  inspectDepth: string;
+  limitations: string[];
+  notClaimed: string[];
+  searchDepth: string;
+  strengths: string[];
 }
 
 export interface ExternalInstallPlan {
@@ -302,7 +315,8 @@ const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["prisma", "pg"], pattern: /\b(database|postgres|postgresql|sql|orm|prisma)\b/i },
   { names: ["vitest", "playwright"], pattern: /\b(test|testing|e2e|browser automation|quality)\b/i },
   { names: ["commander", "yargs"], pattern: /\b(cli|terminal|command line|command-line|console)\b/i },
-  { names: ["playwright"], pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i }
+  { names: ["playwright"], pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i },
+  { names: ["sharp", "jimp", "fabric", "konva", "canvas"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i }
 ];
 const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["requests", "httpx", "aiohttp"], pattern: /\b(http|https|request|requests|client|api)\b/i },
@@ -313,7 +327,8 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["typer", "click", "rich"], pattern: /\b(cli|terminal|command|console)\b/i },
   { names: ["beautifulsoup4", "playwright", "selenium"], pattern: /\b(scrape|crawler|browser|automation|parse html|web crawl)\b/i },
   { names: ["sqlalchemy", "psycopg", "asyncpg"], pattern: /\b(database|postgres|postgresql|sql|orm)\b/i },
-  { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i }
+  { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i },
+  { names: ["pillow", "opencv-python", "scikit-image", "cairosvg"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i }
 ];
 const QUERY_INTENT_RANKING_HINTS: Array<{
   matches: Array<{ bonus: number; name: string; reason: string; source?: ExternalPackageSource }>;
@@ -393,6 +408,17 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 12, name: "playwright", reason: "browser automation fit", source: "npm" }
     ],
     pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "sharp", reason: "Node image processing fit", source: "npm" },
+      { bonus: 12, name: "fabric", reason: "browser canvas design fit", source: "npm" },
+      { bonus: 12, name: "konva", reason: "interactive canvas graphics fit", source: "npm" },
+      { bonus: 14, name: "pillow", reason: "Python image processing fit", source: "pypi" },
+      { bonus: 12, name: "opencv-python", reason: "computer vision image workflow fit", source: "pypi" },
+      { bonus: 11, name: "cairosvg", reason: "SVG conversion fit", source: "pypi" }
+    ],
+    pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i
   }
 ];
 const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
@@ -1636,7 +1662,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   const warnings = [
     ...(repo ? [] : ["No source repository returned by MCP Registry."]),
     ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : []),
-    ...(envRequirementCount ? [`MCP server declares ${envRequirementCount} environment requirements; review secret scope before enabling.`] : []),
+    ...(envRequirementCount ? [`MCP server declares ${envRequirementCount} environment requirements; review credential scope before enabling.`] : []),
     ...(snapshot ? [`MCP Registry live request was unavailable; returned pinned public registry snapshot from ${snapshot}.`] : [])
   ];
 
@@ -2599,11 +2625,107 @@ function sourceCapability(
     circuit: sourceCircuitReport(source),
     endpointHost,
     installPlanWritesWorkspace: false,
+    quality: externalSourceQualityProfile(source),
     resolver: sourceResolverProfile(source, MAX_LIMIT, DEFAULT_TIMEOUT_MS),
     source,
     sourceKind,
     status: "available"
   };
+}
+
+export function externalSourceQualityProfile(source: ExternalPackageSource): ExternalSourceQualityProfile {
+  switch (source) {
+    case "npm":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["JavaScript and TypeScript package selection", "install-plan review", "lifecycle script risk checks"],
+        coverage: "strong",
+        inspectDepth: "latest manifest, tarball integrity, registry signatures, lifecycle scripts, dependency count and download signal",
+        limitations: [
+          "npm search ranking is upstream-provided and can still surface weak packages",
+          "monthly download data is a usage signal, not proof of safety",
+          "Nipmod does not execute or unpack tarballs in the hosted API"
+        ],
+        notClaimed: ["package authorship", "malware-free guarantee", "workspace execution approval"],
+        searchDepth: "registry-ranked search with validated task hints for common agent requests",
+        strengths: ["direct registry API", "integrity and signature metadata when returned", "install-time lifecycle script warnings"]
+      };
+    case "pypi":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["Python package exact inspect", "wheel/source release risk review", "known PyPI vulnerability context"],
+        coverage: "moderate",
+        inspectDepth: "project JSON, latest release files, file hashes, yanked flags, Simple API metadata and provenance links",
+        limitations: [
+          "PyPI has no official JSON search API, so broad natural-language discovery uses normalized candidates and curated task hints",
+          "source-only packages can execute build backend code during local install",
+          "signature/provenance metadata is only as deep as the upstream APIs return"
+        ],
+        notClaimed: ["full index crawl", "malware-free guarantee", "private package visibility"],
+        searchDepth: "normalized name candidates plus validated task hints; exact inspect is stronger than broad search",
+        strengths: ["release-file digest checks", "yanked and vulnerability signals", "Simple API provenance/core metadata when returned"]
+      };
+    case "github":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["source repository discovery", "repo activity context", "agent review before cloning code"],
+        coverage: "moderate",
+        inspectDepth: "repository metadata plus selected manifest, security and lockfile probes on the default branch",
+        limitations: [
+          "GitHub repository search is not package-registry resolution",
+          "selected manifest probes do not replace a full repository audit",
+          "stars, forks and activity are context signals, not safety proof"
+        ],
+        notClaimed: ["verified release provenance", "full code scan", "dependency vulnerability audit"],
+        searchDepth: "GitHub repository search sorted by stars with archived repositories filtered out",
+        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security file checks"]
+      };
+    case "huggingface-model":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["model discovery", "model card and file-shape context", "remote-code and weight-format warning"],
+        coverage: "moderate",
+        inspectDepth: "model API metadata, tags, siblings, downloads, likes, gated/private flags, commit SHA and remote-code indicators",
+        limitations: [
+          "model files are not downloaded or executed by the hosted API",
+          "model safety, bias and license suitability still require separate review",
+          "private or gated model access depends on the caller's own Hugging Face permissions"
+        ],
+        notClaimed: ["model behavior evaluation", "weight integrity beyond returned metadata", "license legal advice"],
+        searchDepth: "Hugging Face hub search sorted by downloads",
+        strengths: ["safetensors versus pickle/binary warning", "trust_remote_code warning", "gated/private metadata"]
+      };
+    case "huggingface-dataset":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["dataset discovery", "dataset card metadata", "license and hub usage context"],
+        coverage: "moderate",
+        inspectDepth: "dataset API metadata, tags, siblings, downloads, likes, gated/private flags and commit SHA when returned",
+        limitations: [
+          "dataset contents are not downloaded, sampled or scanned by the hosted API",
+          "dataset quality, bias and legal suitability require separate review",
+          "private or gated dataset access depends on the caller's own Hugging Face permissions"
+        ],
+        notClaimed: ["dataset content audit", "training suitability approval", "license legal advice"],
+        searchDepth: "Hugging Face dataset search sorted by downloads",
+        strengths: ["source-owned hub metadata", "license tag and card/file presence", "gated/private metadata"]
+      };
+    case "mcp":
+      return {
+        assessmentVersion: "source-quality-v1",
+        bestFor: ["MCP server discovery", "remote endpoint context", "credential-scope review before enabling tools"],
+        coverage: "limited",
+        inspectDepth: "MCP registry server metadata, remote endpoints, repository link, status and environment requirements when returned",
+        limitations: [
+          "MCP registry availability and schema stability are still early",
+          "tool behavior is not executed or sandboxed by the hosted API",
+          "registry fallback is a pinned public snapshot, not a live full registry crawl"
+        ],
+        notClaimed: ["tool execution safety", "server operator verification", "credential policy approval"],
+        searchDepth: "MCP registry server search with pinned fallback for known public records",
+        strengths: ["remote endpoint visibility", "environment requirement warnings", "source repository link when returned"]
+      };
+  }
 }
 
 function sourceResolverProfile(source: ExternalPackageSource, resultLimit: number, timeoutMs: number): ExternalSourceResolverProfile {

@@ -6001,7 +6001,7 @@ body {
   max-width: 900px;
 }
 
-.admin-hero > p:not(.admin-eyebrow):not(.admin-generated):not(.admin-error):not(.admin-notice) {
+.admin-hero > p:not(.admin-eyebrow):not(.admin-generated):not(.admin-error):not(.admin-notice):not(.admin-session):not(.admin-login-help) {
   color: var(--docs-muted);
   font-family: var(--docs-serif);
   font-size: 18px;
@@ -6044,6 +6044,17 @@ body {
 .admin-actions {
   display: flex;
   gap: 8px;
+}
+
+.admin-login-help,
+.admin-session {
+  border-left: 1px solid var(--docs-line);
+  color: var(--docs-faint);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 560px;
+  padding-left: 12px;
 }
 
 .admin-error {

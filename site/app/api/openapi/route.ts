@@ -403,6 +403,22 @@ function openApiDocument() {
           required: ["failureCount", "lastErrorCode", "lastFailureAt", "openedUntil", "status"],
           type: "object"
         },
+        ExternalSourceQualityProfile: {
+          additionalProperties: false,
+          description: "Per-source resolver quality profile. It describes resolver depth and known limits without claiming external package safety.",
+          properties: {
+            assessmentVersion: { const: "source-quality-v1", type: "string" },
+            bestFor: { items: { type: "string" }, type: "array" },
+            coverage: { enum: ["strong", "moderate", "limited"], type: "string" },
+            inspectDepth: { type: "string" },
+            limitations: { items: { type: "string" }, type: "array" },
+            notClaimed: { items: { type: "string" }, type: "array" },
+            searchDepth: { type: "string" },
+            strengths: { items: { type: "string" }, type: "array" }
+          },
+          required: ["assessmentVersion", "bestFor", "coverage", "inspectDepth", "limitations", "notClaimed", "searchDepth", "strengths"],
+          type: "object"
+        },
         ExternalSourceResolverProfile: {
           additionalProperties: false,
           description: "Source Resolver v2 metadata. It describes how a source was queried and normalized without exposing secrets.",
@@ -883,6 +899,7 @@ function openApiDocument() {
             endpointHost: { type: "string" },
             installPlanWritesWorkspace: { const: false, type: "boolean" },
             live: { $ref: "#/components/schemas/ExternalSourceLiveProbe" },
+            quality: { $ref: "#/components/schemas/ExternalSourceQualityProfile" },
             resolver: { $ref: "#/components/schemas/ExternalSourceResolverProfile" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
             sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
@@ -895,6 +912,7 @@ function openApiDocument() {
             "circuit",
             "endpointHost",
             "installPlanWritesWorkspace",
+            "quality",
             "resolver",
             "source",
             "sourceKind",
