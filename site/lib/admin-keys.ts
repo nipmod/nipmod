@@ -49,15 +49,15 @@ export async function revokeAdminKey(
   fetchImpl: typeof fetch = fetch
 ): Promise<AdminKeyActionResult> {
   if (!isKeyId(input.keyId)) {
-    return adminKeyError("invalid_key_id", "keyId must be a Nipmod API key id", 400, false);
+    return actionFailure("invalid_key_id", "keyId must be a Nipmod API key id", 400, false);
   }
   if (input.currentKeyId && input.keyId === input.currentKeyId) {
-    return adminKeyError("cannot_modify_current_admin_key", "current admin key cannot modify itself", 400, false);
+    return actionFailure("cannot_modify_current_admin_key", "current admin key cannot modify itself", 400, false);
   }
 
   const status = keyStoreStatus(env);
   if (!status.configured) {
-    return adminKeyError("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
+    return actionFailure("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
   }
 
   const now = new Date().toISOString();
@@ -68,11 +68,11 @@ export async function revokeAdminKey(
   });
   const response = await patchApiKeys(env, params, { revoked_at: now, status: "revoked" }, fetchImpl);
   if (!response.ok) {
-    return adminKeyError("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
   }
   const keys = await readKeyRows(response);
   if (keys.length === 0) {
-    return adminKeyError("api_key_not_found_or_inactive", "API key was not found or is already inactive", 404, false);
+    return actionFailure("api_key_not_found_or_inactive", "API key was not found or is already inactive", 404, false);
   }
   return adminKeyAction(input.action, keys, status);
 }
@@ -84,7 +84,7 @@ export async function cleanupStaleBetaKeys(
 ): Promise<AdminKeyActionResult> {
   const status = keyStoreStatus(env);
   if (!status.configured) {
-    return adminKeyError("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
+    return actionFailure("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
   }
 
   const olderThanHours = clampStaleHours(input.olderThanHours);
@@ -99,7 +99,7 @@ export async function cleanupStaleBetaKeys(
   });
   const response = await patchApiKeys(env, params, { revoked_at: now, status: "revoked" }, fetchImpl);
   if (!response.ok) {
-    return adminKeyError("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
   }
   return adminKeyAction("cleanup-stale-beta", await readKeyRows(response), status);
 }
@@ -125,7 +125,7 @@ function adminKeyAction(action: AdminKeyAction, keys: AdminKeyRecord[], store: R
   };
 }
 
-function adminKeyError(
+function actionFailure(
   code: string,
   error: string,
   status: number,
