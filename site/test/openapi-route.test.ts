@@ -78,6 +78,17 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.ExternalSourceReport.required).toContain("resolver");
     expect(body.components.schemas.ExternalSourceReport.required).toContain("circuit");
     expect(body.components.schemas.ExternalSourceReport.required).toContain("recovery");
+    expect(body.components.schemas.ExternalSourceCapability.required).toContain("quality");
+    expect(body.components.schemas.ExternalSourceQualityProfile.required).toEqual([
+      "assessmentVersion",
+      "bestFor",
+      "coverage",
+      "inspectDepth",
+      "limitations",
+      "notClaimed",
+      "searchDepth",
+      "strengths"
+    ]);
     expect(body.components.schemas.ExternalSourceCircuitReport.required).toEqual([
       "failureCount",
       "lastErrorCode",

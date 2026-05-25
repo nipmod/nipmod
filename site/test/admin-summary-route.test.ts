@@ -137,6 +137,14 @@ describe("admin summary route", () => {
           }
         ]
       },
+      sourceQuality: {
+        summary: {
+          moderateOrBetter: 5,
+          strong: 1,
+          total: 6
+        },
+        type: "dev.nipmod.admin-source-quality.v1"
+      },
       type: "dev.nipmod.admin-summary.v1",
       usage: {
         totals: {
@@ -148,6 +156,10 @@ describe("admin summary route", () => {
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
     expect(JSON.stringify(body)).not.toContain("service-role-key");
+    expect(body.sourceQuality.profiles[0]).toMatchObject({
+      coverage: "strong",
+      source: "npm"
+    });
     expect(fetchMock).toHaveBeenCalledTimes(6);
   });
 });

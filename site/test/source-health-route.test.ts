@@ -71,6 +71,16 @@ describe("source health route", () => {
       resolverVersion: "source-resolver-v2",
       searchStrategy: "registry-ranked-search"
     });
+    expect(body.sources[0].quality).toMatchObject({
+      assessmentVersion: "source-quality-v1",
+      coverage: "strong",
+      searchDepth: expect.stringContaining("registry-ranked"),
+      strengths: expect.arrayContaining(["direct registry API"])
+    });
+    expect(body.sources.find((source: { source: string }) => source.source === "pypi").quality).toMatchObject({
+      coverage: "moderate",
+      limitations: expect.arrayContaining([expect.stringContaining("no official JSON search API")])
+    });
     expect(JSON.stringify(body)).not.toMatch(/secret|service-role|bearer|publishable-key/i);
   });
 

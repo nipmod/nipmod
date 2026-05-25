@@ -170,6 +170,30 @@ describe("external package resolver", () => {
     expect(result.selection.candidates.length).toBeGreaterThan(0);
   });
 
+  test("uses graphics task hints for natural-language package searches", async () => {
+    const requested: string[] = [];
+    const result = await searchExternalPackages("graphic design image rendering", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        requested.push(url);
+        if (url === "https://pypi.org/pypi/pillow/json") {
+          return pyPiProjectResponse("pillow", "11.2.0", "https://github.com/python-pillow/Pillow");
+        }
+        if (url === "https://pypi.org/pypi/opencv-python/json") {
+          return pyPiProjectResponse("opencv-python", "4.12.0", "https://github.com/opencv/opencv-python");
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 3,
+      sources: ["pypi"]
+    });
+
+    expect(requested).toContain("https://pypi.org/pypi/pillow/json");
+    expect(requested).toContain("https://pypi.org/pypi/opencv-python/json");
+    expect(result.records.map((record) => record.id)).toEqual(expect.arrayContaining(["pypi:pillow", "pypi:opencv-python"]));
+    expect(result.selection.candidates[0]?.reasons).toContain("query intent match: Python image processing fit");
+  });
+
   test("adds query intent reasons for common agent package tasks", async () => {
     const result = await searchExternalPackages("schema validation", {
       fetchImpl: async (input: string | URL | Request) => {
@@ -1007,7 +1031,7 @@ describe("external package resolver", () => {
     expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
     expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
     expect(mcp.trust.signals).toContain("MCP registry packages returned: 1.");
-    expect(mcp.trust.warnings).toContain("MCP server declares 2 environment requirements; review secret scope before enabling.");
+    expect(mcp.trust.warnings).toContain("MCP server declares 2 environment requirements; review credential scope before enabling.");
   });
 
   test("aborts oversized source bodies before full buffering", async () => {

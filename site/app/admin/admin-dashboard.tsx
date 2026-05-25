@@ -27,7 +27,9 @@ export function AdminDashboard() {
   const archive = summary?.archive ?? {};
   const keys = summary?.keys ?? {};
   const keyActivity = summary?.keyActivity ?? {};
+  const sourceQuality = summary?.sourceQuality ?? {};
   const generatedAt = useMemo(() => formatDate(summary?.generatedAt), [summary?.generatedAt]);
+  const signedIn = Boolean(summary);
 
   useEffect(() => {
     const recentKeys = Array.isArray(keys.recentKeys) ? keys.recentKeys : [];
@@ -46,7 +48,7 @@ export function AdminDashboard() {
   async function loadDashboard(event?: FormEvent) {
     event?.preventDefault();
     if (!adminKey.trim()) {
-      setError("Admin credential required.");
+      setError("Admin password required.");
       return;
     }
     setLoading(true);
@@ -70,7 +72,7 @@ export function AdminDashboard() {
     }
   }
 
-  function clearKey() {
+  function logout() {
     sessionStorage.removeItem(SESSION_KEY);
     setAdminKey("");
     setNotice(null);
@@ -80,7 +82,7 @@ export function AdminDashboard() {
 
   async function manageKey(action: KeyManagementAction, keyId?: string, label?: string) {
     if (!adminKey.trim()) {
-      setError("Admin credential required.");
+      setError("Admin password required.");
       return;
     }
     if (action !== "update-label") {
@@ -137,11 +139,11 @@ export function AdminDashboard() {
         <p>API usage, archive growth, beta key activity and safety signals for internal launch monitoring.</p>
         <form className="admin-controls" onSubmit={loadDashboard}>
           <label>
-            <span>Admin key or password</span>
+            <span>Admin login</span>
             <input
               autoComplete="off"
               onChange={(event) => setAdminKey(event.target.value)}
-              placeholder="Admin password or nka_admin..."
+              placeholder="Enter admin password"
               type="password"
               value={adminKey}
             />
@@ -157,13 +159,18 @@ export function AdminDashboard() {
           </label>
           <div className="admin-actions">
             <button className="button button-primary button-small" disabled={loading} type="submit">
-              {loading ? "Loading" : "Refresh"}
+              {loading ? (signedIn ? "Refreshing" : "Signing in") : signedIn ? "Refresh" : "Login"}
             </button>
-            <button className="button button-ghost button-small" onClick={clearKey} type="button">
-              Clear
+            <button className="button button-ghost button-small" onClick={logout} type="button">
+              {signedIn ? "Logout" : "Reset"}
             </button>
           </div>
         </form>
+        {signedIn ? (
+          <p className="admin-session">Logged in. The credential stays in this browser session only.</p>
+        ) : (
+          <p className="admin-login-help">Enter the admin password to open the internal dashboard.</p>
+        )}
         {error ? <p className="admin-error">{error}</p> : null}
         {notice ? <p className="admin-notice">{notice}</p> : null}
         {generatedAt ? <p className="admin-generated">Generated {generatedAt}</p> : null}
@@ -216,6 +223,27 @@ export function AdminDashboard() {
               title="Source touches"
             >
               <BarList labelKey="source" rows={usage.sources} valueKey="requestCount" valueLabel="touches" />
+            </Panel>
+            <Panel
+              description="Static resolver depth by source. This shows where Nipmod has strong metadata and where agents still need extra review."
+              title="Source quality"
+            >
+              <RatioGrid
+                rows={[
+                  ["Sources", sourceQuality.summary?.total],
+                  ["Strong", sourceQuality.summary?.strong],
+                  ["Moderate or better", sourceQuality.summary?.moderateOrBetter]
+                ]}
+              />
+              <DataTable
+                columns={[
+                  ["source", "Source"],
+                  ["coverage", "Coverage"],
+                  ["resolverVersion", "Resolver"],
+                  ["authConfigured", "Auth"]
+                ]}
+                rows={sourceQuality.profiles}
+              />
             </Panel>
             <Panel description="Install-plan and archive outcomes from events that emitted those safety signals." title="Safety outcomes">
               <OutcomeBars
@@ -323,6 +351,19 @@ export function AdminDashboard() {
                   ["Active external keys", keyActivity.externalKeyCount],
                   ["Admin key requests excluded", keyActivity.excludedAdminKeyRequestCount],
                   ["Stale beta keys", keys.staleBetaCount]
+                ]}
+              />
+            </Panel>
+            <Panel title="Source quality detail">
+              <DataTable
+                rows={sourceQuality.profiles}
+                columns={[
+                  ["source", "Source"],
+                  ["coverage", "Coverage"],
+                  ["searchDepth", "Search"],
+                  ["inspectDepth", "Inspect"],
+                  ["strengths", "Strengths"],
+                  ["limitations", "Limits"]
                 ]}
               />
             </Panel>
