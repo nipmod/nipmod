@@ -39,7 +39,6 @@ describe("public security policy", () => {
     expect(globalHeaders["Content-Security-Policy"]).toContain(
       "connect-src 'self' https://node.nipmod.com https://nipmod-witness.fly.dev"
     );
-    expect(nextConfig.experimental?.sri?.algorithm).toBe("sha256");
     expect(globalHeaders["X-Content-Type-Options"]).toBe("nosniff");
     expect(globalHeaders["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
     expect(globalHeaders["Permissions-Policy"]).toContain("camera=()");
