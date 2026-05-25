@@ -339,7 +339,7 @@ describe("external package resolver", () => {
     expect(plan.safety).toMatchObject({ blocked: false, blockReason: null, commandRisk: "low" });
   });
 
-  test("uses compact npm latest manifests for popular packages", async () => {
+  test("uses npm latest manifests and bounded packument depth for popular packages", async () => {
     const requestedUrls: string[] = [];
     const fetchImpl = async (input: string | URL | Request) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
@@ -374,7 +374,7 @@ describe("external package resolver", () => {
     const plan = createExternalInstallPlan(record);
 
     expect(requestedUrls).toContain("https://registry.npmjs.org/react/latest");
-    expect(requestedUrls).not.toContain("https://registry.npmjs.org/react");
+    expect(requestedUrls).toContain("https://registry.npmjs.org/react");
     expect(record.id).toBe("npm:react");
     expect(record.metrics.downloads).toBe(561_906_819);
     expect(record.trust.policy.version).toBe("external-v2");
@@ -388,6 +388,7 @@ describe("external package resolver", () => {
     expect(record.trust.factors.some((factor) => factor.category === "security" && factor.evidence.includes("integrity"))).toBe(true);
     expect(record.trust.signals).toContain("Latest tarball integrity metadata is present.");
     expect(record.trust.signals).toContain("npm registry signature metadata is present.");
+    expect(record.trust.signals).toContain("npm packument summary was not returned.");
     expect(plan.plan.commands).toEqual(["npm install react"]);
   });
 
@@ -727,6 +728,13 @@ describe("external package resolver", () => {
       if (url === "https://api.npmjs.org/downloads/point/last-month/coalesce") {
         return jsonResponse({ downloads: 1234, package: "coalesce" });
       }
+      if (url === "https://registry.npmjs.org/coalesce") {
+        return jsonResponse({
+          "dist-tags": { latest: "1.0.0" },
+          time: { modified: "2026-05-01T00:00:00.000Z" },
+          versions: { "1.0.0": {} }
+        });
+      }
       return jsonResponse({ error: "not found" }, 404);
     });
     vi.stubGlobal("fetch", fetchImpl);
@@ -738,8 +746,9 @@ describe("external package resolver", () => {
     ]);
 
     expect(records.map((record) => record.id)).toEqual(["npm:coalesce", "npm:coalesce", "npm:coalesce"]);
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
     expect(requestedUrls.filter((url) => url === "https://registry.npmjs.org/coalesce/latest")).toHaveLength(1);
+    expect(requestedUrls.filter((url) => url === "https://registry.npmjs.org/coalesce")).toHaveLength(1);
     expect(requestedUrls.filter((url) => url === "https://api.npmjs.org/downloads/point/last-month/coalesce")).toHaveLength(1);
   });
 
@@ -996,6 +1005,8 @@ describe("external package resolver", () => {
     expect(npm.trust.signals).toContain("npm package declares Node engine: >=20.");
     expect(npm.trust.signals).toContain("Latest npm tarball host: registry.npmjs.org.");
     expect(npm.trust.signals).toContain("Latest npm release file count: 44.");
+    expect(npm.trust.signals).toContain("npm packument versions returned: 2.");
+    expect(npm.trust.signals).toContain("npm latest dist-tag matches the latest manifest version.");
 
     const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
     expect(pypi.trust.signals).toContain("PyPI latest release files returned: 1.");
@@ -1020,9 +1031,15 @@ describe("external package resolver", () => {
     expect(github.trust.signals).toContain("GitHub security files found: SECURITY.md, .github/dependabot.yml.");
     expect(github.trust.signals).toContain("GitHub lockfiles found: pnpm-lock.yaml.");
     expect(github.trust.signals).toContain("GitHub package.json package manager: pnpm@10.30.0.");
+    expect(github.trust.signals).toContain("GitHub latest release tag: v1.2.3.");
+    expect(github.trust.signals).toContain("GitHub latest default-branch commit returned: abcdef1234567890.");
+    expect(github.trust.signals).toContain("GitHub community profile health: 84.");
 
     const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
     expect(model.trust.warnings).toContain("Hugging Face marks this model as gated.");
+    expect(model.trust.signals).toContain("Hugging Face cardData metadata is present.");
+    expect(model.trust.signals).toContain("Hugging Face base model metadata: example/base-model.");
+    expect(model.trust.signals).toContain("Hugging Face dataset references returned: example/depth-dataset.");
     expect(model.trust.signals).toContain("Hugging Face repository files returned: 2.");
     expect(model.trust.signals).toContain("Hugging Face safetensors weight file is present.");
     expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
@@ -1277,6 +1294,21 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
     return jsonResponse({ downloads: 25_000, package: "depth-npm" });
   }
 
+  if (url === "https://registry.npmjs.org/depth-npm") {
+    return jsonResponse({
+      "dist-tags": { beta: "1.1.0-beta.1", latest: "1.0.0" },
+      name: "depth-npm",
+      time: {
+        created: "2025-01-01T00:00:00.000Z",
+        modified: "2026-05-01T00:00:00.000Z"
+      },
+      versions: {
+        "0.9.0": {},
+        "1.0.0": {}
+      }
+    });
+  }
+
   if (url === "https://pypi.org/pypi/depth-pypi/json") {
     return jsonResponse({
       info: {
@@ -1386,8 +1418,35 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
     });
   }
 
-  if (url === "https://huggingface.co/api/models/example/depth-model") {
+  if (url === "https://api.github.com/repos/example/depth-repo/releases/latest") {
     return jsonResponse({
+      name: "v1.2.3",
+      tag_name: "v1.2.3"
+    });
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/commits?per_page=1&sha=main") {
+    return jsonResponse([
+      {
+        sha: "abcdef1234567890"
+      }
+    ]);
+  }
+
+  if (url === "https://api.github.com/repos/example/depth-repo/community/profile") {
+    return jsonResponse({
+      health_percentage: 84
+    });
+  }
+
+  if (url.startsWith("https://huggingface.co/api/models/example/depth-model")) {
+    return jsonResponse({
+      cardData: {
+        base_model: "example/base-model",
+        datasets: ["example/depth-dataset"],
+        language: ["en"],
+        tags: ["text-generation"]
+      },
       downloads: 1000,
       gated: true,
       id: "example/depth-model",
