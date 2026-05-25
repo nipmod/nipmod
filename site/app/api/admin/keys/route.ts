@@ -1,6 +1,5 @@
 import { hasApiAccessTier } from "../../../../lib/api-auth";
-import { adminCorsPolicy, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
-import { apiJsonWithUsage } from "../../../../lib/api-response";
+import { adminCorsPolicy, apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
 import { cleanupStaleBetaKeys, revokeAdminKey, type AdminKeyAction } from "../../../../lib/admin-keys";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
@@ -22,8 +21,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   if (!hasApiAccessTier(rateLimit.access, "admin")) {
-    return apiJsonWithUsage(
-      request,
+    return apiJson(
       {
         code: "insufficient_api_access",
         error: "admin key management requires an admin API key",
@@ -33,12 +31,10 @@ export async function POST(request: Request): Promise<Response> {
         type: "dev.nipmod.api-error.v1"
       },
       {
-        access: rateLimit.access,
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: 403,
-        usageBody: adminKeysUsageError("insufficient_api_access")
+        status: 403
       }
     );
   }
@@ -46,8 +42,7 @@ export async function POST(request: Request): Promise<Response> {
   const body = await readJsonBody(request);
   const parsed = parseAdminKeyAction(body);
   if (!parsed.ok) {
-    return apiJsonWithUsage(
-      request,
+    return apiJson(
       {
         code: parsed.code,
         error: parsed.error,
@@ -57,12 +52,10 @@ export async function POST(request: Request): Promise<Response> {
         type: "dev.nipmod.api-error.v1"
       },
       {
-        access: rateLimit.access,
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: 400,
-        usageBody: adminKeysUsageError("admin_key_action_rejected")
+        status: 400
       }
     );
   }
@@ -77,8 +70,7 @@ export async function POST(request: Request): Promise<Response> {
         });
 
   if (!result.ok) {
-    return apiJsonWithUsage(
-      request,
+    return apiJson(
       {
         code: result.code,
         error: result.error,
@@ -89,25 +81,18 @@ export async function POST(request: Request): Promise<Response> {
         type: "dev.nipmod.api-error.v1"
       },
       {
-        access: rateLimit.access,
         context,
         corsPolicy,
         headers: rateLimit.headers,
-        status: result.status,
-        usageBody: adminKeysUsageError("admin_key_action_failed")
+        status: result.status
       }
     );
   }
 
-  return apiJsonWithUsage(request, result, {
-    access: rateLimit.access,
+  return apiJson(result, {
     context,
     corsPolicy,
-    headers: rateLimit.headers,
-    usageBody: {
-      action: result.action,
-      type: "dev.nipmod.admin-key-action.v1"
-    }
+    headers: rateLimit.headers
   });
 }
 
@@ -162,11 +147,4 @@ function readOptionalInteger(value: unknown): number | null {
   }
   const parsed = typeof value === "number" ? value : typeof value === "string" ? Number.parseInt(value, 10) : NaN;
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
-function adminKeysUsageError(code: string) {
-  return {
-    code,
-    type: "dev.nipmod.api-error.v1"
-  };
 }

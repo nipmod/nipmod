@@ -108,7 +108,7 @@ describe("admin keys route", () => {
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
     expect(JSON.stringify(body)).not.toContain("service-role-key");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   test("cleans stale self-serve beta keys only", async () => {
@@ -163,11 +163,7 @@ describe("admin keys route", () => {
     const hashSecret = "test-admin-self-secret";
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
     const currentKeyId = `key_${hash.slice(0, 16)}`;
-    const fetchMock = vi.fn(async (input: string | URL | Request) => {
-      const url = String(input);
-      if (url.endsWith("/rest/v1/api_usage_events")) {
-        return new Response(null, { status: 204 });
-      }
+    const fetchMock = vi.fn(async () => {
       return Response.json({ error: "unexpected patch" }, { status: 500 });
     }) as unknown as typeof fetch;
 
@@ -196,6 +192,6 @@ describe("admin keys route", () => {
       status: 400,
       type: "dev.nipmod.api-error.v1"
     });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(0);
   });
 });
