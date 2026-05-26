@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createPageMetadata } from "../metadata";
 import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
@@ -56,6 +57,18 @@ export default function AgentsPage() {
             ["No hidden approval", "Every install plan still requires local approval before code enters a workspace."]
           ]}
         />
+      </DocsSection>
+
+      <DocsSection eyebrow="Base" title="Base agent preflight">
+        <DocsGrid>
+          <DocsCard label="Base" title="Before SDKs, CLIs and MCP tooling">
+            <p>Base MCP gives agents an onchain action surface. Nipmod can run before package and tool adoption so agents inspect what they are about to install or enable.</p>
+            <p><Link href="/base-agents">Open Base agent path</Link></p>
+          </DocsCard>
+          <DocsCard label="Draft" title="Package preflight prompt">
+            <DocsCode>{"Before installing Base ecosystem tooling, use Nipmod to search, inspect and request an install plan. Continue only after user approval."}</DocsCode>
+          </DocsCard>
+        </DocsGrid>
       </DocsSection>
     </DocsShell>
   );

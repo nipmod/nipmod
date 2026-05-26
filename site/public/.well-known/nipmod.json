@@ -81,6 +81,7 @@
     "home": "https://nipmod.com",
     "quickstart": "https://nipmod.com/quickstart",
     "architecture": "https://nipmod.com/architecture",
+    "baseAgents": "https://nipmod.com/base-agents",
     "api": "https://nipmod.com/api-access",
     "apiSpec": "https://nipmod.com/api/openapi",
     "sources": "https://nipmod.com/sources",
@@ -100,6 +101,27 @@
     "packageIntelligenceStatusApi": "https://nipmod.com/api/archive/status",
     "trust": "https://nipmod.com/trust",
     "security": "https://nipmod.com/security"
+  },
+  "baseAgents": {
+    "page": "https://nipmod.com/base-agents",
+    "status": "integration_path_not_official_listing",
+    "summary": "Use Nipmod as a read-only package intelligence preflight before Base agents install or enable SDKs, CLIs, MCP servers, packages or repos.",
+    "doesNot": [
+      "replace Base MCP",
+      "hold wallet keys",
+      "sign transactions",
+      "create Base Account approval links",
+      "append Builder Codes",
+      "claim official Base approval"
+    ],
+    "workflow": [
+      "search package or tool",
+      "inspect exact source record",
+      "request install plan",
+      "show trust signals and warnings",
+      "wait for user or host approval",
+      "continue to Base MCP, x402 or protocol-specific work only after approval"
+    ]
   },
   "agent": {
     "llms": "https://nipmod.com/llms.txt",

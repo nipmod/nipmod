@@ -25,6 +25,11 @@ const mcpPrompt = `Use the remote Nipmod MCP endpoint for package discovery:
 POST https://nipmod.com/api/mcp with x-nipmod-api-key
 Only use read-only tools from the remote endpoint. Workspace writes require local approval.`;
 
+const baseAgentPrompt = `Before installing or enabling Base ecosystem tooling, use Nipmod.
+Search for the SDK, CLI, MCP server, package or repo.
+Inspect the exact source record and show the install plan.
+Continue to Base MCP or x402 work only after local approval.`;
+
 const genericAgentPrompt = `When a user asks for a package, do this:
 1. Use or issue a Nipmod API key.
 2. Search Nipmod.
@@ -76,6 +81,9 @@ export default function ExamplesPage() {
           </DocsCard>
           <DocsCard label="MCP" title="Remote read-only endpoint">
             <DocsCode>{mcpPrompt}</DocsCode>
+          </DocsCard>
+          <DocsCard label="Base" title="Base agent preflight">
+            <DocsCode>{baseAgentPrompt}</DocsCode>
           </DocsCard>
           <DocsCard label="HTTPS" title="Any agent with fetch">
             <DocsCode>{genericAgentPrompt}</DocsCode>
@@ -135,6 +143,9 @@ export default function ExamplesPage() {
           </DocsCard>
           <DocsCard label="MCP" title="Host prompt">
             <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/mcp-host.md">Open MCP example</Link></p>
+          </DocsCard>
+          <DocsCard label="Base" title="Agent package preflight">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/base-agent-package-preflight.md">Open Base preflight draft</Link></p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

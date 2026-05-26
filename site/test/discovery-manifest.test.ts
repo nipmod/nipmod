@@ -29,6 +29,7 @@ describe("nipmod discovery manifest", () => {
       "agent",
       "api",
       "archive",
+      "baseAgents",
       "description",
       "docs",
       "externalIndex",
@@ -56,6 +57,7 @@ describe("nipmod discovery manifest", () => {
       architecture: "https://nipmod.com/architecture",
       api: "https://nipmod.com/api-access",
       apiSpec: "https://nipmod.com/api/openapi",
+      baseAgents: "https://nipmod.com/base-agents",
       betaKeyApi: "https://nipmod.com/api/keys/beta",
       examples: "https://nipmod.com/examples",
       externalInspectApi: "https://nipmod.com/api/inspect",
@@ -103,6 +105,11 @@ describe("nipmod discovery manifest", () => {
       publicBeta: false,
       rateLimited: true
     });
+    expect(manifest.baseAgents).toMatchObject({
+      page: "https://nipmod.com/base-agents",
+      status: "integration_path_not_official_listing"
+    });
+    expect(manifest.baseAgents.doesNot).toContain("claim official Base approval");
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();
     expect(manifest.agent.commands.setupHermesBundle).toBeUndefined();
     expect(manifest.agent.commands.setupPublish).toBeUndefined();
