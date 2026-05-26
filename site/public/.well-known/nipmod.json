@@ -119,9 +119,16 @@
       "hold wallet keys",
       "sign transactions",
       "create Base Account approval links",
-      "append Builder Codes",
+      "append Builder Codes from the hosted package API",
       "claim official Base approval"
     ],
+    "builderCode": {
+      "registered": true,
+      "code": "bc_vu9r71xi",
+      "erc8021DataSuffix": "0x62635f76753972373178690b0080218021802180218021802180218021",
+      "appendedByHostedApi": false,
+      "note": "Registered for future Nipmod onchain or x402 attribution. Current hosted package intelligence calls remain read-only."
+    },
     "workflow": [
       "search package or tool",
       "inspect exact source record",

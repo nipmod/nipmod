@@ -43,6 +43,12 @@ No wallet custody. No signing. No workspace writes from the hosted API.
 
 5.
 
+We also registered a Base Builder Code for future attribution.
+
+That does not change the boundary: Nipmod is still read-only today and does not append transaction data from hosted package intelligence calls.
+
+6.
+
 We published a Base agent preflight path today:
 
 https://nipmod.com/base-agents
@@ -51,7 +57,7 @@ Agents can also read the machine spec directly:
 
 https://nipmod.com/base-agent-preflight.json
 
-6.
+7.
 
 The first useful flow is simple:
 
@@ -62,13 +68,13 @@ The first useful flow is simple:
 - the user or host approves locally
 - then it continues to Base MCP, x402 or protocol work
 
-7.
+8.
 
 We are not claiming an official Base listing here.
 
 This is the integration path we think makes sense, and we are keeping the boundary clean while we work toward deeper ecosystem support.
 
-8.
+9.
 
 The direction is clear:
 
@@ -76,13 +82,13 @@ agents will not only chat, they will install, pay, connect, trade and operate.
 
 That makes package trust part of agent infrastructure, not a side note.
 
-9.
+10.
 
 If you are building on Base and your product has an SDK, CLI, API client, MCP server or package surface, we want to make it easier for agents to find and inspect it safely.
 
 DM us or email info@nipmod.com if this is relevant.
 
-10.
+11.
 
 Docs:
 https://nipmod.com/base-agents

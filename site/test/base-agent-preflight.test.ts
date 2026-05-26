@@ -32,6 +32,12 @@ describe("Base agent preflight spec", () => {
       walletCustody: false,
       workspaceWritesFromHostedApi: false
     });
+    expect(preflight.baseBuilderCode).toMatchObject({
+      appendedByHostedApi: false,
+      builderCode: "bc_vu9r71xi",
+      erc8021DataSuffix: "0x62635f76753972373178690b0080218021802180218021802180218021",
+      registered: true
+    });
     expect(preflight.workflow).toEqual([
       "issue_or_load_nipmod_api_key",
       "search_for_tooling",

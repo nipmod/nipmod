@@ -30,6 +30,10 @@ const machineSpec = `GET https://nipmod.com/base-agent-preflight.json
 
 Use this JSON before Base-focused package, SDK, CLI, MCP, repo or x402 client decisions.`;
 
+const baseBuilderCode = `Base Builder Code: bc_vu9r71xi
+ERC-8021 data suffix:
+0x62635f76753972373178690b0080218021802180218021802180218021`;
+
 const pluginBoundary = `Base custom plugin:
   prepares unsigned calldata or maps protocol output to send_calls
 
@@ -45,7 +49,7 @@ export default function BaseAgentsPage() {
         { label: "Position", value: "preflight" },
         { label: "Machine spec", value: "public" },
         { label: "Hosted writes", value: "none" },
-        { label: "Base status", value: "integration path" }
+        { label: "Builder Code", value: "registered" }
       ]}
       title="Nipmod for Base agents."
     >
@@ -150,7 +154,8 @@ export default function BaseAgentsPage() {
             <p>Projects with SDK, CLI, MCP or package surfaces can become easier for agents to discover and review.</p>
           </DocsCard>
           <DocsCard label="Builder Codes" title="Attribution boundary">
-            <p>Builder Codes matter for onchain activity. Nipmod is not an onchain action layer, so attribution comes later only if Nipmod adds onchain flows.</p>
+            <p>Nipmod has a Base Builder Code reserved for future onchain attribution. The current hosted API does not append it because Nipmod does not build or submit transactions.</p>
+            <DocsCode>{baseBuilderCode}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
@@ -159,7 +164,7 @@ export default function BaseAgentsPage() {
         <DocsTable
           rows={[
             ["Base app verification", "Homepage verification meta is present. Claim verified only after the Base app flow confirms it."],
-            ["Builder Codes", "Builder Codes are relevant when Nipmod later sends or influences onchain transactions. Current hosted API has no onchain action surface."],
+            ["Builder Codes", "Base Builder Code is registered for future attribution. Current hosted API remains read-only and does not append transaction data."],
             ["Base MCP", "Nipmod can be used beside Base MCP today as a read-only package preflight, using HTTPS or the hosted Nipmod MCP endpoint."],
             ["Public wording", "Use 'Base agent preflight' or 'integration path'. Do not say 'official Base integration' until Base lists or approves it."]
           ]}
