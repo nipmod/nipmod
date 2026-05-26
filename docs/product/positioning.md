@@ -46,7 +46,7 @@ Use precise language:
 | Package intelligence over existing sources | Replacement registry |
 | Safe install plans before workspace writes | Hosted API installs packages |
 | Confirmed package intelligence records | Verified packages from search alone |
-| Public beta, rate limited | Unlimited production access |
+| API beta, key-required and rate limited | Unlimited production access |
 
 ## Why This Matters
 
@@ -67,6 +67,6 @@ Nipmod owns that preflight decision layer.
 
 ## Current Rollout
 
-Public beta access is free and rate limited while the API, trust model and archive loop improve from real usage.
+API beta access is free, key-required and rate limited while the API, trust model and archive loop improve from real usage.
 
 The first collaboration surface is the Base ecosystem because the project, token and early community are already there. The product itself remains broader than Base: the same API can serve any agent host that can call HTTPS or MCP.

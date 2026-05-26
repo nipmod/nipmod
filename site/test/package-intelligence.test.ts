@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { POST as confirmPost } from "../app/api/archive/confirm/route";
 import { POST as preparePost } from "../app/api/archive/prepare/route";
 import { GET as archiveSearchGet } from "../app/api/archive/search/route";
@@ -17,8 +17,13 @@ import {
   upsertPackageIntelligenceRecord
 } from "../lib/package-intelligence-store";
 import type { ExternalPackageRecord } from "../lib/external-packages";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 describe("package intelligence archive", () => {
+  beforeEach(() => {
+    stubApiKeyAuth();
+  });
+
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
@@ -210,7 +215,7 @@ describe("package intelligence archive", () => {
     const prepare = await preparePost(
       new Request("https://nipmod.com/api/archive/prepare", {
         body: JSON.stringify({ record: externalRecord }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -233,7 +238,7 @@ describe("package intelligence archive", () => {
     const confirm = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ actor: "claude-code", dryRun: true, record: externalRecord }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -272,7 +277,7 @@ describe("package intelligence archive", () => {
             trust: { ...externalRecord.trust, decision: "recommended", risk: "low", score: 100, warnings: [] }
           }
         }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -292,7 +297,7 @@ describe("package intelligence archive", () => {
   test("search results stay ephemeral and do not become verified archive records", async () => {
     stubArchiveRouteFetch();
 
-    const response = await searchGet(new Request("https://nipmod.com/api/search?q=http%20client&sources=npm&limit=1"));
+    const response = await searchGet(new Request("https://nipmod.com/api/search?q=http%20client&sources=npm&limit=1", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -320,7 +325,7 @@ describe("package intelligence archive", () => {
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ dryRun: true, record: staleRecord }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -338,7 +343,7 @@ describe("package intelligence archive", () => {
     const response = await preparePost(
       new Request("https://nipmod.com/api/archive/prepare", {
         body: JSON.stringify({ record: { id: "npm:broken", type: "dev.nipmod.external-package.v1" } }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -352,14 +357,14 @@ describe("package intelligence archive", () => {
     });
   });
 
-  test("does not allow unauthenticated archive writes", async () => {
+  test("does not allow archive writes without an archive writer token", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ record: externalRecord }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -378,7 +383,7 @@ describe("package intelligence archive", () => {
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ record: externalRecord }),
-        headers: { "content-type": "application/json", "x-nipmod-archive-token": "write-token" },
+        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": "write-token" }),
         method: "POST"
       })
     );
@@ -398,7 +403,7 @@ describe("package intelligence archive", () => {
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ actor: "codex", record: externalRecord }),
-        headers: { "content-type": "application/json", "x-nipmod-archive-token": "write-token" },
+        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": "write-token" }),
         method: "POST"
       })
     );
@@ -410,7 +415,7 @@ describe("package intelligence archive", () => {
   });
 
   test("reports disabled archive search without a configured database", async () => {
-    const response = await archiveSearchGet(new Request("https://nipmod.com/api/archive/search?q=telegram"));
+    const response = await archiveSearchGet(new Request("https://nipmod.com/api/archive/search?q=telegram", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -419,7 +424,7 @@ describe("package intelligence archive", () => {
   });
 
   test("reports archive store status without exposing secrets", async () => {
-    const response = await archiveStatusGet();
+    const response = await archiveStatusGet(new Request("https://nipmod.com/api/archive/status", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);

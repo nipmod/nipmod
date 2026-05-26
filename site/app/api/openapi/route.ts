@@ -27,7 +27,9 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "openapi", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "openapi", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -62,10 +64,11 @@ function openApiDocument() {
         ApiAccess: {
           additionalProperties: false,
           properties: {
-            publicBeta: { const: true, type: "boolean" },
+            keyRequired: { const: true, type: "boolean" },
+            publicBeta: { const: false, type: "boolean" },
             writeBoundary: { type: "string" }
           },
-          required: ["publicBeta", "writeBoundary"],
+          required: ["keyRequired", "publicBeta", "writeBoundary"],
           type: "object"
         },
         ApiError: {
@@ -1131,10 +1134,11 @@ function openApiDocument() {
                 authorizationHeaderSupported: { const: true, type: "boolean" },
                 keyRegistry: { $ref: "#/components/schemas/ApiKeyStoreStatus" },
                 keyHeaders: { items: { type: "string" }, type: "array" },
-                publicBeta: { const: true, type: "boolean" },
-                tiers: { items: { enum: ["public", "beta", "builder", "partner", "admin"], type: "string" }, type: "array" }
+                keyRequired: { const: true, type: "boolean" },
+                publicBeta: { const: false, type: "boolean" },
+                tiers: { items: { enum: ["beta", "builder", "partner", "admin"], type: "string" }, type: "array" }
               },
-              required: ["authorizationHeaderSupported", "keyRegistry", "keyHeaders", "publicBeta", "tiers"],
+              required: ["authorizationHeaderSupported", "keyRegistry", "keyHeaders", "keyRequired", "publicBeta", "tiers"],
               type: "object"
             },
             archive: {
@@ -1497,12 +1501,12 @@ function openApiDocument() {
       },
       securitySchemes: {
         BearerAuth: {
-          description: "Optional Nipmod API key as an Authorization bearer token. Public beta requests can omit it; beta, partner and admin keys increase or restrict access by tier.",
+          description: "Nipmod API key as an Authorization bearer token. Package intelligence API calls require a key; POST /api/keys/beta issues self-service beta keys.",
           scheme: "bearer",
           type: "http"
         },
         NipmodApiKey: {
-          description: "Optional Nipmod API key. Public beta requests can omit it; beta, partner and admin keys increase or restrict access by tier.",
+          description: "Nipmod API key. Package intelligence API calls require a key; POST /api/keys/beta issues self-service beta keys.",
           in: "header",
           name: "x-nipmod-api-key",
           type: "apiKey"
@@ -1524,7 +1528,7 @@ function openApiDocument() {
             "401": errorResponse(),
             "429": errorResponse()
           },
-          summary: "Return the public Nipmod API contract."
+          summary: "Return the Nipmod API contract."
         }
       },
       "/api/admin/summary": {
@@ -1576,14 +1580,14 @@ function openApiDocument() {
             "429": errorResponse(),
             "503": errorResponse()
           },
-          security: [{ NipmodBearer: [] }, { NipmodApiKey: [] }],
+          security: [{ BearerAuth: [] }, { NipmodApiKey: [] }],
           summary: "Manage beta, partner and admin API keys."
         }
       },
       "/api/keys/beta": {
         post: {
           "x-nipmod-agent-step": "api-access",
-          description: "Issues a public beta API key without human approval. The endpoint is rate limited and stores only a keyed hash of the generated key.",
+          description: "Issues a beta API key without human approval. This is the one public API access endpoint; it is rate limited and stores only a keyed hash of the generated key.",
           operationId: "issueBetaApiKey",
           requestBody: {
             content: {
@@ -1892,7 +1896,7 @@ function openApiDocument() {
       "/api/stats": {
         get: {
           description:
-            "Returns public aggregate product stats. External usage excludes internal monitors, canaries, admin requests and unknown legacy traffic.",
+            "Returns aggregate product stats for authenticated callers. External usage excludes internal monitors, canaries, admin requests and unknown legacy traffic.",
           operationId: "getPublicStats",
           parameters: [
             {
@@ -1910,7 +1914,7 @@ function openApiDocument() {
             "401": errorResponse(),
             "429": errorResponse()
           },
-          summary: "Return public usage, key, archive and source stats."
+          summary: "Return usage, key, archive and source stats."
         }
       },
       "/api/sources/health": {
@@ -1961,7 +1965,7 @@ function openApiDocument() {
       { description: "Privacy-limited API access, rate limits and usage metrics.", name: "operations" },
       { description: "Source capability and degradation reporting.", name: "source-health" }
     ],
-    security: [{}, { NipmodApiKey: [] }, { BearerAuth: [] }],
+    security: [{ NipmodApiKey: [] }, { BearerAuth: [] }],
     servers: [{ url: "https://nipmod.com" }]
   };
 }
@@ -2023,7 +2027,7 @@ function openApiEndpointResponse() {
         schema
       }
     },
-    description: "OpenAPI 3.1 contract for the hosted public beta API."
+    description: "OpenAPI 3.1 contract for the hosted key-required API beta."
   };
 }
 

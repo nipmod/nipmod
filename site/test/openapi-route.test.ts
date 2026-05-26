@@ -1,9 +1,15 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { GET, OPTIONS } from "../app/api/openapi/route";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 describe("OpenAPI route", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   test("publishes the agent package API contract", async () => {
-    const response = await GET(new Request("https://nipmod.com/api/openapi"));
+    stubApiKeyAuth();
+    const response = await GET(new Request("https://nipmod.com/api/openapi", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -12,7 +18,7 @@ describe("OpenAPI route", () => {
     expect(body.openapi).toBe("3.1.0");
     expect(body.info.title).toBe("Nipmod API");
     expect(body.components.securitySchemes.NipmodApiKey.name).toBe("x-nipmod-api-key");
-    expect(body.security).toContainEqual({});
+    expect(body.security).not.toContainEqual({});
     expect(body["x-nipmod-agent-flow"]).toEqual([
       "search",
       "inspect",
@@ -161,6 +167,7 @@ describe("OpenAPI route", () => {
       "type",
       "usage"
     ]);
+    expect(body.components.schemas.SourceHealthResponse.properties.apiAccess.required).toContain("keyRequired");
     expect(body.paths["/api/search"].get.responses["200"].content["application/json"].schema.$ref).toBe(
       "#/components/schemas/ExternalSearchResult"
     );

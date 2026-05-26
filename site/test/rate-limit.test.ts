@@ -13,7 +13,7 @@ describe("API rate limits", () => {
     const request = new Request("https://nipmod.com/api/search", {
       headers: {
         "user-agent": "rate-limit-test",
-        "x-forwarded-for": `203.0.113.${Math.floor(Math.random() * 200) + 1}`,
+        "x-forwarded-for": "203.0.113.24",
         "x-request-id": "test-request-1"
       }
     });
@@ -50,6 +50,29 @@ describe("API rate limits", () => {
     expect(limited.response?.headers.get("x-nipmod-access-tier")).toBe("public");
     await expect(limited.response?.json()).resolves.toMatchObject({
       code: "invalid_api_key",
+      retryable: false,
+      status: 401,
+      type: "dev.nipmod.api-error.v1"
+    });
+  });
+
+  test("requires an API key when the route opts into key-required access", async () => {
+    const request = new Request("https://nipmod.com/api/search", {
+      headers: {
+        "x-request-id": "missing-key-test"
+      }
+    });
+    const limited = await checkApiRateLimitAsync(
+      request,
+      { limit: 1, name: "test-required-key", windowMs: 60_000 },
+      createApiHttpContext(request),
+      { requireApiKey: true }
+    );
+
+    expect(limited.ok).toBe(false);
+    expect(limited.response?.status).toBe(401);
+    await expect(limited.response?.json()).resolves.toMatchObject({
+      code: "api_key_required",
       retryable: false,
       status: 401,
       type: "dev.nipmod.api-error.v1"

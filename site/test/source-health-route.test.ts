@@ -1,7 +1,12 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { GET, OPTIONS, resetSourceHealthProbeCacheForTests } from "../app/api/sources/health/route";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 describe("source health route", () => {
+  beforeEach(() => {
+    stubApiKeyAuth();
+  });
+
   afterEach(() => {
     resetSourceHealthProbeCacheForTests();
     vi.unstubAllEnvs();
@@ -9,7 +14,7 @@ describe("source health route", () => {
   });
 
   test("publishes source capability metadata without secrets or workspace writes", async () => {
-    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "x-request-id": "source-health-test" } }));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: apiKeyHeaders({ "x-request-id": "source-health-test" }) }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -18,12 +23,13 @@ describe("source health route", () => {
     expect(body).toMatchObject({
       apiAccess: {
         keyRegistry: {
-          configured: false,
+          configured: true,
           driver: "env-or-supabase-rest",
-          hashingConfigured: false,
+          hashingConfigured: true,
           registryConfigured: false
         },
-        publicBeta: true
+        keyRequired: true,
+        publicBeta: false
       },
       probe: {
         cacheTtlMs: expect.any(Number),
@@ -95,7 +101,7 @@ describe("source health route", () => {
       vi.fn(async () => new Response(JSON.stringify([{ allowed: true, count: 1, remaining: 9, reset_at: resetAt }]), { status: 200 }))
     );
 
-    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "user-agent": "source-health-test" } }));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: apiKeyHeaders({ "user-agent": "source-health-test" }) }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -116,7 +122,9 @@ describe("source health route", () => {
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({ code: "missing_function" }, { status: 404 })));
 
-    const response = await GET(new Request("https://nipmod.com/api/sources/health", { headers: { "user-agent": "source-health-fallback-test" } }));
+    const response = await GET(
+      new Request("https://nipmod.com/api/sources/health", { headers: apiKeyHeaders({ "user-agent": "source-health-fallback-test" }) })
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -138,7 +146,7 @@ describe("source health route", () => {
       vi.fn(async () => Response.json({ ok: true }))
     );
 
-    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -168,7 +176,7 @@ describe("source health route", () => {
       vi.fn(async () => Response.json({ error: "busy" }, { status: 503 }))
     );
 
-    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -208,7 +216,7 @@ describe("source health route", () => {
       })
     );
 
-    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const response = await GET(new Request("https://nipmod.com/api/sources/health?probe=live", { headers: apiKeyHeaders() }));
     const body = await response.json();
     const mcp = body.sources.find((source: { source: string }) => source.source === "mcp");
 
@@ -234,8 +242,8 @@ describe("source health route", () => {
     const fetchMock = vi.fn(async () => Response.json({ ok: true }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const first = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
-    const second = await GET(new Request("https://nipmod.com/api/sources/health?probe=live"));
+    const first = await GET(new Request("https://nipmod.com/api/sources/health?probe=live", { headers: apiKeyHeaders() }));
+    const second = await GET(new Request("https://nipmod.com/api/sources/health?probe=live", { headers: apiKeyHeaders() }));
     const firstBody = await first.json();
     const secondBody = await second.json();
 

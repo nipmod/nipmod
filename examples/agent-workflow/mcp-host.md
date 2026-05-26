@@ -1,6 +1,7 @@
 # MCP Host Example
 
 The hosted MCP endpoint is read-only and mirrors the public package intelligence surface.
+It requires a Nipmod API key.
 
 Endpoint:
 
@@ -15,6 +16,7 @@ List tools:
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
+  -H "x-nipmod-api-key: <key>" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
@@ -23,6 +25,7 @@ Search:
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
+  -H "x-nipmod-api-key: <key>" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","mcp"],"limit":5}}}'
 ```
 
@@ -33,6 +36,7 @@ Install plan:
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
+  -H "x-nipmod-api-key: <key>" \
   -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}'
 ```
 

@@ -5,7 +5,7 @@ Use after live canaries, production monitor and GitHub checks are green.
 ```text
 Nipmod API beta update
 
-The public API is now centered on the agent package flow:
+The key-required API is now centered on the agent package flow:
 
 - search package sources
 - inspect exact records
@@ -18,7 +18,7 @@ The hosted API does not install packages, execute commands or write into user wo
 Current sources:
 npm, PyPI, GitHub, Hugging Face and MCP.
 
-Public beta access is free and rate limited. No key is required for the core API calls.
+Beta access is free, key-required and rate limited. Agents can issue a beta key through the API before making package intelligence calls.
 
 GitHub:
 https://github.com/nipmod/nipmod
@@ -32,11 +32,11 @@ Short version:
 ```text
 Nipmod API beta update
 
-Agents can now use one public API to search npm, PyPI, GitHub, Hugging Face and MCP, inspect trust signals and request install plans before touching a workspace.
+Agents can now use one key-required API to search npm, PyPI, GitHub, Hugging Face and MCP, inspect trust signals and request install plans before touching a workspace.
 
 Hosted API calls never install or write locally.
 
-Free public beta, rate limited.
+Free API beta, key-required and rate limited.
 
 https://nipmod.com/api-access
 https://github.com/nipmod/nipmod

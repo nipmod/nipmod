@@ -34,7 +34,7 @@ export default function PackagePage() {
       </DocsSection>
 
       <DocsSection eyebrow="API" title="Archive candidate flow">
-        <DocsCode>{"GET /api/archive/prepare?source=npm&name=undici\nGET /api/archive/status"}</DocsCode>
+        <DocsCode>{"GET /api/archive/prepare?source=npm&name=undici with x-nipmod-api-key\nGET /api/archive/status with x-nipmod-api-key"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Gate" title="Before a public listing">

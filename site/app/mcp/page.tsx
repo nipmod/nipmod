@@ -20,7 +20,7 @@ export default function McpPage() {
       title="MCP access."
     >
       <DocsSection eyebrow="Endpoint" title="Hosted read only MCP">
-        <DocsCode>{"POST https://nipmod.com/api/mcp"}</DocsCode>
+        <DocsCode>{"POST https://nipmod.com/api/mcp with x-nipmod-api-key"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Tools" title="Public tools">
@@ -38,10 +38,10 @@ export default function McpPage() {
       <DocsSection eyebrow="Examples" title="JSON RPC calls">
         <DocsGrid>
           <DocsCard label="tools/list" title="List tools">
-            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}\''}</DocsCode>
+            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -H "x-nipmod-api-key: <key>" -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}\''}</DocsCode>
           </DocsCard>
           <DocsCard label="tools/call" title="Search">
-            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -d \'{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"q":"http client","limit":3}}}\''}</DocsCode>
+            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -H "x-nipmod-api-key: <key>" -d \'{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"q":"http client","limit":3}}}\''}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

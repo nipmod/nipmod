@@ -16,7 +16,8 @@ export async function GET(request: Request): Promise<Response> {
   const corsPolicy = adminCorsPolicy(request);
   const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "usage-stats", windowMs: 60_000 }, context, {
     allowAdminPassword: true,
-    corsPolicy
+    corsPolicy,
+    requireApiKey: true
   });
   if (!rateLimit.ok) {
     return rateLimit.response!;

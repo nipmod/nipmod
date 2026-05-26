@@ -1,11 +1,12 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { GET, OPTIONS, POST } from "../app/api/mcp/route";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 async function postJson(body: unknown) {
   const response = await POST(
     new Request("https://nipmod.com/api/mcp", {
       body: JSON.stringify(body),
-      headers: { "content-type": "application/json" },
+      headers: apiKeyHeaders({ "content-type": "application/json" }),
       method: "POST"
     })
   );
@@ -16,12 +17,17 @@ async function postJson(body: unknown) {
 }
 
 describe("hosted read-only MCP route", () => {
+  beforeEach(() => {
+    stubApiKeyAuth();
+  });
+
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
   test("publishes endpoint metadata without workspace write tools", async () => {
-    const response = await GET(new Request("https://nipmod.com/api/mcp", { headers: { "x-request-id": "mcp-route-test" } }));
+    const response = await GET(new Request("https://nipmod.com/api/mcp", { headers: apiKeyHeaders({ "x-request-id": "mcp-route-test" }) }));
     const body = await response.json();
 
     expect(response.headers.get("access-control-allow-origin")).toBe("*");
@@ -95,6 +101,7 @@ describe("hosted read-only MCP route", () => {
       new Request("https://nipmod.com/api/mcp", {
         body: payload,
         headers: {
+          ...apiKeyHeaders(),
           "content-length": String(payload.length),
           "content-type": "application/json"
         },

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GET } from "../app/api/stats/route";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -117,12 +118,13 @@ describe("public stats route", () => {
       return Response.json({ error: "unexpected test URL" }, { status: 500 });
     }) as unknown as typeof fetch;
 
+    stubApiKeyAuth();
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
     vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await GET(new Request("https://nipmod.com/api/stats?hours=24"));
+    const response = await GET(new Request("https://nipmod.com/api/stats?hours=24", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(200);

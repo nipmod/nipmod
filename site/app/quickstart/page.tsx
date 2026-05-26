@@ -8,11 +8,12 @@ export const metadata = createPageMetadata({
 });
 
 const agentPrompt = `Use Nipmod before choosing a package.
-Search sources, inspect the selected package and show me the install plan before writing anything to the workspace.`;
+If no API key is available, issue one with POST /api/keys/beta.
+Search sources with x-nipmod-api-key, inspect the selected package and show me the install plan before writing anything to the workspace.`;
 
-const completeFlow = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
+const completeFlow = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'`;
 
 const localSetup = `curl https://nipmod.com/i|bash
 nipmod doctor --online

@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REQUIRED_ARCHIVE_ENV = ["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_WRITE_TOKEN"];
@@ -135,14 +136,20 @@ async function vercelApply(options) {
 
 async function liveSmoke(options) {
   const baseUrl = (options["base-url"] ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
-  const status = await fetchJson(`${baseUrl}/api/archive/status`);
+  const apiKey = await readCanaryApiKey({
+    baseUrl,
+    fetchFn: fetch,
+    label: "package-intelligence-ops",
+    userAgent: USER_AGENT
+  });
+  const status = await fetchJson(`${baseUrl}/api/archive/status`, {}, apiKey);
   assertEqual(status.type, "dev.nipmod.archive-status.v1", "archive status type mismatch");
 
-  const prepare = await fetchJson(`${baseUrl}/api/archive/prepare?source=npm&name=node-telegram-bot-api`);
+  const prepare = await fetchJson(`${baseUrl}/api/archive/prepare?source=npm&name=node-telegram-bot-api`, {}, apiKey);
   assertEqual(prepare.type, "dev.nipmod.archive-prepare.v1", "archive prepare type mismatch");
   assertEqual(prepare.validation?.ok, true, "archive prepare validation failed");
 
-  const search = await fetchJson(`${baseUrl}/api/archive/search?q=telegram`);
+  const search = await fetchJson(`${baseUrl}/api/archive/search?q=telegram`, {}, apiKey);
   assertEqual(search.type, "dev.nipmod.package-intelligence-search.v1", "archive search type mismatch");
   if (!Array.isArray(search.records)) {
     throw new Error("archive search records are not an array");
@@ -157,7 +164,7 @@ async function liveSmoke(options) {
     }),
     headers: { "content-type": "application/json" },
     method: "POST"
-  });
+  }, apiKey);
   assertEqual(confirm.type, "dev.nipmod.archive-confirm.v1", "archive confirm type mismatch");
   assertEqual(confirm.dryRun, true, "archive confirm dry run mismatch");
   assertEqual(confirm.validation?.ok, true, "archive confirm validation failed");
@@ -262,8 +269,8 @@ function requiredOption(options, key) {
   return value;
 }
 
-async function fetchJson(url, init) {
-  const response = await fetch(url, withInternalHeaders(init));
+async function fetchJson(url, init, apiKey) {
+  const response = await fetch(url, withInternalHeaders(init, apiKey));
   const text = await response.text();
   if (!response.ok) {
     throw new Error(`${url} failed with ${response.status}: ${text.slice(0, 300)}`);
@@ -271,9 +278,14 @@ async function fetchJson(url, init) {
   return text ? JSON.parse(text) : null;
 }
 
-function withInternalHeaders(init) {
+function withInternalHeaders(init, apiKey) {
   const headers = new Headers(init?.headers);
   headers.set("user-agent", USER_AGENT);
+  if (apiKey) {
+    for (const [key, value] of Object.entries(canaryAuthHeaders(apiKey))) {
+      headers.set(key, value);
+    }
+  }
   return { ...init, headers };
 }
 

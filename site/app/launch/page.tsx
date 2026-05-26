@@ -45,7 +45,7 @@ export default function LaunchPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Smoke" title="Public proof command">
-        <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3'\ncurl 'https://nipmod.com/api/sources/health'\ncurl 'https://nipmod.com/api/archive/status'"}</DocsCode>
+        <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/sources/health' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/archive/status' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
       </DocsSection>
     </DocsShell>
   );

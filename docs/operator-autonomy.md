@@ -114,7 +114,7 @@ Run the canary after Production env is available locally or through a temporary 
 NIPMOD_CANARY_ENV_FILE=/tmp/nipmod-archive.env node --experimental-strip-types tools/api-usage-canary.ts --require-configured
 ```
 
-The canary creates one public API request with a unique request id, then checks `api_usage_events` for that id through the service role key. It returns only route, status, count and timestamps; it does not print Supabase secrets or raw user query data.
+The canary creates one key-required API request with a unique request id, then checks `api_usage_events` for that id through the service role key. It returns only route, status, count and timestamps; it does not print Supabase secrets or raw user query data.
 
 ## Local secret file template
 

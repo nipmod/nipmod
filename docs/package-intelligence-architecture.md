@@ -23,7 +23,7 @@ The production rule is direct:
 
 ## Write Boundary
 
-Public users can prepare records and dry run confirmations.
+API key holders can prepare records and dry run confirmations.
 
 Actual persistence requires `NIPMOD_ARCHIVE_WRITE_TOKEN` and a configured production store. This prevents random internet clients from filling the archive with spam.
 
@@ -41,10 +41,10 @@ Without those values, the write APIs stay safe and return a configured false sta
 
 | Endpoint | Purpose | Write |
 |---|---|---|
-| `GET /api/archive/prepare?source=npm&name=package` | Build a package intelligence record from an external source. | No |
-| `POST /api/archive/prepare` | Build a package intelligence record from an external record body. | No |
-| `GET /api/archive/search?q=query` | Search persisted package intelligence records. | No |
-| `POST /api/archive/confirm` | Confirm a resolved package and persist it if authorized. | Yes, authenticated |
+| `GET /api/archive/prepare?source=npm&name=package` | Build a package intelligence record from an external source. API key required. | No |
+| `POST /api/archive/prepare` | Build a package intelligence record from an external record body. API key required. | No |
+| `GET /api/archive/search?q=query` | Search persisted package intelligence records. API key required. | No |
+| `POST /api/archive/confirm` | Confirm a resolved package and persist it if authorized. API key required; durable writes require an archive writer token. | Yes, authenticated |
 
 ## Record Boundary
 

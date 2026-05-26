@@ -54,6 +54,7 @@ type RateLimitCheckOptions = {
   corsPolicy?: ApiCorsPolicy | undefined;
   env?: RateLimitEnv;
   fetchImpl?: typeof fetch;
+  requireApiKey?: boolean;
   timeoutMs?: number;
 };
 
@@ -99,6 +100,30 @@ export async function checkApiRateLimitAsync(
       headers: access.access.headers,
       ok: false,
       response: access.response!
+    };
+  }
+
+  if (options.requireApiKey === true && !access.access.authenticated) {
+    return {
+      access: access.access,
+      headers: access.access.headers,
+      ok: false,
+      response: apiJson(
+        {
+          code: "api_key_required",
+          error: "API key is required for this endpoint",
+          retryable: false,
+          source: null,
+          status: 401,
+          type: "dev.nipmod.api-error.v1"
+        },
+        {
+          context,
+          corsPolicy: options.corsPolicy,
+          headers: access.access.headers,
+          status: 401
+        }
+      )
     };
   }
 

@@ -8,29 +8,30 @@ export const metadata = createPageMetadata({
   title: "Nipmod examples"
 });
 
-const coreFlow = `curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
+const coreFlow = `curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'`;
 
 const codexPrompt = `Use Nipmod before adding a dependency.
 Find a package for HTTP requests, inspect the selected record, show the trust result and install plan, then wait for my approval before editing files.`;
 
-const claudePrompt = `Before choosing a dependency, call the Nipmod API.
+const claudePrompt = `Before choosing a dependency, call the Nipmod API with x-nipmod-api-key.
 Search for package candidates, inspect the best match and present the install plan. Do not run install commands until I approve.`;
 
-const cursorPrompt = `Use https://nipmod.com/api/search first.
+const cursorPrompt = `Use https://nipmod.com/api/search first with x-nipmod-api-key.
 Then inspect the selected package and show the install plan before changing package files or lockfiles.`;
 
 const mcpPrompt = `Use the remote Nipmod MCP endpoint for package discovery:
-POST https://nipmod.com/api/mcp
+POST https://nipmod.com/api/mcp with x-nipmod-api-key
 Only use read-only tools from the remote endpoint. Workspace writes require local approval.`;
 
 const genericAgentPrompt = `When a user asks for a package, do this:
-1. Search Nipmod.
-2. Inspect the selected package.
-3. Request the install plan.
-4. Show source, license, trust score, warnings and command.
-5. Wait for approval before writing to the workspace.`;
+1. Use or issue a Nipmod API key.
+2. Search Nipmod.
+3. Inspect the selected package.
+4. Request the install plan.
+5. Show source, license, trust score, warnings and command.
+6. Wait for approval before writing to the workspace.`;
 
 const expectedOutput = `Package: npm:undici
 Source: https://www.npmjs.com/package/undici
@@ -40,16 +41,16 @@ Warnings: none
 Install plan: npm install undici
 Boundary: manual approval required before workspace write`;
 
-const sourceExamples = `curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=pypi&name=requests'
-curl 'https://nipmod.com/api/install-plan?source=github&name=vercel/next.js'
-curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased'
-curl 'https://nipmod.com/api/install-plan?source=mcp&name=ac.tandem/docs-mcp'`;
+const sourceExamples = `curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=pypi&name=requests' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=github&name=vercel/next.js' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=huggingface-model&name=google-bert/bert-base-uncased' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=mcp&name=ac.tandem/docs-mcp' -H 'x-nipmod-api-key: <key>'`;
 
 export default function ExamplesPage() {
   return (
     <DocsShell
-      description="Copyable examples for the public agent flow: search sources, inspect one record and request a safe install plan before any workspace write."
+      description="Copyable examples for the key-required agent flow: search sources, inspect one record and request a safe install plan before any workspace write."
       eyebrow="Examples"
       stats={[
         { label: "Flow", value: "Search, Inspect, Plan" },
@@ -87,7 +88,7 @@ export default function ExamplesPage() {
       </DocsSection>
 
       <DocsSection title="Source canaries">
-        <p className="docs-note">These are simple public checks across the sources Nipmod resolves today. They are examples, not package endorsements.</p>
+        <p className="docs-note">These are simple keyed checks across the sources Nipmod resolves today. They are examples, not package endorsements.</p>
         <DocsCode>{sourceExamples}</DocsCode>
       </DocsSection>
 

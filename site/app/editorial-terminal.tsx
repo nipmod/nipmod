@@ -24,18 +24,18 @@ type AnimatedTerminalProps = {
 
 const defaultScript: TerminalStep[] = [
   {
-    command: "curl 'https://nipmod.com/api/search?q=http%20client&limit=3'",
+    command: "curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'",
     output: [
       { kind: "default", text: "sources: npm, pypi, github, huggingface-model, huggingface-dataset, mcp", pause: 180 },
       { kind: "header", text: "1  npm:undici        trust 98  risk low", pause: 120 },
       { kind: "header", text: "2  pypi:httpx        trust 92  risk low", pause: 120 },
       { kind: "header", text: "3  github:nodejs/undici  trust 88  risk medium", pause: 240 },
       { kind: "blank" },
-      { kind: "ok", text: "free public beta, rate limited", pause: 680 }
+      { kind: "ok", text: "free beta key required, rate limited", pause: 680 }
     ]
   },
   {
-    command: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici'",
+    command: "curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'",
     output: [
       { kind: "default", text: "source: npm", pause: 80 },
       { kind: "default", text: "repo: https://github.com/nodejs/undici", pause: 80 },
@@ -46,7 +46,7 @@ const defaultScript: TerminalStep[] = [
     ]
   },
   {
-    command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'",
+    command: "curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'",
     output: [
       { kind: "default", text: "command: npm install undici", pause: 140 },
       { kind: "default", text: "requiresApprovalBeforeWrite: true", pause: 140 },

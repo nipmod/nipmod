@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { GET as inspectGet } from "../app/api/inspect/route";
 import { GET as installPlanGet, POST as installPlanPost } from "../app/api/install-plan/route";
 import { GET as resolveGet } from "../app/api/resolve/route";
@@ -11,10 +11,16 @@ import {
   searchExternalPackages,
   type ExternalPackageRecord
 } from "../lib/external-packages";
+import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 describe("external package resolver", () => {
+  beforeEach(() => {
+    stubApiKeyAuth();
+  });
+
   afterEach(() => {
     resetExternalSourceRuntimeStateForTests();
+    vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 
@@ -889,7 +895,7 @@ describe("external package resolver", () => {
   test("publishes search, inspect and install-plan API routes", async () => {
     vi.stubGlobal("fetch", mockFetch);
 
-    const search = await searchGet(new Request("https://nipmod.com/api/search?q=telegram&sources=npm&limit=2"));
+    const search = await searchGet(new Request("https://nipmod.com/api/search?q=telegram&sources=npm&limit=2", { headers: apiKeyHeaders() }));
     const searchBody = await search.json();
     expect(search.status).toBe(200);
     expect(search.headers.get("access-control-allow-origin")).toBe("*");
@@ -910,16 +916,20 @@ describe("external package resolver", () => {
     });
     expect(searchBody.archivePolicy.ownership).toContain("Original package owners");
 
-    const resolve = await resolveGet(new Request("https://nipmod.com/api/resolve?q=telegram&sources=npm&limit=2"));
+    const resolve = await resolveGet(new Request("https://nipmod.com/api/resolve?q=telegram&sources=npm&limit=2", { headers: apiKeyHeaders() }));
     const resolveBody = await resolve.json();
     expect(resolve.status).toBe(200);
     expect(resolveBody.records[0]).toMatchObject({ id: "npm:node-telegram-bot-api", source: "npm" });
 
-    const inspect = await inspectGet(new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api"));
+    const inspect = await inspectGet(
+      new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api", { headers: apiKeyHeaders() })
+    );
     const inspectBody = await inspect.json();
     expect(inspectBody.record.id).toBe("npm:node-telegram-bot-api");
 
-    const plan = await installPlanGet(new Request("https://nipmod.com/api/install-plan?source=npm&name=node-telegram-bot-api"));
+    const plan = await installPlanGet(
+      new Request("https://nipmod.com/api/install-plan?source=npm&name=node-telegram-bot-api", { headers: apiKeyHeaders() })
+    );
     const planBody = await plan.json();
     expect(planBody.plan.commands).toEqual(["npm install node-telegram-bot-api"]);
     expect(planBody.safety).toMatchObject({
@@ -932,7 +942,7 @@ describe("external package resolver", () => {
     const postPlan = await installPlanPost(
       new Request("https://nipmod.com/api/install-plan", {
         body: JSON.stringify({ record: inspectBody.record as ExternalPackageRecord }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -951,7 +961,7 @@ describe("external package resolver", () => {
             }
           }
         }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -974,14 +984,16 @@ describe("external package resolver", () => {
   test("strictly validates posted external records before creating install plans", async () => {
     vi.stubGlobal("fetch", mockFetch);
 
-    const inspect = await inspectGet(new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api"));
+    const inspect = await inspectGet(
+      new Request("https://nipmod.com/api/inspect?source=npm&name=node-telegram-bot-api", { headers: apiKeyHeaders() })
+    );
     const inspectBody = await inspect.json();
     const record = inspectBody.record as ExternalPackageRecord;
 
     const unsafeUrl = await installPlanPost(
       new Request("https://nipmod.com/api/install-plan", {
         body: JSON.stringify({ record: { ...record, originalUrl: "file:///etc/passwd" } }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -997,7 +1009,7 @@ describe("external package resolver", () => {
     const incomplete = await installPlanPost(
       new Request("https://nipmod.com/api/install-plan", {
         body: JSON.stringify({ record: { id: "npm:broken", type: "dev.nipmod.external-package.v1" } }),
-        headers: { "content-type": "application/json" },
+        headers: apiKeyHeaders({ "content-type": "application/json" }),
         method: "POST"
       })
     );
@@ -1009,7 +1021,7 @@ describe("external package resolver", () => {
   test("returns structured API errors when all requested sources fail", async () => {
     vi.stubGlobal("fetch", mockFetch);
 
-    const response = await searchGet(new Request("https://nipmod.com/api/search?q=missing&sources=github&limit=2"));
+    const response = await searchGet(new Request("https://nipmod.com/api/search?q=missing&sources=github&limit=2", { headers: apiKeyHeaders() }));
     const body = await response.json();
 
     expect(response.status).toBe(404);
@@ -1172,7 +1184,7 @@ describe("external package resolver", () => {
   });
 
   test("rejects invalid source and limit parameters instead of silently widening search", async () => {
-    const badSource = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm,bad-source&limit=2"));
+    const badSource = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm,bad-source&limit=2", { headers: apiKeyHeaders() }));
     const badSourceBody = await badSource.json();
     expect(badSource.status).toBe(400);
     expect(badSourceBody).toMatchObject({
@@ -1182,7 +1194,7 @@ describe("external package resolver", () => {
       type: "dev.nipmod.api-error.v1"
     });
 
-    const badLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=two"));
+    const badLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=two", { headers: apiKeyHeaders() }));
     const badLimitBody = await badLimit.json();
     expect(badLimit.status).toBe(400);
     expect(badLimitBody).toMatchObject({
@@ -1192,7 +1204,7 @@ describe("external package resolver", () => {
       type: "dev.nipmod.api-error.v1"
     });
 
-    const tooLargeLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=51"));
+    const tooLargeLimit = await searchGet(new Request("https://nipmod.com/api/search?q=http&sources=npm&limit=51", { headers: apiKeyHeaders() }));
     const tooLargeLimitBody = await tooLargeLimit.json();
     expect(tooLargeLimit.status).toBe(400);
     expect(tooLargeLimitBody.code).toBe("invalid_limit");

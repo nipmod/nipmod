@@ -195,6 +195,7 @@ Hosted read-only MCP is available without installing the CLI:
 ```sh
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}'
 ```
 

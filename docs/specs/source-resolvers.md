@@ -1,6 +1,6 @@
 # Source Resolver Spec
 
-Status: implemented public beta for the listed sources
+Status: implemented key-required beta for the listed sources
 
 Nipmod resolves public package records from external sources. It does not claim ownership of those packages and does not rehost third-party code.
 

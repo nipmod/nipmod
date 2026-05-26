@@ -1,6 +1,6 @@
 # Search, Inspect, Install Plan
 
-The public API has three core calls.
+The key-required public API has three core calls.
 
 ```text
 Search -> Inspect -> Install Plan -> Approval
@@ -8,12 +8,12 @@ Search -> Inspect -> Install Plan -> Approval
 
 The hosted API is read-only. It returns package intelligence and install plans, not command execution.
 
-Public beta access is free and rate limited. The stable beta calls are Search, Inspect, Install Plan and OpenAPI. Archive prepare is preview-only. Archive confirm is operator-only and requires an authorized server writer.
+API beta access is free, key-required and rate limited. The stable beta calls are Search, Inspect, Install Plan and OpenAPI. Archive prepare is preview-only. Archive confirm is operator-only and requires an authorized server writer.
 
 ## Search
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
+curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'
 ```
 
 Search returns package candidates across supported sources. It includes source reports, partial failure state, ranking reasons and a recommended candidate hint.
@@ -33,7 +33,7 @@ Agents should read:
 Production canary search:
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3'
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=3' -H 'x-nipmod-api-key: <key>'
 ```
 
 Copyable client examples:
@@ -46,7 +46,7 @@ python3 examples/http-api/agent_flow.py "http client"
 ## Inspect
 
 ```bash
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Inspect refreshes one exact package record from its source.
@@ -70,18 +70,18 @@ Trust scoring is explained in [trust scoring](trust-scoring.md). The short rule 
 Known exact inspect records:
 
 ```bash
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'
-curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'
-curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'
-curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad'
-curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=pypi&name=requests' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp' -H 'x-nipmod-api-key: <key>'
 ```
 
 ## Install Plan
 
 ```bash
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Install Plan returns review data only.
@@ -122,7 +122,7 @@ Execution belongs to:
 ## Optional Archive Confirmation
 
 ```bash
-curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
+curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Archive prepare previews a package intelligence record. Durable writes require explicit confirmation through an authorized archive writer token.

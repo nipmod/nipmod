@@ -1,6 +1,6 @@
 # Public API Spec
 
-Status: implemented public beta
+Status: implemented key-required API beta
 
 Nipmod exposes a hosted package intelligence API for agents. The API searches supported public sources, normalizes records, returns trust signals and prepares safe install plans.
 
@@ -16,7 +16,7 @@ The public scoring explanation lives in [trust scoring](../api/trust-scoring.md)
 
 ## Access
 
-Public beta requests can be made without a key. Agents can issue free beta keys through `POST /api/keys/beta` for higher shared beta limits. Partner keys are reserved for integrations and agent hosts. Admin keys are reserved for operational endpoints.
+Package intelligence requests require a key. Agents can issue free beta keys through `POST /api/keys/beta`. Partner keys are reserved for integrations and agent hosts. Admin keys are reserved for operational endpoints.
 
 Supported key headers:
 
@@ -25,7 +25,7 @@ x-nipmod-api-key: <key>
 Authorization: Bearer <key>
 ```
 
-Invalid keys return `401`. Requests without a key stay on the public rate limit.
+Invalid or missing keys return `401`.
 
 Server-side key storage uses scrypt-derived keyed digests with a deployment secret. Keys can be bootstrapped from server env or stored in the Supabase-backed `api_keys` registry. Raw API keys are never stored in repo files, Vercel config output, Supabase usage events or analytics responses.
 
@@ -43,7 +43,7 @@ When the shared store is configured but unavailable, source health may include a
 
 `GET /api/usage/stats` requires an admin API key. It returns aggregate route, source, access tier, traffic-origin, trust, install-plan, archive and package-hash counts. It does not return raw queries, raw package names, raw API keys, raw IPs, raw user agents or source response bodies.
 
-Operators can run `pnpm api:contract` to verify the live public API contract. The canary checks success responses, structured validation errors, invalid API-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
+Operators can run `pnpm api:contract` to verify the live key-required API contract. The canary checks success responses, structured validation errors, invalid API-key errors, missing-key errors, invalid JSON errors, CORS headers, request-id echoing and rate-limit headers.
 
 Operators can run `pnpm install-plan:canary` to verify live install-plan boundaries across npm, PyPI, GitHub, Hugging Face and MCP. The canary fails if a hosted response declares workspace writes, treats metadata as instruction, omits approval boundaries or allows hosted command execution.
 
@@ -161,7 +161,7 @@ Query parameters:
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Response type:
@@ -184,7 +184,7 @@ Query parameters:
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Response type:
@@ -213,7 +213,7 @@ This endpoint does not persist by itself. It returns the normalized archive reco
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
+curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Response type:
@@ -246,7 +246,7 @@ Query parameters:
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/archive/search?q=http%20client'
+curl 'https://nipmod.com/api/archive/search?q=http%20client' -H 'x-nipmod-api-key: <key>'
 ```
 
 ## `GET /api/archive/status`
@@ -256,7 +256,7 @@ Return whether the durable archive store is configured.
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/archive/status'
+curl 'https://nipmod.com/api/archive/status' -H 'x-nipmod-api-key: <key>'
 ```
 
 ## `GET /api/sources/health`
@@ -268,7 +268,7 @@ The response includes coarse API key, archive, usage and rate-limit store status
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/sources/health'
+curl 'https://nipmod.com/api/sources/health' -H 'x-nipmod-api-key: <key>'
 ```
 
 ## `POST /api/keys/beta`
@@ -346,12 +346,12 @@ Archive lifecycle:
 
 | Step | Endpoint | Writes durable archive data | Notes |
 | --- | --- | --- | --- |
-| Search | `/api/search` or `/api/resolve` | No | Returns normalized external candidates. |
-| Inspect | `/api/inspect` | No | Refreshes exact source metadata. |
-| Plan | `/api/install-plan` | No | Returns reviewable commands only. |
-| Prepare | `/api/archive/prepare` | No | Builds a server-generated archive preview and receipt preview. |
-| Confirm dry run | `/api/archive/confirm` without writer token | No | Validates the record and returns a receipt shape. |
-| Confirm write | `/api/archive/confirm` with `x-nipmod-archive-token` | Yes | Persists only records that pass archive gates. |
+| Search | `/api/search` or `/api/resolve` with API key | No | Returns normalized external candidates. |
+| Inspect | `/api/inspect` with API key | No | Refreshes exact source metadata. |
+| Plan | `/api/install-plan` with API key | No | Returns reviewable commands only. |
+| Prepare | `/api/archive/prepare` with API key | No | Builds a server-generated archive preview and receipt preview. |
+| Confirm dry run | `/api/archive/confirm` with API key, without writer token | No | Validates the record and returns a receipt shape. |
+| Confirm write | `/api/archive/confirm` with API key and `x-nipmod-archive-token` | Yes | Persists only records that pass archive gates. |
 
 Public lifecycle language:
 
@@ -377,7 +377,7 @@ Return the OpenAPI document for the public hosted API.
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/openapi'
+curl 'https://nipmod.com/api/openapi' -H 'x-nipmod-api-key: <key>'
 ```
 
 The contract includes `x-nipmod-agent-flow` and `x-nipmod-safety-boundary` extensions so generated clients can see the intended agent sequence and hosted API write boundary.

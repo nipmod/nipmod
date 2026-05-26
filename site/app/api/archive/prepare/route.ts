@@ -25,7 +25,9 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -44,7 +46,9 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 60, name: "archive-prepare", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }

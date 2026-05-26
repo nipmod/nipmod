@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const removedIntegrationCopy = /Aeon|OpenHuman|OpenHume|Bankr skill|integrations\/bankr|review-only/i;
+const e2eApiHeaders = {
+  "x-nipmod-api-key": process.env.NIPMOD_E2E_API_KEY ?? "nka_e2e_beta_route_key_1234567890"
+};
 
 test("home page presents the API-first product", async ({ page }) => {
   await page.goto("/");
@@ -27,7 +30,7 @@ test("home page presents the API-first product", async ({ page }) => {
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);
 });
 
-test("API access page exposes one public package surface", async ({ page }) => {
+test("API access page exposes one key-required package surface", async ({ page }) => {
   await page.goto("/api-access");
 
   await expect(page.getByRole("heading", { name: "One package API for agents." })).toBeVisible();
@@ -94,7 +97,7 @@ test("machine discovery points agents at API and MCP surfaces", async ({ request
   await expect(llms).toBeOK();
   const llmsText = await llms.text();
   expect(llmsText).toContain("API reference: https://nipmod.com/api-access");
-  expect(llmsText).toContain("No API key is required today.");
+  expect(llmsText).toContain("Package intelligence API calls require an API key.");
   expect(llmsText).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");
   expect(llmsText).not.toMatch(removedIntegrationCopy);
 
@@ -103,39 +106,44 @@ test("machine discovery points agents at API and MCP surfaces", async ({ request
   const body = await manifest.json();
   expect(body.docs.api).toBe("https://nipmod.com/api-access");
   expect(body.docs.sources).toBe("https://nipmod.com/sources");
-  expect(body.api.access.keyRequired).toBe(false);
+  expect(body.api.access.keyRequired).toBe(true);
   expect(body.agent.commands.externalSearch).toBe(
-    "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp"
+    "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key"
   );
-  expect(body.agent.commands.externalInspect).toBe("GET https://nipmod.com/api/inspect?source=npm&name=<package-name>");
-  expect(body.agent.commands.externalInstallPlan).toBe("GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>");
+  expect(body.agent.commands.externalInspect).toBe("GET https://nipmod.com/api/inspect?source=npm&name=<package-name> with x-nipmod-api-key");
+  expect(body.agent.commands.externalInstallPlan).toBe("GET https://nipmod.com/api/install-plan?source=npm&name=<package-name> with x-nipmod-api-key");
   expect(body.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
   expect(body.mcp.remoteTools).toContain("nipmod.resolve");
   expect(body.mcp.remoteTools).toContain("nipmod.external_install_plan");
 });
 
 test("hosted API routes answer with safe boundaries", async ({ request }) => {
-  const search = await request.get("/api/search?q=react&sources=npm&limit=2");
+  const missingKey = await request.get("/api/search?q=react&sources=npm&limit=1");
+  expect(missingKey.status()).toBe(401);
+  const missingKeyBody = await missingKey.json();
+  expect(missingKeyBody.code).toBe("api_key_required");
+
+  const search = await request.get("/api/search?q=react&sources=npm&limit=2", { headers: e2eApiHeaders });
   await expect(search).toBeOK();
   const searchBody = await search.json();
   expect(searchBody.archivePolicy.externalRecords).toContain("Stored as external_indexed records");
   expect(searchBody.records.length).toBeLessThanOrEqual(2);
 
-  const inspect = await request.get("/api/inspect?source=npm&name=undici");
+  const inspect = await request.get("/api/inspect?source=npm&name=undici", { headers: e2eApiHeaders });
   await expect(inspect).toBeOK();
   const inspectBody = await inspect.json();
   expect(inspectBody.type).toBe("dev.nipmod.external-inspect.v1");
   expect(inspectBody.record.source).toBe("npm");
   expect(inspectBody.record.name).toBe("undici");
 
-  const plan = await request.get("/api/install-plan?source=npm&name=undici");
+  const plan = await request.get("/api/install-plan?source=npm&name=undici", { headers: e2eApiHeaders });
   await expect(plan).toBeOK();
   const planBody = await plan.json();
   expect(planBody.type).toBe("dev.nipmod.external-install-plan.v1");
   expect(planBody.plan.requiresApprovalBeforeWrite).toBe(true);
   expect(planBody.package.source).toBe("npm");
 
-  const archiveStatus = await request.get("/api/archive/status");
+  const archiveStatus = await request.get("/api/archive/status", { headers: e2eApiHeaders });
   await expect(archiveStatus).toBeOK();
   const archiveStatusBody = await archiveStatus.json();
   expect(["durable-archive-enabled", "resolver-only-safe-mode"]).toContain(archiveStatusBody.mode);
@@ -222,7 +230,8 @@ test("internal public links resolve", async ({ page, request }) => {
       const target = new URL(href, `https://nipmod.com${route}`);
       const key = `${target.pathname}${target.search}`;
       if (checked.has(key)) continue;
-      const response = await request.get(key);
+      const headers = target.pathname.startsWith("/api/") && target.pathname !== "/api/keys/beta" ? e2eApiHeaders : undefined;
+      const response = await request.get(key, headers ? { headers } : undefined);
       expect(response.ok(), `${route} links to ${href}`).toBe(true);
       checked.add(key);
     }
