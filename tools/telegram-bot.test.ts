@@ -295,6 +295,7 @@ describe("telegram bot knowledge base", () => {
     assert.match(reply.text, /Website https:\/\/nipmod\.com/);
     assert.match(reply.text, /GitHub https:\/\/github\.com\/nipmod\/nipmod/);
     assert.match(reply.text, /Gitlawb https:\/\/gitlawb\.com\/node\/repos\/z6Mkwbud\/nipmod/);
+    assert.match(reply.text, /Email info@nipmod\.com/);
     assert.match(reply.text, /Install script https:\/\/nipmod\.com\/install\.sh/);
     assert.match(reply.text, /Demo https:\/\/nipmod\.com\/demo/);
     assert.match(reply.text, /\$NPM on Base https:\/\/token\.nipmod\.com/);
@@ -338,6 +339,17 @@ describe("telegram bot knowledge base", () => {
       coinReply.text,
       "Coin\n$NPM on Base https://token.nipmod.com"
     );
+
+    const contactReply = await createTelegramBotReply(groupUpdate("@nipmodbot contact email"), {
+      allowedChatId: "-100123",
+      answerGroupQuestions: true,
+      bindFirstGroup: true,
+      groupOnly: true,
+      packages,
+      username: "nipmodbot"
+    });
+    assert.match(contactReply.text, /Email info@nipmod\.com/);
+    assert.match(contactReply.text, /Security https:\/\/nipmod\.com\/security/);
   });
 
   test("answers a tagged install question", async () => {
@@ -635,6 +647,7 @@ describe("telegram bot AI fallback", () => {
     assert.equal(calls[0].body.model, "test-model");
     assert.equal(calls[0].body.max_tokens, 420);
     assert.match(calls[0].body.messages[0].content, /Official links:/);
+    assert.match(calls[0].body.messages[0].content, /Email: info@nipmod\.com/);
     assert.match(reply.text, /package layer for agents/);
   });
 
@@ -676,6 +689,7 @@ describe("telegram bot AI fallback", () => {
     assert.equal(calls[0].body.model, "claude-sonnet-4-5");
     assert.equal(calls[0].body.max_tokens, 420);
     assert.match(calls[0].body.system, /Official links:/);
+    assert.match(calls[0].body.system, /Email: info@nipmod\.com/);
     assert.equal(calls[0].body.messages[0].role, "user");
     assert.match(reply.text, /package layer for agents/);
   });

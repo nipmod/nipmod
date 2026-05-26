@@ -39,6 +39,10 @@ describe("home content", () => {
     expect(homeContent.links.github).toBe("https://github.com/nipmod/nipmod");
   });
 
+  test("links to the public contact email", () => {
+    expect(homeContent.links.email).toBe("mailto:info@nipmod.com");
+  });
+
   test("links to the public token surface", () => {
     expect(homeContent.links.bankrCoin).toBe("https://token.nipmod.com");
   });

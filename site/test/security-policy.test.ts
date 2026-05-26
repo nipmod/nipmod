@@ -11,6 +11,7 @@ describe("public security policy", () => {
   test("publishes security.txt with canonical policy contacts", async () => {
     const securityTxt = await readFile(join(siteRoot, "public", ".well-known", "security.txt"), "utf8");
 
+    expect(securityTxt).toContain("Contact: mailto:info@nipmod.com");
     expect(securityTxt).toContain("Contact: https://nipmod.com/security");
     expect(securityTxt).toContain("Contact: https://x.com/Nipmod");
     expect(securityTxt).toContain("Canonical: https://nipmod.com/.well-known/security.txt");

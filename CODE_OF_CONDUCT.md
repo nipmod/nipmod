@@ -17,4 +17,4 @@ Nipmod contributors should keep discussion technical, respectful and focused on 
 
 ## Reporting
 
-For conduct issues, use the public contact paths in `SECURITY.md`. For vulnerabilities, follow the private security reporting process there.
+For conduct issues, use info@nipmod.com or the public contact paths in `SECURITY.md`. For vulnerabilities, follow the private security reporting process there.

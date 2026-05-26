@@ -22,6 +22,7 @@ describe("public review packet", () => {
       type: "dev.nipmod.review-packet.v1"
     });
     expect(packet.targets).toMatchObject({
+      contact: "mailto:info@nipmod.com",
       evidenceLedger: "https://nipmod.com/review/evidence-ledger.json",
       proofTranscript: "https://nipmod.com/proof/transcript.json",
       registry: "https://nipmod.com/registry/packages.json",

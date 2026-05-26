@@ -30,6 +30,7 @@ describe("nipmod discovery manifest", () => {
       "api",
       "archive",
       "baseAgents",
+      "contact",
       "description",
       "docs",
       "externalIndex",
@@ -50,6 +51,12 @@ describe("nipmod discovery manifest", () => {
       "witness"
     ]);
     expect(JSON.stringify(manifest)).not.toContain("/integrations/");
+    expect(manifest.contact).toMatchObject({
+      email: "mailto:info@nipmod.com",
+      security: "https://nipmod.com/security",
+      telegram: "https://t.me/nipmod",
+      x: "https://x.com/Nipmod"
+    });
   });
 
   test("keeps docs and agent commands focused on API access", () => {
@@ -228,7 +235,9 @@ describe("nipmod discovery manifest", () => {
         "gitlawb.com",
         "nipmod.com",
         "node.nipmod.com",
-        "nipmod-witness.fly.dev"
+        "nipmod-witness.fly.dev",
+        "t.me",
+        "x.com"
       ]).toContain(url.hostname);
     }
   });

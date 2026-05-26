@@ -56,6 +56,7 @@ With `NIPMOD_TELEGRAM_MENTION_ONLY=1`, the bot still answers only when `@nipmodb
 ```text
 /help@nipmodbot
 /links@nipmodbot
+/contact@nipmodbot
 /search@nipmodbot <term>
 /packages@nipmodbot
 /install@nipmodbot

@@ -33,4 +33,10 @@ Community:
 https://t.me/nipmod
 ```
 
+Contact:
+
+```text
+info@nipmod.com
+```
+
 Do not treat GitHub as the authority for package ownership, DID identity, signed Gitlawb pushes or Nipmod registry provenance.

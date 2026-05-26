@@ -22,6 +22,7 @@ Out of scope:
 
 Primary contact:
 
+- Email: `info@nipmod.com`
 - Policy: `https://nipmod.com/security`
 - Well known metadata: `https://nipmod.com/.well-known/security.txt`
 - X fallback: `https://x.com/Nipmod`

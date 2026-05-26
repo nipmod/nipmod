@@ -34,6 +34,7 @@ const OFFICIAL_LINKS = [
   ["Registry", "https://nipmod.com/registry/packages.json"],
   ["GitHub", "https://github.com/nipmod/nipmod"],
   ["Gitlawb", "https://gitlawb.com/node/repos/z6Mkwbud/nipmod"],
+  ["Email", "info@nipmod.com"],
   ["Telegram", "https://t.me/nipmod"],
   ["X", "https://x.com/Nipmod"],
   ["Install script", "https://nipmod.com/install.sh"],
@@ -124,7 +125,9 @@ const NIPMOD_CONTEXT_TERMS = [
   "claude",
   "codex",
   "coin",
+  "contact",
   "cursor",
+  "email",
   "frage",
   "fragen",
   "github",
@@ -154,6 +157,7 @@ const LINK_TERMS = ["link", "links", "linsk", "url", "official", "offiziell"];
 const X_TERMS = ["twitter", "x"];
 const GITHUB_TERMS = ["github", "git hub", "githb", "gihtub"];
 const GITLAWB_TERMS = ["gitlawb", "git lab", "gitlab", "gitlb", "gitlwab"];
+const CONTACT_TERMS = ["contact", "email", "mail", "kontakt", "reach"];
 const SECURITY_TERMS = [
   "api key",
   "api token",
@@ -702,6 +706,8 @@ export async function renderCommandReply(command, options = {}) {
       return helpText();
     case "links":
       return linksText();
+    case "contact":
+      return contactText();
     case "install":
       return installText();
     case "codex":
@@ -804,6 +810,9 @@ export async function renderImmediatePlainTextReply(text, options = {}) {
   }
   if (matchesAny(lower, SECURITY_TERMS)) {
     return securityText();
+  }
+  if (isSpecificContactRequest(lower)) {
+    return contactText();
   }
   if (isSpecificOfficialLinksRequest(lower)) {
     return linksText();
@@ -1425,6 +1434,7 @@ function helpText() {
     "/search@nipmodbot <term> finds packages",
     "/packages@nipmodbot shows archive and count",
     "/links@nipmodbot shows official links",
+    "/contact@nipmodbot shows contact email",
     "/install@nipmodbot shows install",
     "/codex@nipmodbot shows Codex setup",
     "/claude@nipmodbot shows Claude Code setup",
@@ -1579,6 +1589,16 @@ function linksText() {
   return ["Official Nipmod links", ...OFFICIAL_LINKS.map(([label, url]) => `${label} ${url}`)].join("\n");
 }
 
+function contactText() {
+  return [
+    "Contact",
+    "Email info@nipmod.com",
+    "Telegram https://t.me/nipmod",
+    "X https://x.com/Nipmod",
+    "Security https://nipmod.com/security"
+  ].join("\n");
+}
+
 function xText() {
   return [
     "X",
@@ -1631,6 +1651,7 @@ function securityText() {
   return [
     "Security",
     FACTS.safety,
+    "Email info@nipmod.com",
     "Security policy https://github.com/nipmod/nipmod/blob/main/SECURITY.md",
     "Status https://nipmod.com/status"
   ].join("\n");
@@ -1780,6 +1801,14 @@ function isSpecificOfficialLinksRequest(text) {
     ...HERMES_TERMS,
     ...MCP_TERMS
   ]);
+}
+
+function isSpecificContactRequest(text) {
+  const normalized = normalizeTextForMatching(text);
+  if (!normalized) {
+    return false;
+  }
+  return containsSafetyTerm(normalized, CONTACT_TERMS);
 }
 
 function isSpecificGithubRequest(text) {

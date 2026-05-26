@@ -7,6 +7,7 @@ Mode: API first package discovery
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API reference: https://nipmod.com/api-access
+Contact: mailto:info@nipmod.com
 Base agent preflight: https://nipmod.com/base-agents
 Base agent machine preflight: https://nipmod.com/base-agent-preflight.json
 OpenAPI spec: https://nipmod.com/api/openapi

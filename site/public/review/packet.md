@@ -5,6 +5,7 @@ Nipmod is technically live and ready for an external review. It is not officiall
 ## Public targets
 
 - Website: https://nipmod.com
+- Contact: info@nipmod.com
 - Source: https://gitlawb.com/node/repos/z6Mkwbud/nipmod
 - Launch: https://nipmod.com/launch
 - Security: https://nipmod.com/security

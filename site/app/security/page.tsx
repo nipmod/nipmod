@@ -35,7 +35,16 @@ export default function SecurityPage() {
       <DocsSection eyebrow="Report" title="What to include">
         <DocsTable
           rows={[
-            ["Contact", <a href="/.well-known/security.txt" className="data-link" key="security">security.txt</a>],
+            [
+              "Contact",
+              <>
+                <a href="mailto:info@nipmod.com" className="data-link">info@nipmod.com</a>
+                {" "}
+                and
+                {" "}
+                <a href="/.well-known/security.txt" className="data-link">security.txt</a>
+              </>
+            ],
             ["Package", "Name, source, version, digest and exact reproduction command."],
             ["Impact", "Which API, install plan, archive record or local command is affected."],
             ["Boundaries", "Do not include secrets, destructive payloads or unrelated private data."]
