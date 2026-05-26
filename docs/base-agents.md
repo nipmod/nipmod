@@ -15,6 +15,15 @@ Base is pushing agents through:
 - skill plugins for ecosystem protocols
 - Builder Codes for onchain attribution
 
+Nipmod has registered a Base Builder Code for future attribution:
+
+```text
+bc_vu9r71xi
+0x62635f76753972373178690b0080218021802180218021802180218021
+```
+
+The current hosted API does not append the code because it does not build, sign or submit transactions.
+
 This makes package and tool trust more important. If an agent can act onchain, it also needs a clean way to decide which tooling it should install or enable before acting.
 
 ## Nipmod role
@@ -36,7 +45,7 @@ Do not claim:
 - native Base MCP listing
 - wallet custody
 - transaction signing
-- Builder Code attribution
+- live onchain transaction attribution from the hosted API
 - guaranteed safe packages
 
 ## Product work

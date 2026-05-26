@@ -40,6 +40,9 @@ For Base MCP, x402 or Base ecosystem workflows, use Nipmod as package preflight 
 Nipmod does not replace Base MCP, hold wallet keys, create wallet approval links, sign transactions or append Builder Codes.
 Nipmod returns package source context, trust signals, warnings and install plans before local approval.
 
+Nipmod Base Builder Code: bc_vu9r71xi.
+Current hosted package intelligence calls do not append this code because they do not build or submit transactions.
+
 Base agent preflight page:
 https://nipmod.com/base-agents
 

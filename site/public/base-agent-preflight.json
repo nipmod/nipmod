@@ -26,6 +26,13 @@
     "workspaceWritesFromHostedApi": false,
     "hostedExecution": false
   },
+  "baseBuilderCode": {
+    "registered": true,
+    "builderCode": "bc_vu9r71xi",
+    "erc8021DataSuffix": "0x62635f76753972373178690b0080218021802180218021802180218021",
+    "appendedByHostedApi": false,
+    "currentUse": "Reserved for future Nipmod onchain or x402 transaction attribution. Current package intelligence calls remain read-only and do not append transaction data."
+  },
   "boundary": {
     "baseMcp": "Wallet, onchain action and ecosystem skill surface.",
     "nipmod": "Read-only package intelligence preflight before external tooling is installed or enabled.",

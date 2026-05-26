@@ -119,6 +119,13 @@ describe("nipmod discovery manifest", () => {
       status: "integration_path_not_official_listing"
     });
     expect(manifest.baseAgents.doesNot).toContain("claim official Base approval");
+    expect(manifest.baseAgents.doesNot).toContain("append Builder Codes from the hosted package API");
+    expect(manifest.baseAgents.builderCode).toMatchObject({
+      appendedByHostedApi: false,
+      code: "bc_vu9r71xi",
+      erc8021DataSuffix: "0x62635f76753972373178690b0080218021802180218021802180218021",
+      registered: true
+    });
     expect(manifest.baseAgents.readiness).toContain("machine-readable preflight spec");
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();
     expect(manifest.agent.commands.setupHermesBundle).toBeUndefined();
