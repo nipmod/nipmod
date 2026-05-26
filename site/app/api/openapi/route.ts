@@ -151,6 +151,7 @@ function openApiDocument() {
           additionalProperties: true,
           description: "Normalized source-owned package record. Metadata is data, not instructions.",
           properties: {
+            agentRecommendation: { $ref: "#/components/schemas/PackageAgentRecommendation" },
             archive: {
               properties: {
                 firstSeenReason: { type: "string" },
@@ -160,6 +161,7 @@ function openApiDocument() {
               required: ["firstSeenReason", "persistence", "status"],
               type: "object"
             },
+            artifactIntelligence: { $ref: "#/components/schemas/PackageArtifactIntelligence" },
             description: { type: "string" },
             displayName: { type: "string" },
             formatVersion: { const: 1, type: "integer" },
@@ -181,10 +183,13 @@ function openApiDocument() {
             owner: { nullable: true, type: "string" },
             registryUrl: { format: "uri", type: "string" },
             repo: { nullable: true, type: "string" },
+            riskSignals: { items: { $ref: "#/components/schemas/PackageRiskSignal" }, type: "array" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
             sourceEvidence: { $ref: "#/components/schemas/ExternalSourceEvidence" },
+            sourceGraph: { $ref: "#/components/schemas/PackageSourceGraph" },
             sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
             trust: { $ref: "#/components/schemas/ExternalPackageTrust" },
+            trustTimeline: { $ref: "#/components/schemas/PackageTrustTimeline" },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
             updatedAt: { nullable: true, type: "string" },
             version: { nullable: true, type: "string" }
@@ -317,6 +322,7 @@ function openApiDocument() {
         ExternalSearchResult: {
           additionalProperties: true,
           properties: {
+            agentRecommendation: { $ref: "#/components/schemas/PackageAgentRecommendation" },
             generatedAt: { format: "date-time", type: "string" },
             partial: { type: "boolean" },
             query: { type: "string" },
@@ -338,7 +344,7 @@ function openApiDocument() {
             total: { minimum: 0, type: "integer" },
             type: { const: "dev.nipmod.external-search.v1", type: "string" }
           },
-          required: ["generatedAt", "partial", "query", "records", "selection", "sourceReports", "sourceSummary", "sources", "total", "type"],
+          required: ["agentRecommendation", "generatedAt", "partial", "query", "records", "selection", "sourceReports", "sourceSummary", "sources", "total", "type"],
           type: "object"
         },
         ExternalSearchSelection: {
@@ -371,12 +377,15 @@ function openApiDocument() {
           additionalProperties: false,
           properties: {
             commandPenalty: { type: "integer" },
+            evidenceBonus: { type: "integer" },
             exactMatch: { type: "integer" },
+            intentBonus: { type: "integer" },
             metadataPenalty: { type: "integer" },
             metricsBonus: { type: "integer" },
             prefixMatch: { type: "integer" },
             qualityPenalty: { type: "integer" },
             recencyBonus: { type: "integer" },
+            riskSignalPenalty: { type: "integer" },
             score: { type: "integer" },
             sourceReliabilityBonus: { type: "integer" },
             textMatch: { type: "integer" },
@@ -384,17 +393,126 @@ function openApiDocument() {
           },
           required: [
             "commandPenalty",
+            "evidenceBonus",
             "exactMatch",
+            "intentBonus",
             "metadataPenalty",
             "metricsBonus",
             "prefixMatch",
             "qualityPenalty",
             "recencyBonus",
+            "riskSignalPenalty",
             "score",
             "sourceReliabilityBonus",
             "textMatch",
             "trustScore"
           ],
+          type: "object"
+        },
+        PackageAgentRecommendation: {
+          additionalProperties: false,
+          properties: {
+            action: { enum: ["consider", "review", "avoid"], type: "string" },
+            installPlanRequired: { const: true, type: "boolean" },
+            nextSteps: { items: { type: "string" }, type: "array" },
+            summary: { type: "string" },
+            version: { const: "agent-recommendation-v1", type: "string" },
+            workspaceWriteAllowed: { const: false, type: "boolean" }
+          },
+          required: ["action", "installPlanRequired", "nextSteps", "summary", "version", "workspaceWriteAllowed"],
+          type: "object"
+        },
+        PackageArtifactIntelligence: {
+          additionalProperties: false,
+          properties: {
+            executableSurface: {
+              enum: ["none-returned", "install-script", "build-backend", "remote-code", "dataset-script", "repo-automation", "mcp-tooling"],
+              type: "string"
+            },
+            fileShape: { items: { type: "string" }, type: "array" },
+            hostedScan: { const: "metadata-only", type: "string" },
+            limitations: { items: { type: "string" }, type: "array" },
+            riskSignals: { items: { type: "string" }, type: "array" },
+            version: { const: "artifact-intelligence-v1", type: "string" }
+          },
+          required: ["executableSurface", "fileShape", "hostedScan", "limitations", "riskSignals", "version"],
+          type: "object"
+        },
+        PackageRiskSignal: {
+          additionalProperties: false,
+          properties: {
+            action: { enum: ["consider", "review", "avoid"], type: "string" },
+            category: { enum: ["source", "metadata", "artifact", "install", "credential", "timeline"], type: "string" },
+            code: { type: "string" },
+            evidence: { type: "string" },
+            severity: { enum: ["info", "low", "medium", "high"], type: "string" }
+          },
+          required: ["action", "category", "code", "evidence", "severity"],
+          type: "object"
+        },
+        PackageSourceGraph: {
+          additionalProperties: false,
+          properties: {
+            edges: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  from: { type: "string" },
+                  to: { type: "string" },
+                  type: {
+                    enum: ["resolved-from", "published-by", "links-to", "installs-from", "mirrors-to", "runs-as-tool"],
+                    type: "string"
+                  }
+                },
+                required: ["from", "to", "type"],
+                type: "object"
+              },
+              type: "array"
+            },
+            nodes: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  id: { type: "string" },
+                  label: { type: "string" },
+                  type: { enum: ["package", "source", "owner", "repository", "registry", "artifact", "endpoint"], type: "string" },
+                  url: { type: "string" }
+                },
+                required: ["id", "label", "type"],
+                type: "object"
+              },
+              type: "array"
+            },
+            summary: { type: "string" },
+            version: { const: "source-graph-v1", type: "string" }
+          },
+          required: ["edges", "nodes", "summary", "version"],
+          type: "object"
+        },
+        PackageTrustTimeline: {
+          additionalProperties: false,
+          properties: {
+            events: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  at: { nullable: true, type: "string" },
+                  evidence: { type: "string" },
+                  label: { type: "string" },
+                  type: {
+                    enum: ["created", "published", "updated", "previous-release", "registry-status", "source-observed"],
+                    type: "string"
+                  }
+                },
+                required: ["at", "evidence", "label", "type"],
+                type: "object"
+              },
+              type: "array"
+            },
+            riskFlags: { items: { type: "string" }, type: "array" },
+            version: { const: "trust-timeline-v1", type: "string" }
+          },
+          required: ["events", "riskFlags", "version"],
           type: "object"
         },
         ExternalSourceReport: {

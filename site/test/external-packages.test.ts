@@ -32,6 +32,11 @@ describe("external package resolver", () => {
     expect(result.records.every((record) => record.archive.persistence === "ephemeral")).toBe(true);
     expect(result.partial).toBe(false);
     expect(result.selection.policy).toBe("agent-selection-v1");
+    expect(result.agentRecommendation).toMatchObject({
+      installPlanRequired: true,
+      version: "agent-recommendation-v1",
+      workspaceWriteAllowed: false
+    });
     if (result.selection.recommendedId) {
       expect(result.selection.candidates.find((candidate) => candidate.id === result.selection.recommendedId)?.gate).toBe("pass");
     }
@@ -67,6 +72,10 @@ describe("external package resolver", () => {
       provenanceStatus: "source-only",
       securityConfidence: "medium"
     });
+    expect(npmRecord?.agentRecommendation?.version).toBe("agent-recommendation-v1");
+    expect(npmRecord?.artifactIntelligence?.hostedScan).toBe("metadata-only");
+    expect(npmRecord?.sourceGraph?.nodes.some((node) => node.id === "npm:node-telegram-bot-api")).toBe(true);
+    expect(npmRecord?.trustTimeline?.version).toBe("trust-timeline-v1");
   });
 
   test("reports partial source failures without hiding successful records", async () => {
@@ -599,6 +608,11 @@ describe("external package resolver", () => {
       "Lifecycle script postinstall contains remote download or hidden background execution behavior."
     );
     expect(record.trust.signals).toContain("npm latest release declares install-time lifecycle scripts (postinstall) with high lifecycle risk.");
+    expect(record.artifactIntelligence).toMatchObject({
+      executableSurface: "install-script",
+      hostedScan: "metadata-only"
+    });
+    expect(record.riskSignals?.some((signal) => signal.code === "artifact.execution_surface" && signal.severity === "high")).toBe(true);
     expect(plan.safety).toMatchObject({
       blocked: true,
       blockReason: "Source trust signals require manual security review before installation.",
@@ -692,6 +706,17 @@ describe("external package resolver", () => {
     );
     expect(record.trust.decision).toBe("avoid");
     expect(record.trust.risk).toBe("high");
+    expect(record.riskSignals).toContainEqual(
+      expect.objectContaining({
+        action: "avoid",
+        code: "metadata.agent_instruction",
+        severity: "high"
+      })
+    );
+    expect(record.agentRecommendation).toMatchObject({
+      action: "avoid",
+      workspaceWriteAllowed: false
+    });
     expect(plan.safety).toMatchObject({
       blocked: true,
       blockReason: "Source trust signals require manual security review before installation."
