@@ -9,6 +9,16 @@ import {
   type InstallCommandRisk,
   type PackageLifecycleScript
 } from "./package-command-safety";
+import {
+  buildPackageScannerIntelligence,
+  packageEvidenceBonus,
+  packageRiskPenalty,
+  type PackageAgentRecommendation,
+  type PackageArtifactIntelligence,
+  type PackageRiskSignal,
+  type PackageSourceGraph,
+  type PackageTrustTimeline
+} from "./package-scanner-intelligence";
 
 export const EXTERNAL_PACKAGE_SOURCES = [
   "npm",
@@ -108,11 +118,13 @@ export interface ExternalSourceCircuitReport {
 }
 
 export interface ExternalPackageRecord {
+  agentRecommendation?: PackageAgentRecommendation;
   archive: {
     firstSeenReason: string;
     persistence: "ephemeral" | "static" | "database";
     status: "external_indexed" | "claimed" | "verified_nipmod";
   };
+  artifactIntelligence?: PackageArtifactIntelligence;
   description: string;
   displayName: string;
   formatVersion: 1;
@@ -135,8 +147,10 @@ export interface ExternalPackageRecord {
   owner: string | null;
   registryUrl: string;
   repo: string | null;
+  riskSignals?: PackageRiskSignal[];
   source: ExternalPackageSource;
   sourceEvidence?: ExternalSourceEvidence;
+  sourceGraph?: PackageSourceGraph;
   sourceKind: ExternalPackageSourceKind;
   trust: {
     checkedAt: string;
@@ -149,6 +163,7 @@ export interface ExternalPackageRecord {
     signals: string[];
     warnings: string[];
   };
+  trustTimeline?: PackageTrustTimeline;
   type: "dev.nipmod.external-package.v1";
   updatedAt: string | null;
   version: string | null;
@@ -182,6 +197,7 @@ export interface ExternalSourceReport {
 }
 
 export interface ExternalSearchResult {
+  agentRecommendation: PackageAgentRecommendation;
   generatedAt: string;
   partial: boolean;
   query: string;
@@ -218,12 +234,15 @@ export interface ExternalSelectionCandidate {
 
 export interface ExternalRankBreakdown {
   commandPenalty: number;
+  evidenceBonus: number;
   exactMatch: number;
+  intentBonus: number;
   metadataPenalty: number;
   metricsBonus: number;
   prefixMatch: number;
   qualityPenalty: number;
   recencyBonus: number;
+  riskSignalPenalty: number;
   score: number;
   sourceReliabilityBonus: number;
   textMatch: number;
@@ -428,7 +447,7 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 14, name: "pytest", reason: "Python test runner fit", source: "pypi" },
       { bonus: 12, name: "ruff", reason: "Python linting fit", source: "pypi" },
       { bonus: 14, name: "vitest", reason: "TypeScript test runner fit", source: "npm" },
-      { bonus: 12, name: "playwright", reason: "browser test automation fit", source: "npm" }
+      { bonus: 12, name: "playwright", reason: "browser automation fit", source: "npm" }
     ],
     pattern: /\b(test|testing|lint|linting|e2e|browser automation|quality)\b/i
   },
@@ -548,6 +567,7 @@ export async function searchExternalPackages(query: string, options: ExternalSea
     .slice(0, limit);
 
   return {
+    agentRecommendation: searchAgentRecommendation(records, normalized),
     generatedAt: new Date().toISOString(),
     partial: failed > 0,
     query: normalized,
@@ -2142,7 +2162,7 @@ async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, 
   return items
     .map(mcpRecord)
     .filter(isExternalPackageRecord)
-    .filter((record) => [record.name, record.displayName, record.description].join(" ").toLowerCase().includes(normalized))
+    .filter((record) => queryTokensMatch([record.name, record.displayName, record.description].join(" ").toLowerCase(), normalized))
     .slice(0, limit);
 }
 
@@ -2207,6 +2227,17 @@ function mcpItems(payload: UnknownRecord | UnknownRecord[]): unknown[] {
     return payload;
   }
   return Array.isArray(payload.servers) ? payload.servers : [];
+}
+
+function queryTokensMatch(text: string, query: string): boolean {
+  if (text.includes(query)) {
+    return true;
+  }
+  const tokens = query
+    .split(/[^a-z0-9._/-]+/i)
+    .map((token) => token.trim().toLowerCase())
+    .filter((token) => token.length > 1);
+  return tokens.length > 0 && tokens.every((token) => text.includes(token));
 }
 
 function mcpRecord(item: unknown): ExternalPackageRecord | null {
@@ -2351,13 +2382,46 @@ function makeRecord(input: {
   const signals = capSignal ? dedupeStrings([...initialSignals, capSignal]) : initialSignals;
   const trustInput = { ...input, signals, trustScore, warnings };
   const sourceEvidence = sourceEvidenceForRecord(input.source, signals, warnings);
+  const trust = {
+    checkedAt: new Date().toISOString(),
+    decision: decisionFromScore(trustScore, warnings),
+    dimensions: trustDimensions(trustInput),
+    factors: trustFactors(trustInput),
+    policy: EXTERNAL_TRUST_POLICY,
+    risk: riskFromScore(trustScore, warnings),
+    score: trustScore,
+    signals,
+    warnings
+  };
+  const scannerIntelligence = buildPackageScannerIntelligence({
+    description: input.description,
+    displayName: input.displayName,
+    id: input.id,
+    install: input.install,
+    license: input.license,
+    metrics: input.metrics,
+    name: input.name,
+    originalUrl: input.originalUrl,
+    owner: input.owner,
+    registryUrl: input.registryUrl,
+    repo: input.repo,
+    signals,
+    source: input.source,
+    sourceEvidence,
+    sourceKind: input.sourceKind,
+    trust,
+    updatedAt: input.updatedAt,
+    version: input.version
+  });
 
   return {
+    agentRecommendation: scannerIntelligence.agentRecommendation,
     archive: {
       firstSeenReason: "Resolved by Nipmod external package index.",
       persistence: "ephemeral",
       status: "external_indexed"
     },
+    artifactIntelligence: scannerIntelligence.artifactIntelligence,
     description: input.description,
     displayName: input.displayName,
     formatVersion: 1,
@@ -2370,20 +2434,13 @@ function makeRecord(input: {
     owner: input.owner,
     registryUrl: input.registryUrl,
     repo: input.repo,
+    riskSignals: scannerIntelligence.riskSignals,
     source: input.source,
     sourceEvidence,
+    sourceGraph: scannerIntelligence.sourceGraph,
     sourceKind: input.sourceKind,
-    trust: {
-      checkedAt: new Date().toISOString(),
-      decision: decisionFromScore(trustScore, warnings),
-      dimensions: trustDimensions(trustInput),
-      factors: trustFactors(trustInput),
-      policy: EXTERNAL_TRUST_POLICY,
-      risk: riskFromScore(trustScore, warnings),
-      score: trustScore,
-      signals,
-      warnings
-    },
+    trust,
+    trustTimeline: scannerIntelligence.trustTimeline,
     type: "dev.nipmod.external-package.v1",
     updatedAt: input.updatedAt,
     version: input.version
@@ -3432,6 +3489,34 @@ function searchSelection(records: ExternalPackageRecord[], query: string): Exter
   };
 }
 
+function searchAgentRecommendation(records: ExternalPackageRecord[], query: string): PackageAgentRecommendation {
+  const selection = searchSelection(records, query);
+  const recommended = selection.recommendedId ? records.find((record) => record.id === selection.recommendedId) : null;
+  const hasBlocked = selection.candidates.some((candidate) => candidate.gate === "blocked");
+  const hasReview = selection.candidates.some((candidate) => candidate.gate === "review");
+  const action: PackageAgentRecommendation["action"] = recommended ? "consider" : hasBlocked || hasReview ? "review" : "review";
+  return {
+    action,
+    installPlanRequired: true,
+    nextSteps: recommended
+      ? [
+          `Inspect ${recommended.id} before installation.`,
+          "Request /api/install-plan before any workspace write.",
+          "Use the source graph, artifact intelligence and warnings as review context."
+        ]
+      : [
+          "Do not install from search results alone.",
+          "Inspect the strongest review candidate manually.",
+          "Request an install plan only after source evidence is acceptable."
+        ],
+    summary: recommended
+      ? `For "${query}", Nipmod can consider ${recommended.id} but still requires inspect, install-plan and approval before execution.`
+      : `For "${query}", Nipmod did not find a pass-gated recommendation; review candidates before any install step.`,
+    version: "agent-recommendation-v1",
+    workspaceWriteAllowed: false
+  };
+}
+
 function selectionCandidate(record: ExternalPackageRecord, query: string): ExternalSelectionCandidate {
   const rank = rankExternalRecordBreakdown(record, query);
   const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
@@ -3482,6 +3567,8 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
   const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
   const intentBonus = queryIntentMatch(record, normalizedQuery)?.bonus ?? 0;
+  const evidenceBonus = packageEvidenceBonus(record.sourceEvidence?.depthScore);
+  const riskSignalPenalty = Math.min(48, packageRiskPenalty(record.riskSignals ?? []));
   const sourceBonus = sourceReliabilityBonus(record.source);
   const recency = record.updatedAt ? Math.min(6, Math.round(recencyBonus(record.updatedAt) / 2)) : 0;
   const metricsBonus =
@@ -3494,21 +3581,26 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
       prefixMatch +
       textMatch +
       intentBonus +
+      evidenceBonus +
       metricsBonus +
       sourceBonus +
       recency -
       qualityPenalty -
       metadataPenalty -
-      commandPenalty
+      commandPenalty -
+      riskSignalPenalty
   );
   return {
     commandPenalty,
+    evidenceBonus,
     exactMatch,
+    intentBonus,
     metadataPenalty,
     metricsBonus: Math.round(metricsBonus),
     prefixMatch,
     qualityPenalty,
     recencyBonus: recency,
+    riskSignalPenalty,
     score,
     sourceReliabilityBonus: sourceBonus,
     textMatch,

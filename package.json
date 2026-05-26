@@ -15,6 +15,7 @@
     "public:check": "node --experimental-strip-types tools/open-source-readiness-check.ts",
     "rate-limit:canary": "node --experimental-strip-types tools/rate-limit-canary.ts",
     "security": "pnpm --dir nipmod security:deps && pnpm --dir site security:deps && pnpm --dir site security:secrets && pnpm supply-chain:check",
+    "search:benchmark": "pnpm exec tsx tools/package-search-quality-benchmark.ts",
     "crawler:audit": "node --experimental-strip-types tools/source-crawler-candidate-audit.ts",
     "dev:update": "node --experimental-strip-types tools/daily-build-log.ts",
     "source:canary": "node --experimental-strip-types tools/source-depth-canary.ts",
