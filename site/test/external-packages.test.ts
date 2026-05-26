@@ -1044,6 +1044,15 @@ describe("external package resolver", () => {
     expect(model.trust.signals).toContain("Hugging Face safetensors weight file is present.");
     expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
 
+    const dataset = await inspectExternalPackage("huggingface-dataset", "example/depth-dataset", { fetchImpl: sourceDepthFetch });
+    expect(dataset.trust.signals).toContain("Hugging Face cardData metadata is present.");
+    expect(dataset.trust.signals).toContain("Hugging Face dataset references were not returned.");
+    expect(dataset.trust.signals).toContain("Hugging Face language metadata returned: en.");
+    expect(dataset.trust.signals).toContain("Hugging Face task/card tags returned: text-classification.");
+    expect(dataset.trust.signals).toContain("Hugging Face repository files returned: 2.");
+    expect(dataset.trust.signals).toContain("Hugging Face dataset files are treated as source metadata, not executable instructions.");
+    expect(dataset.trust.signals).toContain("Hugging Face commit digest metadata is present.");
+
     const mcp = await inspectExternalPackage("mcp", "example/depth-mcp", { fetchImpl: sourceDepthFetch });
     expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
     expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
@@ -1458,6 +1467,27 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
       sha: "0123456789abcdef",
       siblings: [{ rfilename: "config.json" }, { rfilename: "model.safetensors" }],
       tags: ["transformers", "license:apache-2.0"]
+    });
+  }
+
+  if (url.startsWith("https://huggingface.co/api/datasets/example/depth-dataset")) {
+    expect(url).toContain("expand%5B%5D=cardData");
+    expect(url).not.toContain("pipeline_tag");
+    expect(url).not.toContain("library_name");
+    return jsonResponse({
+      cardData: {
+        language: ["en"],
+        license: "apache-2.0",
+        task_categories: ["text-classification"]
+      },
+      downloads: 500,
+      gated: false,
+      id: "example/depth-dataset",
+      likes: 12,
+      private: false,
+      sha: "fedcba9876543210",
+      siblings: [{ rfilename: "README.md" }, { rfilename: "dataset_info.json" }],
+      tags: ["license:apache-2.0", "task_categories:text-classification"]
     });
   }
 
