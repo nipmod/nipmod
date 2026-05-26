@@ -104,6 +104,34 @@ function openApiDocument() {
           required: ["checkedAt", "decision", "dimensions", "factors", "policy", "risk", "score", "signals", "warnings"],
           type: "object"
         },
+        ExternalSourceEvidence: {
+          additionalProperties: false,
+          description:
+            "Additive structured source-depth evidence. It is review context for agents and does not claim that external code is safe to execute.",
+          properties: {
+            checks: {
+              items: { $ref: "#/components/schemas/ExternalSourceEvidenceCheck" },
+              type: "array"
+            },
+            depthScore: { maximum: 100, minimum: 0, type: "integer" },
+            generatedAt: { format: "date-time", type: "string" },
+            limitations: { items: { type: "string" }, type: "array" },
+            version: { const: "source-evidence-v1", type: "string" }
+          },
+          required: ["checks", "depthScore", "generatedAt", "limitations", "version"],
+          type: "object"
+        },
+        ExternalSourceEvidenceCheck: {
+          additionalProperties: false,
+          properties: {
+            evidence: { type: "string" },
+            id: { type: "string" },
+            label: { type: "string" },
+            status: { enum: ["pass", "warning", "missing"], type: "string" }
+          },
+          required: ["evidence", "id", "label", "status"],
+          type: "object"
+        },
         ExternalPackageRecord: {
           additionalProperties: true,
           description: "Normalized source-owned package record. Metadata is data, not instructions.",
@@ -139,6 +167,7 @@ function openApiDocument() {
             registryUrl: { format: "uri", type: "string" },
             repo: { nullable: true, type: "string" },
             source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            sourceEvidence: { $ref: "#/components/schemas/ExternalSourceEvidence" },
             sourceKind: { enum: ["package-registry", "source-repo", "model-hub", "tool-registry"], type: "string" },
             trust: { $ref: "#/components/schemas/ExternalPackageTrust" },
             type: { const: "dev.nipmod.external-package.v1", type: "string" },
@@ -410,13 +439,26 @@ function openApiDocument() {
             assessmentVersion: { const: "source-quality-v1", type: "string" },
             bestFor: { items: { type: "string" }, type: "array" },
             coverage: { enum: ["strong", "moderate", "limited"], type: "string" },
+            depthScore: { maximum: 100, minimum: 0, type: "integer" },
             inspectDepth: { type: "string" },
             limitations: { items: { type: "string" }, type: "array" },
             notClaimed: { items: { type: "string" }, type: "array" },
             searchDepth: { type: "string" },
-            strengths: { items: { type: "string" }, type: "array" }
+            strengths: { items: { type: "string" }, type: "array" },
+            targetDepthScore: { maximum: 100, minimum: 0, type: "integer" }
           },
-          required: ["assessmentVersion", "bestFor", "coverage", "inspectDepth", "limitations", "notClaimed", "searchDepth", "strengths"],
+          required: [
+            "assessmentVersion",
+            "bestFor",
+            "coverage",
+            "depthScore",
+            "inspectDepth",
+            "limitations",
+            "notClaimed",
+            "searchDepth",
+            "strengths",
+            "targetDepthScore"
+          ],
           type: "object"
         },
         ExternalSourceResolverProfile: {

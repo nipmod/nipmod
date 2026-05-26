@@ -39,6 +39,7 @@ export type ExternalResolverSearchStrategy =
 export type ExternalResolverInspectStrategy = "exact-package-metadata" | "exact-repository-metadata" | "exact-hub-metadata" | "server-name-match";
 export type ExternalSourceCircuitStatus = "closed" | "open";
 export type ExternalSourceRecoveryAction = "use-returned-records" | "inspect-exact-package" | "retry-source-later" | "fix-source-or-query";
+export type ExternalSourceEvidenceCheckStatus = "pass" | "warning" | "missing";
 
 export interface ExternalTrustFactor {
   category: ExternalTrustFactorCategory;
@@ -61,6 +62,21 @@ export interface ExternalTrustDimensions {
   provenanceStatus: ExternalProvenanceStatus;
   qualityScore: number;
   securityConfidence: ExternalSecurityConfidence;
+}
+
+export interface ExternalSourceEvidenceCheck {
+  evidence: string;
+  id: string;
+  label: string;
+  status: ExternalSourceEvidenceCheckStatus;
+}
+
+export interface ExternalSourceEvidence {
+  checks: ExternalSourceEvidenceCheck[];
+  depthScore: number;
+  generatedAt: string;
+  limitations: string[];
+  version: "source-evidence-v1";
 }
 
 export interface ExternalSourceResolverProfile {
@@ -119,6 +135,7 @@ export interface ExternalPackageRecord {
   registryUrl: string;
   repo: string | null;
   source: ExternalPackageSource;
+  sourceEvidence?: ExternalSourceEvidence;
   sourceKind: ExternalPackageSourceKind;
   trust: {
     checkedAt: string;
@@ -230,11 +247,13 @@ export interface ExternalSourceQualityProfile {
   assessmentVersion: "source-quality-v1";
   bestFor: string[];
   coverage: ExternalSourceCoverage;
+  depthScore: number;
   inspectDepth: string;
   limitations: string[];
   notClaimed: string[];
   searchDepth: string;
   strengths: string[];
+  targetDepthScore: number;
 }
 
 export interface ExternalInstallPlan {
@@ -298,6 +317,7 @@ const EXTERNAL_TRUST_FACTOR_IMPACTS = ["positive", "negative", "neutral"] as con
 const EXTERNAL_POPULARITY_SIGNALS = ["none", "low", "medium", "high"] as const;
 const EXTERNAL_SECURITY_CONFIDENCE = ["low", "medium", "high"] as const;
 const EXTERNAL_PROVENANCE_STATUS = ["unknown", "source-only", "integrity", "signature", "attested"] as const;
+const EXTERNAL_SOURCE_EVIDENCE_CHECK_STATUS = ["pass", "warning", "missing"] as const;
 const EXTERNAL_TRUST_POLICY: ExternalTrustPolicy = {
   summary: "External scores combine source metadata, package health signals, public usage context, warnings and install-plan risk. A score is review context, not permission to execute code.",
   thresholds: {
@@ -329,8 +349,19 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["beautifulsoup4", "playwright", "selenium"], pattern: /\b(scrape|crawler|browser|automation|parse html|web crawl)\b/i },
   { names: ["sqlalchemy", "psycopg", "asyncpg"], pattern: /\b(database|postgres|postgresql|sql|orm)\b/i },
   { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i },
-  { names: ["pillow", "opencv-python", "scikit-image", "cairosvg"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i }
+  { names: ["pillow", "opencv-python", "scikit-image", "cairosvg"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i },
+  { names: ["cryptography", "pyjwt", "passlib"], pattern: /\b(auth|jwt|token|crypto|cryptography|password|security)\b/i },
+  { names: ["pydantic", "marshmallow", "jsonschema"], pattern: /\b(schema|validate|validation|json schema|typed)\b/i },
+  { names: ["celery", "dramatiq", "rq"], pattern: /\b(queue|worker|background job|task queue|jobs)\b/i }
 ];
+const PYPI_CONFUSION_NAMES: Record<string, string> = {
+  "bs4": "beautifulsoup4",
+  "cv2": "opencv-python",
+  "dotenv": "python-dotenv",
+  "pil": "pillow",
+  "pycrypto": "cryptography",
+  "sklearn": "scikit-learn"
+};
 const QUERY_INTENT_RANKING_HINTS: Array<{
   matches: Array<{ bonus: number; name: string; reason: string; source?: ExternalPackageSource }>;
   pattern: RegExp;
@@ -676,6 +707,7 @@ export function readExternalPackageRecord(value: unknown): ExternalPackageRecord
   const archive = readArchive(record.archive);
   const trust = readTrust(record.trust);
   const install = readInstall(record.install);
+  const sourceEvidence = readSourceEvidence(record.sourceEvidence);
   const name = requiredCleanString(record.name, "name", MAX_NAME_LENGTH);
   const id = requiredCleanString(record.id, "id", 320);
   const originalUrl = requiredHttpUrl(record.originalUrl, "originalUrl");
@@ -708,6 +740,7 @@ export function readExternalPackageRecord(value: unknown): ExternalPackageRecord
     registryUrl,
     repo,
     source,
+    ...(sourceEvidence ? { sourceEvidence } : {}),
     sourceKind,
     trust,
     type: "dev.nipmod.external-package.v1",
@@ -970,6 +1003,12 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
           : "npm latest dist-tag does not match the latest manifest version.",
       packument.modifiedAt ? `npm package modified at: ${packument.modifiedAt}.` : "npm package modified timestamp was not returned.",
       packument.createdAt ? `npm package created at: ${packument.createdAt}.` : "npm package created timestamp was not returned.",
+      packument.latestPublishedAt
+        ? `npm latest version published at: ${packument.latestPublishedAt}.`
+        : "npm latest version publish timestamp was not returned.",
+      packument.deprecatedVersionCount
+        ? `npm packument includes ${packument.deprecatedVersionCount} deprecated version(s).`
+        : "npm packument returned no deprecated versions.",
       repo ? "Repository link is present." : "Repository link is missing.",
       dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
       maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
@@ -987,8 +1026,10 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
 interface NpmPackumentSummary {
   available: boolean;
   createdAt: string | null;
+  deprecatedVersionCount: number;
   distTags: string[];
   latestDistTagMatches: boolean | null;
+  latestPublishedAt: string | null;
   modifiedAt: string | null;
   versionCount: number;
 }
@@ -1015,7 +1056,9 @@ async function fetchNpmPackumentSummary(
       available: true,
       createdAt: readNestedString(payload, ["time", "created"]),
       distTags,
+      deprecatedVersionCount: countDeprecatedNpmVersions(payload.versions),
       latestDistTagMatches: latestVersion && latestDistTag ? latestDistTag === latestVersion : null,
+      latestPublishedAt: latestVersion ? readNestedString(payload, ["time", latestVersion]) : null,
       modifiedAt: readNestedString(payload, ["time", "modified"]),
       versionCount: recordKeyCount(payload.versions)
     };
@@ -1028,11 +1071,20 @@ function emptyNpmPackumentSummary(): NpmPackumentSummary {
   return {
     available: false,
     createdAt: null,
+    deprecatedVersionCount: 0,
     distTags: [],
     latestDistTagMatches: null,
+    latestPublishedAt: null,
     modifiedAt: null,
     versionCount: 0
   };
+}
+
+function countDeprecatedNpmVersions(value: unknown): number {
+  if (!isRecord(value)) {
+    return 0;
+  }
+  return Object.values(value).filter((version) => isRecord(version) && readString(version.deprecated)).length;
 }
 
 async function npmMonthlyDownloads(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<number | null> {
@@ -1171,6 +1223,9 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const hasWheel = fileTypes.includes("bdist_wheel");
   const hasSourceDistribution = fileTypes.includes("sdist");
   const sourceOnlyRelease = hasSourceDistribution && !hasWheel;
+  const releaseVersionCount = recordKeyCount(payload.releases);
+  const latestUploadTime = latestPyPiUploadTime(payload.releases);
+  const confusionTarget = PYPI_CONFUSION_NAMES[projectName.toLowerCase()] ?? PYPI_CONFUSION_NAMES[name.toLowerCase()];
   const totalFileSize = releaseFiles.reduce((sum, file) => sum + (readNumber(file.size) ?? 0), 0);
   const provenanceCount = simpleFiles.filter((file) => readString(file.provenance)).length;
   const coreMetadataCount = simpleFiles.filter((file) => Boolean(file["core-metadata"])).length;
@@ -1182,7 +1237,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     ...(releaseFiles.length === 0 ? ["PyPI did not return latest release file metadata."] : []),
     ...(releaseFiles.length > 0 && fileHashCount < releaseFiles.length ? ["Some PyPI latest release files are missing digest metadata."] : []),
     ...(sourceOnlyRelease ? ["PyPI latest release has only source distribution files; local install may execute build backend code."] : []),
-    ...(yankedCount > 0 ? [`PyPI marks ${yankedCount} latest release file(s) as yanked.`] : [])
+    ...(yankedCount > 0 ? [`PyPI marks ${yankedCount} latest release file(s) as yanked.`] : []),
+    ...(confusionTarget ? [`PyPI package name is commonly confused with ${confusionTarget}; verify this is the intended project.`] : [])
   ];
   const score = clampScore(
     58 +
@@ -1196,7 +1252,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       (requiresPython ? 4 : 0) -
       vulnerabilities.length * 24 -
       (sourceOnlyRelease ? 10 : 0) -
-      yankedCount * 30
+      yankedCount * 30 -
+      (confusionTarget ? 12 : 0)
   );
 
   return makeRecord({
@@ -1240,10 +1297,12 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       totalFileSize ? `PyPI latest release total file size bytes: ${totalFileSize}.` : "PyPI latest release file size metadata was not returned.",
       yankedCount === 0 ? "PyPI latest release files are not marked yanked." : "PyPI latest release files include yanked files.",
       requiresPython ? `PyPI requires-python: ${requiresPython}.` : "PyPI did not return requires-python metadata.",
-      classifierCount ? `PyPI classifiers returned: ${classifierCount}.` : "PyPI classifiers were not returned."
+      classifierCount ? `PyPI classifiers returned: ${classifierCount}.` : "PyPI classifiers were not returned.",
+      releaseVersionCount ? `PyPI release history versions returned: ${releaseVersionCount}.` : "PyPI release history was not returned.",
+      latestUploadTime ? `PyPI latest upload timestamp: ${latestUploadTime}.` : "PyPI latest upload timestamp was not returned."
     ],
     trustScore: score,
-    updatedAt: latestPyPiUploadTime(payload.releases),
+    updatedAt: latestUploadTime,
     version: readString(info.version),
     warnings
   });
@@ -1309,6 +1368,7 @@ type GitHubManifestSummary = {
   packageManager: string | null;
   securityFiles: string[];
   scriptCount: number | null;
+  workflowFiles: string[];
 };
 
 async function fetchGitHubManifestSummary(
@@ -1321,12 +1381,27 @@ async function fetchGitHubManifestSummary(
     "package.json",
     "pyproject.toml",
     "requirements.txt",
+    "uv.lock",
+    "poetry.lock",
     "deno.json",
+    "go.mod",
+    "go.sum",
+    "Cargo.toml",
+    "Cargo.lock",
+    "Dockerfile",
     "SECURITY.md",
     ".github/dependabot.yml",
+    ".github/codeql.yml",
+    ".github/CODEOWNERS",
+    "CODEOWNERS",
+    ".github/workflows/ci.yml",
+    ".github/workflows/test.yml",
+    ".github/workflows/build.yml",
+    ".github/workflows/release.yml",
     "package-lock.json",
     "pnpm-lock.yaml",
-    "yarn.lock"
+    "yarn.lock",
+    "bun.lockb"
   ] as const;
   const settled = await Promise.allSettled(
     manifestPaths.map((path) =>
@@ -1348,6 +1423,7 @@ async function fetchGitHubManifestSummary(
   let latestReleaseTag: string | null = null;
   let latestCommitSha: string | null = null;
   let communityHealthPercentage: number | null = null;
+  const workflowFiles: string[] = [];
 
   for (const result of settled) {
     if (result.status !== "fulfilled" || !isRecord(result.value.payload)) {
@@ -1355,6 +1431,10 @@ async function fetchGitHubManifestSummary(
     }
     if (isGitHubSecurityPath(result.value.path)) {
       securityFiles.push(result.value.path);
+      continue;
+    }
+    if (isGitHubWorkflowPath(result.value.path)) {
+      workflowFiles.push(result.value.path);
       continue;
     }
     if (isGitHubLockfilePath(result.value.path)) {
@@ -1417,7 +1497,8 @@ async function fetchGitHubManifestSummary(
     lockfiles,
     packageManager,
     securityFiles,
-    scriptCount
+    scriptCount,
+    workflowFiles
   };
 }
 
@@ -1436,11 +1517,15 @@ function decodeGitHubJsonContent(item: UnknownRecord): UnknownRecord | null {
 }
 
 function isGitHubSecurityPath(path: string): boolean {
-  return path === "SECURITY.md" || path === ".github/dependabot.yml";
+  return path === "SECURITY.md" || path === ".github/dependabot.yml" || path === ".github/codeql.yml" || path === ".github/CODEOWNERS" || path === "CODEOWNERS";
 }
 
 function isGitHubLockfilePath(path: string): boolean {
-  return path === "package-lock.json" || path === "pnpm-lock.yaml" || path === "yarn.lock";
+  return path === "package-lock.json" || path === "pnpm-lock.yaml" || path === "yarn.lock" || path === "bun.lockb" || path === "uv.lock" || path === "poetry.lock" || path === "Cargo.lock" || path === "go.sum";
+}
+
+function isGitHubWorkflowPath(path: string): boolean {
+  return path.startsWith(".github/workflows/");
 }
 
 function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = null): ExternalPackageRecord | null {
@@ -1474,6 +1559,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       (fork ? 8 : 0) +
       (manifest?.securityFiles.length ? 4 : 0) +
       (manifest?.lockfiles.length ? 3 : 0) +
+      (manifest?.workflowFiles.length ? 3 : 0) +
       (manifest?.latestReleaseTag ? 3 : 0) +
       (manifest?.latestCommitSha ? 2 : 0) +
       (typeof manifest?.communityHealthPercentage === "number" ? Math.min(4, Math.round(manifest.communityHealthPercentage / 25)) : 0) +
@@ -1524,6 +1610,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
         ? `GitHub security files found: ${manifest.securityFiles.join(", ")}.`
         : "GitHub security files were not returned.",
       manifest?.lockfiles.length ? `GitHub lockfiles found: ${manifest.lockfiles.join(", ")}.` : "GitHub lockfiles were not returned.",
+      manifest?.workflowFiles.length ? `GitHub workflow files found: ${manifest.workflowFiles.join(", ")}.` : "GitHub workflow files were not returned.",
       manifest?.latestReleaseTag ? `GitHub latest release tag: ${manifest.latestReleaseTag}.` : "GitHub latest release tag was not returned.",
       manifest?.latestCommitSha ? `GitHub latest default-branch commit returned: ${manifest.latestCommitSha}.` : "GitHub latest commit metadata was not returned.",
       typeof manifest?.communityHealthPercentage === "number"
@@ -1601,6 +1688,12 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const hasConfig = siblingNames.some((name) => /(^|\/)(config|tokenizer_config|dataset_info)\.json$/i.test(name));
   const hasSafetensors = source === "huggingface-model" && siblingNames.some((name) => /\.safetensors$/i.test(name));
   const hasPickleWeights = source === "huggingface-model" && siblingNames.some((name) => /\.(bin|pkl|pickle)$/i.test(name));
+  const hasCustomPythonModelFile =
+    source === "huggingface-model" && siblingNames.some((name) => /(^|\/)(modeling|configuration|tokenization|processing)_[^/]+\.py$/i.test(name));
+  const hasTokenizerFile = source === "huggingface-model" && siblingNames.some((name) => /(^|\/)(tokenizer|tokenizer_config|vocab|merges)\./i.test(name));
+  const hasDatasetScript = source === "huggingface-dataset" && siblingNames.some((name) => /\.py$/i.test(name));
+  const datasetDataFileCount =
+    source === "huggingface-dataset" ? siblingNames.filter((name) => /\.(parquet|jsonl?|csv|arrow|txt|zip|gz)$/i.test(name)).length : 0;
   const requiresTrustRemoteCode = source === "huggingface-model" && huggingFaceTrustRemoteCode(item, tags);
   const sha = readString(item.sha);
   const libraryName = readString(item.library_name);
@@ -1609,6 +1702,10 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const datasetRefs = readCardDataStringList(cardData?.datasets);
   const languageRefs = readCardDataStringList(cardData?.language);
   const taskRefs = readCardDataStringList(cardData?.tags ?? cardData?.task_categories);
+  const modelIndexCount = source === "huggingface-model" ? huggingFaceModelIndexResultCount(cardData) : 0;
+  const datasetInfo = source === "huggingface-dataset" ? readRecord(cardData?.dataset_info) : null;
+  const datasetFeatureCount = datasetInfo ? huggingFaceDatasetFeatureCount(datasetInfo) : 0;
+  const datasetSplitCount = datasetInfo ? huggingFaceDatasetSplitCount(datasetInfo) : 0;
   const score = clampScore(
     46 +
       Math.min(22, Math.log10((downloads ?? 0) + 1) * 6) +
@@ -1620,10 +1717,18 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       (baseModel ? 2 : 0) +
       (hasReadme ? 2 : 0) +
       (hasConfig ? 2 : 0) +
+      (hasTokenizerFile ? 2 : 0) +
+      (modelIndexCount ? 2 : 0) +
+      (datasetInfo ? 3 : 0) +
+      (datasetFeatureCount ? 2 : 0) +
+      (datasetSplitCount ? 2 : 0) +
+      (datasetDataFileCount ? 2 : 0) -
       (gated ? 12 : 0) -
       (isPrivate ? 30 : 0) -
       (hasPickleWeights && !hasSafetensors ? 10 : 0) -
-      (requiresTrustRemoteCode ? 34 : 0)
+      (requiresTrustRemoteCode ? 34 : 0) -
+      (hasCustomPythonModelFile ? 8 : 0) -
+      (hasDatasetScript ? 8 : 0)
   );
   const kind = source === "huggingface-model" ? "model" : "dataset";
   const warnings = [
@@ -1631,6 +1736,8 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     ...(gated ? [`Hugging Face marks this ${kind} as gated.`] : []),
     ...(isPrivate ? [`Hugging Face marks this ${kind} as private.`] : []),
     ...(requiresTrustRemoteCode ? ["Hugging Face model metadata indicates trust_remote_code is required or enabled."] : []),
+    ...(hasCustomPythonModelFile ? ["Hugging Face model exposes custom Python model files; review code before local loading."] : []),
+    ...(hasDatasetScript ? ["Hugging Face dataset exposes Python dataset script files; review code before local dataset loading."] : []),
     ...(hasPickleWeights && !hasSafetensors
       ? ["Hugging Face model exposes pickle or binary weight files without safetensors metadata in the source response."]
       : [])
@@ -1673,9 +1780,18 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       datasetRefs.length ? `Hugging Face dataset references returned: ${datasetRefs.slice(0, 5).join(", ")}.` : "Hugging Face dataset references were not returned.",
       languageRefs.length ? `Hugging Face language metadata returned: ${languageRefs.slice(0, 5).join(", ")}.` : "Hugging Face language metadata was not returned.",
       taskRefs.length ? `Hugging Face task/card tags returned: ${taskRefs.slice(0, 5).join(", ")}.` : "Hugging Face task/card tags were not returned.",
+      modelIndexCount ? `Hugging Face model-index/eval metadata returned: ${modelIndexCount} result(s).` : "Hugging Face model-index/eval metadata was not returned.",
       siblingCount ? `Hugging Face repository files returned: ${siblingCount}.` : "Hugging Face repository file list was not returned.",
       hasReadme ? "Hugging Face README/model card file is present." : "Hugging Face README/model card file was not returned.",
       hasConfig ? "Hugging Face config metadata file is present." : "Hugging Face config metadata file was not returned.",
+      hasTokenizerFile ? "Hugging Face tokenizer metadata files are present." : "Hugging Face tokenizer metadata files were not returned.",
+      datasetInfo ? "Hugging Face dataset_info metadata returned." : "Hugging Face dataset_info metadata was not returned.",
+      datasetFeatureCount
+        ? `Hugging Face dataset feature fields returned: ${datasetFeatureCount}.`
+        : "Hugging Face dataset feature metadata was not returned.",
+      datasetSplitCount ? `Hugging Face dataset split metadata returned: ${datasetSplitCount}.` : "Hugging Face dataset split metadata was not returned.",
+      datasetDataFileCount ? `Hugging Face dataset data files returned: ${datasetDataFileCount}.` : "Hugging Face dataset data files were not returned.",
+      hasDatasetScript ? "Hugging Face dataset Python script files returned." : "Hugging Face dataset Python script files were not returned.",
       source === "huggingface-model"
         ? hasSafetensors
           ? "Hugging Face safetensors weight file is present."
@@ -1714,6 +1830,37 @@ function readCardDataStringList(value: unknown): string[] {
     return [];
   }
   return value.filter((item): item is string => typeof item === "string").map((item) => cleanPlainText(item, 120)).filter(Boolean).slice(0, 20);
+}
+
+function huggingFaceModelIndexResultCount(cardData: UnknownRecord | null): number {
+  const modelIndex = cardData?.["model-index"];
+  if (!Array.isArray(modelIndex)) {
+    return 0;
+  }
+  return modelIndex.reduce((count, item) => {
+    if (!isRecord(item)) {
+      return count;
+    }
+    const results = item.results;
+    return count + (Array.isArray(results) ? results.length : 0);
+  }, 0);
+}
+
+function huggingFaceDatasetFeatureCount(datasetInfo: UnknownRecord): number {
+  const features = datasetInfo.features;
+  if (!Array.isArray(features)) {
+    return 0;
+  }
+  return features.filter(isRecord).length;
+}
+
+function huggingFaceDatasetSplitCount(datasetInfo: UnknownRecord): number {
+  const splits = datasetInfo.splits;
+  if (Array.isArray(splits)) {
+    return splits.filter(isRecord).length;
+  }
+  const downloadChecksums = readRecord(datasetInfo.download_checksums);
+  return downloadChecksums ? Object.keys(downloadChecksums).length : 0;
 }
 
 async function searchMcp(query: string, limit: number, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord[]> {
@@ -1805,8 +1952,14 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   }
   const remotes = Array.isArray(server.remotes) ? server.remotes.filter(isRecord) : [];
   const remoteUrl = remotes.map((remote) => readString(remote.url)).find(Boolean) ?? null;
+  const remoteTransportTypes = [...new Set(remotes.map((remote) => readString(remote.type)).filter((type): type is string => Boolean(type)))];
   const envRequirementCount = mcpEnvironmentRequirementCount(server);
-  const packageCount = arrayLength(server.packages);
+  const packages = Array.isArray(server.packages) ? server.packages.filter(isRecord) : [];
+  const packageCount = packages.length;
+  const packageRefs = packages
+    .map((item) => [readString(item.registryType), readString(item.name)].filter(Boolean).join(":"))
+    .filter(Boolean)
+    .slice(0, 4);
   const repo = normalizeRepositoryUrl(
     readNestedString(server, ["repository", "url"]) ?? readString(server.repository) ?? readNestedString(server, ["source", "url"])
   );
@@ -1818,6 +1971,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
     ...(repo ? [] : ["No source repository returned by MCP Registry."]),
     ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : []),
     ...(envRequirementCount ? [`MCP server declares ${envRequirementCount} environment requirements; review credential scope before enabling.`] : []),
+    ...(!repo && envRequirementCount ? ["MCP server declares credentials but no source repository; review operator trust before enabling."] : []),
     ...(snapshot ? [`MCP Registry live request was unavailable; returned pinned public registry snapshot from ${snapshot}.`] : [])
   ];
 
@@ -1844,8 +1998,12 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
       ...(snapshot ? [`Pinned from public MCP Registry snapshot: ${snapshot}.`] : []),
       status ? `MCP Registry status: ${status}.` : "MCP Registry status was not returned.",
       remotes.length ? `Remote MCP endpoints returned: ${remotes.length}.` : "Remote MCP endpoint metadata is missing.",
+      remoteTransportTypes.length
+        ? `MCP remote transport types returned: ${remoteTransportTypes.join(", ")}.`
+        : "MCP remote transport metadata was not returned.",
       envRequirementCount ? `MCP server declares ${envRequirementCount} environment requirements.` : "MCP server did not declare environment requirements.",
       packageCount ? `MCP registry packages returned: ${packageCount}.` : "MCP registry package metadata was not returned.",
+      packageRefs.length ? `MCP registry package references returned: ${packageRefs.join(", ")}.` : "MCP registry package references were not returned.",
       repo ? "Source repository is present." : "Source repository was not returned."
     ],
     trustScore: clampScore(52 + (repo ? 12 : 0) + (remoteUrl ? 8 : 0) + (license ? 8 : 0) + (status === "active" ? 8 : 0)),
@@ -1879,6 +2037,7 @@ function makeRecord(input: {
   const capSignal = evidenceCapSignal(input, trustScore);
   const signals = capSignal ? [...input.signals, capSignal] : input.signals;
   const trustInput = { ...input, signals, trustScore };
+  const sourceEvidence = sourceEvidenceForRecord(input.source, signals, input.warnings);
 
   return {
     archive: {
@@ -1899,6 +2058,7 @@ function makeRecord(input: {
     registryUrl: input.registryUrl,
     repo: input.repo,
     source: input.source,
+    sourceEvidence,
     sourceKind: input.sourceKind,
     trust: {
       checkedAt: new Date().toISOString(),
@@ -1915,6 +2075,168 @@ function makeRecord(input: {
     updatedAt: input.updatedAt,
     version: input.version
   };
+}
+
+interface SourceEvidenceSpec {
+  id: string;
+  label: string;
+  pass: RegExp[];
+  warning?: RegExp[];
+}
+
+function sourceEvidenceForRecord(source: ExternalPackageSource, signals: string[], warnings: string[]): ExternalSourceEvidence {
+  const checks = sourceEvidenceSpecs(source).map((spec) => sourceEvidenceCheck(spec, signals, warnings));
+  const depthScore = sourceEvidenceDepthScore(checks);
+  return {
+    checks,
+    depthScore,
+    generatedAt: new Date().toISOString(),
+    limitations: externalSourceQualityProfile(source).limitations,
+    version: "source-evidence-v1"
+  };
+}
+
+function sourceEvidenceCheck(spec: SourceEvidenceSpec, signals: string[], warnings: string[]): ExternalSourceEvidenceCheck {
+  const passEvidence = matchingEvidence(signals, spec.pass);
+  if (passEvidence) {
+    return {
+      evidence: passEvidence,
+      id: spec.id,
+      label: spec.label,
+      status: "pass"
+    };
+  }
+  const warningEvidence = matchingEvidence([...warnings, ...signals], spec.warning ?? []);
+  if (warningEvidence) {
+    return {
+      evidence: warningEvidence,
+      id: spec.id,
+      label: spec.label,
+      status: "warning"
+    };
+  }
+  return {
+    evidence: "No source evidence returned for this check.",
+    id: spec.id,
+    label: spec.label,
+    status: "missing"
+  };
+}
+
+function matchingEvidence(values: string[], patterns: RegExp[]): string | null {
+  for (const value of values) {
+    if (patterns.some((pattern) => pattern.test(value))) {
+      return value;
+    }
+  }
+  return null;
+}
+
+function sourceEvidenceDepthScore(checks: ExternalSourceEvidenceCheck[]): number {
+  if (checks.length === 0) {
+    return 0;
+  }
+  const total = checks.reduce((sum, check) => {
+    if (check.status === "pass") {
+      return sum + 100;
+    }
+    if (check.status === "warning") {
+      return sum + 65;
+    }
+    return sum + 20;
+  }, 0);
+  return clampScore(Math.round(total / checks.length));
+}
+
+function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[] {
+  switch (source) {
+    case "npm":
+      return [
+        evidenceSpec("npm.manifest.latest", "Latest manifest", /Resolved from the npm latest package manifest/i),
+        evidenceSpec("npm.downloads", "Download signal", /npm monthly downloads:/i, /npm download data was not returned/i),
+        evidenceSpec("npm.tarball.integrity", "Tarball integrity", /Latest tarball integrity metadata is present/i, /integrity metadata is missing/i),
+        evidenceSpec("npm.registry.signature", "Registry signature", /npm registry signature metadata is present/i, /signature metadata is missing/i),
+        evidenceSpec("npm.packument.versions", "Packument versions", /npm packument versions returned:/i, /packument summary was not returned/i),
+        evidenceSpec("npm.dist_tags", "Dist tags", /npm dist-tags returned:/i, /npm dist-tags were not returned/i),
+        evidenceSpec("npm.repository", "Repository link", /Repository link is present/i, /Repository link is missing/i),
+        evidenceSpec("npm.maintainers", "Maintainers", /npm returned \d+ maintainer records/i, /did not return maintainer records/i),
+        evidenceSpec("npm.lifecycle", "Lifecycle scripts", /did not declare install-time lifecycle scripts|declares install-time lifecycle scripts/i),
+        evidenceSpec("npm.node_engine", "Node engine", /declares Node engine:/i, /did not declare a Node engine/i)
+      ];
+    case "pypi":
+      return [
+        evidenceSpec("pypi.project.json", "Project JSON", /Resolved from the PyPI JSON API/i),
+        evidenceSpec("pypi.vulnerabilities", "Vulnerability context", /PyPI returned no vulnerabilities|PyPI returned vulnerability records/i),
+        evidenceSpec("pypi.release.files", "Release files", /PyPI latest release files returned:/i, /latest release files were not returned/i),
+        evidenceSpec("pypi.file.digests", "File digests", /digest metadata:/i, /did not return latest release file digests|missing digest metadata/i),
+        evidenceSpec("pypi.simple.provenance", "Simple API provenance", /simple API provenance links returned/i, /did not return provenance links/i),
+        evidenceSpec("pypi.core_metadata", "Core metadata", /core metadata hashes returned|dist-info metadata hashes returned/i, /metadata hashes were not returned/i),
+        evidenceSpec("pypi.release_shape", "Wheel/source shape", /latest release includes wheel metadata|latest release is source-only/i),
+        evidenceSpec("pypi.yanked", "Yanked status", /latest release files are not marked yanked|latest release files include yanked files/i),
+        evidenceSpec("pypi.requires_python", "Python version boundary", /PyPI requires-python:/i, /did not return requires-python metadata/i),
+        evidenceSpec("pypi.release_history", "Release history", /PyPI release history versions returned:/i, /release history was not returned/i)
+      ];
+    case "github":
+      return [
+        evidenceSpec("github.repo.metadata", "Repository metadata", /Resolved from GitHub repository search/i),
+        evidenceSpec("github.activity", "Activity", /Last pushed at:/i, /Last push timestamp was not returned/i),
+        evidenceSpec("github.default_branch", "Default branch", /Default branch:/i, /Default branch was not returned/i),
+        evidenceSpec("github.manifests", "Manifests", /GitHub package manifests found:/i, /package manifests were not inspected/i),
+        evidenceSpec("github.lockfiles", "Lockfiles", /GitHub lockfiles found:/i, /GitHub lockfiles were not returned/i),
+        evidenceSpec("github.security", "Security files", /GitHub security files found:/i, /GitHub security files were not returned/i),
+        evidenceSpec("github.release", "Latest release", /GitHub latest release tag:/i, /latest release tag was not returned/i),
+        evidenceSpec("github.default_branch_commit", "Latest commit", /GitHub latest default-branch commit returned:/i, /latest commit metadata was not returned/i),
+        evidenceSpec("github.workflows", "CI workflows", /GitHub workflow files found:/i, /workflow files were not returned/i),
+        evidenceSpec("github.lifecycle", "Lifecycle scripts", /GitHub package.json .*lifecycle scripts/i)
+      ];
+    case "huggingface-model":
+      return [
+        evidenceSpec("hf.card_data", "Card metadata", /cardData metadata is present/i, /cardData metadata was not returned/i),
+        evidenceSpec("hf.files", "Repository files", /repository files returned:/i, /file list was not returned/i),
+        evidenceSpec("hf.readme", "Model card file", /README\/model card file is present/i, /README\/model card file was not returned/i),
+        evidenceSpec("hf.config", "Config metadata file", /config metadata file is present/i, /config metadata file was not returned/i),
+        evidenceSpec("hf.safetensors", "Safetensors", /safetensors weight file is present/i, /pickle|safetensors weight file was not returned/i),
+        evidenceSpec("hf.remote_code", "Remote-code boundary", /trust_remote_code metadata was not enabled|trust_remote_code metadata requires manual review/i),
+        evidenceSpec("hf.commit", "Commit digest", /commit digest metadata is present/i, /commit digest metadata is missing/i),
+        evidenceSpec("hf.gated", "Gated/private flag", /gated access flag is/i),
+        evidenceSpec("hf.task", "Task metadata", /task\/card tags returned:|pipeline tag:/i, /task\/card tags were not returned|pipeline tag was not returned/i),
+        evidenceSpec("hf.evals", "Model-index/eval metadata", /model-index\/eval metadata returned:/i, /model-index\/eval metadata was not returned/i)
+      ];
+    case "huggingface-dataset":
+      return [
+        evidenceSpec("hf.card_data", "Card metadata", /cardData metadata is present/i, /cardData metadata was not returned/i),
+        evidenceSpec("hf.dataset_info", "Dataset info", /dataset_info metadata returned/i, /dataset_info metadata was not returned/i),
+        evidenceSpec("hf.dataset_features", "Dataset features", /dataset feature fields returned:/i, /dataset feature metadata was not returned/i),
+        evidenceSpec("hf.dataset_splits", "Dataset splits", /dataset split metadata returned:/i, /dataset split metadata was not returned/i),
+        evidenceSpec("hf.files", "Repository files", /repository files returned:/i, /file list was not returned/i),
+        evidenceSpec("hf.readme", "Dataset card file", /README\/model card file is present/i, /README\/model card file was not returned/i),
+        evidenceSpec("hf.commit", "Commit digest", /commit digest metadata is present/i, /commit digest metadata is missing/i),
+        evidenceSpec("hf.gated", "Gated/private flag", /gated access flag is/i),
+        evidenceSpec("hf.script_files", "Executable dataset scripts", /dataset Python script files were not returned|dataset Python script files returned:/i),
+        evidenceSpec("hf.task", "Task metadata", /task\/card tags returned:/i, /task\/card tags were not returned/i)
+      ];
+    case "mcp":
+      return [
+        evidenceSpec("mcp.registry.status", "Registry status", /MCP Registry status:/i, /status was not returned/i),
+        evidenceSpec("mcp.remote_endpoints", "Remote endpoints", /Remote MCP endpoints returned:/i, /Remote MCP endpoint metadata is missing/i),
+        evidenceSpec("mcp.env_requirements", "Credential scope", /MCP server did not declare environment requirements|MCP server declares \d+ environment requirements/i),
+        evidenceSpec("mcp.packages", "Package references", /MCP registry packages returned:/i, /package metadata was not returned/i),
+        evidenceSpec("mcp.source_repo", "Source repository", /Source repository is present/i, /No source repository returned|Source repository was not returned/i),
+        evidenceSpec("mcp.transport", "Transport metadata", /MCP remote transport types returned:/i, /MCP remote transport metadata was not returned/i)
+      ];
+  }
+}
+
+function evidenceSpec(id: string, label: string, pass: RegExp, warning?: RegExp): SourceEvidenceSpec {
+  const spec: SourceEvidenceSpec = {
+    id,
+    label,
+    pass: [pass]
+  };
+  if (warning) {
+    spec.warning = [warning];
+  }
+  return spec;
 }
 
 function trustDimensions(input: {
@@ -2661,7 +2983,9 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   const exactMatch = name === normalizedQuery || displayName === normalizedQuery ? 18 : 0;
   const prefixMatch = name.startsWith(normalizedQuery) || displayName.startsWith(normalizedQuery) ? 10 : 0;
   const textMatch = `${name} ${displayName} ${description}`.includes(normalizedQuery) ? 6 : 0;
-  const qualityPenalty = record.trust.decision === "avoid" || record.trust.risk === "high" ? 35 : record.trust.warnings.length * 4;
+  const highSeverityWarningCount = record.trust.warnings.filter(hasHighSeverityWarning).length;
+  const qualityPenalty =
+    record.trust.decision === "avoid" || record.trust.risk === "high" ? 45 : highSeverityWarningCount ? 24 + highSeverityWarningCount * 8 : record.trust.warnings.length * 4;
   const metadataPenalty = (record.license ? 0 : 6) + (record.repo ? 0 : 6);
   const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
   const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
@@ -2798,6 +3122,7 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         assessmentVersion: "source-quality-v1",
         bestFor: ["JavaScript and TypeScript package selection", "install-plan review", "lifecycle script risk checks"],
         coverage: "strong",
+        depthScore: 96,
         inspectDepth: "latest manifest, tarball integrity, registry signatures, lifecycle scripts, dependency count and download signal",
         limitations: [
           "npm search ranking is upstream-provided and can still surface weak packages",
@@ -2806,13 +3131,15 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["package authorship", "malware-free guarantee", "workspace execution approval"],
         searchDepth: "registry-ranked search with validated task hints for common agent requests",
-        strengths: ["direct registry API", "integrity and signature metadata when returned", "install-time lifecycle script warnings"]
+        strengths: ["direct registry API", "integrity and signature metadata when returned", "install-time lifecycle script warnings"],
+        targetDepthScore: 95
       };
     case "pypi":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["Python package exact inspect", "wheel/source release risk review", "known PyPI vulnerability context"],
-        coverage: "moderate",
+        coverage: "strong",
+        depthScore: 92,
         inspectDepth: "project JSON, latest release files, file hashes, yanked flags, Simple API metadata and provenance links",
         limitations: [
           "PyPI has no official JSON search API, so broad natural-language discovery uses normalized candidates and curated task hints",
@@ -2820,15 +3147,17 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
           "signature/provenance metadata is only as deep as the upstream APIs return"
         ],
         notClaimed: ["full index crawl", "malware-free guarantee", "private package visibility"],
-        searchDepth: "normalized name candidates plus validated task hints; exact inspect is stronger than broad search",
-        strengths: ["release-file digest checks", "yanked and vulnerability signals", "Simple API provenance/core metadata when returned"]
+        searchDepth: "normalized name candidates, validated task hints, exact-name fallback and source-specific ranking",
+        strengths: ["release-file digest checks", "yanked and vulnerability signals", "Simple API provenance/core metadata when returned"],
+        targetDepthScore: 92
       };
     case "github":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["source repository discovery", "repo activity context", "agent review before cloning code"],
-        coverage: "moderate",
-        inspectDepth: "repository metadata plus selected manifest, security and lockfile probes on the default branch",
+        coverage: "strong",
+        depthScore: 92,
+        inspectDepth: "repository metadata plus selected manifest, security, workflow and lockfile probes on the default branch",
         limitations: [
           "GitHub repository search is not package-registry resolution",
           "selected manifest probes do not replace a full repository audit",
@@ -2836,14 +3165,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["verified release provenance", "full code scan", "dependency vulnerability audit"],
         searchDepth: "GitHub repository search sorted by stars with archived repositories filtered out",
-        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security file checks"]
+        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security/workflow file checks"],
+        targetDepthScore: 92
       };
     case "huggingface-model":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["model discovery", "model card and file-shape context", "remote-code and weight-format warning"],
-        coverage: "moderate",
-        inspectDepth: "model API metadata, tags, siblings, downloads, likes, gated/private flags, commit SHA and remote-code indicators",
+        coverage: "strong",
+        depthScore: 92,
+        inspectDepth: "model API metadata, cardData, tags, siblings, downloads, likes, gated/private flags, commit SHA, file-shape and remote-code indicators",
         limitations: [
           "model files are not downloaded or executed by the hosted API",
           "model safety, bias and license suitability still require separate review",
@@ -2851,14 +3182,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["model behavior evaluation", "weight integrity beyond returned metadata", "license legal advice"],
         searchDepth: "Hugging Face hub search sorted by downloads",
-        strengths: ["safetensors versus pickle/binary warning", "trust_remote_code warning", "gated/private metadata"]
+        strengths: ["safetensors versus pickle/binary warning", "trust_remote_code warning", "gated/private metadata"],
+        targetDepthScore: 92
       };
     case "huggingface-dataset":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["dataset discovery", "dataset card metadata", "license and hub usage context"],
-        coverage: "moderate",
-        inspectDepth: "dataset API metadata, tags, siblings, downloads, likes, gated/private flags and commit SHA when returned",
+        coverage: "strong",
+        depthScore: 90,
+        inspectDepth: "dataset API metadata, dataset_info, features, splits, tags, siblings, downloads, likes, gated/private flags and commit SHA when returned",
         limitations: [
           "dataset contents are not downloaded, sampled or scanned by the hosted API",
           "dataset quality, bias and legal suitability require separate review",
@@ -2866,13 +3199,15 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["dataset content audit", "training suitability approval", "license legal advice"],
         searchDepth: "Hugging Face dataset search sorted by downloads",
-        strengths: ["source-owned hub metadata", "license tag and card/file presence", "gated/private metadata"]
+        strengths: ["source-owned hub metadata", "license tag and card/file presence", "dataset_info and gated/private metadata"],
+        targetDepthScore: 90
       };
     case "mcp":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["MCP server discovery", "remote endpoint context", "credential-scope review before enabling tools"],
         coverage: "limited",
+        depthScore: 85,
         inspectDepth: "MCP registry server metadata, remote endpoints, repository link, status and environment requirements when returned",
         limitations: [
           "MCP registry availability and schema stability are still early",
@@ -2881,7 +3216,8 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["tool execution safety", "server operator verification", "credential policy approval"],
         searchDepth: "MCP registry server search with pinned fallback for known public records",
-        strengths: ["remote endpoint visibility", "environment requirement warnings", "source repository link when returned"]
+        strengths: ["remote endpoint visibility", "environment requirement warnings", "source repository link when returned"],
+        targetDepthScore: 85
       };
   }
 }
@@ -3017,6 +3353,42 @@ function readTrust(value: unknown): ExternalPackageRecord["trust"] {
     signals: boundedStrings(value.signals, 32, 300, "trust.signals", 1),
     warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
   };
+}
+
+function readSourceEvidence(value: unknown): ExternalSourceEvidence | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!isRecord(value)) {
+    throw new ExternalPackageError("record.sourceEvidence must be an object", { code: "invalid_record", status: 400 });
+  }
+  if (value.version !== "source-evidence-v1") {
+    throw new ExternalPackageError("record.sourceEvidence.version must be source-evidence-v1", { code: "invalid_record", status: 400 });
+  }
+  return {
+    checks: readSourceEvidenceChecks(value.checks),
+    depthScore: readBoundedInteger(value.depthScore, "sourceEvidence.depthScore", 0, 100),
+    generatedAt: requiredCleanString(value.generatedAt, "sourceEvidence.generatedAt", 80),
+    limitations: boundedStrings(value.limitations, 12, 240, "sourceEvidence.limitations"),
+    version: "source-evidence-v1"
+  };
+}
+
+function readSourceEvidenceChecks(value: unknown): ExternalSourceEvidenceCheck[] {
+  if (!Array.isArray(value)) {
+    throw new ExternalPackageError("sourceEvidence.checks must be an array", { code: "invalid_record", status: 400 });
+  }
+  return value.slice(0, 32).map((item, index) => {
+    if (!isRecord(item)) {
+      throw new ExternalPackageError(`sourceEvidence.checks.${index} must be an object`, { code: "invalid_record", status: 400 });
+    }
+    return {
+      evidence: requiredCleanString(item.evidence, `sourceEvidence.checks.${index}.evidence`, 300),
+      id: requiredCleanString(item.id, `sourceEvidence.checks.${index}.id`, 120),
+      label: requiredCleanString(item.label, `sourceEvidence.checks.${index}.label`, 120),
+      status: readEnum(item.status, EXTERNAL_SOURCE_EVIDENCE_CHECK_STATUS, `sourceEvidence.checks.${index}.status`)
+    };
+  });
 }
 
 function readTrustDimensions(value: unknown, scoreValue: unknown, riskValue: unknown): ExternalTrustDimensions {

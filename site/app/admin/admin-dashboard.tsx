@@ -232,13 +232,16 @@ export function AdminDashboard() {
                 rows={[
                   ["Sources", sourceQuality.summary?.total],
                   ["Strong", sourceQuality.summary?.strong],
-                  ["Moderate or better", sourceQuality.summary?.moderateOrBetter]
+                  ["Moderate or better", sourceQuality.summary?.moderateOrBetter],
+                  ["Avg depth", sourceQuality.summary?.averageDepthScore]
                 ]}
               />
               <DataTable
                 columns={[
                   ["source", "Source"],
                   ["coverage", "Coverage"],
+                  ["depthScore", "Depth"],
+                  ["targetDepthScore", "Target"],
                   ["resolverVersion", "Resolver"],
                   ["authConfigured", "Auth"]
                 ]}
@@ -360,6 +363,8 @@ export function AdminDashboard() {
                 columns={[
                   ["source", "Source"],
                   ["coverage", "Coverage"],
+                  ["depthScore", "Depth"],
+                  ["targetDepthScore", "Target"],
                   ["searchDepth", "Search"],
                   ["inspectDepth", "Inspect"],
                   ["strengths", "Strengths"],

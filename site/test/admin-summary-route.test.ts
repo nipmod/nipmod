@@ -139,8 +139,9 @@ describe("admin summary route", () => {
       },
       sourceQuality: {
         summary: {
+          averageDepthScore: 91,
           moderateOrBetter: 5,
-          strong: 1,
+          strong: 5,
           total: 6
         },
         type: "dev.nipmod.admin-source-quality.v1"

@@ -66,6 +66,9 @@ describe("OpenAPI route", () => {
     );
     expect(body.components.schemas.ExternalPackageRecord.properties.archive.required).toContain("firstSeenReason");
     expect(body.components.schemas.ExternalPackageRecord.properties.metrics.$ref).toBe("#/components/schemas/ExternalPackageMetrics");
+    expect(body.components.schemas.ExternalPackageRecord.properties.sourceEvidence.$ref).toBe("#/components/schemas/ExternalSourceEvidence");
+    expect(body.components.schemas.ExternalPackageRecord.required).not.toContain("sourceEvidence");
+    expect(body.components.schemas.ExternalSourceEvidence.required).toEqual(["checks", "depthScore", "generatedAt", "limitations", "version"]);
     expect(body.components.schemas.ExternalPackageRecord.properties.trust.$ref).toBe("#/components/schemas/ExternalPackageTrust");
     expect(body.components.schemas.ExternalPackageTrust.required).toContain("checkedAt");
     expect(body.components.schemas.ExternalPackageTrust.required).toContain("dimensions");
@@ -83,11 +86,13 @@ describe("OpenAPI route", () => {
       "assessmentVersion",
       "bestFor",
       "coverage",
+      "depthScore",
       "inspectDepth",
       "limitations",
       "notClaimed",
       "searchDepth",
-      "strengths"
+      "strengths",
+      "targetDepthScore"
     ]);
     expect(body.components.schemas.ExternalSourceCircuitReport.required).toEqual([
       "failureCount",
