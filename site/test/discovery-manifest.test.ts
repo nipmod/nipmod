@@ -106,10 +106,13 @@ describe("nipmod discovery manifest", () => {
       rateLimited: true
     });
     expect(manifest.baseAgents).toMatchObject({
+      agentPrompts: "https://nipmod.com/agent-prompts.json",
       page: "https://nipmod.com/base-agents",
+      preflightSpec: "https://nipmod.com/base-agent-preflight.json",
       status: "integration_path_not_official_listing"
     });
     expect(manifest.baseAgents.doesNot).toContain("claim official Base approval");
+    expect(manifest.baseAgents.readiness).toContain("machine-readable preflight spec");
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();
     expect(manifest.agent.commands.setupHermesBundle).toBeUndefined();
     expect(manifest.agent.commands.setupPublish).toBeUndefined();
