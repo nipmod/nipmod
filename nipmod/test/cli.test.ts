@@ -32,7 +32,20 @@ describe("nipmod CLI", () => {
 
     expect(parsed.ok).toBe(true);
     expect(parsed.data.commands).toEqual(
-      expect.arrayContaining(["inspect", "add", "ci", "publish", "package", "manifest", "dist-tag", "deprecate", "yank", "mcp", "setup"])
+      expect.arrayContaining([
+        "inspect",
+        "add",
+        "ci",
+        "deep-scan",
+        "publish",
+        "package",
+        "manifest",
+        "dist-tag",
+        "deprecate",
+        "yank",
+        "mcp",
+        "setup"
+      ])
     );
     expect(parsed.data.exitCodes).toEqual(
       expect.arrayContaining([

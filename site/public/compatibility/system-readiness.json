@@ -3,7 +3,7 @@
   "type": "dev.nipmod.system-readiness.v1",
   "generatedAt": "2026-05-21T20:20:25.892Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, hosted package API, public source resolution, public package archive, durable package intelligence archive, CLI access, local MCP access, hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
+  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, hosted package API, public source resolution, public package archive, durable package intelligence archive, CLI access, local static deep scan, local MCP access, hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 0,
@@ -100,6 +100,7 @@
     "sbom",
     "doctor",
     "audit",
+    "deep-scan",
     "ci",
     "inspect",
     "search",
@@ -123,6 +124,7 @@
     "nipmod.claim_index",
     "nipmod.verify",
     "nipmod.audit",
+    "nipmod.deep_scan",
     "nipmod.sbom",
     "nipmod.explain"
   ],
@@ -143,6 +145,7 @@
     "nipmod.claim_index",
     "nipmod.verify",
     "nipmod.audit",
+    "nipmod.deep_scan",
     "nipmod.sbom",
     "nipmod.explain"
   ],
@@ -164,6 +167,8 @@
     "install writes a local receipt under .nipmod/receipts",
     "hosted read-only MCP exposes no workspace-write, local-file or publish tools",
     "install plan does not mutate the workspace",
+    "local deep scan reads files already present on disk and does not install, execute, fetch, unpack or write",
+    "hosted API and hosted read-only MCP do not run deep scans because they cannot read caller workspaces",
     "archive confirm requires an authorized Nipmod server writer before durable persistence",
     "publish_plan through MCP never signs locally and never writes remotely",
     "local agent setup writes only local project config files when explicitly run"

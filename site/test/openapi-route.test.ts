@@ -13,11 +13,26 @@ describe("OpenAPI route", () => {
     expect(body.info.title).toBe("Nipmod API");
     expect(body.components.securitySchemes.NipmodApiKey.name).toBe("x-nipmod-api-key");
     expect(body.security).toContainEqual({});
-    expect(body["x-nipmod-agent-flow"]).toEqual(["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"]);
+    expect(body["x-nipmod-agent-flow"]).toEqual([
+      "search",
+      "inspect",
+      "install-plan",
+      "optional-local-deep-scan",
+      "host-approval",
+      "optional-archive-confirm"
+    ]);
+    expect(body["x-nipmod-local-tools"].deepScan).toMatchObject({
+      command: "nipmod deep-scan <path> --json",
+      mcpTool: "nipmod.deep_scan",
+      remoteMcpExposed: false
+    });
     expect(body["x-nipmod-safety-boundary"]).toMatchObject({
+      hostedApiRunsDeepScan: false,
       hostedApiExecutesCommands: false,
+      hostedApiUnpacksArtifacts: false,
       hostedApiWritesCallerWorkspace: false,
       installPlanRequiresHostApproval: true,
+      localDeepScanReadsExistingFilesOnly: true,
       packageMetadataIsInstruction: false,
       searchScoreIsInstallPermission: false
     });

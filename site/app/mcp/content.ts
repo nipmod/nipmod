@@ -1,6 +1,6 @@
 export const mcpContent = {
   headline: "Connect Nipmod to agents",
-  lead: "Use hosted read-only MCP for external package resolution, then local MCP for controlled workspace installs.",
+  lead: "Use hosted read-only MCP for source intelligence, then local MCP for deep scan and controlled installs.",
   primaryAction: "Setup agent",
   secondaryAction: "Trust",
   remote: {
@@ -20,7 +20,7 @@ export const mcpContent = {
       "nipmod.external_install_plan",
       "nipmod.demo"
     ],
-    boundary: "Remote endpoint never exposes install, audit, SBOM, local file verification, claim checks or publish planning."
+    boundary: "Remote endpoint never exposes install, audit, SBOM, local deep scan, local file verification, claim checks or publish planning."
   },
   oneCommand: {
     title: "One local command",
@@ -35,6 +35,10 @@ export const mcpContent = {
     {
       label: "Controlled install",
       text: "nipmod.install writes only after confirmInstall is set to write-lockfile. Agents can pin expected package, version and integrity."
+    },
+    {
+      label: "Local deep scan",
+      text: "nipmod.deep_scan reads files already present on disk and does not install, fetch, unpack, execute or write."
     },
     {
       label: "Unsigned preview",
@@ -66,6 +70,7 @@ export const mcpContent = {
     { name: "nipmod.claim_index", safety: "read only" },
     { name: "nipmod.verify", safety: "read only" },
     { name: "nipmod.audit", safety: "read only" },
+    { name: "nipmod.deep_scan", safety: "local static read" },
     { name: "nipmod.sbom", safety: "read only" },
     { name: "nipmod.explain", safety: "read only" }
   ],

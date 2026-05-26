@@ -8,7 +8,7 @@ export const metadata = createPageMetadata({
 });
 
 const agentPrompt = `Use Nipmod before choosing a package.
-Search for candidates, inspect the selected record, then show me the install plan before changing the workspace.`;
+Search for candidates, inspect the selected record, show me the install plan and run a local deep scan if files are already present before changing the workspace.`;
 
 const agentDiscovery = `Read these first:
 https://nipmod.com/llms.txt
@@ -18,6 +18,8 @@ https://nipmod.com/api/openapi`;
 const threeCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
 curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
 curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
+
+const localDeepScan = `nipmod deep-scan . --json`;
 
 const keyedCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
   -H 'x-nipmod-api-key: <key>'
@@ -129,6 +131,16 @@ export default function ApiAccessPage() {
           ]}
         />
         <DocsCode>{threeCalls}</DocsCode>
+      </DocsSection>
+
+      <DocsSection title="Optional local deep scan">
+        <DocsProse>
+          <p>
+            The hosted API does not read workspaces, clone repositories, unpack artifacts or run package code. When package
+            files are already present locally, an agent can run the CLI deep scan as the second stage before approval.
+          </p>
+        </DocsProse>
+        <DocsCode>{localDeepScan}</DocsCode>
       </DocsSection>
 
       <DocsSection title="Endpoints">

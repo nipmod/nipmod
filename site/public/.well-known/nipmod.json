@@ -37,7 +37,13 @@
       "version": "agent-selection-v1",
       "summary": "Search responses include a recommended candidate, gate state and rank breakdown for agent planning."
     },
-    "writeBoundary": "Hosted API calls do not write to a caller workspace."
+    "writeBoundary": "Hosted API calls do not write to a caller workspace.",
+    "localDeepScan": {
+      "command": "nipmod deep-scan <path> --json",
+      "mode": "local-static",
+      "hostedApiRunsDeepScan": false,
+      "notes": "Deep scan reads files already present locally. The hosted API does not clone repositories, unpack artifacts, install packages or execute code."
+    }
   },
   "sources": [
     "npm",
@@ -107,6 +113,7 @@
       "externalResolve",
       "externalInspect",
       "externalInstallPlan",
+      "localDeepScan",
       "packageIntelligencePrepare",
       "packageIntelligenceSearch",
       "packageIntelligenceStatus",
@@ -122,6 +129,7 @@
       "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
       "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
       "externalInstallPlan": "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
+      "localDeepScan": "nipmod deep-scan <path> --json",
       "packageIntelligencePrepare": "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
       "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query>",
       "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status",
@@ -153,6 +161,7 @@
       "nipmod.claim_index",
       "nipmod.verify",
       "nipmod.audit",
+      "nipmod.deep_scan",
       "nipmod.sbom",
       "nipmod.explain"
     ],
@@ -172,6 +181,7 @@
       "nipmod.claim_index",
       "nipmod.verify",
       "nipmod.audit",
+      "nipmod.deep_scan",
       "nipmod.sbom",
       "nipmod.explain"
     ]

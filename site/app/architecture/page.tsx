@@ -58,6 +58,11 @@ export default function ArchitecturePage() {
               third: "Workspace writes happen only after approval."
             },
             {
+              first: "Local Deep Scan",
+              second: "If package files are already present, the CLI can run a static local scan before approval.",
+              third: "No downloads, clones, unpacking, execution or writes."
+            },
+            {
               first: "Archive",
               second: "Useful confirmed discoveries can be saved as durable package intelligence records.",
               third: "Search alone is not a verified archive entry."
@@ -85,13 +90,18 @@ export default function ArchitecturePage() {
               title: "Install plan"
             },
             {
-              body: "The user or local host decides whether the command can run in the workspace.",
+              body: "If source or package files already exist locally, the agent can run a static deep scan without installing or executing code.",
               label: "4",
+              title: "Local deep scan"
+            },
+            {
+              body: "The user or local host decides whether the command can run in the workspace.",
+              label: "5",
               title: "Approval"
             },
             {
               body: "If the result is useful, it can become a reusable record with source context, trust checks and receipts.",
-              label: "5",
+              label: "6",
               title: "Confirmed archive"
             }
           ]}
@@ -102,7 +112,8 @@ export default function ArchitecturePage() {
         <DocsProse>
           <p>
             Search, Inspect and Install Plan do not download packages, run package managers or change lockfiles. The hosted
-            API gives the agent package intelligence, not local execution power.
+            API gives the agent package intelligence, not local execution power. Deep scan is local only and reads files that
+            are already present on disk.
           </p>
           <p>
             Nipmod does not claim ownership of npm, PyPI, GitHub, Hugging Face or MCP records. Source ownership remains with

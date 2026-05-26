@@ -34,12 +34,14 @@ describe("MCP host content", () => {
       "nipmod.claim_index",
       "nipmod.verify",
       "nipmod.audit",
+      "nipmod.deep_scan",
       "nipmod.sbom",
       "nipmod.explain"
     ]);
 	    expect(text).toContain("publish_plan");
     expect(text).toContain("confirmInstall");
     expect(text).toContain("write-lockfile");
+    expect(text).toContain("nipmod.deep_scan");
     expect(text).toContain("nipmod.demo");
     expect(text).toContain("claim_verify");
 	    expect(text.toLowerCase()).toContain("controlled install");
@@ -60,6 +62,7 @@ describe("MCP host content", () => {
       "nipmod.demo"
     ]);
     expect(mcpContent.remote.boundary).toContain("never exposes install");
+    expect(mcpContent.remote.boundary).toContain("local deep scan");
     expect(mcpContent.demo.steps).toContain("Call nipmod.install only with confirmInstall set to write-lockfile");
     expect(mcpContent.verifyCommand).toContain("tools/list");
   });

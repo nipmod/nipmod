@@ -38,6 +38,7 @@ const expectedTools = [
   "nipmod.claim_index",
   "nipmod.verify",
   "nipmod.audit",
+  "nipmod.deep_scan",
   "nipmod.sbom",
   "nipmod.explain"
 ];
@@ -71,6 +72,7 @@ const expectedCommands = [
   "sbom",
   "doctor",
   "audit",
+  "deep-scan",
   "ci",
   "inspect",
   "search",

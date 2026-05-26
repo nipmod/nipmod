@@ -48,6 +48,7 @@ import {
 } from "./install.js";
 import { type LifecycleAction, type SignedLifecycleEvent, validateManifest, type Manifest } from "./protocol.js";
 import { checkOutdatedPackages, type OutdatedPackage, type OutdatedReport } from "./outdated.js";
+import { deepScanProject, formatDeepScanReport, type DeepScanReport } from "./deep-scan.js";
 import { generateSbom, type AgentSbom } from "./sbom.js";
 import {
   analyzeLocalPackageCandidate,
@@ -110,6 +111,7 @@ const CLI_COMMANDS = [
   "sbom",
   "doctor",
   "audit",
+  "deep-scan",
   "ci",
   "inspect",
   "search",
@@ -212,6 +214,8 @@ async function runCommand(command: string | undefined, args: string[]): Promise<
       return doctorCommand(args);
     case "audit":
       return auditCommand(args);
+    case "deep-scan":
+      return deepScanCommand(args);
     case "ci":
       return ciCommand(args);
     case "inspect":
@@ -1289,6 +1293,32 @@ async function auditCommand(args: string[]): Promise<CliResult> {
   };
 }
 
+async function deepScanCommand(args: string[]): Promise<CliResult> {
+  const target = optionalFirstPositional(args) ?? optionalFlagValue(args, "--dir") ?? process.cwd();
+  const maxFiles = optionalPositiveInteger(args, "--max-files");
+  const maxBytesPerFile = optionalPositiveInteger(args, "--max-bytes-per-file");
+  const options: {
+    maxBytesPerFile?: number;
+    maxFiles?: number;
+    path: string;
+  } = { path: target };
+  if (maxFiles !== undefined) {
+    options.maxFiles = maxFiles;
+  }
+  if (maxBytesPerFile !== undefined) {
+    options.maxBytesPerFile = maxBytesPerFile;
+  }
+  const report: DeepScanReport = await deepScanProject(options);
+  return {
+    ok: report.summary.highCount === 0,
+    data: {
+      message: formatDeepScanReport(report),
+      report
+    },
+    exitCode: report.summary.highCount > 0 ? 7 : 0
+  };
+}
+
 async function ciCommand(args: string[]): Promise<CliResult> {
   assertCustomTrustRoots(args, "ci");
   const { dir, options } = auditProjectOptionsFromFlags(args, "ci");
@@ -2162,6 +2192,18 @@ function optionalFlagValues(args: readonly string[], flag: string): string[] {
   return values;
 }
 
+function optionalPositiveInteger(args: readonly string[], flag: string): number | undefined {
+  const value = optionalFlagValue(args, flag);
+  if (value === null) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`${flag} must be a positive integer`);
+  }
+  return parsed;
+}
+
 function hasFlag(args: readonly string[], flag: string): boolean {
   return args.includes(flag);
 }
@@ -2376,6 +2418,8 @@ const VALUE_FLAGS = new Set([
   "--identity",
   "--integrity",
   "--limit",
+  "--max-bytes-per-file",
+  "--max-files",
   "--log-id",
   "--name",
   "--node",

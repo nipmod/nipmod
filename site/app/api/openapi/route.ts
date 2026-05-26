@@ -6,12 +6,17 @@ import { checkApiRateLimitAsync } from "../../../lib/rate-limit";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const AGENT_FLOW = ["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"] as const;
+const AGENT_FLOW = ["search", "inspect", "install-plan", "optional-local-deep-scan", "host-approval", "optional-archive-confirm"] as const;
 const SAFETY_BOUNDARY = {
   hostedApiExecutesCommands: false,
+  hostedApiClonesRepositories: false,
+  hostedApiDownloadsPackageArtifacts: false,
   hostedApiReadsCallerWorkspace: false,
+  hostedApiRunsDeepScan: false,
+  hostedApiUnpacksArtifacts: false,
   hostedApiWritesCallerWorkspace: false,
   installPlanRequiresHostApproval: true,
+  localDeepScanReadsExistingFilesOnly: true,
   packageMetadataIsInstruction: false,
   searchScoreIsInstallPermission: false
 } as const;
@@ -41,6 +46,14 @@ export async function GET(request: Request): Promise<Response> {
 function openApiDocument() {
   return {
     "x-nipmod-agent-flow": [...AGENT_FLOW],
+    "x-nipmod-local-tools": {
+      deepScan: {
+        command: "nipmod deep-scan <path> --json",
+        mcpTool: "nipmod.deep_scan",
+        mode: "local-static",
+        remoteMcpExposed: false
+      }
+    },
     "x-nipmod-safety-boundary": SAFETY_BOUNDARY,
     components: {
       schemas: {
