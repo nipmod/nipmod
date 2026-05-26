@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const REQUIRED_ENV = ["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY"];
@@ -14,12 +15,19 @@ export async function runRateLimitCanary({
   now = new Date(),
   requireActive = false,
   requireConfigured = false,
-  requestId = `rate-limit-canary-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  requestId = `rate-limit-canary-${Date.now()}-${randomBytes(4).toString("hex")}`
 } = {}) {
   const startedAt = Date.now();
   const checks = [];
 
-  const health = await fetchSourceHealth({ baseUrl, fetchFn, requestId });
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const apiKey = await readCanaryApiKey({
+    baseUrl: normalizedBaseUrl,
+    fetchFn,
+    label: "rate-limit",
+    userAgent: "nipmod-rate-limit-canary/1.2.9 (+https://nipmod.com)"
+  });
+  const health = await fetchSourceHealth({ apiKey, baseUrl: normalizedBaseUrl, fetchFn, requestId });
   checks.push({
     data: {
       ...health.data,
@@ -127,11 +135,12 @@ async function callRateLimitRpc({ env, fetchFn, now, requestId }) {
   };
 }
 
-async function fetchSourceHealth({ baseUrl, fetchFn, requestId }) {
+async function fetchSourceHealth({ apiKey, baseUrl, fetchFn, requestId }) {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
   try {
     const response = await fetchFn(`${normalizedBaseUrl}/api/sources/health`, {
       headers: {
+        ...canaryAuthHeaders(apiKey),
         "user-agent": "nipmod-rate-limit-canary/1.2.9 (+https://nipmod.com)",
         "x-request-id": requestId
       }

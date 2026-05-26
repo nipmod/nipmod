@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArchitectureDiagram, DocsCode, DocsProse, DocsSection, DocsSequence, DocsShell, DocsTable } from "./docs-shell";
 
 const agentInstruction = `Use Nipmod before choosing a package.
-Search sources, inspect the selected record and show the install plan.
+If no key is available, issue a free beta key first.
+Search sources with x-nipmod-api-key, inspect the selected record and show the install plan.
 Do not install or edit files until I approve.`;
 
 export default function Home() {
@@ -11,8 +12,8 @@ export default function Home() {
       description="Nipmod makes existing package ecosystems readable for agents. It searches sources, explains trust and returns install plans before anything touches a workspace."
       eyebrow="Home"
       stats={[
-        { label: "Public sources", value: "5 live" },
-        { label: "API beta", value: "no key" },
+        { label: "Sources", value: "5 live" },
+        { label: "API beta", value: "key required" },
         { label: "Hosted writes", value: "0" }
       ]}
       title="The package layer for AI agents."
@@ -30,11 +31,11 @@ export default function Home() {
         </DocsProse>
       </DocsSection>
 
-      <DocsSection title="Public beta is open">
+      <DocsSection title="API beta is open">
         <DocsProse>
           <p>
-            Nipmod is live as a public beta. An agent can call the hosted API, search supported sources, inspect one exact
-            package record and request an install plan before changing a workspace.
+            Nipmod is live as a key-required API beta. An agent can issue a free beta key, call the hosted API, search
+            supported sources, inspect one exact package record and request an install plan before changing a workspace.
           </p>
           <p>
             Access is free and rate limited during the beta. We use this phase to improve resolver quality, watch real
@@ -42,8 +43,8 @@ export default function Home() {
             read local files, run package managers or write lockfiles.
           </p>
           <p>
-            Agents can read <code>/llms.txt</code>, the discovery manifest and the OpenAPI contract before making calls. The
-            human page and the machine-readable surfaces describe the same boundary.
+            Agents can read <code>/llms.txt</code> and the discovery manifest before requesting a key. Package intelligence
+            calls require <code>x-nipmod-api-key</code> or <code>Authorization: Bearer &lt;key&gt;</code>.
           </p>
         </DocsProse>
       </DocsSection>
@@ -94,22 +95,22 @@ export default function Home() {
             {
               first: "Search",
               second: <code>GET /api/search?q=http%20client&amp;limit=3</code>,
-              third: "Find candidates across sources."
+              third: "Find candidates across sources with x-nipmod-api-key."
             },
             {
               first: "Inspect",
               second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
-              third: "Read source context and trust factors."
+              third: "Read source context and trust factors with x-nipmod-api-key."
             },
             {
               first: "Plan",
               second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
-              third: "Return install steps for approval."
+              third: "Return install steps for approval with x-nipmod-api-key."
             },
             {
               first: "Archive",
               second: <code>GET /api/archive/prepare?source=npm&amp;name=undici</code>,
-              third: "Preview a reusable intelligence record."
+              third: "Preview a reusable intelligence record with x-nipmod-api-key."
             }
           ]}
         />

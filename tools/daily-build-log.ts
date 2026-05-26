@@ -160,7 +160,7 @@ export function collectGitChanges({ includeDirty = true, since = "24 hours ago" 
 
 function focusLine(labels: string[]): string {
   if (labels.includes("api") || labels.includes("trust")) {
-    return "making the public beta more useful for agents before they touch a workspace";
+    return "making the key-required beta more useful for agents before they touch a workspace";
   }
   if (labels.includes("ops")) {
     return "keeping the beta measurable and operationally clear";

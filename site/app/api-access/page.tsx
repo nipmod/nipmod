@@ -8,16 +8,23 @@ export const metadata = createPageMetadata({
 });
 
 const agentPrompt = `Use Nipmod before choosing a package.
-Search for candidates, inspect the selected record, show me the install plan and run a local deep scan if files are already present before changing the workspace.`;
+If no key is available, issue one with POST /api/keys/beta.
+Search for candidates with x-nipmod-api-key, inspect the selected record, show me the install plan and run a local deep scan if files are already present before changing the workspace.`;
 
 const agentDiscovery = `Read these first:
 https://nipmod.com/llms.txt
 https://nipmod.com/.well-known/nipmod.json
-https://nipmod.com/api/openapi`;
+POST https://nipmod.com/api/keys/beta
+GET https://nipmod.com/api/openapi with x-nipmod-api-key`;
 
-const threeCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'`;
+const threeCalls = `curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
+  -H 'x-nipmod-api-key: <key>'
+
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' \\
+  -H 'x-nipmod-api-key: <key>'
+
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' \\
+  -H 'x-nipmod-api-key: <key>'`;
 
 const localDeepScan = `nipmod deep-scan . --json`;
 
@@ -34,7 +41,7 @@ curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
   -H 'x-nipmod-api-key: <returned-key>'`;
 
 const betaKeyAgentPrompt = `Read https://nipmod.com/api/openapi.
-If you need a higher beta limit, POST https://nipmod.com/api/keys/beta.
+If you do not have a Nipmod key yet, POST https://nipmod.com/api/keys/beta first.
 Store the returned key in local secrets and use it as x-nipmod-api-key.
 Do not send prompts, user data, API keys or workspace paths.`;
 
@@ -73,11 +80,12 @@ const errorShape = `{
 
 const mcpCall = `curl -s https://nipmod.com/api/mcp \\
   -H 'content-type: application/json' \\
+  -H 'x-nipmod-api-key: <key>' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
 
 const clientExamples = `node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
 python3 examples/http-api/agent_flow.py "http client"
-curl 'https://nipmod.com/api/openapi'`;
+curl 'https://nipmod.com/api/openapi' -H 'x-nipmod-api-key: <key>'`;
 
 export default function ApiAccessPage() {
   return (
@@ -86,7 +94,7 @@ export default function ApiAccessPage() {
       eyebrow="API"
       stats={[
         { label: "OpenAPI", value: "3.1" },
-        { label: "Public beta", value: "free, rate limited" },
+        { label: "API beta", value: "free key" },
         { label: "Hosted writes", value: "0" }
       ]}
       title="One package API for agents."
@@ -103,8 +111,8 @@ export default function ApiAccessPage() {
           </p>
           <p>
             <code>/llms.txt</code> gives agents the workflow and safety rules without layout copy. The discovery manifest
-            describes the public surfaces. <code>/api/openapi</code> is the contract for generated clients, tests and agent
-            tools.
+            describes the API surfaces. <code>/api/openapi</code> is the contract for generated clients, tests and agent
+            tools, and it requires the same API key as package intelligence calls.
           </p>
         </DocsProse>
         <DocsCode>{agentDiscovery}</DocsCode>
@@ -149,27 +157,27 @@ export default function ApiAccessPage() {
             {
               first: "Search",
               second: <code>GET /api/search?q=&lt;query&gt;&amp;sources=&lt;sources&gt;&amp;limit=5</code>,
-              third: "Ranked candidates from npm, PyPI, GitHub, Hugging Face and MCP."
+              third: "Key-required ranked candidates from npm, PyPI, GitHub, Hugging Face and MCP."
             },
             {
               first: "Inspect",
               second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
-              third: "One exact record with source, trust, license, metrics and warnings."
+              third: "Key-required exact record with source, trust, license, metrics and warnings."
             },
             {
               first: "Install Plan",
               second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
-              third: "Commands for review. The hosted API does not write to the workspace."
+              third: "Key-required commands for review. The hosted API does not write to the workspace."
             },
             {
               first: "Archive Prepare",
               second: <code>GET /api/archive/prepare?source=npm&amp;name=undici</code>,
-              third: "Preview a reusable archive record after useful discovery."
+              third: "Key-required preview of a reusable archive record after useful discovery."
             },
             {
               first: "Source Health",
               second: <code>GET /api/sources/health</code>,
-              third: "Configured source capabilities and bounded source checks."
+              third: "Key-required configured source capabilities and bounded source checks."
             },
             {
               first: "Usage Stats",
@@ -184,12 +192,12 @@ export default function ApiAccessPage() {
             {
               first: "MCP",
               second: <code>POST /api/mcp</code>,
-              third: "Read-only MCP JSON-RPC surface over the same hosted API."
+              third: "Key-required read-only MCP JSON-RPC surface over the same hosted API."
             },
             {
               first: "OpenAPI",
               second: <code>GET /api/openapi</code>,
-              third: "Contract for generated clients, tests and agent tool schemas."
+              third: "Key-required contract for generated clients, tests and agent tool schemas."
             }
           ]}
         />
@@ -199,14 +207,14 @@ export default function ApiAccessPage() {
         <DocsTable
           rows={[
             {
-              first: "Public beta",
-              second: "No API key is required today.",
-              third: "Every public request is rate limited."
+              first: "API beta",
+              second: "API key required.",
+              third: "Self-service beta keys are free and rate limited."
             },
             {
               first: "Free beta keys",
               second: <code>POST /api/keys/beta</code>,
-              third: "Issued directly by the API for higher shared beta limits. They do not unlock private sources."
+              third: "Issued directly by the API. They do not unlock private sources."
             },
             {
               first: "Partner keys",
@@ -248,9 +256,9 @@ export default function ApiAccessPage() {
         <DocsTable
           rows={[
             {
-              first: "Without a key",
-              second: "Nipmod counts requests by a privacy-safe client hash.",
-              third: "Useful for public beta traffic and source usage."
+              first: "Missing key",
+              second: "Package intelligence calls return 401.",
+              third: "Use POST /api/keys/beta before calling search, inspect, install-plan, MCP, stats or health."
             },
             {
               first: "With a key",
@@ -333,8 +341,8 @@ export default function ApiAccessPage() {
         <DocsTable
           rows={[
             {
-              first: "Public beta",
-              second: "No key is required. Requests are rate limited to keep the shared API reliable.",
+              first: "API beta",
+              second: "A key is required. Requests are rate limited to keep the shared API reliable.",
               third: "Higher limits can be added later without changing the core API flow."
             },
             {

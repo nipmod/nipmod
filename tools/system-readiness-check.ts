@@ -220,9 +220,9 @@ async function checkDiscoveryBinding() {
   assertEqual("discovery_agent_prompts", manifest.agent.prompts, state.receipt.entrypoints.agentPrompts);
   assertEqual("discovery_remote_mcp", manifest.mcp.remoteEndpoint, state.receipt.entrypoints.remoteMcp);
   assertDeepEqual("discovery_remote_mcp_tools", manifest.mcp.remoteTools, expectedRemoteMcpTools);
-  assertEqual("discovery_external_search", manifest.agent.commands.externalSearch, "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp");
-  assertEqual("discovery_external_inspect", manifest.agent.commands.externalInspect, "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>");
-  assertEqual("discovery_external_install_plan", manifest.agent.commands.externalInstallPlan, "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>");
+  assertEqual("discovery_external_search", manifest.agent.commands.externalSearch, "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key");
+  assertEqual("discovery_external_inspect", manifest.agent.commands.externalInspect, "GET https://nipmod.com/api/inspect?source=npm&name=<package-name> with x-nipmod-api-key");
+  assertEqual("discovery_external_install_plan", manifest.agent.commands.externalInstallPlan, "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name> with x-nipmod-api-key");
   assertText("llms_system_readiness", llms, state.receipt.entrypoints.systemReadiness);
   assertText("llms_quorum_receipts", llms, "https://nipmod.com/quorum/receipts.json");
   assertText("llms_shared_archive", llms, state.receipt.sharedArchive.registry);

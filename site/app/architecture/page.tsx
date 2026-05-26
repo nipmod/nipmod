@@ -139,7 +139,7 @@ export default function ArchitecturePage() {
             Base.
           </p>
           <p>
-            Premium access and higher usage tiers can come later, after the public beta proves the package layer with real
+            Premium access and higher usage tiers can come later, after the free key-required beta proves the package layer with real
             usage. The product boundary stays the same: search, inspect, install plan, approval, then optional archive
             confirmation.
           </p>

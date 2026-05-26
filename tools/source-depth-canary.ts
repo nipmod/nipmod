@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 
@@ -182,18 +183,27 @@ const DEFAULT_CANARIES = [
 ];
 
 export async function runSourceDepthCanary({
+  apiKey,
   baseUrl = DEFAULT_BASE_URL,
   canaries = DEFAULT_CANARIES,
   fetchFn = fetch
 } = {}) {
   const startedAt = Date.now();
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const resolvedApiKey =
+    apiKey ??
+    (await readCanaryApiKey({
+      baseUrl: normalizedBaseUrl,
+      fetchFn,
+      label: "source-depth",
+      userAgent: "nipmod-source-depth-canary/1.2.9 (+https://nipmod.com)"
+    }));
   const checks = [];
 
   for (const canary of canaries) {
     const startedCheckAt = Date.now();
     try {
-      const payload = await fetchJson(`${normalizedBaseUrl}${canary.path}`, fetchFn);
+      const payload = await fetchJson(`${normalizedBaseUrl}${canary.path}`, fetchFn, resolvedApiKey);
       const data = assertDepthPayload(payload, canary);
       checks.push({
         data,
@@ -303,13 +313,14 @@ function assertDepthPayload(payload, canary) {
   };
 }
 
-async function fetchJson(url, fetchFn) {
+async function fetchJson(url, fetchFn, apiKey) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
     const response = await fetchFn(url, {
       headers: {
         accept: "application/json",
+        ...canaryAuthHeaders(apiKey),
         "user-agent": "nipmod-source-depth-canary/1.2.9 (+https://nipmod.com)"
       },
       signal: controller.signal

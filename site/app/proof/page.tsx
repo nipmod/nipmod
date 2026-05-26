@@ -15,7 +15,7 @@ export default function ProofPage() {
       title="Public proof loop."
     >
       <DocsSection eyebrow="Run" title="Read only proof commands">
-        <DocsCode>{"curl 'https://nipmod.com/api/openapi'\ncurl 'https://nipmod.com/api/search?q=http%20client&limit=3'\ncurl 'https://nipmod.com/api/inspect?source=npm&name=undici'\ncurl 'https://nipmod.com/api/install-plan?source=npm&name=undici'\ncurl 'https://nipmod.com/api/sources/health'\ncurl 'https://nipmod.com/api/archive/status'"}</DocsCode>
+        <DocsCode>{"curl 'https://nipmod.com/api/openapi' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/sources/health' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/archive/status' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Expected" title="What a clean proof shows">

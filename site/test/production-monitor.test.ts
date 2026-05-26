@@ -4,6 +4,7 @@ import { readMonitorDestinationsFromEnv, runProductionMonitor, type MonitorEndpo
 const endpoints: MonitorEndpointConfig = {
   archivePrepare: "https://nipmod.test/api/archive/prepare?source=npm&name=react",
   archiveStatus: "https://nipmod.test/api/archive/status",
+  betaKey: "https://nipmod.test/api/keys/beta",
   discovery: "https://nipmod.test/.well-known/nipmod.json",
   home: "https://nipmod.test",
   installPlan: "https://nipmod.test/api/install-plan?source=npm&name=react",

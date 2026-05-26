@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "type": "dev.nipmod.platform-readiness.v1",
   "generatedAt": "2026-05-21T20:20:25.892Z",
-  "meaning": "Product readiness receipt for the API-first Nipmod surface. It proves hosted API access, public source resolution, read-only hosted MCP, local MCP, GitHub mirror and Gitlawb source sync. It does not claim native third-party platform partnerships.",
+  "meaning": "Product readiness receipt for the API-first Nipmod surface. It proves key-required hosted API access, public source resolution, read-only hosted MCP, local MCP, GitHub mirror and Gitlawb source sync. It does not claim native third-party platform partnerships.",
   "archive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "llms": "https://nipmod.com/llms.txt",
@@ -35,7 +35,7 @@
         "https://nipmod.com/api/install-plan"
       ],
       "checks": [
-        "public API routes return typed responses",
+        "key-required API routes return typed responses",
         "responses include rate limit headers",
         "hosted API performs no workspace writes"
       ]

@@ -18,15 +18,15 @@
     "betaKey": "https://nipmod.com/api/keys/beta",
     "mcp": "https://nipmod.com/api/mcp",
     "access": {
-      "publicBeta": true,
-      "keyRequired": false,
+      "publicBeta": false,
+      "keyRequired": true,
       "rateLimited": true,
       "selfServiceBetaKey": "https://nipmod.com/api/keys/beta",
-      "optionalHeaders": [
+      "requiredHeaders": [
         "x-nipmod-api-key",
         "Authorization: Bearer <key>"
       ],
-      "keyStatus": "Public beta requests do not need a key. Free beta keys can be issued by POST /api/keys/beta and are verified against server-side hashes.",
+      "keyStatus": "Package intelligence API calls require a key. Free beta keys can be issued by POST /api/keys/beta and are verified against server-side hashes.",
       "usageLogging": "Usage events store route, status, source, result count, duration and hashed identifiers. They do not store raw API keys, raw IP addresses, raw queries, package names or user-agent fingerprints."
     },
     "trustPolicy": {
@@ -107,8 +107,8 @@
     "runbook": "https://nipmod.com/api-access",
     "workflow": [
       "readLlms",
-      "readOpenApi",
       "issueBetaKey",
+      "readOpenApi",
       "externalSearch",
       "externalResolve",
       "externalInspect",
@@ -123,18 +123,18 @@
     ],
     "commands": {
       "readLlms": "GET https://nipmod.com/llms.txt",
-      "readOpenApi": "GET https://nipmod.com/api/openapi",
+      "readOpenApi": "GET https://nipmod.com/api/openapi with x-nipmod-api-key",
       "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
-      "externalResolve": "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
-      "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
-      "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
-      "externalInstallPlan": "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
+      "externalResolve": "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",
+      "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",
+      "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name> with x-nipmod-api-key",
+      "externalInstallPlan": "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name> with x-nipmod-api-key",
       "localDeepScan": "nipmod deep-scan <path> --json",
-      "packageIntelligencePrepare": "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
-      "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query>",
-      "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status",
-      "sourceHealth": "GET https://nipmod.com/api/sources/health",
-      "access": "No API key is required for public beta. Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>.",
+      "packageIntelligencePrepare": "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name> with x-nipmod-api-key",
+      "packageIntelligenceSearch": "GET https://nipmod.com/api/archive/search?q=<query> with x-nipmod-api-key",
+      "packageIntelligenceStatus": "GET https://nipmod.com/api/archive/status with x-nipmod-api-key",
+      "sourceHealth": "GET https://nipmod.com/api/sources/health with x-nipmod-api-key",
+      "access": "Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>. Package intelligence API calls require a key.",
       "mcpResolve": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.resolve\",\"arguments\":{\"query\":\"http client\",\"sources\":[\"npm\",\"pypi\",\"github\",\"huggingface-model\",\"mcp\"]}}}",
       "mcpExternalInstallPlan": "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"nipmod.external_install_plan\",\"arguments\":{\"source\":\"npm\",\"name\":\"undici\"}}}",
       "approval": "Show the install plan to the user or host policy. Do not run package commands until approved."

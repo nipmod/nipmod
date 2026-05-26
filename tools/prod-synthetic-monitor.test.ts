@@ -575,7 +575,8 @@ function createFixture({
     }),
     [`GET ${endpoints.sourceHealth}`]: jsonResponse({
       apiAccess: {
-        publicBeta: true
+        keyRequired: true,
+        publicBeta: false
       },
       archive: {
         mode: "durable-archive-enabled"

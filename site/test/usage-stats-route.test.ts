@@ -12,10 +12,10 @@ describe("usage stats route", () => {
     const response = await GET(new Request("https://nipmod.com/api/usage/stats"));
     const body = await response.json();
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
     expect(body).toMatchObject({
-      code: "insufficient_api_access",
-      status: 403,
+      code: "api_key_required",
+      status: 401,
       type: "dev.nipmod.api-error.v1"
     });
   });

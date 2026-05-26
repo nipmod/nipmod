@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 type ExternalPackageSource = "npm" | "pypi" | "github" | "huggingface-model" | "huggingface-dataset" | "mcp";
 
@@ -86,6 +87,12 @@ if (envFile) {
 }
 const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
 const archiveToken = process.env.NIPMOD_ARCHIVE_WRITE_TOKEN ?? "";
+const apiKey = await readCanaryApiKey({
+  baseUrl: baseUrl.replace(/\/+$/, ""),
+  fetchFn: fetch,
+  label: "seed-package-intelligence",
+  userAgent: "nipmod-seed/1.0"
+});
 const only = valueAfter("--only");
 const targets = only ? seedTargets.filter((target) => `${target.source}:${target.name}` === only || target.name === only) : seedTargets;
 
@@ -105,7 +112,10 @@ for (const target of targets) {
     name: target.name,
     source: target.source
   };
-  const response = await postJson("/api/archive/confirm", body, write ? { "x-nipmod-archive-token": archiveToken } : {});
+  const response = await postJson("/api/archive/confirm", body, {
+    ...canaryAuthHeaders(apiKey),
+    ...(write ? { "x-nipmod-archive-token": archiveToken } : {})
+  });
 
   results.push({
     category: target.category,

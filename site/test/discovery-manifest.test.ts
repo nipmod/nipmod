@@ -86,21 +86,21 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.agent.workflow).toContain("externalInstallPlan");
     expect(manifest.agent.workflow).toContain("issueBetaKey");
     expect(manifest.agent.commands).toMatchObject({
-      access: "No API key is required for public beta. Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>.",
-      externalInspect: "GET https://nipmod.com/api/inspect?source=npm&name=<package-name>",
-      externalInstallPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name>",
-      externalResolve: "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
-      externalSearch: "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp",
+      access: "Free beta keys can be issued by POST /api/keys/beta and sent as x-nipmod-api-key or Authorization: Bearer <key>. Package intelligence API calls require a key.",
+      externalInspect: "GET https://nipmod.com/api/inspect?source=npm&name=<package-name> with x-nipmod-api-key",
+      externalInstallPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=<package-name> with x-nipmod-api-key",
+      externalResolve: "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",
+      externalSearch: "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",
       issueBetaKey: "POST https://nipmod.com/api/keys/beta",
-      packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name>",
-      packageIntelligenceStatus: "GET https://nipmod.com/api/archive/status",
+      packageIntelligencePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name> with x-nipmod-api-key",
+      packageIntelligenceStatus: "GET https://nipmod.com/api/archive/status with x-nipmod-api-key",
       readLlms: "GET https://nipmod.com/llms.txt",
-      readOpenApi: "GET https://nipmod.com/api/openapi",
-      sourceHealth: "GET https://nipmod.com/api/sources/health"
+      readOpenApi: "GET https://nipmod.com/api/openapi with x-nipmod-api-key",
+      sourceHealth: "GET https://nipmod.com/api/sources/health with x-nipmod-api-key"
     });
     expect(manifest.api.access).toMatchObject({
-      keyRequired: false,
-      publicBeta: true,
+      keyRequired: true,
+      publicBeta: false,
       rateLimited: true
     });
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();

@@ -27,7 +27,9 @@ export function OPTIONS(request: Request): Response {
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "archive-confirm", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }

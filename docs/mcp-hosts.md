@@ -57,6 +57,7 @@ List tools:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
@@ -65,6 +66,7 @@ Search:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}'
 ```
 
@@ -73,6 +75,7 @@ Resolve external package:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","huggingface-model","mcp"]}}}'
 ```
 
@@ -81,6 +84,7 @@ External install plan:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}'
 ```
 
@@ -89,6 +93,7 @@ Install plan:
 ```bash
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
+  -H 'x-nipmod-api-key: <key>' \
   -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.install_plan","arguments":{"specifier":"gitlawb-repo-reader"}}}'
 ```
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 
@@ -43,18 +44,27 @@ const DEFAULT_CANARIES = [
 ] as const;
 
 export async function runInstallPlanCanary({
+  apiKey,
   baseUrl = DEFAULT_BASE_URL,
   canaries = DEFAULT_CANARIES,
   fetchFn = fetch
 } = {}) {
   const startedAt = Date.now();
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const resolvedApiKey =
+    apiKey ??
+    (await readCanaryApiKey({
+      baseUrl: normalizedBaseUrl,
+      fetchFn,
+      label: "install-plan",
+      userAgent: "nipmod-install-plan-canary/1.2.9 (+https://nipmod.com)"
+    }));
   const checks = [];
 
   for (const canary of canaries) {
     const startedCheckAt = Date.now();
     try {
-      const payload = await fetchJson(`${normalizedBaseUrl}${canary.path}`, fetchFn);
+      const payload = await fetchJson(`${normalizedBaseUrl}${canary.path}`, fetchFn, resolvedApiKey);
       const data = assertInstallPlanPayload(payload, canary);
       checks.push({
         data,
@@ -228,13 +238,14 @@ function assertCommandDetail(detail: Record<string, any>, command: string, id: s
   }
 }
 
-async function fetchJson(url: string, fetchFn: typeof fetch) {
+async function fetchJson(url: string, fetchFn: typeof fetch, apiKey: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
     const response = await fetchFn(url, {
       headers: {
         accept: "application/json",
+        ...canaryAuthHeaders(apiKey),
         "user-agent": "nipmod-install-plan-canary/1.2.9 (+https://nipmod.com)"
       },
       signal: controller.signal

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const DEFAULT_TARGETS = [
@@ -20,10 +21,16 @@ export async function runArchiveDepthCanary({
 } = {}) {
   const startedAt = Date.now();
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const apiKey = await readCanaryApiKey({
+    baseUrl: normalizedBaseUrl,
+    fetchFn,
+    label: "archive-depth",
+    userAgent: "nipmod-archive-depth-canary/1.2.9 (+https://nipmod.com)"
+  });
   const checks = [];
 
   await runCheck(checks, "archive_status", async () => {
-    const status = await fetchJson(`${normalizedBaseUrl}/api/archive/status`, fetchFn);
+    const status = await fetchJson(`${normalizedBaseUrl}/api/archive/status`, fetchFn, apiKey);
     assertEqual(status.type, "dev.nipmod.archive-status.v1", "archive status type mismatch");
     assertIncludes(status.writeBoundary, "authorized server writer", "archive write boundary missing");
     if (requireDurable && status.mode !== "durable-archive-enabled") {
@@ -45,7 +52,7 @@ export async function runArchiveDepthCanary({
         message: "Dry-run archive confirmation used to verify source reinspection, trust gates and install-plan boundaries.",
         name: target.name,
         source: target.source
-      }, fetchFn);
+      }, fetchFn, apiKey);
       return assertArchiveConfirmPayload(payload, target);
     });
   }
@@ -138,8 +145,8 @@ function assertArchiveConfirmPayload(payload, target) {
   };
 }
 
-async function fetchJson(url, fetchFn) {
-  const response = await timedFetch(url, { headers: defaultHeaders(), method: "GET" }, fetchFn);
+async function fetchJson(url, fetchFn, apiKey) {
+  const response = await timedFetch(url, { headers: defaultHeaders(apiKey), method: "GET" }, fetchFn);
   const payload = await response.json();
   if (!response.ok) {
     throw new Error(`${url} returned ${response.status}: ${JSON.stringify(payload)}`);
@@ -147,13 +154,13 @@ async function fetchJson(url, fetchFn) {
   return payload;
 }
 
-async function postJson(url, body, fetchFn) {
+async function postJson(url, body, fetchFn, apiKey) {
   const response = await timedFetch(
     url,
     {
       body: JSON.stringify(body),
       headers: {
-        ...defaultHeaders(),
+        ...defaultHeaders(apiKey),
         "content-type": "application/json"
       },
       method: "POST"
@@ -177,9 +184,10 @@ async function timedFetch(url, init, fetchFn) {
   }
 }
 
-function defaultHeaders() {
+function defaultHeaders(apiKey) {
   return {
     accept: "application/json",
+    ...canaryAuthHeaders(apiKey),
     "user-agent": "nipmod-archive-depth-canary/1.2.9 (+https://nipmod.com)"
   };
 }

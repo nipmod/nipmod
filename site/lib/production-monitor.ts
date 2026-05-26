@@ -10,6 +10,7 @@ export interface MonitorDestination {
 export interface MonitorEndpointConfig {
   archivePrepare: string;
   archiveStatus: string;
+  betaKey: string;
   discovery: string;
   home: string;
   installPlan: string;
@@ -64,6 +65,7 @@ export interface ProductionMonitorResult {
 const DEFAULT_ENDPOINTS: MonitorEndpointConfig = {
   archivePrepare: "https://nipmod.com/api/archive/prepare?source=npm&name=react",
   archiveStatus: "https://nipmod.com/api/archive/status",
+  betaKey: "https://nipmod.com/api/keys/beta",
   discovery: "https://nipmod.com/.well-known/nipmod.json",
   home: "https://nipmod.com",
   installPlan: "https://nipmod.com/api/install-plan?source=npm&name=react",
@@ -141,8 +143,14 @@ export async function runProductionMonitor({
     };
   });
 
+  let apiKey = "";
+  await runCheck(checks, "api_beta_key", async () => {
+    apiKey = await readMonitorApiKey(endpoints.betaKey, fetchFn, timedFetch);
+    return { mode: process.env.NIPMOD_CANARY_API_KEY || process.env.NIPMOD_API_KEY ? "configured" : "self-service" };
+  });
+
   await runCheck(checks, "api_source_health", async () => {
-    const payload = await fetchJson(endpoints.sourceHealth, timedFetch);
+    const payload = await fetchJson(endpoints.sourceHealth, timedFetch, apiKey);
     assertRecord(payload, "source health");
     assertEqual(payload.type, "dev.nipmod.source-health.v1", "source health type mismatch");
     assertNestedEqual(payload, ["summary", "workspaceWritesFromHostedApi"], false, "hosted API workspace write boundary drifted");
@@ -154,7 +162,7 @@ export async function runProductionMonitor({
   });
 
   await runCheck(checks, "api_openapi_contract", async () => {
-    const payload = await fetchJson(endpoints.openapi, timedFetch);
+    const payload = await fetchJson(endpoints.openapi, timedFetch, apiKey);
     assertRecord(payload, "openapi");
     assertEqual(payload.openapi, "3.1.0", "OpenAPI version mismatch");
     const paths = payload.paths;
@@ -168,7 +176,7 @@ export async function runProductionMonitor({
   });
 
   await runCheck(checks, "api_external_search", async () => {
-    const payload = await fetchJson(endpoints.search, timedFetch);
+    const payload = await fetchJson(endpoints.search, timedFetch, apiKey);
     assertRecord(payload, "external search");
     assertEqual(payload.type, "dev.nipmod.external-search.v1", "external search type mismatch");
     const records = payload.records;
@@ -182,7 +190,7 @@ export async function runProductionMonitor({
   });
 
   await runCheck(checks, "api_install_plan", async () => {
-    const payload = await fetchJson(endpoints.installPlan, timedFetch);
+    const payload = await fetchJson(endpoints.installPlan, timedFetch, apiKey);
     assertRecord(payload, "install plan");
     assertEqual(payload.type, "dev.nipmod.external-install-plan.v1", "install plan type mismatch");
     assertNestedEqual(payload, ["plan", "requiresApprovalBeforeWrite"], true, "install plan approval boundary drifted");
@@ -190,7 +198,7 @@ export async function runProductionMonitor({
   });
 
   await runCheck(checks, "api_archive_prepare", async () => {
-    const payload = await fetchJson(endpoints.archivePrepare, timedFetch);
+    const payload = await fetchJson(endpoints.archivePrepare, timedFetch, apiKey);
     assertRecord(payload, "archive prepare");
     assertEqual(payload.type, "dev.nipmod.archive-prepare.v1", "archive prepare type mismatch");
     assertEqual(payload.preparedOnly, true, "archive prepare must remain prepare-only");
@@ -199,7 +207,7 @@ export async function runProductionMonitor({
   });
 
   await runCheck(checks, "api_archive_status", async () => {
-    const payload = await fetchJson(endpoints.archiveStatus, timedFetch);
+    const payload = await fetchJson(endpoints.archiveStatus, timedFetch, apiKey);
     assertRecord(payload, "archive status");
     assertEqual(payload.type, "dev.nipmod.archive-status.v1", "archive status type mismatch");
     assertEqual(payload.driver, "supabase-rest", "archive store driver mismatch");
@@ -215,7 +223,8 @@ export async function runProductionMonitor({
         method: "tools/list",
         params: {}
       },
-      timedFetch
+      timedFetch,
+      apiKey
     );
     assertRecord(payload, "remote MCP");
     assertEqual(payload.jsonrpc, "2.0", "remote MCP jsonrpc mismatch");
@@ -238,7 +247,8 @@ export async function runProductionMonitor({
           name: "nipmod.external_install_plan"
         }
       },
-      timedFetch
+      timedFetch,
+      apiKey
     );
     assertRecord(payload, "remote MCP install plan");
     assertEqual(payload.jsonrpc, "2.0", "remote MCP install plan jsonrpc mismatch");
@@ -479,24 +489,54 @@ async function fetchText(url: string, fetchFn: typeof fetch): Promise<string> {
   return response.text();
 }
 
-async function fetchJson(url: string, fetchFn: typeof fetch): Promise<unknown> {
-  const response = await fetchFn(url, { headers: { accept: "application/json", "user-agent": MONITOR_USER_AGENT } });
+async function fetchJson(url: string, fetchFn: typeof fetch, apiKey?: string): Promise<unknown> {
+  const response = await fetchFn(url, { headers: apiHeaders({ accept: "application/json" }, apiKey) });
   if (!response.ok) {
     throw new Error(`failed to fetch ${url}: ${response.status}`);
   }
   return response.json();
 }
 
-async function fetchJsonPost(url: string, body: unknown, fetchFn: typeof fetch): Promise<unknown> {
+async function fetchJsonPost(url: string, body: unknown, fetchFn: typeof fetch, apiKey?: string): Promise<unknown> {
   const response = await fetchFn(url, {
     body: JSON.stringify(body),
-    headers: { accept: "application/json", "content-type": "application/json", "user-agent": MONITOR_USER_AGENT },
+    headers: apiHeaders({ accept: "application/json", "content-type": "application/json" }, apiKey),
     method: "POST"
   });
   if (!response.ok) {
     throw new Error(`failed to post ${url}: ${response.status}`);
   }
   return response.json();
+}
+
+async function readMonitorApiKey(betaKeyUrl: string, originalFetchFn: typeof fetch, timedFetch: typeof fetch): Promise<string> {
+  const configured = process.env.NIPMOD_CANARY_API_KEY ?? process.env.NIPMOD_API_KEY;
+  if (configured) {
+    return configured;
+  }
+  if (originalFetchFn !== fetch) {
+    return "nka_test_monitor_key_1234567890";
+  }
+
+  const response = await timedFetch(betaKeyUrl, {
+    body: JSON.stringify({ label: "monitor/production" }),
+    headers: apiHeaders({ accept: "application/json", "content-type": "application/json" }),
+    method: "POST"
+  });
+  const payload = await response.json().catch(() => null);
+  const key = isRecordValue(payload) && typeof payload.key === "string" ? payload.key : "";
+  if (!response.ok || !key) {
+    throw new Error(`failed to issue monitor beta key: ${response.status}`);
+  }
+  return key;
+}
+
+function apiHeaders(base: Record<string, string>, apiKey?: string): Record<string, string> {
+  return {
+    ...base,
+    ...(apiKey ? { "x-nipmod-api-key": apiKey } : {}),
+    "user-agent": MONITOR_USER_AGENT
+  };
 }
 
 function isVerifiedPackage(value: unknown): boolean {

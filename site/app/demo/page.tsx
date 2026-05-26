@@ -17,13 +17,13 @@ export default function DemoPage() {
       <DocsSection eyebrow="Terminal" title="Run the read only path">
         <DocsGrid>
           <DocsCard label="1" title="Search">
-            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3'"}</DocsCode>
+            <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
           </DocsCard>
           <DocsCard label="2" title="Inspect">
-            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici'"}</DocsCode>
+            <DocsCode>{"curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
           </DocsCard>
           <DocsCard label="3" title="Plan">
-            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'"}</DocsCode>
+            <DocsCode>{"curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
@@ -40,7 +40,7 @@ export default function DemoPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Agent" title="Prompt">
-        <DocsCode>{"Use Nipmod to search for an HTTP client package. Inspect the best candidate and show me the install plan. Do not modify the workspace."}</DocsCode>
+        <DocsCode>{"Use Nipmod with x-nipmod-api-key to search for an HTTP client package. Inspect the best candidate and show me the install plan. Do not modify the workspace."}</DocsCode>
       </DocsSection>
     </DocsShell>
   );

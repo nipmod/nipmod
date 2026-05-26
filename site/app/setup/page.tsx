@@ -45,7 +45,7 @@ export default function SetupPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Agent prompt" title="What to tell an agent">
-        <DocsCode>{"Use Nipmod through https://nipmod.com/api/search, inspect the selected package, request an install plan, and do not write to the workspace until I approve the plan."}</DocsCode>
+        <DocsCode>{"Use Nipmod through https://nipmod.com/api/search with x-nipmod-api-key, inspect the selected package, request an install plan, and do not write to the workspace until I approve the plan."}</DocsCode>
       </DocsSection>
     </DocsShell>
   );

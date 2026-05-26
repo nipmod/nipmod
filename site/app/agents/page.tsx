@@ -35,11 +35,11 @@ export default function AgentsPage() {
         <DocsGrid>
           <DocsCard label="Hosted" title="HTTP API">
             <p>Use this first. It works from any agent runtime with outbound HTTPS.</p>
-            <DocsCode>{"GET https://nipmod.com/api/search?q=<query>\nGET https://nipmod.com/api/inspect?source=npm&name=undici\nGET https://nipmod.com/api/install-plan?source=npm&name=undici"}</DocsCode>
+            <DocsCode>{"GET https://nipmod.com/api/search?q=<query> with x-nipmod-api-key\nGET https://nipmod.com/api/inspect?source=npm&name=undici with x-nipmod-api-key\nGET https://nipmod.com/api/install-plan?source=npm&name=undici with x-nipmod-api-key"}</DocsCode>
           </DocsCard>
           <DocsCard label="Hosted" title="Read only MCP">
             <p>Use the same package surface through MCP JSON-RPC. Remote MCP calls never read or write the caller workspace.</p>
-            <DocsCode>{"POST https://nipmod.com/api/mcp"}</DocsCode>
+            <DocsCode>{"POST https://nipmod.com/api/mcp with x-nipmod-api-key"}</DocsCode>
           </DocsCard>
           <DocsCard label="Optional" title="Local CLI">
             <p>Install locally only when the workspace needs controlled writes after the plan is approved.</p>

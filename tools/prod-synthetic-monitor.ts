@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateAdvisoryFeed } from "./advisory-signing.ts";
+import { readCanaryApiKey } from "./canary-auth.ts";
 import { assertUnauthenticatedReceivePackBlocked } from "./receive-pack-abuse-smoke.ts";
 
 const DEFAULT_ENDPOINTS = {
@@ -13,6 +14,7 @@ const DEFAULT_ENDPOINTS = {
   archivePrepare: "https://nipmod.com/api/archive/prepare",
   archiveSearch: "https://nipmod.com/api/archive/search",
   archiveStatus: "https://nipmod.com/api/archive/status",
+  betaKey: "https://nipmod.com/api/keys/beta",
   checkpoint: "https://nipmod.com/transparency/checkpoint.json",
   discovery: "https://nipmod.com/.well-known/nipmod.json",
   externalInspect: "https://nipmod.com/api/inspect",
@@ -52,7 +54,14 @@ export async function runSyntheticMonitor({
   rootDir = resolve(import.meta.dirname, "..")
 } = {}) {
   const config = expected ?? (await readExpectedConfig(rootDir));
-  const timedFetch = createTimedFetch(fetchFn, config.fetchTimeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS);
+  const timeoutFetch = createTimedFetch(fetchFn, config.fetchTimeoutMs ?? DEFAULT_FETCH_TIMEOUT_MS);
+  const apiKey = await readCanaryApiKey({
+    baseUrl: endpoints.home,
+    fetchFn,
+    label: "prod-synthetic-monitor",
+    userAgent: USER_AGENT
+  });
+  const timedFetch = withApiKey(timeoutFetch, apiKey, new URL(endpoints.home).hostname);
   const state = {};
   const checks = [];
 
@@ -145,8 +154,14 @@ export async function runSyntheticMonitor({
     if (!Array.isArray(search.selection?.candidates) || search.selection.candidates.length === 0) {
       throw new Error("external search selection candidates missing");
     }
-    if (typeof search.selection?.recommendedId !== "string" || !search.selection.recommendedId.startsWith("npm:")) {
-      throw new Error("external search recommended package missing");
+    const selectedCandidateId =
+      typeof search.selection?.recommendedId === "string"
+        ? search.selection.recommendedId
+        : typeof search.selection?.candidates?.[0]?.id === "string"
+          ? search.selection.candidates[0].id
+          : null;
+    if (!selectedCandidateId?.startsWith("npm:")) {
+      throw new Error("external search candidate package missing");
     }
     if (!Array.isArray(search.sourceReports) || search.sourceReports[0]?.source !== "npm") {
       throw new Error("external search source reports missing");
@@ -183,7 +198,8 @@ export async function runSyntheticMonitor({
 
     return {
       openapi: endpoints.openApi,
-      recommendedId: search.selection.recommendedId,
+      recommendedId: search.selection.recommendedId ?? null,
+      selectedCandidateId,
       trustFactors: inspect.record.trust.factors.length,
       searchReports: search.sourceReports.length
     };
@@ -193,7 +209,8 @@ export async function runSyntheticMonitor({
     const health = await fetchJson(endpoints.sourceHealth, timedFetch);
     assertEqual(health.type, "dev.nipmod.source-health.v1", "source health type mismatch");
     assertEqual(health.summary?.workspaceWritesFromHostedApi, false, "hosted source health write boundary mismatch");
-    assertEqual(health.apiAccess?.publicBeta, true, "source health API access mismatch");
+    assertEqual(health.apiAccess?.keyRequired, true, "source health API key requirement mismatch");
+    assertEqual(health.apiAccess?.publicBeta, false, "source health public access mismatch");
     if (!health.rateLimit?.activeStore || typeof health.rateLimit.distributedActive !== "boolean") {
       throw new Error("source health missing rate-limit activation status");
     }
@@ -582,6 +599,26 @@ function withInternalHeaders(init, accept) {
     headers.set("accept", accept);
   }
   return { ...init, headers };
+}
+
+function withApiKey(fetchFn, apiKey, apiHost) {
+  return (input, init) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    const headers = new Headers(init?.headers);
+    if (shouldAttachApiKey(url, apiHost)) {
+      headers.set("x-nipmod-api-key", apiKey);
+    }
+    return fetchFn(input, { ...init, headers });
+  };
+}
+
+function shouldAttachApiKey(url, apiHost) {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === apiHost && parsed.pathname.startsWith("/api/") && parsed.pathname !== "/api/keys/beta";
+  } catch {
+    return false;
+  }
 }
 
 async function readSha(path) {

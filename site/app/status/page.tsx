@@ -58,7 +58,7 @@ export default function StatusPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Smoke" title="One read only check">
-        <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github&limit=3'\ncurl 'https://nipmod.com/api/archive/status'\ncurl 'https://nipmod.com/api/sources/health'"}</DocsCode>
+        <DocsCode>{"curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github&limit=3' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/archive/status' -H 'x-nipmod-api-key: <key>'\ncurl 'https://nipmod.com/api/sources/health' -H 'x-nipmod-api-key: <key>'"}</DocsCode>
       </DocsSection>
     </DocsShell>
   );

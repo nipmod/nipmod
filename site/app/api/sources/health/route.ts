@@ -21,7 +21,9 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "source-health", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "source-health", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }
@@ -50,7 +52,8 @@ export async function GET(request: Request): Promise<Response> {
           privacy: apiKeys.privacy
         },
         keyHeaders: ["x-nipmod-api-key"],
-        publicBeta: true,
+        keyRequired: true,
+        publicBeta: false,
         tiers: apiKeys.tiers
       },
       archive: {

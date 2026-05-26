@@ -2,6 +2,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const REQUIRED_ENV = ["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY"];
@@ -32,8 +33,15 @@ export async function runApiUsageCanary({
 
   const checks = [];
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const apiKey = await readCanaryApiKey({
+    baseUrl: normalizedBaseUrl,
+    fetchFn,
+    label: "usage",
+    userAgent: "nipmod-usage-canary"
+  });
   const apiResponse = await fetchFn(`${normalizedBaseUrl}/api/search?q=http%20client&sources=npm&limit=1`, {
     headers: {
+      ...canaryAuthHeaders(apiKey),
       "user-agent": "nipmod-usage-canary",
       "x-request-id": requestId
     }

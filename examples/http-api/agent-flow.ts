@@ -1,5 +1,10 @@
 const task = process.argv.slice(2).join(" ").trim() || "http client";
 const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
+const apiKey = process.env.NIPMOD_API_KEY;
+
+if (!apiKey) {
+  throw new Error("Set NIPMOD_API_KEY before calling the Nipmod API.");
+}
 
 const search = await readJson(searchUrl(task));
 const first = firstRecord(search);
@@ -103,6 +108,7 @@ async function readJson(url: URL): Promise<Record<string, any>> {
   const response = await fetch(url, {
     headers: {
       accept: "application/json",
+      "x-nipmod-api-key": apiKey,
       "user-agent": "nipmod-agent-flow-example/1.0"
     }
   });

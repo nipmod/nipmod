@@ -36,11 +36,11 @@ describe("admin keys route", () => {
     );
     const body = await response.json();
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
     expect(response.headers.get("access-control-allow-origin")).toBe("https://nipmod.com");
     expect(body).toMatchObject({
-      code: "insufficient_api_access",
-      status: 403,
+      code: "api_key_required",
+      status: 401,
       type: "dev.nipmod.api-error.v1"
     });
   });

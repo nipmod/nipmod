@@ -166,7 +166,7 @@ export function apiKeyStoreStatus(env: ApiAuthEnv = process.env): {
     missing: registryConfigured ? [] : missing,
     privacy: "keys are verified by keyed hashes and are not stored in usage events",
     registryConfigured,
-    tiers: ["public", "beta", "partner", "admin"],
+    tiers: ["beta", "partner", "admin"],
     type: "dev.nipmod.api-key-store-status.v1"
   };
 }

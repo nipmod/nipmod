@@ -3,7 +3,7 @@
   "type": "dev.nipmod.system-readiness.v1",
   "generatedAt": "2026-05-21T20:20:25.892Z",
   "scope": "Shared agent package archive and access system.",
-  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, hosted package API, public source resolution, public package archive, durable package intelligence archive, CLI access, local static deep scan, local MCP access, hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
+  "meaning": "This proves the current Nipmod API-first system surface: public machine discovery, key-required hosted package API, public source resolution, public package archive, durable package intelligence archive, CLI access, local static deep scan, local MCP access, key-required hosted read-only MCP access, install receipts, GitHub/Gitlawb source sync and verification gates. The public verified archive is intentionally empty after the seed archive reset. New packages must pass verification gates before listing.",
   "sharedArchive": {
     "registry": "https://nipmod.com/registry/packages.json",
     "packageCount": 0,
@@ -42,7 +42,7 @@
       "setup": "nipmod mcp serve",
       "access": "MCP stdio",
       "remoteEndpoint": "https://nipmod.com/api/mcp",
-      "remoteAccess": "HTTPS JSON-RPC read-only MCP",
+      "remoteAccess": "HTTPS JSON-RPC read-only MCP with x-nipmod-api-key",
       "remoteTools": [
         "nipmod.search",
         "nipmod.resolve",

@@ -29,7 +29,7 @@ The hosted API remains read-only. It must never read or write a caller workspace
 
 ## Current Baseline
 
-The current baseline is strong enough for a public beta, but not yet a complete production package network.
+The current baseline is strong enough for a free key-required beta, but not yet a complete production package network.
 
 Working today:
 
@@ -72,7 +72,7 @@ Recent hardening:
 - Source health live probes now use a bounded in-process cache and expose whether each source result was freshly checked or served from cache.
 - Hosted MCP now rejects oversized JSON-RPC bodies and batches before tool handling.
 - Public API routes now use an async rate-limit path that can consume a shared Supabase bucket and falls back to local process buckets when the shared store is unavailable.
-- Usage ingestion now has an operator canary that makes a public API request and verifies its hashed usage event in Supabase.
+- Usage ingestion now has an operator canary that makes a key-required API request and verifies its hashed usage event in Supabase.
 - Source resolvers now extract deeper source-native risk and context signals for npm, PyPI, GitHub, Hugging Face and MCP without changing the public record schema.
 - Source health now exposes the active rate-limit store and `pnpm launch:verify` can be run with `--require-distributed-rate-limit` to make shared Supabase rate limits a hard gate.
 - Source-depth canary now checks live npm, PyPI, GitHub, Hugging Face and MCP inspect responses for concrete source-native trust signals.
@@ -80,7 +80,7 @@ Recent hardening:
 - GitHub exact repo inspect now detects common package manifest files and package.json dependency/script metadata when GitHub exposes them.
 - Source crawling now has an API-first policy, candidate audit and admission checklist so future crawler workers do not bypass official source APIs, robots rules, terms or licensing boundaries.
 - Launch verification now runs the rate-limit canary, and `--require-distributed-rate-limit` promotes Supabase RPC activation from advisory status to a hard gate.
-- Launch verification now runs the public API contract canary for success responses, structured errors, request-id echoing, CORS and rate-limit headers.
+- Launch verification now runs the key-required API contract canary for success responses, structured errors, request-id echoing, CORS and rate-limit headers.
 - Launch verification now runs an install-plan safety canary across npm, PyPI, GitHub, Hugging Face and MCP so hosted responses cannot regress into workspace writes or command execution.
 - Source health now exposes a coarse distributed rate-limit fallback reason so operators can distinguish missing RPC exposure, auth failure, timeout and invalid response shape without leaking secrets.
 
@@ -285,7 +285,7 @@ Definition of Done:
 
 ## Workstream 7: Source Health and Abuse Controls
 
-Goal: keep the public beta usable without letting source outages, retries or hostile clients degrade the service.
+Goal: keep the key-required beta usable without letting source outages, retries or hostile clients degrade the service.
 
 Tasks:
 

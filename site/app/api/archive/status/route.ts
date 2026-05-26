@@ -13,7 +13,9 @@ export function OPTIONS(request: Request): Response {
 
 export async function GET(request: Request = new Request("https://nipmod.com/api/archive/status")): Promise<Response> {
   const context = createApiHttpContext(request);
-  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "archive-status", windowMs: 60_000 }, context);
+  const rateLimit = await checkApiRateLimitAsync(request, { limit: 240, name: "archive-status", windowMs: 60_000 }, context, {
+    requireApiKey: true
+  });
   if (!rateLimit.ok) {
     return rateLimit.response!;
   }

@@ -150,17 +150,17 @@ export function PackagesView() {
               {
                 first: "Search",
                 second: <code>GET /api/search?q=http%20client&amp;sources=npm,pypi&amp;limit=5</code>,
-                third: "Find live candidates."
+                third: "Find live candidates with x-nipmod-api-key."
               },
               {
                 first: "Inspect",
                 second: <code>GET /api/inspect?source=npm&amp;name=undici</code>,
-                third: "Read trust factors."
+                third: "Read trust factors with x-nipmod-api-key."
               },
               {
                 first: "Plan",
                 second: <code>GET /api/install-plan?source=npm&amp;name=undici</code>,
-                third: "Return approved install steps."
+                third: "Return approved install steps with x-nipmod-api-key."
               }
             ]}
           />

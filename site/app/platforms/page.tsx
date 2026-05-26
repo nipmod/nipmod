@@ -13,7 +13,7 @@ export default function PlatformsPage() {
       description="The public product surface is source coverage plus one agent API. Native partner listings are not required for the core product path."
       eyebrow="Access"
       stats={[
-        { label: "Public sources", value: "5" },
+        { label: "Sources", value: "5" },
         { label: "API", value: "one surface" },
         { label: "Native integrations", value: "not required" }
       ]}
@@ -34,7 +34,7 @@ export default function PlatformsPage() {
       </DocsSection>
 
       <DocsSection eyebrow="Calls" title="The platform surface is the API">
-        <DocsCode>{"GET /api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp\nGET /api/inspect?source=npm&name=undici\nGET /api/install-plan?source=npm&name=undici\nPOST /api/mcp"}</DocsCode>
+        <DocsCode>{"GET /api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key\nGET /api/inspect?source=npm&name=undici with x-nipmod-api-key\nGET /api/install-plan?source=npm&name=undici with x-nipmod-api-key\nPOST /api/mcp with x-nipmod-api-key"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Claims" title="How to read the status">
@@ -42,7 +42,7 @@ export default function PlatformsPage() {
           rows={[
             ["Source coverage", "Nipmod can query public source metadata and normalize records for agents."],
             ["Official partnership", "Only claim this after the external platform confirms it publicly."],
-            ["Agent compatibility", "Any agent with HTTPS or MCP access can use the public surface."],
+            ["Agent compatibility", "Any agent with HTTPS or MCP access can use the key-required surface."],
             ["Workspace execution", "Always local and approval based. The hosted API does not execute installs."]
           ]}
         />

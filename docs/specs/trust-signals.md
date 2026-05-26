@@ -1,6 +1,6 @@
 # Trust Signals Spec
 
-Status: implemented public beta, external trust policy `external-v2`, selection policy `agent-selection-v1`
+Status: implemented key-required beta, external trust policy `external-v2`, selection policy `agent-selection-v1`
 
 Nipmod exposes trust data so agents can decide what to show before install. A trust score is not a safety guarantee and is not permission to execute code. It is a structured review signal.
 

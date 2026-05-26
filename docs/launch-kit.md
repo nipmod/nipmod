@@ -28,7 +28,7 @@ https://nipmod.com/api-access
 ```text
 curl https://nipmod.com/i|bash
 
-curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'
+curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3' -H 'x-nipmod-api-key: <key>'
 ```
 
 ## Boundaries

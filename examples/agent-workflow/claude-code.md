@@ -5,11 +5,12 @@ Use this when Claude Code needs package discovery before editing or installing d
 ```text
 When choosing a package, use Nipmod first.
 
-Search for candidates with https://nipmod.com/api/search.
+If no key is available, issue one with POST https://nipmod.com/api/keys/beta.
+Search for candidates with https://nipmod.com/api/search and x-nipmod-api-key.
 Use selection.recommendedId, candidate gates and rank reasons as the shortlist.
-Inspect the strongest candidates with https://nipmod.com/api/inspect.
-Request an install plan with https://nipmod.com/api/install-plan.
-Optionally prepare an archive preview with https://nipmod.com/api/archive/prepare after useful discovery.
+Inspect the strongest candidates with https://nipmod.com/api/inspect and x-nipmod-api-key.
+Request an install plan with https://nipmod.com/api/install-plan and x-nipmod-api-key.
+Optionally prepare an archive preview with https://nipmod.com/api/archive/prepare and x-nipmod-api-key after useful discovery.
 
 Summarize source, license, trust score, decision, warnings, trust factors and install command.
 Do not install until I approve the plan.
@@ -27,8 +28,8 @@ Expected Claude Code behavior:
 Example:
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,mcp&limit=5'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
-curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,mcp&limit=5' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```

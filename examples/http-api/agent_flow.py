@@ -9,10 +9,14 @@ import urllib.request
 
 
 BASE_URL = os.environ.get("NIPMOD_API_BASE_URL", "https://nipmod.com").rstrip("/")
+API_KEY = os.environ.get("NIPMOD_API_KEY")
 SOURCES = "npm,pypi,github,huggingface-model,huggingface-dataset,mcp"
 
 
 def main() -> None:
+    if not API_KEY:
+        raise RuntimeError("Set NIPMOD_API_KEY before calling the Nipmod API.")
+
     task = " ".join(sys.argv[1:]).strip() or "http client"
     search = read_json("/api/search", {"q": task, "sources": SOURCES, "limit": "5"})
     selected = first_record(search)
@@ -74,6 +78,7 @@ def read_json(path: str, params: dict[str, str]) -> dict:
         f"{BASE_URL}{path}?{query}",
         headers={
             "accept": "application/json",
+            "x-nipmod-api-key": API_KEY,
             "user-agent": "nipmod-python-agent-flow-example/1.0",
         },
         method="GET",

@@ -29,7 +29,7 @@ Nipmod focuses on the pre-install decision an agent needs:
 
 ## Limitations
 
-Nipmod is a public beta.
+Nipmod is a free key-required beta.
 
 Current limitations:
 
@@ -38,7 +38,7 @@ Current limitations:
 - malware detection is signal-based, not complete
 - external package ownership remains with upstream sources
 - durable archive writes are gated and not open to public spam
-- private package sources are not part of the public beta
+- private package sources are not part of the beta
 
 ## Standard Claim
 

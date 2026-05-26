@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "type": "dev.nipmod.platform-connections.v1",
   "generatedAt": "2026-05-21T20:20:25.892Z",
-  "meaning": "Public source and access matrix for Nipmod API-first package discovery. These are Nipmod-controlled or public source paths, not native third-party integrations.",
+  "meaning": "Source and access matrix for Nipmod API-first package discovery. Package intelligence API calls are key-required. These are Nipmod-controlled or public source paths, not native third-party integrations.",
   "statusLegend": [
     {
       "status": "Live",
@@ -23,7 +23,7 @@
       "proofLevel": "API routes are covered by site tests, production monitor checks and live rate-limit headers.",
       "url": "https://nipmod.com/api-access",
       "setupCommand": null,
-      "smokeCommand": "curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3'",
+      "smokeCommand": "curl 'https://nipmod.com/api/search?q=telegram%20bot&limit=3' -H 'x-nipmod-api-key: <key>'",
       "externalApprovalRequired": false,
       "externalDependency": "No native platform approval is required to use the hosted API.",
       "evidence": [
@@ -42,7 +42,7 @@
       "proofLevel": "External resolver tests and live synthetic checks validate search, inspect and install-plan responses.",
       "url": "https://nipmod.com/sources",
       "setupCommand": null,
-      "smokeCommand": "curl 'https://nipmod.com/api/search?q=agent&sources=npm,pypi,github,huggingface-model,mcp&limit=5'",
+      "smokeCommand": "curl 'https://nipmod.com/api/search?q=agent&sources=npm,pypi,github,huggingface-model,mcp&limit=5' -H 'x-nipmod-api-key: <key>'",
       "externalApprovalRequired": false,
       "externalDependency": "Nipmod reads public source metadata and keeps original owner attribution.",
       "evidence": [
@@ -59,7 +59,7 @@
       "proofLevel": "Archive prepare, search, confirm dry-run, receipt output and status endpoints are tested. Public verified archive is empty after seed reset.",
       "url": "https://nipmod.com/packages",
       "setupCommand": null,
-      "smokeCommand": "curl 'https://nipmod.com/api/archive/status'",
+      "smokeCommand": "curl 'https://nipmod.com/api/archive/status' -H 'x-nipmod-api-key: <key>'",
       "externalApprovalRequired": false,
       "externalDependency": "Durable writes require Nipmod server-side authorization, not third-party approval.",
       "evidence": [

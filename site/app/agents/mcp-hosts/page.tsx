@@ -15,7 +15,7 @@ export default function AgentHostsPage() {
       title="One API for every host."
     >
       <DocsSection eyebrow="API" title="Default path">
-        <DocsCode>{"GET https://nipmod.com/api/search?q=<query>\nGET https://nipmod.com/api/inspect?source=npm&name=undici\nGET https://nipmod.com/api/install-plan?source=npm&name=undici"}</DocsCode>
+        <DocsCode>{"GET https://nipmod.com/api/search?q=<query> with x-nipmod-api-key\nGET https://nipmod.com/api/inspect?source=npm&name=undici with x-nipmod-api-key\nGET https://nipmod.com/api/install-plan?source=npm&name=undici with x-nipmod-api-key"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Local" title="Optional local server">

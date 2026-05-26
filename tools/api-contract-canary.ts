@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const PUBLIC_RATE_LIMIT_HEADERS = [
@@ -87,6 +88,7 @@ const CONTRACT_CHECKS = [
 ] as const;
 
 export async function runApiContractCanary({
+  apiKey,
   baseUrl = DEFAULT_BASE_URL,
   checks = CONTRACT_CHECKS,
   fetchFn = fetch
@@ -94,10 +96,18 @@ export async function runApiContractCanary({
   const startedAt = Date.now();
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
   const results = [];
+  const resolvedApiKey =
+    apiKey ??
+    (await readCanaryApiKey({
+      baseUrl: normalizedBaseUrl,
+      fetchFn,
+      label: "api-contract",
+      userAgent: "nipmod-api-contract-canary/1.2.9 (+https://nipmod.com)"
+    }));
 
   const openApiStartedAt = Date.now();
   try {
-    const data = await runOpenApiCheck(normalizedBaseUrl, fetchFn);
+    const data = await runOpenApiCheck(normalizedBaseUrl, fetchFn, resolvedApiKey);
     results.push({
       data,
       durationMs: Date.now() - openApiStartedAt,
@@ -116,7 +126,7 @@ export async function runApiContractCanary({
   for (const check of checks) {
     const startedCheckAt = Date.now();
     try {
-      const data = await runContractCheck(normalizedBaseUrl, check, fetchFn);
+      const data = await runContractCheck(normalizedBaseUrl, check, fetchFn, resolvedApiKey);
       results.push({
         data,
         durationMs: Date.now() - startedCheckAt,
@@ -136,10 +146,11 @@ export async function runApiContractCanary({
   return result({ baseUrl: normalizedBaseUrl, checks: results, startedAt });
 }
 
-async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch) {
+async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch, apiKey: string) {
   const response = await fetchFn(`${baseUrl}/api/openapi`, {
     headers: {
       accept: "application/openapi+json, application/json",
+      ...canaryAuthHeaders(apiKey),
       "user-agent": "nipmod-api-contract-canary/1.2.9 (+https://nipmod.com)"
     },
     method: "GET"
@@ -168,12 +179,13 @@ async function runOpenApiCheck(baseUrl: string, fetchFn: typeof fetch) {
   };
 }
 
-async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)[number], fetchFn: typeof fetch) {
+async function runContractCheck(baseUrl: string, check: (typeof CONTRACT_CHECKS)[number], fetchFn: typeof fetch, apiKey: string) {
   const requestId = `api-contract-canary-${check.name}`;
   const response = await fetchFn(`${baseUrl}${check.path}`, {
     body: "body" in check ? check.body : undefined,
     headers: {
       accept: "application/json",
+      ...canaryAuthHeaders(apiKey),
       "user-agent": "nipmod-api-contract-canary/1.2.9 (+https://nipmod.com)",
       "x-request-id": requestId,
       ...("headers" in check ? check.headers : {})

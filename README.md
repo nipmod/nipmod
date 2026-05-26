@@ -12,12 +12,13 @@ inspect package trust, and generate safe install plans before workspace writes.
 Nipmod does not replace package registries.
 It makes existing package ecosystems readable and safer for AI agents.
 
-Public beta access does not require an API key.
+API beta access requires a free beta key.
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&limit=3'
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl -s -X POST 'https://nipmod.com/api/keys/beta'
+curl 'https://nipmod.com/api/search?q=http%20client&limit=3' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
 ```
 
 Tell an agent:
@@ -86,7 +87,8 @@ Nipmod does not bulk mirror these sources. Source owners keep ownership.
 ### Search
 
 ```bash
-curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5'
+curl 'https://nipmod.com/api/search?q=http%20client&sources=npm,pypi,github,huggingface-model,mcp&limit=5' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Search returns candidates, source reports, partial failure state and agent-readable ranking data. Search records are ephemeral by default.
@@ -94,7 +96,8 @@ Search returns candidates, source reports, partial failure state and agent-reada
 ### Inspect
 
 ```bash
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Inspect refreshes one exact source-owned record and returns source URL, license, metrics, warnings, trust factors and policy output.
@@ -102,7 +105,8 @@ Inspect refreshes one exact source-owned record and returns source URL, license,
 ### Install Plan
 
 ```bash
-curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
+curl 'https://nipmod.com/api/install-plan?source=npm&name=undici' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Install plans describe commands, risk, warnings and approval boundaries. The hosted API never executes commands and never writes to the caller workspace.
@@ -118,7 +122,8 @@ Deep scan is a local static pass over files already present on disk, including s
 ### Optional Archive Confirmation
 
 ```bash
-curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici'
+curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Archive prepare is preview-only. Durable archive writes require explicit confirmation through an authorized writer path. Confirmed records are deduplicated by source, name, version and source evidence.
@@ -230,7 +235,7 @@ bash install.sh
 
 | Surface | Status |
 | --- | --- |
-| Hosted package API | Live public beta, rate limited |
+| Hosted package API | Live API beta, key-required and rate limited |
 | Source resolver | Live for npm, PyPI, GitHub, Hugging Face and MCP |
 | Install plan API | Live, read-only hosted boundary |
 | Package intelligence archive | Durable production archive enabled, Seed v1 operator-controlled |

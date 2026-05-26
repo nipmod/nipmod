@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
+import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
@@ -94,7 +95,13 @@ async function runCheck(name, fn) {
 }
 
 async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = false } = {}) {
-  const openApi = await fetchJson(`${targetBaseUrl}/api/openapi`);
+  const apiKey = await readCanaryApiKey({
+    baseUrl: targetBaseUrl,
+    fetchFn: fetch,
+    label: "launch-verify",
+    userAgent: USER_AGENT
+  });
+  const openApi = await fetchJson(`${targetBaseUrl}/api/openapi`, apiKey);
   assertEqual(openApi.openapi, "3.1.0", "OpenAPI version mismatch");
   assertEqual(
     openApi.paths?.["/api/install-plan"]?.get?.responses?.["200"]?.content?.["application/json"]?.schema?.$ref,
@@ -108,7 +115,7 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
     throw new Error("install-plan safety.blocked is not required in OpenAPI");
   }
 
-  const search = await fetchJson(`${targetBaseUrl}/api/search?q=http%20client&sources=npm,pypi&limit=2`);
+  const search = await fetchJson(`${targetBaseUrl}/api/search?q=http%20client&sources=npm,pypi&limit=2`, apiKey);
   assertEqual(search.type, "dev.nipmod.external-search.v1", "search response type mismatch");
   if (!Array.isArray(search.sourceReports) || search.sourceReports.length !== 2) {
     throw new Error("search source reports missing");
@@ -119,7 +126,7 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
     }
   }
 
-  const plan = await fetchJson(`${targetBaseUrl}/api/install-plan?source=npm&name=react`);
+  const plan = await fetchJson(`${targetBaseUrl}/api/install-plan?source=npm&name=react`, apiKey);
   assertEqual(plan.type, "dev.nipmod.external-install-plan.v1", "install-plan response type mismatch");
   assertEqual(plan.safety?.blocked, false, "safe npm plan should not be blocked");
   assertEqual(plan.safety?.requiresApprovalBeforeWrite, true, "install-plan approval boundary mismatch");
@@ -128,13 +135,13 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
   assertEqual(firstCommand?.requiresApprovalBeforeWrite, true, "command approval boundary mismatch");
   assertEqual(firstCommand?.boundary, "manual-after-user-approval", "safe command boundary mismatch");
 
-  const sourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health`);
+  const sourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health`, apiKey);
   assertEqual(sourceHealth.type, "dev.nipmod.source-health.v1", "source health type mismatch");
   assertEqual(sourceHealth.summary?.workspaceWritesFromHostedApi, false, "source health write boundary mismatch");
   if (requireDistributedRateLimit && sourceHealth.rateLimit?.activeStore !== "supabase") {
     throw new Error(`distributed rate-limit store is not active: ${sourceHealth.rateLimit?.activeStore ?? "unknown"}`);
   }
-  const liveSourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health?probe=live`);
+  const liveSourceHealth = await fetchJson(`${targetBaseUrl}/api/sources/health?probe=live`, apiKey);
   assertEqual(liveSourceHealth.type, "dev.nipmod.source-health.v1", "live source health type mismatch");
   const liveSources = Array.isArray(liveSourceHealth.sources) ? liveSourceHealth.sources : [];
   const failedLiveSources = liveSources.filter((source) => source?.live?.status !== "ok");
@@ -156,12 +163,13 @@ async function verifyLiveApi(targetBaseUrl, { requireDistributedRateLimit = fals
   };
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, apiKey) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
     const response = await fetch(url, {
       headers: {
+        ...canaryAuthHeaders(apiKey),
         "user-agent": USER_AGENT
       },
       signal: controller.signal

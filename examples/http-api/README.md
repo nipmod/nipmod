@@ -33,15 +33,16 @@ Environment:
 
 ```bash
 NIPMOD_API_BASE_URL=https://nipmod.com
+NIPMOD_API_KEY=<key>
 ```
 
 Known exact records used by production canaries:
 
 ```bash
-curl 'https://nipmod.com/api/inspect?source=npm&name=undici'
-curl 'https://nipmod.com/api/inspect?source=pypi&name=requests'
-curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js'
-curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased'
-curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad'
-curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp'
+curl 'https://nipmod.com/api/inspect?source=npm&name=undici' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=pypi&name=requests' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=github&name=vercel/next.js' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=huggingface-dataset&name=rajpurkar/squad' -H 'x-nipmod-api-key: <key>'
+curl 'https://nipmod.com/api/inspect?source=mcp&name=ac.tandem/docs-mcp' -H 'x-nipmod-api-key: <key>'
 ```
