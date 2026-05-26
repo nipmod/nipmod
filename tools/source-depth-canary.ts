@@ -7,6 +7,14 @@ const DEFAULT_CANARIES = [
   {
     name: "npm package depth",
     path: "/api/inspect?source=npm&name=undici",
+    requiredEvidenceIds: [
+      "npm.manifest.latest",
+      "npm.tarball.integrity",
+      "npm.registry.signature",
+      "npm.packument.versions",
+      "npm.dist_tags",
+      "npm.lifecycle"
+    ],
     requiredDimensions: {
       provenanceStatus: "signature",
       securityConfidence: "high"
@@ -24,6 +32,18 @@ const DEFAULT_CANARIES = [
   {
     name: "PyPI package depth",
     path: "/api/inspect?source=pypi&name=requests",
+    requiredEvidenceIds: [
+      "pypi.project.json",
+      "pypi.vulnerabilities",
+      "pypi.release.files",
+      "pypi.file.digests",
+      "pypi.simple.provenance",
+      "pypi.core_metadata",
+      "pypi.release_shape",
+      "pypi.yanked",
+      "pypi.requires_python",
+      "pypi.release_history"
+    ],
     requiredDimensions: {
       provenanceStatus: "attested"
     },
@@ -42,6 +62,15 @@ const DEFAULT_CANARIES = [
   {
     name: "GitHub repository depth",
     path: "/api/inspect?source=github&name=vercel/next.js",
+    requiredEvidenceIds: [
+      "github.repo.metadata",
+      "github.activity",
+      "github.default_branch",
+      "github.manifests",
+      "github.lockfiles",
+      "github.security",
+      "github.default_branch_commit"
+    ],
     requiredSignals: [
       "Default branch:",
       "Open issues returned by GitHub:",
@@ -57,6 +86,16 @@ const DEFAULT_CANARIES = [
   {
     name: "Hugging Face model depth",
     path: "/api/inspect?source=huggingface-model&name=google-bert/bert-base-uncased",
+    requiredEvidenceIds: [
+      "hf.card_data",
+      "hf.files",
+      "hf.readme",
+      "hf.config",
+      "hf.safetensors",
+      "hf.remote_code",
+      "hf.commit",
+      "hf.gated"
+    ],
     requiredDimensions: {
       provenanceStatus: "integrity"
     },
@@ -73,6 +112,17 @@ const DEFAULT_CANARIES = [
   {
     name: "Hugging Face dataset depth",
     path: "/api/inspect?source=huggingface-dataset&name=rajpurkar/squad",
+    requiredEvidenceIds: [
+      "hf.card_data",
+      "hf.dataset_info",
+      "hf.dataset_features",
+      "hf.dataset_splits",
+      "hf.files",
+      "hf.readme",
+      "hf.commit",
+      "hf.gated",
+      "hf.script_files"
+    ],
     requiredDimensions: {
       provenanceStatus: "integrity"
     },
@@ -86,6 +136,13 @@ const DEFAULT_CANARIES = [
   {
     name: "MCP registry depth",
     path: "/api/inspect?source=mcp&name=ac.tandem/docs-mcp",
+    requiredEvidenceIds: [
+      "mcp.registry.status",
+      "mcp.remote_endpoints",
+      "mcp.env_requirements",
+      "mcp.source_repo",
+      "mcp.transport"
+    ],
     requiredSignals: [
       "MCP Registry status:",
       "Remote MCP endpoints returned:",
@@ -151,6 +208,25 @@ function assertDepthPayload(payload, canary) {
     }
   }
 
+  const sourceEvidence = record.sourceEvidence;
+  if (sourceEvidence?.version !== "source-evidence-v1") {
+    throw new Error(`sourceEvidence missing for ${record.id ?? canary.source}`);
+  }
+  if (!Number.isFinite(sourceEvidence.depthScore) || sourceEvidence.depthScore < 0 || sourceEvidence.depthScore > 100) {
+    throw new Error(`sourceEvidence depthScore out of range for ${record.id ?? canary.source}`);
+  }
+  const evidenceChecks = Array.isArray(sourceEvidence.checks) ? sourceEvidence.checks : [];
+  const evidenceById = new Map(evidenceChecks.map((check) => [check?.id, check]));
+  for (const requiredEvidenceId of canary.requiredEvidenceIds ?? []) {
+    const check = evidenceById.get(requiredEvidenceId);
+    if (!check) {
+      throw new Error(`missing sourceEvidence check for ${record.id ?? canary.source}: ${requiredEvidenceId}`);
+    }
+    if (check.status === "missing") {
+      throw new Error(`sourceEvidence check missing evidence for ${record.id ?? canary.source}: ${requiredEvidenceId}`);
+    }
+  }
+
   const score = record.trust?.score;
   if (!Number.isFinite(score) || score < 0 || score > 100) {
     throw new Error(`trust score out of range for ${record.id ?? canary.source}`);
@@ -173,8 +249,10 @@ function assertDepthPayload(payload, canary) {
   return {
     decision: record.trust?.decision ?? null,
     id: record.id,
+    requiredEvidenceIds: canary.requiredEvidenceIds?.length ?? 0,
     requiredSignals: canary.requiredSignals.length,
     score,
+    sourceDepthScore: sourceEvidence.depthScore,
     source: record.source
   };
 }
@@ -209,11 +287,11 @@ function result({ baseUrl, checks, startedAt }) {
     baseUrl,
     checkedAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
-    formatVersion: 1,
+    formatVersion: 2,
     ok: summary.fail === 0,
     summary,
     checks,
-    type: "dev.nipmod.source-depth-canary.v1"
+    type: "dev.nipmod.source-depth-canary.v2"
   };
 }
 

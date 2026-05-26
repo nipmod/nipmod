@@ -999,6 +999,8 @@ describe("external package resolver", () => {
 
   test("extracts source-specific depth signals without changing the public record schema", async () => {
     const npm = await inspectExternalPackage("npm", "depth-npm", { fetchImpl: sourceDepthFetch });
+    expect(npm.sourceEvidence?.version).toBe("source-evidence-v1");
+    expect(npm.sourceEvidence?.checks.some((check) => check.id === "npm.packument.versions" && check.status === "pass")).toBe(true);
     expect(npm.trust.warnings).toContain("npm marks the latest release as deprecated: Use depth-npm-next instead.");
     expect(npm.trust.signals).toContain("Latest npm release declares 3 runtime dependencies.");
     expect(npm.trust.signals).toContain("npm returned 2 maintainer records.");
@@ -1009,6 +1011,7 @@ describe("external package resolver", () => {
     expect(npm.trust.signals).toContain("npm latest dist-tag matches the latest manifest version.");
 
     const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
+    expect(pypi.sourceEvidence?.checks.some((check) => check.id === "pypi.release_history" && check.status === "pass")).toBe(true);
     expect(pypi.trust.signals).toContain("PyPI latest release files returned: 1.");
     expect(pypi.trust.signals).toContain("PyPI latest release files with digest metadata: 1.");
     expect(pypi.trust.signals).toContain("PyPI simple API provenance links returned for 1 latest release file(s).");
@@ -1020,6 +1023,7 @@ describe("external package resolver", () => {
     expect(pypi.trust.dimensions.provenanceStatus).toBe("attested");
 
     const github = await inspectExternalPackage("github", "example/depth-repo", { fetchImpl: sourceDepthFetch });
+    expect(github.sourceEvidence?.checks.some((check) => check.id === "github.manifests" && check.status === "pass")).toBe(true);
     expect(github.trust.warnings).toContain("GitHub marks this repository as archived.");
     expect(github.trust.warnings).toContain("GitHub marks this repository as a fork; review the upstream repository before installing.");
     expect(github.trust.signals).toContain("Default branch: main.");
@@ -1036,6 +1040,7 @@ describe("external package resolver", () => {
     expect(github.trust.signals).toContain("GitHub community profile health: 84.");
 
     const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
+    expect(model.sourceEvidence?.checks.some((check) => check.id === "hf.safetensors" && check.status === "pass")).toBe(true);
     expect(model.trust.warnings).toContain("Hugging Face marks this model as gated.");
     expect(model.trust.signals).toContain("Hugging Face cardData metadata is present.");
     expect(model.trust.signals).toContain("Hugging Face base model metadata: example/base-model.");
@@ -1045,6 +1050,7 @@ describe("external package resolver", () => {
     expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
 
     const dataset = await inspectExternalPackage("huggingface-dataset", "example/depth-dataset", { fetchImpl: sourceDepthFetch });
+    expect(dataset.sourceEvidence?.checks.some((check) => check.id === "hf.dataset_info" && check.status === "pass")).toBe(true);
     expect(dataset.trust.signals).toContain("Hugging Face cardData metadata is present.");
     expect(dataset.trust.signals).toContain("Hugging Face dataset references were not returned.");
     expect(dataset.trust.signals).toContain("Hugging Face language metadata returned: en.");
@@ -1054,6 +1060,7 @@ describe("external package resolver", () => {
     expect(dataset.trust.signals).toContain("Hugging Face commit digest metadata is present.");
 
     const mcp = await inspectExternalPackage("mcp", "example/depth-mcp", { fetchImpl: sourceDepthFetch });
+    expect(mcp.sourceEvidence?.checks.some((check) => check.id === "mcp.remote_endpoints" && check.status === "pass")).toBe(true);
     expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
     expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
     expect(mcp.trust.signals).toContain("MCP registry packages returned: 1.");
@@ -1340,6 +1347,14 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
           upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
         }
       ],
+      releases: {
+        "1.0.0": [],
+        "2.0.0": [
+          {
+            upload_time_iso_8601: "2026-05-01T00:00:00.000Z"
+          }
+        ]
+      },
       vulnerabilities: []
     });
   }
@@ -1476,6 +1491,10 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
     expect(url).not.toContain("library_name");
     return jsonResponse({
       cardData: {
+        dataset_info: {
+          features: [{ name: "text" }, { name: "label" }],
+          splits: [{ name: "train" }, { name: "test" }]
+        },
         language: ["en"],
         license: "apache-2.0",
         task_categories: ["text-classification"]

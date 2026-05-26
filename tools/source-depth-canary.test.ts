@@ -169,6 +169,18 @@ function inspectResponse({
   return Response.json({
     record: {
       id,
+      sourceEvidence: {
+        checks: sourceEvidenceIds(source).map((checkId) => ({
+          evidence: `fixture evidence for ${checkId}`,
+          id: checkId,
+          label: checkId,
+          status: "pass"
+        })),
+        depthScore: 95,
+        generatedAt: "2026-05-26T00:00:00.000Z",
+        limitations: [],
+        version: "source-evidence-v1"
+      },
       source,
       trust: {
         decision: "recommended",
@@ -188,4 +200,52 @@ function inspectResponse({
     },
     type: "dev.nipmod.external-inspect.v1"
   });
+}
+
+function sourceEvidenceIds(source: string): string[] {
+  switch (source) {
+    case "npm":
+      return ["npm.manifest.latest", "npm.tarball.integrity", "npm.registry.signature", "npm.packument.versions", "npm.dist_tags", "npm.lifecycle"];
+    case "pypi":
+      return [
+        "pypi.project.json",
+        "pypi.vulnerabilities",
+        "pypi.release.files",
+        "pypi.file.digests",
+        "pypi.simple.provenance",
+        "pypi.core_metadata",
+        "pypi.release_shape",
+        "pypi.yanked",
+        "pypi.requires_python",
+        "pypi.release_history"
+      ];
+    case "github":
+      return [
+        "github.repo.metadata",
+        "github.activity",
+        "github.default_branch",
+        "github.manifests",
+        "github.lockfiles",
+        "github.security",
+        "github.default_branch_commit"
+      ];
+    case "huggingface-model":
+      return ["hf.card_data", "hf.files", "hf.readme", "hf.config", "hf.safetensors", "hf.remote_code", "hf.commit", "hf.gated"];
+    case "huggingface-dataset":
+      return [
+        "hf.card_data",
+        "hf.dataset_info",
+        "hf.dataset_features",
+        "hf.dataset_splits",
+        "hf.files",
+        "hf.readme",
+        "hf.commit",
+        "hf.gated",
+        "hf.script_files"
+      ];
+    case "mcp":
+      return ["mcp.registry.status", "mcp.remote_endpoints", "mcp.env_requirements", "mcp.source_repo", "mcp.transport"];
+    default:
+      return [];
+  }
 }

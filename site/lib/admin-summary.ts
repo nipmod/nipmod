@@ -50,6 +50,7 @@ export async function readAdminSummary(
         access,
         authConfigured,
         coverage: quality.coverage,
+        depthScore: quality.depthScore,
         endpointHost,
         inspectDepth: quality.inspectDepth,
         limitations: quality.limitations,
@@ -57,11 +58,13 @@ export async function readAdminSummary(
         searchDepth: quality.searchDepth,
         source,
         sourceKind,
-        strengths: quality.strengths
+        strengths: quality.strengths,
+        targetDepthScore: quality.targetDepthScore
       })),
       summary: {
         moderateOrBetter: sourceCapabilities.filter((source) => source.quality.coverage === "strong" || source.quality.coverage === "moderate").length,
         strong: sourceCapabilities.filter((source) => source.quality.coverage === "strong").length,
+        averageDepthScore: Math.round(sourceCapabilities.reduce((sum, source) => sum + source.quality.depthScore, 0) / sourceCapabilities.length),
         total: sourceCapabilities.length
       },
       type: "dev.nipmod.admin-source-quality.v1"
