@@ -1,0 +1,77 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.base-agent-integration-outline.v1",
+  "name": "Nipmod Base MCP integration outline",
+  "status": "outline_not_official_listing",
+  "updatedAt": "2026-05-26",
+  "summary": "Use Nipmod as a read-only package and tool preflight before a Base-focused agent installs or enables external tooling and continues to Base MCP, x402 or protocol-specific work.",
+  "links": {
+    "page": "https://nipmod.com/base-agents/integration",
+    "demo": "https://nipmod.com/base-agents/demo",
+    "demoSpec": "https://nipmod.com/base-agent-demo-flow.json",
+    "preflightSpec": "https://nipmod.com/base-agent-preflight.json",
+    "apiAccess": "https://nipmod.com/api-access",
+    "openapi": "https://nipmod.com/api/openapi",
+    "remoteMcp": "https://nipmod.com/api/mcp",
+    "baseMcp": "https://www.base.org/agents",
+    "baseCustomPlugins": "https://docs.base.org/ai-agents/plugins/custom-plugins"
+  },
+  "roles": {
+    "baseMcp": "User-approved onchain action surface through Base Account and ecosystem skill plugins.",
+    "nipmod": "Read-only package intelligence preflight before external SDKs, CLIs, MCP servers, repos, packages or API clients are installed or enabled.",
+    "agentHost": "Local policy and approval boundary for workspace writes, tool enablement and paid request setup.",
+    "user": "Approves local workspace changes and Base Account actions."
+  },
+  "sequence": [
+    "identify_external_tooling_needed_for_base_workflow",
+    "issue_or_load_nipmod_api_key",
+    "search_sources_with_nipmod",
+    "inspect_exact_source_record",
+    "request_install_plan",
+    "show_trust_signals_warnings_and_command_boundary",
+    "wait_for_user_or_host_approval",
+    "continue_to_base_mcp_x402_or_protocol_workflow"
+  ],
+  "calls": {
+    "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
+    "search": "GET https://nipmod.com/api/search?q=<tooling-query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5 with x-nipmod-api-key",
+    "inspect": "GET https://nipmod.com/api/inspect?source=<source>&name=<name> with x-nipmod-api-key",
+    "installPlan": "GET https://nipmod.com/api/install-plan?source=<source>&name=<name> with x-nipmod-api-key",
+    "remoteMcpResolve": "POST https://nipmod.com/api/mcp tools/call nipmod.resolve with x-nipmod-api-key",
+    "remoteMcpInstallPlan": "POST https://nipmod.com/api/mcp tools/call nipmod.external_install_plan with x-nipmod-api-key"
+  },
+  "handoffPolicy": {
+    "beforeApproval": [
+      "search",
+      "inspect",
+      "install_plan_review",
+      "warning_explanation"
+    ],
+    "requiresApproval": [
+      "install",
+      "clone",
+      "tool_enablement",
+      "paid_request_setup",
+      "base_mcp_action_preparation"
+    ],
+    "afterApproval": [
+      "local_workspace_change_if_policy_allows",
+      "base_mcp_or_x402_workflow"
+    ]
+  },
+  "baseBuilderCode": {
+    "registered": true,
+    "builderCode": "bc_vu9r71xi",
+    "appendedByHostedApi": false,
+    "currentUse": "Reserved for future onchain or x402 attribution. The hosted package intelligence API does not append transaction data."
+  },
+  "nonGoals": [
+    "official Base listing claim",
+    "wallet custody",
+    "transaction signing",
+    "Base Account approval link creation",
+    "hosted package execution",
+    "hosted workspace writes",
+    "automatic install permission"
+  ]
+}

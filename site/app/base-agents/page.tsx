@@ -27,6 +27,8 @@ Header: x-nipmod-api-key: <key>
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"Base MCP tooling","sources":["npm","github","mcp"]}}}`;
 
 const machineSpec = `GET https://nipmod.com/base-agent-preflight.json
+GET https://nipmod.com/base-agent-integration.json
+GET https://nipmod.com/base-agent-demo-flow.json
 
 Use this JSON before Base-focused package, SDK, CLI, MCP, repo or x402 client decisions.`;
 
@@ -95,13 +97,21 @@ export default function BaseAgentsPage() {
       <DocsSection eyebrow="Machine" title="Agent-readable entrypoint">
         <DocsGrid>
           <DocsCard label="JSON" title="Base preflight spec">
-            <p>Agents can fetch a compact machine-readable workflow for Base-related package and tool decisions.</p>
+            <p>Agents can fetch compact machine-readable workflows for Base-related package and tool decisions.</p>
             <DocsCode>{machineSpec}</DocsCode>
             <p><Link href="/base-agent-preflight.json">Open preflight JSON</Link></p>
           </DocsCard>
           <DocsCard label="Prompts" title="Prompt pack">
             <p>The public prompt pack includes the Base preflight instruction and links back to this page.</p>
             <p><Link href="/agent-prompts.json">Open agent prompts</Link></p>
+          </DocsCard>
+          <DocsCard label="Outline" title="Integration outline">
+            <p>A concrete handoff model for using Nipmod before Base MCP, x402 or protocol-specific work.</p>
+            <p><Link href="/base-agents/integration">Open integration outline</Link></p>
+          </DocsCard>
+          <DocsCard label="Demo" title="Reproducible flow">
+            <p>A step-by-step package preflight demo that agents and host teams can test directly.</p>
+            <p><Link href="/base-agents/demo">Open demo flow</Link></p>
           </DocsCard>
         </DocsGrid>
       </DocsSection>
@@ -166,6 +176,8 @@ export default function BaseAgentsPage() {
             ["Base app verification", "Homepage verification meta is present. Claim verified only after the Base app flow confirms it."],
             ["Builder Codes", "Base Builder Code is registered for future attribution. Current hosted API remains read-only and does not append transaction data."],
             ["Base MCP", "Nipmod can be used beside Base MCP today as a read-only package preflight, using HTTPS or the hosted Nipmod MCP endpoint."],
+            ["Integration outline", <Link href="/base-agents/integration" key="integration">A concrete package preflight handoff is published for agent hosts.</Link>],
+            ["Demo flow", <Link href="/base-agents/demo" key="demo">A reproducible Base package preflight demo is published for testing.</Link>],
             ["Public wording", "Use 'Base agent preflight' or 'integration path'. Do not say 'official Base integration' until Base lists or approves it."]
           ]}
         />
@@ -195,9 +207,10 @@ export default function BaseAgentsPage() {
 
       <div className="docs-next">
         <Link href="/api-access">Open API reference</Link>
+        <Link href="/base-agents/integration">Open integration outline</Link>
+        <Link href="/base-agents/demo">Run demo flow</Link>
         <Link href="/mcp">Use Nipmod MCP</Link>
         <Link href="/base-agent-preflight.json">Read machine spec</Link>
-        <Link href="/examples">See agent examples</Link>
       </div>
     </DocsShell>
   );

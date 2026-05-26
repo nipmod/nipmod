@@ -114,6 +114,10 @@ describe("nipmod discovery manifest", () => {
     });
     expect(manifest.baseAgents).toMatchObject({
       agentPrompts: "https://nipmod.com/agent-prompts.json",
+      demoFlow: "https://nipmod.com/base-agents/demo",
+      demoSpec: "https://nipmod.com/base-agent-demo-flow.json",
+      integrationOutline: "https://nipmod.com/base-agents/integration",
+      integrationSpec: "https://nipmod.com/base-agent-integration.json",
       page: "https://nipmod.com/base-agents",
       preflightSpec: "https://nipmod.com/base-agent-preflight.json",
       status: "integration_path_not_official_listing"
@@ -127,6 +131,8 @@ describe("nipmod discovery manifest", () => {
       registered: true
     });
     expect(manifest.baseAgents.readiness).toContain("machine-readable preflight spec");
+    expect(manifest.baseAgents.readiness).toContain("integration outline");
+    expect(manifest.baseAgents.readiness).toContain("reproducible demo flow");
     expect(manifest.agent.commands.setupCodexMcp).toBeUndefined();
     expect(manifest.agent.commands.setupHermesBundle).toBeUndefined();
     expect(manifest.agent.commands.setupPublish).toBeUndefined();

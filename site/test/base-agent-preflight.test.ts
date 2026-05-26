@@ -19,6 +19,10 @@ describe("Base agent preflight spec", () => {
       baseBuilderCodes: "https://docs.base.org/apps/builder-codes/builder-codes",
       baseCustomPlugins: "https://docs.base.org/ai-agents/plugins/custom-plugins",
       baseMcpQuickstart: "https://docs.base.org/ai-agents/quickstart",
+      demoFlow: "https://nipmod.com/base-agents/demo",
+      demoSpec: "https://nipmod.com/base-agent-demo-flow.json",
+      integrationOutline: "https://nipmod.com/base-agents/integration",
+      integrationSpec: "https://nipmod.com/base-agent-integration.json",
       llms: "https://nipmod.com/llms.txt",
       page: "https://nipmod.com/base-agents",
       remoteMcp: "https://nipmod.com/api/mcp"
@@ -47,6 +51,12 @@ describe("Base agent preflight spec", () => {
       "wait_for_user_or_host_approval",
       "continue_to_base_mcp_x402_or_protocol_workflow_after_approval"
     ]);
+    expect(preflight.integrationArtifacts).toMatchObject({
+      demo: "https://nipmod.com/base-agents/demo",
+      demoSpec: "https://nipmod.com/base-agent-demo-flow.json",
+      outline: "https://nipmod.com/base-agents/integration",
+      outlineSpec: "https://nipmod.com/base-agent-integration.json"
+    });
     expect(preflight.agentInstruction).toContain("Do not install, clone, run, enable or pay");
   });
 });
