@@ -48,6 +48,8 @@ describe("hosted read-only MCP route", () => {
     ]);
     expect(body.notExposed).toContain("nipmod.install");
     expect(body.notExposed).toContain("nipmod.audit");
+    expect(body.notExposed).toContain("nipmod.deep_scan");
+    expect(body.writeBoundary).toContain("local deep scans");
   });
 
   test("supports CORS preflight for hosted MCP clients", async () => {

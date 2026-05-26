@@ -107,6 +107,14 @@ curl 'https://nipmod.com/api/install-plan?source=npm&name=undici'
 
 Install plans describe commands, risk, warnings and approval boundaries. The hosted API never executes commands and never writes to the caller workspace.
 
+### Local Deep Scan
+
+```bash
+nipmod deep-scan . --json
+```
+
+Deep scan is a local static pass over files already present on disk. It is for the second stage after hosted search, inspect and install-plan. It does not download packages, clone repositories, unpack artifacts, install dependencies, execute code or write to the workspace.
+
 ### Optional Archive Confirmation
 
 ```bash
@@ -120,6 +128,7 @@ Archive prepare is preview-only. Durable archive writes require explicit confirm
 | Boundary | Rule |
 | --- | --- |
 | Hosted API | Read-only package intelligence. No caller workspace reads or writes. |
+| Local deep scan | Reads existing local files only. No package downloads, clones, artifact unpacking, dependency installs, code execution or workspace writes. |
 | Install plan | Review data only. A user, host policy or local tool must approve execution. |
 | Package metadata | README text, model cards, descriptions and MCP metadata are untrusted data, not agent instructions. |
 | Search score | Ranking input only. It is not install permission and not a verification claim. |

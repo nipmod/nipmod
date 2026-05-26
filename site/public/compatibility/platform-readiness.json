@@ -14,6 +14,7 @@
     "hosted API routes are reachable",
     "public source resolver returns package records",
     "install plans are read-only until a user approves workspace writes",
+    "local deep scan is available for files already present on disk",
     "hosted MCP exposes no workspace-write tools",
     "local MCP keeps controlled write tools separate from hosted API use",
     "public discovery documents point to current API and archive surfaces",
@@ -80,7 +81,7 @@
       "productReadiness": 100,
       "connectionStatus": "Live",
       "status": "ready",
-      "claim": "Hosted read-only MCP and local stdio MCP expose the current Nipmod package tools with write boundaries.",
+      "claim": "Hosted read-only MCP and local stdio MCP expose the current Nipmod package tools with write boundaries. Local MCP also exposes static deep scan for files already present on disk.",
       "evidence": [
         "https://nipmod.com/api/mcp",
         "https://nipmod.com/mcp",
@@ -88,7 +89,8 @@
       ],
       "checks": [
         "hosted MCP exposes only safe read tools",
-        "local MCP install requires explicit write-lockfile approval"
+        "local MCP install requires explicit write-lockfile approval",
+        "local deep scan does not install, execute, fetch, unpack or write"
       ]
     },
     {

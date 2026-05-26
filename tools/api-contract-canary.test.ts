@@ -211,12 +211,17 @@ function searchFixture() {
 
 function openApiFixture() {
   return {
-    "x-nipmod-agent-flow": ["search", "inspect", "install-plan", "host-approval", "optional-archive-confirm"],
+    "x-nipmod-agent-flow": ["search", "inspect", "install-plan", "optional-local-deep-scan", "host-approval", "optional-archive-confirm"],
     "x-nipmod-safety-boundary": {
+      hostedApiClonesRepositories: false,
+      hostedApiDownloadsPackageArtifacts: false,
       hostedApiExecutesCommands: false,
       hostedApiReadsCallerWorkspace: false,
+      hostedApiRunsDeepScan: false,
+      hostedApiUnpacksArtifacts: false,
       hostedApiWritesCallerWorkspace: false,
       installPlanRequiresHostApproval: true,
+      localDeepScanReadsExistingFilesOnly: true,
       packageMetadataIsInstruction: false,
       searchScoreIsInstallPermission: false
     },

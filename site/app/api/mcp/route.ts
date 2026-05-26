@@ -73,6 +73,7 @@ const NOT_EXPOSED_REMOTE_TOOLS = [
   "nipmod.claim_index",
   "nipmod.verify",
   "nipmod.audit",
+  "nipmod.deep_scan",
   "nipmod.sbom",
   "nipmod.explain"
 ] as const;
@@ -498,7 +499,8 @@ function remoteServerInfo(): JsonValue {
     registry: "https://nipmod.com/registry/packages.json",
     tools: [...REMOTE_TOOL_NAMES],
     type: "dev.nipmod.remote-mcp.v1",
-    writeBoundary: "No hosted remote tool reads or writes the caller workspace. Use the local stdio MCP server for controlled installs."
+    writeBoundary:
+      "No hosted remote tool reads or writes the caller workspace. Use the local stdio MCP server for local deep scans and controlled installs."
   };
 }
 
@@ -547,7 +549,7 @@ function initializeResult(): JsonValue {
       }
     },
     instructions:
-      "This hosted Nipmod MCP endpoint is read-only. Use search, view, inspect and install_plan against the public registry. For workspace writes, install the CLI and run nipmod mcp serve locally.",
+      "This hosted Nipmod MCP endpoint is read-only. Use search, view, inspect and install_plan against the public registry. Local deep_scan and workspace writes require the CLI through nipmod mcp serve.",
     protocolVersion: PROTOCOL_VERSION,
     serverInfo: {
       name: "nipmod-remote-readonly",
