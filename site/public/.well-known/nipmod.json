@@ -104,6 +104,8 @@
   },
   "baseAgents": {
     "page": "https://nipmod.com/base-agents",
+    "preflightSpec": "https://nipmod.com/base-agent-preflight.json",
+    "agentPrompts": "https://nipmod.com/agent-prompts.json",
     "status": "integration_path_not_official_listing",
     "summary": "Use Nipmod as a read-only package intelligence preflight before Base agents install or enable SDKs, CLIs, MCP servers, packages or repos.",
     "doesNot": [
@@ -121,6 +123,13 @@
       "show trust signals and warnings",
       "wait for user or host approval",
       "continue to Base MCP, x402 or protocol-specific work only after approval"
+    ],
+    "readiness": [
+      "public Base agent page",
+      "machine-readable preflight spec",
+      "agent prompt pack",
+      "read-only hosted MCP endpoint",
+      "API key required package intelligence calls"
     ]
   },
   "agent": {

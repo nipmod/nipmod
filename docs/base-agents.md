@@ -42,7 +42,11 @@ Do not claim:
 ## Product work
 
 - Public page: `https://nipmod.com/base-agents`
+- Machine-readable preflight: `https://nipmod.com/base-agent-preflight.json`
+- Agent prompt pack: `https://nipmod.com/agent-prompts.json`
 - Draft workflow: `examples/agent-workflow/base-agent-package-preflight.md`
+- Plugin boundary draft: `examples/agent-workflow/base-mcp-nipmod-preflight-plugin.md`
+- Builder Code runbook: `docs/base-builder-code-runbook.md`
 - Discovery manifest: include the Base agent preflight page for agent crawlers
 - Public copy: keep the claim at "building for Base agents" until Base confirms a listing or integration
 

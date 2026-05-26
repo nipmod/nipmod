@@ -147,6 +147,9 @@ export default function ExamplesPage() {
           <DocsCard label="Base" title="Agent package preflight">
             <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/base-agent-package-preflight.md">Open Base preflight draft</Link></p>
           </DocsCard>
+          <DocsCard label="Base" title="MCP preflight boundary">
+            <p><Link href="https://github.com/nipmod/nipmod/blob/main/examples/agent-workflow/base-mcp-nipmod-preflight-plugin.md">Open Base MCP boundary draft</Link></p>
+          </DocsCard>
         </DocsGrid>
       </DocsSection>
     </DocsShell>

@@ -1,0 +1,84 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.base-agent-preflight.v1",
+  "name": "Nipmod package preflight for Base agents",
+  "status": "integration_path_not_official_listing",
+  "summary": "Use Nipmod before Base agents install or enable SDKs, CLIs, MCP servers, packages, repos or paid API clients.",
+  "updatedAt": "2026-05-26",
+  "links": {
+    "page": "https://nipmod.com/base-agents",
+    "apiAccess": "https://nipmod.com/api-access",
+    "openapi": "https://nipmod.com/api/openapi",
+    "remoteMcp": "https://nipmod.com/api/mcp",
+    "agentPrompts": "https://nipmod.com/agent-prompts.json",
+    "llms": "https://nipmod.com/llms.txt",
+    "baseAgents": "https://www.base.org/agents",
+    "baseMcpQuickstart": "https://docs.base.org/ai-agents/quickstart",
+    "baseCustomPlugins": "https://docs.base.org/ai-agents/plugins/custom-plugins",
+    "baseBuilderCodes": "https://docs.base.org/apps/builder-codes/builder-codes"
+  },
+  "claims": {
+    "officialBaseListing": false,
+    "walletCustody": false,
+    "transactionSigning": false,
+    "createsWalletApprovalLinks": false,
+    "appendsBuilderCodes": false,
+    "workspaceWritesFromHostedApi": false,
+    "hostedExecution": false
+  },
+  "boundary": {
+    "baseMcp": "Wallet, onchain action and ecosystem skill surface.",
+    "nipmod": "Read-only package intelligence preflight before external tooling is installed or enabled.",
+    "approval": "The user, local host or agent runtime decides whether an install plan can execute."
+  },
+  "sources": [
+    "npm",
+    "pypi",
+    "github",
+    "huggingface-model",
+    "huggingface-dataset",
+    "mcp"
+  ],
+  "workflow": [
+    "issue_or_load_nipmod_api_key",
+    "search_for_tooling",
+    "inspect_exact_source_record",
+    "request_install_plan",
+    "show_trust_signals_warnings_and_command_boundary",
+    "wait_for_user_or_host_approval",
+    "continue_to_base_mcp_x402_or_protocol_workflow_after_approval"
+  ],
+  "commands": {
+    "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
+    "search": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5 with x-nipmod-api-key",
+    "inspect": "GET https://nipmod.com/api/inspect?source=<source>&name=<name> with x-nipmod-api-key",
+    "installPlan": "GET https://nipmod.com/api/install-plan?source=<source>&name=<name> with x-nipmod-api-key",
+    "sourceHealth": "GET https://nipmod.com/api/sources/health with x-nipmod-api-key",
+    "remoteMcpResolve": "POST https://nipmod.com/api/mcp tools/call nipmod.resolve with x-nipmod-api-key",
+    "remoteMcpInstallPlan": "POST https://nipmod.com/api/mcp tools/call nipmod.external_install_plan with x-nipmod-api-key"
+  },
+  "agentInstruction": "Before installing or enabling Base ecosystem tooling, use Nipmod. Search for the SDK, CLI, MCP server, package, model or repo. Inspect the exact source record. Request an install plan. Show trust signals, warnings and the command boundary. Do not install, clone, run, enable or pay for external tooling until the user or host approves.",
+  "examples": {
+    "baseMcpPackage": "Search 'Base MCP tooling' across npm, GitHub and MCP, inspect the selected result, then request an install plan before enabling it.",
+    "x402Client": "Search for the intended x402 client package, inspect source metadata and request an install plan before using it for paid requests.",
+    "partnerSdk": "For a Base ecosystem partner SDK, inspect package source, repo links, license, release metadata and install scripts before continuing."
+  },
+  "privateDataPolicy": {
+    "send": [
+      "source name",
+      "package or repo name",
+      "public version",
+      "public source URL"
+    ],
+    "doNotSend": [
+      "wallet private keys",
+      "seed phrases",
+      "Base Account credentials",
+      "payment secrets",
+      "workspace paths",
+      "private repo names",
+      "raw prompts",
+      "third-party API keys"
+    ]
+  }
+}

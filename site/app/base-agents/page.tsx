@@ -26,6 +26,16 @@ Header: x-nipmod-api-key: <key>
 
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"Base MCP tooling","sources":["npm","github","mcp"]}}}`;
 
+const machineSpec = `GET https://nipmod.com/base-agent-preflight.json
+
+Use this JSON before Base-focused package, SDK, CLI, MCP, repo or x402 client decisions.`;
+
+const pluginBoundary = `Base custom plugin:
+  prepares unsigned calldata or maps protocol output to send_calls
+
+Nipmod preflight:
+  checks package/tool/source trust before that plugin, SDK or MCP server is installed or enabled`;
+
 export default function BaseAgentsPage() {
   return (
     <DocsShell
@@ -33,6 +43,7 @@ export default function BaseAgentsPage() {
       eyebrow="Base agents"
       stats={[
         { label: "Position", value: "preflight" },
+        { label: "Machine spec", value: "public" },
         { label: "Hosted writes", value: "none" },
         { label: "Base status", value: "integration path" }
       ]}
@@ -77,6 +88,20 @@ export default function BaseAgentsPage() {
         <DocsCode>{baseAgentFlow}</DocsCode>
       </DocsSection>
 
+      <DocsSection eyebrow="Machine" title="Agent-readable entrypoint">
+        <DocsGrid>
+          <DocsCard label="JSON" title="Base preflight spec">
+            <p>Agents can fetch a compact machine-readable workflow for Base-related package and tool decisions.</p>
+            <DocsCode>{machineSpec}</DocsCode>
+            <p><Link href="/base-agent-preflight.json">Open preflight JSON</Link></p>
+          </DocsCard>
+          <DocsCard label="Prompts" title="Prompt pack">
+            <p>The public prompt pack includes the Base preflight instruction and links back to this page.</p>
+            <p><Link href="/agent-prompts.json">Open agent prompts</Link></p>
+          </DocsCard>
+        </DocsGrid>
+      </DocsSection>
+
       <DocsSection eyebrow="MCP" title="Read-only MCP option">
         <DocsGrid>
           <DocsCard label="Remote" title="Nipmod MCP">
@@ -88,6 +113,29 @@ export default function BaseAgentsPage() {
             <DocsCode>{baseMcpPrompt}</DocsCode>
           </DocsCard>
         </DocsGrid>
+      </DocsSection>
+
+      <DocsSection eyebrow="Plugins" title="How this fits Base custom plugins">
+        <DocsTable
+          rows={[
+            [
+              "Base custom plugin",
+              "Defines how an agent calls a protocol API, CLI or MCP server and maps prepared output into Base MCP actions.",
+              <Link href="https://docs.base.org/ai-agents/plugins/custom-plugins" key="plugins">Base plugin docs</Link>
+            ],
+            [
+              "Nipmod preflight",
+              "Runs before that dependency is trusted. It inspects the SDK, CLI, MCP server, repo or package the agent wants to enable.",
+              <Link href="/base-agent-preflight.json" key="spec">Preflight spec</Link>
+            ],
+            [
+              "Clean integration",
+              "A Base skill or plugin can instruct the assistant to call Nipmod first, then continue to Base MCP after local approval.",
+              "No wallet custody, no signing, no transaction construction."
+            ]
+          ]}
+        />
+        <DocsCode>{pluginBoundary}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Base surfaces" title="What this helps with">
@@ -105,6 +153,17 @@ export default function BaseAgentsPage() {
             <p>Builder Codes matter for onchain activity. Nipmod is not an onchain action layer, so attribution comes later only if Nipmod adds onchain flows.</p>
           </DocsCard>
         </DocsGrid>
+      </DocsSection>
+
+      <DocsSection eyebrow="Operator checklist" title="Ready without overclaiming">
+        <DocsTable
+          rows={[
+            ["Base app verification", "Homepage verification meta is present. Claim verified only after the Base app flow confirms it."],
+            ["Builder Codes", "Builder Codes are relevant when Nipmod later sends or influences onchain transactions. Current hosted API has no onchain action surface."],
+            ["Base MCP", "Nipmod can be used beside Base MCP today as a read-only package preflight, using HTTPS or the hosted Nipmod MCP endpoint."],
+            ["Public wording", "Use 'Base agent preflight' or 'integration path'. Do not say 'official Base integration' until Base lists or approves it."]
+          ]}
+        />
       </DocsSection>
 
       <DocsSection eyebrow="Links" title="Base references">
@@ -132,6 +191,7 @@ export default function BaseAgentsPage() {
       <div className="docs-next">
         <Link href="/api-access">Open API reference</Link>
         <Link href="/mcp">Use Nipmod MCP</Link>
+        <Link href="/base-agent-preflight.json">Read machine spec</Link>
         <Link href="/examples">See agent examples</Link>
       </div>
     </DocsShell>
