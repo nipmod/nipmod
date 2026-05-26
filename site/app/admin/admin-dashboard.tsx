@@ -189,8 +189,10 @@ export function AdminDashboard() {
             <Metric label="Legacy unknown" value={traffic.unknownLegacyRequestCount} />
             <Metric label="Archive records" value={archive.totalRecords} />
             <Metric label="Active keys" value={keys.activeCount} />
+            <Metric label="Paused keys" value={keys.pausedCount} />
             <Metric label="Self serve beta keys" value={keys.selfServeBetaCount} />
             <Metric label="Stale beta keys" value={keys.staleBetaCount} />
+            <Metric label="Expired active keys" value={keys.expiredActiveCount} />
             <Metric label="External active keys" value={keyActivity.externalKeyCount} />
           </section>
 
@@ -262,12 +264,19 @@ export function AdminDashboard() {
               <BarList labelKey="decision" rows={usage.trustDecisions} valueKey="requestCount" />
               <BarList labelKey="risk" rows={usage.trustRisks} valueKey="requestCount" />
             </Panel>
-            <Panel description="Operational key state. Stale beta means active self-serve beta key older than 30 days." title="Key health">
+            <Panel
+              description="Operational key state. Stale beta means active self-serve beta key older than 30 days or past expiry."
+              title="Key health"
+            >
               <RatioGrid
                 rows={[
                   ["Active keys", keys.activeCount],
+                  ["Paused keys", keys.pausedCount],
+                  ["Revoked keys", keys.revokedCount],
                   ["Self serve beta", keys.selfServeBetaCount],
                   ["Stale beta", keys.staleBetaCount],
+                  ["Expiring soon", keys.expiringSoonCount],
+                  ["Expired active", keys.expiredActiveCount],
                   ["External active", keyActivity.externalKeyCount]
                 ]}
               />
@@ -412,7 +421,7 @@ export function AdminDashboard() {
                   onClick={() => manageKey("cleanup-stale-beta")}
                   type="button"
                 >
-                  {keyActionLoading === "cleanup-stale-beta:all" ? "Cleaning" : "Cleanup beta 30d"}
+                  {keyActionLoading === "cleanup-stale-beta:all" ? "Cleaning" : "Cleanup stale/expired beta"}
                 </button>
               </div>
               <KeyManagementTable
@@ -472,6 +481,7 @@ function KeyManagementTable({
             <th>Tier</th>
             <th>Status</th>
             <th>Age</th>
+            <th>Expires</th>
             <th>Stale</th>
             <th>Created</th>
             <th>Manage</th>
@@ -499,7 +509,8 @@ function KeyManagementTable({
                 <td>{formatCell(row.tier)}</td>
                 <td>{formatCell(row.status)}</td>
                 <td>{row.ageDays === null || row.ageDays === undefined ? "0" : `${formatNumber(row.ageDays)}d`}</td>
-                <td>{row.stale ? "yes" : ""}</td>
+                <td>{formatCell(row.expiresAt)}</td>
+                <td>{row.stale ? row.staleReason || "yes" : row.expiringSoon ? "soon" : ""}</td>
                 <td>{formatCell(row.createdAt)}</td>
                 <td>
                   <div className="admin-key-actions">

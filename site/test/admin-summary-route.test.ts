@@ -3,6 +3,7 @@ import { GET } from "../app/api/admin/summary/route";
 import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
@@ -21,6 +22,8 @@ describe("admin summary route", () => {
   });
 
   test("returns private aggregate launch metrics without raw keys or hashes", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-26T00:00:00.000Z"));
     const rawKey = "nka_test_admin_key_for_summary_123456";
     const hashSecret = "test-admin-summary-secret";
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
@@ -54,8 +57,48 @@ describe("admin summary route", () => {
             revoked_at: null,
             status: "active",
             tier: "beta"
+          },
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_2222222222abcdef",
+            label: "self-serve/paused-agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "paused",
+            tier: "beta"
+          },
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-05-01T00:00:00.000Z",
+            id: "key_3333333333abcdef",
+            label: "self-serve/expired-agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          },
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-05-28T00:00:00.000Z",
+            id: "key_4444444444abcdef",
+            label: "self-serve/expiring-agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          },
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_5555555555abcdef",
+            label: "self-serve/revoked-agent",
+            rate_limit_multiplier: 10,
+            revoked_at: "2026-05-25T00:00:00.000Z",
+            status: "revoked",
+            tier: "beta"
           }
-        ], { headers: { "content-range": "0-0/1" } });
+        ], { headers: { "content-range": "0-4/5" } });
       }
       if (url.includes("/rest/v1/api_usage_events?")) {
         return Response.json([
@@ -118,9 +161,21 @@ describe("admin summary route", () => {
         totalRecords: 1
       },
       keys: {
-        activeCount: 1,
-        selfServeBetaCount: 1,
-        totalKeys: 1
+        activeCount: 3,
+        expiredActiveCount: 1,
+        expiringSoonCount: 1,
+        pausedCount: 1,
+        revokedCount: 1,
+        selfServeBetaCount: 5,
+        staleBetaCount: 1,
+        staleKeys: [
+          {
+            expired: true,
+            id: "key_3333333333abcdef",
+            staleReason: "active beta key is past expiry"
+          }
+        ],
+        totalKeys: 5
       },
       keyActivity: {
         excludedAdminKeyRequestCount: 1,

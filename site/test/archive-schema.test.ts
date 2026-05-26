@@ -14,6 +14,8 @@ const usageTrafficOriginMigration = readFileSync(join(root, "supabase", "migrati
 const usageManualSql = readFileSync(join(root, "docs", "api-usage-schema.sql"), "utf8");
 const rateLimitMigration = readFileSync(join(root, "supabase", "migrations", "20260523084500_api_rate_limit_buckets.sql"), "utf8");
 const rateLimitManualSql = readFileSync(join(root, "docs", "api-rate-limit-schema.sql"), "utf8");
+const apiKeyManualSql = readFileSync(join(root, "docs", "api-key-schema.sql"), "utf8");
+const apiKeyPausedMigration = readFileSync(join(root, "supabase", "migrations", "20260526180332_api_key_paused_status.sql"), "utf8");
 
 describe("package intelligence Supabase schema", () => {
   test("keeps the manual SQL copy aligned with the migration", () => {
@@ -59,5 +61,13 @@ describe("package intelligence Supabase schema", () => {
     expect(rateLimitMigration).toContain("grant execute on function public.consume_api_rate_limit(text, text, text, integer, integer) to service_role");
     expect(rateLimitMigration).not.toMatch(/raw_ip|user_agent|api_key\s/i);
     expect(rateLimitMigration).not.toContain("security definer");
+  });
+
+  test("keeps API key status schema aligned with admin key management", () => {
+    expect(apiKeyManualSql).toContain("status in ('active', 'paused', 'revoked')");
+    expect(apiKeyManualSql).toContain("api_keys_revoked_at_status_check");
+    expect(apiKeyPausedMigration).toContain("status in ('active', 'paused', 'revoked')");
+    expect(apiKeyPausedMigration).toContain("drop constraint if exists api_keys_check");
+    expect(apiKeyPausedMigration).not.toMatch(/raw_key|api_key\s/i);
   });
 });
