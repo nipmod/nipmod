@@ -113,7 +113,7 @@ Install plans describe commands, risk, warnings and approval boundaries. The hos
 nipmod deep-scan . --json
 ```
 
-Deep scan is a local static pass over files already present on disk. It is for the second stage after hosted search, inspect and install-plan. It does not download packages, clone repositories, unpack artifacts, install dependencies, execute code or write to the workspace.
+Deep scan is a local static pass over files already present on disk, including supported local package artifacts such as `.tgz`, `.tar.gz`, `.zip` and `.whl`. It is for the second stage after hosted search, inspect and install-plan. It does not download packages, clone repositories, extract files to disk, install dependencies, execute code or write to the workspace.
 
 ### Optional Archive Confirmation
 

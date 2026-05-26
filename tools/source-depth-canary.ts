@@ -13,6 +13,9 @@ const DEFAULT_CANARIES = [
       "npm.registry.signature",
       "npm.packument.versions",
       "npm.dist_tags",
+      "npm.version_intelligence",
+      "npm.osv",
+      "npm.artifact_shape",
       "npm.lifecycle"
     ],
     requiredDimensions: {
@@ -24,6 +27,8 @@ const DEFAULT_CANARIES = [
       "npm registry signature metadata is present",
       "Latest npm tarball host:",
       "Latest npm release file count:",
+      "npm latest publish age hours:",
+      "OSV",
       "maintainer records",
       "Node engine"
     ],
@@ -35,6 +40,7 @@ const DEFAULT_CANARIES = [
     requiredEvidenceIds: [
       "pypi.project.json",
       "pypi.vulnerabilities",
+      "pypi.osv",
       "pypi.release.files",
       "pypi.file.digests",
       "pypi.simple.provenance",
@@ -42,6 +48,7 @@ const DEFAULT_CANARIES = [
       "pypi.release_shape",
       "pypi.yanked",
       "pypi.requires_python",
+      "pypi.version_intelligence",
       "pypi.release_history"
     ],
     requiredDimensions: {
@@ -49,13 +56,15 @@ const DEFAULT_CANARIES = [
     },
     requiredSignals: [
       "PyPI returned no vulnerabilities",
+      "OSV",
       "PyPI latest release files returned",
       "digest metadata",
       "PyPI simple API provenance links returned",
       "PyPI simple API core metadata hashes returned",
       "PyPI latest release file types:",
       "PyPI latest release files are not marked yanked.",
-      "requires-python"
+      "requires-python",
+      "PyPI latest publish age hours:"
     ],
     source: "pypi"
   },
@@ -69,6 +78,8 @@ const DEFAULT_CANARIES = [
       "github.manifests",
       "github.lockfiles",
       "github.security",
+      "github.content_risk",
+      "github.release_assets",
       "github.default_branch_commit"
     ],
     requiredSignals: [
@@ -79,6 +90,9 @@ const DEFAULT_CANARIES = [
       "GitHub package.json declares",
       "GitHub security files",
       "GitHub lockfiles",
+      "GitHub workflow/Dockerfile risk",
+      "GitHub latest release asset count:",
+      "GitHub latest default-branch commit date:",
       "GitHub package.json package manager:"
     ],
     source: "github"
@@ -92,6 +106,7 @@ const DEFAULT_CANARIES = [
       "hf.readme",
       "hf.config",
       "hf.safetensors",
+      "hf.file_shape",
       "hf.remote_code",
       "hf.commit",
       "hf.gated"
@@ -104,6 +119,7 @@ const DEFAULT_CANARIES = [
       "Hugging Face README/model card file",
       "Hugging Face config metadata file",
       "Hugging Face safetensors weight file",
+      "Hugging Face pickle/binary weight files",
       "Hugging Face commit digest metadata is present",
       "Hugging Face gated access flag"
     ],
@@ -118,6 +134,7 @@ const DEFAULT_CANARIES = [
       "hf.dataset_features",
       "hf.dataset_splits",
       "hf.files",
+      "hf.dataset_files",
       "hf.readme",
       "hf.commit",
       "hf.gated",
@@ -138,14 +155,19 @@ const DEFAULT_CANARIES = [
     path: "/api/inspect?source=mcp&name=ac.tandem/docs-mcp",
     requiredEvidenceIds: [
       "mcp.registry.status",
+      "mcp.schema",
       "mcp.remote_endpoints",
+      "mcp.endpoint_security",
       "mcp.env_requirements",
+      "mcp.credential_scope",
       "mcp.source_repo",
       "mcp.transport"
     ],
     requiredSignals: [
       "MCP Registry status:",
+      "MCP schema URL",
       "Remote MCP endpoints returned:",
+      "MCP remote endpoint HTTPS count:",
       "MCP server",
       "Source repository is present"
     ],

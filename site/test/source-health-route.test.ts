@@ -74,13 +74,13 @@ describe("source health route", () => {
     expect(body.sources[0].quality).toMatchObject({
       assessmentVersion: "source-quality-v1",
       coverage: "strong",
-      depthScore: 96,
+      depthScore: 98,
       searchDepth: expect.stringContaining("registry-ranked"),
       strengths: expect.arrayContaining(["direct registry API"])
     });
     expect(body.sources.find((source: { source: string }) => source.source === "pypi").quality).toMatchObject({
       coverage: "strong",
-      depthScore: 92,
+      depthScore: 96,
       limitations: expect.arrayContaining([expect.stringContaining("no official JSON search API")])
     });
     expect(JSON.stringify(body)).not.toMatch(/secret|service-role|bearer|publishable-key/i);

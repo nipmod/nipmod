@@ -107,11 +107,11 @@ Resolvers should expose source-native context as `trust.signals` and risk as `tr
 
 Current depth signals include:
 
-- npm deprecation, maintainer count, dependency count, Node engine, funding metadata, tarball host, file count, unpacked size, integrity and signature metadata
-- PyPI latest release files, file types, file size, yanked status, digest metadata, signature metadata, Simple API provenance links, core metadata hashes, `requires-python`, classifiers and vulnerability records
-- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count, package manifest hints, security files and lockfiles for exact repo inspect
-- Hugging Face gated/private flags, pipeline tag, library, repository file count, README/model card, config metadata, safetensors metadata for models and commit digest metadata
-- MCP remote endpoint count, environment requirements, package metadata, registry status and source repository
+- npm deprecation, maintainer count, dependency count, Node engine, funding metadata, tarball host, file count, unpacked size, integrity, signature metadata, OSV advisory context and version velocity
+- PyPI latest release files, file types, file size, yanked status, digest metadata, signature metadata, Simple API provenance links, core metadata hashes, `requires-python`, classifiers, OSV advisory context, release velocity and vulnerability records
+- GitHub archived, disabled and fork status, default branch, push timestamp, open issue count, fork count, package manifest hints, workflow/Dockerfile risk probes, release asset metadata, commit freshness, security files and lockfiles for exact repo inspect
+- Hugging Face gated/private flags, pipeline tag, library, repository file count, README/model card, config metadata, safetensors/pickle/custom-Python file shape for models, model-index labels and commit digest metadata
+- MCP schema URL, remote endpoint count, endpoint HTTPS summary, credential-scope summary, package metadata, registry status and source repository
 
 These signals are review context. They improve package comparison and install-plan review, but they do not guarantee that third-party code is safe.
 

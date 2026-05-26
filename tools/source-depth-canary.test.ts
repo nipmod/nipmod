@@ -72,6 +72,8 @@ async function sourceResponse(url: string): Promise<Response> {
         "npm registry signature metadata is present.",
         "Latest npm tarball host: registry.npmjs.org.",
         "Latest npm release file count: 412.",
+        "npm latest publish age hours: 240.",
+        "OSV returned no known vulnerabilities for this npm package/version.",
         "npm returned 3 maintainer records.",
         "npm package declares Node engine: >=22."
       ],
@@ -84,13 +86,15 @@ async function sourceResponse(url: string): Promise<Response> {
       id: "pypi:requests",
       signals: [
         "PyPI returned no vulnerabilities for the latest release.",
+        "OSV returned no known vulnerabilities for this PyPI package/version.",
         "PyPI latest release files returned: 2.",
         "PyPI latest release files with digest metadata: 2.",
         "PyPI simple API provenance links returned for 2 latest release file(s).",
         "PyPI simple API core metadata hashes returned for 1 latest release file(s).",
         "PyPI latest release file types: bdist_wheel, sdist.",
         "PyPI latest release files are not marked yanked.",
-        "PyPI requires-python: >=3.10."
+        "PyPI requires-python: >=3.10.",
+        "PyPI latest publish age hours: 240."
       ],
       source: "pypi"
     });
@@ -107,6 +111,9 @@ async function sourceResponse(url: string): Promise<Response> {
         "GitHub package.json declares 0 dependency entries.",
         "GitHub security files found: SECURITY.md, .github/dependabot.yml.",
         "GitHub lockfiles found: pnpm-lock.yaml.",
+        "GitHub workflow/Dockerfile risk scan found no high-risk patterns in probed files.",
+        "GitHub latest release asset count: 2.",
+        "GitHub latest default-branch commit date: 2026-05-01T00:00:00.000Z.",
         "GitHub package.json package manager: pnpm@10.33.0."
       ],
       source: "github"
@@ -121,6 +128,7 @@ async function sourceResponse(url: string): Promise<Response> {
         "Hugging Face README/model card file is present.",
         "Hugging Face config metadata file is present.",
         "Hugging Face safetensors weight file is present.",
+        "Hugging Face pickle/binary weight files were not returned.",
         "Hugging Face commit digest metadata is present.",
         "Hugging Face gated access flag is not enabled for this model."
       ],
@@ -145,7 +153,9 @@ async function sourceResponse(url: string): Promise<Response> {
       id: "mcp:ac.tandem/docs-mcp",
       signals: [
         "MCP Registry status: active.",
+        "MCP schema URL returned: https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json.",
         "Remote MCP endpoints returned: 1.",
+        "MCP remote endpoint HTTPS count: 1; non-HTTPS count: 0; host count: 1.",
         "MCP server did not declare environment requirements.",
         "Source repository is present."
       ],
@@ -205,11 +215,22 @@ function inspectResponse({
 function sourceEvidenceIds(source: string): string[] {
   switch (source) {
     case "npm":
-      return ["npm.manifest.latest", "npm.tarball.integrity", "npm.registry.signature", "npm.packument.versions", "npm.dist_tags", "npm.lifecycle"];
+      return [
+        "npm.manifest.latest",
+        "npm.tarball.integrity",
+        "npm.registry.signature",
+        "npm.packument.versions",
+        "npm.dist_tags",
+        "npm.version_intelligence",
+        "npm.osv",
+        "npm.artifact_shape",
+        "npm.lifecycle"
+      ];
     case "pypi":
       return [
         "pypi.project.json",
         "pypi.vulnerabilities",
+        "pypi.osv",
         "pypi.release.files",
         "pypi.file.digests",
         "pypi.simple.provenance",
@@ -217,6 +238,7 @@ function sourceEvidenceIds(source: string): string[] {
         "pypi.release_shape",
         "pypi.yanked",
         "pypi.requires_python",
+        "pypi.version_intelligence",
         "pypi.release_history"
       ];
     case "github":
@@ -227,10 +249,12 @@ function sourceEvidenceIds(source: string): string[] {
         "github.manifests",
         "github.lockfiles",
         "github.security",
+        "github.content_risk",
+        "github.release_assets",
         "github.default_branch_commit"
       ];
     case "huggingface-model":
-      return ["hf.card_data", "hf.files", "hf.readme", "hf.config", "hf.safetensors", "hf.remote_code", "hf.commit", "hf.gated"];
+      return ["hf.card_data", "hf.files", "hf.readme", "hf.config", "hf.safetensors", "hf.file_shape", "hf.remote_code", "hf.commit", "hf.gated"];
     case "huggingface-dataset":
       return [
         "hf.card_data",
@@ -238,13 +262,23 @@ function sourceEvidenceIds(source: string): string[] {
         "hf.dataset_features",
         "hf.dataset_splits",
         "hf.files",
+        "hf.dataset_files",
         "hf.readme",
         "hf.commit",
         "hf.gated",
         "hf.script_files"
       ];
     case "mcp":
-      return ["mcp.registry.status", "mcp.remote_endpoints", "mcp.env_requirements", "mcp.source_repo", "mcp.transport"];
+      return [
+        "mcp.registry.status",
+        "mcp.schema",
+        "mcp.remote_endpoints",
+        "mcp.endpoint_security",
+        "mcp.env_requirements",
+        "mcp.credential_scope",
+        "mcp.source_repo",
+        "mcp.transport"
+      ];
     default:
       return [];
   }

@@ -136,8 +136,8 @@ export default function ApiAccessPage() {
       <DocsSection title="Optional local deep scan">
         <DocsProse>
           <p>
-            The hosted API does not read workspaces, clone repositories, unpack artifacts or run package code. When package
-            files are already present locally, an agent can run the CLI deep scan as the second stage before approval.
+            The hosted API does not read workspaces, clone repositories, extract artifacts or run package code. When package
+            files or package artifacts are already present locally, an agent can run the CLI deep scan as the second stage before approval.
           </p>
         </DocsProse>
         <DocsCode>{localDeepScan}</DocsCode>
