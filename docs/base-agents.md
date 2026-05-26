@@ -52,6 +52,10 @@ Do not claim:
 
 - Public page: `https://nipmod.com/base-agents`
 - Machine-readable preflight: `https://nipmod.com/base-agent-preflight.json`
+- Integration outline: `https://nipmod.com/base-agents/integration`
+- Machine-readable integration outline: `https://nipmod.com/base-agent-integration.json`
+- Demo flow: `https://nipmod.com/base-agents/demo`
+- Machine-readable demo flow: `https://nipmod.com/base-agent-demo-flow.json`
 - Agent prompt pack: `https://nipmod.com/agent-prompts.json`
 - Draft workflow: `examples/agent-workflow/base-agent-package-preflight.md`
 - Plugin boundary draft: `examples/agent-workflow/base-mcp-nipmod-preflight-plugin.md`

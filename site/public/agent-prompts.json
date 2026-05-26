@@ -6,6 +6,7 @@
     "api": "Use the Nipmod API before choosing dependencies. If no key is available, first POST /api/keys/beta and store the returned key locally. Start with /api/search using x-nipmod-api-key, read selection.recommendedId and candidate gates, then use /api/inspect and /api/install-plan. Show trust score, decision, warnings and trust.factors before approval.",
     "remoteMcp": "Use https://nipmod.com/api/mcp with x-nipmod-api-key for read-only Nipmod package search, exact metadata, trust inspection and install planning. Do not expect remote workspace writes. Use local nipmod mcp serve only for controlled installs.",
     "baseAgentPreflight": "Before installing or enabling Base ecosystem tooling, use Nipmod. Search for the SDK, CLI, MCP server, package, model or repo. Inspect the exact source record and request an install plan. Show trust signals, warnings and the command boundary. Continue to Base MCP, x402 or protocol-specific work only after local or user approval.",
+    "baseMcpIntegration": "For Base MCP or x402 workflows, treat Nipmod as the package preflight layer. Use the integration outline and demo flow, then call /api/search, /api/inspect and /api/install-plan before external tooling becomes part of the workflow.",
     "packageAuthor": "Only when the repo owner asks: use Nipmod to prepare this Gitlawb repo for publishing. Run package doctor, create local package files, verify claim status, then show a publish dry run without remote writes."
   },
   "setup": {
@@ -14,6 +15,10 @@
     "localMcp": "nipmod mcp serve",
     "betaKey": "POST https://nipmod.com/api/keys/beta",
     "baseAgentPreflight": "GET https://nipmod.com/base-agent-preflight.json",
+    "baseAgentIntegration": "GET https://nipmod.com/base-agent-integration.json",
+    "baseAgentDemoFlow": "GET https://nipmod.com/base-agent-demo-flow.json",
+    "baseAgentIntegrationPage": "https://nipmod.com/base-agents/integration",
+    "baseAgentDemoPage": "https://nipmod.com/base-agents/demo",
     "baseAgentsPage": "https://nipmod.com/base-agents",
     "externalSearch": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",
     "externalInspect": "GET https://nipmod.com/api/inspect?source=npm&name=<package-name> with x-nipmod-api-key",

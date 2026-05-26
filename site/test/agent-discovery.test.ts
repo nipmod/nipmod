@@ -11,6 +11,10 @@ describe("agent discovery text", () => {
     expect(llmsText).toContain("Primary machine manifest: https://nipmod.com/.well-known/nipmod.json");
     expect(llmsText).toContain("API reference: https://nipmod.com/api-access");
     expect(llmsText).toContain("Contact: mailto:info@nipmod.com");
+    expect(llmsText).toContain("Base MCP integration outline: https://nipmod.com/base-agents/integration");
+    expect(llmsText).toContain("Base MCP integration machine outline: https://nipmod.com/base-agent-integration.json");
+    expect(llmsText).toContain("Base agent demo flow: https://nipmod.com/base-agents/demo");
+    expect(llmsText).toContain("Base agent demo machine flow: https://nipmod.com/base-agent-demo-flow.json");
     expect(llmsText).toContain("OpenAPI spec: https://nipmod.com/api/openapi");
     expect(llmsText).toContain("Source health: https://nipmod.com/api/sources/health");
     expect(llmsText).toContain("Hosted read-only MCP endpoint: https://nipmod.com/api/mcp");

@@ -53,9 +53,19 @@ We published a Base agent preflight path today:
 
 https://nipmod.com/base-agents
 
-Agents can also read the machine spec directly:
+We also published the concrete integration outline and demo flow:
+
+https://nipmod.com/base-agents/integration
+
+https://nipmod.com/base-agents/demo
+
+Agents can read the machine specs directly:
 
 https://nipmod.com/base-agent-preflight.json
+
+https://nipmod.com/base-agent-integration.json
+
+https://nipmod.com/base-agent-demo-flow.json
 
 7.
 
@@ -92,6 +102,12 @@ DM us or email info@nipmod.com if this is relevant.
 
 Docs:
 https://nipmod.com/base-agents
+
+Integration:
+https://nipmod.com/base-agents/integration
+
+Demo:
+https://nipmod.com/base-agents/demo
 
 GitHub:
 https://github.com/nipmod/nipmod

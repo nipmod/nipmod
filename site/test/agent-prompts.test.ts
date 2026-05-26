@@ -13,6 +13,10 @@ describe("agent prompt pack", () => {
     });
     expect(prompts.setup).toMatchObject({
       archivePrepare: "GET https://nipmod.com/api/archive/prepare?source=npm&name=<package-name> with x-nipmod-api-key",
+      baseAgentDemoFlow: "GET https://nipmod.com/base-agent-demo-flow.json",
+      baseAgentDemoPage: "https://nipmod.com/base-agents/demo",
+      baseAgentIntegration: "GET https://nipmod.com/base-agent-integration.json",
+      baseAgentIntegrationPage: "https://nipmod.com/base-agents/integration",
       baseAgentPreflight: "GET https://nipmod.com/base-agent-preflight.json",
       baseAgentsPage: "https://nipmod.com/base-agents",
       betaKey: "POST https://nipmod.com/api/keys/beta",
@@ -27,6 +31,7 @@ describe("agent prompt pack", () => {
     expect(prompts.prompts.api).toContain("x-nipmod-api-key");
     expect(prompts.prompts.baseAgentPreflight).toContain("Base ecosystem tooling");
     expect(prompts.prompts.baseAgentPreflight).toContain("after local or user approval");
+    expect(prompts.prompts.baseMcpIntegration).toContain("/api/install-plan");
     expect(JSON.stringify(prompts)).not.toContain("cursor://");
     expect(JSON.stringify(prompts)).not.toMatch(/private key|token|ignore previous instructions/i);
   });

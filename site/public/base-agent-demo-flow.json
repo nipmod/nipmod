@@ -1,0 +1,111 @@
+{
+  "formatVersion": 1,
+  "type": "dev.nipmod.base-agent-demo-flow.v1",
+  "name": "Base agent package preflight demo",
+  "status": "public_demo_flow",
+  "updatedAt": "2026-05-26",
+  "summary": "A reproducible flow for agents that use Nipmod before enabling Base MCP, x402 or ecosystem tooling.",
+  "links": {
+    "page": "https://nipmod.com/base-agents/demo",
+    "integrationOutline": "https://nipmod.com/base-agents/integration",
+    "integrationSpec": "https://nipmod.com/base-agent-integration.json",
+    "preflightSpec": "https://nipmod.com/base-agent-preflight.json",
+    "apiAccess": "https://nipmod.com/api-access",
+    "openapi": "https://nipmod.com/api/openapi"
+  },
+  "scenario": {
+    "userRequest": "Use a Base or x402 tool for this workflow.",
+    "agentFirstResponse": "I will inspect the package or tool surface first, then wait for approval before installing, cloning, enabling, paying for or running external tooling."
+  },
+  "steps": [
+    {
+      "id": "issue_key",
+      "method": "POST",
+      "url": "https://nipmod.com/api/keys/beta",
+      "body": {
+        "label": "base-agent-preflight"
+      }
+    },
+    {
+      "id": "search",
+      "method": "GET",
+      "url": "https://nipmod.com/api/search?q=base%20mcp%20tooling&sources=npm,pypi,github,mcp&limit=5",
+      "headers": {
+        "x-nipmod-api-key": "<key>"
+      },
+      "agentReads": [
+        "selection.recommendedId",
+        "selection.candidates",
+        "records[].trust",
+        "sourceReports"
+      ]
+    },
+    {
+      "id": "inspect",
+      "method": "GET",
+      "url": "https://nipmod.com/api/inspect?source=<selected-source>&name=<selected-name>",
+      "headers": {
+        "x-nipmod-api-key": "<key>"
+      },
+      "agentReads": [
+        "source",
+        "name",
+        "sourceUrl",
+        "version",
+        "license",
+        "trust",
+        "sourceEvidence"
+      ]
+    },
+    {
+      "id": "install_plan",
+      "method": "GET",
+      "url": "https://nipmod.com/api/install-plan?source=<selected-source>&name=<selected-name>",
+      "headers": {
+        "x-nipmod-api-key": "<key>"
+      },
+      "agentReads": [
+        "command",
+        "safety",
+        "steps",
+        "package.trust"
+      ]
+    },
+    {
+      "id": "approval",
+      "method": "host_policy",
+      "description": "Show the selected source, trust decision, warnings and install command as review data. Wait for user or host approval."
+    },
+    {
+      "id": "handoff",
+      "method": "base_mcp_or_x402",
+      "description": "Continue to Base MCP, x402 or protocol-specific action preparation only after package preflight approval."
+    }
+  ],
+  "expectedAgentOutput": {
+    "mustInclude": [
+      "selected source and package name",
+      "public source URL",
+      "trust decision",
+      "warnings",
+      "install command as review data",
+      "approval requirement before workspace writes",
+      "Base MCP handoff only after preflight"
+    ],
+    "mustNotInclude": [
+      "automatic install execution",
+      "official Base integration claim",
+      "transaction attribution claim",
+      "wallet custody claim"
+    ]
+  },
+  "passCriteria": [
+    "agent uses a Nipmod API key",
+    "agent searches before selecting a package",
+    "agent inspects the exact selected source record",
+    "agent requests an install plan",
+    "package metadata is treated as untrusted data",
+    "no install, clone, enablement or paid request setup happens before approval",
+    "Base MCP handoff happens after preflight"
+  ]
+}

@@ -7,6 +7,10 @@
   "updatedAt": "2026-05-26",
   "links": {
     "page": "https://nipmod.com/base-agents",
+    "integrationOutline": "https://nipmod.com/base-agents/integration",
+    "integrationSpec": "https://nipmod.com/base-agent-integration.json",
+    "demoFlow": "https://nipmod.com/base-agents/demo",
+    "demoSpec": "https://nipmod.com/base-agent-demo-flow.json",
     "apiAccess": "https://nipmod.com/api-access",
     "openapi": "https://nipmod.com/api/openapi",
     "remoteMcp": "https://nipmod.com/api/mcp",
@@ -55,6 +59,12 @@
     "wait_for_user_or_host_approval",
     "continue_to_base_mcp_x402_or_protocol_workflow_after_approval"
   ],
+  "integrationArtifacts": {
+    "outline": "https://nipmod.com/base-agents/integration",
+    "outlineSpec": "https://nipmod.com/base-agent-integration.json",
+    "demo": "https://nipmod.com/base-agents/demo",
+    "demoSpec": "https://nipmod.com/base-agent-demo-flow.json"
+  },
   "commands": {
     "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
     "search": "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5 with x-nipmod-api-key",
