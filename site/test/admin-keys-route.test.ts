@@ -92,10 +92,27 @@ describe("admin keys route", () => {
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
+      if (url.includes("/rest/v1/api_keys?") && init?.method !== "PATCH") {
+        const parsed = new URL(url);
+        expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
+        expect(parsed.searchParams.get("limit")).toBe("1");
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: "self-serve/agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ]);
+      }
       if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
         const parsed = new URL(url);
         expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
-        expect(parsed.searchParams.get("status")).toBe("eq.active");
+        expect(parsed.searchParams.get("status")).toBeNull();
         expect(parsed.searchParams.get("select")).toContain("id,label,tier,status");
         expect(init.headers).toMatchObject({ Prefer: "return=representation" });
         expect(JSON.parse(String(init.body))).toMatchObject({ status: "revoked" });
@@ -150,43 +167,62 @@ describe("admin keys route", () => {
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
     expect(JSON.stringify(body)).not.toContain("service-role-key");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  test("pauses and resumes active keys without revoking them", async () => {
+  test("pauses and resumes active keys without requiring native paused database status", async () => {
     const rawKey = "nka_test_admin_key_for_pause_resume_123456";
     const hashSecret = "test-admin-pause-resume-secret";
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
+    let storedLabel = "self-serve/agent";
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
-      if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
+      if (url.includes("/rest/v1/api_keys?") && init?.method !== "PATCH") {
         const parsed = new URL(url);
-        const body = JSON.parse(String(init.body));
         expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
-        if (body.status === "paused") {
-          expect(parsed.searchParams.get("status")).toBe("eq.active");
-          expect(body.revoked_at).toBeNull();
-          return Response.json([
-            {
-              created_at: "2026-05-24T00:00:00.000Z",
-              expires_at: "2026-08-22T00:00:00.000Z",
-              id: "key_1234567890abcdef",
-              label: "self-serve/agent",
-              rate_limit_multiplier: 10,
-              revoked_at: null,
-              status: "paused",
-              tier: "beta"
-            }
-          ]);
-        }
-        expect(parsed.searchParams.get("status")).toBe("eq.paused");
-        expect(body).toMatchObject({ revoked_at: null, status: "active" });
         return Response.json([
           {
             created_at: "2026-05-24T00:00:00.000Z",
             expires_at: "2026-08-22T00:00:00.000Z",
             id: "key_1234567890abcdef",
-            label: "self-serve/agent",
+            label: storedLabel,
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ]);
+      }
+      if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
+        const parsed = new URL(url);
+        const body = JSON.parse(String(init.body));
+        expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
+        if (body.label === "paused/self-serve/agent") {
+          expect(body.revoked_at).toBeNull();
+          expect(body.status).toBeUndefined();
+          storedLabel = body.label;
+          return Response.json([
+            {
+              created_at: "2026-05-24T00:00:00.000Z",
+              expires_at: "2026-08-22T00:00:00.000Z",
+              id: "key_1234567890abcdef",
+              label: storedLabel,
+              rate_limit_multiplier: 10,
+              revoked_at: null,
+              status: "active",
+              tier: "beta"
+            }
+          ]);
+        }
+        expect(body).toMatchObject({ label: "self-serve/agent", revoked_at: null });
+        expect(body.status).toBeUndefined();
+        storedLabel = body.label;
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: storedLabel,
             rate_limit_multiplier: 10,
             revoked_at: null,
             status: "active",
@@ -244,7 +280,7 @@ describe("admin keys route", () => {
     });
     expect(JSON.stringify(pauseBody)).not.toContain(rawKey);
     expect(JSON.stringify(resumeBody)).not.toContain(rawKey);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   test("updates key labels without returning raw key material", async () => {
@@ -253,6 +289,20 @@ describe("admin keys route", () => {
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
+      if (url.includes("/rest/v1/api_keys?") && init?.method !== "PATCH") {
+        return Response.json([
+          {
+            created_at: "2026-05-24T00:00:00.000Z",
+            expires_at: "2026-08-22T00:00:00.000Z",
+            id: "key_1234567890abcdef",
+            label: "self-serve/agent",
+            rate_limit_multiplier: 10,
+            revoked_at: null,
+            status: "active",
+            tier: "beta"
+          }
+        ]);
+      }
       if (url.includes("/rest/v1/api_keys?") && init?.method === "PATCH") {
         const parsed = new URL(url);
         expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
@@ -302,7 +352,7 @@ describe("admin keys route", () => {
     });
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   test("cleans stale self-serve beta keys only", async () => {
