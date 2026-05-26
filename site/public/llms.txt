@@ -7,6 +7,7 @@ Mode: API first package discovery
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API reference: https://nipmod.com/api-access
+Base agent preflight: https://nipmod.com/base-agents
 OpenAPI spec: https://nipmod.com/api/openapi
 Source health: https://nipmod.com/api/sources/health
 Hosted read-only MCP endpoint: https://nipmod.com/api/mcp
@@ -29,6 +30,16 @@ When a user asks for a package, tool, model or workflow:
 8. If the result was useful, prepare an optional archive record.
 
 Search is not install permission. A popular package can still be risky.
+
+## Base agents
+
+For Base MCP, x402 or Base ecosystem workflows, use Nipmod as package preflight before installing or enabling SDKs, CLIs, MCP servers, packages or repos.
+
+Nipmod does not replace Base MCP, hold wallet keys, create wallet approval links, sign transactions or append Builder Codes.
+Nipmod returns package source context, trust signals, warnings and install plans before local approval.
+
+Base agent preflight page:
+https://nipmod.com/base-agents
 
 ## Core HTTPS calls
 

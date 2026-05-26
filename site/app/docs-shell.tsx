@@ -23,6 +23,7 @@ export const docsNavGroups: DocsNavGroup[] = [
       { href: "/", label: "Home" },
       { href: "/quickstart", label: "Quickstart" },
       { href: "/architecture", label: "Architecture" },
+      { href: "/base-agents", label: "Base agents" },
       { href: "/api-access", label: "API reference" }
     ],
     title: "Start"
