@@ -112,7 +112,6 @@ const SKIPPED_DIRECTORIES = new Set([
   "__pycache__",
   "build",
   "coverage",
-  "dist",
   "node_modules",
   "out",
   "target",
@@ -169,28 +168,50 @@ const LIFECYCLE_SCRIPTS = new Set([
   "preinstall",
   "install",
   "postinstall",
-  "prepack",
+  "preprepare",
   "prepare",
+  "postprepare",
+  "prepack",
+  "postpack",
   "prepublish",
-  "prepublishOnly"
+  "prepublishOnly",
+  "prepublishonly"
 ]);
 
 const TEXT_RULES: TextRule[] = [
   {
     category: "remote-shell",
-    regex: /\b(curl|wget)\b[^\n\r|;&]{0,180}(?:\||;|&&)\s*(?:sudo\s+)?(?:sh|bash|zsh|node|python|python3)\b/i,
+    regex: /\b(curl|wget)\b[^\n\r|;&]{0,220}(?:\||;|&&)\s*(?:sudo\s+)?(?:sh|bash|zsh|node|python|python3)\b|\b(?:bash|sh|zsh)\s+-c\s+["']?\$?\(\s*(?:curl|wget)\b|\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b|\b(?:iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:\||;)[^\n\r]{0,120}\b(?:iex|Invoke-Expression)\b/i,
     severity: "high",
     recommendation: "Review remote shell execution before allowing any install or setup command."
   },
   {
+    category: "downloaded-file-execution",
+    regex: /\b(curl|wget|iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:-o|--output|>|-OutFile)\s*\S+[^\n\r]{0,220}(?:&&|;|\|\|)[^\n\r]{0,160}\b(sh|bash|zsh|node|python|python3|chmod|pwsh|powershell)\b/i,
+    severity: "high",
+    recommendation: "Reject or isolate installers that download a payload and then execute it."
+  },
+  {
     category: "encoded-execution",
-    regex: /\b(base64|openssl)\b[^\n\r|;&]{0,120}(?:-d|-decode|enc)[^\n\r|;&]{0,120}(?:\||;|&&)\s*(?:sh|bash|node|python|python3)\b/i,
+    regex: /\b(base64|openssl)\b[^\n\r|;&]{0,120}(?:-d|-decode|enc)[^\n\r|;&]{0,120}(?:\||;|&&)\s*(?:sh|bash|node|python|python3)\b|\b(powershell|pwsh)\b[^\n\r]{0,80}\b(-enc|-encodedcommand)\b/i,
     severity: "high",
     recommendation: "Reject or isolate encoded command execution unless the source is independently verified."
   },
   {
+    category: "obfuscated-execution",
+    regex: /\$\{IFS\}|\$'\\x[0-9a-f]{2}|\\x[0-9a-f]{2}\\x[0-9a-f]{2}|\bc['"]u['"]rl\b|String\.fromCharCode|Buffer\.from\(\[|atob\s*\(|base64\.b64decode|marshal\.loads|zlib\.decompress/i,
+    severity: "high",
+    recommendation: "Review obfuscated execution before allowing package code to run."
+  },
+  {
+    category: "secret-exfiltration",
+    regex: /\b(curl|wget|fetch\s*\(|requests\.post|axios\.post|urllib\.request|http\.post|https\.post|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}\b(\.npmrc|\.pypirc|\.netrc|\.env|id_rsa|id_ed25519|GITHUB_TOKEN|NPM_TOKEN|PYPI_TOKEN|HF_TOKEN|AWS_SECRET_ACCESS_KEY|SSH_AUTH_SOCK|private[_-]?key|wallet|keystore|mnemonic)\b|\b(\.npmrc|\.pypirc|\.netrc|\.env|id_rsa|id_ed25519|GITHUB_TOKEN|NPM_TOKEN|PYPI_TOKEN|HF_TOKEN|AWS_SECRET_ACCESS_KEY|SSH_AUTH_SOCK|private[_-]?key|wallet|keystore|mnemonic)\b[^\n\r]{0,220}\b(curl|wget|fetch\s*\(|requests\.post|axios\.post|urllib\.request|http\.post|https\.post|Invoke-WebRequest|Invoke-RestMethod)\b/i,
+    severity: "high",
+    recommendation: "Block package code that appears to upload tokens, SSH keys, wallets or environment secrets."
+  },
+  {
     category: "credential-access",
-    regex: /\b(id_rsa|id_ed25519|ssh-agent|\.ssh|mnemonic|seed phrase|private[_-]?key|wallet|keystore|\.env)\b/i,
+    regex: /\b(id_rsa|id_ed25519|ssh-agent|\.ssh|\.npmrc|\.pypirc|\.netrc|\/proc\/self\/environ|process\.env|os\.environ|getenv|GITHUB_TOKEN|NPM_TOKEN|PYPI_TOKEN|HF_TOKEN|AWS_SECRET_ACCESS_KEY|SSH_AUTH_SOCK|169\.254\.169\.254|metadata\.google\.internal|mnemonic|seed phrase|private[_-]?key|wallet|keystore|\.env)\b/i,
     severity: "high",
     recommendation: "Check whether the package attempts to read credentials, wallets, SSH keys or environment secrets."
   },
@@ -202,9 +223,21 @@ const TEXT_RULES: TextRule[] = [
   },
   {
     category: "process-execution",
-    regex: /\b(child_process|execSync|spawnSync|subprocess\.|os\.system|ProcessBuilder|eval\s*\(|new Function\s*\()\b/i,
+    regex: /\b(child_process|execSync|spawnSync|subprocess\.|os\.system|ProcessBuilder|eval\s*\(|new Function\s*\(|cmdclass\s*=|setup_requires\s*=)\b/i,
     severity: "medium",
     recommendation: "Review process execution paths and make sure install-time code cannot run unexpectedly."
+  },
+  {
+    category: "python-build-backend-risk",
+    regex: /\bbackend-path\s*=|\bbuild-backend\s*=\s*["'](?!setuptools\.build_meta|hatchling\.build|flit_core\.buildapi|poetry\.core\.masonry\.api)[^"']+["']/i,
+    severity: "medium",
+    recommendation: "Review custom Python build backends because source installs can execute build backend code."
+  },
+  {
+    category: "metadata-prompt-injection",
+    regex: /\b(ignore|disregard|override)\b[^\n\r]{0,80}\b(previous|prior|system|developer|user|safety)\b[^\n\r]{0,80}\binstructions\b|\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b[^\n\r]{0,120}\b(system prompt|developer message|secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b|\bdo not tell\b[^\n\r]{0,80}\b(user|developer|operator)\b|\brun\b[^\n\r]{0,80}\bwithout\b[^\n\r]{0,80}\b(approval|confirmation|permission)\b/i,
+    severity: "high",
+    recommendation: "Treat package docs, model cards and MCP metadata as untrusted data, not agent instructions."
   },
   {
     category: "network-fetch",
@@ -399,6 +432,12 @@ async function scanFile(absolutePath: string, state: ScanState): Promise<void> {
   if (basename(rel) === "package.json") {
     scanPackageJson(rel, content, state);
   }
+  if (basename(rel) === "pyproject.toml") {
+    scanPyProjectToml(rel, content, state);
+  }
+  if (basename(rel) === "setup.py" || basename(rel) === "setup.cfg") {
+    scanPythonSetupFile(rel, content, state);
+  }
   scanTextRules(rel, content, state);
 }
 
@@ -417,7 +456,7 @@ async function scanArtifactFile(
   let scannedEntries = 0;
   let skippedEntries = 0;
   const scanEntry = (entryName: string, content: Buffer): void => {
-    const result = scanVirtualArtifactEntry(rel, entryName, content, state);
+    const result = scanVirtualArtifactEntry(rel, entryName, content, state, 0);
     if (result === "scanned") {
       scannedEntries += 1;
     } else if (result === "skipped") {
@@ -429,6 +468,15 @@ async function scanArtifactFile(
     if (state.skipped.length < state.maxFiles) {
       state.skipped.push({ path: `${rel}!${entryName}`, reason });
     }
+    if (/encrypted|zip64|data descriptor|unsafe|exceeds|limit|could not be parsed/i.test(reason)) {
+      addFinding(state, {
+        category: "artifact-scan-limit",
+        evidence: `${entryName || "."}: ${reason}`,
+        file: rel,
+        recommendation: "Review unsupported or intentionally hard-to-scan archive entries before allowing install execution.",
+        severity: "medium"
+      });
+    }
   };
 
   try {
@@ -436,9 +484,9 @@ async function scanArtifactFile(
     if (type === "tar") {
       scanTarArtifact(buffer, scanEntry, skipEntry, state.maxArtifactEntries);
     } else if (type === "tar.gz" || type === "tgz") {
-      scanTarArtifact(gunzipSync(buffer), scanEntry, skipEntry, state.maxArtifactEntries);
+      scanTarArtifact(gunzipSync(buffer, { maxOutputLength: state.maxArtifactBytes }), scanEntry, skipEntry, state.maxArtifactEntries);
     } else {
-      scanZipArtifact(buffer, scanEntry, skipEntry, state.maxArtifactEntries);
+      scanZipArtifact(buffer, scanEntry, skipEntry, state.maxArtifactEntries, state.maxBytesPerFile);
     }
   } catch {
     state.skipped.push({ path: rel, reason: "artifact could not be parsed as a supported archive" });
@@ -453,12 +501,17 @@ function scanVirtualArtifactEntry(
   artifactPath: string,
   entryName: string,
   content: Buffer,
-  state: ScanState
+  state: ScanState,
+  depth: number
 ): "ignored" | "scanned" | "skipped" {
   const safePath = safeArtifactEntryPath(entryName);
   if (!safePath) {
     state.skipped.push({ path: `${artifactPath}!${entryName}`, reason: "unsafe archive entry path skipped" });
     return "skipped";
+  }
+  const nestedType = artifactTypeForPath(safePath);
+  if (nestedType) {
+    return scanNestedArtifactEntry(artifactPath, safePath, content, nestedType, state, depth);
   }
   if (!shouldScanFile(safePath)) {
     return "ignored";
@@ -484,7 +537,86 @@ function scanVirtualArtifactEntry(
   if (basename(safePath) === "package.json") {
     scanPackageJson(virtualPath, text, state);
   }
+  if (basename(safePath) === "pyproject.toml") {
+    scanPyProjectToml(virtualPath, text, state);
+  }
+  if (basename(safePath) === "setup.py" || basename(safePath) === "setup.cfg") {
+    scanPythonSetupFile(virtualPath, text, state);
+  }
   scanTextRules(virtualPath, text, state);
+  return "scanned";
+}
+
+function scanNestedArtifactEntry(
+  artifactPath: string,
+  safePath: string,
+  content: Buffer,
+  type: DeepScanArtifactType,
+  state: ScanState,
+  depth: number
+): "scanned" | "skipped" {
+  const nestedPath = `${artifactPath}!${safePath}`;
+  if (depth >= 1) {
+    state.skipped.push({ path: nestedPath, reason: "nested artifact scan depth limit reached" });
+    addFinding(state, {
+      category: "nested-artifact-depth",
+      evidence: "Nested package artifact exceeds scan depth limit.",
+      file: nestedPath,
+      recommendation: "Review nested artifacts manually before allowing package execution.",
+      severity: "medium"
+    });
+    return "skipped";
+  }
+  if (content.byteLength > state.maxArtifactBytes) {
+    state.skipped.push({ path: nestedPath, reason: `nested artifact exceeds ${state.maxArtifactBytes} byte scan limit` });
+    addFinding(state, {
+      category: "artifact-scan-limit",
+      evidence: "Nested artifact exceeds scan size limit.",
+      file: nestedPath,
+      recommendation: "Review large nested artifacts manually before allowing package execution.",
+      severity: "medium"
+    });
+    return "skipped";
+  }
+  let scannedEntries = 0;
+  let skippedEntries = 0;
+  const scanEntry = (entryName: string, entryContent: Buffer): void => {
+    const result = scanVirtualArtifactEntry(nestedPath, entryName, entryContent, state, depth + 1);
+    if (result === "scanned") scannedEntries += 1;
+    else if (result === "skipped") skippedEntries += 1;
+  };
+  const skipEntry = (entryName: string, reason: string): void => {
+    skippedEntries += 1;
+    state.skipped.push({ path: `${nestedPath}!${entryName}`, reason });
+    addFinding(state, {
+      category: "artifact-scan-limit",
+      evidence: `${entryName || "."}: ${reason}`,
+      file: nestedPath,
+      recommendation: "Review skipped nested archive entries before allowing package execution.",
+      severity: "medium"
+    });
+  };
+  try {
+    if (type === "tar") {
+      scanTarArtifact(content, scanEntry, skipEntry, state.maxArtifactEntries);
+    } else if (type === "tar.gz" || type === "tgz") {
+      scanTarArtifact(gunzipSync(content, { maxOutputLength: state.maxArtifactBytes }), scanEntry, skipEntry, state.maxArtifactEntries);
+    } else {
+      scanZipArtifact(content, scanEntry, skipEntry, state.maxArtifactEntries, state.maxBytesPerFile);
+    }
+  } catch {
+    state.skipped.push({ path: nestedPath, reason: "nested artifact could not be parsed as a supported archive" });
+    addFinding(state, {
+      category: "artifact-scan-limit",
+      evidence: "Nested artifact could not be parsed.",
+      file: nestedPath,
+      recommendation: "Review unparsable nested artifacts manually before allowing package execution.",
+      severity: "medium"
+    });
+    return "skipped";
+  }
+  state.totalArtifactEntries += scannedEntries;
+  state.scannedArtifacts.push({ path: nestedPath, scannedEntries, skippedEntries, type });
   return "scanned";
 }
 
@@ -526,7 +658,8 @@ function scanZipArtifact(
   buffer: Buffer,
   scanEntry: (entryName: string, content: Buffer) => void,
   skipEntry: (entryName: string, reason: string) => void,
-  maxEntries: number
+  maxEntries: number,
+  maxOutputLength: number
 ): void {
   let offset = 0;
   let entries = 0;
@@ -551,10 +684,16 @@ function scanZipArtifact(
     } else if (dataEnd > buffer.length) {
       skipEntry(entryName, "invalid zip entry skipped");
       break;
+    } else if (uncompressedSize > maxOutputLength) {
+      skipEntry(entryName, `zip entry exceeds ${maxOutputLength} byte uncompressed scan limit`);
     } else if (method === 0) {
       scanEntry(entryName, buffer.subarray(dataStart, dataEnd));
     } else if (method === 8) {
-      scanEntry(entryName, inflateRawSync(buffer.subarray(dataStart, dataEnd)));
+      try {
+        scanEntry(entryName, inflateRawSync(buffer.subarray(dataStart, dataEnd), { maxOutputLength }));
+      } catch {
+        skipEntry(entryName, "zip entry could not be inflated within scan limits");
+      }
     } else {
       skipEntry(entryName, "unsupported zip compression method skipped");
     }
@@ -586,7 +725,7 @@ function scanPackageJson(file: string, content: string, state: ScanState): void 
   }
 
   for (const [name, value] of Object.entries(scripts)) {
-    if (!LIFECYCLE_SCRIPTS.has(name) || typeof value !== "string") {
+    if ((!LIFECYCLE_SCRIPTS.has(name) && !LIFECYCLE_SCRIPTS.has(name.toLowerCase())) || typeof value !== "string") {
       continue;
     }
     const severity = isHighRiskShell(value) ? "high" : "medium";
@@ -596,6 +735,40 @@ function scanPackageJson(file: string, content: string, state: ScanState): void 
       file,
       recommendation: "Review install-time lifecycle scripts before allowing package execution.",
       severity
+    });
+  }
+}
+
+function scanPyProjectToml(file: string, content: string, state: ScanState): void {
+  if (/\bbackend-path\s*=/i.test(content)) {
+    addFinding(state, {
+      category: "python-build-backend-risk",
+      evidence: "pyproject.toml declares backend-path.",
+      file,
+      recommendation: "Review local build backend paths before allowing source installs.",
+      severity: "medium"
+    });
+  }
+  const backend = content.match(/\bbuild-backend\s*=\s*["']([^"']+)["']/i)?.[1];
+  if (backend && !/^(setuptools\.build_meta|hatchling\.build|flit_core\.buildapi|poetry\.core\.masonry\.api)$/.test(backend)) {
+    addFinding(state, {
+      category: "python-build-backend-risk",
+      evidence: `pyproject.toml declares custom build-backend ${compact(backend)}.`,
+      file,
+      recommendation: "Review custom Python build backends because building from source can execute backend code.",
+      severity: "medium"
+    });
+  }
+}
+
+function scanPythonSetupFile(file: string, content: string, state: ScanState): void {
+  if (/\bcmdclass\s*=|\bsetup_requires\s*=/i.test(content)) {
+    addFinding(state, {
+      category: "python-build-backend-risk",
+      evidence: "setup file declares cmdclass or setup_requires.",
+      file,
+      recommendation: "Review setup-time Python hooks before allowing a package build.",
+      severity: "high"
     });
   }
 }

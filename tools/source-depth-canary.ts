@@ -16,11 +16,12 @@ const DEFAULT_CANARIES = [
       "npm.version_intelligence",
       "npm.osv",
       "npm.artifact_shape",
-      "npm.lifecycle"
+      "npm.lifecycle",
+      "metadata.agent_instructions"
     ],
     requiredDimensions: {
       provenanceStatus: "signature",
-      securityConfidence: "high"
+      securityConfidence: ["medium", "high"]
     },
     requiredSignals: [
       "Latest tarball integrity metadata is present",
@@ -49,7 +50,8 @@ const DEFAULT_CANARIES = [
       "pypi.yanked",
       "pypi.requires_python",
       "pypi.version_intelligence",
-      "pypi.release_history"
+      "pypi.release_history",
+      "metadata.agent_instructions"
     ],
     requiredDimensions: {
       provenanceStatus: "attested"
@@ -80,7 +82,8 @@ const DEFAULT_CANARIES = [
       "github.security",
       "github.content_risk",
       "github.release_assets",
-      "github.default_branch_commit"
+      "github.default_branch_commit",
+      "metadata.agent_instructions"
     ],
     requiredSignals: [
       "Default branch:",
@@ -109,7 +112,8 @@ const DEFAULT_CANARIES = [
       "hf.file_shape",
       "hf.remote_code",
       "hf.commit",
-      "hf.gated"
+      "hf.gated",
+      "metadata.agent_instructions"
     ],
     requiredDimensions: {
       provenanceStatus: "integrity"
@@ -138,7 +142,8 @@ const DEFAULT_CANARIES = [
       "hf.readme",
       "hf.commit",
       "hf.gated",
-      "hf.script_files"
+      "hf.script_files",
+      "metadata.agent_instructions"
     ],
     requiredDimensions: {
       provenanceStatus: "integrity"
@@ -161,7 +166,8 @@ const DEFAULT_CANARIES = [
       "mcp.env_requirements",
       "mcp.credential_scope",
       "mcp.source_repo",
-      "mcp.transport"
+      "mcp.transport",
+      "metadata.agent_instructions"
     ],
     requiredSignals: [
       "MCP Registry status:",
@@ -219,6 +225,21 @@ function assertDepthPayload(payload, canary) {
   if (record.source !== canary.source) {
     throw new Error(`source mismatch: expected ${canary.source}, got ${record.source ?? "unknown"}`);
   }
+  if (record.formatVersion !== 1) {
+    throw new Error(`external record formatVersion mismatch for ${record.id ?? canary.source}`);
+  }
+  if (record.archive?.status !== "external_indexed") {
+    throw new Error(`external archive status mismatch for ${record.id ?? canary.source}`);
+  }
+  if (record.trust?.policy?.version !== "external-v2") {
+    throw new Error(`trust policy version mismatch for ${record.id ?? canary.source}`);
+  }
+  if (!["recommended", "usable_with_warning"].includes(record.trust?.decision)) {
+    throw new Error(`inspect record should not be avoid/unknown for canary ${record.id ?? canary.source}`);
+  }
+  if (record.trust?.risk === "high") {
+    throw new Error(`inspect record must not be high risk for canary ${record.id ?? canary.source}`);
+  }
 
   const signals = Array.isArray(record.trust?.signals) ? record.trust.signals : [];
   if (signals.length === 0) {
@@ -244,8 +265,8 @@ function assertDepthPayload(payload, canary) {
     if (!check) {
       throw new Error(`missing sourceEvidence check for ${record.id ?? canary.source}: ${requiredEvidenceId}`);
     }
-    if (check.status === "missing") {
-      throw new Error(`sourceEvidence check missing evidence for ${record.id ?? canary.source}: ${requiredEvidenceId}`);
+    if (check.status !== "pass") {
+      throw new Error(`sourceEvidence check did not pass for ${record.id ?? canary.source}: ${requiredEvidenceId}`);
     }
   }
 
@@ -262,8 +283,11 @@ function assertDepthPayload(payload, canary) {
   const dimensions = record.trust?.dimensions ?? {};
   if (canary.requiredDimensions) {
     for (const [key, expected] of Object.entries(canary.requiredDimensions)) {
-      if (dimensions[key] !== expected) {
-        throw new Error(`dimension ${key} mismatch for ${record.id ?? canary.source}: expected ${expected}, got ${dimensions[key] ?? "unknown"}`);
+      const expectedValues = Array.isArray(expected) ? expected : [expected];
+      if (!expectedValues.includes(dimensions[key])) {
+        throw new Error(
+          `dimension ${key} mismatch for ${record.id ?? canary.source}: expected ${expectedValues.join(" or ")}, got ${dimensions[key] ?? "unknown"}`
+        );
       }
     }
   }

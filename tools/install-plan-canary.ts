@@ -95,6 +95,12 @@ export function assertInstallPlanPayload(payload: unknown, canary: { expectBlock
   if (typeof packageRecord.id !== "string" || !packageRecord.id.startsWith(`${canary.source}:`)) {
     throw new Error(`package id must use source prefix ${canary.source}:`);
   }
+  if (packageRecord.archive?.status !== "external_indexed") {
+    throw new Error(`install-plan package archive status mismatch for ${packageRecord.id}`);
+  }
+  if (packageRecord.trust?.policy?.version !== "external-v2") {
+    throw new Error(`install-plan package trust policy mismatch for ${packageRecord.id}`);
+  }
 
   assertTrust(packageRecord.trust, packageRecord.id);
 
@@ -110,6 +116,9 @@ export function assertInstallPlanPayload(payload: unknown, canary: { expectBlock
   }
   if (!Array.isArray(plan.commands) || plan.commands.length === 0) {
     throw new Error(`install commands missing for ${packageRecord.id}`);
+  }
+  if (plan.sourceOwnership !== "external-owner-retained") {
+    throw new Error(`install plan source ownership boundary mismatch for ${packageRecord.id}`);
   }
   if (!Array.isArray(plan.commandDetails) || plan.commandDetails.length !== plan.commands.length) {
     throw new Error(`commandDetails must exist for every command in ${packageRecord.id}`);
@@ -131,9 +140,25 @@ export function assertInstallPlanPayload(payload: unknown, canary: { expectBlock
   if (!["low", "medium", "high"].includes(safety.commandRisk)) {
     throw new Error(`unknown command risk for ${packageRecord.id}: ${String(safety.commandRisk)}`);
   }
+  if (!Array.isArray(safety.warnings)) {
+    throw new Error(`safety warnings must be an array for ${packageRecord.id}`);
+  }
+  if (safety.blocked === true) {
+    if (typeof safety.blockReason !== "string" || safety.blockReason.length === 0) {
+      throw new Error(`blocked install plan must include a blockReason for ${packageRecord.id}`);
+    }
+  } else if (safety.blockReason !== null) {
+    throw new Error(`unblocked install plan must keep blockReason null for ${packageRecord.id}`);
+  }
+  if ((packageRecord.trust?.decision === "avoid" || packageRecord.trust?.risk === "high") && safety.blocked !== true) {
+    throw new Error(`source risk must block install plan for ${packageRecord.id}`);
+  }
 
   for (const [index, detail] of plan.commandDetails.entries()) {
     assertCommandDetail(detail, plan.commands[index], packageRecord.id, Boolean(safety.blocked));
+  }
+  if (!Array.isArray(plan.steps) || !plan.steps.some((step: unknown) => typeof step === "string" && step.includes("Ask the user"))) {
+    throw new Error(`install plan must tell the host to ask the user before workspace writes for ${packageRecord.id}`);
   }
 
   return {
