@@ -39,6 +39,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html data-scroll-behavior="smooth" lang="en">
       <head>
+        <meta content="6a15cf215ef08857424491fe" name="base:app_id" />
         <link href="/llms.txt" rel="alternate" title="Nipmod agent instructions" type="text/plain" />
         <link href="/.well-known/nipmod.json" rel="alternate" title="Nipmod machine discovery" type="application/json" />
       </head>
