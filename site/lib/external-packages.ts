@@ -1565,13 +1565,18 @@ async function inspectHuggingFace(
 ): Promise<ExternalPackageRecord | null> {
   const endpoint = source === "huggingface-model" ? "models" : "datasets";
   const params = new URLSearchParams();
-  for (const field of ["siblings", "cardData", "tags", "downloads", "likes", "sha", "lastModified", "pipeline_tag", "library_name"]) {
+  for (const field of huggingFaceInspectExpandFields(source)) {
     params.append("expand[]", field);
   }
   const payload = await fetchJson(`https://huggingface.co/api/${endpoint}/${encodeURIComponentRepo(name)}?${params.toString()}`, fetchImpl, timeoutMs, {
     source
   });
   return huggingFaceRecord(source, payload);
+}
+
+function huggingFaceInspectExpandFields(source: "huggingface-model" | "huggingface-dataset"): string[] {
+  const common = ["siblings", "cardData", "tags", "downloads", "likes", "sha", "lastModified"];
+  return source === "huggingface-model" ? [...common, "pipeline_tag", "library_name"] : common;
 }
 
 function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", item: unknown): ExternalPackageRecord | null {
