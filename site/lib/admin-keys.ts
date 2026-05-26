@@ -132,18 +132,29 @@ export async function cleanupStaleBetaKeys(
   const olderThanHours = clampStaleHours(input.olderThanHours);
   const cutoff = new Date(Date.now() - olderThanHours * 60 * 60 * 1000).toISOString();
   const now = new Date().toISOString();
-  const params = new URLSearchParams({
+  const staleParams = new URLSearchParams({
     created_at: `lt.${cutoff}`,
     label: "like.self-serve/%",
     select: KEY_SELECT,
     status: "eq.active",
     tier: "eq.beta"
   });
-  const response = await patchApiKeys(env, params, { revoked_at: now, status: "revoked" }, fetchImpl);
-  if (!response.ok) {
+  const expiredParams = new URLSearchParams({
+    expires_at: `lt.${now}`,
+    label: "like.self-serve/%",
+    select: KEY_SELECT,
+    status: "eq.active",
+    tier: "eq.beta"
+  });
+  const staleResponse = await patchApiKeys(env, staleParams, { revoked_at: now, status: "revoked" }, fetchImpl);
+  if (!staleResponse.ok) {
     return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
   }
-  return adminKeyAction("cleanup-stale-beta", await readKeyRows(response), status);
+  const expiredResponse = await patchApiKeys(env, expiredParams, { revoked_at: now, status: "revoked" }, fetchImpl);
+  if (!expiredResponse.ok) {
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+  }
+  return adminKeyAction("cleanup-stale-beta", dedupeKeyRows([...(await readKeyRows(staleResponse)), ...(await readKeyRows(expiredResponse))]), status);
 }
 
 export function keyStoreStatus(env: AdminKeyEnv = process.env) {
@@ -223,6 +234,10 @@ async function patchApiKeys(
 async function readKeyRows(response: Response): Promise<AdminKeyRecord[]> {
   const rows = await response.json().catch(() => []);
   return Array.isArray(rows) ? rows.map(keyRecordFromRow).filter((row): row is AdminKeyRecord => row !== null) : [];
+}
+
+function dedupeKeyRows(rows: AdminKeyRecord[]): AdminKeyRecord[] {
+  return [...new Map(rows.map((row) => [row.id, row])).values()];
 }
 
 function keyRecordFromRow(value: unknown): AdminKeyRecord | null {

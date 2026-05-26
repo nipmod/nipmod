@@ -900,7 +900,7 @@ function openApiDocument() {
             },
             olderThanHours: {
               default: 720,
-              description: "Only used by cleanup-stale-beta. Active self-serve beta keys older than this window are disabled.",
+              description: "Only used by cleanup-stale-beta. Active self-serve beta keys older than this window or past expiry are revoked.",
               maximum: 8760,
               minimum: 1,
               type: "integer"

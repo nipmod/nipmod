@@ -12,6 +12,7 @@ const ARCHIVE_ROW_LIMIT = 5_000;
 const KEY_ACTIVITY_EVENT_LIMIT = 5_000;
 const KEY_ROW_LIMIT = 500;
 const STALE_BETA_HOURS = 720;
+const EXPIRING_SOON_HOURS = 168;
 
 export interface AdminSummaryInput {
   limit: number;
@@ -224,6 +225,9 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
     return {
       ...status,
       activeCount: 0,
+      expiredActiveCount: 0,
+      expiringSoonCount: 0,
+      pausedCount: 0,
       recentKeys: [],
       revokedCount: 0,
       selfServeBetaCount: 0,
@@ -247,6 +251,9 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
     return {
       ...status,
       activeCount: keys.filter((key) => key.status === "active").length,
+      expiredActiveCount: keys.filter(isExpiredActiveKey).length,
+      expiringSoonCount: keys.filter(isExpiringSoonKey).length,
+      pausedCount: keys.filter((key) => key.status === "paused").length,
       recentKeys: keys.slice(0, input.limit).map(keySummaryRow),
       revokedCount: keys.filter((key) => key.status === "revoked").length,
       selfServeBetaCount: keys.filter((key) => key.tier === "beta" && key.label.startsWith("self-serve/")).length,
@@ -260,6 +267,9 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
       ...status,
       activeCount: null,
       error: "key metrics are temporarily unavailable",
+      expiredActiveCount: null,
+      expiringSoonCount: null,
+      pausedCount: null,
       recentKeys: [],
       revokedCount: null,
       selfServeBetaCount: null,
@@ -496,8 +506,27 @@ function isStaleBetaKey(key: KeyMetricRow): boolean {
   if (key.status !== "active" || key.tier !== "beta" || !key.label.startsWith("self-serve/")) {
     return false;
   }
+  if (isExpiredActiveKey(key)) {
+    return true;
+  }
   const createdAt = Date.parse(key.created_at);
   return Number.isFinite(createdAt) && Date.now() - createdAt > STALE_BETA_HOURS * 60 * 60 * 1000;
+}
+
+function isExpiredActiveKey(key: KeyMetricRow): boolean {
+  if (key.status !== "active" || !key.expires_at) {
+    return false;
+  }
+  const expiresAt = Date.parse(key.expires_at);
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now();
+}
+
+function isExpiringSoonKey(key: KeyMetricRow): boolean {
+  if (key.status !== "active" || !key.expires_at || isExpiredActiveKey(key)) {
+    return false;
+  }
+  const expiresAt = Date.parse(key.expires_at);
+  return Number.isFinite(expiresAt) && expiresAt - Date.now() <= EXPIRING_SOON_HOURS * 60 * 60 * 1000;
 }
 
 function keyAgeDays(value: string): number | null {
@@ -510,16 +539,20 @@ function keyAgeDays(value: string): number | null {
 
 function keySummaryRow(key: KeyMetricRow) {
   const stale = isStaleBetaKey(key);
+  const expired = isExpiredActiveKey(key);
+  const expiringSoon = isExpiringSoonKey(key);
   return {
     ageDays: keyAgeDays(key.created_at),
     createdAt: key.created_at,
+    expired,
+    expiringSoon,
     expiresAt: key.expires_at,
     id: key.id,
     label: key.label,
     rateLimitMultiplier: key.rate_limit_multiplier,
     revokedAt: key.revoked_at,
     stale,
-    staleReason: stale ? "active self-serve beta key older than 30 days" : "",
+    staleReason: expired ? "active beta key is past expiry" : stale ? "active self-serve beta key older than 30 days" : "",
     status: key.status,
     tier: key.tier
   };

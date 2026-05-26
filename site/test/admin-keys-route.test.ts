@@ -83,7 +83,7 @@ describe("admin keys route", () => {
       ok: true
     });
     expect(JSON.stringify(body)).not.toContain(password);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   test("revokes a key without returning raw key material", async () => {
@@ -316,7 +316,7 @@ describe("admin keys route", () => {
         expect(parsed.searchParams.get("tier")).toBe("eq.beta");
         expect(parsed.searchParams.get("status")).toBe("eq.active");
         expect(parsed.searchParams.get("label")).toBe("like.self-serve/%");
-        expect(parsed.searchParams.get("created_at")).toMatch(/^lt\./);
+        expect(parsed.searchParams.get("created_at") ?? parsed.searchParams.get("expires_at")).toMatch(/^lt\./);
         return Response.json([]);
       }
       if (url.endsWith("/rest/v1/api_usage_events")) {
@@ -350,6 +350,7 @@ describe("admin keys route", () => {
       affectedCount: 0,
       ok: true
     });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   test("blocks current admin key self-modification", async () => {

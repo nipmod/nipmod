@@ -76,11 +76,12 @@ If the live check returns `fallbackReason: "distributed_rpc_http_404"`, Producti
    - Supported tiers: `beta`, `partner`, `admin`. `builder` remains accepted as a legacy beta-tier alias.
 
 3. Supabase key registry and metrics RPC
-   - Apply `supabase/migrations/20260524103142_api_keys_and_usage_metrics.sql` to the Supabase project.
+   - Apply `supabase/migrations/20260524103142_api_keys_and_usage_metrics.sql` and later API-key migrations to the Supabase project.
    - If using the Supabase SQL editor, use `docs/api-key-schema.sql` and `docs/api-usage-metrics-schema.sql` for the new key registry and metrics RPC.
    - In Supabase Data API settings, expose `api_keys` and `read_api_usage_metrics` for server-side service role calls only.
 
 Raw API keys are never inserted. Store only `key_hash` values derived with `NIPMOD_API_KEY_HASH_SECRET`.
+Key status may be `active`, `paused` or `revoked`. Paused keys do not authenticate because runtime verification only accepts active registry rows.
 
 Free beta keys can be issued by the API once the registry table is live:
 
