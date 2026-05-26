@@ -1297,11 +1297,21 @@ async function deepScanCommand(args: string[]): Promise<CliResult> {
   const target = optionalFirstPositional(args) ?? optionalFlagValue(args, "--dir") ?? process.cwd();
   const maxFiles = optionalPositiveInteger(args, "--max-files");
   const maxBytesPerFile = optionalPositiveInteger(args, "--max-bytes-per-file");
+  const maxArtifactBytes = optionalPositiveInteger(args, "--max-artifact-bytes");
+  const maxArtifactEntries = optionalPositiveInteger(args, "--max-artifact-entries");
   const options: {
+    maxArtifactBytes?: number;
+    maxArtifactEntries?: number;
     maxBytesPerFile?: number;
     maxFiles?: number;
     path: string;
   } = { path: target };
+  if (maxArtifactBytes !== undefined) {
+    options.maxArtifactBytes = maxArtifactBytes;
+  }
+  if (maxArtifactEntries !== undefined) {
+    options.maxArtifactEntries = maxArtifactEntries;
+  }
   if (maxFiles !== undefined) {
     options.maxFiles = maxFiles;
   }
@@ -2418,6 +2428,8 @@ const VALUE_FLAGS = new Set([
   "--identity",
   "--integrity",
   "--limit",
+  "--max-artifact-bytes",
+  "--max-artifact-entries",
   "--max-bytes-per-file",
   "--max-files",
   "--log-id",

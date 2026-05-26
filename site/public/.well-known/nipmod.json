@@ -42,7 +42,7 @@
       "command": "nipmod deep-scan <path> --json",
       "mode": "local-static",
       "hostedApiRunsDeepScan": false,
-      "notes": "Deep scan reads files already present locally. The hosted API does not clone repositories, unpack artifacts, install packages or execute code."
+      "notes": "Deep scan reads files and supported package artifacts already present locally. The hosted API does not clone repositories, extract artifacts, install packages or execute code."
     }
   },
   "sources": [

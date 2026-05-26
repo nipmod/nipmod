@@ -169,6 +169,8 @@ const AuditArgumentsSchema = TrustPinsSchema.extend({
 });
 
 const DeepScanArgumentsSchema = z.strictObject({
+  maxArtifactBytes: z.number().int().min(1).max(50 * 1024 * 1024).optional(),
+  maxArtifactEntries: z.number().int().min(1).max(5_000).optional(),
   maxBytesPerFile: z.number().int().min(1).max(5 * 1024 * 1024).optional(),
   maxFiles: z.number().int().min(1).max(10_000).optional(),
   projectDir: z.string().optional()
@@ -657,6 +659,8 @@ async function deepScanTool(raw: unknown): Promise<JsonValue> {
   const args = DeepScanArgumentsSchema.parse(raw);
   return toJsonValue(
     await deepScanProject({
+      ...(args.maxArtifactBytes === undefined ? {} : { maxArtifactBytes: args.maxArtifactBytes }),
+      ...(args.maxArtifactEntries === undefined ? {} : { maxArtifactEntries: args.maxArtifactEntries }),
       ...(args.maxBytesPerFile === undefined ? {} : { maxBytesPerFile: args.maxBytesPerFile }),
       ...(args.maxFiles === undefined ? {} : { maxFiles: args.maxFiles }),
       path: args.projectDir ?? process.cwd()
@@ -1176,10 +1180,12 @@ const MCP_TOOLS: ToolDefinition[] = [
       openWorldHint: false
     },
     description:
-      "Run a local static deep scan over files already present in a workspace. It reads files but does not install packages, fetch network resources, unpack artifacts, execute code or write to the workspace.",
+      "Run a local static deep scan over files already present in a workspace. It reads files and can inspect supported local package artifacts in memory, but does not install packages, fetch network resources, execute code, extract files to disk or write to the workspace.",
     inputSchema: {
       additionalProperties: false,
       properties: {
+        maxArtifactBytes: { maximum: 52428800, minimum: 1, type: "integer" },
+        maxArtifactEntries: { maximum: 5000, minimum: 1, type: "integer" },
         maxBytesPerFile: { maximum: 5242880, minimum: 1, type: "integer" },
         maxFiles: { maximum: 10000, minimum: 1, type: "integer" },
         projectDir: { type: "string" }

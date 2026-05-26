@@ -294,6 +294,26 @@ export interface ExternalInstallPlanCommand {
 
 type UnknownRecord = Record<string, unknown>;
 
+interface OsvVulnerabilitySummary {
+  available: boolean;
+  ids: string[];
+  vulnerabilityCount: number;
+}
+
+interface VersionIntelligence {
+  dormancyDaysBeforeLatest: number | null;
+  latestPublishAgeHours: number | null;
+  previousPublishedAt: string | null;
+  recentVersionCount30d: number;
+}
+
+interface McpEnvironmentSummary {
+  count: number;
+  optionalCount: number;
+  requiredCount: number;
+  secretLikeCount: number;
+}
+
 const DEFAULT_TIMEOUT_MS = 6500;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
@@ -301,6 +321,7 @@ const MAX_QUERY_LENGTH = 200;
 const MAX_NAME_LENGTH = 220;
 const MAX_SOURCE_RESPONSE_BYTES = 2_000_000;
 const MAX_NPM_PACKUMENT_RESPONSE_BYTES = 8_000_000;
+const MAX_OSV_RESPONSE_BYTES = 1_000_000;
 const SOURCE_USER_AGENT = "nipmod-package-api/1.2.9 (+https://nipmod.com)";
 const FETCH_CACHE_TTL_MS = 30_000;
 const FETCH_CACHE_MAX_ITEMS = 500;
@@ -479,6 +500,8 @@ const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
 
 const fetchCache = new Map<string, { expiresAt: number; value: UnknownRecord | UnknownRecord[] }>();
 const inflightFetches = new Map<string, Promise<UnknownRecord | UnknownRecord[]>>();
+const osvFetchCache = new Map<string, { expiresAt: number; value: OsvVulnerabilitySummary }>();
+const inflightOsvFetches = new Map<string, Promise<OsvVulnerabilitySummary>>();
 const sourceCircuitStates = new Map<
   ExternalPackageSource,
   {
@@ -492,6 +515,8 @@ const sourceCircuitStates = new Map<
 export function resetExternalSourceRuntimeStateForTests(): void {
   fetchCache.clear();
   inflightFetches.clear();
+  osvFetchCache.clear();
+  inflightOsvFetches.clear();
   sourceCircuitStates.clear();
 }
 
@@ -924,7 +949,6 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   }
   const packageName = readString(manifest.name) ?? name;
   const version = readString(manifest.version);
-  const packument = await fetchNpmPackumentSummary(packageName, version, fetchImpl, timeoutMs);
   const repo = normalizeRepositoryUrl(readNestedString(manifest, ["repository", "url"]) ?? readString(manifest.repository));
   const license = readString(manifest.license);
   const integrity = readNestedString(manifest, ["dist", "integrity"]);
@@ -942,9 +966,17 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const deprecated = readString(manifest.deprecated);
   const nodeEngine = readNestedString(manifest, ["engines", "node"]);
   const fundingUrl = readString(manifest.funding) ?? readNestedString(manifest, ["funding", "url"]);
-  const downloads = await npmMonthlyDownloads(packageName, fetchImpl, timeoutMs);
+  const [packument, downloads, osv] = await Promise.all([
+    fetchNpmPackumentSummary(packageName, version, fetchImpl, timeoutMs),
+    npmMonthlyDownloads(packageName, fetchImpl, timeoutMs),
+    fetchOsvVulnerabilitySummary("npm", packageName, version, fetchImpl, timeoutMs)
+  ]);
   const warnings = [
     ...(deprecated ? [`npm marks the latest release as deprecated: ${deprecated}`] : []),
+    ...(osv.vulnerabilityCount > 0
+      ? [`OSV reports ${osv.vulnerabilityCount} known vulnerabilities for this npm package/version.`]
+      : []),
+    ...versionIntelligenceWarnings("npm", packument),
     ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
     ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."]),
     ...(tarball && !tarballIsHttps ? ["npm tarball URL is not HTTPS."] : []),
@@ -963,6 +995,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (packument.latestDistTagMatches ? 2 : 0) +
       (maintainerCount ? 4 : 0) +
       (deprecated ? -28 : 0) +
+      osv.vulnerabilityCount * -24 +
+      versionIntelligencePenalty(packument) +
       (tarball && !tarballIsHttps ? -10 : 0) +
       lifecycleRiskPenalty(lifecycleRisk) +
       Math.min(12, Math.log10((downloads ?? 0) + 1) * 2)
@@ -1006,9 +1040,26 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       packument.latestPublishedAt
         ? `npm latest version published at: ${packument.latestPublishedAt}.`
         : "npm latest version publish timestamp was not returned.",
+      packument.previousPublishedAt
+        ? `npm previous version published at: ${packument.previousPublishedAt}.`
+        : "npm previous version publish timestamp was not returned.",
+      packument.latestPublishAgeHours === null
+        ? "npm latest publish age could not be computed."
+        : `npm latest publish age hours: ${packument.latestPublishAgeHours}.`,
+      packument.recentVersionCount30d
+        ? `npm versions published in the last 30 days: ${packument.recentVersionCount30d}.`
+        : "npm returned no versions published in the last 30 days.",
+      packument.dormancyDaysBeforeLatest === null
+        ? "npm dormancy before latest release could not be computed."
+        : `npm dormancy before latest release days: ${packument.dormancyDaysBeforeLatest}.`,
       packument.deprecatedVersionCount
         ? `npm packument includes ${packument.deprecatedVersionCount} deprecated version(s).`
         : "npm packument returned no deprecated versions.",
+      osv.available
+        ? osv.vulnerabilityCount === 0
+          ? "OSV returned no known vulnerabilities for this npm package/version."
+          : `OSV returned vulnerability IDs for this npm package/version: ${osv.ids.join(", ")}.`
+        : "OSV vulnerability context was unavailable for this npm package/version.",
       repo ? "Repository link is present." : "Repository link is missing.",
       dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
       maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
@@ -1023,7 +1074,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   });
 }
 
-interface NpmPackumentSummary {
+interface NpmPackumentSummary extends VersionIntelligence {
   available: boolean;
   createdAt: string | null;
   deprecatedVersionCount: number;
@@ -1052,6 +1103,7 @@ async function fetchNpmPackumentSummary(
     }
     const distTags = Object.keys(readRecord(payload["dist-tags"]) ?? {}).slice(0, 12);
     const latestDistTag = readNestedString(payload, ["dist-tags", "latest"]);
+    const versionIntelligence = versionIntelligenceFromNpmTime(readRecord(payload.time), latestVersion);
     return {
       available: true,
       createdAt: readNestedString(payload, ["time", "created"]),
@@ -1060,7 +1112,8 @@ async function fetchNpmPackumentSummary(
       latestDistTagMatches: latestVersion && latestDistTag ? latestDistTag === latestVersion : null,
       latestPublishedAt: latestVersion ? readNestedString(payload, ["time", latestVersion]) : null,
       modifiedAt: readNestedString(payload, ["time", "modified"]),
-      versionCount: recordKeyCount(payload.versions)
+      versionCount: recordKeyCount(payload.versions),
+      ...versionIntelligence
     };
   } catch {
     return emptyNpmPackumentSummary();
@@ -1073,9 +1126,13 @@ function emptyNpmPackumentSummary(): NpmPackumentSummary {
     createdAt: null,
     deprecatedVersionCount: 0,
     distTags: [],
+    dormancyDaysBeforeLatest: null,
     latestDistTagMatches: null,
+    latestPublishAgeHours: null,
     latestPublishedAt: null,
     modifiedAt: null,
+    previousPublishedAt: null,
+    recentVersionCount30d: 0,
     versionCount: 0
   };
 }
@@ -1085,6 +1142,29 @@ function countDeprecatedNpmVersions(value: unknown): number {
     return 0;
   }
   return Object.values(value).filter((version) => isRecord(version) && readString(version.deprecated)).length;
+}
+
+function versionIntelligenceFromNpmTime(time: UnknownRecord | null, latestVersion: string | null): VersionIntelligence {
+  if (!time) {
+    return emptyVersionIntelligence();
+  }
+  const latestPublishedAt = latestVersion ? readString(time[latestVersion]) : null;
+  const publishedDates = Object.entries(time)
+    .filter(([key]) => key !== "created" && key !== "modified")
+    .map(([versionName, publishedAt]) => ({ publishedAt: readString(publishedAt), versionName }))
+    .filter((entry): entry is { publishedAt: string; versionName: string } => Boolean(entry.publishedAt))
+    .sort((left, right) => new Date(left.publishedAt).getTime() - new Date(right.publishedAt).getTime());
+  const previousPublishedAt = latestPublishedAt
+    ? publishedDates
+        .filter((entry) => entry.publishedAt < latestPublishedAt)
+        .at(-1)?.publishedAt ?? null
+    : publishedDates.at(-2)?.publishedAt ?? null;
+  return {
+    dormancyDaysBeforeLatest: latestPublishedAt && previousPublishedAt ? daysBetweenIso(previousPublishedAt, latestPublishedAt) : null,
+    latestPublishAgeHours: latestPublishedAt ? hoursSinceIso(latestPublishedAt) : null,
+    previousPublishedAt,
+    recentVersionCount30d: publishedDates.filter((entry) => hoursSinceIso(entry.publishedAt) !== null && hoursSinceIso(entry.publishedAt)! <= 720).length
+  };
 }
 
 async function npmMonthlyDownloads(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<number | null> {
@@ -1214,8 +1294,12 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const repo =
     normalizeRepositoryUrl(readString(projectUrls?.Source) ?? readString(projectUrls?.Homepage) ?? readString(info.home_page)) ?? null;
   const license = readString(info.license) || licenseFromClassifiers(info.classifiers);
-  const releaseFiles = latestPyPiReleaseFiles(payload, readString(info.version));
-  const simpleFiles = await fetchPyPiSimpleLatestFiles(projectName, releaseFiles, fetchImpl, timeoutMs);
+  const version = readString(info.version);
+  const releaseFiles = latestPyPiReleaseFiles(payload, version);
+  const [simpleFiles, osv] = await Promise.all([
+    fetchPyPiSimpleLatestFiles(projectName, releaseFiles, fetchImpl, timeoutMs),
+    fetchOsvVulnerabilitySummary("PyPI", projectName, version, fetchImpl, timeoutMs)
+  ]);
   const fileHashCount = releaseFiles.filter(pyPiFileHasHash).length;
   const fileSignatureCount = releaseFiles.filter((file) => readBoolean(file.has_sig)).length;
   const yankedCount = releaseFiles.filter((file) => readBoolean(file.yanked)).length;
@@ -1232,8 +1316,13 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const distInfoMetadataCount = simpleFiles.filter((file) => Boolean(file["data-dist-info-metadata"])).length;
   const requiresPython = readString(info.requires_python);
   const classifierCount = arrayLength(info.classifiers);
+  const releaseIntelligence = versionIntelligenceFromPyPiReleases(payload.releases, version);
   const warnings = [
     ...(vulnerabilities.length > 0 ? [`PyPI reports ${vulnerabilities.length} known vulnerabilities for the latest release.`] : []),
+    ...(osv.vulnerabilityCount > 0
+      ? [`OSV reports ${osv.vulnerabilityCount} known vulnerabilities for this PyPI package/version.`]
+      : []),
+    ...versionIntelligenceWarnings("PyPI", releaseIntelligence),
     ...(releaseFiles.length === 0 ? ["PyPI did not return latest release file metadata."] : []),
     ...(releaseFiles.length > 0 && fileHashCount < releaseFiles.length ? ["Some PyPI latest release files are missing digest metadata."] : []),
     ...(sourceOnlyRelease ? ["PyPI latest release has only source distribution files; local install may execute build backend code."] : []),
@@ -1251,6 +1340,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       (hasWheel ? 4 : 0) +
       (requiresPython ? 4 : 0) -
       vulnerabilities.length * 24 -
+      osv.vulnerabilityCount * 24 +
+      versionIntelligencePenalty(releaseIntelligence) -
       (sourceOnlyRelease ? 10 : 0) -
       yankedCount * 30 -
       (confusionTarget ? 12 : 0)
@@ -1277,6 +1368,11 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     signals: [
       "Resolved from the PyPI JSON API.",
       vulnerabilities.length === 0 ? "PyPI returned no vulnerabilities for the latest release." : "PyPI returned vulnerability records.",
+      osv.available
+        ? osv.vulnerabilityCount === 0
+          ? "OSV returned no known vulnerabilities for this PyPI package/version."
+          : `OSV returned vulnerability IDs for this PyPI package/version: ${osv.ids.join(", ")}.`
+        : "OSV vulnerability context was unavailable for this PyPI package/version.",
       repo ? "Project source/homepage link is present." : "Project source link is missing.",
       releaseFiles.length ? `PyPI latest release files returned: ${releaseFiles.length}.` : "PyPI latest release files were not returned.",
       fileHashCount ? `PyPI latest release files with digest metadata: ${fileHashCount}.` : "PyPI did not return latest release file digests.",
@@ -1299,11 +1395,23 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       requiresPython ? `PyPI requires-python: ${requiresPython}.` : "PyPI did not return requires-python metadata.",
       classifierCount ? `PyPI classifiers returned: ${classifierCount}.` : "PyPI classifiers were not returned.",
       releaseVersionCount ? `PyPI release history versions returned: ${releaseVersionCount}.` : "PyPI release history was not returned.",
-      latestUploadTime ? `PyPI latest upload timestamp: ${latestUploadTime}.` : "PyPI latest upload timestamp was not returned."
+      latestUploadTime ? `PyPI latest upload timestamp: ${latestUploadTime}.` : "PyPI latest upload timestamp was not returned.",
+      releaseIntelligence.previousPublishedAt
+        ? `PyPI previous release upload timestamp: ${releaseIntelligence.previousPublishedAt}.`
+        : "PyPI previous release upload timestamp was not returned.",
+      releaseIntelligence.latestPublishAgeHours === null
+        ? "PyPI latest publish age could not be computed."
+        : `PyPI latest publish age hours: ${releaseIntelligence.latestPublishAgeHours}.`,
+      releaseIntelligence.recentVersionCount30d
+        ? `PyPI versions uploaded in the last 30 days: ${releaseIntelligence.recentVersionCount30d}.`
+        : "PyPI returned no versions uploaded in the last 30 days.",
+      releaseIntelligence.dormancyDaysBeforeLatest === null
+        ? "PyPI dormancy before latest release could not be computed."
+        : `PyPI dormancy before latest release days: ${releaseIntelligence.dormancyDaysBeforeLatest}.`
     ],
     trustScore: score,
     updatedAt: latestUploadTime,
-    version: readString(info.version),
+    version,
     warnings
   });
 }
@@ -1359,9 +1467,15 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
 
 type GitHubManifestSummary = {
   communityHealthPercentage: number | null;
+  contentRiskFiles: string[];
+  contentRiskPatternCount: number;
   dependencyCount: number | null;
   files: string[];
+  latestCommitDate: string | null;
   latestCommitSha: string | null;
+  latestReleaseAssetCount: number | null;
+  latestReleasePublishedAt: string | null;
+  latestReleasePrerelease: boolean | null;
   latestReleaseTag: string | null;
   lifecycleScripts: PackageLifecycleScript[];
   lockfiles: string[];
@@ -1421,9 +1535,15 @@ async function fetchGitHubManifestSummary(
   let dependencyCount: number | null = null;
   let scriptCount: number | null = null;
   let latestReleaseTag: string | null = null;
+  let latestReleasePublishedAt: string | null = null;
+  let latestReleaseAssetCount: number | null = null;
+  let latestReleasePrerelease: boolean | null = null;
   let latestCommitSha: string | null = null;
+  let latestCommitDate: string | null = null;
   let communityHealthPercentage: number | null = null;
   const workflowFiles: string[] = [];
+  const contentRiskFiles: string[] = [];
+  let contentRiskPatternCount = 0;
 
   for (const result of settled) {
     if (result.status !== "fulfilled" || !isRecord(result.value.payload)) {
@@ -1435,6 +1555,11 @@ async function fetchGitHubManifestSummary(
     }
     if (isGitHubWorkflowPath(result.value.path)) {
       workflowFiles.push(result.value.path);
+      const riskCount = gitHubContentRiskPatternCount(result.value.path, decodeGitHubTextContent(result.value.payload));
+      if (riskCount > 0) {
+        contentRiskPatternCount += riskCount;
+        contentRiskFiles.push(result.value.path);
+      }
       continue;
     }
     if (isGitHubLockfilePath(result.value.path)) {
@@ -1442,6 +1567,13 @@ async function fetchGitHubManifestSummary(
       continue;
     }
     files.push(result.value.path);
+    if (result.value.path === "Dockerfile") {
+      const riskCount = gitHubContentRiskPatternCount(result.value.path, decodeGitHubTextContent(result.value.payload));
+      if (riskCount > 0) {
+        contentRiskPatternCount += riskCount;
+        contentRiskFiles.push(result.value.path);
+      }
+    }
     if (result.value.path === "package.json") {
       const packageJson = decodeGitHubJsonContent(result.value.payload);
       if (packageJson) {
@@ -1472,10 +1604,16 @@ async function fetchGitHubManifestSummary(
 
   if (releaseResult.status === "fulfilled" && isRecord(releaseResult.value)) {
     latestReleaseTag = readString(releaseResult.value.tag_name) ?? readString(releaseResult.value.name);
+    latestReleasePublishedAt = readString(releaseResult.value.published_at);
+    latestReleaseAssetCount = arrayLength(releaseResult.value.assets);
+    latestReleasePrerelease = typeof releaseResult.value.prerelease === "boolean" ? releaseResult.value.prerelease : null;
   }
   if (commitResult.status === "fulfilled") {
     const commits = Array.isArray(commitResult.value) ? commitResult.value : [];
-    latestCommitSha = readString(readRecord(commits[0])?.sha);
+    const commit = readRecord(commits[0]);
+    latestCommitSha = readString(commit?.sha);
+    latestCommitDate =
+      readNestedString(commit, ["commit", "committer", "date"]) ?? readNestedString(commit, ["commit", "author", "date"]);
   }
   if (communityResult.status === "fulfilled" && isRecord(communityResult.value)) {
     communityHealthPercentage = readNumber(communityResult.value.health_percentage);
@@ -1489,9 +1627,15 @@ async function fetchGitHubManifestSummary(
 
   return {
     communityHealthPercentage,
+    contentRiskFiles,
+    contentRiskPatternCount,
     dependencyCount,
     files,
+    latestCommitDate,
     latestCommitSha,
+    latestReleaseAssetCount,
+    latestReleasePublishedAt,
+    latestReleasePrerelease,
     latestReleaseTag,
     lifecycleScripts,
     lockfiles,
@@ -1503,17 +1647,47 @@ async function fetchGitHubManifestSummary(
 }
 
 function decodeGitHubJsonContent(item: UnknownRecord): UnknownRecord | null {
+  const text = decodeGitHubTextContent(item);
+  if (!text) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeGitHubTextContent(item: UnknownRecord): string | null {
   const content = readString(item.content);
   const encoding = readString(item.encoding);
   if (!content || encoding !== "base64") {
     return null;
   }
   try {
-    const parsed = JSON.parse(Buffer.from(content.replace(/\s+/g, ""), "base64").toString("utf8")) as unknown;
-    return isRecord(parsed) ? parsed : null;
+    return Buffer.from(content.replace(/\s+/g, ""), "base64").toString("utf8");
   } catch {
     return null;
   }
+}
+
+function gitHubContentRiskPatternCount(path: string, content: string | null): number {
+  if (!content) {
+    return 0;
+  }
+  const patterns = [
+    /\bpull_request_target\b/i,
+    /\bpermissions:\s*write-all\b/i,
+    /\bsecrets\.[A-Z0-9_]+\b/i,
+    /\b(curl|wget)\b[^\n\r|;&]{0,180}(?:\||;|&&)\s*(?:sudo\s+)?(?:sh|bash|zsh|node|python|python3)\b/i,
+    /\b(chmod\s+\+x|sudo\s+|docker\s+run\s+--privileged)\b/i
+  ];
+  const matched = patterns.filter((pattern) => pattern.test(content)).length;
+  if (path === "Dockerfile" && /\bADD\s+https?:\/\//i.test(content)) {
+    return matched + 1;
+  }
+  return matched;
 }
 
 function isGitHubSecurityPath(path: string): boolean {
@@ -1561,8 +1735,10 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       (manifest?.lockfiles.length ? 3 : 0) +
       (manifest?.workflowFiles.length ? 3 : 0) +
       (manifest?.latestReleaseTag ? 3 : 0) +
+      (manifest?.latestReleaseAssetCount ? 1 : 0) +
       (manifest?.latestCommitSha ? 2 : 0) +
       (typeof manifest?.communityHealthPercentage === "number" ? Math.min(4, Math.round(manifest.communityHealthPercentage / 25)) : 0) +
+      (manifest?.contentRiskPatternCount ? -Math.min(24, manifest.contentRiskPatternCount * 8) : 0) +
       lifecycleRiskPenalty(lifecycleRisk)
   );
   const warnings = [
@@ -1570,6 +1746,10 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
     ...(archived ? ["GitHub marks this repository as archived."] : []),
     ...(disabled ? ["GitHub marks this repository as disabled."] : []),
     ...(fork ? ["GitHub marks this repository as a fork; review the upstream repository before installing."] : []),
+    ...(manifest?.contentRiskPatternCount
+      ? [`GitHub manifest/workflow probes found ${manifest.contentRiskPatternCount} risky automation pattern(s).`]
+      : []),
+    ...(manifest?.latestReleasePrerelease ? ["GitHub latest release is marked as prerelease."] : []),
     ...lifecycleScriptWarnings(lifecycleScripts)
   ];
 
@@ -1611,8 +1791,25 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
         : "GitHub security files were not returned.",
       manifest?.lockfiles.length ? `GitHub lockfiles found: ${manifest.lockfiles.join(", ")}.` : "GitHub lockfiles were not returned.",
       manifest?.workflowFiles.length ? `GitHub workflow files found: ${manifest.workflowFiles.join(", ")}.` : "GitHub workflow files were not returned.",
+      manifest
+        ? manifest.contentRiskPatternCount
+          ? `GitHub workflow/Dockerfile risk patterns returned: ${manifest.contentRiskPatternCount} in ${manifest.contentRiskFiles.join(", ")}.`
+          : "GitHub workflow/Dockerfile risk scan found no high-risk patterns in probed files."
+        : "GitHub workflow/Dockerfile risk scan was not run.",
       manifest?.latestReleaseTag ? `GitHub latest release tag: ${manifest.latestReleaseTag}.` : "GitHub latest release tag was not returned.",
+      manifest?.latestReleasePublishedAt
+        ? `GitHub latest release published at: ${manifest.latestReleasePublishedAt}.`
+        : "GitHub latest release publish timestamp was not returned.",
+      typeof manifest?.latestReleaseAssetCount === "number"
+        ? `GitHub latest release asset count: ${manifest.latestReleaseAssetCount}.`
+        : "GitHub latest release asset metadata was not returned.",
+      typeof manifest?.latestReleasePrerelease === "boolean"
+        ? `GitHub latest release prerelease flag: ${manifest.latestReleasePrerelease}.`
+        : "GitHub latest release prerelease flag was not returned.",
       manifest?.latestCommitSha ? `GitHub latest default-branch commit returned: ${manifest.latestCommitSha}.` : "GitHub latest commit metadata was not returned.",
+      manifest?.latestCommitDate
+        ? `GitHub latest default-branch commit date: ${manifest.latestCommitDate}.`
+        : "GitHub latest commit date was not returned.",
       typeof manifest?.communityHealthPercentage === "number"
         ? `GitHub community profile health: ${manifest.communityHealthPercentage}.`
         : "GitHub community profile health was not returned.",
@@ -1685,15 +1882,25 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const siblingNames = hubSiblingNames(item.siblings);
   const siblingCount = siblingNames.length;
   const hasReadme = siblingNames.some((name) => name.toLowerCase() === "readme.md");
-  const hasConfig = siblingNames.some((name) => /(^|\/)(config|tokenizer_config|dataset_info)\.json$/i.test(name));
-  const hasSafetensors = source === "huggingface-model" && siblingNames.some((name) => /\.safetensors$/i.test(name));
-  const hasPickleWeights = source === "huggingface-model" && siblingNames.some((name) => /\.(bin|pkl|pickle)$/i.test(name));
-  const hasCustomPythonModelFile =
-    source === "huggingface-model" && siblingNames.some((name) => /(^|\/)(modeling|configuration|tokenization|processing)_[^/]+\.py$/i.test(name));
-  const hasTokenizerFile = source === "huggingface-model" && siblingNames.some((name) => /(^|\/)(tokenizer|tokenizer_config|vocab|merges)\./i.test(name));
-  const hasDatasetScript = source === "huggingface-dataset" && siblingNames.some((name) => /\.py$/i.test(name));
+  const configFileCount = siblingNames.filter((name) => /(^|\/)(config|tokenizer_config|dataset_info)\.json$/i.test(name)).length;
+  const safetensorsCount = source === "huggingface-model" ? siblingNames.filter((name) => /\.safetensors$/i.test(name)).length : 0;
+  const pickleWeightCount = source === "huggingface-model" ? siblingNames.filter((name) => /\.(bin|pkl|pickle|pt)$/i.test(name)).length : 0;
+  const customPythonFileCount =
+    source === "huggingface-model"
+      ? siblingNames.filter((name) => /(^|\/)(modeling|configuration|tokenization|processing)_[^/]+\.py$/i.test(name)).length
+      : 0;
+  const tokenizerFileCount =
+    source === "huggingface-model" ? siblingNames.filter((name) => /(^|\/)(tokenizer|tokenizer_config|vocab|merges)\./i.test(name)).length : 0;
+  const datasetScriptFileCount = source === "huggingface-dataset" ? siblingNames.filter((name) => /\.py$/i.test(name)).length : 0;
+  const datasetArchiveFileCount = source === "huggingface-dataset" ? siblingNames.filter((name) => /\.(zip|tar|tgz|gz)$/i.test(name)).length : 0;
   const datasetDataFileCount =
     source === "huggingface-dataset" ? siblingNames.filter((name) => /\.(parquet|jsonl?|csv|arrow|txt|zip|gz)$/i.test(name)).length : 0;
+  const hasConfig = configFileCount > 0;
+  const hasSafetensors = safetensorsCount > 0;
+  const hasPickleWeights = pickleWeightCount > 0;
+  const hasCustomPythonModelFile = customPythonFileCount > 0;
+  const hasTokenizerFile = tokenizerFileCount > 0;
+  const hasDatasetScript = datasetScriptFileCount > 0;
   const requiresTrustRemoteCode = source === "huggingface-model" && huggingFaceTrustRemoteCode(item, tags);
   const sha = readString(item.sha);
   const libraryName = readString(item.library_name);
@@ -1702,7 +1909,8 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const datasetRefs = readCardDataStringList(cardData?.datasets);
   const languageRefs = readCardDataStringList(cardData?.language);
   const taskRefs = readCardDataStringList(cardData?.tags ?? cardData?.task_categories);
-  const modelIndexCount = source === "huggingface-model" ? huggingFaceModelIndexResultCount(cardData) : 0;
+  const modelIndexSummary = source === "huggingface-model" ? huggingFaceModelIndexSummary(cardData) : { labels: [], resultCount: 0 };
+  const modelIndexCount = modelIndexSummary.resultCount;
   const datasetInfo = source === "huggingface-dataset" ? readRecord(cardData?.dataset_info) : null;
   const datasetFeatureCount = datasetInfo ? huggingFaceDatasetFeatureCount(datasetInfo) : 0;
   const datasetSplitCount = datasetInfo ? huggingFaceDatasetSplitCount(datasetInfo) : 0;
@@ -1738,6 +1946,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
     ...(requiresTrustRemoteCode ? ["Hugging Face model metadata indicates trust_remote_code is required or enabled."] : []),
     ...(hasCustomPythonModelFile ? ["Hugging Face model exposes custom Python model files; review code before local loading."] : []),
     ...(hasDatasetScript ? ["Hugging Face dataset exposes Python dataset script files; review code before local dataset loading."] : []),
+    ...(datasetArchiveFileCount ? [`Hugging Face dataset exposes ${datasetArchiveFileCount} compressed archive file(s); review locally before loading.`] : []),
     ...(hasPickleWeights && !hasSafetensors
       ? ["Hugging Face model exposes pickle or binary weight files without safetensors metadata in the source response."]
       : [])
@@ -1781,22 +1990,45 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
       languageRefs.length ? `Hugging Face language metadata returned: ${languageRefs.slice(0, 5).join(", ")}.` : "Hugging Face language metadata was not returned.",
       taskRefs.length ? `Hugging Face task/card tags returned: ${taskRefs.slice(0, 5).join(", ")}.` : "Hugging Face task/card tags were not returned.",
       modelIndexCount ? `Hugging Face model-index/eval metadata returned: ${modelIndexCount} result(s).` : "Hugging Face model-index/eval metadata was not returned.",
+      modelIndexSummary.labels.length
+        ? `Hugging Face model-index/eval labels returned: ${modelIndexSummary.labels.slice(0, 5).join(", ")}.`
+        : "Hugging Face model-index/eval labels were not returned.",
       siblingCount ? `Hugging Face repository files returned: ${siblingCount}.` : "Hugging Face repository file list was not returned.",
       hasReadme ? "Hugging Face README/model card file is present." : "Hugging Face README/model card file was not returned.",
-      hasConfig ? "Hugging Face config metadata file is present." : "Hugging Face config metadata file was not returned.",
-      hasTokenizerFile ? "Hugging Face tokenizer metadata files are present." : "Hugging Face tokenizer metadata files were not returned.",
+      hasConfig ? `Hugging Face config metadata files returned: ${configFileCount}.` : "Hugging Face config metadata file was not returned.",
+      hasTokenizerFile ? `Hugging Face tokenizer metadata files returned: ${tokenizerFileCount}.` : "Hugging Face tokenizer metadata files were not returned.",
       datasetInfo ? "Hugging Face dataset_info metadata returned." : "Hugging Face dataset_info metadata was not returned.",
       datasetFeatureCount
         ? `Hugging Face dataset feature fields returned: ${datasetFeatureCount}.`
         : "Hugging Face dataset feature metadata was not returned.",
       datasetSplitCount ? `Hugging Face dataset split metadata returned: ${datasetSplitCount}.` : "Hugging Face dataset split metadata was not returned.",
       datasetDataFileCount ? `Hugging Face dataset data files returned: ${datasetDataFileCount}.` : "Hugging Face dataset data files were not returned.",
-      hasDatasetScript ? "Hugging Face dataset Python script files returned." : "Hugging Face dataset Python script files were not returned.",
+      hasDatasetScript
+        ? `Hugging Face dataset Python script files returned: ${datasetScriptFileCount}.`
+        : "Hugging Face dataset Python script files were not returned.",
+      datasetArchiveFileCount
+        ? `Hugging Face dataset compressed archive files returned: ${datasetArchiveFileCount}.`
+        : "Hugging Face dataset compressed archive files were not returned.",
       source === "huggingface-model"
         ? hasSafetensors
-          ? "Hugging Face safetensors weight file is present."
+          ? `Hugging Face safetensors weight files returned: ${safetensorsCount}.`
           : "Hugging Face safetensors weight file was not returned."
         : "Hugging Face dataset files are treated as source metadata, not executable instructions.",
+      source === "huggingface-model" && hasSafetensors
+        ? "Hugging Face safetensors weight file is present."
+        : source === "huggingface-model"
+          ? "Hugging Face safetensors compatibility signal was not returned."
+          : "Hugging Face dataset does not expose safetensors model weights.",
+      source === "huggingface-model"
+        ? pickleWeightCount
+          ? `Hugging Face pickle/binary weight files returned: ${pickleWeightCount}.`
+          : "Hugging Face pickle/binary weight files were not returned."
+        : "Hugging Face dataset file shape was checked without executing dataset code.",
+      customPythonFileCount
+        ? `Hugging Face custom Python model files returned: ${customPythonFileCount}.`
+        : source === "huggingface-model"
+          ? "Hugging Face custom Python model files were not returned."
+          : "Hugging Face dataset does not use model custom Python file checks.",
       requiresTrustRemoteCode
         ? "Hugging Face trust_remote_code metadata requires manual review before local model loading."
         : source === "huggingface-model"
@@ -1832,32 +2064,67 @@ function readCardDataStringList(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === "string").map((item) => cleanPlainText(item, 120)).filter(Boolean).slice(0, 20);
 }
 
-function huggingFaceModelIndexResultCount(cardData: UnknownRecord | null): number {
+function huggingFaceModelIndexSummary(cardData: UnknownRecord | null): { labels: string[]; resultCount: number } {
   const modelIndex = cardData?.["model-index"];
   if (!Array.isArray(modelIndex)) {
-    return 0;
+    return { labels: [], resultCount: 0 };
   }
-  return modelIndex.reduce((count, item) => {
+  const labels: string[] = [];
+  const resultCount = modelIndex.reduce((count, item) => {
     if (!isRecord(item)) {
       return count;
     }
+    const modelName = readString(item.name);
+    if (modelName) {
+      labels.push(modelName);
+    }
     const results = item.results;
+    if (Array.isArray(results)) {
+      for (const result of results) {
+        if (!isRecord(result)) {
+          continue;
+        }
+        const taskType = readNestedString(result, ["task", "type"]);
+        const datasetName = readNestedString(result, ["dataset", "name"]) ?? readNestedString(result, ["dataset", "type"]);
+        const metricLabels = (Array.isArray(result.metrics) ? result.metrics : [])
+          .map((metric) => (isRecord(metric) ? readString(metric.type) ?? readString(metric.name) : null))
+          .filter((label): label is string => Boolean(label));
+        for (const label of [taskType, datasetName, ...metricLabels]) {
+          if (label) {
+            labels.push(label);
+          }
+        }
+      }
+    }
     return count + (Array.isArray(results) ? results.length : 0);
   }, 0);
+  return { labels: [...new Set(labels)].slice(0, 10), resultCount };
 }
 
 function huggingFaceDatasetFeatureCount(datasetInfo: UnknownRecord): number {
   const features = datasetInfo.features;
-  if (!Array.isArray(features)) {
-    return 0;
+  if (Array.isArray(features)) {
+    return features.filter(isRecord).length;
   }
-  return features.filter(isRecord).length;
+  if (isRecord(features)) {
+    return Object.keys(features).length;
+  }
+  const configs = readRecord(datasetInfo.configs);
+  if (configs) {
+    return Object.values(configs)
+      .map((config) => (isRecord(config) && isRecord(config.features) ? Object.keys(config.features).length : 0))
+      .reduce((sum, count) => sum + count, 0);
+  }
+  return 0;
 }
 
 function huggingFaceDatasetSplitCount(datasetInfo: UnknownRecord): number {
   const splits = datasetInfo.splits;
   if (Array.isArray(splits)) {
     return splits.filter(isRecord).length;
+  }
+  if (isRecord(splits)) {
+    return Object.keys(splits).length;
   }
   const downloadChecksums = readRecord(datasetInfo.download_checksums);
   return downloadChecksums ? Object.keys(downloadChecksums).length : 0;
@@ -1953,7 +2220,17 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   const remotes = Array.isArray(server.remotes) ? server.remotes.filter(isRecord) : [];
   const remoteUrl = remotes.map((remote) => readString(remote.url)).find(Boolean) ?? null;
   const remoteTransportTypes = [...new Set(remotes.map((remote) => readString(remote.type)).filter((type): type is string => Boolean(type)))];
-  const envRequirementCount = mcpEnvironmentRequirementCount(server);
+  const remoteHttpsCount = remotes.filter((remote) => {
+    const url = readString(remote.url);
+    return Boolean(url && isHttpsUrl(url));
+  }).length;
+  const remoteNonHttpsCount = remotes.filter((remote) => {
+    const url = readString(remote.url);
+    return Boolean(url && !isHttpsUrl(url));
+  }).length;
+  const remoteHostCount = new Set(remotes.map((remote) => httpUrlHost(readString(remote.url))).filter(Boolean)).size;
+  const envSummary = mcpEnvironmentSummary(server);
+  const envRequirementCount = envSummary.count;
   const packages = Array.isArray(server.packages) ? server.packages.filter(isRecord) : [];
   const packageCount = packages.length;
   const packageRefs = packages
@@ -1965,12 +2242,17 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
   );
   const homepage = readString(server.homepage) ?? readString(server.url) ?? repo ?? remoteUrl ?? "https://registry.modelcontextprotocol.io";
   const status = readString(official?.status);
+  const schemaUrl = readString(server.$schema) ?? readNestedString(item, ["$schema"]);
   const updatedAt = readString(official?.updatedAt) ?? readString(official?.publishedAt) ?? readString(server.updatedAt) ?? readString(server.updated_at);
   const license = readString(server.license);
   const warnings = [
     ...(repo ? [] : ["No source repository returned by MCP Registry."]),
     ...(status && status !== "active" ? [`MCP Registry status is ${status}.`] : []),
     ...(envRequirementCount ? [`MCP server declares ${envRequirementCount} environment requirements; review credential scope before enabling.`] : []),
+    ...(envSummary.secretLikeCount
+      ? [`MCP server declares ${envSummary.secretLikeCount} secret-like environment requirement(s); review credential scope before enabling.`]
+      : []),
+    ...(remoteNonHttpsCount ? [`MCP server exposes ${remoteNonHttpsCount} non-HTTPS remote endpoint(s).`] : []),
     ...(!repo && envRequirementCount ? ["MCP server declares credentials but no source repository; review operator trust before enabling."] : []),
     ...(snapshot ? [`MCP Registry live request was unavailable; returned pinned public registry snapshot from ${snapshot}.`] : [])
   ];
@@ -1997,16 +2279,30 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
       "Resolved from the MCP Registry.",
       ...(snapshot ? [`Pinned from public MCP Registry snapshot: ${snapshot}.`] : []),
       status ? `MCP Registry status: ${status}.` : "MCP Registry status was not returned.",
+      schemaUrl ? `MCP schema URL returned: ${schemaUrl}.` : "MCP schema URL was not returned.",
       remotes.length ? `Remote MCP endpoints returned: ${remotes.length}.` : "Remote MCP endpoint metadata is missing.",
+      remotes.length
+        ? `MCP remote endpoint HTTPS count: ${remoteHttpsCount}; non-HTTPS count: ${remoteNonHttpsCount}; host count: ${remoteHostCount}.`
+        : "MCP remote endpoint security metadata was not returned.",
       remoteTransportTypes.length
         ? `MCP remote transport types returned: ${remoteTransportTypes.join(", ")}.`
         : "MCP remote transport metadata was not returned.",
       envRequirementCount ? `MCP server declares ${envRequirementCount} environment requirements.` : "MCP server did not declare environment requirements.",
+      `MCP credential scope summary: ${envSummary.requiredCount} required, ${envSummary.optionalCount} optional, ${envSummary.secretLikeCount} secret-like.`,
       packageCount ? `MCP registry packages returned: ${packageCount}.` : "MCP registry package metadata was not returned.",
       packageRefs.length ? `MCP registry package references returned: ${packageRefs.join(", ")}.` : "MCP registry package references were not returned.",
       repo ? "Source repository is present." : "Source repository was not returned."
     ],
-    trustScore: clampScore(52 + (repo ? 12 : 0) + (remoteUrl ? 8 : 0) + (license ? 8 : 0) + (status === "active" ? 8 : 0)),
+    trustScore: clampScore(
+      52 +
+        (repo ? 12 : 0) +
+        (remoteUrl ? 8 : 0) +
+        (license ? 8 : 0) +
+        (schemaUrl ? 4 : 0) +
+        (status === "active" ? 8 : 0) -
+        remoteNonHttpsCount * 16 -
+        envSummary.secretLikeCount * 4
+    ),
     updatedAt,
     version: readString(server.version),
     warnings
@@ -2158,6 +2454,9 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("npm.registry.signature", "Registry signature", /npm registry signature metadata is present/i, /signature metadata is missing/i),
         evidenceSpec("npm.packument.versions", "Packument versions", /npm packument versions returned:/i, /packument summary was not returned/i),
         evidenceSpec("npm.dist_tags", "Dist tags", /npm dist-tags returned:/i, /npm dist-tags were not returned/i),
+        evidenceSpec("npm.version_intelligence", "Version intelligence", /npm latest publish age hours:/i, /latest publish age could not be computed/i),
+        evidenceSpec("npm.osv", "OSV advisory context", /OSV returned no known vulnerabilities|OSV returned vulnerability IDs/i, /OSV vulnerability context was unavailable/i),
+        evidenceSpec("npm.artifact_shape", "Artifact shape", /Latest npm release file count:|Latest npm unpacked size bytes:/i, /file count was not returned|unpacked size was not returned/i),
         evidenceSpec("npm.repository", "Repository link", /Repository link is present/i, /Repository link is missing/i),
         evidenceSpec("npm.maintainers", "Maintainers", /npm returned \d+ maintainer records/i, /did not return maintainer records/i),
         evidenceSpec("npm.lifecycle", "Lifecycle scripts", /did not declare install-time lifecycle scripts|declares install-time lifecycle scripts/i),
@@ -2167,6 +2466,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
       return [
         evidenceSpec("pypi.project.json", "Project JSON", /Resolved from the PyPI JSON API/i),
         evidenceSpec("pypi.vulnerabilities", "Vulnerability context", /PyPI returned no vulnerabilities|PyPI returned vulnerability records/i),
+        evidenceSpec("pypi.osv", "OSV advisory context", /OSV returned no known vulnerabilities|OSV returned vulnerability IDs/i, /OSV vulnerability context was unavailable/i),
         evidenceSpec("pypi.release.files", "Release files", /PyPI latest release files returned:/i, /latest release files were not returned/i),
         evidenceSpec("pypi.file.digests", "File digests", /digest metadata:/i, /did not return latest release file digests|missing digest metadata/i),
         evidenceSpec("pypi.simple.provenance", "Simple API provenance", /simple API provenance links returned/i, /did not return provenance links/i),
@@ -2174,6 +2474,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("pypi.release_shape", "Wheel/source shape", /latest release includes wheel metadata|latest release is source-only/i),
         evidenceSpec("pypi.yanked", "Yanked status", /latest release files are not marked yanked|latest release files include yanked files/i),
         evidenceSpec("pypi.requires_python", "Python version boundary", /PyPI requires-python:/i, /did not return requires-python metadata/i),
+        evidenceSpec("pypi.version_intelligence", "Version intelligence", /PyPI latest publish age hours:/i, /latest publish age could not be computed/i),
         evidenceSpec("pypi.release_history", "Release history", /PyPI release history versions returned:/i, /release history was not returned/i)
       ];
     case "github":
@@ -2184,8 +2485,11 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("github.manifests", "Manifests", /GitHub package manifests found:/i, /package manifests were not inspected/i),
         evidenceSpec("github.lockfiles", "Lockfiles", /GitHub lockfiles found:/i, /GitHub lockfiles were not returned/i),
         evidenceSpec("github.security", "Security files", /GitHub security files found:/i, /GitHub security files were not returned/i),
+        evidenceSpec("github.content_risk", "Workflow/Dockerfile risk", /risk scan found no high-risk patterns|risk patterns returned:/i, /risky automation pattern/i),
         evidenceSpec("github.release", "Latest release", /GitHub latest release tag:/i, /latest release tag was not returned/i),
+        evidenceSpec("github.release_assets", "Release assets", /GitHub latest release asset count:/i, /release asset metadata was not returned/i),
         evidenceSpec("github.default_branch_commit", "Latest commit", /GitHub latest default-branch commit returned:/i, /latest commit metadata was not returned/i),
+        evidenceSpec("github.commit_freshness", "Commit freshness", /GitHub latest default-branch commit date:/i, /latest commit date was not returned/i),
         evidenceSpec("github.workflows", "CI workflows", /GitHub workflow files found:/i, /workflow files were not returned/i),
         evidenceSpec("github.lifecycle", "Lifecycle scripts", /GitHub package.json .*lifecycle scripts/i)
       ];
@@ -2194,8 +2498,9 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("hf.card_data", "Card metadata", /cardData metadata is present/i, /cardData metadata was not returned/i),
         evidenceSpec("hf.files", "Repository files", /repository files returned:/i, /file list was not returned/i),
         evidenceSpec("hf.readme", "Model card file", /README\/model card file is present/i, /README\/model card file was not returned/i),
-        evidenceSpec("hf.config", "Config metadata file", /config metadata file is present/i, /config metadata file was not returned/i),
-        evidenceSpec("hf.safetensors", "Safetensors", /safetensors weight file is present/i, /pickle|safetensors weight file was not returned/i),
+        evidenceSpec("hf.config", "Config metadata file", /config metadata files returned:/i, /config metadata file was not returned/i),
+        evidenceSpec("hf.safetensors", "Safetensors", /safetensors weight files returned:/i, /pickle|safetensors weight file was not returned/i),
+        evidenceSpec("hf.file_shape", "File shape", /pickle\/binary weight files|custom Python model files/i),
         evidenceSpec("hf.remote_code", "Remote-code boundary", /trust_remote_code metadata was not enabled|trust_remote_code metadata requires manual review/i),
         evidenceSpec("hf.commit", "Commit digest", /commit digest metadata is present/i, /commit digest metadata is missing/i),
         evidenceSpec("hf.gated", "Gated/private flag", /gated access flag is/i),
@@ -2209,6 +2514,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("hf.dataset_features", "Dataset features", /dataset feature fields returned:/i, /dataset feature metadata was not returned/i),
         evidenceSpec("hf.dataset_splits", "Dataset splits", /dataset split metadata returned:/i, /dataset split metadata was not returned/i),
         evidenceSpec("hf.files", "Repository files", /repository files returned:/i, /file list was not returned/i),
+        evidenceSpec("hf.dataset_files", "Dataset file shape", /dataset data files returned:|compressed archive files returned:/i, /dataset data files were not returned/i),
         evidenceSpec("hf.readme", "Dataset card file", /README\/model card file is present/i, /README\/model card file was not returned/i),
         evidenceSpec("hf.commit", "Commit digest", /commit digest metadata is present/i, /commit digest metadata is missing/i),
         evidenceSpec("hf.gated", "Gated/private flag", /gated access flag is/i),
@@ -2218,8 +2524,11 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
     case "mcp":
       return [
         evidenceSpec("mcp.registry.status", "Registry status", /MCP Registry status:/i, /status was not returned/i),
+        evidenceSpec("mcp.schema", "Schema metadata", /MCP schema URL returned:/i, /MCP schema URL was not returned/i),
         evidenceSpec("mcp.remote_endpoints", "Remote endpoints", /Remote MCP endpoints returned:/i, /Remote MCP endpoint metadata is missing/i),
+        evidenceSpec("mcp.endpoint_security", "Endpoint security", /MCP remote endpoint HTTPS count:/i, /non-HTTPS remote endpoint|endpoint security metadata was not returned/i),
         evidenceSpec("mcp.env_requirements", "Credential scope", /MCP server did not declare environment requirements|MCP server declares \d+ environment requirements/i),
+        evidenceSpec("mcp.credential_scope", "Credential scope detail", /MCP credential scope summary:/i, /secret-like environment requirement/i),
         evidenceSpec("mcp.packages", "Package references", /MCP registry packages returned:/i, /package metadata was not returned/i),
         evidenceSpec("mcp.source_repo", "Source repository", /Source repository is present/i, /No source repository returned|Source repository was not returned/i),
         evidenceSpec("mcp.transport", "Transport metadata", /MCP remote transport types returned:/i, /MCP remote transport metadata was not returned/i)
@@ -2370,7 +2679,9 @@ function hasHighSeverityWarning(warning: string): boolean {
     normalized.includes("hidden background") ||
     normalized.includes("encoded") ||
     normalized.includes("inline interpreter") ||
-    normalized.includes("shell patterns")
+    normalized.includes("shell patterns") ||
+    normalized.includes("risky automation") ||
+    normalized.includes("non-https remote")
   );
 }
 
@@ -2554,6 +2865,96 @@ function sourceDisplayName(source: ExternalPackageSource): string {
       return "PyPI";
     case "github":
       return "GitHub";
+  }
+}
+
+async function fetchOsvVulnerabilitySummary(
+  ecosystem: "npm" | "PyPI",
+  packageName: string,
+  version: string | null,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<OsvVulnerabilitySummary> {
+  if (!version) {
+    return { available: false, ids: [], vulnerabilityCount: 0 };
+  }
+  const cacheKey = `${ecosystem}:${packageName}:${version}`;
+  const canCache = fetchImpl === fetch;
+  if (canCache) {
+    const cached = osvFetchCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return structuredClone(cached.value);
+    }
+    if (cached) {
+      osvFetchCache.delete(cacheKey);
+    }
+    const pending = inflightOsvFetches.get(cacheKey);
+    if (pending) {
+      return structuredClone(await pending);
+    }
+  }
+  const request = fetchOsvVulnerabilitySummaryUncached(ecosystem, packageName, version, fetchImpl, timeoutMs);
+  if (!canCache) {
+    return request;
+  }
+  inflightOsvFetches.set(cacheKey, request);
+  try {
+    const value = await request;
+    osvFetchCache.set(cacheKey, {
+      expiresAt: Date.now() + FETCH_CACHE_TTL_MS,
+      value: structuredClone(value)
+    });
+    return structuredClone(value);
+  } finally {
+    inflightOsvFetches.delete(cacheKey);
+  }
+}
+
+async function fetchOsvVulnerabilitySummaryUncached(
+  ecosystem: "npm" | "PyPI",
+  packageName: string,
+  version: string,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<OsvVulnerabilitySummary> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), Math.min(timeoutMs, 2400));
+  try {
+    const headers = externalSourceRequestHeaders("https://api.osv.dev/v1/query") as Record<string, string>;
+    const response = await fetchImpl("https://api.osv.dev/v1/query", {
+      body: JSON.stringify({
+        package: {
+          ecosystem,
+          name: packageName
+        },
+        version
+      }),
+      headers: {
+        ...headers,
+        "content-type": "application/json"
+      },
+      method: "POST",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return { available: false, ids: [], vulnerabilityCount: 0 };
+    }
+    const text = await readLimitedResponseText(response, MAX_OSV_RESPONSE_BYTES, ecosystem === "npm" ? "npm" : "pypi");
+    const payload = JSON.parse(text) as unknown;
+    const vulnerabilities = isRecord(payload) && Array.isArray(payload.vulns) ? payload.vulns.filter(isRecord) : [];
+    const ids = vulnerabilities
+      .map((vulnerability) => readString(vulnerability.id))
+      .filter((id): id is string => Boolean(id))
+      .slice(0, 8);
+    return {
+      available: true,
+      ids,
+      vulnerabilityCount: vulnerabilities.length
+    };
+  } catch {
+    return { available: false, ids: [], vulnerabilityCount: 0 };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -3122,8 +3523,8 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         assessmentVersion: "source-quality-v1",
         bestFor: ["JavaScript and TypeScript package selection", "install-plan review", "lifecycle script risk checks"],
         coverage: "strong",
-        depthScore: 96,
-        inspectDepth: "latest manifest, tarball integrity, registry signatures, lifecycle scripts, dependency count and download signal",
+        depthScore: 98,
+        inspectDepth: "latest manifest, tarball integrity, registry signatures, lifecycle scripts, packument version intelligence, OSV advisory context, dependency count and download signal",
         limitations: [
           "npm search ranking is upstream-provided and can still surface weak packages",
           "monthly download data is a usage signal, not proof of safety",
@@ -3131,16 +3532,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["package authorship", "malware-free guarantee", "workspace execution approval"],
         searchDepth: "registry-ranked search with validated task hints for common agent requests",
-        strengths: ["direct registry API", "integrity and signature metadata when returned", "install-time lifecycle script warnings"],
-        targetDepthScore: 95
+        strengths: ["direct registry API", "integrity and signature metadata when returned", "OSV advisory lookup", "install-time lifecycle script warnings"],
+        targetDepthScore: 98
       };
     case "pypi":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["Python package exact inspect", "wheel/source release risk review", "known PyPI vulnerability context"],
         coverage: "strong",
-        depthScore: 92,
-        inspectDepth: "project JSON, latest release files, file hashes, yanked flags, Simple API metadata and provenance links",
+        depthScore: 96,
+        inspectDepth: "project JSON, latest release files, file hashes, yanked flags, OSV advisory context, release velocity, Simple API metadata and provenance links",
         limitations: [
           "PyPI has no official JSON search API, so broad natural-language discovery uses normalized candidates and curated task hints",
           "source-only packages can execute build backend code during local install",
@@ -3148,16 +3549,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["full index crawl", "malware-free guarantee", "private package visibility"],
         searchDepth: "normalized name candidates, validated task hints, exact-name fallback and source-specific ranking",
-        strengths: ["release-file digest checks", "yanked and vulnerability signals", "Simple API provenance/core metadata when returned"],
-        targetDepthScore: 92
+        strengths: ["release-file digest checks", "yanked and vulnerability signals", "OSV advisory lookup", "Simple API provenance/core metadata when returned"],
+        targetDepthScore: 96
       };
     case "github":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["source repository discovery", "repo activity context", "agent review before cloning code"],
         coverage: "strong",
-        depthScore: 92,
-        inspectDepth: "repository metadata plus selected manifest, security, workflow and lockfile probes on the default branch",
+        depthScore: 95,
+        inspectDepth: "repository metadata plus selected manifest, security, workflow, Dockerfile, release asset, commit freshness and lockfile probes on the default branch",
         limitations: [
           "GitHub repository search is not package-registry resolution",
           "selected manifest probes do not replace a full repository audit",
@@ -3165,16 +3566,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["verified release provenance", "full code scan", "dependency vulnerability audit"],
         searchDepth: "GitHub repository search sorted by stars with archived repositories filtered out",
-        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security/workflow file checks"],
-        targetDepthScore: 92
+        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security/workflow file checks", "workflow and Dockerfile risk pattern probes"],
+        targetDepthScore: 95
       };
     case "huggingface-model":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["model discovery", "model card and file-shape context", "remote-code and weight-format warning"],
         coverage: "strong",
-        depthScore: 92,
-        inspectDepth: "model API metadata, cardData, tags, siblings, downloads, likes, gated/private flags, commit SHA, file-shape and remote-code indicators",
+        depthScore: 95,
+        inspectDepth: "model API metadata, cardData, tags, siblings, downloads, likes, gated/private flags, commit SHA, file-shape counts, eval labels and remote-code indicators",
         limitations: [
           "model files are not downloaded or executed by the hosted API",
           "model safety, bias and license suitability still require separate review",
@@ -3182,16 +3583,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["model behavior evaluation", "weight integrity beyond returned metadata", "license legal advice"],
         searchDepth: "Hugging Face hub search sorted by downloads",
-        strengths: ["safetensors versus pickle/binary warning", "trust_remote_code warning", "gated/private metadata"],
-        targetDepthScore: 92
+        strengths: ["safetensors versus pickle/binary warning", "trust_remote_code warning", "gated/private metadata", "model-index and file-shape evidence"],
+        targetDepthScore: 95
       };
     case "huggingface-dataset":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["dataset discovery", "dataset card metadata", "license and hub usage context"],
         coverage: "strong",
-        depthScore: 90,
-        inspectDepth: "dataset API metadata, dataset_info, features, splits, tags, siblings, downloads, likes, gated/private flags and commit SHA when returned",
+        depthScore: 93,
+        inspectDepth: "dataset API metadata, dataset_info, features, splits, tags, siblings, data file shape, compressed archive/script warnings, downloads, likes, gated/private flags and commit SHA when returned",
         limitations: [
           "dataset contents are not downloaded, sampled or scanned by the hosted API",
           "dataset quality, bias and legal suitability require separate review",
@@ -3199,16 +3600,16 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["dataset content audit", "training suitability approval", "license legal advice"],
         searchDepth: "Hugging Face dataset search sorted by downloads",
-        strengths: ["source-owned hub metadata", "license tag and card/file presence", "dataset_info and gated/private metadata"],
-        targetDepthScore: 90
+        strengths: ["source-owned hub metadata", "license tag and card/file presence", "dataset_info and gated/private metadata", "dataset script and archive warnings"],
+        targetDepthScore: 93
       };
     case "mcp":
       return {
         assessmentVersion: "source-quality-v1",
         bestFor: ["MCP server discovery", "remote endpoint context", "credential-scope review before enabling tools"],
-        coverage: "limited",
-        depthScore: 85,
-        inspectDepth: "MCP registry server metadata, remote endpoints, repository link, status and environment requirements when returned",
+        coverage: "moderate",
+        depthScore: 90,
+        inspectDepth: "MCP registry server metadata, schema URL, remote endpoint security, repository link, status, package references and credential-scope summary when returned",
         limitations: [
           "MCP registry availability and schema stability are still early",
           "tool behavior is not executed or sandboxed by the hosted API",
@@ -3216,8 +3617,8 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
         ],
         notClaimed: ["tool execution safety", "server operator verification", "credential policy approval"],
         searchDepth: "MCP registry server search with pinned fallback for known public records",
-        strengths: ["remote endpoint visibility", "environment requirement warnings", "source repository link when returned"],
-        targetDepthScore: 85
+        strengths: ["remote endpoint visibility", "environment requirement warnings", "credential-scope summary", "source repository link when returned"],
+        targetDepthScore: 90
       };
   }
 }
@@ -3350,7 +3751,7 @@ function readTrust(value: unknown): ExternalPackageRecord["trust"] {
     policy: readTrustPolicy(value.policy),
     risk: readEnum(value.risk, EXTERNAL_PACKAGE_RISKS, "trust.risk"),
     score: readBoundedInteger(value.score, "trust.score", 0, 100),
-    signals: boundedStrings(value.signals, 32, 300, "trust.signals", 1),
+    signals: boundedStrings(value.signals, 64, 300, "trust.signals", 1),
     warnings: boundedStrings(value.warnings, 16, 300, "trust.warnings")
   };
 }
@@ -3606,6 +4007,60 @@ function recencyBonus(value: string): number {
   return 0;
 }
 
+function emptyVersionIntelligence(): VersionIntelligence {
+  return {
+    dormancyDaysBeforeLatest: null,
+    latestPublishAgeHours: null,
+    previousPublishedAt: null,
+    recentVersionCount30d: 0
+  };
+}
+
+function hoursSinceIso(value: string): number | null {
+  const time = new Date(value).getTime();
+  if (Number.isNaN(time)) {
+    return null;
+  }
+  return Math.max(0, Math.round((Date.now() - time) / 3_600_000));
+}
+
+function daysBetweenIso(start: string, end: string): number | null {
+  const startTime = new Date(start).getTime();
+  const endTime = new Date(end).getTime();
+  if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
+    return null;
+  }
+  return Math.max(0, Math.round((endTime - startTime) / 86_400_000));
+}
+
+function versionIntelligenceWarnings(sourceLabel: string, info: VersionIntelligence): string[] {
+  return [
+    ...(info.latestPublishAgeHours !== null && info.latestPublishAgeHours <= 48
+      ? [`${sourceLabel} latest release was published within the last 48 hours; review before production use.`]
+      : []),
+    ...(info.recentVersionCount30d >= 20
+      ? [`${sourceLabel} shows high release velocity with ${info.recentVersionCount30d} versions in the last 30 days.`]
+      : []),
+    ...(info.dormancyDaysBeforeLatest !== null && info.dormancyDaysBeforeLatest >= 365
+      ? [`${sourceLabel} latest release followed ${info.dormancyDaysBeforeLatest} days of release dormancy; review maintainer continuity.`]
+      : [])
+  ];
+}
+
+function versionIntelligencePenalty(info: VersionIntelligence): number {
+  let penalty = 0;
+  if (info.latestPublishAgeHours !== null && info.latestPublishAgeHours <= 48) {
+    penalty -= 6;
+  }
+  if (info.recentVersionCount30d >= 20) {
+    penalty -= 6;
+  }
+  if (info.dormancyDaysBeforeLatest !== null && info.dormancyDaysBeforeLatest >= 365) {
+    penalty -= 8;
+  }
+  return penalty;
+}
+
 function licenseFromClassifiers(value: unknown): string | null {
   if (!Array.isArray(value)) {
     return null;
@@ -3666,6 +4121,43 @@ function latestPyPiUploadTime(value: unknown): string | null {
     .filter((item): item is string => Boolean(item))
     .sort((left, right) => right.localeCompare(left));
   return uploads[0] ?? null;
+}
+
+function versionIntelligenceFromPyPiReleases(releases: unknown, latestVersion: string | null): VersionIntelligence {
+  if (!isRecord(releases)) {
+    return emptyVersionIntelligence();
+  }
+  const versionUploads = Object.entries(releases)
+    .map(([versionName, release]) => {
+      const uploadTimes = (Array.isArray(release) ? release : [])
+        .map((file) => (isRecord(file) ? readString(file.upload_time_iso_8601) : null))
+        .filter((item): item is string => Boolean(item))
+        .sort();
+      return {
+        publishedAt: uploadTimes.at(-1) ?? null,
+        versionName
+      };
+    })
+    .filter((entry): entry is { publishedAt: string; versionName: string } => Boolean(entry.publishedAt))
+    .sort((left, right) => new Date(left.publishedAt).getTime() - new Date(right.publishedAt).getTime());
+  const latestPublishedAt =
+    (latestVersion ? versionUploads.find((entry) => entry.versionName === latestVersion)?.publishedAt : null) ??
+    versionUploads.at(-1)?.publishedAt ??
+    null;
+  const previousPublishedAt = latestPublishedAt
+    ? versionUploads
+        .filter((entry) => entry.publishedAt < latestPublishedAt)
+        .at(-1)?.publishedAt ?? null
+    : null;
+  return {
+    dormancyDaysBeforeLatest: latestPublishedAt && previousPublishedAt ? daysBetweenIso(previousPublishedAt, latestPublishedAt) : null,
+    latestPublishAgeHours: latestPublishedAt ? hoursSinceIso(latestPublishedAt) : null,
+    previousPublishedAt,
+    recentVersionCount30d: versionUploads.filter((entry) => {
+      const age = hoursSinceIso(entry.publishedAt);
+      return age !== null && age <= 720;
+    }).length
+  };
 }
 
 function normalizeRepositoryUrl(value: string | null): string | null {
@@ -3750,19 +4242,47 @@ function recordKeyCount(value: unknown): number {
   return isRecord(value) ? Object.keys(value).length : 0;
 }
 
-function mcpEnvironmentRequirementCount(server: UnknownRecord): number {
-  return Math.max(
-    arrayLength(server.env),
-    arrayLength(server.envs),
-    arrayLength(server.environmentVariables),
-    arrayLength(server.environment_variables),
-    arrayLength(server.envVars),
-    recordKeyCount(server.env),
-    recordKeyCount(server.envs),
-    recordKeyCount(server.environmentVariables),
-    recordKeyCount(server.environment_variables),
-    recordKeyCount(server.envVars)
-  );
+function mcpEnvironmentSummary(server: UnknownRecord): McpEnvironmentSummary {
+  const candidates = [server.env, server.envs, server.environmentVariables, server.environment_variables, server.envVars];
+  const entries: UnknownRecord[] = [];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      entries.push(...candidate.filter(isRecord));
+      continue;
+    }
+    if (isRecord(candidate)) {
+      for (const [name, value] of Object.entries(candidate)) {
+        entries.push(isRecord(value) ? { ...value, name } : { name });
+      }
+    }
+  }
+  const seen = new Set<string>();
+  let optionalCount = 0;
+  let requiredCount = 0;
+  let secretLikeCount = 0;
+  for (const entry of entries) {
+    const name = readString(entry.name) ?? readString(entry.key) ?? readString(entry.env);
+    const key = name?.toLowerCase() ?? JSON.stringify(entry);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    const optional = readBoolean(entry.optional) || readBoolean(entry.isOptional) || readString(entry.required) === "false";
+    if (optional) {
+      optionalCount += 1;
+    } else {
+      requiredCount += 1;
+    }
+    if (name && /token|secret|key|password|passwd|mnemonic|wallet|private/i.test(name)) {
+      secretLikeCount += 1;
+    }
+  }
+  return {
+    count: seen.size,
+    optionalCount,
+    requiredCount,
+    secretLikeCount
+  };
 }
 
 function hubSiblingNames(value: unknown): string[] {

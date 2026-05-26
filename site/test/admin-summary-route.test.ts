@@ -139,8 +139,8 @@ describe("admin summary route", () => {
       },
       sourceQuality: {
         summary: {
-          averageDepthScore: 91,
-          moderateOrBetter: 5,
+          averageDepthScore: 95,
+          moderateOrBetter: 6,
           strong: 5,
           total: 6
         },

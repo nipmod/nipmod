@@ -746,10 +746,11 @@ describe("external package resolver", () => {
     ]);
 
     expect(records.map((record) => record.id)).toEqual(["npm:coalesce", "npm:coalesce", "npm:coalesce"]);
-    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
     expect(requestedUrls.filter((url) => url === "https://registry.npmjs.org/coalesce/latest")).toHaveLength(1);
     expect(requestedUrls.filter((url) => url === "https://registry.npmjs.org/coalesce")).toHaveLength(1);
     expect(requestedUrls.filter((url) => url === "https://api.npmjs.org/downloads/point/last-month/coalesce")).toHaveLength(1);
+    expect(requestedUrls.filter((url) => url === "https://api.osv.dev/v1/query")).toHaveLength(1);
   });
 
   test("opens a per-source circuit after repeated retryable failures", async () => {
@@ -1009,6 +1010,8 @@ describe("external package resolver", () => {
     expect(npm.trust.signals).toContain("Latest npm release file count: 44.");
     expect(npm.trust.signals).toContain("npm packument versions returned: 2.");
     expect(npm.trust.signals).toContain("npm latest dist-tag matches the latest manifest version.");
+    expect(npm.trust.signals).toContain("OSV returned no known vulnerabilities for this npm package/version.");
+    expect(npm.sourceEvidence?.checks.some((check) => check.id === "npm.osv" && check.status === "pass")).toBe(true);
 
     const pypi = await inspectExternalPackage("pypi", "depth-pypi", { fetchImpl: sourceDepthFetch });
     expect(pypi.sourceEvidence?.checks.some((check) => check.id === "pypi.release_history" && check.status === "pass")).toBe(true);
@@ -1020,6 +1023,7 @@ describe("external package resolver", () => {
     expect(pypi.trust.signals).toContain("PyPI latest release file types: bdist_wheel.");
     expect(pypi.trust.signals).toContain("PyPI latest release files are not marked yanked.");
     expect(pypi.trust.signals).toContain("PyPI requires-python: >=3.11.");
+    expect(pypi.trust.signals).toContain("OSV returned no known vulnerabilities for this PyPI package/version.");
     expect(pypi.trust.dimensions.provenanceStatus).toBe("attested");
 
     const github = await inspectExternalPackage("github", "example/depth-repo", { fetchImpl: sourceDepthFetch });
@@ -1036,7 +1040,9 @@ describe("external package resolver", () => {
     expect(github.trust.signals).toContain("GitHub lockfiles found: pnpm-lock.yaml.");
     expect(github.trust.signals).toContain("GitHub package.json package manager: pnpm@10.30.0.");
     expect(github.trust.signals).toContain("GitHub latest release tag: v1.2.3.");
+    expect(github.trust.signals).toContain("GitHub latest release asset count: 1.");
     expect(github.trust.signals).toContain("GitHub latest default-branch commit returned: abcdef1234567890.");
+    expect(github.trust.signals).toContain("GitHub latest default-branch commit date: 2026-05-01T00:00:00.000Z.");
     expect(github.trust.signals).toContain("GitHub community profile health: 84.");
 
     const model = await inspectExternalPackage("huggingface-model", "example/depth-model", { fetchImpl: sourceDepthFetch });
@@ -1047,6 +1053,7 @@ describe("external package resolver", () => {
     expect(model.trust.signals).toContain("Hugging Face dataset references returned: example/depth-dataset.");
     expect(model.trust.signals).toContain("Hugging Face repository files returned: 2.");
     expect(model.trust.signals).toContain("Hugging Face safetensors weight file is present.");
+    expect(model.trust.signals).toContain("Hugging Face model-index/eval labels returned: depth-eval, text-classification, depth-dataset, accuracy.");
     expect(model.trust.signals).toContain("Hugging Face commit digest metadata is present.");
 
     const dataset = await inspectExternalPackage("huggingface-dataset", "example/depth-dataset", { fetchImpl: sourceDepthFetch });
@@ -1062,7 +1069,10 @@ describe("external package resolver", () => {
     const mcp = await inspectExternalPackage("mcp", "example/depth-mcp", { fetchImpl: sourceDepthFetch });
     expect(mcp.sourceEvidence?.checks.some((check) => check.id === "mcp.remote_endpoints" && check.status === "pass")).toBe(true);
     expect(mcp.trust.signals).toContain("Remote MCP endpoints returned: 1.");
+    expect(mcp.trust.signals).toContain("MCP schema URL returned: https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json.");
+    expect(mcp.trust.signals).toContain("MCP remote endpoint HTTPS count: 1; non-HTTPS count: 0; host count: 1.");
     expect(mcp.trust.signals).toContain("MCP server declares 2 environment requirements.");
+    expect(mcp.trust.signals).toContain("MCP credential scope summary: 2 required, 0 optional, 1 secret-like.");
     expect(mcp.trust.signals).toContain("MCP registry packages returned: 1.");
     expect(mcp.trust.warnings).toContain("MCP server declares 2 environment requirements; review credential scope before enabling.");
   });
@@ -1282,6 +1292,10 @@ function pyPiSimpleResponse(name: string): Response {
 async function sourceDepthFetch(input: string | URL | Request): Promise<Response> {
   const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
 
+  if (url === "https://api.osv.dev/v1/query") {
+    return jsonResponse({ vulns: [] });
+  }
+
   if (url === "https://registry.npmjs.org/depth-npm/latest") {
     return jsonResponse({
       dependencies: { alpha: "1.0.0" },
@@ -1316,7 +1330,9 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
       name: "depth-npm",
       time: {
         created: "2025-01-01T00:00:00.000Z",
-        modified: "2026-05-01T00:00:00.000Z"
+        modified: "2026-05-01T00:00:00.000Z",
+        "0.9.0": "2025-12-01T00:00:00.000Z",
+        "1.0.0": "2026-05-01T00:00:00.000Z"
       },
       versions: {
         "0.9.0": {},
@@ -1444,7 +1460,10 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
 
   if (url === "https://api.github.com/repos/example/depth-repo/releases/latest") {
     return jsonResponse({
+      assets: [{ name: "depth-repo.tgz" }],
       name: "v1.2.3",
+      prerelease: false,
+      published_at: "2026-05-02T00:00:00.000Z",
       tag_name: "v1.2.3"
     });
   }
@@ -1452,6 +1471,11 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
   if (url === "https://api.github.com/repos/example/depth-repo/commits?per_page=1&sha=main") {
     return jsonResponse([
       {
+        commit: {
+          committer: {
+            date: "2026-05-01T00:00:00.000Z"
+          }
+        },
         sha: "abcdef1234567890"
       }
     ]);
@@ -1469,6 +1493,18 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
         base_model: "example/base-model",
         datasets: ["example/depth-dataset"],
         language: ["en"],
+        "model-index": [
+          {
+            name: "depth-eval",
+            results: [
+              {
+                dataset: { name: "depth-dataset" },
+                metrics: [{ type: "accuracy" }],
+                task: { type: "text-classification" }
+              }
+            ]
+          }
+        ],
         tags: ["text-generation"]
       },
       downloads: 1000,
@@ -1528,6 +1564,7 @@ async function sourceDepthFetch(input: string | URL | Request): Promise<Response
             packages: [{ registryType: "npm", name: "@example/depth-mcp" }],
             remotes: [{ type: "streamable-http", url: "https://example.com/mcp" }],
             repository: { source: "github", url: "https://github.com/example/depth-mcp" },
+            "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
             title: "Depth MCP",
             version: "1.0.0"
           }

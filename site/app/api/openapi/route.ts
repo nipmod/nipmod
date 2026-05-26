@@ -48,10 +48,12 @@ function openApiDocument() {
     "x-nipmod-agent-flow": [...AGENT_FLOW],
     "x-nipmod-local-tools": {
       deepScan: {
+        artifactSupport: ["tgz", "tar.gz", "zip", "whl"],
         command: "nipmod deep-scan <path> --json",
         mcpTool: "nipmod.deep_scan",
         mode: "local-static",
-        remoteMcpExposed: false
+        remoteMcpExposed: false,
+        writesWorkspace: false
       }
     },
     "x-nipmod-safety-boundary": SAFETY_BOUNDARY,
