@@ -19,13 +19,15 @@ The hosted API is designed to help agents make safer package decisions before lo
 | Threat | Risk | Control |
 | --- | --- | --- |
 | Malicious package metadata | README, model card or MCP description tells an agent to ignore instructions. | Treat metadata as untrusted data and scan for agent-targeted instruction text. |
-| npm or GitHub lifecycle scripts | `preinstall`, `install` or `postinstall` downloads and executes payloads. | Detect lifecycle scripts, warn on install-time hooks, block suspicious remote execution behavior. |
-| PyPI vulnerable release | A package exposes known vulnerability records. | Treat vulnerability records as negative trust evidence. |
-| Hugging Face unsafe model load | Pickle or binary weights, `trust_remote_code`, gated/private state or missing safetensors increases risk. | Surface file and config warnings; block or warn when source signals are unsafe. |
+| npm or GitHub lifecycle scripts | Install-time hooks such as `preinstall`, `postinstall`, `prepare`, `prepack` or `prepublishOnly` download and execute payloads. | Detect lifecycle scripts, warn on install-time hooks, block suspicious remote execution behavior. |
+| PyPI vulnerable or source-only release | A package exposes known vulnerability records, yanked files, weak digest data or source-only build execution risk. | Treat vulnerability records, yanked files, source-only installs and weak release evidence as negative trust evidence. |
+| Hugging Face unsafe model load | Pickle or binary weights, custom Python files, dataset scripts, `trust_remote_code`, gated/private state or missing safetensors increases risk. | Surface file and config warnings; block or warn when source signals are unsafe. |
 | Remote shell install command | Install command pipes a remote script into shell. | Mark command high risk and block hosted install plan execution. |
+| Secret exfiltration during install | Package scripts read `.env`, `.npmrc`, SSH keys, wallet material, cloud metadata or token environment variables. | Mark the command or local deep-scan finding high risk before any workspace write. |
+| Obfuscated execution | Package scripts hide payloads through base64, PowerShell encoded commands, hex escapes, dynamic eval or generated commands. | Mark obfuscated execution patterns high risk and require manual review. |
 | Popular compromised package | Downloads, stars or likes make a compromised package look attractive. | Popularity affects ranking only, never install permission. |
 | Archive spam | Public callers try to persist junk records. | Durable writes require server-side store configuration and archive writer token. |
-| Forged trust in posted records | Caller submits a record with fake score or decision. | Server reinspects original source before prepare or confirm. |
+| Forged trust in posted records | Caller submits a record with fake score, decision, warnings or install command. | Server reinspects original source before install-plan POST, archive prepare or archive confirm. |
 | Sensitive request logging | Raw queries, IPs, user agents or keys leak through usage events. | Store hashed or structured fields only. |
 
 ## Non Goals
@@ -40,6 +42,8 @@ The hosted API is designed to help agents make safer package decisions before lo
 ### npm and PyPI
 
 Nipmod checks source metadata, package release information, license, repository link, integrity or digest metadata, dependency and release signals, lifecycle scripts where available and vulnerability signals when returned by the source.
+
+For PyPI, SHA-256 and BLAKE2 release digests count as strong digest evidence. Legacy MD5-only release data is treated as weak evidence.
 
 ### Hugging Face
 

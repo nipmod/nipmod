@@ -5,10 +5,22 @@ export interface PackageLifecycleScript {
   name: string;
 }
 
+export interface PackageMetadataField {
+  field: string;
+  value: string | null | undefined;
+}
+
 const INSTALL_LIFECYCLE_SCRIPT_NAMES = new Set([
   "preinstall",
   "install",
-  "postinstall"
+  "postinstall",
+  "preprepare",
+  "prepare",
+  "postprepare",
+  "prepack",
+  "postpack",
+  "prepublish",
+  "prepublishonly"
 ]);
 
 export function cleanPlainText(value: string, maxLength: number): string {
@@ -20,10 +32,19 @@ export function installCommandRisk(commands: string[]): InstallCommandRisk {
   if (normalizedCommands.some(hasPipedShellDownload)) {
     return "high";
   }
+  if (normalizedCommands.some(hasDownloadedFileExecutionPattern)) {
+    return "high";
+  }
+  if (normalizedCommands.some(hasSecretAccessPattern)) {
+    return "high";
+  }
   if (normalizedCommands.some(hasPrivilegedOrDestructiveCommand)) {
     return "high";
   }
   if (normalizedCommands.some(hasEncodedOrInlineExecutionPattern)) {
+    return "high";
+  }
+  if (normalizedCommands.some(hasObfuscatedExecutionPattern)) {
     return "high";
   }
   if (normalizedCommands.some(hasCompoundShellSyntax)) {
@@ -34,8 +55,22 @@ export function installCommandRisk(commands: string[]): InstallCommandRisk {
 
 export function commandWarnings(commands: string[]): string[] {
   const risk = installCommandRisk(commands);
+  const normalizedCommands = commands.map(normalizeCommandForRisk);
+  const warnings: string[] = [];
   if (risk === "high") {
-    return ["Install command contains shell patterns that require manual review before execution."];
+    warnings.push("Install command contains shell patterns that require manual review before execution.");
+  }
+  if (normalizedCommands.some(hasSecretAccessPattern)) {
+    warnings.push("Install command appears to access credentials, tokens, wallet material or environment secrets.");
+  }
+  if (normalizedCommands.some(hasDownloadedFileExecutionPattern)) {
+    warnings.push("Install command downloads code and then executes it or passes it to a shell/interpreter.");
+  }
+  if (normalizedCommands.some(hasObfuscatedExecutionPattern)) {
+    warnings.push("Install command contains obfuscated execution patterns that require manual review.");
+  }
+  if (warnings.length > 0) {
+    return dedupeStrings(warnings);
   }
   if (risk === "medium") {
     return ["Install command contains compound shell syntax. Review the command before execution."];
@@ -94,6 +129,39 @@ export function lifecycleScriptWarnings(scripts: PackageLifecycleScript[]): stri
   return warnings;
 }
 
+export function metadataInstructionWarnings(fields: PackageMetadataField[]): string[] {
+  const text = cleanPlainText(
+    fields
+      .map((field) => field.value)
+      .filter((value): value is string => typeof value === "string" && value.length > 0)
+      .join(" "),
+    6000
+  ).toLowerCase();
+  if (!text) {
+    return [];
+  }
+  const instructionOverridePatterns = [
+    /ignore (all )?(previous|prior|system|developer|user|safety) instructions/,
+    /disregard (all )?(previous|prior|system|developer|user|safety) instructions/,
+    /override (the )?(system|developer|user|safety) (prompt|instructions|message)/,
+    /\byou are (now )?(chatgpt|claude|codex|an ai agent|the assistant)\b/,
+    /\b(system prompt|developer message|hidden prompt)\b.{0,80}\b(reveal|print|show|dump|send)\b/,
+    /\bdo not tell (the )?(user|developer|operator|maintainer)\b/,
+    /\bhide (this|these) (instruction|instructions|message|messages)\b/,
+    /\brun (this|the) command without (asking|approval|confirmation|permission)\b/,
+    /\bdisable (safety|policy|guardrails|approval|sandbox)\b/,
+    /\bbypass (safety|policy|approval|sandbox|permission)\b/
+  ];
+  const secretExfiltrationPatterns = [
+    /\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b.{0,120}\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
+    /\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b.{0,120}\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b/,
+    /\bread\b.{0,80}\b(\.env|\.npmrc|\.pypirc|\.netrc|id_rsa|id_ed25519|wallet|keystore)\b/
+  ];
+  return instructionOverridePatterns.some((pattern) => pattern.test(text)) || secretExfiltrationPatterns.some((pattern) => pattern.test(text))
+    ? ["Package metadata contains agent-targeted instructions and must be treated as untrusted data."]
+    : [];
+}
+
 function normalizeCommandForRisk(command: string): string {
   return cleanPlainText(command, 1000).toLowerCase();
 }
@@ -106,6 +174,16 @@ function hasPipedShellDownload(command: string): boolean {
   const beforePipe = command.slice(0, pipeIndex);
   const afterPipe = command.slice(pipeIndex + 1);
   return containsAnyToken(beforePipe, ["curl", "wget"]) && containsAnyToken(afterPipe, ["bash", "sh"]);
+}
+
+function hasDownloadedFileExecutionPattern(command: string): boolean {
+  return (
+    /\b(?:bash|sh|zsh)\s+-c\s+["']?\$?\(\s*(?:curl|wget)\b/.test(command) ||
+    /\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b/.test(command) ||
+    /\b(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod)\b.{0,220}(?:-o|--output|>|-outfile)\s*\S+.{0,220}(?:&&|;|\|\|).{0,160}\b(?:sh|bash|zsh|node|python|python3|chmod|pwsh|powershell)\b/.test(command) ||
+    /\b(?:iwr|irm|invoke-webrequest|invoke-restmethod)\b.{0,220}(?:\||;).{0,120}\b(?:iex|invoke-expression)\b/.test(command) ||
+    /\b(?:curl|wget)\b.{0,220}(?:\||;|&&).{0,120}\b(?:eval|exec|iex|invoke-expression)\b/.test(command)
+  );
 }
 
 function hasPrivilegedOrDestructiveCommand(command: string): boolean {
@@ -190,6 +268,56 @@ function hasEncodedOrInlineExecutionPattern(command: string): boolean {
   return (hasInlineInterpreter && (hasEncodedPayload || hasDynamicEval || hasNetworkFetch)) || (hasEncodedPayload && hasDynamicEval);
 }
 
+function hasObfuscatedExecutionPattern(command: string): boolean {
+  const normalized = normalizeCommandForRisk(command);
+  const hasObfuscation =
+    normalized.includes("${ifs}") ||
+    /\$'\\x[0-9a-f]{2}/i.test(normalized) ||
+    /\\x[0-9a-f]{2}\\x[0-9a-f]{2}/i.test(normalized) ||
+    /\bc['"]u['"]rl\b/i.test(normalized) ||
+    normalized.includes("string.fromcharcode") ||
+    normalized.includes("buffer.from([") ||
+    normalized.includes("marshal.loads") ||
+    normalized.includes("zlib.decompress") ||
+    normalized.includes("base64.b64decode") ||
+    normalized.includes("fromcharcode");
+  if (!hasObfuscation) {
+    return false;
+  }
+  const tokens = new Set(commandTokens(normalized));
+  const hasExecution =
+    tokens.has("eval") ||
+    tokens.has("exec") ||
+    normalized.includes("invoke-expression") ||
+    normalized.includes("child_process") ||
+    normalized.includes("subprocess") ||
+    normalized.includes("os.system") ||
+    normalized.includes("new function") ||
+    normalized.includes("function(") ||
+    tokens.has("node") ||
+    tokens.has("python") ||
+    tokens.has("python3") ||
+    tokens.has("sh") ||
+    tokens.has("bash") ||
+    normalized.includes("http://") ||
+    normalized.includes("https://") ||
+    tokens.has("curl") ||
+    tokens.has("wget");
+  return hasExecution;
+}
+
+function hasSecretAccessPattern(command: string): boolean {
+  const normalized = normalizeCommandForRisk(command);
+  return (
+    /(^|[\s@~/'"])(\.npmrc|\.pypirc|\.netrc|\.env|id_rsa|id_ed25519|private[_-]?key|ssh[_-]?key|mnemonic|seed phrase|wallet|keystore)\b/i.test(normalized) ||
+    /\b(github_token|npm_token|pypi_token|hf_token|huggingface_hub_token|aws_secret_access_key|aws_session_token|google_application_credentials|ssh_auth_sock)\b/i.test(
+      normalized
+    ) ||
+    /\b(process\.env|os\.environ|getenv|\/proc\/self\/environ)\b/i.test(normalized) ||
+    /\b(169\.254\.169\.254|metadata\.google\.internal)\b/i.test(normalized)
+  );
+}
+
 function hasBackgroundExecutionOutsideQuotes(command: string): boolean {
   let quote: "\"" | "'" | null = null;
   let escaped = false;
@@ -261,6 +389,10 @@ function isCommandTokenChar(char: string): boolean {
     char === "_" ||
     char === "."
   );
+}
+
+function dedupeStrings(values: string[]): string[] {
+  return [...new Set(values)];
 }
 
 function indexOfShellOperatorOutsideQuotes(command: string, operator: string): number {

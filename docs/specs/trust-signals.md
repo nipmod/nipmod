@@ -271,8 +271,10 @@ Selection order:
 5. Use popularity signals only as tie-breakers or ecosystem-fit signals.
 6. Request an install plan before recommending local execution.
 
-Recommended candidates can still be rejected by the install-plan boundary. A high-risk command, remote shell pattern, source lifecycle risk or agent-targeted package text blocks archive confirmation even when search ranking was strong.
-Install-time lifecycle scripts are evaluated as source trust signals. A visible command such as `npm install <name>` can remain low command risk while the package is still blocked because upstream metadata declares suspicious `preinstall`, `install` or `postinstall` behavior.
+Recommended candidates can still be rejected by the install-plan boundary. A high-risk command, remote shell pattern, source lifecycle risk or agent-targeted package text blocks install plans and archive confirmation even when search ranking was strong.
+Install-time lifecycle scripts are evaluated as source trust signals. A visible command such as `npm install <name>` can remain low command risk while the package is still blocked because upstream metadata declares suspicious `preinstall`, `install`, `postinstall`, `prepare`, `prepack`, `postpack`, `prepublish` or `prepublishOnly` behavior.
+
+Search ranking is never install permission. If the resolver cannot return critical source evidence, the candidate is kept in review until an inspect or install-plan call establishes enough evidence.
 
 Human-readable result summaries should include:
 

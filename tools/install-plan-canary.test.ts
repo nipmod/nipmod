@@ -39,7 +39,7 @@ describe("install plan canary", () => {
         commands: ["npm install undici"],
         requiresApprovalBeforeWrite: true,
         sourceOwnership: "external-owner-retained",
-        steps: [],
+        steps: ["Ask the user before writing to the workspace."],
         writes: []
       }
     });
@@ -72,7 +72,7 @@ describe("install plan canary", () => {
         commands: ["npm install undici"],
         requiresApprovalBeforeWrite: true,
         sourceOwnership: "external-owner-retained",
-        steps: [],
+        steps: ["Ask the user before writing to the workspace."],
         writes: ["package.json"]
       }
     });
@@ -105,7 +105,7 @@ describe("install plan canary", () => {
         commands: ["npm install undici"],
         requiresApprovalBeforeWrite: true,
         sourceOwnership: "external-owner-retained",
-        steps: [],
+        steps: ["Ask the user before writing to the workspace."],
         writes: []
       }
     });
@@ -148,7 +148,7 @@ describe("install plan canary", () => {
         commands: ["npm install undici"],
         requiresApprovalBeforeWrite: true,
         sourceOwnership: "external-owner-retained",
-        steps: [],
+        steps: ["Ask the user before writing to the workspace."],
         writes: []
       },
       safety: {
@@ -241,7 +241,7 @@ function installPlanFixture(overrides: Record<string, unknown> = {}) {
       commands: ["npm install undici"],
       requiresApprovalBeforeWrite: true,
       sourceOwnership: "external-owner-retained",
-      steps: ["Review the original source and license."],
+      steps: ["Review the original source and license.", "Ask the user before writing to the workspace."],
       writes: []
     },
     safety: {

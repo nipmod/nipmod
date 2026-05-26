@@ -178,6 +178,12 @@ function inspectResponse({
 }): Response {
   return Response.json({
     record: {
+      archive: {
+        firstSeenReason: "Resolved by Nipmod external package index.",
+        persistence: "ephemeral",
+        status: "external_indexed"
+      },
+      formatVersion: 1,
       id,
       sourceEvidence: {
         checks: sourceEvidenceIds(source).map((checkId) => ({
@@ -203,8 +209,18 @@ function inspectResponse({
             label: "Install plan boundary"
           }
         ],
+        policy: {
+          summary: "External scores combine source metadata.",
+          thresholds: {
+            recommended: 75,
+            usableWithWarning: 50
+          },
+          version: "external-v2"
+        },
+        risk: "low",
         score: dimensions.qualityScore,
-        signals
+        signals,
+        warnings: []
       },
       type: "dev.nipmod.external-package.v1"
     },
@@ -224,7 +240,8 @@ function sourceEvidenceIds(source: string): string[] {
         "npm.version_intelligence",
         "npm.osv",
         "npm.artifact_shape",
-        "npm.lifecycle"
+        "npm.lifecycle",
+        "metadata.agent_instructions"
       ];
     case "pypi":
       return [
@@ -239,7 +256,8 @@ function sourceEvidenceIds(source: string): string[] {
         "pypi.yanked",
         "pypi.requires_python",
         "pypi.version_intelligence",
-        "pypi.release_history"
+        "pypi.release_history",
+        "metadata.agent_instructions"
       ];
     case "github":
       return [
@@ -251,10 +269,22 @@ function sourceEvidenceIds(source: string): string[] {
         "github.security",
         "github.content_risk",
         "github.release_assets",
-        "github.default_branch_commit"
+        "github.default_branch_commit",
+        "metadata.agent_instructions"
       ];
     case "huggingface-model":
-      return ["hf.card_data", "hf.files", "hf.readme", "hf.config", "hf.safetensors", "hf.file_shape", "hf.remote_code", "hf.commit", "hf.gated"];
+      return [
+        "hf.card_data",
+        "hf.files",
+        "hf.readme",
+        "hf.config",
+        "hf.safetensors",
+        "hf.file_shape",
+        "hf.remote_code",
+        "hf.commit",
+        "hf.gated",
+        "metadata.agent_instructions"
+      ];
     case "huggingface-dataset":
       return [
         "hf.card_data",
@@ -266,7 +296,8 @@ function sourceEvidenceIds(source: string): string[] {
         "hf.readme",
         "hf.commit",
         "hf.gated",
-        "hf.script_files"
+        "hf.script_files",
+        "metadata.agent_instructions"
       ];
     case "mcp":
       return [
@@ -277,7 +308,8 @@ function sourceEvidenceIds(source: string): string[] {
         "mcp.env_requirements",
         "mcp.credential_scope",
         "mcp.source_repo",
-        "mcp.transport"
+        "mcp.transport",
+        "metadata.agent_instructions"
       ];
     default:
       return [];

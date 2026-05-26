@@ -62,7 +62,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const record = readRecord(body);
+    const record = await readRecord(body);
     return apiJsonWithUsage(request, createExternalInstallPlan(record), { access: rateLimit.access, context, headers: rateLimit.headers, status: 200 });
   } catch (error) {
     return errorJson(error, rateLimit.access, rateLimit.headers, context, request);
@@ -79,11 +79,29 @@ function parseSource(value: string | null): ExternalPackageSource {
   });
 }
 
-function readRecord(value: unknown): ExternalPackageRecord {
+async function readRecord(value: unknown): Promise<ExternalPackageRecord> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ExternalPackageError("request body must be an external package record", { code: "invalid_record", status: 400 });
   }
-  return readExternalPackageRecord(value);
+  const submitted = readExternalPackageRecord(value);
+  const inspected = await inspectExternalPackage(submitted.source, submitted.name);
+  if (inspected.id !== submitted.id || inspected.source !== submitted.source || inspected.name !== submitted.name) {
+    throw new ExternalPackageError("submitted record does not match the current source record", {
+      code: "stale_external_record",
+      retryable: false,
+      source: submitted.source,
+      status: 409
+    });
+  }
+  if (submitted.version && inspected.version && submitted.version !== inspected.version) {
+    throw new ExternalPackageError("submitted record version is stale; reinspect before requesting an install plan", {
+      code: "stale_external_record",
+      retryable: false,
+      source: submitted.source,
+      status: 409
+    });
+  }
+  return inspected;
 }
 
 function errorJson(

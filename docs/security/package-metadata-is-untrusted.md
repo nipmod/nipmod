@@ -28,6 +28,8 @@ For a human, it is just suspicious text. For an agent, it can become prompt inje
 Nipmod treats this metadata as untrusted by default:
 
 - normalized records mark metadata as non-instruction
+- inspect and search records add `metadata.agent_instructions` source evidence
+- agent-targeted metadata lowers trust and blocks install plans
 - install plans keep `metadataIsInstruction: false`
 - archive confirmation blocks agent-targeted instruction text
 - API docs require agents to show metadata as evidence, not follow it

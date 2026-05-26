@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
 import { createExternalInstallPlan, type ExternalInstallPlan, type ExternalPackageRecord } from "./external-packages";
-import { cleanPlainText, commandWarnings, installCommandRisk, type InstallCommandRisk } from "./package-command-safety";
+import {
+  cleanPlainText,
+  commandWarnings,
+  installCommandRisk,
+  metadataInstructionWarnings,
+  type InstallCommandRisk
+} from "./package-command-safety";
 
 export const PACKAGE_INTELLIGENCE_STATUSES = [
   "external_indexed",
@@ -143,7 +149,7 @@ export function createPackageIntelligenceRecord(
   const id = `pkgintel_${sha256(stableKey).slice(0, 24)}`;
   const installPlan = createExternalInstallPlan(sourceRecord);
   const securityWarnings = commandWarnings(installPlan.plan.commands);
-  const metadataWarnings = metadataInstructionWarnings(sourceRecord);
+  const metadataWarnings = packageMetadataInstructionWarnings(sourceRecord);
   const sourceSnapshot = {
     license: sourceRecord.license,
     metrics: sourceRecord.metrics,
@@ -446,28 +452,14 @@ function sanitizeExternalRecord(record: ExternalPackageRecord): ExternalPackageR
   };
 }
 
-function metadataInstructionWarnings(record: ExternalPackageRecord): string[] {
-  const text = cleanPlainText(
-    [
-      record.description,
-      record.displayName,
-      record.install.notes.join(" "),
-      record.trust.signals.join(" "),
-      record.trust.warnings.join(" ")
-    ].join(" "),
-    4000
-  ).toLowerCase();
-  const patterns = [
-    /ignore (all )?(previous|prior|system|developer) instructions/,
-    /reveal (the )?(system prompt|developer message|secret|api key|token)/,
-    /send (the )?(secret|api key|token|private key)/,
-    /exfiltrat(e|ion)/,
-    /do not tell (the )?(user|developer|operator)/,
-    /run (this|the) command without (asking|approval|confirmation)/
-  ];
-  return patterns.some((pattern) => pattern.test(text))
-    ? ["Package metadata contains agent-targeted instructions and must be treated as untrusted data."]
-    : [];
+function packageMetadataInstructionWarnings(record: ExternalPackageRecord): string[] {
+  return metadataInstructionWarnings([
+    { field: "description", value: record.description },
+    { field: "displayName", value: record.displayName },
+    { field: "install.notes", value: record.install.notes.join(" ") },
+    { field: "trust.signals", value: record.trust.signals.join(" ") },
+    { field: "trust.warnings", value: record.trust.warnings.join(" ") }
+  ]);
 }
 
 function cleanText(value: string, maxLength: number): string {
