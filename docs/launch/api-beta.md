@@ -56,6 +56,7 @@ curl 'https://nipmod.com/api/archive/prepare?source=npm&name=undici' -H 'x-nipmo
 | `https://nipmod.com/api/sources/health` | Source, archive and rate-limit health. |
 | `https://github.com/nipmod/nipmod/tree/main/examples/http-api` | Copyable TypeScript and Python HTTPS examples. |
 | `https://github.com/nipmod/nipmod/tree/main/examples/agent-workflow` | Copyable agent prompts for host setup. |
+| `info@nipmod.com` | Partner, support and security contact. |
 | `docs/api/trust-scoring.md` | Trust score thresholds, dimensions and boundaries. |
 
 ## Agent Prompt

@@ -2,6 +2,8 @@
 
 Nipmod is an independent open source project.
 
+Contact: info@nipmod.com
+
 Nipmod is not affiliated with, endorsed by or sponsored by npm, PyPI, GitHub, Microsoft, Hugging Face, Gitlawb or any other third party unless an explicit written statement says otherwise.
 
 References to npm, PyPI, GitHub, Hugging Face, Gitlawb and MCP are descriptive references to ecosystem tools, networks or sources. They do not imply ownership, endorsement or partnership.

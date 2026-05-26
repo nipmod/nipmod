@@ -5,6 +5,7 @@ This is the operator path for a real package quarantine. It separates decentrali
 ## Inputs
 
 - Reporter contact and timestamp.
+- Reports can be sent to info@nipmod.com.
 - Package canonical id and version.
 - Evidence URL or local evidence file.
 - Impact summary.

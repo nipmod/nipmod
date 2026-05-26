@@ -110,7 +110,7 @@ Avoid internal process language, tool names, personal notes and vague launch lan
 
 ## Community
 
-Use https://t.me/nipmod for public community discussion. Keep active vulnerability details out of public chats and use `SECURITY.md` for security reports.
+Use https://t.me/nipmod for public community discussion and info@nipmod.com for direct contact. Keep active vulnerability details out of public chats and use `SECURITY.md` for security reports.
 
 ## Security Reports
 

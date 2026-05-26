@@ -23,6 +23,9 @@ Beta access is free, key-required and rate limited. Agents can issue a beta key 
 GitHub:
 https://github.com/nipmod/nipmod
 
+Contact:
+info@nipmod.com
+
 API:
 https://nipmod.com/api-access
 ```
@@ -40,4 +43,5 @@ Free API beta, key-required and rate limited.
 
 https://nipmod.com/api-access
 https://github.com/nipmod/nipmod
+info@nipmod.com
 ```

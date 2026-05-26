@@ -80,7 +80,7 @@ That makes package trust part of agent infrastructure, not a side note.
 
 If you are building on Base and your product has an SDK, CLI, API client, MCP server or package surface, we want to make it easier for agents to find and inspect it safely.
 
-DM us if this is relevant.
+DM us or email info@nipmod.com if this is relevant.
 
 10.
 
@@ -89,6 +89,9 @@ https://nipmod.com/base-agents
 
 GitHub:
 https://github.com/nipmod/nipmod
+
+Email:
+info@nipmod.com
 
 Nipmod API:
 https://nipmod.com/api-access

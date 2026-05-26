@@ -17,6 +17,7 @@ describe("OpenAPI route", () => {
     expect(response.headers.get("content-type")).toContain("application/openapi+json");
     expect(body.openapi).toBe("3.1.0");
     expect(body.info.title).toBe("Nipmod API");
+    expect(body.info.contact.email).toBe("info@nipmod.com");
     expect(body.components.securitySchemes.NipmodApiKey.name).toBe("x-nipmod-api-key");
     expect(body.security).not.toContainEqual({});
     expect(body["x-nipmod-agent-flow"]).toEqual([

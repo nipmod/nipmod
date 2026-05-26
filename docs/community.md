@@ -36,6 +36,8 @@ Publishing that patch requires the matching repo owner DID identity.
 
 Website: https://nipmod.com
 
+Email: info@nipmod.com
+
 X: https://x.com/Nipmod
 
 Telegram: https://t.me/nipmod
@@ -120,5 +122,5 @@ Follow up matrix:
 
 Nipmod does not delete Gitlawb content. It can publish signed advisories, quarantine registry records and block install surfaces. See `docs/incident-publication.md` for the operator path.
 
-Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. X DM to https://x.com/Nipmod is the current public contact path until a dedicated security mailbox is published.
+Security reports should include package id, version, digest, source repo, proof URL, witness URL and the command that reproduced the issue. Use info@nipmod.com for private reports and X DM to https://x.com/Nipmod only as a fallback.
 Use the public security policy at https://nipmod.com/security and the well known metadata at https://nipmod.com/.well-known/security.txt.

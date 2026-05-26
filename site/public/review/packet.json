@@ -11,6 +11,7 @@
   },
   "targets": {
     "website": "https://nipmod.com",
+    "contact": "mailto:info@nipmod.com",
     "source": "https://gitlawb.com/node/repos/z6Mkwbud/nipmod",
     "launch": "https://nipmod.com/launch",
     "security": "https://nipmod.com/security",

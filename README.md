@@ -78,6 +78,7 @@ Nipmod does not bulk mirror these sources. Source owners keep ownership.
 | Website | https://nipmod.com |
 | API docs | https://nipmod.com/api-access |
 | GitHub | https://github.com/nipmod/nipmod |
+| Email | info@nipmod.com |
 | X | https://x.com/Nipmod |
 | Telegram | https://t.me/nipmod |
 | $NPM on Base | https://token.nipmod.com |
@@ -275,6 +276,7 @@ See [release process](docs/release-process.md) for the verification flow.
 | Registry | https://nipmod.com/registry/packages.json |
 | Agent instructions | https://nipmod.com/llms.txt |
 | Machine discovery | https://nipmod.com/.well-known/nipmod.json |
+| Email | info@nipmod.com |
 | X | https://x.com/Nipmod |
 | Telegram | https://t.me/nipmod |
 | $NPM on Base | https://token.nipmod.com |

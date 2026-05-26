@@ -2,6 +2,8 @@
 
 Current public maintainers:
 
+Contact: info@nipmod.com
+
 | Area | Owner |
 | --- | --- |
 | Product direction | [`@hazarxyz`](https://github.com/hazarxyz) |

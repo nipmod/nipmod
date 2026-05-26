@@ -150,6 +150,7 @@ export default function Home() {
         <DocsTable
           rows={[
             ["GitHub", <a className="data-link" href="https://github.com/nipmod/nipmod" key="github" rel="noreferrer" target="_blank">github.com/nipmod/nipmod</a>],
+            ["Email", <a className="data-link" href="mailto:info@nipmod.com" key="email">info@nipmod.com</a>],
             ["X", <a className="data-link" href="https://x.com/Nipmod" key="x" rel="noreferrer" target="_blank">x.com/Nipmod</a>],
             ["Telegram", <a className="data-link" href="https://t.me/nipmod" key="telegram" rel="noreferrer" target="_blank">t.me/nipmod</a>],
             ["$NPM on Base", <a className="data-link" href="https://token.nipmod.com" key="token" rel="noreferrer" target="_blank">token.nipmod.com</a>]

@@ -6,6 +6,12 @@
   "homepage": "https://nipmod.com",
   "previewImage": "https://nipmod.com/nipmod-logo.png",
   "trustPage": "https://nipmod.com/trust",
+  "contact": {
+    "email": "mailto:info@nipmod.com",
+    "security": "https://nipmod.com/security",
+    "telegram": "https://t.me/nipmod",
+    "x": "https://x.com/Nipmod"
+  },
   "api": {
     "baseUrl": "https://nipmod.com",
     "description": "Hosted package discovery, trust checks and safe install plans for agents.",

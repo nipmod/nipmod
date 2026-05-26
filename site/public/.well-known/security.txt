@@ -1,3 +1,4 @@
+Contact: mailto:info@nipmod.com
 Contact: https://nipmod.com/security
 Contact: https://x.com/Nipmod
 Expires: 2027-05-16T00:00:00.000Z

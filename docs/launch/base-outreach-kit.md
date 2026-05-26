@@ -18,6 +18,9 @@ https://nipmod.com/base-agent-preflight.json
 
 No big ask yet. If this is relevant for your side, I would be happy to send a short integration outline.
 
+Email:
+info@nipmod.com
+
 ## Partner with SDK or MCP surface
 
 Hey, quick one.
@@ -33,6 +36,9 @@ https://nipmod.com/base-agents
 
 GitHub:
 https://github.com/nipmod/nipmod
+
+Email:
+info@nipmod.com
 
 ## Reply when someone asks if this is official Base
 
