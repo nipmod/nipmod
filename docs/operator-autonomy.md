@@ -81,7 +81,7 @@ If the live check returns `fallbackReason: "distributed_rpc_http_404"`, Producti
    - In Supabase Data API settings, expose `api_keys` and `read_api_usage_metrics` for server-side service role calls only.
 
 Raw API keys are never inserted. Store only `key_hash` values derived with `NIPMOD_API_KEY_HASH_SECRET`.
-Key status may be `active`, `paused` or `revoked`. Paused keys do not authenticate because runtime verification only accepts active registry rows.
+Key status may be `active`, `paused` or `revoked`. Production pause/resume is also protected by a reversible label hold, so paused keys stop authenticating even before every registry has the native `paused` constraint applied.
 
 Free beta keys can be issued by the API once the registry table is live:
 

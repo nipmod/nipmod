@@ -1,4 +1,5 @@
 import { scryptSync, timingSafeEqual } from "node:crypto";
+import { isPausedApiKeyLabel } from "./api-key-labels";
 import { type ApiCorsPolicy, type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 
 type ApiAuthEnv = Record<string, string | undefined>;
@@ -376,10 +377,14 @@ function storedApiKeyFromRow(row: unknown): StoredApiKeyLookup | null {
   if (expiresAt && Date.parse(expiresAt) <= Date.now()) {
     return { status: "missing" };
   }
+  const label = sanitizeLabel(typeof record.label === "string" ? record.label : "api-key");
+  if (isPausedApiKeyLabel(label)) {
+    return { status: "missing" };
+  }
   return {
     key: {
       id,
-      label: sanitizeLabel(typeof record.label === "string" ? record.label : "api-key"),
+      label,
       limitMultiplier: readLimitMultiplier(record.rate_limit_multiplier) ?? tierMultiplier(tier),
       tier
     },

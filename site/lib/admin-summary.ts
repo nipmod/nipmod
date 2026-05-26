@@ -1,6 +1,8 @@
 import { readApiUsageMetrics } from "./api-usage";
 import { externalSourceCapabilities } from "./external-packages";
 
+import { visibleApiKeyLabel } from "./api-key-labels";
+
 type AdminSummaryEnv = Record<string, string | undefined>;
 
 type CountRow = Record<string, unknown>;
@@ -250,13 +252,13 @@ async function readKeyMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fe
     const staleBetaKeys = keys.filter(isStaleBetaKey);
     return {
       ...status,
-      activeCount: keys.filter((key) => key.status === "active").length,
+      activeCount: keys.filter((key) => operationalKeyStatus(key) === "active").length,
       expiredActiveCount: keys.filter(isExpiredActiveKey).length,
       expiringSoonCount: keys.filter(isExpiringSoonKey).length,
-      pausedCount: keys.filter((key) => key.status === "paused").length,
+      pausedCount: keys.filter((key) => operationalKeyStatus(key) === "paused").length,
       recentKeys: keys.slice(0, input.limit).map(keySummaryRow),
       revokedCount: keys.filter((key) => key.status === "revoked").length,
-      selfServeBetaCount: keys.filter((key) => key.tier === "beta" && key.label.startsWith("self-serve/")).length,
+      selfServeBetaCount: keys.filter((key) => key.tier === "beta" && visibleApiKeyLabel(key.label).startsWith("self-serve/")).length,
       staleBetaCount: staleBetaKeys.length,
       staleKeys: staleBetaKeys.slice(0, input.limit).map(keySummaryRow),
       tiers: sortedCounts(keys, (key) => key.tier, "tier", input.limit),
@@ -393,12 +395,12 @@ function createKeyActivityAggregate(keyId: string, key: KeyMetricRow | undefined
     errors: new Map(),
     installPlanCount: 0,
     keyId,
-    label: key?.label ?? "external key",
+    label: key ? visibleApiKeyLabel(key.label) : "external key",
     lastSeenAt: null,
     requestCount: 0,
     routes: new Map(),
     sources: new Map(),
-    status: key?.status ?? "unknown",
+    status: key ? operationalKeyStatus(key) : "unknown",
     successCount: 0,
     tier: key?.tier ?? "unknown",
     trafficOrigins: new Map()
@@ -503,7 +505,7 @@ function countFromHeader(value: string | null): number | null {
 }
 
 function isStaleBetaKey(key: KeyMetricRow): boolean {
-  if (key.status !== "active" || key.tier !== "beta" || !key.label.startsWith("self-serve/")) {
+  if (operationalKeyStatus(key) !== "active" || key.tier !== "beta" || !visibleApiKeyLabel(key.label).startsWith("self-serve/")) {
     return false;
   }
   if (isExpiredActiveKey(key)) {
@@ -514,7 +516,7 @@ function isStaleBetaKey(key: KeyMetricRow): boolean {
 }
 
 function isExpiredActiveKey(key: KeyMetricRow): boolean {
-  if (key.status !== "active" || !key.expires_at) {
+  if (operationalKeyStatus(key) !== "active" || !key.expires_at) {
     return false;
   }
   const expiresAt = Date.parse(key.expires_at);
@@ -522,7 +524,7 @@ function isExpiredActiveKey(key: KeyMetricRow): boolean {
 }
 
 function isExpiringSoonKey(key: KeyMetricRow): boolean {
-  if (key.status !== "active" || !key.expires_at || isExpiredActiveKey(key)) {
+  if (operationalKeyStatus(key) !== "active" || !key.expires_at || isExpiredActiveKey(key)) {
     return false;
   }
   const expiresAt = Date.parse(key.expires_at);
@@ -541,6 +543,7 @@ function keySummaryRow(key: KeyMetricRow) {
   const stale = isStaleBetaKey(key);
   const expired = isExpiredActiveKey(key);
   const expiringSoon = isExpiringSoonKey(key);
+  const status = operationalKeyStatus(key);
   return {
     ageDays: keyAgeDays(key.created_at),
     createdAt: key.created_at,
@@ -548,14 +551,18 @@ function keySummaryRow(key: KeyMetricRow) {
     expiringSoon,
     expiresAt: key.expires_at,
     id: key.id,
-    label: key.label,
+    label: visibleApiKeyLabel(key.label),
     rateLimitMultiplier: key.rate_limit_multiplier,
     revokedAt: key.revoked_at,
     stale,
     staleReason: expired ? "active beta key is past expiry" : stale ? "active self-serve beta key older than 30 days" : "",
-    status: key.status,
+    status,
     tier: key.tier
   };
+}
+
+function operationalKeyStatus(key: KeyMetricRow): string {
+  return key.status === "active" && key.label !== visibleApiKeyLabel(key.label) ? "paused" : key.status;
 }
 
 type ArchiveMetricRow = {

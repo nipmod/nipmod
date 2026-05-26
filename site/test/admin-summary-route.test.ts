@@ -62,10 +62,10 @@ describe("admin summary route", () => {
             created_at: "2026-05-24T00:00:00.000Z",
             expires_at: "2026-08-22T00:00:00.000Z",
             id: "key_2222222222abcdef",
-            label: "self-serve/paused-agent",
+            label: "paused/self-serve/paused-agent",
             rate_limit_multiplier: 10,
             revoked_at: null,
-            status: "paused",
+            status: "active",
             tier: "beta"
           },
           {

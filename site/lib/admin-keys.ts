@@ -1,3 +1,5 @@
+import { pausedApiKeyLabel, visibleApiKeyLabel } from "./api-key-labels";
+
 type AdminKeyEnv = Record<string, string | undefined>;
 
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
@@ -16,6 +18,17 @@ export type AdminKeyRecord = {
   label: string;
   rateLimitMultiplier: number;
   revokedAt: string | null;
+  status: string;
+  tier: string;
+};
+
+type ApiKeyRow = {
+  created_at: string;
+  expires_at: string | null;
+  id: string;
+  label: string;
+  rate_limit_multiplier: number;
+  revoked_at: string | null;
   status: string;
   tier: string;
 };
@@ -60,18 +73,33 @@ export async function updateAdminKeyStatus(
     return actionFailure("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
   }
 
-  const now = new Date().toISOString();
+  const current = await readApiKeyRow(input.keyId, env, fetchImpl);
+  if (current.status === "unavailable") {
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+  }
+  if (!current.row) {
+    return actionFailure("api_key_not_found", "API key was not found", 404, false);
+  }
+
+  const currentStatus = operationalKeyStatus(current.row);
+  if (input.action === "pause" && currentStatus === "paused") {
+    return adminKeyAction(input.action, [keyRecordFromApiKeyRow(current.row)], status);
+  }
+  if (input.action === "resume" && currentStatus === "active") {
+    return actionFailure("api_key_not_paused", "API key is not paused", 404, false);
+  }
+  if (input.action !== "revoke" && currentStatus !== (input.action === "pause" ? "active" : "paused")) {
+    return actionFailure("api_key_not_found_or_inactive", "API key was not found or is already inactive", 404, false);
+  }
+  if (input.action === "revoke" && currentStatus === "revoked") {
+    return actionFailure("api_key_not_found_or_inactive", "API key was not found or is already inactive", 404, false);
+  }
+
   const params = new URLSearchParams({
     id: `eq.${input.keyId}`,
-    select: KEY_SELECT,
-    status: input.action === "resume" ? "eq.paused" : "eq.active"
+    select: KEY_SELECT
   });
-  const patch =
-    input.action === "pause"
-      ? { revoked_at: null, status: "paused" }
-      : input.action === "resume"
-        ? { revoked_at: null, status: "active" }
-        : { revoked_at: now, status: "revoked" };
+  const patch = patchForStatusAction(input.action, current.row);
   const response = await patchApiKeys(env, params, patch, fetchImpl);
   if (!response.ok) {
     return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
@@ -94,7 +122,7 @@ export async function updateAdminKeyLabel(
   if (!isKeyId(input.keyId)) {
     return actionFailure("invalid_key_id", "keyId must be a Nipmod API key id", 400, false);
   }
-  const label = sanitizeEditableLabel(input.label);
+  const label = visibleApiKeyLabel(sanitizeEditableLabel(input.label));
   if (!label) {
     return actionFailure("invalid_key_label", "label must contain 1 to 80 safe characters", 400, false);
   }
@@ -104,11 +132,20 @@ export async function updateAdminKeyLabel(
     return actionFailure("key_store_not_configured", "API key registry is not configured", 503, false, status.missing);
   }
 
+  const current = await readApiKeyRow(input.keyId, env, fetchImpl);
+  if (current.status === "unavailable") {
+    return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
+  }
+  if (!current.row) {
+    return actionFailure("api_key_not_found", "API key was not found", 404, false);
+  }
+
   const params = new URLSearchParams({
     id: `eq.${input.keyId}`,
     select: KEY_SELECT
   });
-  const response = await patchApiKeys(env, params, { label }, fetchImpl);
+  const nextLabel = operationalKeyStatus(current.row) === "paused" ? pausedApiKeyLabel(label) : label;
+  const response = await patchApiKeys(env, params, { label: nextLabel }, fetchImpl);
   if (!response.ok) {
     return actionFailure("key_management_unavailable", "API key registry is temporarily unavailable", 503, true);
   }
@@ -231,16 +268,76 @@ async function patchApiKeys(
   }
 }
 
-async function readKeyRows(response: Response): Promise<AdminKeyRecord[]> {
+async function getApiKeys(env: AdminKeyEnv, params: URLSearchParams, fetchImpl: typeof fetch): Promise<Response> {
+  const baseUrl = env[SUPABASE_URL_ENV];
+  const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV];
+  if (!baseUrl || !serviceRoleKey) {
+    return Response.json({ error: "not configured" }, { status: 503 });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ADMIN_KEYS_TIMEOUT_MS);
+  try {
+    return await fetchImpl(`${baseUrl.replace(/\/$/, "")}/rest/v1/api_keys?${params.toString()}`, {
+      headers: {
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${serviceRoleKey}`
+      },
+      signal: controller.signal
+    });
+  } catch {
+    return Response.json({ error: "key management unavailable" }, { status: 503 });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function readApiKeyRow(
+  keyId: string,
+  env: AdminKeyEnv,
+  fetchImpl: typeof fetch
+): Promise<{ row: ApiKeyRow | null; status: "ok" | "unavailable" }> {
+  const params = new URLSearchParams({
+    id: `eq.${keyId}`,
+    limit: "1",
+    select: KEY_SELECT
+  });
+  const response = await getApiKeys(env, params, fetchImpl);
+  if (!response.ok) {
+    return { row: null, status: "unavailable" };
+  }
+  const rows = await readRawKeyRows(response);
+  return { row: rows.at(0) ?? null, status: "ok" };
+}
+
+function patchForStatusAction(action: "pause" | "resume" | "revoke", row: ApiKeyRow): Record<string, unknown> {
+  if (action === "pause") {
+    return { label: pausedApiKeyLabel(row.label), revoked_at: null };
+  }
+  if (action === "resume") {
+    const patch: Record<string, unknown> = { label: visibleApiKeyLabel(row.label), revoked_at: null };
+    if (row.status === "paused") {
+      patch.status = "active";
+    }
+    return patch;
+  }
+  return { revoked_at: new Date().toISOString(), status: "revoked" };
+}
+
+async function readRawKeyRows(response: Response): Promise<ApiKeyRow[]> {
   const rows = await response.json().catch(() => []);
-  return Array.isArray(rows) ? rows.map(keyRecordFromRow).filter((row): row is AdminKeyRecord => row !== null) : [];
+  return Array.isArray(rows) ? rows.map(parseApiKeyRow).filter((row): row is ApiKeyRow => row !== null) : [];
+}
+
+async function readKeyRows(response: Response): Promise<AdminKeyRecord[]> {
+  return (await readRawKeyRows(response)).map(keyRecordFromApiKeyRow);
 }
 
 function dedupeKeyRows(rows: AdminKeyRecord[]): AdminKeyRecord[] {
   return [...new Map(rows.map((row) => [row.id, row])).values()];
 }
 
-function keyRecordFromRow(value: unknown): AdminKeyRecord | null {
+function parseApiKeyRow(value: unknown): ApiKeyRow | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
   }
@@ -258,15 +355,32 @@ function keyRecordFromRow(value: unknown): AdminKeyRecord | null {
     return null;
   }
   return {
-    createdAt: row.created_at,
-    expiresAt: row.expires_at,
+    created_at: row.created_at,
+    expires_at: row.expires_at,
     id: row.id,
     label: row.label,
-    rateLimitMultiplier: row.rate_limit_multiplier,
-    revokedAt: row.revoked_at,
+    rate_limit_multiplier: row.rate_limit_multiplier,
+    revoked_at: row.revoked_at,
     status: row.status,
     tier: row.tier
   };
+}
+
+function keyRecordFromApiKeyRow(row: ApiKeyRow): AdminKeyRecord {
+  return {
+    createdAt: row.created_at,
+    expiresAt: row.expires_at,
+    id: row.id,
+    label: visibleApiKeyLabel(row.label),
+    rateLimitMultiplier: row.rate_limit_multiplier,
+    revokedAt: row.revoked_at,
+    status: operationalKeyStatus(row),
+    tier: row.tier
+  };
+}
+
+function operationalKeyStatus(row: ApiKeyRow): string {
+  return row.status === "active" && row.label !== visibleApiKeyLabel(row.label) ? "paused" : row.status;
 }
 
 function clampStaleHours(value: number | null | undefined): number {
