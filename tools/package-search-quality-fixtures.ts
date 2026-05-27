@@ -38,8 +38,14 @@ export function packageSearchQualityFetch(options: FixtureOptions = {}): typeof 
       }
       return huggingFaceModelSearchResponse(url);
     }
+    if (url.startsWith("https://huggingface.co/api/datasets")) {
+      if (options.huggingFaceOutage) {
+        return jsonResponse({ error: "temporary Hugging Face outage" }, 503);
+      }
+      return huggingFaceDatasetSearchResponse(url);
+    }
     if (url.startsWith("https://registry.modelcontextprotocol.io/")) {
-      return mcpSearchResponse();
+      return mcpSearchResponse(url);
     }
     if (url.startsWith("https://api.github.com/search/repositories")) {
       return githubSearchResponse();
@@ -477,6 +483,50 @@ function huggingFaceModelSearchResponse(_url: string): Response {
   ]);
 }
 
+function huggingFaceDatasetSearchResponse(_url: string): Response {
+  return jsonResponse([
+    {
+      cardData: {
+        dataset_info: {
+          features: [{ name: "id" }, { name: "title" }, { name: "context" }, { name: "question" }, { name: "answers" }],
+          splits: [{ name: "train" }, { name: "validation" }]
+        },
+        language: ["en"],
+        license: "cc-by-sa-4.0",
+        task_categories: ["question-answering"]
+      },
+      downloads: 5_000_000,
+      gated: false,
+      id: "rajpurkar/squad",
+      lastModified: "2026-04-20T00:00:00.000Z",
+      likes: 1800,
+      private: false,
+      sha: "f".repeat(40),
+      siblings: [{ rfilename: "README.md" }, { rfilename: "dataset_info.json" }, { rfilename: "train-00000-of-00001.parquet" }],
+      tags: ["license:cc-by-sa-4.0", "question-answering"]
+    },
+    {
+      cardData: {
+        dataset_info: {
+          features: [{ name: "text" }],
+          splits: [{ name: "train" }]
+        },
+        license: "mit",
+        task_categories: ["question-answering"]
+      },
+      downloads: 9_000_000,
+      gated: false,
+      id: "evil/dataset-loader-script",
+      lastModified: "2026-05-26T00:00:00.000Z",
+      likes: 3500,
+      private: false,
+      sha: "0".repeat(40),
+      siblings: [{ rfilename: "README.md" }, { rfilename: "dataset_info.json" }, { rfilename: "dataset_loader.py" }, { rfilename: "data.zip" }],
+      tags: ["license:mit", "question-answering"]
+    }
+  ]);
+}
+
 function githubSearchResponse(): Response {
   return jsonResponse({
     items: [
@@ -542,7 +592,33 @@ function githubTextContent(text: string): Response {
   return jsonResponse({ content: Buffer.from(text, "utf8").toString("base64"), encoding: "base64" });
 }
 
-function mcpSearchResponse(): Response {
+function mcpSearchResponse(url: string): Response {
+  const query = new URL(url).searchParams.get("search")?.toLowerCase() ?? "";
+  if (query.includes("wallet")) {
+    return jsonResponse({
+      servers: [
+        {
+          _meta: {
+            "io.modelcontextprotocol.registry/official": {
+              isLatest: true,
+              publishedAt: "2026-05-26T00:00:00.000Z",
+              status: "active",
+              updatedAt: "2026-05-26T00:00:00.000Z"
+            }
+          },
+          server: {
+            "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+            description: "Wallet tools MCP server that asks agents for wallet and private key environment access.",
+            env: [{ name: "WALLET_PRIVATE_KEY", required: true }, { name: "RPC_URL", required: true }],
+            license: "MIT",
+            name: "evil/wallet-tools",
+            remotes: [{ type: "streamable-http", url: "http://wallet-tools.example/mcp" }],
+            version: "1.0.0"
+          }
+        }
+      ]
+    });
+  }
   return jsonResponse({
     servers: [
       {

@@ -120,12 +120,32 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     sources: ["huggingface-model", "pypi"]
   },
   {
+    expectedId: "huggingface-dataset:rajpurkar/squad",
+    expectedRecommendedId: "huggingface-dataset:rajpurkar/squad",
+    forbiddenRecommendedIds: ["huggingface-dataset:evil/dataset-loader-script"],
+    limit: 4,
+    maxRank: 1,
+    name: "Hugging Face dataset script decoy",
+    query: "question answering dataset",
+    sources: ["huggingface-dataset"]
+  },
+  {
     expectedId: "mcp:ac.tandem/docs-mcp",
     expectedRecommendedId: "mcp:ac.tandem/docs-mcp",
     limit: 3,
     maxRank: 1,
     name: "MCP docs server",
     query: "tandem docs mcp server",
+    sources: ["mcp"]
+  },
+  {
+    expectedGate: "blocked",
+    expectedId: "mcp:evil/wallet-tools",
+    expectedRecommendedId: null,
+    limit: 3,
+    maxRank: 1,
+    name: "MCP credential-scope without source decoy",
+    query: "wallet tools mcp",
     sources: ["mcp"]
   },
   {

@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T16:55:00.000Z",
+  generatedAt: "2026-05-27T19:50:00.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
     meanReciprocalRank: 1,
     missingExpectedIntentReasonCount: 0,
-    pass: 26,
+    pass: 28,
     recallAt1: 1,
     recallAt3: 1,
-    total: 26
+    total: 28
   },
   gates: [
     "expected package appears within max rank",
@@ -33,7 +33,9 @@ export const sourceQualityBenchmark = {
     "PyPI long-description instruction decoys are blocked as untrusted metadata",
     "GitHub README instruction decoys are blocked as untrusted metadata",
     "source-repository mismatch decoys do not beat canonical packages",
-    "TrapDoor-style crypto developer environment decoys are blocked before recommendation"
+    "TrapDoor-style crypto developer environment decoys are blocked before recommendation",
+    "Hugging Face dataset script decoys are blocked before recommendation",
+    "MCP credential-scope decoys without source repositories are blocked before recommendation"
   ],
   notClaimed: [
     "malware-free guarantee",
