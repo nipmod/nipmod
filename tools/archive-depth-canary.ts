@@ -151,14 +151,16 @@ function assertSourceDrift(sourceDrift, sourceRecordDigest) {
   if (sourceDrift?.version !== "source-drift-v1") {
     throw new Error("archive source drift marker missing");
   }
+  if (!SHA256.test(sourceRecordDigest ?? "")) {
+    throw new Error("archive source record digest missing");
+  }
   if (!SHA256.test(sourceDrift.baselineSourceRecordDigest ?? "")) {
     throw new Error("archive source drift baseline digest missing");
   }
   if (!SHA256.test(sourceDrift.currentSourceRecordDigest ?? "")) {
     throw new Error("archive source drift current digest missing");
   }
-  assertEqual(sourceDrift.currentSourceRecordDigest, sourceRecordDigest, "archive source drift current digest mismatch");
-  assertEqual(sourceDrift.baselineSourceRecordDigest, sourceRecordDigest, "dry-run archive source drift baseline mismatch");
+  assertEqual(sourceDrift.baselineSourceRecordDigest, sourceDrift.currentSourceRecordDigest, "dry-run archive source drift baseline mismatch");
   assertEqual(sourceDrift.changed, false, "dry-run archive source drift should be fresh");
   assertEqual(sourceDrift.status, "fresh", "dry-run archive source drift status mismatch");
   if (typeof sourceDrift.checkedAt !== "string" || sourceDrift.checkedAt.length === 0) {

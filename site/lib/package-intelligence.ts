@@ -399,15 +399,13 @@ export function ensurePackageIntelligenceEvidence(record: PackageIntelligenceRec
   if (existing && validEvidenceDigests({ ...record, evidence: existing })) {
     return { ...record, evidence: existing };
   }
-  const currentSourceRecordDigest = sha256(stableJson(record.sourceRecord));
+  const currentSourceDriftDigest = packageIntelligenceSourceDriftDigest(record.sourceRecord);
   const baselineSourceRecordDigest =
     existing?.sourceDrift &&
     isSha256(existing.sourceDrift.baselineSourceRecordDigest) &&
-    existing.sourceDrift.currentSourceRecordDigest === existing.sourceRecordDigest
+    existing.sourceDrift.currentSourceRecordDigest === currentSourceDriftDigest
       ? existing.sourceDrift.baselineSourceRecordDigest
-      : existing && existing.sourceRecordDigest === currentSourceRecordDigest
-        ? existing.sourceRecordDigest
-        : undefined;
+      : undefined;
   const evidenceOptions: { baselineSourceRecordDigest?: string; checkedAt: string } = {
     checkedAt: typeof existing?.sourceDrift?.checkedAt === "string" ? existing.sourceDrift.checkedAt : record.archive.updatedAt
   };
@@ -432,12 +430,13 @@ function packageIntelligenceEvidence(
   options: { baselineSourceRecordDigest?: string; checkedAt?: string } = {}
 ): PackageIntelligenceRecord["evidence"] {
   const sourceRecordDigest = sha256(stableJson(sourceRecord));
-  const baselineSourceRecordDigest = options.baselineSourceRecordDigest ?? sourceRecordDigest;
+  const sourceDriftDigest = packageIntelligenceSourceDriftDigest(sourceRecord);
+  const baselineSourceRecordDigest = options.baselineSourceRecordDigest ?? sourceDriftDigest;
   return {
     archivePolicy: "agent-confirmed-source-owned-v1",
     generatedFrom: "server-reinspected-source",
     installPlanDigest: sha256(stableJson(installPlan)),
-    sourceDrift: packageIntelligenceSourceDrift(baselineSourceRecordDigest, sourceRecordDigest, options.checkedAt ?? trust.checkedAt),
+    sourceDrift: packageIntelligenceSourceDrift(baselineSourceRecordDigest, sourceDriftDigest, options.checkedAt ?? trust.checkedAt),
     sourceRecordDigest,
     sourceSnapshotDigest: sha256(stableJson(sourceSnapshot)),
     trustDigest: sha256(stableJson(trust))
@@ -446,7 +445,7 @@ function packageIntelligenceEvidence(
 
 function validEvidenceDigests(record: PackageIntelligenceRecord): boolean {
   const sourceDrift = record.evidence?.sourceDrift;
-  if (!validSourceDrift(sourceDrift, record.evidence?.sourceRecordDigest)) {
+  if (!validSourceDrift(sourceDrift, packageIntelligenceSourceDriftDigest(record.sourceRecord))) {
     return false;
   }
   const expected = packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust, {
@@ -489,7 +488,7 @@ function packageIntelligenceSourceDrift(
   };
 }
 
-function validSourceDrift(value: unknown, sourceRecordDigest: unknown): value is PackageIntelligenceSourceDrift {
+function validSourceDrift(value: unknown, currentSourceDriftDigest: unknown): value is PackageIntelligenceSourceDrift {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }
@@ -504,8 +503,34 @@ function validSourceDrift(value: unknown, sourceRecordDigest: unknown): value is
     drift.checkedAt.length > 0 &&
     isSha256(drift.baselineSourceRecordDigest) &&
     isSha256(drift.currentSourceRecordDigest) &&
-    drift.currentSourceRecordDigest === sourceRecordDigest
+    drift.currentSourceRecordDigest === currentSourceDriftDigest
   );
+}
+
+function packageIntelligenceSourceDriftDigest(sourceRecord: ExternalPackageRecord): string {
+  return sha256(stableJson(sourceRecordDriftMaterial(sourceRecord)));
+}
+
+function sourceRecordDriftMaterial(sourceRecord: ExternalPackageRecord): unknown {
+  return {
+    displayName: sourceRecord.displayName,
+    id: sourceRecord.id,
+    install: {
+      command: sourceRecord.install.command,
+      commands: sourceRecord.install.commands ?? null,
+      manager: sourceRecord.install.manager
+    },
+    license: sourceRecord.license,
+    name: sourceRecord.name,
+    originalUrl: sourceRecord.originalUrl,
+    owner: sourceRecord.owner,
+    registryUrl: sourceRecord.registryUrl,
+    repo: sourceRecord.repo,
+    source: sourceRecord.source,
+    sourceKind: sourceRecord.sourceKind,
+    updatedAt: sourceRecord.updatedAt,
+    version: sourceRecord.version
+  };
 }
 
 function isSha256(value: unknown): boolean {
