@@ -16,6 +16,28 @@ export const sourceQualityBenchmark = {
     recallAt3: 1,
     total: 28
   },
+  scope: {
+    countingNote: "Source coverage counts benchmark cases where the source was requested; multi-source cases count toward each requested source.",
+    question: "Can Nipmod choose a useful package, model, repo, dataset or MCP server before an agent moves toward external code execution?",
+    scenarioNote: "Scenario groups are overlapping by design; one benchmark case can exercise more than one risk class.",
+    unit: "search result and pre-install source selection"
+  },
+  sourceCoverage: [
+    { pass: 16, requestedCases: 16, source: "npm" },
+    { pass: 12, requestedCases: 12, source: "pypi" },
+    { pass: 1, requestedCases: 1, source: "github" },
+    { pass: 2, requestedCases: 2, source: "huggingface-model" },
+    { pass: 1, requestedCases: 1, source: "huggingface-dataset" },
+    { pass: 2, requestedCases: 2, source: "mcp" }
+  ],
+  scenarioCoverage: [
+    { cases: 8, label: "baseline package, model, repo or MCP selection" },
+    { cases: 2, label: "partial or multi-source outage behavior" },
+    { cases: 6, label: "typo, namespace, dependency confusion or source impersonation" },
+    { cases: 5, label: "install, lifecycle, wallet, dataset script or credential-scope risk" },
+    { cases: 5, label: "package metadata, README, long-description or model-card instruction risk" },
+    { cases: 4, label: "deprecation, publisher continuity or takeover timeline risk" }
+  ],
   gates: [
     "expected package appears within max rank",
     "recommended candidate is not blocked",

@@ -51,6 +51,16 @@ describe("public agent proof kit", () => {
       total: 28
     });
     expect(sourceQualityBenchmark.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.95);
+    expect(sourceQualityBenchmark.scope.unit).toBe("search result and pre-install source selection");
+    expect(sourceQualityBenchmark.sourceCoverage.map((item) => item.source)).toEqual([
+      "npm",
+      "pypi",
+      "github",
+      "huggingface-model",
+      "huggingface-dataset",
+      "mcp"
+    ]);
+    expect(sourceQualityBenchmark.scenarioCoverage.map((item) => item.label).join(" ")).toContain("credential-scope");
     expect(sourceQualityBenchmark.notClaimed).toContain("malware-free guarantee");
     expect(sourceQualityBenchmark.notClaimed).toContain("full registry crawl");
   });

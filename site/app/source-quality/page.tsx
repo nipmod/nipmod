@@ -61,6 +61,29 @@ export default function SourceQualityPage() {
         </DocsGrid>
       </DocsSection>
 
+      <DocsSection eyebrow="Scope" title="What the benchmark covers">
+        <DocsTable
+          rows={[
+            ["Question", report.benchmark.scope.question],
+            ["Unit", report.benchmark.scope.unit],
+            ["Counting", report.benchmark.scope.countingNote],
+            ["Scenarios", report.benchmark.scope.scenarioNote]
+          ]}
+        />
+        <DocsTable
+          rows={report.benchmark.sourceCoverage.map((item) => [
+            sourceLabel(item.source),
+            `${item.pass}/${item.requestedCases} pass`
+          ])}
+        />
+        <DocsTable
+          rows={report.benchmark.scenarioCoverage.map((item) => [
+            item.label,
+            `${item.cases} cases`
+          ])}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Profiles" title="What each source is best for">
         <DocsTable
           rows={report.profiles.map((profile) => [
