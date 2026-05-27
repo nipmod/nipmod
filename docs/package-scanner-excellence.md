@@ -7,12 +7,12 @@ The hosted API stays read-only. It can search, inspect and return install plans,
 ## Eight-part buildout
 
 1. Search quality benchmark
-   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP, partial source outages, dependency-confusion lookalikes, namespace-confusion scoped SDKs, PyPI confusion aliases, typo-squat aliases, stale/deprecated package decoys, obfuscated metadata-instruction decoys, remote-code model decoys and crypto-drainer package decoys.
+   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP, partial source outages, dependency-confusion lookalikes, namespace-confusion scoped SDKs, PyPI confusion aliases, typo-squat aliases, stale/deprecated package decoys, publisher-continuity drift, cross-registry name impersonation, obfuscated metadata-instruction decoys, remote-code model decoys and crypto-drainer package decoys.
    - The benchmark measures expected rank, recall at 1, recall at 3, mean reciprocal rank, blocked recommendations and missing intent reasons.
    - Run with `pnpm search:benchmark`.
 
 2. Ranking
-   - Ranking combines trust score, exact/prefix/text match, source reliability, intent hints, source evidence depth, metadata completeness, command risk and typed risk penalties.
+   - Ranking combines trust score, exact/prefix/text match, source reliability, intent hints, runtime/source intent fit, source evidence depth, metadata completeness, command risk and typed risk penalties.
    - Popularity is only a tie-breaker. It must not beat high-risk metadata, lifecycle scripts or weak source evidence.
 
 3. Cross-source graph
@@ -31,7 +31,7 @@ The hosted API stays read-only. It can search, inspect and return install plans,
 
 6. Trust timeline
    - External records now include `trustTimeline`.
-   - The timeline captures created, published, updated, previous release and registry status events when upstream metadata returns them.
+   - The timeline captures created, published, updated, previous release, publisher-continuity and registry status events when upstream metadata returns them.
    - Risk flags highlight suspicious release timing such as very new releases, high release velocity or long dormancy before a new release.
 
 7. Agent-specific output

@@ -166,6 +166,7 @@ function sourceEvidenceCheck(externalPackages: string): ExcellenceCheck {
     "hf.file_shape",
     "hf.remote_code",
     "hf.script_files",
+    "npm.publisher_continuity",
     "mcp.endpoint_security",
     "mcp.credential_scope",
     "metadata.agent_instructions"
@@ -192,7 +193,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
     summary.blockedRecommendedCount === 0 &&
     summary.missingExpectedIntentReasonCount === 0;
   return {
-    answer: passed ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys and partial source outage." : "Search ranking did not pass the current quality gates.",
+    answer: passed ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys, source-intent ambiguity and partial source outage." : "Search ranking did not pass the current quality gates.",
     category: "search",
     evidence: [
       `${summary.pass}/${summary.total} benchmark cases passed`,
@@ -201,7 +202,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
       `recall@3 ${summary.recallAt3}`,
       `${summary.blockedRecommendedCount} blocked recommendations`
     ],
-    next: passed ? ["Expand the corpus further with publisher-drift, maintainer-change and cross-registry impersonation cases."] : benchmark.checks.filter((check) => check.status === "fail").map((check) => `${check.name}: ${check.error ?? "failed"}`),
+    next: passed ? ["Expand the corpus further with README/model-card instruction injection, maintainer compromise narratives and multi-source outage cases."] : benchmark.checks.filter((check) => check.status === "fail").map((check) => `${check.name}: ${check.error ?? "failed"}`),
     question: "Do relevant safe candidates beat popularity and malicious-looking decoys?",
     status: passed ? "pass" : "fail"
   };

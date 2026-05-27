@@ -75,8 +75,8 @@ describe("external package resolver", () => {
     const npmRecord = result.records.find((record) => record.id === "npm:node-telegram-bot-api");
     expect(npmRecord?.trust.dimensions).toMatchObject({
       popularitySignal: "high",
-      provenanceStatus: "source-only",
-      securityConfidence: "medium"
+      provenanceStatus: "signature",
+      securityConfidence: "high"
     });
     expect(npmRecord?.agentRecommendation?.version).toBe("agent-recommendation-v1");
     expect(npmRecord?.artifactIntelligence?.hostedScan).toBe("metadata-only");
@@ -1249,7 +1249,29 @@ async function mockFetch(input: string | URL | Request): Promise<Response> {
     });
   }
 
-  if (url.includes("registry.npmjs.org/node-telegram-bot-api")) {
+  if (url === "https://registry.npmjs.org/node-telegram-bot-api/latest") {
+    return jsonResponse({
+      _npmUser: { name: "gochomugo" },
+      description: "Telegram Bot API",
+      dist: {
+        fileCount: 36,
+        integrity: "sha512-fixture",
+        signatures: [{ keyid: "fixture", sig: "fixture" }],
+        tarball: "https://registry.npmjs.org/node-telegram-bot-api/-/node-telegram-bot-api-0.67.0.tgz",
+        unpackedSize: 120_000
+      },
+      engines: { node: ">=18" },
+      funding: { url: "https://github.com/sponsors/yagop" },
+      homepage: "https://github.com/yagop/node-telegram-bot-api",
+      license: "MIT",
+      maintainers: [{ name: "gochomugo" }],
+      name: "node-telegram-bot-api",
+      repository: { url: "git+https://github.com/yagop/node-telegram-bot-api.git" },
+      version: "0.67.0"
+    });
+  }
+
+  if (url === "https://registry.npmjs.org/node-telegram-bot-api") {
     return jsonResponse({
       description: "Telegram Bot API",
       "dist-tags": { latest: "0.67.0" },
@@ -1267,6 +1289,10 @@ async function mockFetch(input: string | URL | Request): Promise<Response> {
         }
       }
     });
+  }
+
+  if (url === "https://api.npmjs.org/downloads/point/last-month/node-telegram-bot-api") {
+    return jsonResponse({ downloads: 1_018_117 });
   }
 
   if (url.includes("huggingface.co/api/models")) {

