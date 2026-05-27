@@ -53,6 +53,8 @@ Operators can run `pnpm archive:drift -- --base-url https://nipmod.com --limit 1
 
 Scheduled GitHub monitors should provide `NIPMOD_CANARY_API_KEY` from repository secrets so repeated production checks reuse one dedicated canary key instead of issuing fresh beta keys on every run. If the secret is absent, canaries can still self-issue a temporary beta key as a fallback.
 
+Scheduled archive drift review should also pass the workflow `github.token` as `NIPMOD_GITHUB_TOKEN` so GitHub source reinspection uses authenticated public API limits instead of unauthenticated rate limits.
+
 Operators can run `pnpm archive:seed` to dry-run Seed v1 across npm, PyPI, GitHub, Hugging Face and MCP. Production seed writes require `NIPMOD_ARCHIVE_WRITE_TOKEN` and must use the archive confirm path, which re-inspects source data and deduplicates by stable source identity.
 
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
