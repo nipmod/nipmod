@@ -8,9 +8,6 @@ on:
 permissions:
   contents: read
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 concurrency:
   group: archive-drift-review
   cancel-in-progress: false
@@ -35,7 +32,7 @@ jobs:
         run: pnpm --silent archive:drift -- --base-url https://nipmod.com --limit 100 > archive-drift-review.json
       - name: Write operator summary
         run: node --experimental-strip-types tools/archive-drift-review-summary.ts archive-drift-review.json >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: archive-drift-review
           path: archive-drift-review.json
