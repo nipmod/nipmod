@@ -94,11 +94,6 @@ const nextConfig: NextConfig = {
         source: "/launch-kit"
       },
       {
-        destination: "/examples",
-        permanent: false,
-        source: "/demo"
-      },
-      {
         destination: "/sources",
         permanent: false,
         source: "/platforms"

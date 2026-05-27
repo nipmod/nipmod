@@ -22,6 +22,7 @@ export const docsNavGroups: DocsNavGroup[] = [
     items: [
       { href: "/", label: "Home" },
       { href: "/quickstart", label: "Quickstart" },
+      { href: "/demo", label: "Demo" },
       { href: "/architecture", label: "Architecture" },
       { href: "/base-agents", label: "Base agents" },
       { href: "/api-access", label: "API reference" }
@@ -31,6 +32,8 @@ export const docsNavGroups: DocsNavGroup[] = [
   {
     items: [
       { href: "/sources", label: "Sources" },
+      { href: "/source-quality", label: "Source quality" },
+      { href: "/integrations", label: "Integrations" },
       { href: "/trust", label: "Trust and safety" },
       { href: "/mcp", label: "MCP" },
       { href: "/examples", label: "Examples" }

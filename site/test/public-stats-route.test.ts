@@ -150,8 +150,14 @@ describe("public stats route", () => {
         successCount: 2,
         uniqueClientCount: 2
       },
+      recap: {
+        headline: "Public recap is safe to draft",
+        publicShareRecommended: true
+      },
       type: "dev.nipmod.public-stats.v1"
     });
+    expect(body.recap.bullets).toContain("3 external API requests in 24h");
+    expect(body.recap.draft).toContain("Internal monitors, canaries, admin routes and old legacy events are excluded.");
     expect(JSON.stringify(body)).not.toContain("key_external_beta");
     expect(JSON.stringify(body)).not.toContain("key_external_beta_2");
     expect(JSON.stringify(body)).not.toContain("admin_password");
