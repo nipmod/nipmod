@@ -44,6 +44,14 @@ The hosted API stays read-only. It can search, inspect and return install plans,
    - Avoid saying malware-free or 100 percent safe.
    - Strong public proof is a case where Nipmod ranked a safer package, blocked a risky candidate or surfaced a useful warning before installation.
 
+## Excellence automode
+
+Run `pnpm excellence:automode` before broad product claims or risky source changes.
+
+The automode asks hard questions across source depth, search quality, install-plan boundaries, prompt-injection handling, archive persistence, operational checks and public claim discipline. It produces a `dev.nipmod.excellence-automode.v1` JSON report.
+
+Use `pnpm excellence:automode -- --live` before partner demos or production release notes. Live mode adds the production source-depth, install-plan and archive-depth canaries.
+
 ## Current hard boundary
 
 This layer improves package selection and pre-install intelligence. It still does not replace a local sandbox, full artifact scan, legal review or human/host approval before execution.
