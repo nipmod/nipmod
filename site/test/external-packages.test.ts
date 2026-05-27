@@ -874,14 +874,16 @@ describe("external package resolver", () => {
   });
 
   test("keeps known MCP results available when the live registry is unavailable", async () => {
+    const unavailableFetch = async () => {
+      throw new TypeError("network unavailable");
+    };
     const result = await searchExternalPackages("tandem docs mcp server", {
-      fetchImpl: async () => {
-        throw new TypeError("network unavailable");
-      },
+      fetchImpl: unavailableFetch,
       limit: 3,
       sources: ["mcp"],
       timeoutMs: 20
     });
+    const record = await inspectExternalPackage("mcp", "ac.tandem/docs-mcp", { fetchImpl: unavailableFetch, timeoutMs: 20 });
 
     expect(result.partial).toBe(false);
     expect(result.records[0]).toMatchObject({
@@ -890,6 +892,8 @@ describe("external package resolver", () => {
       version: "0.3.2"
     });
     expect(result.records[0]?.trust.warnings.join(" ")).toContain("pinned public registry snapshot");
+    expect(record.trust.decision).not.toBe("avoid");
+    expect(record.trust.risk).not.toBe("high");
   });
 
   test("publishes search, inspect and install-plan API routes", async () => {
