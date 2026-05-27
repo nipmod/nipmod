@@ -3,9 +3,17 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 type ArchiveDriftReviewStatus = "changed" | "failed" | "fresh";
+type ArchiveDriftSeverity = "high" | "low" | "medium";
 
 interface ArchiveDriftReviewRecord {
   baselineDigestPrefix?: string;
+  changeSummary?: {
+    high: number;
+    highestSeverity: ArchiveDriftSeverity | null;
+    low: number;
+    medium: number;
+    paths: string[];
+  };
   currentDigestPrefix?: string;
   error?: {
     code?: string;
@@ -16,8 +24,16 @@ interface ArchiveDriftReviewRecord {
   name: string;
   source: string;
   status: ArchiveDriftReviewStatus;
+  trustChange?: {
+    currentDecision: string;
+    currentScore: number;
+    previousDecision: string;
+    previousScore: number;
+    severity: ArchiveDriftSeverity;
+  } | null;
   trustDecision?: string;
   trustScore?: number;
+  validationOk?: boolean;
 }
 
 interface ArchiveDriftReviewSummaryInput {
@@ -38,7 +54,7 @@ interface ArchiveDriftReviewSummaryInput {
 }
 
 export function renderArchiveDriftReviewSummary(input: ArchiveDriftReviewSummaryInput): string {
-  const needsReview = input.results.filter((result) => result.status !== "fresh");
+  const needsReview = input.results.filter((result) => result.status !== "fresh" || result.trustChange || result.validationOk === false);
   const lines = [
     "## Archive drift review",
     "",
@@ -66,8 +82,8 @@ export function renderArchiveDriftReviewSummary(input: ArchiveDriftReviewSummary
     "",
     "### Records to review",
     "",
-    "| Source | Name | Status | Trust | Digest | Error |",
-    "| --- | --- | --- | --- | --- | --- |"
+    "| Source | Name | Status | Severity | Trust | Changes | Digest | Error |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |"
   );
 
   for (const result of needsReview.slice(0, 25)) {
@@ -84,8 +100,8 @@ export function renderArchiveDriftReviewSummary(input: ArchiveDriftReviewSummary
       : "";
     lines.push(
       `| ${escapeTableCell(result.source)} | ${escapeTableCell(result.name)} | ${result.status} | ${escapeTableCell(
-        trust
-      )} | ${escapeTableCell(digest)} | ${escapeTableCell(error)} |`
+        displaySeverity(result)
+      )} | ${escapeTableCell(trust)} | ${escapeTableCell(displayChanges(result))} | ${escapeTableCell(digest)} | ${escapeTableCell(error)} |`
     );
   }
 
@@ -111,6 +127,39 @@ export function parseArchiveDriftReviewPayload(raw: string): ArchiveDriftReviewS
 
 function escapeTableCell(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
+function displaySeverity(result: ArchiveDriftReviewRecord): string {
+  let severity = result.changeSummary?.highestSeverity ?? null;
+  if (result.trustChange) {
+    severity = higherSeverity(severity, result.trustChange.severity);
+  }
+  if (result.validationOk === false) {
+    severity = "high";
+  }
+  return severity ?? "";
+}
+
+function displayChanges(result: ArchiveDriftReviewRecord): string {
+  const paths = [...(result.changeSummary?.paths ?? [])];
+  if (result.trustChange) {
+    paths.push(
+      `trust ${result.trustChange.previousDecision} ${result.trustChange.previousScore} -> ${result.trustChange.currentDecision} ${result.trustChange.currentScore}`
+    );
+  }
+  if (result.validationOk === false) {
+    paths.push("validation");
+  }
+  if (paths.length === 0) {
+    return "";
+  }
+  const visible = paths.slice(0, 5).join(", ");
+  return paths.length > 5 ? `${visible}, +${paths.length - 5} more` : visible;
+}
+
+function higherSeverity(previous: ArchiveDriftSeverity | null, current: ArchiveDriftSeverity): ArchiveDriftSeverity {
+  const rank: Record<ArchiveDriftSeverity, number> = { high: 3, medium: 2, low: 1 };
+  return !previous || rank[current] > rank[previous] ? current : previous;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

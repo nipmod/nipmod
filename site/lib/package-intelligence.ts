@@ -106,6 +106,26 @@ export interface PackageIntelligenceSourceDrift {
   version: "source-drift-v1";
 }
 
+export interface PackageIntelligenceSourceDriftMaterial {
+  displayName: string;
+  id: string;
+  install: {
+    command: string;
+    commands: string[] | null;
+    manager: string;
+  };
+  license: string | null;
+  name: string;
+  originalUrl: string;
+  owner: string | null;
+  registryUrl: string;
+  repo: string | null;
+  source: ExternalPackageRecord["source"];
+  sourceKind: ExternalPackageRecord["sourceKind"];
+  updatedAt: string | null;
+  version: string | null;
+}
+
 export interface CreatePackageIntelligenceOptions {
   firstSeenReason?: string;
   now?: string;
@@ -508,10 +528,12 @@ function validSourceDrift(value: unknown, currentSourceDriftDigest: unknown): va
 }
 
 function packageIntelligenceSourceDriftDigest(sourceRecord: ExternalPackageRecord): string {
-  return sha256(stableJson(sourceRecordDriftMaterial(sourceRecord)));
+  return sha256(stableJson(packageIntelligenceSourceDriftMaterial(sourceRecord)));
 }
 
-function sourceRecordDriftMaterial(sourceRecord: ExternalPackageRecord): unknown {
+export function packageIntelligenceSourceDriftMaterial(
+  sourceRecord: ExternalPackageRecord
+): PackageIntelligenceSourceDriftMaterial {
   return {
     displayName: sourceRecord.displayName,
     id: sourceRecord.id,

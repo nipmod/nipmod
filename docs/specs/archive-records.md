@@ -142,7 +142,7 @@ Record evidence uses:
 }
 ```
 
-This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores. `sourceDrift` compares stable source material from the first archived source record with the latest server-reinspected record so repeated confirmations can surface upstream metadata changes without treating volatile inspection timestamps as drift.
+This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores. `sourceDrift` compares stable source material from the first archived source record with the latest server-reinspected record so repeated confirmations can surface upstream metadata changes without treating volatile inspection timestamps as drift. The operator drift review also reports bounded change reasons for the same stable material, grouped into identity, install, metadata and freshness fields, so a changed digest can be reviewed without exposing raw private request data.
 
 ## Confirmation Gate
 
