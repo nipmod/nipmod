@@ -299,15 +299,22 @@ function installBoundaryCheck(installPlanRoute: string, installPlanCanary: strin
     "metadataIsInstruction",
     "blocked-high-risk-command",
     "blocked-source-risk",
-    "writes.length !== 0"
+    "writes.length !== 0",
+    "synthetic blocked high-risk install command",
+    "synthetic blocked remote-code source risk"
   ];
   const corpus = `${installPlanRoute}\n${installPlanCanary}`;
   const missing = required.filter((token) => !corpus.includes(token));
   return {
-    answer: missing.length === 0 ? "Install plans are review data only: hosted execution is false, writes are empty and approval is mandatory." : "Install-plan boundary checks are incomplete.",
+    answer:
+      missing.length === 0
+        ? "Install plans are review data only: hosted execution is false, writes are empty, approval is mandatory and blocked negative cases stay in the release gate."
+        : "Install-plan boundary checks are incomplete.",
     category: "install",
     evidence: required.filter((token) => !missing.includes(token)),
-    next: missing.length === 0 ? ["Add negative live canaries for known bad lifecycle scripts and remote-code packages."] : missing.map((token) => `Restore install boundary assertion ${token}.`),
+    next: missing.length === 0
+      ? ["Promote negative canaries from synthetic fixtures to stable live fixtures only when a safe public fixture source exists."]
+      : missing.map((token) => `Restore install boundary assertion ${token}.`),
     question: "Can hosted Nipmod accidentally become an installer?",
     status: missing.length === 0 ? "pass" : "fail"
   };
