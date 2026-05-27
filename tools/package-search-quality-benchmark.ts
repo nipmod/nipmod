@@ -205,6 +205,28 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     sources: ["npm"]
   },
   {
+    expectedId: "npm:undici",
+    expectedRecommendedId: "npm:undici",
+    forbiddenRecommendedIds: ["npm:drifted-http-client"],
+    limit: 4,
+    maxRank: 1,
+    name: "npm publisher continuity decoy",
+    query: "http client",
+    requiredIntentReason: "query intent match: Node HTTP client fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:requests",
+    expectedRecommendedId: "pypi:requests",
+    forbiddenRecommendedIds: ["npm:requests"],
+    limit: 5,
+    maxRank: 1,
+    name: "Cross-registry package name impersonation",
+    query: "python requests http client",
+    requiredIntentReason: "query intent match: Python HTTP client fit",
+    sources: ["npm", "pypi"]
+  },
+  {
     expectedId: "npm:@solana/web3.js",
     expectedRecommendedId: "npm:@solana/web3.js",
     forbiddenRecommendedIds: ["npm:solana-web3-helper"],

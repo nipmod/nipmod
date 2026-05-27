@@ -244,6 +244,7 @@ export interface ExternalRankBreakdown {
   recencyBonus: number;
   riskSignalPenalty: number;
   score: number;
+  sourceIntentPenalty: number;
   sourceReliabilityBonus: number;
   textMatch: number;
   trustScore: number;
@@ -974,8 +975,9 @@ async function searchNpm(query: string, limit: number, fetchImpl: typeof fetch, 
   );
   const objects = isRecord(payload) && Array.isArray(payload.objects) ? payload.objects : [];
   const records = objects.map((item) => npmSearchRecord(item)).filter(isExternalPackageRecord);
-  const hintRecords = await npmHintRecords(query, records, fetchImpl, timeoutMs);
-  return dedupeExternalRecords([...records, ...hintRecords]);
+  const enrichedRecords = await enrichNpmSearchRecords(records, limit, fetchImpl, timeoutMs);
+  const hintRecords = await npmHintRecords(query, enrichedRecords, fetchImpl, timeoutMs);
+  return dedupeExternalRecords([...enrichedRecords, ...hintRecords]);
 }
 
 async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -996,7 +998,13 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const signatures = readRecord(manifest.dist)?.signatures;
   const hasSignature = Array.isArray(signatures) && signatures.length > 0;
   const dependencyCount = packageDependencyCount(manifest);
-  const maintainerCount = arrayLength(manifest.maintainers);
+  const maintainerNames = packageMaintainerNames(manifest.maintainers);
+  const maintainerCount = maintainerNames.length;
+  const latestPublisher = readNestedString(manifest, ["_npmUser", "name"]);
+  const latestPublisherInMaintainers =
+    latestPublisher && maintainerNames.length > 0
+      ? maintainerNames.some((name) => name.toLowerCase() === latestPublisher.toLowerCase())
+      : null;
   const lifecycleScripts = packageLifecycleScripts(manifest.scripts);
   const lifecycleRisk = lifecycleScriptRisk(lifecycleScripts);
   const deprecated = readString(manifest.deprecated);
@@ -1016,6 +1024,9 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
     ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."]),
     ...(tarball && !tarballIsHttps ? ["npm tarball URL is not HTTPS."] : []),
+    ...(latestPublisherInMaintainers === false
+      ? ["Latest npm publisher is not listed in maintainer records; review publisher continuity."]
+      : []),
     ...lifecycleScriptWarnings(lifecycleScripts)
   ];
   const score = clampScore(
@@ -1030,6 +1041,8 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (packument.available ? 3 : 0) +
       (packument.latestDistTagMatches ? 2 : 0) +
       (maintainerCount ? 4 : 0) +
+      (latestPublisher ? 2 : 0) +
+      (latestPublisherInMaintainers === false ? -18 : 0) +
       (deprecated ? -28 : 0) +
       osv.vulnerabilityCount * -24 +
       versionIntelligencePenalty(packument) +
@@ -1099,6 +1112,13 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       repo ? "Repository link is present." : "Repository link is missing.",
       dependencyCount === 0 ? "Latest npm release declares no runtime dependencies." : `Latest npm release declares ${dependencyCount} runtime dependencies.`,
       maintainerCount ? `npm returned ${maintainerCount} maintainer records.` : "npm did not return maintainer records.",
+      latestPublisher ? `npm latest publisher: ${latestPublisher}.` : "npm latest publisher was not returned.",
+      maintainerNames.length ? `npm maintainer names returned: ${maintainerNames.join(", ")}.` : "npm maintainer names were not returned.",
+      latestPublisherInMaintainers === null
+        ? "npm latest publisher could not be compared with maintainer records."
+        : latestPublisherInMaintainers
+          ? "npm latest publisher is listed in maintainer records."
+          : "npm latest publisher is not listed in maintainer records.",
       lifecycleScriptSignal("npm latest release", lifecycleScripts),
       nodeEngine ? `npm package declares Node engine: ${nodeEngine}.` : "npm package did not declare a Node engine.",
       fundingUrl ? "npm package exposes funding metadata." : "npm package did not expose funding metadata."
@@ -1281,10 +1301,31 @@ async function npmHintRecords(
   return settled.flatMap((result) => (result.status === "fulfilled" && result.value ? [result.value] : []));
 }
 
+async function enrichNpmSearchRecords(
+  records: ExternalPackageRecord[],
+  limit: number,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<ExternalPackageRecord[]> {
+  const inspectable = records.slice(0, Math.min(limit, 3)).filter((record) => isSafeNpmHintName(record.name));
+  if (inspectable.length === 0) {
+    return records;
+  }
+  const settled = await Promise.allSettled(inspectable.map((record) => inspectNpm(record.name, fetchImpl, timeoutMs)));
+  const enriched = new Map<string, ExternalPackageRecord>();
+  for (const result of settled) {
+    if (result.status === "fulfilled" && result.value) {
+      enriched.set(result.value.id.toLowerCase(), result.value);
+    }
+  }
+  return records.map((record) => enriched.get(record.id.toLowerCase()) ?? record);
+}
+
 function npmCandidateNames(query: string): string[] {
   const normalized = normalizeName(query);
+  const exactName = isSafeNpmHintName(normalized.toLowerCase()) ? normalized.toLowerCase() : null;
   const hintNames = NPM_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
-  return [...new Set(hintNames.map((name) => name.toLowerCase()).filter(isSafeNpmHintName))];
+  return [...new Set([exactName, ...hintNames.map((name) => name.toLowerCase())].filter((name): name is string => Boolean(name)).filter(isSafeNpmHintName))];
 }
 
 function isSafeNpmHintName(name: string): boolean {
@@ -2551,6 +2592,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("npm.artifact_shape", "Artifact shape", /Latest npm release file count:|Latest npm unpacked size bytes:/i, /file count was not returned|unpacked size was not returned/i),
         evidenceSpec("npm.repository", "Repository link", /Repository link is present/i, /Repository link is missing/i),
         evidenceSpec("npm.maintainers", "Maintainers", /npm returned \d+ maintainer records/i, /did not return maintainer records/i),
+        evidenceSpec("npm.publisher_continuity", "Publisher continuity", /npm latest publisher is listed in maintainer records/i, /latest publisher is not listed in maintainer records|latest publisher could not be compared/i),
         evidenceSpec("npm.lifecycle", "Lifecycle scripts", /did not declare install-time lifecycle scripts|declares install-time lifecycle scripts/i),
         evidenceSpec("npm.node_engine", "Node engine", /declares Node engine:/i, /did not declare a Node engine/i)
       ];
@@ -3498,6 +3540,7 @@ function searchSelection(records: ExternalPackageRecord[], query: string): Exter
       "exact or prefix name match",
       "query intent hints for common package tasks",
       "source and license metadata",
+      "runtime/source intent fit",
       "security confidence and provenance",
       "install command boundary",
       "usage metrics as tie-breakers"
@@ -3583,6 +3626,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   const commandRisk = installCommandRisk(record.install.commands ?? [record.install.command]);
   const commandPenalty = commandRisk === "high" ? 24 : commandRisk === "medium" ? 8 : 0;
   const intentBonus = queryIntentMatch(record, normalizedQuery)?.bonus ?? 0;
+  const sourceIntentPenaltyValue = sourceIntentPenalty(record.source, normalizedQuery);
   const evidenceBonus = packageEvidenceBonus(record.sourceEvidence?.depthScore);
   const riskSignalPenalty = Math.min(48, packageRiskPenalty(record.riskSignals ?? []));
   const sourceBonus = sourceReliabilityBonus(record.source);
@@ -3604,6 +3648,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
       qualityPenalty -
       metadataPenalty -
       commandPenalty -
+      sourceIntentPenaltyValue -
       riskSignalPenalty
   );
   return {
@@ -3618,6 +3663,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
     recencyBonus: recency,
     riskSignalPenalty,
     score,
+    sourceIntentPenalty: sourceIntentPenaltyValue,
     sourceReliabilityBonus: sourceBonus,
     textMatch,
     trustScore: record.trust.score
@@ -3632,6 +3678,9 @@ function queryIntentMatch(
   const recordName = record.name.toLowerCase();
   const displayName = record.displayName.toLowerCase();
   let best: { bonus: number; reason: string } | null = null;
+  if (sourceIntentPenalty(record.source, normalizedQuery) > 0) {
+    return null;
+  }
 
   for (const hint of QUERY_INTENT_RANKING_HINTS) {
     if (!hint.pattern.test(normalizedQuery)) {
@@ -3652,6 +3701,18 @@ function queryIntentMatch(
   }
 
   return best;
+}
+
+function sourceIntentPenalty(source: ExternalPackageSource, normalizedQuery: string): number {
+  const asksForPython = /\b(python|pypi|pip)\b/i.test(normalizedQuery);
+  const asksForNode = /\b(node|nodejs|javascript|typescript|npm|js)\b/i.test(normalizedQuery);
+  if (asksForPython && source === "npm") {
+    return 18;
+  }
+  if (asksForNode && source === "pypi") {
+    return 18;
+  }
+  return 0;
 }
 
 function sourceReliabilityBonus(source: ExternalPackageSource): number {
@@ -4280,6 +4341,15 @@ function packageDependencyCount(manifest: UnknownRecord): number {
     recordKeyCount(manifest.peerDependencies) +
     recordKeyCount(manifest.optionalDependencies)
   );
+}
+
+function packageMaintainerNames(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => (isRecord(item) ? readString(item.name) : readString(item)))
+    .filter((name): name is string => Boolean(name));
 }
 
 function latestPyPiReleaseFiles(payload: UnknownRecord, version: string | null): UnknownRecord[] {
