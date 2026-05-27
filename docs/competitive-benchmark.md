@@ -20,7 +20,7 @@ pnpm benchmark:competitive -- --no-live
 
 ## Tracks
 
-The report separates the systems by dimension instead of forcing a fake universal winner.
+The report separates the systems by role and dimension instead of forcing a fake universal winner.
 
 | Track | Measures |
 | --- | --- |
@@ -34,9 +34,24 @@ The report separates the systems by dimension instead of forcing a fake universa
 | Surplus Intelligence | Agent marketplace/model catalog and cost-market context, not package safety. |
 | Raw agent | Baseline for direct install/pull behavior without a package intelligence layer. |
 
+Surplus Intelligence stays in the full machine report only as adjacent agent-infrastructure context. It is not shown in the public package-decision chart.
+
+Project scanners and update bots such as Dependabot, Renovate, npm audit, pip-audit, local Snyk CLI flows and install firewalls are useful, but they are not ranked in this API snapshot because they operate on manifests, local projects or install interception instead of this hosted read-only preflight boundary.
+
 ## Scoring Boundary
 
-The score is `agent package-decision depth`, not total security quality.
+The headline score is `agent preflight fit`, not total security quality.
+
+Unsupported source cases count as scope limits in the headline score. Specialized evidence feeds keep an applicable depth score separately, so an advisory database is not treated as a failed full preflight layer.
+
+Public categories:
+
+| Category | Measures |
+| --- | --- |
+| Source resolution | Search, identity, version, metadata, source depth and multi-source scope. |
+| Security evidence | Advisories, provenance, repository posture, metadata and package behavior. |
+| Execution preflight | Install plan, read-only boundary, package behavior and prompt boundary. |
+| Agent readiness | Action-ready JSON, install boundary, source evidence and machine output. |
 
 Weighted dimensions include:
 

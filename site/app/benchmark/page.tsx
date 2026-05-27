@@ -12,19 +12,15 @@ export const metadata = createPageMetadata({
 export default function BenchmarkPage() {
   const report = competitiveBenchmarkReport;
   const tracks = [...report.tracks].sort((left, right) => right.score - left.score);
-  const primaryTracks = tracks.filter((track) => track.name !== "Surplus");
   const nipmodTrack = tracks.find((track) => track.name === "Nipmod");
   if (!nipmodTrack) {
     throw new Error("Benchmark report is missing the Nipmod track.");
   }
-  const nextTrack = tracks.find((track) => track.name !== "Nipmod");
-  const scoreGap = nextTrack ? nipmodTrack.score - nextTrack.score : 0;
-  const categoryStats = categoryReadout(report.categoryBreakdown);
-  const largestCategoryGap = categoryStats.reduce((largest, item) => Math.max(largest, item.gap), 0);
+  const limitedTracks = tracks.filter((track) => track.status === "warn");
 
   return (
     <DocsShell
-      description="A visual readout of the latest production benchmark. It compares the evidence an agent receives before installing, pulling or reusing external code."
+      description="A coverage-adjusted benchmark for the evidence an agent receives before installing, pulling or reusing external code."
       eyebrow="Benchmark"
       stats={[
         { label: "Nipmod live", value: report.headline.liveChecks },
@@ -32,37 +28,37 @@ export default function BenchmarkPage() {
         { label: "Score", value: String(report.headline.score) },
         { label: "Median latency", value: `${report.headline.medianLatencyMs} ms` }
       ]}
-      title="Agent package-decision depth."
+      title="Agent preflight benchmark."
     >
       <DocsSection eyebrow="Comparison" title="Agent preflight benchmark">
         <div className="benchmark-article-lede">
           <p>
-            This benchmark measures the moment before an agent installs, pulls or reuses external code. The question is not whether a tool can find one advisory or one repository signal. The question is how much usable evidence an agent receives before it crosses the install boundary.
+            The run measures one specific moment: before an agent installs a package, pulls a model, reuses a repository or connects a tool. It does not rank security companies on a generic score.
           </p>
           <p>
-            Nipmod is measured as an end-to-end preflight layer: search, inspect, source evidence, warnings and a read-only install plan. Other tracks are measured only by the evidence they expose.
+            Each track is measured by what it exposes to that preflight decision. Specialized feeds keep their own scope visible, so advisory databases and repository scanners are not treated as full package-intelligence layers.
           </p>
         </div>
 
-        <BenchmarkChart tracks={primaryTracks} />
+        <BenchmarkChart tracks={tracks} />
       </DocsSection>
 
-      <DocsSection eyebrow="Readout" title="Where the benchmark breaks open">
+      <DocsSection eyebrow="Readout" title="What the run shows">
         <div className="benchmark-readout-grid">
           <article>
-            <span>Overall lead</span>
-            <strong>+{scoreGap}</strong>
-            <p>Nipmod scores {nipmodTrack.score}/100. The next measured package-decision track is {nextTrack?.name ?? "n/a"} at {nextTrack?.score ?? 0}/100.</p>
+            <span>Preflight fit</span>
+            <strong>{nipmodTrack.score}</strong>
+            <p>Coverage-adjusted score across the full agent preflight case set, not only the package ecosystems where a feed is strongest.</p>
           </article>
           <article>
-            <span>Category record</span>
-            <strong>{categoryStats.filter((category) => category.nipmodPosition === "lead").length}/4</strong>
-            <p>Nipmod is the sole leader in source discovery, install boundary and agent output, with one top tie in advisory/provenance.</p>
+            <span>Source scope</span>
+            <strong>{nipmodTrack.applicable}/7</strong>
+            <p>Npm, PyPI, GitHub, Hugging Face model, MCP and known vulnerable package cases completed in the live run.</p>
           </article>
           <article>
-            <span>Largest category gap</span>
-            <strong>+{largestCategoryGap}</strong>
-            <p>The widest measured gap is install boundary: read-only install plans and execution boundary context before workspace writes.</p>
+            <span>Execution preflight</span>
+            <strong>{report.categoryBreakdown.find((category) => category.key === "execution-preflight")?.tracks[0]?.score ?? 0}</strong>
+            <p>Read-only install-plan output, package-behavior context and execution boundary before workspace writes.</p>
           </article>
           <article>
             <span>Hosted execution</span>
@@ -70,6 +66,22 @@ export default function BenchmarkPage() {
             <p>The benchmark performs no install, clone, artifact unpacking, model execution, paid inference call or workspace write.</p>
           </article>
         </div>
+      </DocsSection>
+
+      <DocsSection eyebrow="Scope" title="Why these tracks are included">
+        <DocsTable
+          rows={[
+            ["Nipmod", "Full agent preflight layer: search, inspect, evidence, warnings and read-only install plan."],
+            ["Native registries", "Source-of-truth metadata baseline from npm, PyPI, GitHub, Hugging Face and MCP."],
+            ["OSV and deps.dev", "Advisory, dependency, provenance and package metadata evidence feeds."],
+            ["Socket and Snyk", "Package security intelligence APIs. This snapshot marks their current API access limits instead of treating limits as product failure."],
+            ["OpenSSF Scorecard", "Repository posture baseline for the GitHub case, not a package install-plan competitor."],
+            ["Raw agent", "Baseline for an agent moving toward install without an independent package intelligence layer."]
+          ]}
+        />
+        <p className="docs-note">
+          Project scanners and update bots such as Dependabot, Renovate, npm audit, pip-audit, local Snyk CLI flows and install firewalls are useful, but they are not ranked in this API snapshot because they operate on manifests, local projects or install interception instead of this hosted read-only preflight boundary.
+        </p>
       </DocsSection>
 
       <DocsSection eyebrow="Categories" title="Separated scoring">
@@ -85,9 +97,9 @@ export default function BenchmarkPage() {
           rows={[
             ["7 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, MCP server and GitHub repository posture."],
             ["16 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON, multi-source coverage and adjacent cost-market context."],
-            ["4 public categories", "Source discovery, advisory/provenance, install boundary and agent output. Cost-market context stays in the machine report as an adjacent reference."],
+            ["4 public categories", "Source resolution, security evidence, execution preflight and agent readiness."],
             ["8 tracks", "Nipmod, native registries, OSV, deps.dev, OpenSSF Scorecard, Socket, Snyk and a raw agent baseline."],
-            ["1 reference", "Surplus is kept in the machine report as adjacent agent-infra context, not as a package-decision competitor."],
+            ["Scope-adjusted score", "Unsupported source cases count as scope limits in the headline score. Applicable depth is still shown separately."],
             ["0 execution", "No package install, repository clone, artifact unpacking, model execution, paid inference call or workspace write is performed."]
           ]}
         />
@@ -98,12 +110,12 @@ export default function BenchmarkPage() {
           <article className="benchmark-panel">
             <span>Nipmod score</span>
             <strong>{nipmodTrack.score}/100</strong>
-            <p>{nipmodTrack.pass}/{nipmodTrack.applicable} live checks, {report.headline.installPlanEvidence} install-plan evidence, {nipmodTrack.warn} warnings.</p>
+            <p>{nipmodTrack.pass}/{nipmodTrack.applicable} live checks, {report.headline.installPlanEvidence} install-plan evidence, {nipmodTrack.warn} warnings. Applicable depth score {nipmodTrack.depthScore}/100.</p>
           </article>
           <article className="benchmark-panel">
-            <span>Score gap</span>
-            <strong>+{scoreGap} points</strong>
-            <p>Next measured track: {nextTrack?.name ?? "n/a"} at {nextTrack?.score ?? 0}/100 in this benchmark snapshot.</p>
+            <span>Limited tracks</span>
+            <strong>{limitedTracks.length}</strong>
+            <p>{limitedTracks.map((track) => track.name).join(", ")} were authenticated or reachable, but marked limited in this snapshot.</p>
           </article>
           <article className="benchmark-panel">
             <span>Hosted writes</span>
@@ -118,9 +130,10 @@ export default function BenchmarkPage() {
           rows={[
             [`${nipmodTrack.score}/100`, "Nipmod score in the current production benchmark snapshot."],
             [`${nipmodTrack.pass}/${nipmodTrack.applicable}`, "Live source cases completed by the Nipmod track."],
+            [`${nipmodTrack.sourceCoveragePct}%`, "Nipmod source coverage across the full benchmark case set."],
+            [`${nipmodTrack.depthScore}/100`, "Nipmod applicable depth score before source-coverage adjustment."],
             [report.headline.installPlanEvidence, "Read-only install-plan evidence returned by the Nipmod track."],
             [`${nipmodTrack.warn}`, "Nipmod track warnings in the latest snapshot."],
-            [`+${scoreGap}`, `Nipmod score gap over the next measured track, ${nextTrack?.name ?? "n/a"} at ${nextTrack?.score ?? 0}/100.`],
             ["0", "Hosted installs, repository clones, artifact unpacking, code execution or workspace writes performed by benchmark requests."]
           ]}
         />
@@ -136,20 +149,6 @@ export default function BenchmarkPage() {
       </DocsSection>
     </DocsShell>
   );
-}
-
-function categoryReadout(categories: CompetitiveBenchmarkCategory[]) {
-  return categories.map((category) => {
-    const ordered = [...category.tracks].sort((left, right) => right.score - left.score);
-    const topScore = ordered[0]?.score ?? 0;
-    const leaders = ordered.filter((track) => track.score === topScore).map((track) => track.name);
-    const nextScore = ordered.find((track) => track.score < topScore)?.score ?? topScore;
-    return {
-      gap: topScore - nextScore,
-      leaders,
-      nipmodPosition: leaders.includes("Nipmod") && leaders.length === 1 ? "lead" : leaders.includes("Nipmod") ? "tie" : "behind"
-    };
-  });
 }
 
 function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCategory }) {
@@ -178,7 +177,7 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
           <dd>{topScore}/100</dd>
         </div>
         <div>
-          <dt>Gap</dt>
+          <dt>Margin</dt>
           <dd>+{gap}</dd>
         </div>
       </dl>
@@ -194,6 +193,7 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
                 <span style={{ width }} />
               </div>
               <b>{track.score}</b>
+              <em>{track.sourceCoveragePct}% scope</em>
             </div>
           );
         })}
@@ -204,45 +204,48 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
 
 function BenchmarkChart({ tracks }: { tracks: CompetitiveBenchmarkTrack[] }) {
   return (
-    <div className="benchmark-scoreboard" role="table" aria-label="Competitive benchmark score chart">
-      <div className="benchmark-scoreboard-head" role="row">
+    <div className="benchmark-rank-list" role="table" aria-label="Competitive benchmark score chart">
+      <div className="benchmark-rank-head" role="row">
+        <span role="columnheader">Rank</span>
         <span role="columnheader">Track</span>
-        <span role="columnheader">Score</span>
-        <span role="columnheader">Checks</span>
-        <span role="columnheader">Warnings</span>
+        <span role="columnheader">Preflight fit</span>
+        <span role="columnheader">Scope</span>
+        <span role="columnheader">Depth</span>
         <span role="columnheader">Latency</span>
       </div>
 
-      <div className="benchmark-scoreboard-grid">
-        {tracks.map((track) => {
+      <div className="benchmark-rank-rows">
+        {tracks.map((track, index) => {
           const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
-          const height = `${Math.max(4, Math.min(100, track.score))}%`;
+          const width = `${Math.max(2, Math.min(100, track.score))}%`;
           const isNipmod = track.name === "Nipmod";
 
           return (
-            <article className={`benchmark-scorecard benchmark-scorecard-${track.status}${isNipmod ? " benchmark-scorecard-primary" : ""}`} key={track.name} role="row">
-              <div className="benchmark-scorebar" role="cell" aria-label={`${track.name} score ${track.score} out of 100`}>
-                <span className="benchmark-scorebar-fill" style={{ height }} />
+            <article className={`benchmark-rank-row benchmark-rank-row-${track.status}${isNipmod ? " benchmark-rank-row-primary" : ""}`} key={track.name} role="row">
+              <strong className="benchmark-rank-index" role="cell">{index + 1}</strong>
+              <div className="benchmark-rank-track" role="cell">
+                <strong>{track.name}</strong>
+                <span>{track.role}</span>
+              </div>
+              <div className="benchmark-rank-score" role="cell" aria-label={`${track.name} preflight fit ${track.score} out of 100`}>
+                <div className="benchmark-rank-scorebar"><span style={{ width }} /></div>
                 <b>{track.score}</b>
               </div>
-              <div className="benchmark-scorecard-track" role="cell">
-                <strong>{track.name}</strong>
-                <span>{track.note}</span>
-              </div>
-              <dl className="benchmark-scorecard-metrics">
+              <dl className="benchmark-rank-metrics">
                 <div role="cell">
-                  <dt>Checks</dt>
-                  <dd>{track.pass}/{track.applicable}</dd>
+                  <dt>Scope</dt>
+                  <dd>{track.sourceCoveragePct}%</dd>
                 </div>
                 <div role="cell">
-                  <dt>Warnings</dt>
-                  <dd>{track.warn}</dd>
+                  <dt>Depth</dt>
+                  <dd>{track.depthScore}</dd>
                 </div>
                 <div role="cell">
                   <dt>Median</dt>
                   <dd>{latency}</dd>
                 </div>
               </dl>
+              {track.status === "warn" && track.name !== "Raw agent" ? <p className="benchmark-rank-warning">{track.note}</p> : null}
             </article>
           );
         })}
