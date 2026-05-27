@@ -22,11 +22,18 @@ describe("canary auth", () => {
       baseUrl: "https://nipmod.test",
       fetchFn: fetch,
       label: "install-plan",
-      userAgent: "nipmod-canary-test"
+      userAgent: "nipmod-install-plan-canary-test"
+    });
+    const third = await readCanaryApiKey({
+      baseUrl: "https://nipmod.test/",
+      fetchFn: fetch,
+      label: "archive",
+      userAgent: "nipmod-archive-canary-test"
     });
 
     expect(first).toBe("nka_beta_cached");
     expect(second).toBe("nka_beta_cached");
+    expect(third).toBe("nka_beta_cached");
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
 
