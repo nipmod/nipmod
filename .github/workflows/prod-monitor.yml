@@ -41,6 +41,8 @@ jobs:
         run: pnpm archive:canary -- --base-url https://nipmod.com
       - name: Rate limit health canary
         run: pnpm rate-limit:canary -- --base-url https://nipmod.com
+      - name: Production excellence gate
+        run: pnpm excellence:live -- --base-url https://nipmod.com
       - name: Production alert runner
         env:
           NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN: ${{ secrets.NIPMOD_ALERT_PRIMARY_WEBHOOK_BEARER_TOKEN }}
