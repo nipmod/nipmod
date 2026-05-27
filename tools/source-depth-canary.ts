@@ -15,6 +15,7 @@ const DEFAULT_CANARIES = [
       "npm.packument.versions",
       "npm.dist_tags",
       "npm.version_intelligence",
+      "npm.release_timeline",
       "npm.osv",
       "npm.artifact_shape",
       "npm.lifecycle",
@@ -30,6 +31,7 @@ const DEFAULT_CANARIES = [
       "Latest npm tarball host:",
       "Latest npm release file count:",
       "npm latest publish age hours:",
+      "npm previous version published at:",
       "OSV",
       "maintainer records",
       "Node engine"
@@ -51,6 +53,7 @@ const DEFAULT_CANARIES = [
       "pypi.yanked",
       "pypi.requires_python",
       "pypi.version_intelligence",
+      "pypi.release_timeline",
       "pypi.release_history",
       "metadata.agent_instructions"
     ],
@@ -67,7 +70,8 @@ const DEFAULT_CANARIES = [
       "PyPI latest release file types:",
       "PyPI latest release files are not marked yanked.",
       "requires-python",
-      "PyPI latest publish age hours:"
+      "PyPI latest publish age hours:",
+      "PyPI previous release upload timestamp:"
     ],
     source: "pypi"
   },

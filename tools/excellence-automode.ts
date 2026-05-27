@@ -167,6 +167,8 @@ function sourceEvidenceCheck(externalPackages: string): ExcellenceCheck {
     "hf.remote_code",
     "hf.script_files",
     "npm.publisher_continuity",
+    "npm.release_timeline",
+    "pypi.release_timeline",
     "mcp.endpoint_security",
     "mcp.credential_scope",
     "metadata.agent_instructions"
@@ -176,7 +178,7 @@ function sourceEvidenceCheck(externalPackages: string): ExcellenceCheck {
     answer: missing.length === 0 ? "The source evidence model covers identity, provenance, vulnerability, file-shape and credential boundaries." : "The source evidence model is missing required controls.",
     category: "sources",
     evidence: requiredEvidence.filter((id) => !missing.includes(id)),
-    next: missing.length === 0 ? ["Add historical drift checks for publisher identity changes and provenance changes."] : missing.map((id) => `Add evidence check ${id}.`),
+    next: missing.length === 0 ? ["Add registry-specific provenance-change fixtures where upstream APIs expose enough history."] : missing.map((id) => `Add evidence check ${id}.`),
     question: "Does every source return structured evidence instead of broad labels?",
     status: missing.length === 0 ? "pass" : "fail"
   };

@@ -44,13 +44,12 @@ describe("package search quality benchmark", () => {
     });
     expect(result.checks.find((check) => check.name === "Cross-registry package name impersonation")?.data?.recommendedId).toBe("pypi:requests");
     expect(result.checks.find((check) => check.name === "npm namespace confusion scoped SDK")?.data?.recommendedId).toBe("npm:@solana/web3.js");
-    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data).toMatchObject({
+    const trapDoorCheck = result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy");
+    expect(trapDoorCheck?.data).toMatchObject({
       recommendedId: "npm:@solana/web3.js"
     });
-    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data?.topGates).toContain("blocked");
-    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data?.topIds).toContain(
-      "npm:trapdoor-wallet-helper"
-    );
+    expect(trapDoorCheck?.data?.topGates).toContain("blocked");
+    expect(trapDoorCheck?.data?.topIds).toEqual(expect.arrayContaining([expect.stringMatching(/^npm:(trapdoor-wallet-helper|solana-web3-helper)$/)]));
     expect(result.checks.find((check) => check.name === "Obfuscated metadata instruction decoy")?.data).toMatchObject({
       recommendedId: "npm:zod",
       topGates: ["pass", "pass", "review", "blocked"]

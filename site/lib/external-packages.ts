@@ -2688,6 +2688,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("npm.packument.versions", "Packument versions", /npm packument versions returned:/i, /packument summary was not returned/i),
         evidenceSpec("npm.dist_tags", "Dist tags", /npm dist-tags returned:/i, /npm dist-tags were not returned/i),
         evidenceSpec("npm.version_intelligence", "Version intelligence", /npm latest publish age hours:/i, /latest publish age could not be computed/i),
+        evidenceSpec("npm.release_timeline", "Release timeline", /npm previous version published at:|npm dormancy before latest release days:/i, /previous version publish timestamp was not returned|dormancy before latest release could not be computed/i),
         evidenceSpec("npm.osv", "OSV advisory context", /OSV returned no known vulnerabilities|OSV returned vulnerability IDs/i, /OSV vulnerability context was unavailable/i),
         evidenceSpec("npm.artifact_shape", "Artifact shape", /Latest npm release file count:|Latest npm unpacked size bytes:/i, /file count was not returned|unpacked size was not returned/i),
         evidenceSpec("npm.repository", "Repository link", /Repository link is present/i, /Repository link is missing/i),
@@ -2709,6 +2710,7 @@ function sourceEvidenceSpecs(source: ExternalPackageSource): SourceEvidenceSpec[
         evidenceSpec("pypi.yanked", "Yanked status", /latest release files are not marked yanked|latest release files include yanked files/i),
         evidenceSpec("pypi.requires_python", "Python version boundary", /PyPI requires-python:/i, /did not return requires-python metadata/i),
         evidenceSpec("pypi.version_intelligence", "Version intelligence", /PyPI latest publish age hours:/i, /latest publish age could not be computed/i),
+        evidenceSpec("pypi.release_timeline", "Release timeline", /PyPI previous release upload timestamp:|PyPI dormancy before latest release days:/i, /previous release upload timestamp was not returned|dormancy before latest release could not be computed/i),
         evidenceSpec("pypi.release_history", "Release history", /PyPI release history versions returned:/i, /release history was not returned/i)
       ];
     case "github":
