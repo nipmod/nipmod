@@ -7,7 +7,7 @@ The hosted API stays read-only. It can search, inspect and return install plans,
 ## Eight-part buildout
 
 1. Search quality benchmark
-   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP, partial source outages, dependency-confusion lookalikes, namespace-confusion scoped SDKs, PyPI confusion aliases, typo-squat aliases, stale/deprecated package decoys, publisher-continuity drift, cross-registry name impersonation, obfuscated metadata-instruction decoys, remote-code model decoys and crypto-drainer package decoys.
+   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP, partial and multi-source outages, dependency-confusion lookalikes, namespace-confusion scoped SDKs, PyPI confusion aliases, typo-squat aliases, stale/deprecated package decoys, publisher-continuity drift, cross-registry name impersonation, model-card instruction decoys, obfuscated metadata-instruction decoys, remote-code model decoys and crypto-drainer package decoys.
    - The benchmark measures expected rank, recall at 1, recall at 3, mean reciprocal rank, blocked recommendations and missing intent reasons.
    - Run with `pnpm search:benchmark`.
 
@@ -27,7 +27,7 @@ The hosted API stays read-only. It can search, inspect and return install plans,
 
 5. Malware and abuse pattern library
    - External records now include typed `riskSignals`.
-   - Signals classify plain and obfuscated metadata instructions, credential scope, known vulnerabilities, source-only builds, lifecycle execution, remote-code model loading, pickle/binary weights and weak operator/source evidence.
+   - Signals classify plain, obfuscated and model-card metadata instructions, credential scope, known vulnerabilities, source-only builds, lifecycle execution, remote-code model loading, pickle/binary weights and weak operator/source evidence.
 
 6. Trust timeline
    - External records now include `trustTimeline`.

@@ -7,7 +7,8 @@ import {
   metadataInstructionWarnings,
   packageLifecycleScripts,
   type InstallCommandRisk,
-  type PackageLifecycleScript
+  type PackageLifecycleScript,
+  type PackageMetadataField
 } from "./package-command-safety";
 import {
   buildPackageScannerIntelligence,
@@ -1997,6 +1998,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   const datasetInfo = source === "huggingface-dataset" ? readRecord(cardData?.dataset_info) : null;
   const datasetFeatureCount = datasetInfo ? huggingFaceDatasetFeatureCount(datasetInfo) : 0;
   const datasetSplitCount = datasetInfo ? huggingFaceDatasetSplitCount(datasetInfo) : 0;
+  const cardMetadataWarnings = metadataInstructionWarnings(huggingFaceCardDataMetadataFields(cardData));
   const score = clampScore(
     46 +
       Math.min(22, Math.log10((downloads ?? 0) + 1) * 6) +
@@ -2023,6 +2025,7 @@ function huggingFaceRecord(source: "huggingface-model" | "huggingface-dataset", 
   );
   const kind = source === "huggingface-model" ? "model" : "dataset";
   const warnings = [
+    ...cardMetadataWarnings,
     ...(license ? [] : ["No license tag returned by Hugging Face."]),
     ...(gated ? [`Hugging Face marks this ${kind} as gated.`] : []),
     ...(isPrivate ? [`Hugging Face marks this ${kind} as private.`] : []),
@@ -2182,6 +2185,39 @@ function huggingFaceModelIndexSummary(cardData: UnknownRecord | null): { labels:
     return count + (Array.isArray(results) ? results.length : 0);
   }, 0);
   return { labels: [...new Set(labels)].slice(0, 10), resultCount };
+}
+
+function huggingFaceCardDataMetadataFields(cardData: UnknownRecord | null): PackageMetadataField[] {
+  if (!cardData) {
+    return [];
+  }
+  const fields: PackageMetadataField[] = [];
+  collectHuggingFaceCardDataText(cardData, "cardData", fields);
+  return fields.slice(0, 40);
+}
+
+function collectHuggingFaceCardDataText(value: unknown, path: string, fields: PackageMetadataField[], depth = 0): void {
+  if (fields.length >= 40 || depth > 4) {
+    return;
+  }
+  if (typeof value === "string") {
+    const text = cleanPlainText(value, 500);
+    if (text) {
+      fields.push({ field: path, value: text });
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.slice(0, 20).forEach((item, index) => {
+      collectHuggingFaceCardDataText(item, `${path}[${index}]`, fields, depth + 1);
+    });
+    return;
+  }
+  if (isRecord(value)) {
+    for (const [key, child] of Object.entries(value).slice(0, 30)) {
+      collectHuggingFaceCardDataText(child, `${path}.${key}`, fields, depth + 1);
+    }
+  }
 }
 
 function huggingFaceDatasetFeatureCount(datasetInfo: UnknownRecord): number {

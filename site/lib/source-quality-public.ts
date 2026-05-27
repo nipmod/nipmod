@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T15:20:11.000Z",
+  generatedAt: "2026-05-27T15:32:36.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
     meanReciprocalRank: 1,
     missingExpectedIntentReasonCount: 0,
-    pass: 19,
+    pass: 20,
     recallAt1: 1,
     recallAt3: 1,
-    total: 19
+    total: 20
   },
   gates: [
     "expected package appears within max rank",
@@ -25,7 +25,9 @@ export const sourceQualityBenchmark = {
     "namespace-confusion decoys do not beat expected scoped SDKs",
     "obfuscated package metadata instructions are treated as untrusted data",
     "publisher-continuity warnings can force npm candidates into review",
-    "runtime/source intent prevents cross-registry name impersonation from winning"
+    "runtime/source intent prevents cross-registry name impersonation from winning",
+    "model-card instruction decoys are blocked as untrusted metadata",
+    "multi-source outages remain partial when at least one safe source returns records"
   ],
   notClaimed: [
     "malware-free guarantee",

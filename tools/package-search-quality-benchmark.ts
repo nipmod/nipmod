@@ -25,6 +25,7 @@ interface BenchmarkCase {
   query: string;
   requiredIntentReason?: string;
   sources: ExternalPackageSource[];
+  useHuggingFaceOutage?: boolean;
   useNpmOutage?: boolean;
 }
 
@@ -110,8 +111,8 @@ const DEFAULT_CASES: BenchmarkCase[] = [
   },
   {
     expectedId: "huggingface-model:sentence-transformers/all-MiniLM-L6-v2",
-    forbiddenRecommendedIds: ["huggingface-model:evil/embedding-wallet-drainer"],
-    limit: 4,
+    forbiddenRecommendedIds: ["huggingface-model:evil/embedding-wallet-drainer", "huggingface-model:evil/model-card-injection"],
+    limit: 5,
     maxRank: 2,
     name: "Embedding model",
     query: "semantic search embeddings model",
@@ -149,6 +150,20 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     query: "http client",
     requiredIntentReason: "query intent match: Python HTTP client fit",
     sources: ["npm", "pypi"],
+    useNpmOutage: true
+  },
+  {
+    expectedId: "pypi:requests",
+    expectedPartial: true,
+    expectedRecommendedId: "pypi:requests",
+    expectedSourceSummary: { empty: 0, failed: 2, ok: 1, requested: 3 },
+    limit: 3,
+    maxRank: 1,
+    name: "Multi-source outage keeps safe recommendation",
+    query: "http client",
+    requiredIntentReason: "query intent match: Python HTTP client fit",
+    sources: ["npm", "pypi", "huggingface-model"],
+    useHuggingFaceOutage: true,
     useNpmOutage: true
   },
   {
@@ -257,7 +272,10 @@ export async function runPackageSearchQualityBenchmark(cases: BenchmarkCase[] = 
     resetExternalSourceRuntimeStateForTests();
     try {
       const result = await searchExternalPackages(testCase.query, {
-        fetchImpl: packageSearchQualityFetch({ npmOutage: testCase.useNpmOutage }),
+        fetchImpl: packageSearchQualityFetch({
+          huggingFaceOutage: testCase.useHuggingFaceOutage,
+          npmOutage: testCase.useNpmOutage
+        }),
         limit: testCase.limit,
         sources: testCase.sources
       });
