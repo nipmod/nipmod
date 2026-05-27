@@ -86,6 +86,12 @@
   "docs": {
     "home": "https://nipmod.com",
     "quickstart": "https://nipmod.com/quickstart",
+    "demo": "https://nipmod.com/demo",
+    "agentDemoFlow": "https://nipmod.com/agent-demo-flow.json",
+    "integrations": "https://nipmod.com/integrations",
+    "integrationKit": "https://nipmod.com/integration-kit.json",
+    "sourceQuality": "https://nipmod.com/source-quality",
+    "sourceQualityReport": "https://nipmod.com/source-quality.json",
     "architecture": "https://nipmod.com/architecture",
     "baseAgents": "https://nipmod.com/base-agents",
     "api": "https://nipmod.com/api-access",
@@ -173,6 +179,9 @@
     ],
     "commands": {
       "readLlms": "GET https://nipmod.com/llms.txt",
+      "readDemoFlow": "GET https://nipmod.com/agent-demo-flow.json",
+      "readIntegrationKit": "GET https://nipmod.com/integration-kit.json",
+      "readSourceQuality": "GET https://nipmod.com/source-quality.json",
       "readOpenApi": "GET https://nipmod.com/api/openapi with x-nipmod-api-key",
       "issueBetaKey": "POST https://nipmod.com/api/keys/beta",
       "externalResolve": "GET https://nipmod.com/api/resolve?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp with x-nipmod-api-key",

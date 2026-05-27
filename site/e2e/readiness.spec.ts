@@ -183,6 +183,10 @@ test("trust and security pages keep public proof readable", async ({ page, reque
   await expect(page.getByRole("heading", { name: "Security policy." })).toBeVisible();
   await expect(page.getByRole("link", { name: "security.txt" })).toHaveAttribute("href", "/.well-known/security.txt");
 
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { name: "Run the agent preflight." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "1. Issue beta key" })).toBeVisible();
+
   const response = await request.get("/.well-known/security.txt");
   await expect(response).toBeOK();
   await expect(response.text()).resolves.toContain("Policy: https://nipmod.com/security");

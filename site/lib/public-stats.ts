@@ -41,12 +41,17 @@ export async function readPublicStats(input: PublicStatsInput, env: PublicStatsE
   };
 
   if (!store.configured) {
+    const archive = emptyArchiveStats();
+    const betaKeys = { activeCount: 0 };
+    const excluded = emptyExcludedStats();
+    const external = emptyExternalStats();
     return {
       ...base,
-      archive: emptyArchiveStats(),
-      betaKeys: { activeCount: 0 },
-      excluded: emptyExcludedStats(),
-      external: emptyExternalStats()
+      archive,
+      betaKeys,
+      excluded,
+      external,
+      recap: buildPublicRecap({ archive, betaKeys, excluded, external, windowHours: safeHours })
     };
   }
 
@@ -66,7 +71,16 @@ export async function readPublicStats(input: PublicStatsInput, env: PublicStatsE
       activeCount: betaKeys
     },
     excluded,
-    external
+    external,
+    recap: buildPublicRecap({
+      archive,
+      betaKeys: {
+        activeCount: betaKeys
+      },
+      excluded,
+      external,
+      windowHours: safeHours
+    })
   };
 }
 
@@ -257,6 +271,55 @@ function emptyArchiveStats() {
       { count: 0, label: "50-69" },
       { count: 0, label: "0-49" }
     ]
+  };
+}
+
+function buildPublicRecap(input: {
+  archive: ReturnType<typeof emptyArchiveStats> | Awaited<ReturnType<typeof readArchiveStats>>;
+  betaKeys: { activeCount: number };
+  excluded: ReturnType<typeof emptyExcludedStats>;
+  external: ReturnType<typeof emptyExternalStats> | ReturnType<typeof buildExternalStats>;
+  windowHours: number;
+}) {
+  const hasMeaningfulUsage =
+    input.external.authenticatedRequestCount > 0 ||
+    input.external.installPlanCount > 0 ||
+    input.external.archiveStoredCount > 0 ||
+    input.archive.confirmedRecords > 0;
+  const hasQualitySignal =
+    input.external.trustDecisions.length > 0 ||
+    input.external.trustRisks.length > 0 ||
+    input.external.blockedInstallPlanCount > 0;
+  const publicShareRecommended = hasMeaningfulUsage && (input.external.requestCount >= 10 || hasQualitySignal);
+  const bullets = [
+    `${input.external.requestCount} external API requests in ${input.windowHours}h`,
+    `${input.external.authenticatedRequestCount} authenticated beta or partner requests`,
+    `${input.external.activeKeyCount} external keys observed`,
+    `${input.betaKeys.activeCount} active self-serve beta keys`,
+    `${input.external.installPlanCount} install plans returned`,
+    `${input.external.blockedInstallPlanCount} install plans blocked`,
+    `${input.external.archiveStoredCount} archive records stored from confirmed useful results`,
+    `${input.archive.confirmedRecords} confirmed package intelligence records in archive`
+  ];
+  return {
+    bullets,
+    draft: publicShareRecommended
+      ? [
+          `Nipmod ${input.windowHours}h operator snapshot:`,
+          ...bullets.map((bullet) => `- ${bullet}`),
+          "",
+          "These are public-safe aggregates only. Internal monitors, canaries, admin routes and old legacy events are excluded."
+        ].join("\n")
+      : null,
+    exclusions: [
+      `${input.excluded.controlPlaneRequestCount} control-plane requests excluded`,
+      `${input.excluded.internalRequestCount} internal monitor or canary requests excluded`,
+      `${input.excluded.unknownLegacyRequestCount} unknown legacy events excluded`
+    ],
+    headline: publicShareRecommended ? "Public recap is safe to draft" : "No public recap recommended yet",
+    publicShareRecommended,
+    privacy:
+      "recap contains only public aggregate counts; no raw API keys, IPs, user agents, prompts, workspace paths, package hashes or private package names"
   };
 }
 

@@ -1,4 +1,4 @@
-import { DocsCard, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
 import { readPublicStats } from "../../lib/public-stats";
 
@@ -14,6 +14,7 @@ export default async function StatsPage() {
   const stats = await readPublicStats({ hours: 24 });
   const external = stats.external;
   const archive = stats.archive;
+  const recap = stats.recap;
   return (
     <DocsShell
       description="A public usage snapshot for the API beta. Control-plane routes, internal monitors, canaries and unknown legacy events are separated from external usage counts."
@@ -56,6 +57,19 @@ export default async function StatsPage() {
 
       <DocsSection eyebrow="Archive" title="Confirmed package intelligence">
         <DocsTable rows={archive.sources.map((row) => [String(row.source ?? ""), formatNumber(row.requestCount), "Records"])} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Recap" title="Public-safe operator recap">
+        <DocsGrid>
+          <DocsCard label="Status" title={recap.publicShareRecommended ? "draft ready" : "hold"}>
+            <p>{recap.headline}. The recap uses aggregate counts only.</p>
+          </DocsCard>
+          <DocsCard label="Privacy" title="safe aggregate">
+            <p>No raw API keys, IPs, user agents, prompts, workspace paths, package hashes or private package names.</p>
+          </DocsCard>
+        </DocsGrid>
+        <DocsTable rows={recap.bullets.map((bullet) => [bullet, "Public-safe aggregate"])} />
+        {recap.draft ? <DocsCode>{recap.draft}</DocsCode> : null}
       </DocsSection>
 
       <DocsSection eyebrow="Boundary" title="What is excluded">

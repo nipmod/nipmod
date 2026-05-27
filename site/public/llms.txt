@@ -7,6 +7,12 @@ Mode: API first package discovery
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API reference: https://nipmod.com/api-access
+Public agent demo: https://nipmod.com/demo
+Public agent demo machine flow: https://nipmod.com/agent-demo-flow.json
+Generic integration kit: https://nipmod.com/integrations
+Generic integration machine kit: https://nipmod.com/integration-kit.json
+Source quality benchmark: https://nipmod.com/source-quality
+Source quality machine report: https://nipmod.com/source-quality.json
 Contact: mailto:info@nipmod.com
 Base agent preflight: https://nipmod.com/base-agents
 Base agent machine preflight: https://nipmod.com/base-agent-preflight.json
@@ -36,6 +42,23 @@ When a user asks for a package, tool, model or workflow:
 8. If the result was useful, prepare an optional archive record.
 
 Search is not install permission. A popular package can still be risky.
+
+## Generic integration
+
+Use the generic integration kit when adding Nipmod to an agent product, MCP server, SDK, CLI, wallet flow, infra layer or devtool:
+
+https://nipmod.com/integrations
+https://nipmod.com/integration-kit.json
+
+Use the public demo flow to test the full preflight before writing platform-specific integration code:
+
+https://nipmod.com/demo
+https://nipmod.com/agent-demo-flow.json
+
+Use source quality data to understand current source depth and limits:
+
+https://nipmod.com/source-quality
+https://nipmod.com/source-quality.json
 
 ## Base agents
 
