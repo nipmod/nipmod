@@ -350,15 +350,28 @@ function hasObfuscatedExecutionPattern(command: string): boolean {
 function hasSecretAccessPattern(command: string): boolean {
   const normalized = normalizeCommandForRisk(command);
   return (
-    /(^|[\s@~/'"])(\.npmrc|\.pypirc|\.netrc|\.env|id_rsa|id_ed25519|private[_-]?key|ssh[_-]?key|mnemonic|seed phrase|wallet|keystore)\b/i.test(normalized) ||
-    /(^|[\s@~/'"])(\.ssh|\.gnupg|\.aws|\.azure|\.config\/solana|\.aptos|\.sui|\.ethereum|\.foundry|\.brownie)\b/i.test(normalized) ||
-    /\b(solana|aptos|sui|ethereum|evm|wallet)\b.{0,120}\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b/i.test(normalized) ||
-    /\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b.{0,120}\b(solana|aptos|sui|ethereum|evm|wallet)\b/i.test(normalized) ||
-    /\b(github_token|npm_token|pypi_token|hf_token|huggingface_hub_token|aws_secret_access_key|aws_session_token|google_application_credentials|ssh_auth_sock)\b/i.test(
+    /(^|[\s@~/'"])(\.npmrc|\.pypirc|\.netrc|\.env|\.git-credentials|\.gitconfig|\.bash_history|\.zsh_history|id_rsa|id_dsa|id_ecdsa|id_ed25519|id_ed25519_sk|private[_-]?key|ssh[_-]?key|mnemonic|seed phrase|wallet|keystore|credentials\.json|service[_-]?account)\b/i.test(
       normalized
     ) ||
+    /(^|[\s@~/'"])(\.ssh|\.gnupg|\.aws|\.azure|\.docker|\.kube|\.config\/solana|\.config\/gh|\.config\/gcloud|\.config\/huggingface|\.aptos|\.sui|\.ethereum|\.foundry|\.brownie|\.cargo\/credentials)\b/i.test(
+      normalized
+    ) ||
+    /\b(solana|aptos|sui|ethereum|evm|wallet)\b.{0,120}\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b/i.test(normalized) ||
+    /\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b.{0,120}\b(solana|aptos|sui|ethereum|evm|wallet)\b/i.test(normalized) ||
+    /\b(github_token|npm_token|pypi_token|hf_token|huggingface_hub_token|openai_api_key|anthropic_api_key|coinbase_api_key|base_private_key|wallet_private_key|privy_app_secret|vercel_token|supabase_service_role_key|aws_secret_access_key|aws_session_token|google_application_credentials|ssh_auth_sock)\b/i.test(normalized) ||
     /\b(process\.env|os\.environ|getenv|\/proc\/self\/environ)\b/i.test(normalized) ||
-    /\b(169\.254\.169\.254|metadata\.google\.internal)\b/i.test(normalized)
+    /\b(169\.254\.169\.254|metadata\.google\.internal)\b/i.test(normalized) ||
+    hasEnvironmentDumpExfiltrationPattern(normalized)
+  );
+}
+
+function hasEnvironmentDumpExfiltrationPattern(command: string): boolean {
+  return (
+    /\b(?:env|printenv|set)\b.{0,160}\|.{0,160}\b(?:curl|wget|nc|netcat|socat|openssl)\b/i.test(command) ||
+    /\b(?:curl|wget)\b.{0,220}(?:--data|--data-binary|-d|-f|--form)\s+@-(?:\s|$).{0,160}\b(?:env|printenv|set)\b/i.test(command) ||
+    /\b(?:env|printenv|set)\b.{0,160}\|.{0,160}\b(?:python|python3|node|ruby|perl|php)\b.{0,220}\b(?:requests\.post|fetch\(|http\.post|https\.request|urllib\.request)\b/i.test(
+      command
+    )
   );
 }
 

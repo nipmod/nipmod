@@ -247,6 +247,7 @@ function securityPatternCheck(commandSafety: string, scannerIntelligence: string
     "hasPipedShellDownload",
     "hasDownloadedFileExecutionPattern",
     "hasSecretAccessPattern",
+    "hasEnvironmentDumpExfiltrationPattern",
     "hasPrivilegedOrDestructiveCommand",
     "hasEncodedOrInlineExecutionPattern",
     "hasObfuscatedExecutionPattern",
