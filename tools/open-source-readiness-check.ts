@@ -143,6 +143,7 @@ const publicApiSpec = read("docs/specs/public-api.md");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
 check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
+check("public-api:archive-drift-review", () => publicApiSpec.includes("pnpm archive:drift"));
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");

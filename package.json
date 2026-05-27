@@ -9,6 +9,7 @@
     "archive:seed": "node --experimental-strip-types tools/seed-package-intelligence.ts",
     "api:contract": "node --experimental-strip-types tools/api-contract-canary.ts",
     "archive:canary": "node --experimental-strip-types tools/archive-depth-canary.ts",
+    "archive:drift": "pnpm --dir nipmod exec tsx ../tools/archive-drift-review.ts",
     "build": "pnpm --dir nipmod build && pnpm --dir site build",
     "install-plan:canary": "node --experimental-strip-types tools/install-plan-canary.ts",
     "launch:verify": "node --experimental-strip-types tools/launch-verify.ts",

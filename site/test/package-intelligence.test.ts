@@ -48,8 +48,8 @@ describe("package intelligence archive", () => {
         version: "source-drift-v1"
       }
     });
-    expect(record.evidence.sourceDrift.baselineSourceRecordDigest).toBe(record.evidence.sourceRecordDigest);
-    expect(record.evidence.sourceDrift.currentSourceRecordDigest).toBe(record.evidence.sourceRecordDigest);
+    expect(record.evidence.sourceDrift.baselineSourceRecordDigest).toMatch(/^[a-f0-9]{64}$/);
+    expect(record.evidence.sourceDrift.currentSourceRecordDigest).toBe(record.evidence.sourceDrift.baselineSourceRecordDigest);
     expect(record.evidence.sourceRecordDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(record.evidence.trustDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(record.stableKey).toContain("npm:node-telegram-bot-api");
@@ -94,9 +94,9 @@ describe("package intelligence archive", () => {
     const upgraded = ensurePackageIntelligenceEvidence(legacy);
 
     expect(upgraded.evidence.sourceDrift).toMatchObject({
-      baselineSourceRecordDigest: record.evidence.sourceRecordDigest,
+      baselineSourceRecordDigest: record.evidence.sourceDrift.baselineSourceRecordDigest,
       changed: false,
-      currentSourceRecordDigest: record.evidence.sourceRecordDigest,
+      currentSourceRecordDigest: record.evidence.sourceDrift.currentSourceRecordDigest,
       status: "fresh"
     });
     expect(validatePackageIntelligenceRecord(upgraded).ok).toBe(true);
@@ -242,7 +242,7 @@ describe("package intelligence archive", () => {
     ]);
   });
 
-  test("marks archive source drift when repeated confirmations see changed upstream metadata", () => {
+  test("marks archive source drift when repeated confirmations see changed upstream identity metadata", () => {
     const first = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" }), {
       actor: "codex",
       now: "2026-05-21T00:05:00.000Z"
@@ -251,7 +251,7 @@ describe("package intelligence archive", () => {
       createPackageIntelligenceRecord(
         {
           ...externalRecord,
-          description: "Telegram Bot API with changed upstream metadata.",
+          license: "Apache-2.0",
           metrics: { ...externalRecord.metrics, downloads: 1_050_000 }
         },
         { now: "2026-05-22T00:00:00.000Z" }
@@ -265,10 +265,45 @@ describe("package intelligence archive", () => {
     const merged = mergePackageIntelligenceRecords(first, second);
 
     expect(merged.evidence.sourceDrift).toMatchObject({
-      baselineSourceRecordDigest: first.evidence.sourceRecordDigest,
+      baselineSourceRecordDigest: first.evidence.sourceDrift.currentSourceRecordDigest,
       changed: true,
-      currentSourceRecordDigest: second.evidence.sourceRecordDigest,
+      currentSourceRecordDigest: second.evidence.sourceDrift.currentSourceRecordDigest,
       status: "changed",
+      version: "source-drift-v1"
+    });
+    expect(validatePackageIntelligenceRecord(merged).ok).toBe(true);
+  });
+
+  test("does not mark archive source drift for volatile score and metric changes", () => {
+    const first = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" }), {
+      actor: "codex",
+      now: "2026-05-21T00:05:00.000Z"
+    });
+    const second = confirmPackageIntelligenceRecord(
+      createPackageIntelligenceRecord(
+        {
+          ...externalRecord,
+          metrics: { ...externalRecord.metrics, downloads: 2_000_000 },
+          trust: {
+            ...externalRecord.trust,
+            checkedAt: "2026-05-22T00:00:00.000Z",
+            score: 98,
+            signals: [...externalRecord.trust.signals, "Fresh resolver check completed."]
+          }
+        },
+        { now: "2026-05-22T00:00:00.000Z" }
+      ),
+      {
+        actor: "claude-code",
+        now: "2026-05-22T00:05:00.000Z"
+      }
+    );
+
+    const merged = mergePackageIntelligenceRecords(first, second);
+
+    expect(merged.evidence.sourceDrift).toMatchObject({
+      changed: false,
+      status: "fresh",
       version: "source-drift-v1"
     });
     expect(validatePackageIntelligenceRecord(merged).ok).toBe(true);

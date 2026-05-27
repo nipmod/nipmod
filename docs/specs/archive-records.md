@@ -142,7 +142,7 @@ Record evidence uses:
 }
 ```
 
-This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores. `sourceDrift` compares the first archived source record with the latest server-reinspected record so repeated confirmations can surface upstream metadata changes.
+This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores. `sourceDrift` compares stable source material from the first archived source record with the latest server-reinspected record so repeated confirmations can surface upstream metadata changes without treating volatile inspection timestamps as drift.
 
 ## Confirmation Gate
 

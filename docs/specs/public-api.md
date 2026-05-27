@@ -49,6 +49,8 @@ Operators can run `pnpm install-plan:canary` to verify live install-plan boundar
 
 Operators can run `pnpm archive:canary -- --require-durable` to verify the live archive layer without writing data. The canary dry-runs archive confirmation across every declared source and fails if source reinspection, eligibility, evidence digests, source drift evidence, trust factors, install-plan boundaries or receipt shape drift.
 
+Operators can run `pnpm archive:drift -- --base-url https://nipmod.com --limit 100` to review stored archive records without writing data. The review fetches archive records through the public API, re-inspects their upstream sources and reports whether the current stable source digest still matches the first archived stable source digest.
+
 Operators can run `pnpm archive:seed` to dry-run Seed v1 across npm, PyPI, GitHub, Hugging Face and MCP. Production seed writes require `NIPMOD_ARCHIVE_WRITE_TOKEN` and must use the archive confirm path, which re-inspects source data and deduplicates by stable source identity.
 
 Operators can run `pnpm rate-limit:canary -- --require-active` to verify the live production health endpoint reports the shared Supabase bucket as active. With a local ignored env file, `pnpm rate-limit:canary -- --require-configured --require-active` also performs a direct Supabase Data API RPC probe and verifies that `consume_api_rate_limit` is exposed to the service role.
