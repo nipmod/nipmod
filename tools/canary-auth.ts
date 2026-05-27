@@ -24,7 +24,7 @@ export async function readCanaryApiKey({
     return TEST_CANARY_API_KEY;
   }
 
-  const cacheKey = `${baseUrl.replace(/\/$/, "")}:${userAgent}`;
+  const cacheKey = baseUrl.replace(/\/$/, "");
   const cached = issuedCanaryKeys.get(cacheKey);
   if (cached) {
     return cached;
