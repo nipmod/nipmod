@@ -4,7 +4,7 @@
 [![Production monitor](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml/badge.svg)](https://github.com/nipmod/nipmod/actions/workflows/prod-monitor.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-white.svg)](LICENSE)
 
-The package layer for AI agents.
+The package intelligence layer for AI agents.
 
 Nipmod lets agents search npm, PyPI, Hugging Face, GitHub and MCP sources,
 inspect package trust, and generate safe install plans before workspace writes.

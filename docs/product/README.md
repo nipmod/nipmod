@@ -4,7 +4,7 @@ This folder documents Nipmod's public product direction.
 
 The direction is:
 
-> Nipmod is the package layer for AI agents.
+> Nipmod is the package intelligence layer for AI agents.
 
 Agents use Nipmod to search packages, inspect trust, and get safe install plans before touching a workspace.
 

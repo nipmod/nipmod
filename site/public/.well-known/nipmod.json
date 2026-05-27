@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "type": "dev.nipmod.discovery.v1",
   "name": "Nipmod",
-  "description": "The package layer for AI agents.",
+  "description": "The package intelligence layer for AI agents.",
   "homepage": "https://nipmod.com",
   "previewImage": "https://nipmod.com/nipmod-logo.png",
   "trustPage": "https://nipmod.com/trust",

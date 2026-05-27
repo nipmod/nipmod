@@ -214,7 +214,7 @@ export default function ApiAccessPage() {
             {
               first: "Free beta keys",
               second: <code>POST /api/keys/beta</code>,
-              third: "Issued directly by the API. They do not unlock private sources."
+              third: "Issued directly by the API. They do not expose private sources."
             },
             {
               first: "Partner keys",
