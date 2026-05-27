@@ -1,6 +1,6 @@
 # Nipmod
 
-Nipmod is the package layer for AI agents.
+Nipmod is the package intelligence layer for AI agents.
 
 Agents use Nipmod to search package ecosystems, inspect trust signals and request safe install plans before changing a workspace.
 Mode: API first package discovery

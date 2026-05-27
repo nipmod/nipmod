@@ -5,7 +5,7 @@ import { createPageMetadata, previewImageUrl, siteDescription, siteName } from "
 describe("site metadata", () => {
   test("uses one canonical preview description and image", () => {
     expect(siteName).toBe("Nipmod");
-    expect(siteDescription).toBe("The package layer for AI agents.");
+    expect(siteDescription).toBe("The package intelligence layer for AI agents.");
     expect(previewImageUrl).toBe("https://nipmod.com/nipmod-logo.png?v=20260522-orange-cube");
   });
 

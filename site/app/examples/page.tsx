@@ -96,7 +96,7 @@ export default function ExamplesPage() {
       </DocsSection>
 
       <DocsSection title="Source canaries">
-        <p className="docs-note">These are simple keyed checks across the sources Nipmod resolves today. They are examples, not package endorsements.</p>
+        <p className="docs-note">These are keyed checks across the sources Nipmod resolves today. They are examples, not package endorsements.</p>
         <DocsCode>{sourceExamples}</DocsCode>
       </DocsSection>
 

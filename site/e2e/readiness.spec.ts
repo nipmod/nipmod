@@ -9,12 +9,12 @@ test("home page presents the API-first product", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle("Nipmod");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "The package layer for AI agents.");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "The package intelligence layer for AI agents.");
   await expect(page.locator('head link[rel="alternate"][type="text/plain"][href="/llms.txt"]')).toHaveCount(1);
   await expect(page.locator('head link[rel="alternate"][type="application/json"][href="/.well-known/nipmod.json"]')).toHaveCount(1);
 
-  await expect(page.getByRole("heading", { name: /The package layer\s+for AI agents\./ })).toBeVisible();
-  await expect(page.getByText("Nipmod makes existing package ecosystems readable for agents")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Package intelligence before agent execution\./ })).toBeVisible();
+  await expect(page.getByText("Nipmod gives agents a package preflight")).toBeVisible();
   await expect(page.getByRole("link", { name: "Read architecture" })).toHaveAttribute("href", "/architecture");
   await expect(page.getByRole("link", { name: "Open API docs" })).toHaveAttribute("href", "/api-access");
   await expect(page.getByRole("link", { name: "Start quickstart" })).toHaveAttribute("href", "/quickstart");

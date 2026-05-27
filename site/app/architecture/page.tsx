@@ -40,7 +40,7 @@ export default function ArchitecturePage() {
             {
               first: "Normalizer",
               second: "Different source formats are converted into one agent-readable package record.",
-              third: "Agents get one shape instead of five."
+              third: "Agents get one shape instead of six source-specific shapes."
             },
             {
               first: "Trust engine",
@@ -134,14 +134,14 @@ export default function ArchitecturePage() {
             enough to become durable intelligence.
           </p>
           <p>
-            We are using the Base ecosystem as the first collaboration surface because the project, token and early community
-            are already there. After the API and archive loop are stable, the same structure applies to agent builders beyond
-            Base.
+            Base is the first public ecosystem path because Base MCP, x402 and app skills make package preflight easy to
+            test in real agent workflows. After the API and archive loop are stable, the same structure applies to agent
+            builders beyond Base.
           </p>
           <p>
-            Premium access and higher usage tiers can come later, after the free key-required beta proves the package layer with real
-            usage. The product boundary stays the same: search, inspect, install plan, approval, then optional archive
-            confirmation.
+            Premium access and higher usage tiers can come later, after the free key-required beta proves the package
+            intelligence layer with real usage. The product boundary stays the same: search, inspect, install plan, approval,
+            then optional archive confirmation.
           </p>
         </DocsProse>
       </DocsSection>

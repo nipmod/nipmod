@@ -97,7 +97,7 @@ for (const file of requiredFiles) {
 }
 
 const readme = read("README.md");
-check("readme:positioning", () => readme.includes("The package layer for AI agents."));
+check("readme:positioning", () => readme.includes("The package intelligence layer for AI agents."));
 check("readme:registry-boundary", () => readme.includes("Nipmod does not replace package registries."));
 check("readme:core-flow", () => readme.includes("Search supported sources.") && readme.includes("Generate an install plan."));
 check("readme:hosted-api", () => readme.includes("API beta access requires a free beta key."));

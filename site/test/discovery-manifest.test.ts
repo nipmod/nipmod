@@ -15,7 +15,7 @@ describe("nipmod discovery manifest", () => {
   test("publishes a stable API first discovery document", () => {
     expect(manifest).toMatchObject({
       formatVersion: 1,
-      description: "The package layer for AI agents.",
+      description: "The package intelligence layer for AI agents.",
       homepage: "https://nipmod.com",
       name: "Nipmod",
       previewImage: "https://nipmod.com/nipmod-logo.png",
