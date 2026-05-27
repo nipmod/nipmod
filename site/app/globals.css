@@ -6220,6 +6220,150 @@ body {
   padding: 16px;
 }
 
+.benchmark-rank-list {
+  border: 1px solid var(--docs-line);
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.benchmark-rank-head {
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid var(--docs-line);
+  color: var(--docs-faint);
+  display: grid;
+  font-family: var(--docs-ui);
+  font-size: 10.5px;
+  font-weight: 750;
+  gap: 14px;
+  grid-template-columns: 46px minmax(160px, 0.9fr) minmax(210px, 1.3fr) 72px 72px 86px;
+  padding: 12px 14px;
+  text-transform: uppercase;
+}
+
+.benchmark-rank-rows {
+  display: grid;
+}
+
+.benchmark-rank-row {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 46px minmax(160px, 0.9fr) minmax(210px, 1.3fr) minmax(230px, 0.95fr);
+  padding: 14px;
+}
+
+.benchmark-rank-row + .benchmark-rank-row {
+  border-top: 1px solid var(--docs-line-soft);
+}
+
+.benchmark-rank-row-primary {
+  background: linear-gradient(90deg, rgba(216, 181, 109, 0.11), transparent 62%);
+}
+
+.benchmark-rank-index {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.benchmark-rank-track {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.benchmark-rank-track strong {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.18;
+}
+
+.benchmark-rank-track span {
+  color: var(--docs-muted);
+  font-family: var(--docs-ui);
+  font-size: 11.5px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.benchmark-rank-score {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(140px, 1fr) 42px;
+}
+
+.benchmark-rank-scorebar {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 25% 100%,
+    rgba(255, 255, 255, 0.045);
+  border-radius: 999px;
+  height: 18px;
+  overflow: hidden;
+}
+
+.benchmark-rank-scorebar span {
+  background: linear-gradient(90deg, #8fbf9a, #d8b56d);
+  display: block;
+  height: 100%;
+}
+
+.benchmark-rank-row-warn .benchmark-rank-scorebar span {
+  background: linear-gradient(90deg, #8f8b7f, #b98172);
+}
+
+.benchmark-rank-score b {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1;
+  text-align: right;
+}
+
+.benchmark-rank-metrics {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 68px 68px minmax(72px, 1fr);
+  margin: 0;
+}
+
+.benchmark-rank-metrics div {
+  display: grid;
+  gap: 3px;
+}
+
+.benchmark-rank-metrics dt {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.benchmark-rank-metrics dd {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.benchmark-rank-warning {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 13.5px;
+  grid-column: 2 / -1;
+  line-height: 1.45;
+  margin: -4px 0 0;
+}
+
 .benchmark-scoreboard-head {
   border-bottom: 1px solid var(--docs-line);
   color: var(--docs-faint);
@@ -6491,7 +6635,7 @@ body {
   align-items: center;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(126px, 0.45fr) minmax(160px, 1fr) 46px;
+  grid-template-columns: minmax(126px, 0.42fr) minmax(160px, 1fr) 46px 76px;
 }
 
 .benchmark-category-row strong,
@@ -6505,6 +6649,16 @@ body {
 
 .benchmark-category-row b {
   font-size: 14px;
+  text-align: right;
+}
+
+.benchmark-category-row em {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.2;
   text-align: right;
 }
 
@@ -6575,8 +6729,26 @@ body {
     display: none;
   }
 
+  .benchmark-rank-head {
+    display: none;
+  }
+
   .benchmark-scoreboard {
     padding: 12px;
+  }
+
+  .benchmark-rank-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .benchmark-rank-score,
+  .benchmark-rank-metrics,
+  .benchmark-rank-warning {
+    grid-column: 2;
+  }
+
+  .benchmark-rank-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .benchmark-scoreboard-grid {
@@ -6606,6 +6778,10 @@ body {
   }
 
   .benchmark-category-row b {
+    text-align: left;
+  }
+
+  .benchmark-category-row em {
     text-align: left;
   }
 }

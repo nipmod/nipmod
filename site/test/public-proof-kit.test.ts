@@ -59,17 +59,17 @@ describe("public agent proof kit", () => {
     expect(competitiveBenchmarkReport.headline).toMatchObject({
       installPlanEvidence: "7/7",
       liveChecks: "7/7",
-      score: 89
+      score: 95
     });
     expect(competitiveBenchmarkReport.tracks.map((track) => track.name)).toContain("Nipmod");
     expect(competitiveBenchmarkReport.tracks.find((track) => track.name === "Nipmod")?.score).toBeGreaterThan(80);
     expect(competitiveBenchmarkReport.categoryBreakdown.map((category) => category.key)).toEqual([
-      "source-discovery",
-      "advisory-provenance",
-      "install-boundary",
-      "agent-output"
+      "source-resolution",
+      "security-evidence",
+      "execution-preflight",
+      "agent-readiness"
     ]);
-    expect(competitiveBenchmarkReport.categoryBreakdown.find((category) => category.key === "install-boundary")?.tracks[0]).toMatchObject({
+    expect(competitiveBenchmarkReport.categoryBreakdown.find((category) => category.key === "execution-preflight")?.tracks[0]).toMatchObject({
       name: "Nipmod",
       score: 100
     });

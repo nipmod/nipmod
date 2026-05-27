@@ -17,6 +17,7 @@ type BenchmarkProvider =
   | "surplus";
 
 type BenchmarkSource = "github" | "huggingface-model" | "mcp" | "npm" | "pypi";
+type CategoryKey = "agent-readiness" | "execution-preflight" | "security-evidence" | "source-resolution";
 type ObservationStatus = "pass" | "warn" | "fail" | "skip";
 type Dimension =
   | "advisory"
@@ -71,13 +72,23 @@ interface ProviderObservation {
 interface ProviderSummary {
   applicable: number;
   coveragePct: number;
+  depthScore: number;
   fail: number;
   medianLatencyMs: number | null;
   pass: number;
   provider: BenchmarkProvider;
   score: number;
   skip: number;
+  sourceCoveragePct: number;
   warn: number;
+}
+
+interface CategoryDefinition {
+  description: string;
+  dimensions: string;
+  key: CategoryKey;
+  title: string;
+  weights: Partial<Record<Dimension, number>>;
 }
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
@@ -172,6 +183,65 @@ const DIMENSION_WEIGHTS: Record<Dimension, number> = {
   version: 6
 };
 
+const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
+  {
+    description: "Can the system resolve the right upstream object and return enough source context before an agent moves toward install?",
+    dimensions: "search, identity, version, metadata, source depth, multi-source scope",
+    key: "source-resolution",
+    title: "Source resolution",
+    weights: {
+      identity: 18,
+      metadata: 14,
+      multi_source: 16,
+      search: 18,
+      source_depth: 22,
+      version: 12
+    }
+  },
+  {
+    description: "Can the system return security evidence beyond a name match: advisories, provenance, repository posture and package behavior?",
+    dimensions: "advisories, provenance, repository posture, package behavior",
+    key: "security-evidence",
+    title: "Security evidence",
+    weights: {
+      advisory: 24,
+      metadata: 8,
+      package_behavior: 24,
+      provenance: 20,
+      repo_posture: 18,
+      version: 6
+    }
+  },
+  {
+    description: "Can the system describe what would run, keep hosted checks read-only and expose the execution boundary before workspace writes?",
+    dimensions: "install plan, read-only boundary, package behavior, prompt boundary",
+    key: "execution-preflight",
+    title: "Execution preflight",
+    weights: {
+      agent_json: 8,
+      install_plan: 32,
+      package_behavior: 14,
+      prompt_boundary: 18,
+      read_only: 28
+    }
+  },
+  {
+    description: "Can an agent consume the result as an action-ready decision object, not just a generic API response or human page?",
+    dimensions: "agent decision JSON, install boundary, source evidence, machine output",
+    key: "agent-readiness",
+    title: "Agent readiness",
+    weights: {
+      agent_json: 34,
+      identity: 4,
+      install_plan: 22,
+      machine_readable: 6,
+      prompt_boundary: 14,
+      read_only: 12,
+      source_depth: 8
+    }
+  }
+];
+
 export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptions = {}) {
   const startedAt = Date.now();
   const fetchFn = options.fetchFn ?? fetch;
@@ -196,7 +266,8 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
     observations.push(...(await nipmodTrack(CASES, baseUrl, env, fetchFn, options.timeoutMs)));
   }
 
-  const summaries = summarizeProviders(observations);
+  const categoryBreakdown = buildCategoryBreakdown(observations);
+  const summaries = summarizeProviders(observations, categoryBreakdown);
   const matrix = buildMatrix(observations);
   const report = {
     articleDraft: articleDraft(summaries),
@@ -208,6 +279,7 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
       name,
       source
     })),
+    categoryBreakdown,
     checkedAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
     formatVersion: 1,
@@ -218,8 +290,16 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
         "This is an agent package-intelligence benchmark, not a malware-free guarantee.",
         "Scores measure whether a system returns useful pre-install decision evidence for agents.",
         "Direct competitor names are separated by dimension because OSV, deps.dev, Socket, Snyk, Scorecard and native registries do different jobs.",
+        "The main score is coverage-adjusted across the full agent preflight case set. Specialized evidence feeds keep their applicable depth score separately.",
         "No paid inference calls, package installs, repository clones, artifact unpacking or workspace writes are performed."
       ],
+      categories: CATEGORY_DEFINITIONS.map(({ key, title, dimensions, description, weights }) => ({
+        description,
+        dimensions,
+        key,
+        title,
+        weights
+      })),
       dimensions: DIMENSION_WEIGHTS,
       sources: [
         "Nipmod live API search, inspect and install-plan",
@@ -330,6 +410,7 @@ async function nipmodTrack(
           package_behavior: Boolean(record.artifactIntelligence || (record.trust as UnknownRecord | undefined)?.warnings),
           prompt_boundary: Boolean(record.sourceEvidence),
           provenance: Boolean(record.sourceEvidence),
+          repo_posture: testCase.source === "github" && Boolean(record.sourceEvidence),
           read_only: Array.isArray(plan.writes) && plan.writes.length === 0,
           search: Boolean(searchPayload?.type),
           source_depth: numberOrNull((record.sourceEvidence as UnknownRecord | undefined)?.depthScore) !== null,
@@ -755,7 +836,10 @@ function scoreDimensions(dimensions: Partial<Record<Dimension, boolean>>, status
   return status === "warn" ? Math.round(base * 0.7) : base;
 }
 
-function summarizeProviders(observations: ProviderObservation[]): ProviderSummary[] {
+function summarizeProviders(
+  observations: ProviderObservation[],
+  categoryBreakdown: Array<{ key: CategoryKey; tracks: Array<{ provider: BenchmarkProvider; score: number }> }>
+): ProviderSummary[] {
   const providers = [...new Set(observations.map((item) => item.provider))].sort();
   return providers.map((provider) => {
     const rows = observations.filter((item) => item.provider === provider);
@@ -764,21 +848,67 @@ function summarizeProviders(observations: ProviderObservation[]): ProviderSummar
     const warn = applicableRows.filter((item) => item.status === "warn").length;
     const fail = applicableRows.filter((item) => item.status === "fail").length;
     const latencies = applicableRows.filter((item) => item.durationMs > 0).map((item) => item.durationMs).sort((a, b) => a - b);
-    const score = applicableRows.length
+    const depthScore = applicableRows.length
       ? Math.round(applicableRows.reduce((sum, item) => sum + item.score, 0) / applicableRows.length)
+      : 0;
+    const categoryScores = categoryBreakdown
+      .map((category) => category.tracks.find((track) => track.provider === provider)?.score)
+      .filter((score): score is number => typeof score === "number");
+    const score = categoryScores.length
+      ? Math.round(categoryScores.reduce((sum, value) => sum + value, 0) / categoryScores.length)
       : 0;
     return {
       applicable: applicableRows.length,
       coveragePct: Math.round((pass / Math.max(applicableRows.length, 1)) * 100),
+      depthScore,
       fail,
       medianLatencyMs: percentile(latencies, 0.5),
       pass,
       provider,
       score,
       skip: rows.length - applicableRows.length,
+      sourceCoveragePct: Math.round((applicableRows.length / Math.max(rows.length, 1)) * 100),
       warn
     };
   });
+}
+
+function buildCategoryBreakdown(observations: ProviderObservation[]) {
+  const providers = [...new Set(observations.map((item) => item.provider))].sort();
+  return CATEGORY_DEFINITIONS.map((category) => ({
+    description: category.description,
+    dimensions: category.dimensions,
+    key: category.key,
+    title: category.title,
+    tracks: providers
+      .map((provider) => {
+        const rows = observations.filter((item) => item.provider === provider);
+        const score = rows.length
+          ? Math.round(rows.reduce((sum, item) => sum + scoreCategory(item, category), 0) / rows.length)
+          : 0;
+        const applicable = rows.filter((item) => item.status !== "skip").length;
+        const pass = rows.filter((item) => item.status === "pass").length;
+        return {
+          applicable,
+          pass,
+          provider,
+          score,
+          sourceCoveragePct: Math.round((applicable / Math.max(rows.length, 1)) * 100)
+        };
+      })
+      .sort((left, right) => right.score - left.score || right.sourceCoveragePct - left.sourceCoveragePct || left.provider.localeCompare(right.provider))
+  }));
+}
+
+function scoreCategory(observation: ProviderObservation, category: CategoryDefinition): number {
+  if (observation.status === "skip" || observation.status === "fail") return 0;
+  const possible = Object.values(category.weights).reduce((sum, weight) => sum + weight, 0);
+  const earned = Object.entries(category.weights).reduce(
+    (sum, [dimension, weight]) => sum + (observation.dimensions[dimension as Dimension] ? weight : 0),
+    0
+  );
+  const base = Math.round((earned / possible) * 100);
+  return observation.status === "warn" ? Math.round(base * 0.7) : base;
 }
 
 function buildMatrix(observations: ProviderObservation[]) {
