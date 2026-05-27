@@ -19,6 +19,8 @@ export default function BenchmarkPage() {
   }
   const nextTrack = tracks.find((track) => track.name !== "Nipmod");
   const scoreGap = nextTrack ? nipmodTrack.score - nextTrack.score : 0;
+  const categoryStats = categoryReadout(report.categoryBreakdown);
+  const largestCategoryGap = categoryStats.reduce((largest, item) => Math.max(largest, item.gap), 0);
 
   return (
     <DocsShell
@@ -43,6 +45,31 @@ export default function BenchmarkPage() {
         </div>
 
         <BenchmarkChart tracks={primaryTracks} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Readout" title="Where the benchmark breaks open">
+        <div className="benchmark-readout-grid">
+          <article>
+            <span>Overall lead</span>
+            <strong>+{scoreGap}</strong>
+            <p>Nipmod scores {nipmodTrack.score}/100. The next measured package-decision track is {nextTrack?.name ?? "n/a"} at {nextTrack?.score ?? 0}/100.</p>
+          </article>
+          <article>
+            <span>Category record</span>
+            <strong>{categoryStats.filter((category) => category.nipmodPosition === "lead").length}/4</strong>
+            <p>Nipmod is the sole leader in source discovery, install boundary and agent output, with one top tie in advisory/provenance.</p>
+          </article>
+          <article>
+            <span>Largest category gap</span>
+            <strong>+{largestCategoryGap}</strong>
+            <p>The widest measured gap is install boundary: read-only install plans and execution boundary context before workspace writes.</p>
+          </article>
+          <article>
+            <span>Hosted execution</span>
+            <strong>0</strong>
+            <p>The benchmark performs no install, clone, artifact unpacking, model execution, paid inference call or workspace write.</p>
+          </article>
+        </div>
       </DocsSection>
 
       <DocsSection eyebrow="Categories" title="Separated scoring">
@@ -111,7 +138,27 @@ export default function BenchmarkPage() {
   );
 }
 
+function categoryReadout(categories: CompetitiveBenchmarkCategory[]) {
+  return categories.map((category) => {
+    const ordered = [...category.tracks].sort((left, right) => right.score - left.score);
+    const topScore = ordered[0]?.score ?? 0;
+    const leaders = ordered.filter((track) => track.score === topScore).map((track) => track.name);
+    const nextScore = ordered.find((track) => track.score < topScore)?.score ?? topScore;
+    return {
+      gap: topScore - nextScore,
+      leaders,
+      nipmodPosition: leaders.includes("Nipmod") && leaders.length === 1 ? "lead" : leaders.includes("Nipmod") ? "tie" : "behind"
+    };
+  });
+}
+
 function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCategory }) {
+  const ordered = [...category.tracks].sort((left, right) => right.score - left.score);
+  const topScore = ordered[0]?.score ?? 0;
+  const leaders = ordered.filter((track) => track.score === topScore).map((track) => track.name);
+  const nextScore = ordered.find((track) => track.score < topScore)?.score ?? topScore;
+  const gap = topScore - nextScore;
+
   return (
     <article className="benchmark-category-panel">
       <header>
@@ -121,6 +168,20 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
         </div>
         <p>{category.description}</p>
       </header>
+      <dl className="benchmark-category-summary">
+        <div>
+          <dt>Leader</dt>
+          <dd>{leaders.join(", ")}</dd>
+        </div>
+        <div>
+          <dt>Top score</dt>
+          <dd>{topScore}/100</dd>
+        </div>
+        <div>
+          <dt>Gap</dt>
+          <dd>+{gap}</dd>
+        </div>
+      </dl>
       <div className="benchmark-category-bars">
         {category.tracks.map((track) => {
           const width = `${Math.max(2, Math.min(100, track.score))}%`;
