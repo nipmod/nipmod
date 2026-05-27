@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 24
+      total: 26
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -31,6 +31,17 @@ describe("package search quality benchmark", () => {
     });
     expect(result.checks.find((check) => check.name === "npm publisher continuity decoy")?.data?.recommendedId).toBe("npm:undici");
     expect(result.checks.find((check) => check.name === "npm publisher continuity decoy")?.data?.topGates).toContain("review");
+    expect(result.checks.find((check) => check.name === "npm maintainer compromise after dormancy decoy")?.data).toMatchObject({
+      recommendedId: "npm:undici"
+    });
+    expect(result.checks.find((check) => check.name === "npm maintainer compromise after dormancy decoy")?.data?.topIds).toContain(
+      "npm:maintainer-compromised-fetch"
+    );
+    expect(result.checks.find((check) => check.name === "npm maintainer compromise after dormancy decoy")?.data?.topGates).toContain("review");
+    expect(result.checks.find((check) => check.name === "PyPI package takeover timeline exact package")?.data).toMatchObject({
+      recommendedId: null,
+      topGates: ["review"]
+    });
     expect(result.checks.find((check) => check.name === "Cross-registry package name impersonation")?.data?.recommendedId).toBe("pypi:requests");
     expect(result.checks.find((check) => check.name === "npm namespace confusion scoped SDK")?.data?.recommendedId).toBe("npm:@solana/web3.js");
     expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data).toMatchObject({

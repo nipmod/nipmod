@@ -231,6 +231,27 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     sources: ["npm"]
   },
   {
+    expectedId: "npm:undici",
+    expectedRecommendedId: "npm:undici",
+    forbiddenRecommendedIds: ["npm:maintainer-compromised-fetch", "npm:drifted-http-client"],
+    limit: 5,
+    maxRank: 1,
+    name: "npm maintainer compromise after dormancy decoy",
+    query: "http client fetch",
+    requiredIntentReason: "query intent match: Node HTTP client fit",
+    sources: ["npm"]
+  },
+  {
+    expectedGate: "review",
+    expectedId: "pypi:requests-plus",
+    expectedRecommendedId: null,
+    limit: 3,
+    maxRank: 1,
+    name: "PyPI package takeover timeline exact package",
+    query: "requests-plus",
+    sources: ["pypi"]
+  },
+  {
     expectedId: "pypi:requests",
     expectedRecommendedId: "pypi:requests",
     forbiddenRecommendedIds: ["npm:requests"],
