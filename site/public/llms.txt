@@ -13,6 +13,8 @@ Generic integration kit: https://nipmod.com/integrations
 Generic integration machine kit: https://nipmod.com/integration-kit.json
 Source quality benchmark: https://nipmod.com/source-quality
 Source quality machine report: https://nipmod.com/source-quality.json
+Competitive benchmark: https://nipmod.com/benchmark
+Competitive benchmark machine report: https://nipmod.com/benchmark.json
 Contact: mailto:info@nipmod.com
 Base agent preflight: https://nipmod.com/base-agents
 Base agent machine preflight: https://nipmod.com/base-agent-preflight.json
@@ -59,6 +61,11 @@ Use source quality data to understand current source depth and limits:
 
 https://nipmod.com/source-quality
 https://nipmod.com/source-quality.json
+
+Use the competitive benchmark to understand agent package-decision depth across evidence feeds, source metadata, repository posture and install-plan readiness:
+
+https://nipmod.com/benchmark
+https://nipmod.com/benchmark.json
 
 ## Base agents
 

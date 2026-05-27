@@ -44,6 +44,7 @@ export const docsNavGroups: DocsNavGroup[] = [
     items: [
       { href: "/packages", label: "Archive" },
       { href: "/security", label: "Security" },
+      { href: "/benchmark", label: "Benchmark" },
       { href: "/stats", label: "Stats" },
       { href: "/status", label: "Status" }
     ],
