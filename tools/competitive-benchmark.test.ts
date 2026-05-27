@@ -6,8 +6,6 @@ describe("competitive benchmark", () => {
     const report = await runCompetitiveBenchmark({
       baseUrl: "https://nipmod.test",
       env: {
-        MARKETPLACE_API_KEY: "inf_fixture",
-        MARKETPLACE_BASE_URL: "https://surplus.test/docs",
         SNYK_TOKEN: "snyk_fixture",
         SOCKET_API_KEY: "socket_fixture"
       },
@@ -22,9 +20,10 @@ describe("competitive benchmark", () => {
       "nipmod",
       "osv",
       "snyk",
-      "socket",
-      "surplus"
+      "socket"
     ]));
+    expect(report.summaries.map((summary) => summary.provider)).not.toContain("surplus");
+    expect(JSON.stringify(report.methodology)).not.toMatch(/surplus|cost[-_ ]market/i);
     expect(report.headlineFindings.join("\n")).toContain("Nipmod returned install-plan/read-only evidence");
     expect(report.articleDraft).toContain("It does not rank every company on one generic security number.");
 
@@ -38,8 +37,6 @@ describe("competitive benchmark", () => {
     const report = await runCompetitiveBenchmark({
       baseUrl: "https://nipmod.test",
       env: {
-        MARKETPLACE_API_KEY: "inf_secret_should_not_print",
-        MARKETPLACE_BASE_URL: "https://surplus.test/docs",
         SNYK_TOKEN: "snyk_secret_should_not_print",
         SOCKET_API_KEY: "socket_secret_should_not_print"
       },
@@ -48,7 +45,6 @@ describe("competitive benchmark", () => {
     });
     const text = JSON.stringify(report);
 
-    expect(text).not.toContain("inf_secret_should_not_print");
     expect(text).not.toContain("snyk_secret_should_not_print");
     expect(text).not.toContain("socket_secret_should_not_print");
     expect(text).not.toMatch(/private key|seed phrase|service_role/i);
@@ -117,10 +113,6 @@ const fixtureFetch: typeof fetch = (async (input: string | URL | Request, init?:
   if (url.startsWith("https://api.snyk.io/rest/orgs?")) return json({ data: [{ id: "org_1" }] });
   if (parsed.host === "api.snyk.io" && parsed.pathname.startsWith("/rest/orgs/org_1/ecosystems/")) return json({ data: { attributes: { package_health: { score: 90 } }, id: "pkg", type: "package" } });
   if (url.startsWith("https://api.scorecard.dev/")) return json({ checks: [{ name: "Maintained", score: 10 }], repo: { name: "github.com/vercel/next.js" }, score: 8 });
-  if (url === "https://surplus.test/api/inference/v1/models") return json({ data: [{ id: "model" }] });
-  if (url === "https://surplus.test/api/inference/markets") return json([{ model: "model" }]);
-  if (url === "https://surplus.test/api/inference/buyers/me") return json({ total_requests: 0, wallet: "0x0000000000000000000000000000000000000000" });
-
   return json({ error: `fixture not found: ${url}` }, 404);
 }) as typeof fetch;
 

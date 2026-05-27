@@ -13,8 +13,7 @@ type BenchmarkProvider =
   | "osv"
   | "raw-agent"
   | "snyk"
-  | "socket"
-  | "surplus";
+  | "socket";
 
 type BenchmarkSource = "github" | "huggingface-model" | "mcp" | "npm" | "pypi";
 type CategoryKey = "agent-readiness" | "execution-preflight" | "security-evidence" | "source-resolution";
@@ -22,7 +21,6 @@ type ObservationStatus = "pass" | "warn" | "fail" | "skip";
 type Dimension =
   | "advisory"
   | "agent_json"
-  | "cost_market"
   | "identity"
   | "install_plan"
   | "machine_readable"
@@ -94,8 +92,7 @@ interface CategoryDefinition {
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const USER_AGENT = "nipmod-competitive-benchmark/1.0 (+https://nipmod.com)";
 const CREDENTIAL_FILES = [
-  resolve(homedir(), ".config/nipmod/competitor-benchmark.env"),
-  resolve(homedir(), ".config/nipmod/marketplace-benchmark.env")
+  resolve(homedir(), ".config/nipmod/competitor-benchmark.env")
 ];
 
 const CASES: BenchmarkCase[] = [
@@ -167,7 +164,6 @@ const CASES: BenchmarkCase[] = [
 const DIMENSION_WEIGHTS: Record<Dimension, number> = {
   advisory: 12,
   agent_json: 9,
-  cost_market: 6,
   identity: 8,
   install_plan: 14,
   machine_readable: 8,
@@ -260,7 +256,6 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
   observations.push(...(await socketTrack(CASES, env, fetchFn, options.timeoutMs)));
   observations.push(...(await snykTrack(CASES, env, fetchFn, options.timeoutMs)));
   observations.push(...(await scorecardTrack(CASES, fetchFn, options.timeoutMs)));
-  observations.push(...(await surplusTrack(env, fetchFn, options.timeoutMs)));
 
   if (options.includeLive !== false) {
     observations.push(...(await nipmodTrack(CASES, baseUrl, env, fetchFn, options.timeoutMs)));
@@ -308,8 +303,7 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
         "deps.dev package metadata and advisory API",
         "Socket PURL API when a token is configured",
         "Snyk REST API when a token and plan allow package endpoints",
-        "OpenSSF Scorecard public API",
-        "Surplus Intelligence public market/catalog endpoints when configured"
+        "OpenSSF Scorecard public API"
       ]
     },
     observations,
@@ -747,61 +741,6 @@ async function scorecardTrack(cases: BenchmarkCase[], fetchFn: typeof fetch, tim
   return observations;
 }
 
-async function surplusTrack(env: Record<string, string | undefined>, fetchFn: typeof fetch, timeoutMs?: number): Promise<ProviderObservation[]> {
-  const base = normalizeSurplusBase(env.MARKETPLACE_BASE_URL);
-  if (!base) {
-    return [skip("surplus", "agent-marketplace-catalog", "MARKETPLACE_BASE_URL is not configured.")];
-  }
-  const observations: ProviderObservation[] = [];
-  const started = Date.now();
-  try {
-    const models = await fetchJson(`${base}/api/inference/v1/models`, {}, fetchFn, timeoutMs);
-    const markets = await fetchJson(`${base}/api/inference/markets`, {}, fetchFn, timeoutMs);
-    const marketCount = Array.isArray(markets) ? markets.length : Array.isArray(markets.data) ? markets.data.length : 0;
-    const modelCount = Array.isArray(models.data) ? models.data.length : Array.isArray(models) ? models.length : 0;
-    observations.push(
-      observation("surplus", "agent-marketplace-catalog", "pass", Date.now() - started, [
-        `models ${modelCount}`,
-        `markets ${marketCount}`
-      ], {
-        agent_json: true,
-        cost_market: marketCount > 0,
-        identity: modelCount > 0,
-        machine_readable: true,
-        metadata: modelCount > 0,
-        read_only: true
-      }, "Surplus is an inference-marketplace benchmark context, not a package safety competitor.")
-    );
-  } catch (error) {
-    observations.push(observation("surplus", "agent-marketplace-catalog", "fail", Date.now() - started, [errorMessage(error)], {}));
-  }
-
-  if (env.MARKETPLACE_API_KEY) {
-    const authStarted = Date.now();
-    try {
-      const buyer = await fetchJson(
-        `${base}/api/inference/buyers/me`,
-        { headers: { authorization: `Bearer ${env.MARKETPLACE_API_KEY}`, "user-agent": USER_AGENT } },
-        fetchFn,
-        timeoutMs
-      );
-      observations.push(
-        observation("surplus", "agent-marketplace-auth", "pass", Date.now() - authStarted, [`buyer keys ${Object.keys(buyer).length}`], {
-          agent_json: true,
-          cost_market: true,
-          identity: Boolean(buyer.wallet),
-          machine_readable: true,
-          read_only: true
-        }, "Authenticated buyer profile check only; no paid inference call.")
-      );
-    } catch (error) {
-      observations.push(observation("surplus", "agent-marketplace-auth", "warn", Date.now() - authStarted, [errorMessage(error)], {}, "Buyer auth unavailable or rejected."));
-    }
-  }
-
-  return observations;
-}
-
 function observation(
   provider: BenchmarkProvider,
   caseId: string,
@@ -1086,16 +1025,6 @@ function parseNdjson(text: string): UnknownRecord[] {
 
 function toNipmodSource(source: BenchmarkSource): string {
   return source;
-}
-
-function normalizeSurplusBase(value: string | undefined): string | null {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return `${url.protocol}//${url.host}`;
-  } catch {
-    return null;
-  }
 }
 
 function encodeHubRepoPath(value: string): string {

@@ -73,8 +73,18 @@ describe("public agent proof kit", () => {
       name: "Nipmod",
       score: 100
     });
+    expect(competitiveBenchmarkReport.cases).toHaveLength(7);
+    expect(competitiveBenchmarkReport.rubric).toHaveLength(4);
+    expect(competitiveBenchmarkReport.categoryWeights).toHaveLength(4);
+    expect(competitiveBenchmarkReport.categoryWeights.find((category) => category.category === "Execution preflight")?.weights.find((weight) => weight.dimension === "install plan")?.weight).toBe(32);
+    expect(competitiveBenchmarkReport.scoreAccounting).toHaveLength(5);
+    expect(competitiveBenchmarkReport.fairnessControls.join(" ")).toContain("coverage-adjusted");
+    expect(competitiveBenchmarkReport.limitations.join(" ")).toContain("not a guarantee");
+    expect(competitiveBenchmarkReport.reviewerAssessment.academicGrade).toContain("not sufficient");
     expect(competitiveBenchmarkReport.claimBoundary.join(" ")).toContain("not a malware-free guarantee");
+    expect(JSON.stringify(competitiveBenchmarkReport)).not.toMatch(/Surplus|cost-market|cost_market/i);
     expect(competitiveBenchmarkReport.publishableClaims.join(" ")).not.toMatch(/safer than every competitor|guarantees package safety/i);
+    expect(competitiveBenchmarkReport.unsafeClaims.join(" ")).toMatch(/Socket or Snyk/);
   });
 
   test("serves machine-readable JSON routes for agents", async () => {

@@ -4,7 +4,7 @@ import { createPageMetadata } from "../metadata";
 import { competitiveBenchmarkReport, type CompetitiveBenchmarkCategory, type CompetitiveBenchmarkTrack } from "../../lib/competitive-benchmark-public";
 
 export const metadata = createPageMetadata({
-  description: "Nipmod competitive benchmark for agent package-decision depth across source metadata, advisories, repository posture and install-plan readiness.",
+  description: "Nipmod agent preflight benchmark with public methodology, scoring rubric, source scope, evidence limits and machine-readable results.",
   path: "/benchmark",
   title: "Nipmod benchmark"
 });
@@ -68,6 +68,26 @@ export default function BenchmarkPage() {
         </div>
       </DocsSection>
 
+      <DocsSection eyebrow="Audit" title="Strict reviewer answer">
+        <DocsGrid>
+          <article className="benchmark-panel">
+            <span>Product benchmark</span>
+            <strong>{report.reviewerAssessment.productGrade}</strong>
+            <p>{report.reviewerAssessment.reason}</p>
+          </article>
+          <article className="benchmark-panel">
+            <span>Academic benchmark</span>
+            <strong>{report.reviewerAssessment.academicGrade}</strong>
+            <p>The sample is small and the weights are authored by Nipmod, so the page does not claim independent proof or malware-free safety.</p>
+          </article>
+          <article className="benchmark-panel">
+            <span>Measured question</span>
+            <strong>preflight evidence</strong>
+            <p>What can an agent know before installing, pulling, reusing or connecting external code?</p>
+          </article>
+        </DocsGrid>
+      </DocsSection>
+
       <DocsSection eyebrow="Scope" title="Why these tracks are included">
         <DocsTable
           rows={[
@@ -84,6 +104,55 @@ export default function BenchmarkPage() {
         </p>
       </DocsSection>
 
+      <DocsSection eyebrow="Rubric" title="How the score is graded">
+        <DocsTable
+          rows={report.rubric.map((item) => [
+            item.category,
+            <>
+              <strong>Full:</strong> {item.fullCredit}
+              <br />
+              <strong>Partial:</strong> {item.partialCredit}
+              <br />
+              <strong>Zero:</strong> {item.noCredit}
+            </>,
+            item.whyItMatters
+          ])}
+        />
+      </DocsSection>
+
+      <DocsSection eyebrow="Accounting" title="How the score is counted">
+        <DocsTable
+          rows={report.scoreAccounting.map((item) => [
+            item.label,
+            item.value,
+            item.explanation
+          ])}
+        />
+      </DocsSection>
+
+      <DocsSection eyebrow="Weights" title="Category weights">
+        <DocsTable
+          rows={report.categoryWeights.map((category) => [
+            category.category,
+            category.weights.map((weight) => `${weight.dimension} ${weight.weight}`).join(", ")
+          ])}
+        />
+      </DocsSection>
+
+      <DocsSection eyebrow="Cases" title="What is tested">
+        <DocsTable
+          rows={report.cases.map((testCase) => [
+            testCase.task,
+            <>
+              <strong>{testCase.source}</strong>
+              <br />
+              {testCase.expected}
+            </>,
+            testCase.reason
+          ])}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Categories" title="Separated scoring">
         <div className="benchmark-category-list">
           {report.categoryBreakdown.map((category) => (
@@ -92,11 +161,23 @@ export default function BenchmarkPage() {
         </div>
       </DocsSection>
 
-      <DocsSection eyebrow="Scope" title="What is measured">
+      <DocsSection eyebrow="Controls" title="Fairness controls">
+        <DocsTable rows={report.fairnessControls.map((control, index) => [`${index + 1}`, control])} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Excluded" title="What is not ranked here">
+        <DocsTable rows={report.excludedComparisons.map((item) => [item.name, item.reason])} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Limits" title="Known limitations">
+        <DocsTable rows={report.limitations.map((limitation, index) => [`${index + 1}`, limitation])} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Definition" title="What is measured">
         <DocsTable
           rows={[
             ["7 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, MCP server and GitHub repository posture."],
-            ["16 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON, multi-source coverage and adjacent cost-market context."],
+            ["15 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON and multi-source coverage."],
             ["4 public categories", "Source resolution, security evidence, execution preflight and agent readiness."],
             ["8 tracks", "Nipmod, native registries, OSV, deps.dev, OpenSSF Scorecard, Socket, Snyk and a raw agent baseline."],
             ["Scope-adjusted score", "Unsupported source cases count as scope limits in the headline score. Applicable depth is still shown separately."],
@@ -139,6 +220,10 @@ export default function BenchmarkPage() {
         />
       </DocsSection>
 
+      <DocsSection eyebrow="Claims" title="What this page must not claim">
+        <DocsTable rows={report.unsafeClaims.map((claim, index) => [`${index + 1}`, claim])} />
+      </DocsSection>
+
       <DocsSection eyebrow="Method" title="How to rerun it">
         <DocsCode>{report.command}</DocsCode>
         <p className="docs-note">
@@ -146,6 +231,19 @@ export default function BenchmarkPage() {
           <Link className="data-link" href="/benchmark.json">/benchmark.json</Link>. Full methodology:{" "}
           <a className="data-link" href="https://github.com/nipmod/nipmod/blob/main/docs/competitive-benchmark.md" rel="noreferrer" target="_blank">docs/competitive-benchmark.md</a>.
         </p>
+      </DocsSection>
+
+      <DocsSection eyebrow="References" title="External reference points">
+        <DocsTable
+          rows={[
+            ["OSV", <a className="data-link" href="https://google.github.io/osv.dev/api/" rel="noreferrer" target="_blank">Official API docs for vulnerability queries by package version or commit hash.</a>],
+            ["deps.dev", <a className="data-link" href="https://docs.deps.dev/api/v3/" rel="noreferrer" target="_blank">Official API docs for package versions, dependencies, licenses and advisories.</a>],
+            ["Socket", <a className="data-link" href="https://docs.socket.dev/reference/batchpackagefetchbyorg" rel="noreferrer" target="_blank">Official PURL API docs for package metadata and alerts.</a>],
+            ["Snyk", <a className="data-link" href="https://docs.snyk.io/snyk-api/reference/package" rel="noreferrer" target="_blank">Official package API docs and package-health endpoint boundary.</a>],
+            ["OpenSSF Scorecard", <a className="data-link" href="https://openssf.org/scorecard/" rel="noreferrer" target="_blank">Official project description for repository security posture scoring.</a>],
+            ["npm audit", <a className="data-link" href="https://docs.npmjs.com/cli/v8/commands/npm-audit/" rel="noreferrer" target="_blank">Official npm audit docs for dependency-tree advisory checks.</a>]
+          ]}
+        />
       </DocsSection>
     </DocsShell>
   );
