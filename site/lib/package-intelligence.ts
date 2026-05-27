@@ -56,6 +56,7 @@ export interface PackageIntelligenceRecord {
     archivePolicy: "agent-confirmed-source-owned-v1";
     generatedFrom: "server-reinspected-source";
     installPlanDigest: string;
+    sourceDrift: PackageIntelligenceSourceDrift;
     sourceRecordDigest: string;
     sourceSnapshotDigest: string;
     trustDigest: string;
@@ -94,6 +95,15 @@ export interface PackageIntelligenceRecord {
   trust: ExternalPackageRecord["trust"];
   type: "dev.nipmod.package-intelligence-record.v1";
   version: string | null;
+}
+
+export interface PackageIntelligenceSourceDrift {
+  baselineSourceRecordDigest: string;
+  changed: boolean;
+  checkedAt: string;
+  currentSourceRecordDigest: string;
+  status: "fresh" | "changed";
+  version: "source-drift-v1";
 }
 
 export interface CreatePackageIntelligenceOptions {
@@ -248,6 +258,12 @@ export function mergePackageIntelligenceRecords(
       ? "agent_confirmed"
       : existing.archive.status;
   const mergedEvents = mergeEvents(existing.events, incomingConfirmations);
+  const baselineSourceRecordDigest =
+    existing.evidence.sourceDrift?.baselineSourceRecordDigest ?? existing.evidence.sourceRecordDigest;
+  const evidence = packageIntelligenceEvidence(incoming.sourceRecord, incoming.sourceSnapshot, incoming.installPlan, incoming.trust, {
+    baselineSourceRecordDigest,
+    checkedAt: incoming.archive.updatedAt
+  });
 
   return {
     ...incoming,
@@ -259,6 +275,7 @@ export function mergePackageIntelligenceRecords(
       status,
       updatedAt: incoming.archive.updatedAt
     },
+    evidence,
     events: mergedEvents,
     ownership: protectedStatuses.includes(existing.archive.status) ? existing.ownership : incoming.ownership
   };
@@ -382,9 +399,24 @@ export function ensurePackageIntelligenceEvidence(record: PackageIntelligenceRec
   if (existing && validEvidenceDigests({ ...record, evidence: existing })) {
     return { ...record, evidence: existing };
   }
+  const currentSourceRecordDigest = sha256(stableJson(record.sourceRecord));
+  const baselineSourceRecordDigest =
+    existing?.sourceDrift &&
+    isSha256(existing.sourceDrift.baselineSourceRecordDigest) &&
+    existing.sourceDrift.currentSourceRecordDigest === existing.sourceRecordDigest
+      ? existing.sourceDrift.baselineSourceRecordDigest
+      : existing && existing.sourceRecordDigest === currentSourceRecordDigest
+        ? existing.sourceRecordDigest
+        : undefined;
+  const evidenceOptions: { baselineSourceRecordDigest?: string; checkedAt: string } = {
+    checkedAt: typeof existing?.sourceDrift?.checkedAt === "string" ? existing.sourceDrift.checkedAt : record.archive.updatedAt
+  };
+  if (baselineSourceRecordDigest) {
+    evidenceOptions.baselineSourceRecordDigest = baselineSourceRecordDigest;
+  }
   return {
     ...record,
-    evidence: packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust)
+    evidence: packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust, evidenceOptions)
   };
 }
 
@@ -396,24 +428,41 @@ function packageIntelligenceEvidence(
   sourceRecord: ExternalPackageRecord,
   sourceSnapshot: PackageIntelligenceRecord["sourceSnapshot"],
   installPlan: ExternalInstallPlan,
-  trust: ExternalPackageRecord["trust"]
+  trust: ExternalPackageRecord["trust"],
+  options: { baselineSourceRecordDigest?: string; checkedAt?: string } = {}
 ): PackageIntelligenceRecord["evidence"] {
+  const sourceRecordDigest = sha256(stableJson(sourceRecord));
+  const baselineSourceRecordDigest = options.baselineSourceRecordDigest ?? sourceRecordDigest;
   return {
     archivePolicy: "agent-confirmed-source-owned-v1",
     generatedFrom: "server-reinspected-source",
     installPlanDigest: sha256(stableJson(installPlan)),
-    sourceRecordDigest: sha256(stableJson(sourceRecord)),
+    sourceDrift: packageIntelligenceSourceDrift(baselineSourceRecordDigest, sourceRecordDigest, options.checkedAt ?? trust.checkedAt),
+    sourceRecordDigest,
     sourceSnapshotDigest: sha256(stableJson(sourceSnapshot)),
     trustDigest: sha256(stableJson(trust))
   };
 }
 
 function validEvidenceDigests(record: PackageIntelligenceRecord): boolean {
-  const expected = packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust);
+  const sourceDrift = record.evidence?.sourceDrift;
+  if (!validSourceDrift(sourceDrift, record.evidence?.sourceRecordDigest)) {
+    return false;
+  }
+  const expected = packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust, {
+    baselineSourceRecordDigest: sourceDrift.baselineSourceRecordDigest,
+    checkedAt: sourceDrift.checkedAt
+  });
   return (
     record.evidence?.archivePolicy === "agent-confirmed-source-owned-v1" &&
     record.evidence.generatedFrom === "server-reinspected-source" &&
     record.evidence.installPlanDigest === expected.installPlanDigest &&
+    record.evidence.sourceDrift.baselineSourceRecordDigest === expected.sourceDrift.baselineSourceRecordDigest &&
+    record.evidence.sourceDrift.changed === expected.sourceDrift.changed &&
+    record.evidence.sourceDrift.checkedAt === expected.sourceDrift.checkedAt &&
+    record.evidence.sourceDrift.currentSourceRecordDigest === expected.sourceDrift.currentSourceRecordDigest &&
+    record.evidence.sourceDrift.status === expected.sourceDrift.status &&
+    record.evidence.sourceDrift.version === expected.sourceDrift.version &&
     record.evidence.sourceRecordDigest === expected.sourceRecordDigest &&
     record.evidence.sourceSnapshotDigest === expected.sourceSnapshotDigest &&
     record.evidence.trustDigest === expected.trustDigest &&
@@ -421,6 +470,41 @@ function validEvidenceDigests(record: PackageIntelligenceRecord): boolean {
     isSha256(record.evidence.sourceRecordDigest) &&
     isSha256(record.evidence.sourceSnapshotDigest) &&
     isSha256(record.evidence.trustDigest)
+  );
+}
+
+function packageIntelligenceSourceDrift(
+  baselineSourceRecordDigest: string,
+  currentSourceRecordDigest: string,
+  checkedAt: string
+): PackageIntelligenceSourceDrift {
+  const changed = baselineSourceRecordDigest !== currentSourceRecordDigest;
+  return {
+    baselineSourceRecordDigest,
+    changed,
+    checkedAt,
+    currentSourceRecordDigest,
+    status: changed ? "changed" : "fresh",
+    version: "source-drift-v1"
+  };
+}
+
+function validSourceDrift(value: unknown, sourceRecordDigest: unknown): value is PackageIntelligenceSourceDrift {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const drift = value as PackageIntelligenceSourceDrift;
+  const changed = drift.baselineSourceRecordDigest !== drift.currentSourceRecordDigest;
+  return (
+    drift.version === "source-drift-v1" &&
+    (drift.status === "fresh" || drift.status === "changed") &&
+    drift.changed === changed &&
+    drift.status === (changed ? "changed" : "fresh") &&
+    typeof drift.checkedAt === "string" &&
+    drift.checkedAt.length > 0 &&
+    isSha256(drift.baselineSourceRecordDigest) &&
+    isSha256(drift.currentSourceRecordDigest) &&
+    drift.currentSourceRecordDigest === sourceRecordDigest
   );
 }
 

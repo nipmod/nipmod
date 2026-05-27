@@ -128,13 +128,21 @@ Record evidence uses:
   "archivePolicy": "agent-confirmed-source-owned-v1",
   "generatedFrom": "server-reinspected-source",
   "installPlanDigest": "<sha256>",
+  "sourceDrift": {
+    "baselineSourceRecordDigest": "<sha256>",
+    "changed": false,
+    "checkedAt": "<iso8601>",
+    "currentSourceRecordDigest": "<sha256>",
+    "status": "fresh",
+    "version": "source-drift-v1"
+  },
   "sourceRecordDigest": "<sha256>",
   "sourceSnapshotDigest": "<sha256>",
   "trustDigest": "<sha256>"
 }
 ```
 
-This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores.
+This lets agents and operators see that the archive preview was rebuilt from server-side source inspection instead of caller-supplied scores. `sourceDrift` compares the first archived source record with the latest server-reinspected record so repeated confirmations can surface upstream metadata changes.
 
 ## Confirmation Gate
 

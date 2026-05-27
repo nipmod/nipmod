@@ -100,6 +100,7 @@ function assertArchiveConfirmPayload(payload, target) {
   }
   assertEqual(record.evidence?.archivePolicy, "agent-confirmed-source-owned-v1", "archive policy mismatch");
   assertEqual(record.evidence?.generatedFrom, "server-reinspected-source", "source reinspection marker missing");
+  assertSourceDrift(record.evidence?.sourceDrift, record.evidence?.sourceRecordDigest);
 
   if (record.trust?.decision === "avoid" || record.trust?.decision === "unknown") {
     throw new Error(`archive trust decision is not confirmable: ${record.trust?.decision}`);
@@ -141,8 +142,28 @@ function assertArchiveConfirmPayload(payload, target) {
     factorCategories: [...categories].sort(),
     id: record.id,
     score: record.trust.score,
+    sourceDrift: record.evidence.sourceDrift.status,
     source: record.source
   };
+}
+
+function assertSourceDrift(sourceDrift, sourceRecordDigest) {
+  if (sourceDrift?.version !== "source-drift-v1") {
+    throw new Error("archive source drift marker missing");
+  }
+  if (!SHA256.test(sourceDrift.baselineSourceRecordDigest ?? "")) {
+    throw new Error("archive source drift baseline digest missing");
+  }
+  if (!SHA256.test(sourceDrift.currentSourceRecordDigest ?? "")) {
+    throw new Error("archive source drift current digest missing");
+  }
+  assertEqual(sourceDrift.currentSourceRecordDigest, sourceRecordDigest, "archive source drift current digest mismatch");
+  assertEqual(sourceDrift.baselineSourceRecordDigest, sourceRecordDigest, "dry-run archive source drift baseline mismatch");
+  assertEqual(sourceDrift.changed, false, "dry-run archive source drift should be fresh");
+  assertEqual(sourceDrift.status, "fresh", "dry-run archive source drift status mismatch");
+  if (typeof sourceDrift.checkedAt !== "string" || sourceDrift.checkedAt.length === 0) {
+    throw new Error("archive source drift checkedAt missing");
+  }
 }
 
 async function fetchJson(url, fetchFn, apiKey) {

@@ -1324,6 +1324,7 @@ function openApiDocument() {
             archivePolicy: { const: "agent-confirmed-source-owned-v1", type: "string" },
             generatedFrom: { const: "server-reinspected-source", type: "string" },
             installPlanDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            sourceDrift: { $ref: "#/components/schemas/PackageIntelligenceSourceDrift" },
             sourceRecordDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
             sourceSnapshotDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
             trustDigest: { pattern: "^[a-f0-9]{64}$", type: "string" }
@@ -1332,9 +1333,31 @@ function openApiDocument() {
             "archivePolicy",
             "generatedFrom",
             "installPlanDigest",
+            "sourceDrift",
             "sourceRecordDigest",
             "sourceSnapshotDigest",
             "trustDigest"
+          ],
+          type: "object"
+        },
+        PackageIntelligenceSourceDrift: {
+          additionalProperties: false,
+          description: "Digest comparison between the first archived source record and the latest server-reinspected source record.",
+          properties: {
+            baselineSourceRecordDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            changed: { type: "boolean" },
+            checkedAt: { type: "string" },
+            currentSourceRecordDigest: { pattern: "^[a-f0-9]{64}$", type: "string" },
+            status: { enum: ["fresh", "changed"], type: "string" },
+            version: { const: "source-drift-v1", type: "string" }
+          },
+          required: [
+            "baselineSourceRecordDigest",
+            "changed",
+            "checkedAt",
+            "currentSourceRecordDigest",
+            "status",
+            "version"
           ],
           type: "object"
         },

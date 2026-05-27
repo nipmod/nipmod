@@ -144,6 +144,15 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.PackageIntelligenceRecord.required).toEqual(
       expect.arrayContaining(["archive", "installPlan", "ownership", "security", "sourceRecord", "trust"])
     );
+    expect(body.components.schemas.PackageIntelligenceEvidence.required).toContain("sourceDrift");
+    expect(body.components.schemas.PackageIntelligenceSourceDrift.required).toEqual([
+      "baselineSourceRecordDigest",
+      "changed",
+      "checkedAt",
+      "currentSourceRecordDigest",
+      "status",
+      "version"
+    ]);
     expect(body.components.schemas.PackageIntelligenceValidation.required).toContain("eligibility");
     expect(body.components.schemas.ArchivePrepareResponse.required).toEqual([
       "eligibility",

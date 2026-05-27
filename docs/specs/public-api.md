@@ -47,7 +47,7 @@ Operators can run `pnpm api:contract` to verify the live key-required API contra
 
 Operators can run `pnpm install-plan:canary` to verify live install-plan boundaries across npm, PyPI, GitHub, Hugging Face and MCP. The canary fails if a hosted response declares workspace writes, treats metadata as instruction, omits approval boundaries or allows hosted command execution.
 
-Operators can run `pnpm archive:canary -- --require-durable` to verify the live archive layer without writing data. The canary dry-runs archive confirmation across every declared source and fails if source reinspection, eligibility, evidence digests, trust factors, install-plan boundaries or receipt shape drift.
+Operators can run `pnpm archive:canary -- --require-durable` to verify the live archive layer without writing data. The canary dry-runs archive confirmation across every declared source and fails if source reinspection, eligibility, evidence digests, source drift evidence, trust factors, install-plan boundaries or receipt shape drift.
 
 Operators can run `pnpm archive:seed` to dry-run Seed v1 across npm, PyPI, GitHub, Hugging Face and MCP. Production seed writes require `NIPMOD_ARCHIVE_WRITE_TOKEN` and must use the archive confirm path, which re-inspects source data and deduplicates by stable source identity.
 
