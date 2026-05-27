@@ -75,7 +75,7 @@ describe("archive drift review", () => {
       limit: 10
     });
 
-    expect(result.ok).toBe(false);
+    expect(result.ok).toBe(true);
     expect(result.summary.failed).toBe(1);
     expect(result.results[0]).toMatchObject({
       error: {
@@ -85,6 +85,23 @@ describe("archive drift review", () => {
       status: "failed"
     });
     expect(JSON.stringify(result)).not.toContain("private payload");
+  });
+
+  test("can fail when inspect failures should gate a release", async () => {
+    const record = createPackageIntelligenceRecord(externalRecord);
+    const result = await runArchiveDriftReview({
+      apiKey: "test-key",
+      baseUrl: "https://nipmod.test",
+      failOnFailed: true,
+      fetchFn: archiveSearchFetch([record]),
+      inspectFn: async () => {
+        throw new Error("transient upstream failure");
+      },
+      limit: 10
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.summary.failed).toBe(1);
   });
 });
 

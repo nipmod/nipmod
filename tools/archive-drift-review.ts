@@ -22,6 +22,7 @@ export interface ArchiveDriftReviewOptions {
   apiKey?: string;
   baseUrl?: string;
   failOnChanged?: boolean;
+  failOnFailed?: boolean;
   fetchFn?: typeof fetch;
   inspectFn?: (source: ExternalPackageSource, name: string) => Promise<ExternalPackageRecord>;
   limit?: number;
@@ -71,7 +72,7 @@ export async function runArchiveDriftReview(options: ArchiveDriftReviewOptions =
     checkedAt: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
     formatVersion: 1,
-    ok: failed === 0 && (!options.failOnChanged || changed === 0),
+    ok: (!options.failOnFailed || failed === 0) && (!options.failOnChanged || changed === 0),
     readOnly: true,
     results,
     summary,
@@ -193,6 +194,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const options: ArchiveDriftReviewOptions = {
     baseUrl: readOption("--base-url") ?? process.env.NIPMOD_API_BASE_URL ?? DEFAULT_BASE_URL,
     failOnChanged: process.argv.includes("--fail-on-changed"),
+    failOnFailed: process.argv.includes("--fail-on-failed"),
     limit: Number(readOption("--limit") ?? DEFAULT_LIMIT)
   };
   const name = readOption("--name");
