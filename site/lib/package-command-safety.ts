@@ -351,6 +351,9 @@ function hasSecretAccessPattern(command: string): boolean {
   const normalized = normalizeCommandForRisk(command);
   return (
     /(^|[\s@~/'"])(\.npmrc|\.pypirc|\.netrc|\.env|id_rsa|id_ed25519|private[_-]?key|ssh[_-]?key|mnemonic|seed phrase|wallet|keystore)\b/i.test(normalized) ||
+    /(^|[\s@~/'"])(\.ssh|\.gnupg|\.aws|\.azure|\.config\/solana|\.aptos|\.sui|\.ethereum|\.foundry|\.brownie)\b/i.test(normalized) ||
+    /\b(solana|aptos|sui|ethereum|evm|wallet)\b.{0,120}\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b/i.test(normalized) ||
+    /\b(id\.json|keypair|private[_-]?key|seed|mnemonic|keystore|client\.yaml|config\.yaml)\b.{0,120}\b(solana|aptos|sui|ethereum|evm|wallet)\b/i.test(normalized) ||
     /\b(github_token|npm_token|pypi_token|hf_token|huggingface_hub_token|aws_secret_access_key|aws_session_token|google_application_credentials|ssh_auth_sock)\b/i.test(
       normalized
     ) ||
