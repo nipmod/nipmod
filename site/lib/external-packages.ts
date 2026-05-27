@@ -2941,8 +2941,7 @@ function hasHighSeverityWarning(warning: string): boolean {
     normalized.includes("trust_remote_code") ||
     normalized.includes("no source repository returned by mcp registry") ||
     normalized.includes("credentials but no source repository") ||
-    normalized.includes("source-repository mismatch") ||
-    normalized.includes("pinned public registry snapshot")
+    normalized.includes("source-repository mismatch")
   );
 }
 
