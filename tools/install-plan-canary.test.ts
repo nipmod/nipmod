@@ -2,6 +2,34 @@ import { describe, expect, test, vi } from "vitest";
 import { runInstallPlanCanary } from "./install-plan-canary.ts";
 
 describe("install plan canary", () => {
+  test("includes synthetic negative canaries in the default release gate", async () => {
+    const fetchFn = vi.fn(async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      const params = new URL(url).searchParams;
+      const source = params.get("source") ?? "npm";
+      const name = params.get("name") ?? "undici";
+      return Response.json(safeInstallPlanFixture(source, name));
+    }) as unknown as typeof fetch;
+
+    const result = await runInstallPlanCanary({ fetchFn });
+
+    expect(result.ok).toBe(true);
+    expect(result.summary).toEqual({ fail: 0, pass: 8, total: 8 });
+    expect(result.checks.find((check) => check.name === "synthetic blocked high-risk install command")?.data).toMatchObject({
+      blocked: true,
+      commandRisk: "high",
+      id: "npm:risky-lifecycle",
+      source: "npm"
+    });
+    expect(result.checks.find((check) => check.name === "synthetic blocked remote-code source risk")?.data).toMatchObject({
+      blocked: true,
+      commandRisk: "low",
+      decision: "avoid",
+      id: "huggingface-model:evil/remote-code",
+      source: "huggingface-model"
+    });
+  });
+
   test("passes safe install-plan boundaries", async () => {
     const fetchFn = vi.fn(async () => Response.json(installPlanFixture())) as unknown as typeof fetch;
 
@@ -176,6 +204,36 @@ describe("install plan canary", () => {
     });
   });
 });
+
+function safeInstallPlanFixture(source: string, name: string) {
+  const fixture = installPlanFixture();
+  const command = source === "pypi" ? `python -m pip install ${name}` : source.startsWith("huggingface") ? "python -m pip install huggingface_hub" : `npm install ${name}`;
+  return installPlanFixture({
+    package: {
+      ...fixture.package,
+      displayName: name,
+      id: `${source}:${name}`,
+      name,
+      source
+    },
+    plan: {
+      ...fixture.plan,
+      commandDetails: [
+        {
+          blocked: false,
+          boundary: "manual-after-user-approval",
+          command,
+          hostedApiExecutes: false,
+          manager: source === "pypi" || source.startsWith("huggingface") ? "python" : source,
+          metadataIsInstruction: false,
+          requiresApprovalBeforeWrite: true,
+          risk: "low"
+        }
+      ],
+      commands: [command]
+    }
+  });
+}
 
 function installPlanFixture(overrides: Record<string, unknown> = {}) {
   return {
