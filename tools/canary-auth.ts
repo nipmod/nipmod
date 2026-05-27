@@ -1,4 +1,9 @@
 const TEST_CANARY_API_KEY = "nka_test_canary_key_1234567890";
+const issuedCanaryKeys = new Map<string, Promise<string>>();
+
+export function resetCanaryAuthCacheForTests(): void {
+  issuedCanaryKeys.clear();
+}
 
 export async function readCanaryApiKey({
   baseUrl,
@@ -19,6 +24,35 @@ export async function readCanaryApiKey({
     return TEST_CANARY_API_KEY;
   }
 
+  const cacheKey = `${baseUrl.replace(/\/$/, "")}:${userAgent}`;
+  const cached = issuedCanaryKeys.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const pending = issueCanaryBetaKey({ baseUrl, fetchFn, label, userAgent });
+  issuedCanaryKeys.set(cacheKey, pending);
+  try {
+    return await pending;
+  } catch (error) {
+    if (issuedCanaryKeys.get(cacheKey) === pending) {
+      issuedCanaryKeys.delete(cacheKey);
+    }
+    throw error;
+  }
+}
+
+async function issueCanaryBetaKey({
+  baseUrl,
+  fetchFn,
+  label,
+  userAgent
+}: {
+  baseUrl: string;
+  fetchFn: typeof fetch;
+  label: string;
+  userAgent: string;
+}): Promise<string> {
   const response = await fetchFn(`${baseUrl}/api/keys/beta`, {
     body: JSON.stringify({ label: `canary/${label}` }),
     headers: {
