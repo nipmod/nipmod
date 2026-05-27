@@ -5,23 +5,25 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T14:40:47.000Z",
+  generatedAt: "2026-05-27T15:01:34.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
-    meanReciprocalRank: 0.967,
+    meanReciprocalRank: 0.971,
     missingExpectedIntentReasonCount: 0,
-    pass: 15,
-    recallAt1: 0.933,
+    pass: 17,
+    recallAt1: 0.941,
     recallAt3: 1,
-    total: 15
+    total: 17
   },
   gates: [
     "expected package appears within max rank",
     "recommended candidate is not blocked",
     "unsafe decoys are not recommended",
     "query intent reason is present where required",
-    "partial source outage is surfaced without hiding returned records"
+    "partial source outage is surfaced without hiding returned records",
+    "namespace-confusion decoys do not beat expected scoped SDKs",
+    "obfuscated package metadata instructions are treated as untrusted data"
   ],
   notClaimed: [
     "malware-free guarantee",
