@@ -76,6 +76,7 @@ const requiredFiles = [
   "tools/release-metadata.test.ts",
   "docs/github-mirror.md",
   ".github/workflows/ci.yml",
+  ".github/workflows/archive-drift-review.yml",
   ".github/workflows/codeql.yml",
   ".github/workflows/dependency-review.yml",
   ".github/workflows/scorecard.yml",
@@ -140,10 +141,12 @@ check("api-flow:three-calls", () => apiFlowDoc.includes("/api/search") && apiFlo
 check("api-flow:no-exec", () => apiFlowDoc.includes("The hosted API never executes the command."));
 
 const publicApiSpec = read("docs/specs/public-api.md");
+const archiveDriftWorkflow = read(".github/workflows/archive-drift-review.yml");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
 check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
 check("public-api:archive-drift-review", () => publicApiSpec.includes("pnpm archive:drift"));
+check("public-api:scheduled-archive-drift-review", () => archiveDriftWorkflow.includes("archive:drift") && archiveDriftWorkflow.includes("archive-drift-review.json"));
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");

@@ -1,0 +1,39 @@
+name: Archive drift review
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archive-drift-review
+  cancel-in-progress: false
+
+jobs:
+  archive-drift-review:
+    name: Archive drift review
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: corepack prepare pnpm@10.30.0 --activate
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm --dir nipmod build
+      - name: Archive drift review
+        env:
+          NIPMOD_CANARY_KEY_CACHE: "0"
+        run: pnpm --silent archive:drift -- --base-url https://nipmod.com --limit 100 > archive-drift-review.json
+      - name: Write operator summary
+        run: node --experimental-strip-types tools/archive-drift-review-summary.ts archive-drift-review.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: archive-drift-review
+          path: archive-drift-review.json
+          retention-days: 14
