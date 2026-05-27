@@ -6193,6 +6193,126 @@ body {
   margin: 4px 0 0;
 }
 
+.benchmark-scoreboard {
+  border: 1px solid var(--docs-line);
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.benchmark-row {
+  background: rgba(255, 255, 255, 0.018);
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.benchmark-row + .benchmark-row {
+  border-top: 1px solid var(--docs-line-soft);
+}
+
+.benchmark-row-head {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.benchmark-row h3 {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 0 0 6px;
+}
+
+.benchmark-row p {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 15.5px;
+  line-height: 1.62;
+  margin: 0;
+  max-width: 720px;
+}
+
+.benchmark-row-head strong {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.benchmark-bar {
+  background: rgba(255, 255, 255, 0.055);
+  border-radius: 999px;
+  height: 9px;
+  overflow: hidden;
+}
+
+.benchmark-bar span {
+  background: linear-gradient(90deg, #8fbf9a, #d8b56d);
+  display: block;
+  height: 100%;
+}
+
+.benchmark-row-warn .benchmark-bar span {
+  background: linear-gradient(90deg, #d8b56d, #b98172);
+}
+
+.benchmark-row dl {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.benchmark-row dl div {
+  border-top: 1px solid var(--docs-line-soft);
+  padding-top: 10px;
+}
+
+.benchmark-row dt,
+.benchmark-panel span {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.benchmark-row dd {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 14px;
+  font-weight: 650;
+  margin: 4px 0 0;
+}
+
+.benchmark-panel {
+  border-top: 1px solid var(--docs-line);
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.benchmark-panel strong {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.benchmark-panel p {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 15.5px;
+  line-height: 1.62;
+  margin: 0;
+}
+
 @media (max-width: 720px) {
   .demo-input-grid {
     grid-template-columns: 1fr;
@@ -6203,6 +6323,11 @@ body {
   }
 
   .quality-profile dl {
+    grid-template-columns: 1fr;
+  }
+
+  .benchmark-row-head,
+  .benchmark-row dl {
     grid-template-columns: 1fr;
   }
 }

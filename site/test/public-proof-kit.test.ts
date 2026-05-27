@@ -1,8 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { GET as getAgentDemoFlow } from "../app/agent-demo-flow.json/route";
+import { GET as getBenchmark } from "../app/benchmark.json/route";
 import { GET as getIntegrationKit } from "../app/integration-kit.json/route";
 import { GET as getSourceQuality } from "../app/source-quality.json/route";
 import { agentDemoFlow } from "../lib/agent-demo-flow";
+import { competitiveBenchmarkReport } from "../lib/competitive-benchmark-public";
 import { integrationKit } from "../lib/integration-kit";
 import { publicSourceQualityReport, sourceQualityBenchmark } from "../lib/source-quality-public";
 
@@ -52,13 +54,28 @@ describe("public agent proof kit", () => {
     expect(sourceQualityBenchmark.notClaimed).toContain("full registry crawl");
   });
 
+  test("publishes a visual competitive benchmark snapshot without unsafe claims", () => {
+    expect(competitiveBenchmarkReport.type).toBe("dev.nipmod.competitive-benchmark-public.v1");
+    expect(competitiveBenchmarkReport.headline).toMatchObject({
+      installPlanEvidence: "7/7",
+      liveChecks: "7/7",
+      score: 89
+    });
+    expect(competitiveBenchmarkReport.tracks.map((track) => track.name)).toContain("Nipmod");
+    expect(competitiveBenchmarkReport.tracks.find((track) => track.name === "Nipmod")?.score).toBeGreaterThan(80);
+    expect(competitiveBenchmarkReport.claimBoundary.join(" ")).toContain("not a malware-free guarantee");
+    expect(competitiveBenchmarkReport.publishableClaims.join(" ")).not.toMatch(/safer than every competitor|guarantees package safety/i);
+  });
+
   test("serves machine-readable JSON routes for agents", async () => {
-    const [demo, kit, quality] = await Promise.all([
+    const [benchmark, demo, kit, quality] = await Promise.all([
+      getBenchmark().json(),
       getAgentDemoFlow().json(),
       getIntegrationKit().json(),
       getSourceQuality().json()
     ]);
 
+    expect(benchmark.type).toBe("dev.nipmod.competitive-benchmark-public.v1");
     expect(demo.type).toBe("dev.nipmod.agent-demo-flow.v1");
     expect(kit.type).toBe("dev.nipmod.integration-kit.v1");
     expect(quality.type).toBe("dev.nipmod.source-quality-report.v1");
