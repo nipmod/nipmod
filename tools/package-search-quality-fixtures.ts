@@ -48,6 +48,7 @@ const npmDownloads: Record<string, number> = {
   "left-pad": 20_000_000,
   "metadata-injection": 40_000_000,
   playwright: 16_000_000,
+  request: 65_000_000,
   "risky-lifecycle": 30_000_000,
   sharp: 12_000_000,
   undici: 40_000_000,
@@ -72,7 +73,11 @@ function npmSearchResponse(url: string): Response {
   } else if (query.includes("browser")) {
     objects = [npmSearchObject("playwright", "Browser automation and testing.", 0.85), npmSearchObject("risky-lifecycle", "Fast browser helper.", 1)];
   } else if (query.includes("http") || query.includes("fetch")) {
-    objects = [npmSearchObject("got", "Human-friendly HTTP requests.", 0.8), npmSearchObject("left-pad", "Popular tiny utility.", 1)];
+    objects = [
+      npmSearchObject("got", "Human-friendly HTTP requests.", 0.8),
+      npmSearchObject("request", "Deprecated HTTP request client.", 1),
+      npmSearchObject("left-pad", "Popular tiny utility.", 0.9)
+    ];
   } else if (query.includes("graphic") || query.includes("image")) {
     objects = [npmSearchObject("sharp", "High performance image processing.", 0.8)];
   } else {
@@ -91,7 +96,21 @@ function npmRegistryResponse(url: string): Response {
   return jsonResponse(isLatest ? npmLatest(spec) : npmPackument(spec));
 }
 
-const npmPackageSpecs: Record<string, { description: string; license?: string; repo?: string; scripts?: Record<string, string>; version: string }> = {
+const npmPackageSpecs: Record<
+  string,
+  {
+    createdAt?: string;
+    deprecated?: string;
+    description: string;
+    latestPublishedAt?: string;
+    license?: string;
+    modifiedAt?: string;
+    previousPublishedAt?: string;
+    repo?: string;
+    scripts?: Record<string, string>;
+    version: string;
+  }
+> = {
   "company-payments-sdk": {
     description: "Internal payments SDK for company agent workflows.",
     version: "0.1.0"
@@ -106,6 +125,17 @@ const npmPackageSpecs: Record<string, { description: string; license?: string; r
     version: "9.9.9"
   },
   playwright: { description: "Browser automation and testing.", license: "Apache-2.0", repo: "https://github.com/microsoft/playwright", version: "1.55.0" },
+  request: {
+    createdAt: "2010-02-01T00:00:00.000Z",
+    deprecated: "request has been deprecated; use undici or another maintained HTTP client.",
+    description: "Deprecated HTTP request client.",
+    latestPublishedAt: "2020-02-11T00:00:00.000Z",
+    license: "Apache-2.0",
+    modifiedAt: "2020-02-12T00:00:00.000Z",
+    previousPublishedAt: "2019-07-01T00:00:00.000Z",
+    repo: "https://github.com/request/request",
+    version: "2.88.2"
+  },
   "risky-lifecycle": {
     description: "Fast browser helper.",
     license: "MIT",
@@ -152,6 +182,7 @@ function npmLatest(spec: (typeof npmPackageSpecs)[string]): unknown {
   return {
     _npmUser: { name: "maintainer" },
     description: spec.description,
+    deprecated: spec.deprecated,
     dist: {
       fileCount: 36,
       integrity: "sha512-fixture",
@@ -171,17 +202,19 @@ function npmLatest(spec: (typeof npmPackageSpecs)[string]): unknown {
 }
 
 function npmPackument(spec: (typeof npmPackageSpecs)[string]): unknown {
+  const previousPublishedAt = spec.previousPublishedAt ?? "2026-04-15T00:00:00.000Z";
+  const latestPublishedAt = spec.latestPublishedAt ?? "2026-05-01T00:00:00.000Z";
   return {
     "dist-tags": { latest: spec.version },
     time: {
-      "1.0.0": "2026-04-15T00:00:00.000Z",
-      [spec.version]: "2026-05-01T00:00:00.000Z",
-      created: "2024-01-01T00:00:00.000Z",
-      modified: "2026-05-02T00:00:00.000Z"
+      "1.0.0": previousPublishedAt,
+      [spec.version]: latestPublishedAt,
+      created: spec.createdAt ?? "2024-01-01T00:00:00.000Z",
+      modified: spec.modifiedAt ?? "2026-05-02T00:00:00.000Z"
     },
     versions: {
       "1.0.0": {},
-      [spec.version]: {}
+      [spec.version]: spec.deprecated ? { deprecated: spec.deprecated } : {}
     }
   };
 }
@@ -227,6 +260,7 @@ const pypiSpecs: Record<string, { description: string; license: string; repo: st
   pillow: { description: "Python image processing library.", license: "HPND", repo: "https://github.com/python-pillow/Pillow", version: "11.2.0" },
   playwright: { description: "Browser automation for Python.", license: "Apache-2.0", repo: "https://github.com/microsoft/playwright-python", version: "1.55.0" },
   pydantic: { description: "Data validation using Python type hints.", license: "MIT", repo: "https://github.com/pydantic/pydantic", version: "2.11.0" },
+  reqeusts: { description: "HTTP client typo package.", license: "", repo: "", version: "1.0.0" },
   requests: { description: "Python HTTP client for humans.", license: "Apache-2.0", repo: "https://github.com/psf/requests", version: "2.34.2" },
   "sentence-transformers": { description: "Embeddings, retrieval and semantic search.", license: "Apache-2.0", repo: "https://github.com/UKPLab/sentence-transformers", version: "4.1.0" }
 };
