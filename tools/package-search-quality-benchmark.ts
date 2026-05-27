@@ -8,9 +8,10 @@ import {
 import { packageSearchQualityFetch } from "./package-search-quality-fixtures.ts";
 
 interface BenchmarkCase {
-  expectedId: string;
+  expectedGate?: "blocked" | "pass" | "review";
+  expectedId?: string;
   expectedPartial?: boolean;
-  expectedRecommendedId?: string;
+  expectedRecommendedId?: string | null;
   expectedSourceSummary?: {
     empty: number;
     failed: number;
@@ -29,7 +30,7 @@ interface BenchmarkCase {
 
 interface BenchmarkCheck {
   data?: {
-    expectedId: string;
+    expectedId: string | null;
     intentReasonFound: boolean;
     partial: boolean;
     rank: number | null;
@@ -109,6 +110,7 @@ const DEFAULT_CASES: BenchmarkCase[] = [
   },
   {
     expectedId: "huggingface-model:sentence-transformers/all-MiniLM-L6-v2",
+    forbiddenRecommendedIds: ["huggingface-model:evil/embedding-wallet-drainer"],
     limit: 4,
     maxRank: 2,
     name: "Embedding model",
@@ -148,6 +150,38 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     requiredIntentReason: "query intent match: Python HTTP client fit",
     sources: ["npm", "pypi"],
     useNpmOutage: true
+  },
+  {
+    expectedGate: "review",
+    expectedId: "npm:company-payments-sdk",
+    expectedRecommendedId: null,
+    limit: 3,
+    maxRank: 1,
+    name: "Dependency confusion private-looking package",
+    query: "internal payments sdk",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:pillow",
+    expectedRecommendedId: "pypi:pillow",
+    forbiddenRecommendedIds: ["pypi:pil"],
+    limit: 3,
+    maxRank: 1,
+    name: "PyPI confusion alias",
+    query: "pil",
+    requiredIntentReason: "query intent match: Python image processing fit",
+    sources: ["pypi"]
+  },
+  {
+    expectedId: "npm:ethers",
+    expectedRecommendedId: "npm:ethers",
+    forbiddenRecommendedIds: ["npm:wallet-connect-helper"],
+    limit: 4,
+    maxRank: 1,
+    name: "Crypto wallet drainer decoy",
+    query: "ethereum wallet sdk",
+    requiredIntentReason: "query intent match: Ethereum wallet library fit",
+    sources: ["npm"]
   }
 ];
 
@@ -164,17 +198,22 @@ export async function runPackageSearchQualityBenchmark(cases: BenchmarkCase[] = 
       });
       const topIds = result.selection.candidates.map((candidate) => candidate.id);
       const topGates = result.selection.candidates.map((candidate) => candidate.gate);
-      const rankIndex = topIds.indexOf(testCase.expectedId);
+      const rankIndex = testCase.expectedId ? topIds.indexOf(testCase.expectedId) : -1;
       const rank = rankIndex >= 0 ? rankIndex + 1 : null;
-      const expectedCandidate = result.selection.candidates.find((candidate) => candidate.id === testCase.expectedId);
+      const expectedCandidate = testCase.expectedId
+        ? result.selection.candidates.find((candidate) => candidate.id === testCase.expectedId)
+        : undefined;
       const intentReasonFound =
         !testCase.requiredIntentReason || Boolean(expectedCandidate?.reasons.some((reason) => reason === testCase.requiredIntentReason));
       const reciprocalRank = rank ? 1 / rank : 0;
       const errors = [
-        ...(rank === null ? [`expected ${testCase.expectedId} was not returned`] : []),
+        ...(testCase.expectedId && rank === null ? [`expected ${testCase.expectedId} was not returned`] : []),
         ...(rank !== null && rank > testCase.maxRank ? [`expected ${testCase.expectedId} rank ${rank} exceeded max ${testCase.maxRank}`] : []),
-        ...(testCase.expectedRecommendedId && result.selection.recommendedId !== testCase.expectedRecommendedId
+        ...(testCase.expectedRecommendedId !== undefined && result.selection.recommendedId !== testCase.expectedRecommendedId
           ? [`recommendedId ${String(result.selection.recommendedId)} did not match ${testCase.expectedRecommendedId}`]
+          : []),
+        ...(testCase.expectedGate && expectedCandidate?.gate !== testCase.expectedGate
+          ? [`expected ${testCase.expectedId} gate ${String(expectedCandidate?.gate)} did not match ${testCase.expectedGate}`]
           : []),
         ...((testCase.forbiddenRecommendedIds ?? []).includes(result.selection.recommendedId ?? "")
           ? [`forbidden candidate was recommended: ${String(result.selection.recommendedId)}`]

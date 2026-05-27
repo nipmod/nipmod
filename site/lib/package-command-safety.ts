@@ -142,6 +142,9 @@ export function metadataInstructionWarnings(fields: PackageMetadataField[]): str
   }
   const instructionOverridePatterns = [
     /ignore (all )?(previous|prior|system|developer|user|safety) instructions/,
+    /ignoriere (alle )?(vorherigen|frueheren|system|entwickler|benutzer|sicherheits) (anweisungen|instruktionen)/,
+    /ignora (todas )?(las )?(instrucciones|indicaciones) (anteriores|previas|del sistema|de seguridad)/,
+    /(onceki|sistem|gelistirici|kullanici|guvenlik) (talimatlari|komutlari).{0,60}(yok say|gecersiz kil)/,
     /disregard (all )?(previous|prior|system|developer|user|safety) instructions/,
     /override (the )?(system|developer|user|safety) (prompt|instructions|message)/,
     /\byou are (now )?(chatgpt|claude|codex|an ai agent|the assistant)\b/,
@@ -155,6 +158,8 @@ export function metadataInstructionWarnings(fields: PackageMetadataField[]): str
   const secretExfiltrationPatterns = [
     /\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b.{0,120}\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
     /\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b.{0,120}\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b/,
+    /\b(zeige|drucke|sende|lade hoch|veroeffentliche|leake)\b.{0,120}\b(geheimnis|api key|api schluessel|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
+    /\b(goster|yazdir|gonder|yukle|sizdir)\b.{0,120}\b(gizli|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
     /\bread\b.{0,80}\b(\.env|\.npmrc|\.pypirc|\.netrc|id_rsa|id_ed25519|wallet|keystore)\b/
   ];
   return instructionOverridePatterns.some((pattern) => pattern.test(text)) || secretExfiltrationPatterns.some((pattern) => pattern.test(text))
