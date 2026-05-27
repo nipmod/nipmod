@@ -63,6 +63,16 @@ describe("public agent proof kit", () => {
     });
     expect(competitiveBenchmarkReport.tracks.map((track) => track.name)).toContain("Nipmod");
     expect(competitiveBenchmarkReport.tracks.find((track) => track.name === "Nipmod")?.score).toBeGreaterThan(80);
+    expect(competitiveBenchmarkReport.categoryBreakdown.map((category) => category.key)).toEqual([
+      "source-discovery",
+      "advisory-provenance",
+      "install-boundary",
+      "agent-output"
+    ]);
+    expect(competitiveBenchmarkReport.categoryBreakdown.find((category) => category.key === "install-boundary")?.tracks[0]).toMatchObject({
+      name: "Nipmod",
+      score: 100
+    });
     expect(competitiveBenchmarkReport.claimBoundary.join(" ")).toContain("not a malware-free guarantee");
     expect(competitiveBenchmarkReport.publishableClaims.join(" ")).not.toMatch(/safer than every competitor|guarantees package safety/i);
   });

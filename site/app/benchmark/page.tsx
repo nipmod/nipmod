@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
-import { competitiveBenchmarkReport, type CompetitiveBenchmarkTrack } from "../../lib/competitive-benchmark-public";
+import { competitiveBenchmarkReport, type CompetitiveBenchmarkCategory, type CompetitiveBenchmarkTrack } from "../../lib/competitive-benchmark-public";
 
 export const metadata = createPageMetadata({
   description: "Nipmod competitive benchmark for agent package-decision depth across source metadata, advisories, repository posture and install-plan readiness.",
@@ -45,11 +45,20 @@ export default function BenchmarkPage() {
         <BenchmarkChart tracks={primaryTracks} />
       </DocsSection>
 
+      <DocsSection eyebrow="Categories" title="Separated scoring">
+        <div className="benchmark-category-list">
+          {report.categoryBreakdown.map((category) => (
+            <BenchmarkCategoryPanel category={category} key={category.key} />
+          ))}
+        </div>
+      </DocsSection>
+
       <DocsSection eyebrow="Scope" title="What is measured">
         <DocsTable
           rows={[
             ["7 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, MCP server and GitHub repository posture."],
-            ["16 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON, multi-source coverage and cost-market context."],
+            ["16 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON, multi-source coverage and adjacent cost-market context."],
+            ["4 public categories", "Source discovery, advisory/provenance, install boundary and agent output. Cost-market context stays in the machine report as an adjacent reference."],
             ["8 tracks", "Nipmod, native registries, OSV, deps.dev, OpenSSF Scorecard, Socket, Snyk and a raw agent baseline."],
             ["1 reference", "Surplus is kept in the machine report as adjacent agent-infra context, not as a package-decision competitor."],
             ["0 execution", "No package install, repository clone, artifact unpacking, model execution, paid inference call or workspace write is performed."]
@@ -99,6 +108,36 @@ export default function BenchmarkPage() {
         </p>
       </DocsSection>
     </DocsShell>
+  );
+}
+
+function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCategory }) {
+  return (
+    <article className="benchmark-category-panel">
+      <header>
+        <div>
+          <span>{category.dimensions}</span>
+          <h3>{category.title}</h3>
+        </div>
+        <p>{category.description}</p>
+      </header>
+      <div className="benchmark-category-bars">
+        {category.tracks.map((track) => {
+          const width = `${Math.max(2, Math.min(100, track.score))}%`;
+          const isNipmod = track.name === "Nipmod";
+
+          return (
+            <div className={`benchmark-category-row${isNipmod ? " benchmark-category-row-primary" : ""}`} key={`${category.key}-${track.name}`}>
+              <strong>{track.name}</strong>
+              <div aria-label={`${category.title}: ${track.name} score ${track.score} out of 100`} className="benchmark-category-bar">
+                <span style={{ width }} />
+              </div>
+              <b>{track.score}</b>
+            </div>
+          );
+        })}
+      </div>
+    </article>
   );
 }
 
