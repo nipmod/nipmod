@@ -143,6 +143,7 @@ check("api-flow:no-exec", () => apiFlowDoc.includes("The hosted API never execut
 const publicApiSpec = read("docs/specs/public-api.md");
 const archiveDriftWorkflow = read(".github/workflows/archive-drift-review.yml");
 const prodMonitorWorkflow = read(".github/workflows/prod-monitor.yml");
+const packageJson = read("package.json");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
 check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
@@ -157,6 +158,10 @@ check(
     prodMonitorWorkflow.includes("NIPMOD_CANARY_API_KEY")
 );
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
+check(
+  "public-api:production-excellence-live-gate",
+  () => packageJson.includes('"excellence:live"') && prodMonitorWorkflow.includes("pnpm excellence:live -- --base-url https://nipmod.com")
+);
 
 const apiKeyRequiredRoutes = [
   "site/app/api/admin/keys/route.ts",
