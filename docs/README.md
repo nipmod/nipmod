@@ -58,6 +58,7 @@ Public docs are organized around the product surface that agents and maintainers
 ## Comparison
 
 - [Category comparison](comparison/README.md)
+- [Agent package intelligence benchmark](competitive-benchmark.md)
 
 ## Publishing
 

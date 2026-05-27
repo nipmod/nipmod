@@ -874,7 +874,7 @@ describe("external package resolver", () => {
   });
 
   test("keeps known MCP results available when the live registry is unavailable", async () => {
-    const result = await searchExternalPackages("tandem", {
+    const result = await searchExternalPackages("tandem docs mcp server", {
       fetchImpl: async () => {
         throw new TypeError("network unavailable");
       },

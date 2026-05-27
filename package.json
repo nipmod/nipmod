@@ -16,6 +16,7 @@
     "rate-limit:canary": "node --experimental-strip-types tools/rate-limit-canary.ts",
     "security": "pnpm --dir nipmod security:deps && pnpm --dir site security:deps && pnpm --dir site security:secrets && pnpm supply-chain:check",
     "search:benchmark": "pnpm exec tsx tools/package-search-quality-benchmark.ts",
+    "benchmark:competitive": "pnpm --dir nipmod exec tsx ../tools/competitive-benchmark.ts",
     "crawler:audit": "node --experimental-strip-types tools/source-crawler-candidate-audit.ts",
     "dev:update": "node --experimental-strip-types tools/daily-build-log.ts",
     "excellence:automode": "pnpm --dir nipmod exec tsx ../tools/excellence-automode.ts",
