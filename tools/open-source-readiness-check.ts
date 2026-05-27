@@ -142,11 +142,19 @@ check("api-flow:no-exec", () => apiFlowDoc.includes("The hosted API never execut
 
 const publicApiSpec = read("docs/specs/public-api.md");
 const archiveDriftWorkflow = read(".github/workflows/archive-drift-review.yml");
+const prodMonitorWorkflow = read(".github/workflows/prod-monitor.yml");
 check("public-api:rate-limit-canary", () => publicApiSpec.includes("pnpm rate-limit:canary"));
 check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contract"));
 check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
 check("public-api:archive-drift-review", () => publicApiSpec.includes("pnpm archive:drift"));
 check("public-api:scheduled-archive-drift-review", () => archiveDriftWorkflow.includes("archive:drift") && archiveDriftWorkflow.includes("archive-drift-review.json"));
+check(
+  "public-api:scheduled-canary-secret",
+  () =>
+    publicApiSpec.includes("NIPMOD_CANARY_API_KEY") &&
+    archiveDriftWorkflow.includes("NIPMOD_CANARY_API_KEY") &&
+    prodMonitorWorkflow.includes("NIPMOD_CANARY_API_KEY")
+);
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
 const trustSignals = read("docs/specs/trust-signals.md");
