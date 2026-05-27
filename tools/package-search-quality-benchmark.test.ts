@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 26
+      total: 28
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -68,6 +68,16 @@ describe("package search quality benchmark", () => {
     expect(result.checks.find((check) => check.name === "Source repository mismatch decoy")?.data?.topIds).toContain("npm:zod-helper");
     expect(result.checks.find((check) => check.name === "Embedding model")?.data?.topGates).toContain("blocked");
     expect(result.checks.find((check) => check.name === "Embedding model")?.data?.topIds).toContain("huggingface-model:evil/model-card-injection");
+    const datasetScriptCheck = result.checks.find((check) => check.name === "Hugging Face dataset script decoy");
+    expect(datasetScriptCheck?.data).toMatchObject({
+      recommendedId: "huggingface-dataset:rajpurkar/squad"
+    });
+    expect(datasetScriptCheck?.data?.topGates).toContain("blocked");
+    expect(datasetScriptCheck?.data?.topIds).toContain("huggingface-dataset:evil/dataset-loader-script");
+    expect(result.checks.find((check) => check.name === "MCP credential-scope without source decoy")?.data).toMatchObject({
+      recommendedId: null,
+      topGates: ["blocked"]
+    });
     expect(result.checks.find((check) => check.name === "Partial source outage")?.data?.sourceSummary).toEqual({
       empty: 0,
       failed: 1,

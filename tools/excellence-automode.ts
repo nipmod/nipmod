@@ -204,7 +204,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
     summary.missingExpectedIntentReasonCount === 0;
   return {
     answer: passed
-      ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys, source-intent ambiguity, README/model-card/long-description injection, source-repository mismatch, maintainer compromise, package takeover timelines and multi-source outage."
+      ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys, source-intent ambiguity, README/model-card/long-description injection, dataset-script risk, MCP credential-scope risk, source-repository mismatch, maintainer compromise, package takeover timelines and multi-source outage."
       : "Search ranking did not pass the current quality gates.",
     category: "search",
     evidence: [
