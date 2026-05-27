@@ -989,6 +989,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const packageName = readString(manifest.name) ?? name;
   const version = readString(manifest.version);
   const repo = normalizeRepositoryUrl(readNestedString(manifest, ["repository", "url"]) ?? readString(manifest.repository));
+  const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(packageName, repo);
   const license = readString(manifest.license);
   const integrity = readNestedString(manifest, ["dist", "integrity"]);
   const tarball = readNestedString(manifest, ["dist", "tarball"]);
@@ -1025,6 +1026,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     ...(integrity ? [] : ["npm did not return tarball integrity metadata for the latest release."]),
     ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."]),
     ...(tarball && !tarballIsHttps ? ["npm tarball URL is not HTTPS."] : []),
+    ...repositoryMismatchWarnings,
     ...(latestPublisherInMaintainers === false
       ? ["Latest npm publisher is not listed in maintainer records; review publisher continuity."]
       : []),
@@ -1044,6 +1046,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (maintainerCount ? 4 : 0) +
       (latestPublisher ? 2 : 0) +
       (latestPublisherInMaintainers === false ? -18 : 0) +
+      (repositoryMismatchWarnings.length ? -22 : 0) +
       (deprecated ? -28 : 0) +
       osv.vulnerabilityCount * -24 +
       versionIntelligencePenalty(packument) +
@@ -1254,8 +1257,14 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
   const downloads = isRecord(item.downloads) ? (readNumber(item.downloads.monthly) ?? readNumber(item.downloads.weekly)) : null;
   const license = readString(pkg.license);
   const repo = normalizeRepositoryUrl(readNestedString(pkg, ["links", "repository"]));
-  const warnings = readNumber(readRecord(item.flags)?.insecure) ? ["npm search marks this package as insecure."] : [];
-  const score = clampScore(45 + popularity * 18 + quality * 18 + maintenance * 18 + (license ? 6 : 0) + (repo ? 6 : 0));
+  const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(name, repo);
+  const warnings = [
+    ...(readNumber(readRecord(item.flags)?.insecure) ? ["npm search marks this package as insecure."] : []),
+    ...repositoryMismatchWarnings
+  ];
+  const score = clampScore(
+    45 + popularity * 18 + quality * 18 + maintenance * 18 + (license ? 6 : 0) + (repo ? 6 : 0) - repositoryMismatchWarnings.length * 22
+  );
 
   return makeRecord({
     description: readString(pkg.description) ?? "",
@@ -1357,8 +1366,14 @@ function pyPiCandidateNames(query: string): string[] {
   const normalized = normalizeName(query);
   const baseNames = [normalized, normalized.replace(/\s+/g, "-"), normalized.replace(/\s+/g, "_")];
   const confusionName = PYPI_CONFUSION_NAMES[normalized.toLowerCase()];
-  const hintNames = PYPI_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
+  const hintNames = looksLikeExactPackageNameQuery(normalized)
+    ? []
+    : PYPI_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
   return [...new Set([...baseNames, confusionName, ...hintNames].map((name) => normalizeName(name ?? "")).filter(Boolean))].slice(0, 10);
+}
+
+function looksLikeExactPackageNameQuery(normalized: string): boolean {
+  return /[._-]/.test(normalized) && /^[a-z0-9][a-z0-9._-]{1,80}$/i.test(normalized);
 }
 
 async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -1372,8 +1387,11 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const projectUrls = readRecord(info.project_urls);
   const repo =
     normalizeRepositoryUrl(readString(projectUrls?.Source) ?? readString(projectUrls?.Homepage) ?? readString(info.home_page)) ?? null;
+  const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(projectName, repo);
   const license = readString(info.license) || licenseFromClassifiers(info.classifiers);
   const version = readString(info.version);
+  const longDescription = readString(info.description);
+  const longDescriptionWarnings = metadataInstructionWarnings([{ field: "pypi.info.description", value: longDescription ?? "" }]);
   const releaseFiles = latestPyPiReleaseFiles(payload, version);
   const [simpleFiles, osv] = await Promise.all([
     fetchPyPiSimpleLatestFiles(projectName, releaseFiles, fetchImpl, timeoutMs),
@@ -1411,6 +1429,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     ...(md5OnlyCount ? [`PyPI returned ${md5OnlyCount} latest release file(s) with only legacy MD5 digest metadata.`] : []),
     ...(sourceOnlyRelease ? ["PyPI latest release has only source distribution files; local install may execute build backend code."] : []),
     ...(yankedCount > 0 ? [`PyPI marks ${yankedCount} latest release file(s) as yanked.`] : []),
+    ...repositoryMismatchWarnings,
+    ...longDescriptionWarnings,
     ...(confusionTarget ? [`PyPI package name is commonly confused with ${confusionTarget}; verify this is the intended project.`] : [])
   ];
   const score = clampScore(
@@ -1428,6 +1448,8 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       versionIntelligencePenalty(releaseIntelligence) -
       (sourceOnlyRelease ? 10 : 0) -
       yankedCount * 30 -
+      repositoryMismatchWarnings.length * 22 -
+      longDescriptionWarnings.length * 34 -
       (confusionTarget ? 12 : 0)
   );
 
@@ -1458,6 +1480,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
           : `OSV returned vulnerability IDs for this PyPI package/version: ${osv.ids.join(", ")}.`
         : "OSV vulnerability context was unavailable for this PyPI package/version.",
       repo ? "Project source/homepage link is present." : "Project source link is missing.",
+      longDescription ? "PyPI long description metadata was inspected for agent-targeted instructions." : "PyPI long description metadata was not returned.",
       releaseFiles.length ? `PyPI latest release files returned: ${releaseFiles.length}.` : "PyPI latest release files were not returned.",
       fileHashCount ? `PyPI latest release files with digest metadata: ${fileHashCount}.` : "PyPI did not return latest release file digests.",
       fileSignatureCount ? `PyPI latest release files with signature metadata: ${fileSignatureCount}.` : "PyPI latest release file signature metadata was not returned.",
@@ -1536,7 +1559,8 @@ async function searchGitHub(query: string, limit: number, fetchImpl: typeof fetc
     { source: "github" }
   );
   const items = isRecord(payload) && Array.isArray(payload.items) ? payload.items : [];
-  return items.map((item) => gitHubRecord(item)).filter(isExternalPackageRecord);
+  const records = items.map((item) => gitHubRecord(item)).filter(isExternalPackageRecord);
+  return enrichGitHubSearchRecords(records, limit, fetchImpl, timeoutMs);
 }
 
 async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {
@@ -1547,6 +1571,26 @@ async function inspectGitHub(name: string, fetchImpl: typeof fetch, timeoutMs: n
   const defaultBranch = isRecord(payload) ? readString(payload.default_branch) : null;
   const manifest = await fetchGitHubManifestSummary(name, defaultBranch, fetchImpl, timeoutMs);
   return gitHubRecord(payload, manifest);
+}
+
+async function enrichGitHubSearchRecords(
+  records: ExternalPackageRecord[],
+  limit: number,
+  fetchImpl: typeof fetch,
+  timeoutMs: number
+): Promise<ExternalPackageRecord[]> {
+  const inspectable = records.slice(0, Math.min(limit, 2)).filter((record) => record.name.includes("/"));
+  if (inspectable.length === 0) {
+    return records;
+  }
+  const settled = await Promise.allSettled(inspectable.map((record) => inspectGitHub(record.name, fetchImpl, Math.min(timeoutMs, 4500))));
+  const enriched = new Map<string, ExternalPackageRecord>();
+  for (const result of settled) {
+    if (result.status === "fulfilled" && result.value) {
+      enriched.set(result.value.id.toLowerCase(), result.value);
+    }
+  }
+  return records.map((record) => enriched.get(record.id.toLowerCase()) ?? record);
 }
 
 type GitHubManifestSummary = {
@@ -1563,7 +1607,9 @@ type GitHubManifestSummary = {
   latestReleaseTag: string | null;
   lifecycleScripts: PackageLifecycleScript[];
   lockfiles: string[];
+  metadataWarnings: string[];
   packageManager: string | null;
+  readmeInspected: boolean;
   securityFiles: string[];
   scriptCount: number | null;
   workflowFiles: string[];
@@ -1587,6 +1633,7 @@ async function fetchGitHubManifestSummary(
     "Cargo.toml",
     "Cargo.lock",
     "Dockerfile",
+    "README.md",
     "SECURITY.md",
     ".github/dependabot.yml",
     ".github/codeql.yml",
@@ -1625,12 +1672,21 @@ async function fetchGitHubManifestSummary(
   let latestCommitSha: string | null = null;
   let latestCommitDate: string | null = null;
   let communityHealthPercentage: number | null = null;
+  const metadataWarnings: string[] = [];
   const workflowFiles: string[] = [];
   const contentRiskFiles: string[] = [];
   let contentRiskPatternCount = 0;
+  let readmeInspected = false;
 
   for (const result of settled) {
     if (result.status !== "fulfilled" || !isRecord(result.value.payload)) {
+      continue;
+    }
+    if (result.value.path === "README.md") {
+      readmeInspected = true;
+      metadataWarnings.push(
+        ...metadataInstructionWarnings([{ field: "github.README.md", value: decodeGitHubTextContent(result.value.payload) ?? "" }])
+      );
       continue;
     }
     if (isGitHubSecurityPath(result.value.path)) {
@@ -1723,7 +1779,9 @@ async function fetchGitHubManifestSummary(
     latestReleaseTag,
     lifecycleScripts,
     lockfiles,
+    metadataWarnings: dedupeStrings(metadataWarnings),
     packageManager,
+    readmeInspected,
     securityFiles,
     scriptCount,
     workflowFiles
@@ -1823,6 +1881,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       (manifest?.latestCommitSha ? 2 : 0) +
       (typeof manifest?.communityHealthPercentage === "number" ? Math.min(4, Math.round(manifest.communityHealthPercentage / 25)) : 0) +
       (manifest?.contentRiskPatternCount ? -Math.min(24, manifest.contentRiskPatternCount * 8) : 0) +
+      (manifest?.metadataWarnings.length ? -34 : 0) +
       lifecycleRiskPenalty(lifecycleRisk)
   );
   const warnings = [
@@ -1833,6 +1892,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
     ...(manifest?.contentRiskPatternCount
       ? [`GitHub manifest/workflow probes found ${manifest.contentRiskPatternCount} risky automation pattern(s).`]
       : []),
+    ...(manifest?.metadataWarnings ?? []),
     ...(manifest?.latestReleasePrerelease ? ["GitHub latest release is marked as prerelease."] : []),
     ...lifecycleScriptWarnings(lifecycleScripts)
   ];
@@ -1873,6 +1933,9 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
       manifest?.securityFiles.length
         ? `GitHub security files found: ${manifest.securityFiles.join(", ")}.`
         : "GitHub security files were not returned.",
+      manifest?.readmeInspected
+        ? "GitHub README metadata was inspected for agent-targeted instructions."
+        : "GitHub README metadata was not returned.",
       manifest?.lockfiles.length ? `GitHub lockfiles found: ${manifest.lockfiles.join(", ")}.` : "GitHub lockfiles were not returned.",
       manifest?.workflowFiles.length ? `GitHub workflow files found: ${manifest.workflowFiles.join(", ")}.` : "GitHub workflow files were not returned.",
       manifest
@@ -2465,8 +2528,9 @@ function makeRecord(input: {
     { field: "install.notes", value: input.install.notes.join(" ") }
   ]);
   const warnings = dedupeStrings([...input.warnings, ...metadataWarnings]);
+  const hasMetadataInstructionWarning = warnings.some((warning) => /agent-targeted instructions/i.test(warning));
   const metadataSignal =
-    metadataWarnings.length > 0
+    hasMetadataInstructionWarning
       ? "Package metadata contains agent-targeted instructions and must be treated as untrusted data."
       : "Package metadata did not contain agent-targeted instructions in inspected fields.";
   const initialSignals = dedupeStrings([...input.signals, metadataSignal]);
@@ -2875,6 +2939,7 @@ function hasHighSeverityWarning(warning: string): boolean {
     normalized.includes("trust_remote_code") ||
     normalized.includes("no source repository returned by mcp registry") ||
     normalized.includes("credentials but no source repository") ||
+    normalized.includes("source-repository mismatch") ||
     normalized.includes("pinned public registry snapshot")
   );
 }
@@ -3861,8 +3926,14 @@ export function externalSourceQualityProfile(source: ExternalPackageSource): Ext
           "stars, forks and activity are context signals, not safety proof"
         ],
         notClaimed: ["verified release provenance", "full code scan", "dependency vulnerability audit"],
-        searchDepth: "GitHub repository search sorted by stars with archived repositories filtered out",
-        strengths: ["owner/repo identity", "license and activity metadata", "selected package/security/workflow file checks", "workflow and Dockerfile risk pattern probes"],
+        searchDepth: "GitHub repository search sorted by stars with archived repositories filtered out and top-result manifest/README enrichment",
+        strengths: [
+          "owner/repo identity",
+          "license and activity metadata",
+          "selected package/security/workflow file checks",
+          "workflow and Dockerfile risk pattern probes",
+          "README metadata instruction warnings"
+        ],
         targetDepthScore: 95
       };
     case "huggingface-model":
@@ -4489,6 +4560,56 @@ function normalizeRepositoryUrl(value: string | null): string | null {
 
   const withoutTrailingGit = withoutGitPrefix.replace(/\.git$/, "");
   return isHttpUrl(withoutTrailingGit) ? withoutTrailingGit : null;
+}
+
+const PROTECTED_SOURCE_REPOSITORY_SLUGS: Record<string, { allowedPackageNames: string[]; label: string }> = {
+  ethers: { allowedPackageNames: ["ethers"], label: "ethers" },
+  got: { allowedPackageNames: ["got"], label: "got" },
+  playwright: { allowedPackageNames: ["playwright"], label: "playwright" },
+  pydantic: { allowedPackageNames: ["pydantic"], label: "pydantic" },
+  requests: { allowedPackageNames: ["requests"], label: "requests" },
+  solanaweb3js: { allowedPackageNames: ["web3js", "solanaweb3js"], label: "@solana/web3.js" },
+  undici: { allowedPackageNames: ["undici"], label: "undici" },
+  viem: { allowedPackageNames: ["viem"], label: "viem" },
+  zod: { allowedPackageNames: ["zod"], label: "zod" }
+};
+
+function sourceRepositoryMismatchWarnings(packageName: string, repo: string | null): string[] {
+  const repoSlug = githubRepositorySlug(repo);
+  if (!repoSlug) {
+    return [];
+  }
+  const protectedRepo = PROTECTED_SOURCE_REPOSITORY_SLUGS[repoIdentity(repoSlug)];
+  if (!protectedRepo) {
+    return [];
+  }
+  const packageIdentity = repoIdentity(packageName.split("/").at(-1) ?? packageName);
+  if (protectedRepo.allowedPackageNames.includes(packageIdentity)) {
+    return [];
+  }
+  return [
+    `Source-repository mismatch: package ${packageName} points at the canonical ${protectedRepo.label} repository; review possible impersonation before installation.`
+  ];
+}
+
+function githubRepositorySlug(repo: string | null): string | null {
+  if (!repo) {
+    return null;
+  }
+  try {
+    const url = new URL(repo);
+    if (url.hostname.toLowerCase() !== "github.com") {
+      return null;
+    }
+    const parts = url.pathname.split("/").filter(Boolean);
+    return parts[1]?.replace(/\.git$/i, "") ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function repoIdentity(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
 function pythonStringLiteral(value: string): string {

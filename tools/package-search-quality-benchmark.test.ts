@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 20
+      total: 23
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -35,8 +35,20 @@ describe("package search quality benchmark", () => {
     expect(result.checks.find((check) => check.name === "npm namespace confusion scoped SDK")?.data?.recommendedId).toBe("npm:@solana/web3.js");
     expect(result.checks.find((check) => check.name === "Obfuscated metadata instruction decoy")?.data).toMatchObject({
       recommendedId: "npm:zod",
-      topGates: ["pass", "pass", "pass", "blocked"]
+      topGates: ["pass", "pass", "review", "blocked"]
     });
+    expect(result.checks.find((check) => check.name === "PyPI long-description instruction decoy")?.data).toMatchObject({
+      recommendedId: null,
+      topGates: ["blocked"]
+    });
+    expect(result.checks.find((check) => check.name === "GitHub README instruction decoy")?.data).toMatchObject({
+      recommendedId: null,
+      topGates: ["blocked"]
+    });
+    expect(result.checks.find((check) => check.name === "Source repository mismatch decoy")?.data).toMatchObject({
+      recommendedId: "npm:zod"
+    });
+    expect(result.checks.find((check) => check.name === "Source repository mismatch decoy")?.data?.topIds).toContain("npm:zod-helper");
     expect(result.checks.find((check) => check.name === "Embedding model")?.data?.topGates).toContain("blocked");
     expect(result.checks.find((check) => check.name === "Embedding model")?.data?.topIds).toContain("huggingface-model:evil/model-card-injection");
     expect(result.checks.find((check) => check.name === "Partial source outage")?.data?.sourceSummary).toEqual({
