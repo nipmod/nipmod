@@ -6358,6 +6358,104 @@ body {
   margin: 0;
 }
 
+.benchmark-category-list {
+  display: grid;
+  gap: 16px;
+}
+
+.benchmark-category-panel {
+  border: 1px solid var(--docs-line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.benchmark-category-panel header {
+  border-bottom: 1px solid var(--docs-line-soft);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
+  padding-bottom: 16px;
+}
+
+.benchmark-category-panel header span {
+  color: var(--docs-faint);
+  display: block;
+  font-family: var(--docs-ui);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.benchmark-category-panel h3 {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.12;
+  margin: 7px 0 0;
+}
+
+.benchmark-category-panel p {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 15.5px;
+  line-height: 1.62;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.benchmark-category-bars {
+  display: grid;
+  gap: 9px;
+}
+
+.benchmark-category-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(126px, 0.45fr) minmax(160px, 1fr) 46px;
+}
+
+.benchmark-category-row strong,
+.benchmark-category-row b {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.benchmark-category-row b {
+  font-size: 14px;
+  text-align: right;
+}
+
+.benchmark-category-bar {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px) 0 0 / 25% 100%,
+    rgba(255, 255, 255, 0.045);
+  border-radius: 999px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.benchmark-category-bar span {
+  background: linear-gradient(90deg, #8fbf9a, #d8b56d);
+  display: block;
+  height: 100%;
+}
+
+.benchmark-category-row-primary .benchmark-category-bar span {
+  background: linear-gradient(90deg, #8fbf9a, #e2bd77);
+}
+
+.benchmark-category-row:not(.benchmark-category-row-primary) .benchmark-category-bar span {
+  opacity: 0.82;
+}
+
 .benchmark-panel {
   border-top: 1px solid var(--docs-line);
   display: grid;
@@ -6416,6 +6514,19 @@ body {
 
   .benchmark-scorebar {
     min-height: 210px;
+  }
+
+  .benchmark-category-panel header,
+  .benchmark-category-row {
+    grid-template-columns: 1fr;
+  }
+
+  .benchmark-category-row {
+    gap: 7px;
+  }
+
+  .benchmark-category-row b {
+    text-align: left;
   }
 }
 
