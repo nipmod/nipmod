@@ -373,6 +373,7 @@ const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
 const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["undici", "got"], pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i },
   { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
+  { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
   { names: ["next", "vite"], pattern: /\b(web app|web framework|frontend|react app|vite|next)\b/i },
   { names: ["prisma", "pg"], pattern: /\b(database|postgres|postgresql|sql|orm|prisma)\b/i },
   { names: ["vitest", "playwright"], pattern: /\b(test|testing|e2e|browser automation|quality)\b/i },
@@ -391,6 +392,7 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["sqlalchemy", "psycopg", "asyncpg"], pattern: /\b(database|postgres|postgresql|sql|orm)\b/i },
   { names: ["transformers", "torch", "sentence-transformers"], pattern: /\b(ai|ml|model|embedding|transformer|llm)\b/i },
   { names: ["pillow", "opencv-python", "scikit-image", "cairosvg"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i },
+  { names: ["pillow"], pattern: /\b(pil|pillow)\b/i },
   { names: ["cryptography", "pyjwt", "passlib"], pattern: /\b(auth|jwt|token|crypto|cryptography|password|security)\b/i },
   { names: ["pydantic", "marshmallow", "jsonschema"], pattern: /\b(schema|validate|validation|json schema|typed)\b/i },
   { names: ["celery", "dramatiq", "rq"], pattern: /\b(queue|worker|background job|task queue|jobs)\b/i }
@@ -415,6 +417,13 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 13, name: "httpx", reason: "Python HTTP client fit", source: "pypi" }
     ],
     pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "ethers", reason: "Ethereum wallet library fit", source: "npm" },
+      { bonus: 13, name: "viem", reason: "Ethereum wallet library fit", source: "npm" }
+    ],
+    pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i
   },
   {
     matches: [
@@ -491,7 +500,7 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 12, name: "opencv-python", reason: "computer vision image workflow fit", source: "pypi" },
       { bonus: 11, name: "cairosvg", reason: "SVG conversion fit", source: "pypi" }
     ],
-    pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i
+    pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render|pil|pillow)\b/i
   }
 ];
 const MCP_REGISTRY_BOOTSTRAP_SERVERS: UnknownRecord[] = [
@@ -1299,8 +1308,9 @@ async function searchPyPi(query: string, fetchImpl: typeof fetch, timeoutMs: num
 function pyPiCandidateNames(query: string): string[] {
   const normalized = normalizeName(query);
   const baseNames = [normalized, normalized.replace(/\s+/g, "-"), normalized.replace(/\s+/g, "_")];
+  const confusionName = PYPI_CONFUSION_NAMES[normalized.toLowerCase()];
   const hintNames = PYPI_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
-  return [...new Set([...baseNames, ...hintNames].map(normalizeName).filter(Boolean))].slice(0, 10);
+  return [...new Set([...baseNames, confusionName, ...hintNames].map((name) => normalizeName(name ?? "")).filter(Boolean))].slice(0, 10);
 }
 
 async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: number): Promise<ExternalPackageRecord | null> {

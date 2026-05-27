@@ -7,7 +7,7 @@ The hosted API stays read-only. It can search, inspect and return install plans,
 ## Eight-part buildout
 
 1. Search quality benchmark
-   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP and partial source outages.
+   - Fixed offline benchmark cases cover npm, PyPI, Hugging Face models, MCP, partial source outages, dependency-confusion lookalikes, PyPI confusion aliases, remote-code model decoys and crypto-drainer package decoys.
    - The benchmark measures expected rank, recall at 1, recall at 3, mean reciprocal rank, blocked recommendations and missing intent reasons.
    - Run with `pnpm search:benchmark`.
 
