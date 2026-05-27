@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T15:32:36.000Z",
+  generatedAt: "2026-05-27T15:53:21.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
     meanReciprocalRank: 1,
     missingExpectedIntentReasonCount: 0,
-    pass: 20,
+    pass: 23,
     recallAt1: 1,
     recallAt3: 1,
-    total: 20
+    total: 23
   },
   gates: [
     "expected package appears within max rank",
@@ -27,7 +27,10 @@ export const sourceQualityBenchmark = {
     "publisher-continuity warnings can force npm candidates into review",
     "runtime/source intent prevents cross-registry name impersonation from winning",
     "model-card instruction decoys are blocked as untrusted metadata",
-    "multi-source outages remain partial when at least one safe source returns records"
+    "multi-source outages remain partial when at least one safe source returns records",
+    "PyPI long-description instruction decoys are blocked as untrusted metadata",
+    "GitHub README instruction decoys are blocked as untrusted metadata",
+    "source-repository mismatch decoys do not beat canonical packages"
   ],
   notClaimed: [
     "malware-free guarantee",

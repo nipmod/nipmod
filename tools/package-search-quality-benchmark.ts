@@ -58,7 +58,7 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     query: "schema validation",
     requiredIntentReason: "query intent match: TypeScript schema validation fit",
     sources: ["npm"],
-    forbiddenRecommendedIds: ["npm:metadata-injection"]
+    forbiddenRecommendedIds: ["npm:metadata-injection", "npm:zod-helper"]
   },
   {
     expectedId: "pypi:pydantic",
@@ -131,7 +131,7 @@ const DEFAULT_CASES: BenchmarkCase[] = [
   {
     expectedId: "npm:zod",
     expectedRecommendedId: "npm:zod",
-    forbiddenRecommendedIds: ["npm:metadata-injection", "npm:risky-lifecycle"],
+    forbiddenRecommendedIds: ["npm:metadata-injection", "npm:risky-lifecycle", "npm:zod-helper"],
     limit: 3,
     maxRank: 1,
     name: "Unsafe popular decoy",
@@ -255,10 +255,41 @@ const DEFAULT_CASES: BenchmarkCase[] = [
   {
     expectedId: "npm:zod",
     expectedRecommendedId: "npm:zod",
-    forbiddenRecommendedIds: ["npm:metadata-obfuscated"],
+    forbiddenRecommendedIds: ["npm:metadata-obfuscated", "npm:zod-helper"],
     limit: 4,
     maxRank: 1,
     name: "Obfuscated metadata instruction decoy",
+    query: "schema validation",
+    requiredIntentReason: "query intent match: TypeScript schema validation fit",
+    sources: ["npm"]
+  },
+  {
+    expectedGate: "blocked",
+    expectedId: "pypi:schema-description-injection",
+    expectedRecommendedId: null,
+    limit: 3,
+    maxRank: 1,
+    name: "PyPI long-description instruction decoy",
+    query: "schema-description-injection",
+    sources: ["pypi"]
+  },
+  {
+    expectedGate: "blocked",
+    expectedId: "github:evil/readme-injection",
+    expectedRecommendedId: null,
+    limit: 3,
+    maxRank: 1,
+    name: "GitHub README instruction decoy",
+    query: "readme injection tool",
+    sources: ["github"]
+  },
+  {
+    expectedId: "npm:zod",
+    expectedRecommendedId: "npm:zod",
+    forbiddenRecommendedIds: ["npm:zod-helper"],
+    limit: 5,
+    maxRank: 1,
+    name: "Source repository mismatch decoy",
     query: "schema validation",
     requiredIntentReason: "query intent match: TypeScript schema validation fit",
     sources: ["npm"]
