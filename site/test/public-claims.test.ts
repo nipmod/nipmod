@@ -11,7 +11,12 @@ const unsupportedClaimPatterns = [
   new RegExp(`decentralized ${legacyRegistryWord}`, "i"),
   new RegExp(`${legacyRegistryWord} for agents`, "i"),
   /approved by Gitlawb/i,
-  /endorsed by Gitlawb/i
+  /endorsed by Gitlawb/i,
+  /approved by Clawnch/i,
+  /endorsed by Clawnch/i,
+  /Clawnch-approved/i,
+  /Clawnch endorsed/i,
+  /official Clawnch integration/i
 ];
 
 describe("public claim boundaries", () => {
