@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T15:53:21.000Z",
+  generatedAt: "2026-05-27T16:20:07.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
     meanReciprocalRank: 1,
     missingExpectedIntentReasonCount: 0,
-    pass: 23,
+    pass: 24,
     recallAt1: 1,
     recallAt3: 1,
-    total: 23
+    total: 24
   },
   gates: [
     "expected package appears within max rank",
@@ -30,7 +30,8 @@ export const sourceQualityBenchmark = {
     "multi-source outages remain partial when at least one safe source returns records",
     "PyPI long-description instruction decoys are blocked as untrusted metadata",
     "GitHub README instruction decoys are blocked as untrusted metadata",
-    "source-repository mismatch decoys do not beat canonical packages"
+    "source-repository mismatch decoys do not beat canonical packages",
+    "TrapDoor-style crypto developer environment decoys are blocked before recommendation"
   ],
   notClaimed: [
     "malware-free guarantee",

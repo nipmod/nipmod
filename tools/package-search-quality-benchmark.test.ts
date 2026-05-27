@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 23
+      total: 24
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -33,6 +33,13 @@ describe("package search quality benchmark", () => {
     expect(result.checks.find((check) => check.name === "npm publisher continuity decoy")?.data?.topGates).toContain("review");
     expect(result.checks.find((check) => check.name === "Cross-registry package name impersonation")?.data?.recommendedId).toBe("pypi:requests");
     expect(result.checks.find((check) => check.name === "npm namespace confusion scoped SDK")?.data?.recommendedId).toBe("npm:@solana/web3.js");
+    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data).toMatchObject({
+      recommendedId: "npm:@solana/web3.js"
+    });
+    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data?.topGates).toContain("blocked");
+    expect(result.checks.find((check) => check.name === "TrapDoor crypto developer environment decoy")?.data?.topIds).toContain(
+      "npm:trapdoor-wallet-helper"
+    );
     expect(result.checks.find((check) => check.name === "Obfuscated metadata instruction decoy")?.data).toMatchObject({
       recommendedId: "npm:zod",
       topGates: ["pass", "pass", "review", "blocked"]

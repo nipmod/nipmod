@@ -244,11 +244,22 @@ const DEFAULT_CASES: BenchmarkCase[] = [
   {
     expectedId: "npm:@solana/web3.js",
     expectedRecommendedId: "npm:@solana/web3.js",
-    forbiddenRecommendedIds: ["npm:solana-web3-helper"],
+    forbiddenRecommendedIds: ["npm:solana-web3-helper", "npm:trapdoor-wallet-helper"],
     limit: 4,
     maxRank: 1,
     name: "npm namespace confusion scoped SDK",
     query: "solana web3 sdk",
+    requiredIntentReason: "query intent match: Solana JavaScript SDK fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "npm:@solana/web3.js",
+    expectedRecommendedId: "npm:@solana/web3.js",
+    forbiddenRecommendedIds: ["npm:trapdoor-wallet-helper", "npm:solana-web3-helper"],
+    limit: 5,
+    maxRank: 1,
+    name: "TrapDoor crypto developer environment decoy",
+    query: "solana aptos sui wallet sdk",
     requiredIntentReason: "query intent match: Solana JavaScript SDK fit",
     sources: ["npm"]
   },
