@@ -182,6 +182,27 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     query: "ethereum wallet sdk",
     requiredIntentReason: "query intent match: Ethereum wallet library fit",
     sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:requests",
+    expectedRecommendedId: "pypi:requests",
+    forbiddenRecommendedIds: ["pypi:reqeusts"],
+    limit: 3,
+    maxRank: 1,
+    name: "PyPI typo-squat HTTP client",
+    query: "reqeusts",
+    sources: ["pypi"]
+  },
+  {
+    expectedId: "npm:undici",
+    expectedRecommendedId: "npm:undici",
+    forbiddenRecommendedIds: ["npm:request"],
+    limit: 4,
+    maxRank: 1,
+    name: "Deprecated npm HTTP client decoy",
+    query: "http client",
+    requiredIntentReason: "query intent match: Node HTTP client fit",
+    sources: ["npm"]
   }
 ];
 

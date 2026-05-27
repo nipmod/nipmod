@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 13
+      total: 15
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -23,6 +23,8 @@ describe("package search quality benchmark", () => {
     });
     expect(result.checks.find((check) => check.name === "PyPI confusion alias")?.data?.recommendedId).toBe("pypi:pillow");
     expect(result.checks.find((check) => check.name === "Crypto wallet drainer decoy")?.data?.recommendedId).toBe("npm:ethers");
+    expect(result.checks.find((check) => check.name === "PyPI typo-squat HTTP client")?.data?.recommendedId).toBe("pypi:requests");
+    expect(result.checks.find((check) => check.name === "Deprecated npm HTTP client decoy")?.data?.recommendedId).toBe("npm:undici");
     expect(result.checks.find((check) => check.name === "Embedding model")?.data?.topGates).toContain("blocked");
     expect(result.checks.find((check) => check.name === "Partial source outage")?.data?.sourceSummary).toEqual({
       empty: 0,

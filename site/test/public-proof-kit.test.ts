@@ -47,8 +47,8 @@ describe("public agent proof kit", () => {
     expect(sourceQualityBenchmark.summary).toMatchObject({
       blockedRecommendedCount: 0,
       fail: 0,
-      pass: 13,
-      total: 13
+      pass: 15,
+      total: 15
     });
     expect(sourceQualityBenchmark.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.95);
     expect(sourceQualityBenchmark.notClaimed).toContain("malware-free guarantee");

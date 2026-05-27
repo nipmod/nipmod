@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T14:12:48.097Z",
+  generatedAt: "2026-05-27T14:40:47.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
-    meanReciprocalRank: 0.962,
+    meanReciprocalRank: 0.967,
     missingExpectedIntentReasonCount: 0,
-    pass: 13,
-    recallAt1: 0.923,
+    pass: 15,
+    recallAt1: 0.933,
     recallAt3: 1,
-    total: 13
+    total: 15
   },
   gates: [
     "expected package appears within max rank",

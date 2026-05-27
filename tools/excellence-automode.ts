@@ -201,7 +201,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
       `recall@3 ${summary.recallAt3}`,
       `${summary.blockedRecommendedCount} blocked recommendations`
     ],
-    next: passed ? ["Expand the corpus further with typo-squat, abandonware and multilingual prompt-injection cases."] : benchmark.checks.filter((check) => check.status === "fail").map((check) => `${check.name}: ${check.error ?? "failed"}`),
+    next: passed ? ["Expand the corpus further with namespace-confusion, mixed-source ambiguity and obfuscated metadata cases."] : benchmark.checks.filter((check) => check.status === "fail").map((check) => `${check.name}: ${check.error ?? "failed"}`),
     question: "Do relevant safe candidates beat popularity and malicious-looking decoys?",
     status: passed ? "pass" : "fail"
   };

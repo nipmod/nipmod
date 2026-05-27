@@ -403,6 +403,7 @@ const PYPI_CONFUSION_NAMES: Record<string, string> = {
   "dotenv": "python-dotenv",
   "pil": "pillow",
   "pycrypto": "cryptography",
+  "reqeusts": "requests",
   "sklearn": "scikit-learn"
 };
 const QUERY_INTENT_RANKING_HINTS: Array<{
@@ -4231,6 +4232,9 @@ function versionIntelligenceWarnings(sourceLabel: string, info: VersionIntellige
     ...(info.latestPublishAgeHours !== null && info.latestPublishAgeHours <= 48
       ? [`${sourceLabel} latest release was published within the last 48 hours; review before production use.`]
       : []),
+    ...(info.latestPublishAgeHours !== null && info.latestPublishAgeHours >= 17_520
+      ? [`${sourceLabel} latest release is older than 730 days; review maintenance status before production use.`]
+      : []),
     ...(info.recentVersionCount30d >= 20
       ? [`${sourceLabel} shows high release velocity with ${info.recentVersionCount30d} versions in the last 30 days.`]
       : []),
@@ -4244,6 +4248,9 @@ function versionIntelligencePenalty(info: VersionIntelligence): number {
   let penalty = 0;
   if (info.latestPublishAgeHours !== null && info.latestPublishAgeHours <= 48) {
     penalty -= 6;
+  }
+  if (info.latestPublishAgeHours !== null && info.latestPublishAgeHours >= 17_520) {
+    penalty -= 8;
   }
   if (info.recentVersionCount30d >= 20) {
     penalty -= 6;
