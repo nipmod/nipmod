@@ -8,8 +8,12 @@ describe("excellence automode", () => {
     expect(result.type).toBe("dev.nipmod.excellence-automode.v1");
     expect(result.ok).toBe(true);
     expect(result.summary.fail).toBe(0);
-    expect(result.summary.pass).toBeGreaterThanOrEqual(10);
+    expect(result.summary.pass).toBeGreaterThanOrEqual(11);
     expect(result.summary.score).toBeGreaterThanOrEqual(95);
+    expect(result.checks).toContainEqual(expect.objectContaining({
+      question: "Are public API and admin surfaces closed by default?",
+      status: "pass"
+    }));
     expect(result.checks.map((check) => check.category)).toEqual(expect.arrayContaining([
       "archive",
       "claims",
