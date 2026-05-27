@@ -5,6 +5,7 @@ import { GET as resolveGet } from "../app/api/resolve/route";
 import { GET as searchGet } from "../app/api/search/route";
 import {
   createExternalInstallPlan,
+  externalSourceCapabilities,
   externalSourceRequestHeaders,
   inspectExternalPackage,
   resetExternalSourceRuntimeStateForTests,
@@ -1220,6 +1221,28 @@ describe("external package resolver", () => {
     });
     expect(externalSourceRequestHeaders("https://pypi.org/pypi/requests/json")).toMatchObject({
       accept: "application/json"
+    });
+  });
+
+  test("uses GitHub Actions token fallback for GitHub source auth", () => {
+    expect(
+      externalSourceRequestHeaders("https://api.github.com/repos/nipmod/nipmod", {
+        GITHUB_TOKEN: "actions-token"
+      })
+    ).toMatchObject({
+      authorization: "Bearer actions-token"
+    });
+    expect(
+      externalSourceRequestHeaders("https://api.github.com/repos/nipmod/nipmod", {
+        GITHUB_TOKEN: "actions-token",
+        NIPMOD_GITHUB_TOKEN: "source-token"
+      })
+    ).toMatchObject({
+      authorization: "Bearer source-token"
+    });
+    expect(externalSourceCapabilities({ GITHUB_TOKEN: "actions-token" }).find((source) => source.source === "github")).toMatchObject({
+      access: "public-with-optional-token",
+      authConfigured: true
     });
   });
 });

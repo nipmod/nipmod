@@ -731,10 +731,11 @@ export function parseExternalSources(value: string | null): ExternalPackageSourc
 }
 
 export function externalSourceCapabilities(env: Record<string, string | undefined> = process.env): ExternalSourceCapability[] {
+  const githubToken = env.NIPMOD_GITHUB_TOKEN ?? env.GITHUB_TOKEN;
   return [
     sourceCapability("npm", "package-registry", "registry.npmjs.org", false),
     sourceCapability("pypi", "package-registry", "pypi.org", false),
-    sourceCapability("github", "source-repo", "api.github.com", Boolean(env.NIPMOD_GITHUB_TOKEN)),
+    sourceCapability("github", "source-repo", "api.github.com", Boolean(githubToken)),
     sourceCapability(
       "huggingface-model",
       "model-hub",
@@ -3573,8 +3574,9 @@ function sourceAuthHeader(url: string, env: Record<string, string | undefined>):
   } catch {
     return null;
   }
-  if (hostname === "api.github.com" && env.NIPMOD_GITHUB_TOKEN) {
-    return `Bearer ${env.NIPMOD_GITHUB_TOKEN}`;
+  const githubToken = env.NIPMOD_GITHUB_TOKEN ?? env.GITHUB_TOKEN;
+  if (hostname === "api.github.com" && githubToken) {
+    return `Bearer ${githubToken}`;
   }
   if (hostname === "huggingface.co" && (env.NIPMOD_HUGGINGFACE_TOKEN || env.HF_TOKEN)) {
     return `Bearer ${env.NIPMOD_HUGGINGFACE_TOKEN ?? env.HF_TOKEN}`;

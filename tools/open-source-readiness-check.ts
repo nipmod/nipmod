@@ -148,6 +148,7 @@ check("public-api:contract-canary", () => publicApiSpec.includes("pnpm api:contr
 check("public-api:archive-depth-canary", () => publicApiSpec.includes("pnpm archive:canary"));
 check("public-api:archive-drift-review", () => publicApiSpec.includes("pnpm archive:drift"));
 check("public-api:scheduled-archive-drift-review", () => archiveDriftWorkflow.includes("archive:drift") && archiveDriftWorkflow.includes("archive-drift-review.json"));
+check("public-api:scheduled-github-source-token", () => archiveDriftWorkflow.includes("NIPMOD_GITHUB_TOKEN") && archiveDriftWorkflow.includes("github.token"));
 check(
   "public-api:scheduled-canary-secret",
   () =>
