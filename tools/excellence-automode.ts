@@ -194,7 +194,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
     summary.missingExpectedIntentReasonCount === 0;
   return {
     answer: passed
-      ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys, source-intent ambiguity, README/model-card/long-description injection, source-repository mismatch and multi-source outage."
+      ? "Search ranking passes the offline adversarial benchmark, including unsafe decoys, source-intent ambiguity, README/model-card/long-description injection, source-repository mismatch, maintainer compromise, package takeover timelines and multi-source outage."
       : "Search ranking did not pass the current quality gates.",
     category: "search",
     evidence: [
@@ -205,7 +205,7 @@ function searchBenchmarkCheck(benchmark: Awaited<ReturnType<typeof runPackageSea
       `${summary.blockedRecommendedCount} blocked recommendations`
     ],
     next: passed
-      ? ["Expand the corpus further with maintainer compromise narratives and package takeover timelines."]
+      ? ["Expand the corpus further with real-world advisory-derived fixtures and registry-specific takeover variants."]
       : benchmark.checks.filter((check) => check.status === "fail").map((check) => `${check.name}: ${check.error ?? "failed"}`),
     question: "Do relevant safe candidates beat popularity and malicious-looking decoys?",
     status: passed ? "pass" : "fail"
@@ -285,7 +285,7 @@ function promptBoundaryCheck(commandSafety: string, llms: string, benchmarkFixtu
       "README and long-description fixtures"
     ],
     next: required.every(Boolean)
-      ? ["Add maintainer compromise and package takeover fixtures to the benchmark corpus."]
+      ? ["Add real-world advisory-derived fixtures for more package metadata injection variants."]
       : ["Restore scanner, llms or benchmark prompt-injection coverage."],
     question: "Can package text turn into agent instructions?",
     status: required.every(Boolean) ? "pass" : "fail"
