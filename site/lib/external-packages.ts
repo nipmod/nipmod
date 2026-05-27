@@ -2193,7 +2193,7 @@ async function fetchMcpServers(
 
   const bootstrap = MCP_REGISTRY_BOOTSTRAP_SERVERS.filter((item) => {
     const record = mcpRecord(item);
-    return record ? [record.name, record.displayName, record.description].join(" ").toLowerCase().includes(normalizedQuery) : false;
+    return record ? queryTokensMatch([record.name, record.displayName, record.description].join(" ").toLowerCase(), normalizedQuery) : false;
   });
   if (bootstrap.length > 0) {
     return bootstrap;
