@@ -11,6 +11,13 @@ describe("archive drift review summary", () => {
       results: [
         {
           baselineDigestPrefix: "aaaaaaaaaaaa",
+          changeSummary: {
+            high: 0,
+            highestSeverity: "medium",
+            low: 0,
+            medium: 1,
+            paths: ["license"]
+          },
           currentDigestPrefix: "bbbbbbbbbbbb",
           id: "pkgintel_1",
           name: "owner/package",
@@ -30,7 +37,16 @@ describe("archive drift review summary", () => {
           id: "pkgintel_3",
           name: "react",
           source: "npm",
-          status: "fresh"
+          status: "fresh",
+          trustChange: {
+            currentDecision: "usable_with_warning",
+            currentScore: 64,
+            previousDecision: "recommended",
+            previousScore: 92,
+            severity: "medium"
+          },
+          trustDecision: "usable_with_warning",
+          trustScore: 64
         }
       ],
       summary: {
@@ -47,9 +63,9 @@ describe("archive drift review summary", () => {
     expect(rendered).toContain("## Archive drift review");
     expect(rendered).toContain("| Changed | 1 |");
     expect(rendered).toContain("| Failed | 1 |");
-    expect(rendered).toContain("| github | owner/package | changed | recommended 92 | aaaaaaaaaaaa -> bbbbbbbbbbbb |  |");
-    expect(rendered).toContain("| github | modelcontextprotocol/servers | failed |  |  | source_rejected 502 |");
-    expect(rendered).not.toContain("react");
+    expect(rendered).toContain("| github | owner/package | changed | medium | recommended 92 | license | aaaaaaaaaaaa -> bbbbbbbbbbbb |  |");
+    expect(rendered).toContain("| github | modelcontextprotocol/servers | failed |  |  |  |  | source_rejected 502 |");
+    expect(rendered).toContain("| npm | react | fresh | medium | usable_with_warning 64 | trust recommended 92 -> usable_with_warning 64 |  |  |");
   });
 
   test("parses payloads with accidental package-manager banners", () => {
@@ -86,6 +102,13 @@ describe("archive drift review summary", () => {
       results: [
         {
           baselineDigestPrefix: "aaaaaaaaaaaa",
+          changeSummary: {
+            high: 1,
+            highestSeverity: "high",
+            low: 0,
+            medium: 0,
+            paths: ["name|bad", "repo\\bad"]
+          },
           currentDigestPrefix: "bbbbbbbbbbbb",
           id: "pkgintel_1",
           name: "owner/pkg|name\\with-slash",

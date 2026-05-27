@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import {
   ExternalPackageError,
@@ -10,6 +11,7 @@ import {
   createPackageIntelligenceRecord,
   ensurePackageIntelligenceEvidence,
   mergePackageIntelligenceRecords,
+  packageIntelligenceSourceDriftMaterial,
   validatePackageIntelligenceRecord,
   type PackageIntelligenceRecord
 } from "../site/lib/package-intelligence.ts";
@@ -17,6 +19,39 @@ import { canaryAuthHeaders, readCanaryApiKey } from "./canary-auth.ts";
 
 const DEFAULT_BASE_URL = "https://nipmod.com";
 const DEFAULT_LIMIT = 50;
+
+type ArchiveDriftChangeSeverity = "high" | "low" | "medium";
+type ArchiveDriftChangeCategory = "freshness" | "identity" | "install" | "metadata";
+
+interface ArchiveDriftField {
+  category: ArchiveDriftChangeCategory;
+  path: string;
+  severity: ArchiveDriftChangeSeverity;
+}
+
+interface ArchiveDriftChange {
+  category: ArchiveDriftChangeCategory;
+  current: string | null;
+  path: string;
+  previous: string | null;
+  severity: ArchiveDriftChangeSeverity;
+}
+
+interface ArchiveDriftChangeSummary {
+  high: number;
+  highestSeverity: ArchiveDriftChangeSeverity | null;
+  low: number;
+  medium: number;
+  paths: string[];
+}
+
+interface ArchiveDriftTrustChange {
+  currentDecision: ExternalPackageRecord["trust"]["decision"];
+  currentScore: number;
+  previousDecision: ExternalPackageRecord["trust"]["decision"];
+  previousScore: number;
+  severity: ArchiveDriftChangeSeverity;
+}
 
 export interface ArchiveDriftReviewOptions {
   apiKey?: string;
@@ -90,14 +125,19 @@ async function reviewRecord(
     const reviewed = mergePackageIntelligenceRecords(record, currentRecord);
     const drift = reviewed.evidence.sourceDrift;
     const validation = validatePackageIntelligenceRecord(reviewed);
+    const changes = drift.changed ? sourceDriftChanges(record.sourceRecord, currentExternalRecord) : [];
+    const trustChange = describeTrustChange(record, reviewed, validation.ok);
     return {
       baselineDigestPrefix: drift.baselineSourceRecordDigest.slice(0, 12),
       changed: drift.changed,
+      changeSummary: summarizeChanges(changes),
+      changes,
       currentDigestPrefix: drift.currentSourceRecordDigest.slice(0, 12),
       id: record.id,
       name: record.name,
       source: record.source,
       status: drift.status,
+      trustChange,
       trustDecision: reviewed.trust.decision,
       trustScore: reviewed.trust.score,
       validationOk: validation.ok,
@@ -112,6 +152,125 @@ async function reviewRecord(
       status: "failed" as const
     };
   }
+}
+
+const DRIFT_FIELDS: ArchiveDriftField[] = [
+  { category: "identity", path: "id", severity: "high" },
+  { category: "identity", path: "source", severity: "high" },
+  { category: "identity", path: "sourceKind", severity: "high" },
+  { category: "identity", path: "name", severity: "high" },
+  { category: "identity", path: "originalUrl", severity: "high" },
+  { category: "identity", path: "registryUrl", severity: "high" },
+  { category: "identity", path: "repo", severity: "high" },
+  { category: "install", path: "install.manager", severity: "high" },
+  { category: "install", path: "install.command", severity: "high" },
+  { category: "install", path: "install.commands", severity: "high" },
+  { category: "metadata", path: "owner", severity: "medium" },
+  { category: "metadata", path: "license", severity: "medium" },
+  { category: "metadata", path: "version", severity: "medium" },
+  { category: "metadata", path: "displayName", severity: "low" },
+  { category: "freshness", path: "updatedAt", severity: "low" }
+];
+
+function sourceDriftChanges(previousRecord: ExternalPackageRecord, currentRecord: ExternalPackageRecord): ArchiveDriftChange[] {
+  const previous = packageIntelligenceSourceDriftMaterial(previousRecord);
+  const current = packageIntelligenceSourceDriftMaterial(currentRecord);
+  return DRIFT_FIELDS.flatMap((field) => {
+    const previousValue = materialValue(previous, field.path);
+    const currentValue = materialValue(current, field.path);
+    if (JSON.stringify(previousValue ?? null) === JSON.stringify(currentValue ?? null)) {
+      return [];
+    }
+    return [
+      {
+        category: field.category,
+        current: formatChangeValue(currentValue),
+        path: field.path,
+        previous: formatChangeValue(previousValue),
+        severity: field.severity
+      }
+    ];
+  });
+}
+
+function summarizeChanges(changes: ArchiveDriftChange[]): ArchiveDriftChangeSummary {
+  const summary: ArchiveDriftChangeSummary = {
+    high: 0,
+    highestSeverity: null,
+    low: 0,
+    medium: 0,
+    paths: changes.map((change) => change.path)
+  };
+  for (const change of changes) {
+    summary[change.severity] += 1;
+    summary.highestSeverity = higherSeverity(summary.highestSeverity, change.severity);
+  }
+  return summary;
+}
+
+function describeTrustChange(
+  previous: PackageIntelligenceRecord,
+  current: PackageIntelligenceRecord,
+  validationOk: boolean
+): ArchiveDriftTrustChange | null {
+  const previousDecision = previous.trust.decision;
+  const currentDecision = current.trust.decision;
+  const previousScore = previous.trust.score;
+  const currentScore = current.trust.score;
+  if (previousDecision === currentDecision && previousScore === currentScore) {
+    return null;
+  }
+  const scoreDrop = previousScore - currentScore;
+  const severity: ArchiveDriftChangeSeverity =
+    !validationOk || currentDecision === "avoid" || current.trust.risk === "high" || scoreDrop >= 30
+      ? "high"
+      : currentDecision !== previousDecision || scoreDrop >= 15
+        ? "medium"
+        : "low";
+  return {
+    currentDecision,
+    currentScore,
+    previousDecision,
+    previousScore,
+    severity
+  };
+}
+
+function higherSeverity(
+  previous: ArchiveDriftChangeSeverity | null,
+  current: ArchiveDriftChangeSeverity
+): ArchiveDriftChangeSeverity {
+  const rank: Record<ArchiveDriftChangeSeverity, number> = { high: 3, medium: 2, low: 1 };
+  return !previous || rank[current] > rank[previous] ? current : previous;
+}
+
+function materialValue(value: unknown, path: string): unknown {
+  let cursor = value;
+  for (const segment of path.split(".")) {
+    if (!cursor || typeof cursor !== "object" || Array.isArray(cursor)) {
+      return undefined;
+    }
+    cursor = (cursor as Record<string, unknown>)[segment];
+  }
+  return cursor;
+}
+
+function formatChangeValue(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const serialized = JSON.stringify(value);
+  const raw = Array.isArray(value)
+    ? value.join(" | ")
+    : typeof value === "string" || typeof value === "number" || typeof value === "boolean"
+      ? String(value)
+      : JSON.stringify(value);
+  const normalized = raw.replace(/\s+/g, " ").trim();
+  if (normalized.length <= 160 && !Array.isArray(value)) {
+    return normalized;
+  }
+  const preview = normalized.length > 120 ? `${normalized.slice(0, 117)}...` : normalized;
+  return `${preview} [sha256:${createHash("sha256").update(serialized).digest("hex").slice(0, 12)}]`;
 }
 
 async function fetchArchiveRecords(baseUrl: string, limit: number, apiKey: string, fetchFn: typeof fetch): Promise<PackageIntelligenceRecord[]> {

