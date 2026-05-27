@@ -25,12 +25,17 @@ export default function BenchmarkPage() {
       ]}
       title="Agent package-decision depth."
     >
-      <DocsSection eyebrow="Scoreboard" title="Latest production run">
-        <div className="benchmark-scoreboard">
-          {tracks.map((track) => (
-            <BenchmarkRow key={track.name} track={track} />
-          ))}
+      <DocsSection eyebrow="Comparison" title="Agent preflight benchmark">
+        <div className="benchmark-article-lede">
+          <p>
+            This benchmark measures the moment before an agent installs, pulls or reuses external code. The question is not whether a tool can find one advisory or one repository signal. The question is how much usable evidence an agent receives before it crosses the install boundary.
+          </p>
+          <p>
+            Nipmod is measured as an end-to-end preflight layer: search, inspect, source evidence, warnings and a read-only install plan. Other tracks are measured only by the evidence they expose.
+          </p>
         </div>
+
+        <BenchmarkChart tracks={tracks} />
       </DocsSection>
 
       <DocsSection eyebrow="Readout" title="What the numbers mean">
@@ -76,27 +81,55 @@ export default function BenchmarkPage() {
   );
 }
 
-function BenchmarkRow({ track }: { track: CompetitiveBenchmarkTrack }) {
-  const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
+function BenchmarkChart({ tracks }: { tracks: CompetitiveBenchmarkTrack[] }) {
   return (
-    <article className={`benchmark-row benchmark-row-${track.status}`}>
-      <div className="benchmark-row-head">
-        <div>
-          <h3>{track.name}</h3>
-          <p>{track.note}</p>
-        </div>
-        <strong>{track.score}</strong>
+    <div className="benchmark-chart" role="table" aria-label="Competitive benchmark score chart">
+      <div className="benchmark-chart-topline" aria-hidden="true">
+        <span>0</span>
+        <span>25</span>
+        <span>50</span>
+        <span>75</span>
+        <span>100</span>
       </div>
-      <div className="benchmark-bar" aria-label={`${track.name} score ${track.score} out of 100`}>
-        <span style={{ width: `${Math.max(2, Math.min(100, track.score))}%` }} />
+
+      <div className="benchmark-chart-head" role="row">
+        <span role="columnheader">Track</span>
+        <span role="columnheader">Score</span>
+        <span role="columnheader">Evidence</span>
+        <span role="columnheader">Warnings</span>
+        <span role="columnheader">Latency</span>
       </div>
-      <dl>
-        <div><dt>Coverage</dt><dd>{track.coveragePct}%</dd></div>
-        <div><dt>Checks</dt><dd>{track.pass}/{track.applicable}</dd></div>
-        <div><dt>Warnings</dt><dd>{track.warn}</dd></div>
-        <div><dt>Latency</dt><dd>{latency}</dd></div>
-      </dl>
-    </article>
+
+      {tracks.map((track) => {
+        const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
+        const width = `${Math.max(2, Math.min(100, track.score))}%`;
+
+        return (
+          <article className={`benchmark-chart-row benchmark-chart-row-${track.status}`} key={track.name} role="row">
+            <div className="benchmark-chart-track" role="cell">
+              <strong>{track.name}</strong>
+              <span>{track.note}</span>
+            </div>
+            <div className="benchmark-chart-bar" role="cell" aria-label={`${track.name} score ${track.score} out of 100`}>
+              <span className="benchmark-chart-fill" style={{ width }} />
+              <b>{track.score}</b>
+            </div>
+            <div className="benchmark-chart-metric" role="cell">
+              <span>{track.coveragePct}%</span>
+              <strong>{track.pass}/{track.applicable}</strong>
+            </div>
+            <div className="benchmark-chart-metric" role="cell">
+              <span>Warnings</span>
+              <strong>{track.warn}</strong>
+            </div>
+            <div className="benchmark-chart-metric" role="cell">
+              <span>Median</span>
+              <strong>{latency}</strong>
+            </div>
+          </article>
+        );
+      })}
+    </div>
   );
 }
 
