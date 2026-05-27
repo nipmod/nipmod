@@ -24,7 +24,7 @@ export function SiteHeader() {
           </svg>
         </SocialIcon>
         <SocialIcon href={homeContent.links.email} label="Email Nipmod" title="Email">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
+          <svg aria-hidden="true" className="brand-email-icon" viewBox="0 0 24 24">
             <path
               d="M4.75 6.5h14.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-8.5c0-.69.56-1.25 1.25-1.25Zm.62 1.5L12 12.64 18.63 8H5.37Zm-.37 1.43v6.57h14V9.43l-6.57 4.6a.75.75 0 0 1-.86 0L5 9.43Z"
               fill="currentColor"

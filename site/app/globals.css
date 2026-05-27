@@ -4289,6 +4289,11 @@ body {
   border-radius: 4px;
 }
 
+.brand-icon-button .brand-email-icon {
+  height: 24px;
+  width: 24px;
+}
+
 .brand-icon-button .brand-telegram-icon {
   height: 28px;
   width: 28px;
