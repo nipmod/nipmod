@@ -12,6 +12,7 @@ export const metadata = createPageMetadata({
 export default function BenchmarkPage() {
   const report = competitiveBenchmarkReport;
   const tracks = [...report.tracks].sort((left, right) => right.score - left.score);
+  const primaryTracks = tracks.filter((track) => track.name !== "Surplus");
   const nipmodTrack = tracks.find((track) => track.name === "Nipmod");
   if (!nipmodTrack) {
     throw new Error("Benchmark report is missing the Nipmod track.");
@@ -41,7 +42,19 @@ export default function BenchmarkPage() {
           </p>
         </div>
 
-        <BenchmarkChart tracks={tracks} />
+        <BenchmarkChart tracks={primaryTracks} />
+      </DocsSection>
+
+      <DocsSection eyebrow="Scope" title="What is measured">
+        <DocsTable
+          rows={[
+            ["7 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, MCP server and GitHub repository posture."],
+            ["16 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON, multi-source coverage and cost-market context."],
+            ["8 tracks", "Nipmod, native registries, OSV, deps.dev, OpenSSF Scorecard, Socket, Snyk and a raw agent baseline."],
+            ["1 reference", "Surplus is kept in the machine report as adjacent agent-infra context, not as a package-decision competitor."],
+            ["0 execution", "No package install, repository clone, artifact unpacking, model execution, paid inference call or workspace write is performed."]
+          ]}
+        />
       </DocsSection>
 
       <DocsSection eyebrow="Result" title="Measured result">
@@ -91,52 +104,49 @@ export default function BenchmarkPage() {
 
 function BenchmarkChart({ tracks }: { tracks: CompetitiveBenchmarkTrack[] }) {
   return (
-    <div className="benchmark-chart" role="table" aria-label="Competitive benchmark score chart">
-      <div className="benchmark-chart-topline" aria-hidden="true">
-        <span>0</span>
-        <span>25</span>
-        <span>50</span>
-        <span>75</span>
-        <span>100</span>
-      </div>
-
-      <div className="benchmark-chart-head" role="row">
+    <div className="benchmark-scoreboard" role="table" aria-label="Competitive benchmark score chart">
+      <div className="benchmark-scoreboard-head" role="row">
         <span role="columnheader">Track</span>
         <span role="columnheader">Score</span>
-        <span role="columnheader">Evidence</span>
+        <span role="columnheader">Checks</span>
         <span role="columnheader">Warnings</span>
         <span role="columnheader">Latency</span>
       </div>
 
-      {tracks.map((track) => {
-        const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
-        const width = `${Math.max(2, Math.min(100, track.score))}%`;
+      <div className="benchmark-scoreboard-grid">
+        {tracks.map((track) => {
+          const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
+          const height = `${Math.max(4, Math.min(100, track.score))}%`;
+          const isNipmod = track.name === "Nipmod";
 
-        return (
-          <article className={`benchmark-chart-row benchmark-chart-row-${track.status}`} key={track.name} role="row">
-            <div className="benchmark-chart-track" role="cell">
-              <strong>{track.name}</strong>
-              <span>{track.note}</span>
-            </div>
-            <div className="benchmark-chart-bar" role="cell" aria-label={`${track.name} score ${track.score} out of 100`}>
-              <span className="benchmark-chart-fill" style={{ width }} />
-              <b>{track.score}</b>
-            </div>
-            <div className="benchmark-chart-metric" role="cell">
-              <span>{track.coveragePct}%</span>
-              <strong>{track.pass}/{track.applicable}</strong>
-            </div>
-            <div className="benchmark-chart-metric" role="cell">
-              <span>Warnings</span>
-              <strong>{track.warn}</strong>
-            </div>
-            <div className="benchmark-chart-metric" role="cell">
-              <span>Median</span>
-              <strong>{latency}</strong>
-            </div>
-          </article>
-        );
-      })}
+          return (
+            <article className={`benchmark-scorecard benchmark-scorecard-${track.status}${isNipmod ? " benchmark-scorecard-primary" : ""}`} key={track.name} role="row">
+              <div className="benchmark-scorebar" role="cell" aria-label={`${track.name} score ${track.score} out of 100`}>
+                <span className="benchmark-scorebar-fill" style={{ height }} />
+                <b>{track.score}</b>
+              </div>
+              <div className="benchmark-scorecard-track" role="cell">
+                <strong>{track.name}</strong>
+                <span>{track.note}</span>
+              </div>
+              <dl className="benchmark-scorecard-metrics">
+                <div role="cell">
+                  <dt>Checks</dt>
+                  <dd>{track.pass}/{track.applicable}</dd>
+                </div>
+                <div role="cell">
+                  <dt>Warnings</dt>
+                  <dd>{track.warn}</dd>
+                </div>
+                <div role="cell">
+                  <dt>Median</dt>
+                  <dd>{latency}</dd>
+                </div>
+              </dl>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
