@@ -66,7 +66,15 @@ export async function runExcellenceAutomode(options: ExcellenceAutomodeOptions =
   checks.push(securityPatternCheck(files.commandSafety, files.scannerIntelligence, files.externalPackages));
   checks.push(promptBoundaryCheck(files.commandSafety, files.llms, files.benchmarkFixture));
   checks.push(installBoundaryCheck(files.installPlanRoute, files.installPlanCanary));
-  checks.push(archiveMemoryCheck(files.archivePrepareRoute, files.archiveConfirmRoute, files.archiveStatusRoute, files.archiveDepthCanary));
+  checks.push(
+    archiveMemoryCheck(
+      files.archivePrepareRoute,
+      files.archiveConfirmRoute,
+      files.archiveStatusRoute,
+      files.archiveDepthCanary,
+      files.archiveDriftWorkflow
+    )
+  );
   checks.push(operationsCheck(files.packageJson, files.ciWorkflow, files.codeqlWorkflow, files.dependencyReviewWorkflow, files.scorecardWorkflow));
   checks.push(publicClaimsCheck(files.llms, files.sourceQualityPage, files.integrationKitText));
 
@@ -322,7 +330,13 @@ function installBoundaryCheck(installPlanRoute: string, installPlanCanary: strin
   };
 }
 
-function archiveMemoryCheck(prepareRoute: string, confirmRoute: string, statusRoute: string, archiveCanary: string): ExcellenceCheck {
+function archiveMemoryCheck(
+  prepareRoute: string,
+  confirmRoute: string,
+  statusRoute: string,
+  archiveCanary: string,
+  archiveDriftWorkflow: string
+): ExcellenceCheck {
   const required = [
     prepareRoute.includes("preparedOnly"),
     prepareRoute.includes("stored: false"),
@@ -334,20 +348,25 @@ function archiveMemoryCheck(prepareRoute: string, confirmRoute: string, statusRo
     archiveCanary.includes("generatedFrom"),
     archiveCanary.includes("server-reinspected-source"),
     archiveCanary.includes("sourceDrift"),
-    archiveCanary.includes("source-drift-v1")
+    archiveCanary.includes("source-drift-v1"),
+    archiveDriftWorkflow.includes("archive:drift"),
+    archiveDriftWorkflow.includes("archive-drift-review.json")
   ];
   return {
-    answer: required.every(Boolean) ? "The archive path separates preview, dry-run confirmation, durable writes and server-side authorization." : "Archive memory gates are incomplete.",
+    answer: required.every(Boolean)
+      ? "The archive path separates preview, dry-run confirmation, durable writes, drift review and server-side authorization."
+      : "Archive memory gates are incomplete.",
     category: "archive",
     evidence: [
       "prepare does not persist",
       "confirm supports dry-run",
       "durable writes require authorized server writer",
       "archive canary verifies reinspection receipts",
-      "archive canary verifies source drift evidence"
+      "archive canary verifies source drift evidence",
+      "scheduled archive drift review"
     ],
     next: required.every(Boolean)
-      ? ["Add a scheduled archive drift review that re-inspects stored records and marks changed sources for operator review."]
+      ? ["Expand drift review with per-source trend history after enough archive records exist."]
       : ["Restore archive preview, dry-run, authorization or reinspection checks."],
     question: "Does the archive store only confirmed useful package intelligence records?",
     status: required.every(Boolean) ? "pass" : "fail"
@@ -435,6 +454,7 @@ async function readControlFiles() {
   const entries = {
     archiveConfirmRoute: "site/app/api/archive/confirm/route.ts",
     archiveDepthCanary: "tools/archive-depth-canary.ts",
+    archiveDriftWorkflow: ".github/workflows/archive-drift-review.yml",
     archivePrepareRoute: "site/app/api/archive/prepare/route.ts",
     archiveStatusRoute: "site/app/api/archive/status/route.ts",
     benchmarkFixture: "tools/package-search-quality-fixtures.ts",
