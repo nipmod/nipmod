@@ -7,6 +7,7 @@ import { GET as searchGet } from "../app/api/search/route";
 import {
   confirmPackageIntelligenceRecord,
   createPackageIntelligenceRecord,
+  ensurePackageIntelligenceEvidence,
   mergePackageIntelligenceRecords,
   packageIntelligenceLifecycleState,
   validatePackageIntelligenceRecord
@@ -40,8 +41,15 @@ describe("package intelligence archive", () => {
     expect(record.security.metadataIsInstruction).toBe(false);
     expect(record.evidence).toMatchObject({
       archivePolicy: "agent-confirmed-source-owned-v1",
-      generatedFrom: "server-reinspected-source"
+      generatedFrom: "server-reinspected-source",
+      sourceDrift: {
+        changed: false,
+        status: "fresh",
+        version: "source-drift-v1"
+      }
     });
+    expect(record.evidence.sourceDrift.baselineSourceRecordDigest).toBe(record.evidence.sourceRecordDigest);
+    expect(record.evidence.sourceDrift.currentSourceRecordDigest).toBe(record.evidence.sourceRecordDigest);
     expect(record.evidence.sourceRecordDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(record.evidence.trustDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(record.stableKey).toContain("npm:node-telegram-bot-api");
@@ -67,6 +75,31 @@ describe("package intelligence archive", () => {
       ok: false,
       errors: expect.arrayContaining(["archive evidence digests are invalid"])
     });
+  });
+
+  test("upgrades legacy archive evidence with source drift metadata", () => {
+    const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const legacy = {
+      ...record,
+      evidence: {
+        archivePolicy: record.evidence.archivePolicy,
+        generatedFrom: record.evidence.generatedFrom,
+        installPlanDigest: record.evidence.installPlanDigest,
+        sourceRecordDigest: record.evidence.sourceRecordDigest,
+        sourceSnapshotDigest: record.evidence.sourceSnapshotDigest,
+        trustDigest: record.evidence.trustDigest
+      }
+    };
+
+    const upgraded = ensurePackageIntelligenceEvidence(legacy);
+
+    expect(upgraded.evidence.sourceDrift).toMatchObject({
+      baselineSourceRecordDigest: record.evidence.sourceRecordDigest,
+      changed: false,
+      currentSourceRecordDigest: record.evidence.sourceRecordDigest,
+      status: "fresh"
+    });
+    expect(validatePackageIntelligenceRecord(upgraded).ok).toBe(true);
   });
 
   test("flags risky shell install plans without regex backtracking", () => {
@@ -207,6 +240,38 @@ describe("package intelligence archive", () => {
       "codex",
       "claude-code"
     ]);
+  });
+
+  test("marks archive source drift when repeated confirmations see changed upstream metadata", () => {
+    const first = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" }), {
+      actor: "codex",
+      now: "2026-05-21T00:05:00.000Z"
+    });
+    const second = confirmPackageIntelligenceRecord(
+      createPackageIntelligenceRecord(
+        {
+          ...externalRecord,
+          description: "Telegram Bot API with changed upstream metadata.",
+          metrics: { ...externalRecord.metrics, downloads: 1_050_000 }
+        },
+        { now: "2026-05-22T00:00:00.000Z" }
+      ),
+      {
+        actor: "claude-code",
+        now: "2026-05-22T00:05:00.000Z"
+      }
+    );
+
+    const merged = mergePackageIntelligenceRecords(first, second);
+
+    expect(merged.evidence.sourceDrift).toMatchObject({
+      baselineSourceRecordDigest: first.evidence.sourceRecordDigest,
+      changed: true,
+      currentSourceRecordDigest: second.evidence.sourceRecordDigest,
+      status: "changed",
+      version: "source-drift-v1"
+    });
+    expect(validatePackageIntelligenceRecord(merged).ok).toBe(true);
   });
 
   test("prepares and dry-runs archive confirmation through public routes", async () => {

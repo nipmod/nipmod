@@ -85,6 +85,33 @@ describe("archive depth canary", () => {
       status: "fail"
     });
   });
+
+  test("fails when archive source drift evidence is missing", async () => {
+    const result = await runArchiveDepthCanary({
+      baseUrl: "https://nipmod.test",
+      fetchFn: async (url, init) => {
+        if (url.toString().endsWith("/api/archive/status")) {
+          return Response.json({
+            configured: true,
+            mode: "durable-archive-enabled",
+            type: "dev.nipmod.archive-status.v1",
+            writeBoundary: "Durable package intelligence writes require the configured server-side archive store and an authorized server writer."
+          });
+        }
+        const body = JSON.parse(String(init?.body ?? "{}"));
+        const fixture = archiveConfirmFixture(body.source ?? "npm", body.name ?? "react");
+        delete fixture.record.evidence.sourceDrift;
+        return Response.json(fixture);
+      },
+      targets: [{ name: "react", requiredSource: "npm", source: "npm" }]
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.checks.find((check) => check.name === "npm:react")).toMatchObject({
+      error: expect.stringContaining("archive source drift marker missing"),
+      status: "fail"
+    });
+  });
 });
 
 function archiveConfirmFixture(source: string, name: string) {
@@ -102,6 +129,14 @@ function archiveConfirmFixture(source: string, name: string) {
       archivePolicy: "agent-confirmed-source-owned-v1",
       generatedFrom: "server-reinspected-source",
       installPlanDigest: digest,
+      sourceDrift: {
+        baselineSourceRecordDigest: digest,
+        changed: false,
+        checkedAt: "2026-05-23T00:00:00.000Z",
+        currentSourceRecordDigest: digest,
+        status: "fresh",
+        version: "source-drift-v1"
+      },
       sourceRecordDigest: digest,
       sourceSnapshotDigest: digest,
       trustDigest: digest

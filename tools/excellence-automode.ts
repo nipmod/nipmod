@@ -332,7 +332,9 @@ function archiveMemoryCheck(prepareRoute: string, confirmRoute: string, statusRo
     statusRoute.includes("durable-archive-enabled"),
     statusRoute.includes("resolver-only-safe-mode"),
     archiveCanary.includes("generatedFrom"),
-    archiveCanary.includes("server-reinspected-source")
+    archiveCanary.includes("server-reinspected-source"),
+    archiveCanary.includes("sourceDrift"),
+    archiveCanary.includes("source-drift-v1")
   ];
   return {
     answer: required.every(Boolean) ? "The archive path separates preview, dry-run confirmation, durable writes and server-side authorization." : "Archive memory gates are incomplete.",
@@ -341,10 +343,11 @@ function archiveMemoryCheck(prepareRoute: string, confirmRoute: string, statusRo
       "prepare does not persist",
       "confirm supports dry-run",
       "durable writes require authorized server writer",
-      "archive canary verifies reinspection receipts"
+      "archive canary verifies reinspection receipts",
+      "archive canary verifies source drift evidence"
     ],
     next: required.every(Boolean)
-      ? ["Add drift detection for records whose upstream source changes after archive confirmation."]
+      ? ["Add a scheduled archive drift review that re-inspects stored records and marks changed sources for operator review."]
       : ["Restore archive preview, dry-run, authorization or reinspection checks."],
     question: "Does the archive store only confirmed useful package intelligence records?",
     status: required.every(Boolean) ? "pass" : "fail"
