@@ -203,6 +203,28 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     query: "http client",
     requiredIntentReason: "query intent match: Node HTTP client fit",
     sources: ["npm"]
+  },
+  {
+    expectedId: "npm:@solana/web3.js",
+    expectedRecommendedId: "npm:@solana/web3.js",
+    forbiddenRecommendedIds: ["npm:solana-web3-helper"],
+    limit: 4,
+    maxRank: 1,
+    name: "npm namespace confusion scoped SDK",
+    query: "solana web3 sdk",
+    requiredIntentReason: "query intent match: Solana JavaScript SDK fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "npm:zod",
+    expectedRecommendedId: "npm:zod",
+    forbiddenRecommendedIds: ["npm:metadata-obfuscated"],
+    limit: 4,
+    maxRank: 1,
+    name: "Obfuscated metadata instruction decoy",
+    query: "schema validation",
+    requiredIntentReason: "query intent match: TypeScript schema validation fit",
+    sources: ["npm"]
   }
 ];
 

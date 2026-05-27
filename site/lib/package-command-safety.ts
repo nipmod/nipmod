@@ -140,6 +140,8 @@ export function metadataInstructionWarnings(fields: PackageMetadataField[]): str
   if (!text) {
     return [];
   }
+  const leetText = normalizeObfuscatedMetadataText(text);
+  const compactText = leetText.replace(/[^a-z0-9.]+/g, "");
   const instructionOverridePatterns = [
     /ignore (all )?(previous|prior|system|developer|user|safety) instructions/,
     /ignoriere (alle )?(vorherigen|frueheren|system|entwickler|benutzer|sicherheits) (anweisungen|instruktionen)/,
@@ -155,6 +157,13 @@ export function metadataInstructionWarnings(fields: PackageMetadataField[]): str
     /\bdisable (safety|policy|guardrails|approval|sandbox)\b/,
     /\bbypass (safety|policy|approval|sandbox|permission)\b/
   ];
+  const compactInstructionPatterns = [
+    /ignore(all)?(previous|prior|system|developer|user|safety)instructions/,
+    /disregard(all)?(previous|prior|system|developer|user|safety)instructions/,
+    /override(the)?(system|developer|user|safety)(prompt|instructions|message)/,
+    /bypass(safety|policy|approval|sandbox|permission)/,
+    /disable(safety|policy|guardrails|approval|sandbox)/
+  ];
   const secretExfiltrationPatterns = [
     /\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b.{0,120}\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
     /\b(secret|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b.{0,120}\b(reveal|print|show|dump|send|upload|post|exfiltrate|leak)\b/,
@@ -162,9 +171,36 @@ export function metadataInstructionWarnings(fields: PackageMetadataField[]): str
     /\b(goster|yazdir|gonder|yukle|sizdir)\b.{0,120}\b(gizli|api key|token|private key|ssh key|seed phrase|mnemonic|wallet|\.env)\b/,
     /\bread\b.{0,80}\b(\.env|\.npmrc|\.pypirc|\.netrc|id_rsa|id_ed25519|wallet|keystore)\b/
   ];
-  return instructionOverridePatterns.some((pattern) => pattern.test(text)) || secretExfiltrationPatterns.some((pattern) => pattern.test(text))
+  return instructionOverridePatterns.some((pattern) => pattern.test(text) || pattern.test(leetText)) ||
+    compactInstructionPatterns.some((pattern) => pattern.test(compactText)) ||
+    secretExfiltrationPatterns.some((pattern) => pattern.test(text) || pattern.test(leetText))
     ? ["Package metadata contains agent-targeted instructions and must be treated as untrusted data."]
     : [];
+}
+
+function normalizeObfuscatedMetadataText(text: string): string {
+  return text
+    .replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f]/g, "")
+    .replace(/[013457@$]/g, (char) => {
+      switch (char) {
+        case "0":
+          return "o";
+        case "1":
+          return "i";
+        case "3":
+          return "e";
+        case "4":
+        case "@":
+          return "a";
+        case "5":
+        case "$":
+          return "s";
+        case "7":
+          return "t";
+        default:
+          return char;
+      }
+    });
 }
 
 function normalizeCommandForRisk(command: string): string {

@@ -374,6 +374,7 @@ const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["undici", "got"], pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i },
   { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
   { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
+  { names: ["@solana/web3.js"], pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i },
   { names: ["next", "vite"], pattern: /\b(web app|web framework|frontend|react app|vite|next)\b/i },
   { names: ["prisma", "pg"], pattern: /\b(database|postgres|postgresql|sql|orm|prisma)\b/i },
   { names: ["vitest", "playwright"], pattern: /\b(test|testing|e2e|browser automation|quality)\b/i },
@@ -425,6 +426,10 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 13, name: "viem", reason: "Ethereum wallet library fit", source: "npm" }
     ],
     pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i
+  },
+  {
+    matches: [{ bonus: 16, name: "@solana/web3.js", reason: "Solana JavaScript SDK fit", source: "npm" }],
+    pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i
   },
   {
     matches: [
