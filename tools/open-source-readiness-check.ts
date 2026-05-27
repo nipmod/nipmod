@@ -158,6 +158,41 @@ check(
 );
 check("public-api:install-plan-canary", () => publicApiSpec.includes("pnpm install-plan:canary"));
 
+const apiKeyRequiredRoutes = [
+  "site/app/api/admin/keys/route.ts",
+  "site/app/api/admin/summary/route.ts",
+  "site/app/api/archive/confirm/route.ts",
+  "site/app/api/archive/prepare/route.ts",
+  "site/app/api/archive/search/route.ts",
+  "site/app/api/archive/status/route.ts",
+  "site/app/api/inspect/route.ts",
+  "site/app/api/install-plan/route.ts",
+  "site/app/api/mcp/route.ts",
+  "site/app/api/openapi/route.ts",
+  "site/app/api/search/route.ts",
+  "site/app/api/sources/health/route.ts",
+  "site/app/api/stats/route.ts",
+  "site/app/api/usage/stats/route.ts"
+];
+for (const routeFile of apiKeyRequiredRoutes) {
+  const routeSource = read(routeFile);
+  check(`api-key-boundary:${routeFile}`, () => routeSource.includes("requireApiKey: true"));
+}
+const resolveRoute = read("site/app/api/resolve/route.ts");
+check("api-key-boundary:resolve-reuses-search", () => resolveRoute.includes('from "../search/route"'));
+const betaKeyRoute = read("site/app/api/keys/beta/route.ts");
+check(
+  "api-key-boundary:self-serve-beta-public-only",
+  () => betaKeyRoute.includes("issueSelfServeBetaApiKey") && !betaKeyRoute.includes("requireApiKey: true")
+);
+const monitorRoute = read("site/app/api/monitor/route.ts");
+check(
+  "api-key-boundary:monitor-secret",
+  () => monitorRoute.includes("CRON_SECRET") && monitorRoute.includes("NIPMOD_MONITOR_SECRET") && monitorRoute.includes("Bearer")
+);
+const alertSink = read("site/lib/alert-sink.ts");
+check("api-key-boundary:alert-sink-token", () => alertSink.includes("alert sink not configured") && alertSink.includes("Bearer"));
+
 const trustSignals = read("docs/specs/trust-signals.md");
 check("trust-signals:external-thresholds", () => trustSignals.includes("`75-100` | `recommended` | `low`"));
 check("trust-signals:verified-score", () => trustSignals.includes("Bundle signature verified | `20`"));
