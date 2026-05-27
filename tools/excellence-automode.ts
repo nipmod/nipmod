@@ -66,6 +66,7 @@ export async function runExcellenceAutomode(options: ExcellenceAutomodeOptions =
   checks.push(securityPatternCheck(files.commandSafety, files.scannerIntelligence, files.externalPackages));
   checks.push(promptBoundaryCheck(files.commandSafety, files.llms, files.benchmarkFixture));
   checks.push(installBoundaryCheck(files.installPlanRoute, files.installPlanCanary));
+  checks.push(apiAccessBoundaryCheck(files.apiAccessBoundaryTest, files.openSourceReadiness, files.betaKeyRoute, files.monitorRoute, files.alertSink));
   checks.push(
     archiveMemoryCheck(
       files.archivePrepareRoute,
@@ -331,6 +332,76 @@ function installBoundaryCheck(installPlanRoute: string, installPlanCanary: strin
   };
 }
 
+function apiAccessBoundaryCheck(
+  apiAccessBoundaryTest: string,
+  openSourceReadiness: string,
+  betaKeyRoute: string,
+  monitorRoute: string,
+  alertSink: string
+): ExcellenceCheck {
+  const protectedRouteLabels = [
+    "GET /api/search",
+    "GET /api/resolve",
+    "GET /api/inspect",
+    "GET /api/install-plan",
+    "POST /api/install-plan",
+    "GET /api/archive/prepare",
+    "POST /api/archive/prepare",
+    "POST /api/archive/confirm",
+    "GET /api/archive/search",
+    "GET /api/archive/status",
+    "GET /api/mcp",
+    "POST /api/mcp",
+    "GET /api/openapi",
+    "GET /api/sources/health",
+    "GET /api/stats",
+    "GET /api/usage/stats",
+    "GET /api/admin/summary",
+    "POST /api/admin/keys"
+  ];
+  const missingTestRoutes = protectedRouteLabels.filter((route) => !apiAccessBoundaryTest.includes(route));
+  const staticBoundaryPresent =
+    openSourceReadiness.includes("apiKeyRequiredRoutes") &&
+    openSourceReadiness.includes("api-key-boundary:resolve-reuses-search") &&
+    openSourceReadiness.includes("api-key-boundary:self-serve-beta-public-only");
+  const betaBoundaryPresent =
+    betaKeyRoute.includes("issueSelfServeBetaApiKey") &&
+    !betaKeyRoute.includes("requireApiKey: true") &&
+    apiAccessBoundaryTest.includes("/api/keys/beta stays public but never mints on malformed input");
+  const tokenBoundariesPresent =
+    monitorRoute.includes("CRON_SECRET") &&
+    monitorRoute.includes("NIPMOD_MONITOR_SECRET") &&
+    monitorRoute.includes("Bearer") &&
+    alertSink.includes("alert sink not configured") &&
+    alertSink.includes("Bearer");
+  const passed = missingTestRoutes.length === 0 && staticBoundaryPresent && betaBoundaryPresent && tokenBoundariesPresent;
+  return {
+    answer: passed
+      ? "Protected API, archive, MCP, stats and admin routes reject unauthenticated calls before request handling."
+      : "API access boundaries are not fully covered by tests and readiness gates.",
+    category: "security",
+    evidence: passed
+      ? [
+          `${protectedRouteLabels.length} protected route cases`,
+          "self-serve beta key issuer remains intentionally public",
+          "malformed beta key input cannot mint a key",
+          "monitor and alert sinks use bearer-token boundaries",
+          "public readiness checks require route-level key gates"
+        ]
+      : [
+          ...missingTestRoutes.map((route) => `missing route test: ${route}`),
+          staticBoundaryPresent ? "static readiness gate present" : "static readiness gate missing",
+          betaBoundaryPresent ? "beta issuer boundary present" : "beta issuer boundary missing",
+          tokenBoundariesPresent ? "token boundaries present" : "token boundaries missing"
+        ],
+    next: passed
+      ? ["Keep every new hosted API route in the access-boundary matrix before exposing it publicly."]
+      : ["Restore missing API-key, beta issuer, monitor or alert boundary coverage."],
+    question: "Are public API and admin surfaces closed by default?",
+    status: passed ? "pass" : "fail"
+  };
+}
+
 function archiveMemoryCheck(
   prepareRoute: string,
   confirmRoute: string,
@@ -453,12 +524,15 @@ async function liveCanaryCheck(category: ExcellenceCategory, question: string, p
 
 async function readControlFiles() {
   const entries = {
+    alertSink: "site/lib/alert-sink.ts",
+    apiAccessBoundaryTest: "site/test/api-access-boundary.test.ts",
     archiveConfirmRoute: "site/app/api/archive/confirm/route.ts",
     archiveDepthCanary: "tools/archive-depth-canary.ts",
     archiveDriftWorkflow: ".github/workflows/archive-drift-review.yml",
     archivePrepareRoute: "site/app/api/archive/prepare/route.ts",
     archiveStatusRoute: "site/app/api/archive/status/route.ts",
     benchmarkFixture: "tools/package-search-quality-fixtures.ts",
+    betaKeyRoute: "site/app/api/keys/beta/route.ts",
     ciWorkflow: ".github/workflows/ci.yml",
     codeqlWorkflow: ".github/workflows/codeql.yml",
     commandSafety: "site/lib/package-command-safety.ts",
@@ -468,6 +542,8 @@ async function readControlFiles() {
     installPlanRoute: "site/app/api/install-plan/route.ts",
     integrationKitText: "site/lib/integration-kit.ts",
     llms: "site/public/llms.txt",
+    monitorRoute: "site/app/api/monitor/route.ts",
+    openSourceReadiness: "tools/open-source-readiness-check.ts",
     packageJson: "package.json",
     scannerIntelligence: "site/lib/package-scanner-intelligence.ts",
     scorecardWorkflow: ".github/workflows/scorecard.yml",
