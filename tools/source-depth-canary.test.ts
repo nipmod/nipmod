@@ -73,6 +73,7 @@ async function sourceResponse(url: string): Promise<Response> {
         "Latest npm tarball host: registry.npmjs.org.",
         "Latest npm release file count: 412.",
         "npm latest publish age hours: 240.",
+        "npm previous version published at: 2026-05-01T00:00:00.000Z.",
         "OSV returned no known vulnerabilities for this npm package/version.",
         "npm returned 3 maintainer records.",
         "npm package declares Node engine: >=22."
@@ -94,7 +95,8 @@ async function sourceResponse(url: string): Promise<Response> {
         "PyPI latest release file types: bdist_wheel, sdist.",
         "PyPI latest release files are not marked yanked.",
         "PyPI requires-python: >=3.10.",
-        "PyPI latest publish age hours: 240."
+        "PyPI latest publish age hours: 240.",
+        "PyPI previous release upload timestamp: 2026-05-01T00:00:00.000Z."
       ],
       source: "pypi"
     });
@@ -238,6 +240,7 @@ function sourceEvidenceIds(source: string): string[] {
         "npm.packument.versions",
         "npm.dist_tags",
         "npm.version_intelligence",
+        "npm.release_timeline",
         "npm.osv",
         "npm.artifact_shape",
         "npm.lifecycle",
@@ -256,6 +259,7 @@ function sourceEvidenceIds(source: string): string[] {
         "pypi.yanked",
         "pypi.requires_python",
         "pypi.version_intelligence",
+        "pypi.release_timeline",
         "pypi.release_history",
         "metadata.agent_instructions"
       ];
