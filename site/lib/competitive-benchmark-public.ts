@@ -26,9 +26,9 @@ export const competitiveBenchmarkReport = {
     score: 89
   },
   publishableClaims: [
-    "Nipmod returned read-only install-plan evidence for 7/7 benchmark source cases.",
-    "Nipmod live track passed 7/7 applicable checks with median latency 2049 ms.",
-    "OSV and deps.dev are useful evidence feeds, but they do not produce agent install plans by themselves."
+    "Nipmod score: 89/100 across the current production agent-preflight benchmark.",
+    "Nipmod completed 7/7 live source cases and returned 7/7 read-only install-plan evidence.",
+    "Next measured track score: deps.dev at 35/100. Current score gap: +54."
   ],
   tracks: [
     {
@@ -47,7 +47,7 @@ export const competitiveBenchmarkReport = {
       coveragePct: 100,
       latencyMs: 43,
       name: "deps.dev",
-      note: "Strong package metadata, licenses, advisory and provenance context for supported ecosystems.",
+      note: "Package metadata, licenses, advisory and provenance context for supported ecosystems.",
       pass: 4,
       score: 35,
       status: "pass",
