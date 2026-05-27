@@ -207,13 +207,13 @@ export function DocsTable({
 }) {
   return (
     <div className="docs-table" role="table">
-      {rows.map((row) => {
+      {rows.map((row, index) => {
         const first = Array.isArray(row) ? row[0] : row.first;
         const second = Array.isArray(row) ? row[1] : row.second;
         const third = Array.isArray(row) ? row[2] : row.third;
 
         return (
-          <div className={third ? "docs-table-row" : "docs-table-row docs-table-row-two"} key={first} role="row">
+          <div className={third ? "docs-table-row" : "docs-table-row docs-table-row-two"} key={`${first}-${index}`} role="row">
             <strong role="cell">{first}</strong>
             <div role="cell">{second}</div>
             {third ? <div role="cell">{third}</div> : null}
