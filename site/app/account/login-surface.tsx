@@ -29,16 +29,12 @@ export function AccountLoginSurface({
   return (
     <main className="account-auth-shell" id="main">
       <section className="account-auth-copy" aria-labelledby="account-login-title">
-        <p>Account</p>
         <h1 id="account-login-title">Sign in to Nipmod.</h1>
         <div className="account-auth-body">
-          <p>Use the same package intelligence layer directly in chat, then create API keys for agents and integrations.</p>
-          <p>Email login keeps the beta simple: no password, no social account, no OAuth provider setup.</p>
+          <p>Use Nipmod directly in chat, then create API keys for agents and integrations.</p>
         </div>
         <div className="account-auth-links">
           <Link href={docsHref}>Docs</Link>
-          <Link href="/api-access">API reference</Link>
-          <Link href="/account">Login</Link>
         </div>
       </section>
 
@@ -66,22 +62,10 @@ function LoginPanel({
     <>
       <div className="account-auth-panel-head">
         <span>Login</span>
-        <h2>Continue with email</h2>
-        <p>Enter your email, then confirm the code we send you.</p>
+        <h2>{state.codeRequested ? "Enter email code" : "Continue with email"}</h2>
       </div>
       {state.notice ? <p className={`account-login-notice account-login-notice-${state.notice.tone}`}>{state.notice.text}</p> : null}
       <div className="account-login-steps">
-        <form action="/auth/login" className="account-login-form" method="post">
-          <input name="loginPath" type="hidden" value={loginPath} />
-          <input name="next" type="hidden" value={nextPath} />
-          <label className="account-field">
-            <span>Email</span>
-            <input autoComplete="email" inputMode="email" name="email" placeholder="you@example.com" required type="email" />
-          </label>
-          <button className="button button-primary" type="submit">
-            {state.codeRequested ? "Send another code" : "Send code"}
-          </button>
-        </form>
         {state.codeRequested ? (
           <form action="/auth/verify" className="account-login-form account-code-form" method="post">
             <input name="loginPath" type="hidden" value={loginPath} />
@@ -94,9 +78,20 @@ function LoginPanel({
               Confirm code
             </button>
           </form>
-        ) : null}
+        ) : (
+          <form action="/auth/login" className="account-login-form" method="post">
+            <input name="loginPath" type="hidden" value={loginPath} />
+            <input name="next" type="hidden" value={nextPath} />
+            <label className="account-field">
+              <span>Email</span>
+              <input autoComplete="email" inputMode="email" name="email" placeholder="you@example.com" required type="email" />
+            </label>
+            <button className="button button-primary" type="submit">
+              Send code
+            </button>
+          </form>
+        )}
       </div>
-      <p className="account-login-help">After login, Nipmod opens the chat first. API key creation and settings are in the left account rail.</p>
     </>
   );
 }
@@ -119,7 +114,7 @@ export function readAccountLoginState(params: AccountSearchParams): AccountLogin
     return {
       codeRequested,
       notice: {
-        text: "Check your email and enter the login code.",
+        text: "Code sent.",
         tone: "success"
       }
     };

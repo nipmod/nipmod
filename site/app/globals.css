@@ -4353,8 +4353,8 @@ body {
 }
 
 .brand-icon-button .brand-email-icon {
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 28px;
 }
 
 .brand-icon-button .brand-telegram-icon {
@@ -6348,8 +6348,8 @@ body {
 }
 
 .account-code-form {
-  border-top: 1px solid var(--docs-line);
-  padding-top: 18px;
+  border-top: 0;
+  padding-top: 0;
 }
 
 .account-app-shell {
