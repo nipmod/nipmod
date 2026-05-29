@@ -173,12 +173,14 @@ export function AdminDashboard() {
       {summary ? (
         <div className="admin-content">
           <section className="admin-stat-grid" aria-label="Usage summary">
-            <Metric label="Requests" value={totals.requestCount} />
+            <Metric label="Total API calls" value={totals.requestCount} />
             <Metric label="External requests" value={traffic.externalRequestCount} />
+            <Metric label="Authenticated external" value={traffic.authenticatedRequestCount} />
+            <Metric label="Core public calls" value={traffic.publicRequestCount} />
             <Metric label="Internal checks" value={traffic.internalRequestCount} />
             <Metric label="Errors" value={totals.errorCount} />
-            <Metric label="Clients" value={totals.clientCount} />
-            <Metric label="Keyed callers" value={totals.keyCount} />
+            <Metric label="Client hashes" value={totals.clientCount} />
+            <Metric label="Key ids seen" value={totals.keyCount} />
             <Metric label="Avg duration" suffix="ms" value={totals.avgDurationMs} />
             <Metric label="Legacy unknown" value={traffic.unknownLegacyRequestCount} />
             <Metric label="Archive records" value={archive.totalRecords} />
@@ -191,6 +193,21 @@ export function AdminDashboard() {
           </section>
 
           <section className="admin-analytics-grid" aria-label="Visual analysis">
+            <Panel
+              description="Operator readout for external adoption. Requests are HTTP calls; external active keys are key ids, not guaranteed unique humans."
+              title="Adoption readout"
+            >
+              <RatioGrid
+                rows={[
+                  ["External API calls", traffic.externalRequestCount],
+                  ["Authenticated external", traffic.authenticatedRequestCount],
+                  ["External active keys", keyActivity.externalKeyCount],
+                  ["Install plans", usage.installPlans?.observedCount],
+                  ["Blocked installs", usage.installPlans?.blockedCount],
+                  ["Archive stored", usage.archiveWrites?.storedCount]
+                ]}
+              />
+            </Panel>
             <Panel
               description="HTTP requests received by Nipmod API routes in the selected window. This is the closest count to agent or client calls into Nipmod."
               title="Traffic mix"
@@ -206,7 +223,8 @@ export function AdminDashboard() {
                 rows={[
                   ["External share", percentLabel(traffic.externalRequestCount, totals.requestCount)],
                   ["Error rate", percentLabel(totals.errorCount, totals.requestCount)],
-                  ["Keyed share", percentLabel(traffic.authenticatedRequestCount, traffic.externalRequestCount)],
+                  ["Keyed external share", percentLabel(traffic.authenticatedRequestCount, traffic.externalRequestCount)],
+                  ["Core public calls", traffic.publicRequestCount],
                   ["Avg response", `${formatNumber(totals.avgDurationMs)}ms`]
                 ]}
               />
@@ -279,9 +297,10 @@ export function AdminDashboard() {
               <DefinitionRows
                 rows={[
                   ["Request", "One HTTP call to a Nipmod API route, for example /api/search or /api/install-plan."],
-                  ["External request", "A public, beta or partner call. Admin, monitors and canaries are separated."],
+                  ["External request", "A beta or partner API call after the key gate. Internal monitors, canaries and admin are separated."],
+                  ["Core public call", "A no-key API usage event. This should stay at 0 for core package intelligence routes."],
                   ["Source touch", "A request tagged with a source. One request can count against several sources."],
-                  ["Keyed caller", "Distinct key ids seen in usage events, not raw keys and not guaranteed unique humans."],
+                  ["Key id", "Distinct API key ids seen in usage events, not raw keys and not guaranteed unique humans."],
                   ["Client", "Privacy-limited client hash count. Raw IPs and user agents are not returned."]
                 ]}
               />
@@ -389,6 +408,11 @@ export function AdminDashboard() {
                   ["requestCount", "Requests"],
                   ["successCount", "OK"],
                   ["errorCount", "Errors"],
+                  ["errorRate", "Error rate"],
+                  ["installPlanCount", "Plans"],
+                  ["blockedInstallPlanCount", "Blocked"],
+                  ["archivePreviewCount", "Archive preview"],
+                  ["archiveStoredCount", "Archive stored"],
                   ["lastSeenAt", "Last seen"],
                   ["routeSummary", "Routes"],
                   ["sourceSummary", "Sources"]

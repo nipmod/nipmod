@@ -34,6 +34,7 @@ export const docsNavGroups: DocsNavGroup[] = [
       { href: "/sources", label: "Sources" },
       { href: "/source-quality", label: "Source quality" },
       { href: "/integrations", label: "Integrations" },
+      { href: "/partners", label: "Partners" },
       { href: "/trust", label: "Trust and safety" },
       { href: "/mcp", label: "MCP" },
       { href: "/examples", label: "Examples" }

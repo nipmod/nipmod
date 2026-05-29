@@ -54,28 +54,28 @@
       <text x="584" y="21" class="sans white" font-size="22" font-weight="850">95</text>
 
       <text x="0" y="65" class="sans mutedText" font-size="18" font-weight="700">Native registries</text>
-      <rect x="190" y="49" width="86" height="18" rx="9" fill="url(#muted)"/>
-      <text x="584" y="66" class="sans mutedText" font-size="18" font-weight="800">22</text>
+      <rect x="190" y="49" width="90" height="18" rx="9" fill="url(#muted)"/>
+      <text x="584" y="66" class="sans mutedText" font-size="18" font-weight="800">23</text>
 
       <text x="0" y="106" class="sans mutedText" font-size="18" font-weight="700">deps.dev</text>
-      <rect x="190" y="90" width="63" height="18" rx="9" fill="url(#muted)"/>
-      <text x="584" y="107" class="sans mutedText" font-size="18" font-weight="800">16</text>
+      <rect x="190" y="90" width="55" height="18" rx="9" fill="url(#muted)"/>
+      <text x="584" y="107" class="sans mutedText" font-size="18" font-weight="800">14</text>
 
       <text x="0" y="147" class="sans mutedText" font-size="18" font-weight="700">Socket</text>
-      <rect x="190" y="131" width="39" height="18" rx="9" fill="url(#muted)"/>
-      <text x="584" y="148" class="sans mutedText" font-size="18" font-weight="800">10</text>
+      <rect x="190" y="131" width="63" height="18" rx="9" fill="url(#muted)"/>
+      <text x="584" y="148" class="sans mutedText" font-size="18" font-weight="800">16</text>
 
       <text x="0" y="188" class="sans mutedText" font-size="18" font-weight="700">OSV</text>
-      <rect x="190" y="172" width="39" height="18" rx="9" fill="url(#muted)"/>
-      <text x="584" y="189" class="sans mutedText" font-size="18" font-weight="800">10</text>
+      <rect x="190" y="172" width="35" height="18" rx="9" fill="url(#muted)"/>
+      <text x="584" y="189" class="sans mutedText" font-size="18" font-weight="800">9</text>
 
       <text x="0" y="229" class="sans mutedText" font-size="18" font-weight="700">Raw agent</text>
       <rect x="190" y="213" width="12" height="18" rx="9" fill="url(#muted)"/>
       <text x="584" y="230" class="sans mutedText" font-size="18" font-weight="800">3</text>
 
       <text x="0" y="270" class="sans mutedText" font-size="18" font-weight="700">OpenSSF Scorecard</text>
-      <rect x="190" y="254" width="8" height="18" rx="9" fill="url(#muted)"/>
-      <text x="584" y="271" class="sans mutedText" font-size="18" font-weight="800">2</text>
+      <rect x="190" y="254" width="5" height="18" rx="9" fill="url(#muted)"/>
+      <text x="584" y="271" class="sans mutedText" font-size="18" font-weight="800">1</text>
 
       <text x="0" y="311" class="sans mutedText" font-size="18" font-weight="700">Snyk API</text>
       <rect x="190" y="295" width="5" height="18" rx="9" fill="url(#muted)"/>
@@ -91,21 +91,21 @@
     <g transform="translate(34 140)">
       <text x="0" y="23" class="sans white" font-size="21" font-weight="770">Source resolution</text>
       <text x="0" y="52" class="serif mutedText" font-size="18">Search, identity, version and metadata</text>
-      <rect x="360" y="5" width="274" height="22" rx="11" fill="url(#gold)"/>
-      <text x="646" y="24" class="sans white" font-size="21" font-weight="850">97</text>
-      <text x="360" y="55" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 50</text>
+      <rect x="360" y="5" width="272" height="22" rx="11" fill="url(#gold)"/>
+      <text x="646" y="24" class="sans white" font-size="21" font-weight="850">96</text>
+      <text x="360" y="55" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 49</text>
 
       <text x="0" y="111" class="sans white" font-size="21" font-weight="770">Security evidence</text>
       <text x="0" y="140" class="serif mutedText" font-size="18">Advisories, provenance and behavior signals</text>
-      <rect x="360" y="93" width="235" height="22" rx="11" fill="url(#gold)"/>
-      <text x="646" y="112" class="sans white" font-size="21" font-weight="850">83</text>
-      <text x="360" y="143" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 33</text>
+      <rect x="360" y="93" width="232" height="22" rx="11" fill="url(#gold)"/>
+      <text x="646" y="112" class="sans white" font-size="21" font-weight="850">82</text>
+      <text x="360" y="143" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 31</text>
 
       <text x="0" y="199" class="sans white" font-size="21" font-weight="770">Execution preflight</text>
       <text x="0" y="228" class="serif mutedText" font-size="18">Install plan and hosted read only boundary</text>
       <rect x="360" y="181" width="283" height="22" rx="11" fill="url(#gold)"/>
       <text x="646" y="200" class="sans white" font-size="21" font-weight="850">100</text>
-      <text x="360" y="231" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 4</text>
+      <text x="360" y="231" class="sans faintText" font-size="13" font-weight="750">best non Nipmod: 7</text>
 
       <text x="0" y="287" class="sans white" font-size="21" font-weight="770">Agent readiness</text>
       <text x="0" y="316" class="serif mutedText" font-size="18">Agent decision JSON</text>
@@ -117,7 +117,7 @@
 
   <g transform="translate(96 846)">
     <text x="0" y="0" class="serif white" font-size="24">Public report: nipmod.com/benchmark</text>
-    <text x="0" y="36" class="serif mutedText" font-size="20">7/7 live checks. 7/7 read only install plan evidence. Zero installs, clones, artifact unpacking, execution or workspace writes.</text>
+    <text x="0" y="36" class="serif mutedText" font-size="20">8/8 live checks. 8/8 read only install plan evidence. Zero installs, clones, artifact unpacking, execution or workspace writes.</text>
     <text x="0" y="66" class="serif mutedText" font-size="20">Scoped product benchmark. A high score means stronger preflight evidence at this boundary, not a guarantee that a package is safe.</text>
   </g>
 </svg>

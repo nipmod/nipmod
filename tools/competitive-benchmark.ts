@@ -15,7 +15,7 @@ type BenchmarkProvider =
   | "snyk"
   | "socket";
 
-type BenchmarkSource = "github" | "huggingface-model" | "mcp" | "npm" | "pypi";
+type BenchmarkSource = "github" | "huggingface-dataset" | "huggingface-model" | "mcp" | "npm" | "pypi";
 type CategoryKey = "agent-readiness" | "execution-preflight" | "security-evidence" | "source-resolution";
 type ObservationStatus = "pass" | "warn" | "fail" | "skip";
 type Dimension =
@@ -143,6 +143,13 @@ const CASES: BenchmarkCase[] = [
     name: "Embedding model",
     query: "semantic search embeddings model",
     source: "huggingface-model"
+  },
+  {
+    expectedPackage: "rajpurkar/squad",
+    id: "hf-dataset-squad",
+    name: "Question answering dataset",
+    query: "question answering dataset",
+    source: "huggingface-dataset"
   },
   {
     expectedPackage: "ac.tandem/docs-mcp",
@@ -281,6 +288,12 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
     headlineFindings: headlineFindings(summaries, observations),
     matrix,
     methodology: {
+      caseSelectionPolicy: [
+        "Cases must represent a real pre-install agent decision, not a synthetic point chosen only for Nipmod.",
+        "At least one case must cover each Nipmod public source surface before a public snapshot is treated as current.",
+        "Specialized tools are scored only on the dimensions they expose, with unsupported sources shown as scope limits.",
+        "Any direct competitor claim must be supported by the current JSON and must not include excluded CLI, SCM, firewall or paid platform products."
+      ],
       claimBoundary: [
         "This is an agent package-intelligence benchmark, not a malware-free guarantee.",
         "Scores measure whether a system returns useful pre-install decision evidence for agents.",
@@ -304,7 +317,8 @@ export async function runCompetitiveBenchmark(options: CompetitiveBenchmarkOptio
         "Socket PURL API when a token is configured",
         "Snyk REST API when a token and plan allow package endpoints",
         "OpenSSF Scorecard public API"
-      ]
+      ],
+      reviewerStatus: "product benchmark with explicit scope limits; not an independent academic security benchmark"
     },
     observations,
     publishableClaims: publishableClaims(summaries, observations),
@@ -480,6 +494,21 @@ async function nativeRegistryTrack(cases: BenchmarkCase[], fetchFn: typeof fetch
             `siblings ${Array.isArray(metadata.siblings) ? metadata.siblings.length : "n/a"}`
           ], {
             identity: Boolean(metadata.id || metadata.modelId),
+            machine_readable: true,
+            metadata: Boolean(metadata.cardData || metadata.tags),
+            package_behavior: Array.isArray(metadata.siblings),
+            version: Boolean(metadata.sha || metadata.lastModified)
+          })
+        );
+      } else if (testCase.source === "huggingface-dataset") {
+        const name = testCase.expectedPackage ?? "";
+        const metadata = await fetchJson(`https://huggingface.co/api/datasets/${encodeHubRepoPath(name)}`, {}, fetchFn, timeoutMs);
+        observations.push(
+          observation("native-registry", testCase.id, "pass", Date.now() - started, [
+            `downloads ${numberOrNull(metadata.downloads) ?? "n/a"}`,
+            `siblings ${Array.isArray(metadata.siblings) ? metadata.siblings.length : "n/a"}`
+          ], {
+            identity: Boolean(metadata.id || metadata.datasetId),
             machine_readable: true,
             metadata: Boolean(metadata.cardData || metadata.tags),
             package_behavior: Array.isArray(metadata.siblings),

@@ -81,6 +81,8 @@ describe("nipmod discovery manifest", () => {
       packageIntelligenceSearchApi: "https://nipmod.com/api/archive/search",
       packageIntelligenceStatusApi: "https://nipmod.com/api/archive/status",
       packages: "https://nipmod.com/packages",
+      partnerPack: "https://nipmod.com/partner-pack.json",
+      partners: "https://nipmod.com/partners",
       quickstart: "https://nipmod.com/quickstart",
       security: "https://nipmod.com/security",
       sourceHealthApi: "https://nipmod.com/api/sources/health",

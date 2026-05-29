@@ -11,6 +11,8 @@ Public agent demo: https://nipmod.com/demo
 Public agent demo machine flow: https://nipmod.com/agent-demo-flow.json
 Generic integration kit: https://nipmod.com/integrations
 Generic integration machine kit: https://nipmod.com/integration-kit.json
+Partner integration pack: https://nipmod.com/partners
+Partner integration machine pack: https://nipmod.com/partner-pack.json
 Source quality benchmark: https://nipmod.com/source-quality
 Source quality machine report: https://nipmod.com/source-quality.json
 Competitive benchmark: https://nipmod.com/benchmark
@@ -51,6 +53,8 @@ Use the generic integration kit when adding Nipmod to an agent product, MCP serv
 
 https://nipmod.com/integrations
 https://nipmod.com/integration-kit.json
+https://nipmod.com/partners
+https://nipmod.com/partner-pack.json
 
 Use the public demo flow to test the full preflight before writing platform-specific integration code:
 

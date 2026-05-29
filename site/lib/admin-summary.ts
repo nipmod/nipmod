@@ -43,6 +43,7 @@ export async function readAdminSummary(
     notes: [
       "Archive records are stored in public.package_intelligence_records on Supabase.",
       "Usage metrics are aggregated and privacy limited. Raw keys, raw IPs, raw queries, prompts and workspace paths are not returned.",
+      "Core package intelligence routes are key-gated. Any public usage count should be treated as an audit signal, not external adoption.",
       "Traffic origin separates public/keyed usage from Nipmod canaries and monitors for events recorded after the traffic-origin schema is live.",
       "Trust-decision and blocked-install metrics are populated for events recorded after the decision-metrics schema is live.",
       "Source quality profiles describe resolver depth and known limits. They are review context, not a claim that external packages are safe to execute."

@@ -45,6 +45,7 @@ It scores the hosted API surface available at the agent preflight boundary:
 - security evidence
 - execution preflight
 - agent readiness
+- one fixed case for each Nipmod source surface
 
 Raw JSON is public at:
 https://nipmod.com/benchmark.json
@@ -52,15 +53,15 @@ https://nipmod.com/benchmark.json
 6/ Current public run:
 
 - Nipmod: 95/100
-- Native registries: 22/100
-- deps.dev: 16/100
-- Socket: 10/100
-- OSV: 10/100
+- Native registries: 23/100
+- Socket: 16/100
+- deps.dev: 14/100
+- OSV: 9/100
 - Raw agent: 3/100
-- OpenSSF Scorecard: 2/100
+- OpenSSF Scorecard: 1/100
 - Snyk API: 1/100
 
-Nipmod also completed 7/7 live source checks and returned 7/7 read only install plan results.
+Nipmod also completed 8/8 live source checks and returned 8/8 read only install plan results.
 
 7/ The most important category is execution preflight.
 
