@@ -56,6 +56,15 @@ export type CompetitiveBenchmarkScoreAccounting = {
   value: string;
 };
 
+export type CompetitiveBenchmarkMarketReference = {
+  benchmarkBoundary: string;
+  benchmarkRole: string;
+  name: string;
+  scaleContext: string;
+  sourceLabel: string;
+  sourceUrl: string;
+};
+
 export const competitiveBenchmarkReport = {
   categoryBreakdown: [
     {
@@ -70,8 +79,8 @@ export const competitiveBenchmarkReport = {
         { name: "deps.dev", score: 25, sourceCoveragePct: 57 },
         { name: "OSV", score: 17, sourceCoveragePct: 57 },
         { name: "Raw agent", score: 13, sourceCoveragePct: 100 },
+        { name: "Socket", score: 13, sourceCoveragePct: 57 },
         { name: "OpenSSF Scorecard", score: 3, sourceCoveragePct: 14 },
-        { name: "Socket", score: 0, sourceCoveragePct: 57 },
         { name: "Snyk", score: 0, sourceCoveragePct: 57 }
       ]
     },
@@ -85,10 +94,10 @@ export const competitiveBenchmarkReport = {
         { name: "Nipmod", score: 83, sourceCoveragePct: 100 },
         { name: "deps.dev", score: 33, sourceCoveragePct: 57 },
         { name: "Native registries", score: 26, sourceCoveragePct: 100 },
+        { name: "Socket", score: 18, sourceCoveragePct: 57 },
         { name: "OSV", score: 17, sourceCoveragePct: 57 },
         { name: "OpenSSF Scorecard", score: 3, sourceCoveragePct: 14 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 },
-        { name: "Socket", score: 0, sourceCoveragePct: 57 },
         { name: "Snyk", score: 0, sourceCoveragePct: 57 }
       ]
     },
@@ -100,11 +109,11 @@ export const competitiveBenchmarkReport = {
       title: "Execution preflight",
       tracks: [
         { name: "Nipmod", score: 100, sourceCoveragePct: 100 },
+        { name: "Socket", score: 4, sourceCoveragePct: 57 },
         { name: "Native registries", score: 2, sourceCoveragePct: 100 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 },
         { name: "deps.dev", score: 0, sourceCoveragePct: 57 },
         { name: "OSV", score: 0, sourceCoveragePct: 57 },
-        { name: "Socket", score: 0, sourceCoveragePct: 57 },
         { name: "Snyk", score: 0, sourceCoveragePct: 57 },
         { name: "OpenSSF Scorecard", score: 0, sourceCoveragePct: 14 }
       ]
@@ -120,7 +129,7 @@ export const competitiveBenchmarkReport = {
         { name: "Native registries", score: 10, sourceCoveragePct: 100 },
         { name: "deps.dev", score: 6, sourceCoveragePct: 57 },
         { name: "OSV", score: 6, sourceCoveragePct: 57 },
-        { name: "Socket", score: 2, sourceCoveragePct: 57 },
+        { name: "Socket", score: 4, sourceCoveragePct: 57 },
         { name: "Snyk", score: 2, sourceCoveragePct: 57 },
         { name: "OpenSSF Scorecard", score: 1, sourceCoveragePct: 14 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 }
@@ -173,8 +182,74 @@ export const competitiveBenchmarkReport = {
       ]
     }
   ] satisfies CompetitiveBenchmarkCategoryWeight[],
-  checkedAt: "2026-05-27T13:09:11.674Z",
+  checkedAt: "2026-05-29T09:44:19.025Z",
   command: "pnpm benchmark:competitive",
+  marketContext: [
+    {
+      benchmarkBoundary: "Measured through Nipmod's live search, inspect and install-plan API. Nipmod owns the benchmark and is therefore treated with explicit claim limits.",
+      benchmarkRole: "Agent package intelligence layer",
+      name: "Nipmod",
+      scaleContext: "Live beta product. No valuation claim.",
+      sourceLabel: "Nipmod benchmark methodology",
+      sourceUrl: "https://github.com/nipmod/nipmod/blob/main/docs/competitive-benchmark.md"
+    },
+    {
+      benchmarkBoundary: "Measured through public npm, PyPI, GitHub, Hugging Face and MCP metadata endpoints. They are source-of-truth registries, not install-plan layers.",
+      benchmarkRole: "Upstream source metadata baseline",
+      name: "Native registries",
+      scaleContext: "Official package/model/repository sources.",
+      sourceLabel: "Benchmark source list",
+      sourceUrl: "https://nipmod.com/benchmark.json"
+    },
+    {
+      benchmarkBoundary: "Measured as a vulnerability lookup feed for package/version cases. It is not expected to return an agent install plan.",
+      benchmarkRole: "Open vulnerability database and API",
+      name: "OSV",
+      scaleContext: "Open source vulnerability infrastructure backed by the OSV ecosystem.",
+      sourceLabel: "OSV API docs",
+      sourceUrl: "https://google.github.io/osv.dev/api/"
+    },
+    {
+      benchmarkBoundary: "Measured as package metadata, dependency, license, advisory and provenance context where the API supports the ecosystem.",
+      benchmarkRole: "Package metadata and advisory evidence",
+      name: "deps.dev",
+      scaleContext: "Open Source Insights data service developed by Google.",
+      sourceLabel: "deps.dev API docs",
+      sourceUrl: "https://docs.deps.dev/api/v3/"
+    },
+    {
+      benchmarkBoundary: "Measured through authenticated PURL package lookup. The benchmark does not test Socket Firewall, CLI, GitHub app, browser extension or paid enterprise workflows.",
+      benchmarkRole: "Supply-chain package evidence",
+      name: "Socket",
+      scaleContext: "Socket announced a $60M Series C at a $1B valuation in May 2026.",
+      sourceLabel: "Socket Series C announcement",
+      sourceUrl: "https://socket.dev/blog/series-c"
+    },
+    {
+      benchmarkBoundary: "Measured through authenticated REST package API access. The benchmark does not test Snyk CLI, SCM imports, full platform project scanning, IaC, container or code analysis.",
+      benchmarkRole: "Developer security and package health evidence",
+      name: "Snyk",
+      scaleContext: "Snyk was reported at a $7.4B valuation after its 2022 Series G round.",
+      sourceLabel: "Reuters report",
+      sourceUrl: "https://www.streetinsider.com/Reuters/Cybersecurity%2Bstartup%2BSnyk%2Bvalued%2Bat%2B%247.4%2Bbillion%2Bafter%2Blatest%2Bfunding/20960166.html"
+    },
+    {
+      benchmarkBoundary: "Measured only for the GitHub repository posture case. It is not expected to search npm, PyPI, Hugging Face or MCP.",
+      benchmarkRole: "Repository security posture baseline",
+      name: "OpenSSF Scorecard",
+      scaleContext: "OpenSSF project for automated open source repository security posture scoring.",
+      sourceLabel: "OpenSSF Scorecard",
+      sourceUrl: "https://openssf.org/scorecard/"
+    },
+    {
+      benchmarkBoundary: "Measured as the control path where an agent has no independent package intelligence layer before moving toward installation or reuse.",
+      benchmarkRole: "No independent package intelligence layer",
+      name: "Raw agent",
+      scaleContext: "Control baseline. No company or product valuation.",
+      sourceLabel: "Benchmark methodology",
+      sourceUrl: "https://github.com/nipmod/nipmod/blob/main/docs/competitive-benchmark.md"
+    }
+  ] satisfies CompetitiveBenchmarkMarketReference[],
   excludedComparisons: [
     {
       name: "Dependabot and Renovate",
@@ -297,13 +372,14 @@ export const competitiveBenchmarkReport = {
   headline: {
     installPlanEvidence: "7/7",
     liveChecks: "7/7",
-    medianLatencyMs: 2177,
+    medianLatencyMs: 2121,
     score: 95
   },
   publishableClaims: [
     "Nipmod score: 95/100 across the current production agent-preflight benchmark.",
-    "Nipmod completed 7/7 live source cases and returned 7/7 read-only install-plan evidence.",
-    "Socket and Snyk were authenticated, but package-depth endpoints were rate-limited or plan-limited in this run; do not use this snapshot for a direct Socket or Snyk depth claim."
+    "Nipmod completed 7/7 live source cases and returned 7/7 read-only install-plan evidence with 2121 ms median latency.",
+    "Socket was authenticated and returned package-depth evidence in 2/4 applicable package checks, while 2/4 remained token, plan or rate limited.",
+    "Snyk authentication worked, but package-health depth was unavailable on the current token or plan; do not use this snapshot for a direct Snyk depth claim."
   ],
   reviewerAssessment: {
     academicGrade: "not sufficient as an academic security benchmark",
@@ -350,8 +426,8 @@ export const competitiveBenchmarkReport = {
     {
       applicable: 7,
       coveragePct: 100,
-      depthScore: 90,
-      latencyMs: 2177,
+      depthScore: 94,
+      latencyMs: 2121,
       name: "Nipmod",
       note: "Search, inspect, source evidence, warnings, read-only install-plan output and agent JSON.",
       pass: 7,
@@ -364,8 +440,8 @@ export const competitiveBenchmarkReport = {
     {
       applicable: 4,
       coveragePct: 100,
-      depthScore: 35,
-      latencyMs: 44,
+      depthScore: 37,
+      latencyMs: 78,
       name: "deps.dev",
       note: "Package metadata, licenses, advisory and provenance context for supported ecosystems.",
       pass: 4,
@@ -378,8 +454,8 @@ export const competitiveBenchmarkReport = {
     {
       applicable: 7,
       coveragePct: 100,
-      depthScore: 27,
-      latencyMs: 171,
+      depthScore: 28,
+      latencyMs: 347,
       name: "Native registries",
       note: "Source-of-truth metadata from npm, PyPI, GitHub, Hugging Face and MCP.",
       pass: 7,
@@ -392,8 +468,8 @@ export const competitiveBenchmarkReport = {
     {
       applicable: 4,
       coveragePct: 100,
-      depthScore: 24,
-      latencyMs: 359,
+      depthScore: 25,
+      latencyMs: 461,
       name: "OSV",
       note: "Vulnerability lookup for package and version pairs.",
       pass: 4,
@@ -406,8 +482,8 @@ export const competitiveBenchmarkReport = {
     {
       applicable: 1,
       coveragePct: 100,
-      depthScore: 17,
-      latencyMs: 57,
+      depthScore: 18,
+      latencyMs: 196,
       name: "OpenSSF Scorecard",
       note: "Repository posture for GitHub projects. It is not a package install-plan layer.",
       pass: 1,
@@ -419,23 +495,23 @@ export const competitiveBenchmarkReport = {
     },
     {
       applicable: 4,
-      coveragePct: 0,
-      depthScore: 4,
-      latencyMs: 492,
+      coveragePct: 50,
+      depthScore: 21,
+      latencyMs: 274,
       name: "Socket",
-      note: "Authenticated PURL endpoint was available, but package-depth lookups were rate-limited in this run.",
-      pass: 0,
+      note: "Authenticated PURL lookup returned package-depth evidence for 2/4 applicable package checks; 2/4 remained token, plan or rate limited.",
+      pass: 2,
       role: "Supply-chain package evidence",
-      score: 1,
+      score: 10,
       sourceCoveragePct: 57,
       status: "warn",
-      warn: 4
+      warn: 2
     },
     {
       applicable: 4,
       coveragePct: 0,
       depthScore: 4,
-      latencyMs: 248,
+      latencyMs: 237,
       name: "Snyk",
       note: "Authentication worked, but package-health depth was unavailable on the current token or plan.",
       pass: 0,

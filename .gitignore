@@ -38,6 +38,9 @@ task_plan.md
 !site/public/codex-logo.png
 !site/public/hermes-logo.png
 !site/public/architecture.png
+!site/public/benchmark-agent-preflight.png
+!site/public/benchmark-cover-simple.png
+!site/public/benchmark-thread/*.png
 !site/public/agents/*.png
 
 # Release tarballs are shipped through GitHub Releases. Keep only small

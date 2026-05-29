@@ -88,6 +88,25 @@ export default function BenchmarkPage() {
         </DocsGrid>
       </DocsSection>
 
+      <DocsSection eyebrow="Market context" title="Who this is measured against">
+        <DocsTable
+          rows={report.marketContext.map((item) => [
+            item.name,
+            item.scaleContext,
+            <>
+              <strong>{item.benchmarkRole}</strong>
+              <br />
+              {item.benchmarkBoundary}
+              <br />
+              <a className="data-link" href={item.sourceUrl} rel="noreferrer" target="_blank">{item.sourceLabel}</a>
+            </>
+          ])}
+        />
+        <p className="docs-note">
+          Company size is included for context, not for scoring. The benchmark scores the API surface available at this hosted read-only preflight boundary.
+        </p>
+      </DocsSection>
+
       <DocsSection eyebrow="Scope" title="Why these tracks are included">
         <DocsTable
           rows={[
@@ -229,7 +248,9 @@ export default function BenchmarkPage() {
         <p className="docs-note">
           Last public snapshot: <time dateTime={report.checkedAt}>{formatDate(report.checkedAt)}</time>. Machine report:{" "}
           <Link className="data-link" href="/benchmark.json">/benchmark.json</Link>. Full methodology:{" "}
-          <a className="data-link" href="https://github.com/nipmod/nipmod/blob/main/docs/competitive-benchmark.md" rel="noreferrer" target="_blank">docs/competitive-benchmark.md</a>.
+          <a className="data-link" href="https://github.com/nipmod/nipmod/blob/main/docs/competitive-benchmark.md" rel="noreferrer" target="_blank">docs/competitive-benchmark.md</a>. Share image:{" "}
+          <Link className="data-link" href="/benchmark-agent-preflight.png">PNG</Link>{" "}
+          and <Link className="data-link" href="/benchmark-agent-preflight.svg">SVG</Link>.
         </p>
       </DocsSection>
 
@@ -239,7 +260,9 @@ export default function BenchmarkPage() {
             ["OSV", <a className="data-link" href="https://google.github.io/osv.dev/api/" rel="noreferrer" target="_blank">Official API docs for vulnerability queries by package version or commit hash.</a>],
             ["deps.dev", <a className="data-link" href="https://docs.deps.dev/api/v3/" rel="noreferrer" target="_blank">Official API docs for package versions, dependencies, licenses and advisories.</a>],
             ["Socket", <a className="data-link" href="https://docs.socket.dev/reference/batchpackagefetchbyorg" rel="noreferrer" target="_blank">Official PURL API docs for package metadata and alerts.</a>],
+            ["Socket funding context", <a className="data-link" href="https://socket.dev/blog/series-c" rel="noreferrer" target="_blank">Socket announcement of its $60M Series C at a $1B valuation.</a>],
             ["Snyk", <a className="data-link" href="https://docs.snyk.io/snyk-api/reference/package" rel="noreferrer" target="_blank">Official package API docs and package-health endpoint boundary.</a>],
+            ["Snyk funding context", <a className="data-link" href="https://www.streetinsider.com/Reuters/Cybersecurity%2Bstartup%2BSnyk%2Bvalued%2Bat%2B%247.4%2Bbillion%2Bafter%2Blatest%2Bfunding/20960166.html" rel="noreferrer" target="_blank">Reuters report on Snyk's $7.4B valuation after its 2022 Series G.</a>],
             ["OpenSSF Scorecard", <a className="data-link" href="https://openssf.org/scorecard/" rel="noreferrer" target="_blank">Official project description for repository security posture scoring.</a>],
             ["npm audit", <a className="data-link" href="https://docs.npmjs.com/cli/v8/commands/npm-audit/" rel="noreferrer" target="_blank">Official npm audit docs for dependency-tree advisory checks.</a>]
           ]}

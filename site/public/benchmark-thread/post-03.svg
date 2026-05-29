@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Who we measured</title>
+  <desc id="desc">03 · Tracks</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#131514"/>
+      <stop offset="0.55" stop-color="#22211f"/>
+      <stop offset="1" stop-color="#101111"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#8fbf9a"/>
+      <stop offset="1" stop-color="#d8b56d"/>
+    </linearGradient>
+    <linearGradient id="muted" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#6f746f"/>
+      <stop offset="1" stop-color="#a8916d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity="0.32"/>
+    </filter>
+    <style>
+      .serif { font-family: Georgia, "Times New Roman", serif; }
+      .sans { font-family: Inter, Arial, sans-serif; }
+      .white { fill: #f5f1ea; }
+      .mutedText { fill: #b9b2a8; opacity: 0.78; }
+      .faintText { fill: #b9b2a8; opacity: 0.55; }
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect x="58" y="58" width="1484" height="884" rx="18" fill="rgba(255,255,255,0.018)" stroke="rgba(245,241,234,0.16)"/>
+
+  <g transform="translate(96 86)">
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#ef7c62"/>
+    <text x="62" y="30" class="sans white" font-size="24" font-weight="750">Nipmod</text>
+    <text x="0" y="104" class="sans faintText" font-size="16" font-weight="820">03 · TRACKS</text>
+    <text x="0" y="170" class="serif white" font-size="64">Who we measured</text>
+    
+  </g>
+  
+
+  <g transform="translate(96 380)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1408" height="440" rx="14" fill="rgba(255,255,255,0.034)" stroke="rgba(245,241,234,0.17)"/>
+    
+      <text x="54" y="80" class="white sans" font-size="20" font-weight="820">Nipmod</text>
+      <rect x="444" y="61" width="722" height="20" rx="10" fill="url(#gold)"/>
+      <text x="1324" y="81" class="white sans" font-size="18" font-weight="850" text-anchor="end">agent preflight layer</text>
+    
+
+      <text x="54" y="128" class="mutedText sans" font-size="20" font-weight="720">Native registries</text>
+      <rect x="444" y="109" width="167" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="129" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">source metadata</text>
+    
+
+      <text x="54" y="176" class="mutedText sans" font-size="20" font-weight="720">OSV</text>
+      <rect x="444" y="157" width="76" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="177" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">vulnerability feed</text>
+    
+
+      <text x="54" y="224" class="mutedText sans" font-size="20" font-weight="720">deps.dev</text>
+      <rect x="444" y="205" width="122" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="225" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">package evidence</text>
+    
+
+      <text x="54" y="272" class="mutedText sans" font-size="20" font-weight="720">Socket</text>
+      <rect x="444" y="253" width="76" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="273" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">authenticated PURL lookup</text>
+    
+
+      <text x="54" y="320" class="mutedText sans" font-size="20" font-weight="720">Snyk API</text>
+      <rect x="444" y="301" width="8" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="321" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">authenticated package API</text>
+    
+
+      <text x="54" y="368" class="mutedText sans" font-size="20" font-weight="720">OpenSSF Scorecard</text>
+      <rect x="444" y="349" width="15" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="369" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">repository posture</text>
+    
+
+      <text x="54" y="416" class="mutedText sans" font-size="20" font-weight="720">Raw agent</text>
+      <rect x="444" y="397" width="23" height="20" rx="10" fill="url(#muted)"/>
+      <text x="1324" y="417" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">control baseline</text>
+    
+    
+    
+  </g>
+
+  <text x="96" y="884" class="sans faintText" font-size="15" font-weight="780">NIPMOD.COM/BENCHMARK · RAW JSON: NIPMOD.COM/BENCHMARK.JSON · 03/12</text>
+</svg>

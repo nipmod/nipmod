@@ -35,6 +35,21 @@ The report separates the systems by role and dimension instead of forcing a fake
 
 Project scanners and update bots such as Dependabot, Renovate, npm audit, pip-audit, local Snyk CLI flows and install firewalls are useful, but they are not ranked in this API snapshot because they operate on manifests, local projects or install interception instead of this hosted read-only preflight boundary.
 
+## Market Context
+
+Company size and ecosystem weight are included only as context. They are not scoring inputs.
+
+| Track | Context | Benchmark boundary |
+| --- | --- | --- |
+| Nipmod | Live beta product. No valuation claim. | Live search, inspect and install-plan API owned by Nipmod. Explicit claim limits are required because Nipmod authors the benchmark. |
+| Native registries | Official package/model/repository sources. | Public source metadata from npm, PyPI, GitHub, Hugging Face and MCP. They are source-of-truth registries, not install-plan layers. |
+| OSV | Open source vulnerability infrastructure backed by the OSV ecosystem. | Vulnerability lookup feed for package/version cases. |
+| deps.dev | Open Source Insights data service developed by Google. | Package metadata, dependency, license, advisory and provenance context where supported. |
+| Socket | Socket announced a $60M Series C at a $1B valuation in May 2026. | Authenticated PURL package lookup only. Socket Firewall, CLI, GitHub app, browser extension and paid enterprise workflows are outside this snapshot. |
+| Snyk | Snyk was reported at a $7.4B valuation after its 2022 Series G round. | Authenticated REST package API access only. Snyk CLI, SCM imports, full platform project scanning, IaC, container and code analysis are outside this snapshot. |
+| OpenSSF Scorecard | OpenSSF project for automated open source repository security posture scoring. | GitHub repository posture case only. |
+| Raw agent | Control baseline. No company or product valuation. | Agent flow without an independent package intelligence layer. |
+
 ## Scoring Boundary
 
 The headline score is `agent preflight fit`, not total security quality.
