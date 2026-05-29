@@ -29,11 +29,9 @@ describe("Clawnch integration draft", () => {
       "clawnch-mcp-server",
       "@clawnch/clawtomaton",
       "@clawnch/memory",
-      "@clawnch/memory-mcp-server",
-      "clawmes"
+      "@clawnch/memory-mcp-server"
     ]);
     expect(clawnchIntegrationDraft.surfaces.every((surface) => surface.reviewStatus === "needs_partner_confirmation")).toBe(true);
-    expect(clawnchIntegrationDraft.surfaces.map((surface) => surface.source)).toContain("pypi");
     expect(clawnchIntegrationDraft.surfaces.map((surface) => surface.source)).toContain("npm");
   });
 

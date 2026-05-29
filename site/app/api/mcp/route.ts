@@ -2,6 +2,7 @@ import registryData from "../../registry-data.json";
 import {
   EXTERNAL_PACKAGE_SOURCES,
   createExternalInstallPlan,
+  externalPackageApiError,
   inspectExternalPackage,
   parseExternalSources,
   searchExternalPackages,
@@ -284,7 +285,7 @@ async function handleJsonRpc(message: unknown): Promise<JsonRpcResponse> {
     if (error instanceof RemoteMcpError) {
       return errorResponse(id, error.code, error.message);
     }
-    return errorResponse(id, -32000, error instanceof Error ? error.message : "remote MCP server error");
+    return errorResponse(id, -32000, "remote MCP server error");
   }
 }
 
@@ -438,7 +439,7 @@ async function externalInstallPlanTool(args: Record<string, unknown>): Promise<J
       plan: createExternalInstallPlan(await inspectExternalPackage(source, name, { timeoutMs: 6000 }))
     });
   } catch (error) {
-    throw new RemoteMcpError(-32602, error instanceof Error ? error.message : "external package install plan failed");
+    throw new RemoteMcpError(-32602, externalPackageApiError(error, "external package install plan failed").error);
   }
 }
 

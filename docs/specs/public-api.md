@@ -51,7 +51,7 @@ Operators can run `pnpm archive:canary -- --require-durable` to verify the live 
 
 Operators can run `pnpm archive:drift -- --base-url https://nipmod.com --limit 100` to review stored archive records without writing data. The review fetches archive records through the public API, re-inspects their upstream sources and reports whether the current stable source digest still matches the first archived stable source digest. Changed records include bounded field-level reasons such as identity, install, metadata or freshness changes. The review also reports trust-score movement when trust changes without source-material drift. Add `--fail-on-changed` or `--fail-on-failed` only when drift or upstream errors should gate a release.
 
-Scheduled GitHub monitors should provide `NIPMOD_CANARY_API_KEY` from repository secrets so repeated production checks reuse one dedicated canary key instead of issuing fresh beta keys on every run. If the secret is absent, canaries can still self-issue a temporary beta key as a fallback.
+Scheduled GitHub monitors should provide `NIPMOD_CANARY_API_KEY` from repository secrets so repeated production checks reuse one dedicated canary key instead of issuing fresh beta keys on every run. If the secret is absent, canaries can still self-issue a temporary beta key as a fallback. Raw self-issued canary keys are kept in memory only unless `NIPMOD_CANARY_KEY_CACHE=1` or `NIPMOD_CANARY_KEY_CACHE_FILE` explicitly enables local cache storage.
 
 Scheduled archive drift review should also pass the workflow `github.token` as `NIPMOD_GITHUB_TOKEN` so GitHub source reinspection uses authenticated public API limits instead of unauthenticated rate limits.
 

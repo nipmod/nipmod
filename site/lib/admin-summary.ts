@@ -1,5 +1,5 @@
 import { readApiUsageMetrics } from "./api-usage";
-import { externalSourceCapabilities } from "./external-packages";
+import { EXTERNAL_PACKAGE_SOURCES, externalSourceCapabilities } from "./external-packages";
 
 import { visibleApiKeyLabel } from "./api-key-labels";
 
@@ -15,6 +15,7 @@ const KEY_ACTIVITY_EVENT_LIMIT = 5_000;
 const KEY_ROW_LIMIT = 500;
 const STALE_BETA_HOURS = 720;
 const EXPIRING_SOON_HOURS = 168;
+const ADMIN_SOURCE_SET = new Set<string>(EXTERNAL_PACKAGE_SOURCES);
 
 export interface AdminSummaryInput {
   limit: number;
@@ -447,11 +448,22 @@ function latestIso(left: string | null, right: string): string {
 }
 
 function metricSources(row: KeyActivityEventRow): string[] {
-  const fromSources = Array.isArray(row.sources) ? row.sources.filter((source): source is string => typeof source === "string" && source.length > 0) : [];
+  const fromSources = Array.isArray(row.sources)
+    ? row.sources.map(normalizeMetricSource).filter((source): source is string => source !== null)
+    : [];
   if (fromSources.length > 0) {
     return [...new Set(fromSources)];
   }
-  return row.source ? [row.source] : [];
+  const source = normalizeMetricSource(row.source);
+  return source ? [source] : [];
+}
+
+function normalizeMetricSource(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase();
+  return ADMIN_SOURCE_SET.has(normalized) ? normalized : null;
 }
 
 function readTrafficOrigin(value: string | null): string {

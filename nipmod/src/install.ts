@@ -66,7 +66,7 @@ export async function installFilePackage(
   options: InstallOptions = {}
 ): Promise<InstallResult> {
   const absoluteBundlePath = resolve(bundlePath);
-  const bytes = await readFile(absoluteBundlePath);
+  const bytes = await readLocalBundleBytes(absoluteBundlePath);
 
   return installBundlePackage(bytes, pathToFileURL(absoluteBundlePath).href, projectDir, options);
 }
@@ -344,7 +344,7 @@ async function readLockedPackageBundle(
   const resolved = new URL(pkg.resolved);
   if (pkg.storePath) {
     try {
-      const bytes = await readFile(join(projectDir, pkg.storePath));
+      const bytes = await readLocalBundleBytes(join(projectDir, pkg.storePath));
       if (sha256Hex(bytes) !== expectedDigest) {
         if (resolved.protocol !== "file:" && !options.allowNetwork) {
           throw new Error(`cached bundle digest mismatch for ${packageKey}; run without --offline to refetch`);
@@ -364,7 +364,7 @@ async function readLockedPackageBundle(
 
   if (resolved.protocol === "file:") {
     return {
-      bytes: await readFile(fileURLToPath(resolved)),
+      bytes: await readLocalBundleBytes(fileURLToPath(resolved)),
       source: "file"
     };
   }
@@ -390,6 +390,17 @@ async function writeStoreBundle(projectDir: string, digest: string, bundleBytes:
   await mkdirNoSymlinkPath(projectDir, [".nipmod", "store", "sha256", digest]);
   await writeBytesFileAtomic(join(directory, "bundle.nipmod"), bundleBytes);
   return relativePath;
+}
+
+async function readLocalBundleBytes(path: string): Promise<Buffer> {
+  const stats = await lstat(path);
+  if (!stats.isFile()) {
+    throw new Error(`local bundle path is not a file: ${path}`);
+  }
+  if (stats.size > BUNDLE_LIMIT) {
+    throw new Error(`local bundle exceeds ${BUNDLE_LIMIT} bytes: ${path}`);
+  }
+  return readFile(path);
 }
 
 async function mkdirNoSymlinkPath(root: string, parts: readonly string[]): Promise<void> {

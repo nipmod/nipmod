@@ -1,5 +1,6 @@
 import { ExternalPackageError, externalPackageApiError } from "../../../../lib/external-packages";
 import { apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
 import { apiJsonWithUsage } from "../../../../lib/api-response";
 import {
   archiveEligibility,
@@ -36,8 +37,14 @@ export async function POST(request: Request): Promise<Response> {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJsonRequestBody(request);
+  } catch (error) {
+    if (error instanceof ApiRequestBodyError) {
+      return apiJsonWithUsage(request,
+        { code: error.code, error: error.message, retryable: false, source: null, status: error.status, type: "dev.nipmod.api-error.v1" },
+        { access: rateLimit.access, context, headers: rateLimit.headers, status: error.status }
+      );
+    }
     return apiJsonWithUsage(request,
       { code: "invalid_json", error: "invalid JSON", retryable: false, source: null, status: 400, type: "dev.nipmod.api-error.v1" },
       { access: rateLimit.access, context, headers: rateLimit.headers, status: 400 }

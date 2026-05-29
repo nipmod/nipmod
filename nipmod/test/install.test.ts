@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, symlink, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -38,6 +38,19 @@ describe("local install", () => {
     expect(lockfile.packages[`${signedProject.manifest.canonical}@0.1.0`].integrity).toBe(
       `sha256-${packed.digest}`
     );
+  });
+
+  test("rejects oversized local bundles before parsing", async () => {
+    const temp = await mkdtemp(join(tmpdir(), "nipmod-oversized-local-bundle-"));
+    const bundlePath = join(temp, "oversized.nipmod");
+    await writeFile(bundlePath, "");
+    await truncate(bundlePath, 50 * 1024 * 1024 + 1);
+
+    await expect(
+      installFilePackage(bundlePath, temp, {
+        integrity: `sha256-${"0".repeat(64)}`
+      })
+    ).rejects.toThrow(/local bundle exceeds/);
   });
 
   test("single package install records dependency snapshots without requiring unfetched dependencies", async () => {

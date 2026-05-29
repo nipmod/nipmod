@@ -36,8 +36,8 @@ describe("public stats route", () => {
             error_code: "invalid_query",
             install_blocked: null,
             route: "/api/search",
-            source: "npm",
-            sources: ["npm"],
+            source: "private-package-name",
+            sources: ["npm", "private-package-name"],
             status: 400,
             traffic_origin: "public",
             trust_decision: null,
@@ -104,8 +104,9 @@ describe("public stats route", () => {
       if (url.includes("/rest/v1/package_intelligence_records?")) {
         return Response.json([
           { source: "npm", status: "agent_confirmed", trust_score: 100 },
-          { source: "pypi", status: "agent_confirmed", trust_score: 88 }
-        ], { headers: { "content-range": "0-1/2" } });
+          { source: "pypi", status: "agent_confirmed", trust_score: 88 },
+          { source: "private-source-name", status: "private-status", trust_score: 100 }
+        ], { headers: { "content-range": "0-2/3" } });
       }
       if (url.includes("/rest/v1/api_keys?")) {
         return Response.json([{ id: "key_external_beta" }], { headers: { "content-range": "0-0/1" } });
@@ -131,7 +132,7 @@ describe("public stats route", () => {
     expect(response.headers.get("access-control-allow-origin")).toBe("*");
     expect(body).toMatchObject({
       archive: {
-        confirmedRecords: 2
+        confirmedRecords: 3
       },
       betaKeys: {
         activeCount: 1
@@ -162,8 +163,47 @@ describe("public stats route", () => {
     expect(JSON.stringify(body)).not.toContain("key_external_beta_2");
     expect(JSON.stringify(body)).not.toContain("admin_password");
     expect(JSON.stringify(body)).not.toContain("service-role-key");
+    expect(JSON.stringify(body)).not.toContain("private-status");
     expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/usage/stats" }));
     expect(body.external.routes).not.toContainEqual(expect.objectContaining({ route: "/api/admin/summary" }));
+    expect(body.external.sources).not.toContainEqual(expect.objectContaining({ source: "private-package-name" }));
     expect(fetchMock).toHaveBeenCalledTimes(7);
+  });
+
+  test("falls back safely when usage event rows cannot be parsed", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/api_usage_events?")) {
+        return new Response("{", { headers: { "content-type": "application/json" }, status: 200 });
+      }
+      if (url.includes("/rest/v1/package_intelligence_records?")) {
+        return Response.json([], { headers: { "content-range": "*/0" } });
+      }
+      if (url.includes("/rest/v1/api_keys?")) {
+        return Response.json([], { headers: { "content-range": "*/0" } });
+      }
+      if (url.endsWith("/rest/v1/api_usage_events")) {
+        return new Response(null, { status: 204 });
+      }
+      return Response.json({ error: "unexpected test URL" }, { status: 500 });
+    }) as unknown as typeof fetch;
+
+    stubApiKeyAuth();
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await GET(new Request("https://nipmod.com/api/stats?hours=24", { headers: apiKeyHeaders() }));
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      external: {
+        requestCount: 0
+      },
+      type: "dev.nipmod.public-stats.v1"
+    });
+    expect(JSON.stringify(body)).not.toContain("service-role-key");
   });
 });

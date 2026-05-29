@@ -63,7 +63,7 @@ function errorJson(
   return apiJsonWithUsage(request,
     {
       code: "internal_error",
-      error: error instanceof Error ? error.message : "archive search failed",
+      error: "archive search failed",
       retryable: false,
       source: null,
       status: 500,

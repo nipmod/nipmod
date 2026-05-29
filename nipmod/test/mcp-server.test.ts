@@ -58,11 +58,25 @@ describe("nipmod MCP server", () => {
       "nipmod.explain"
     ]);
     const tools = list.result.tools as Array<{ annotations: Record<string, boolean>; name: string }>;
-    for (const tool of tools) {
-      expect(tool.annotations).toMatchObject({
-        destructiveHint: false
-      });
-    }
+    expect(
+      Object.fromEntries(tools.map((tool) => [tool.name, tool.annotations.destructiveHint]))
+    ).toEqual({
+      "nipmod.search": false,
+      "nipmod.view": false,
+      "nipmod.inspect": false,
+      "nipmod.install_plan": false,
+      "nipmod.install": true,
+      "nipmod.update_plan": false,
+      "nipmod.demo": false,
+      "nipmod.publish_plan": false,
+      "nipmod.claim_verify": false,
+      "nipmod.claim_index": false,
+      "nipmod.verify": false,
+      "nipmod.audit": false,
+      "nipmod.deep_scan": false,
+      "nipmod.sbom": false,
+      "nipmod.explain": false
+    });
     expect(
       Object.fromEntries(tools.map((tool) => [tool.name, tool.annotations.readOnlyHint]))
     ).toEqual({

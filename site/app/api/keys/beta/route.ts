@@ -1,4 +1,5 @@
 import { apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { ApiRequestBodyError, readJsonRequestBody, readLimitedRequestText } from "../../../../lib/api-request";
 import { issueSelfServeBetaApiKey } from "../../../../lib/api-key-issuer";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
@@ -20,14 +21,14 @@ export async function POST(request: Request): Promise<Response> {
   if (!input.ok) {
     return apiJson(
       {
-        code: "invalid_json",
-        error: "invalid JSON",
+        code: input.code,
+        error: input.error,
         retryable: false,
         source: null,
-        status: 400,
+        status: input.status,
         type: "dev.nipmod.api-error.v1"
       },
-      { context, headers: rateLimit.headers, status: 400 }
+      { context, headers: rateLimit.headers, status: input.status }
     );
   }
 
@@ -56,32 +57,44 @@ export async function POST(request: Request): Promise<Response> {
   });
 }
 
-async function readIssueInput(request: Request): Promise<{ label?: unknown; ok: true } | { ok: false }> {
+async function readIssueInput(
+  request: Request
+): Promise<{ label?: unknown; ok: true } | { code: "invalid_json" | "payload_too_large"; error: string; ok: false; status: 400 | 413 }> {
   const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
   if (contentType.includes("application/json")) {
     let body: unknown;
     try {
-      body = await request.json();
-    } catch {
-      return { ok: false };
+      body = await readJsonRequestBody(request, 16 * 1024);
+    } catch (error) {
+      if (error instanceof ApiRequestBodyError) {
+        return { code: error.code, error: error.message, ok: false, status: error.status };
+      }
+      return { code: "invalid_json", error: "invalid JSON", ok: false, status: 400 };
     }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
-      return { ok: false };
+      return { code: "invalid_json", error: "invalid JSON", ok: false, status: 400 };
     }
     return { label: readFirstString(body, ["label", "name", "agent", "client"]), ok: true };
   }
 
-  if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
-    let form: FormData;
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    let form: URLSearchParams;
     try {
-      form = await request.formData();
-    } catch {
-      return { ok: false };
+      form = new URLSearchParams(await readLimitedRequestText(request, 16 * 1024));
+    } catch (error) {
+      if (error instanceof ApiRequestBodyError) {
+        return { code: error.code, error: error.message, ok: false, status: error.status };
+      }
+      return { code: "invalid_json", error: "invalid JSON", ok: false, status: 400 };
     }
     return {
       label: form.get("label") ?? form.get("name") ?? form.get("agent") ?? form.get("client") ?? undefined,
       ok: true
     };
+  }
+
+  if (contentType.includes("multipart/form-data")) {
+    return { ok: true };
   }
 
   return { ok: true };

@@ -95,7 +95,7 @@ function canUsePersistentCache(): boolean {
   if (flag === "0" || flag === "false") {
     return false;
   }
-  return process.env.NODE_ENV !== "test" || Boolean(process.env.NIPMOD_CANARY_KEY_CACHE_FILE);
+  return flag === "1" || flag === "true" || Boolean(process.env.NIPMOD_CANARY_KEY_CACHE_FILE);
 }
 
 function canaryCachePath(baseUrl: string): string {

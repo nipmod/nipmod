@@ -82,15 +82,6 @@ export const clawnchIntegrationDraft = {
       candidateInstall: "npx @clawnch/memory-mcp-server",
       publicReference: "https://www.clawn.ch/skill",
       reviewStatus: "needs_partner_confirmation"
-    },
-    {
-      id: "clawmes",
-      name: "clawmes",
-      kind: "chat_launch_plugin",
-      source: "pypi",
-      candidateInstall: "pip install clawmes",
-      publicReference: "https://www.clawn.ch",
-      reviewStatus: "needs_partner_confirmation"
     }
   ],
   proposedFlow: [
@@ -149,7 +140,7 @@ export const clawnchIntegrationDraft = {
   calls: {
     issueBetaKey: "POST https://nipmod.com/api/keys/beta",
     search:
-      "GET https://nipmod.com/api/search?q=clawnch%20agent%20token%20tooling&sources=npm,pypi,github,mcp&limit=5 with x-nipmod-api-key",
+      "GET https://nipmod.com/api/search?q=clawnch%20agent%20token%20tooling&sources=npm,github,mcp&limit=5 with x-nipmod-api-key",
     inspect: "GET https://nipmod.com/api/inspect?source=npm&name=@clawnch/sdk with x-nipmod-api-key",
     installPlan: "GET https://nipmod.com/api/install-plan?source=npm&name=@clawnch/sdk with x-nipmod-api-key",
     remoteMcpResolve: "POST https://nipmod.com/api/mcp tools/call nipmod.resolve with x-nipmod-api-key"

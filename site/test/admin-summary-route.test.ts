@@ -110,8 +110,8 @@ describe("admin summary route", () => {
             error_code: null,
             install_blocked: false,
             route: "/api/install-plan",
-            source: "npm",
-            sources: ["npm"],
+            source: "private-source-name",
+            sources: ["npm", "private-source-name"],
             status: 200,
             traffic_origin: "authenticated_beta"
           },
@@ -212,6 +212,7 @@ describe("admin summary route", () => {
     expect(JSON.stringify(body)).not.toContain(rawKey);
     expect(JSON.stringify(body)).not.toContain(hash);
     expect(JSON.stringify(body)).not.toContain("service-role-key");
+    expect(JSON.stringify(body)).not.toContain("private-source-name");
     expect(body.sourceQuality.profiles[0]).toMatchObject({
       coverage: "strong",
       source: "npm"

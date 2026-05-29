@@ -8,6 +8,8 @@ const PUBLIC_STATS_EVENT_LIMIT = 5_000;
 const PUBLIC_STATS_TIMEOUT_MS = 1_500;
 const PUBLIC_STATS_EVENT_SELECT =
   "created_at,api_key_id,client_hash,route,status,source,sources,error_code,traffic_origin,trust_decision,trust_risk,install_blocked,archive_stored";
+const PUBLIC_STATS_SOURCE_SET = new Set<string>(EXTERNAL_PACKAGE_SOURCES);
+const PUBLIC_ARCHIVE_STATUS_SET = new Set(["external_indexed", "agent_confirmed", "claimed", "verified_nipmod", "quarantined", "yanked"]);
 
 export interface PublicStatsInput {
   hours: number;
@@ -102,11 +104,15 @@ async function readUsageEvents(
   if (responses.some((response) => !response.ok)) {
     return { ok: false, rows: [] };
   }
-  const groups = await Promise.all(responses.map((response) => response.json()));
-  return {
-    ok: true,
-    rows: groups.flatMap((rows) => (Array.isArray(rows) ? rows.filter(isPublicStatsEventRow) : []))
-  };
+  try {
+    const groups = await Promise.all(responses.map((response) => response.json()));
+    return {
+      ok: true,
+      rows: groups.flatMap((rows) => (Array.isArray(rows) ? rows.filter(isPublicStatsEventRow) : []))
+    };
+  } catch {
+    return { ok: false, rows: [] };
+  }
 }
 
 async function readArchiveStats(env: PublicStatsEnv, fetchImpl: typeof fetch) {
@@ -421,7 +427,16 @@ function isArchiveStatsRow(value: unknown): value is ArchiveStatsRow {
     return false;
   }
   const row = value as Partial<ArchiveStatsRow>;
-  return typeof row.source === "string" && typeof row.status === "string" && typeof row.trust_score === "number";
+  return (
+    typeof row.source === "string" &&
+    PUBLIC_STATS_SOURCE_SET.has(row.source) &&
+    typeof row.status === "string" &&
+    PUBLIC_ARCHIVE_STATUS_SET.has(row.status) &&
+    typeof row.trust_score === "number" &&
+    Number.isFinite(row.trust_score) &&
+    row.trust_score >= 0 &&
+    row.trust_score <= 100
+  );
 }
 
 function isExternalOrigin(value: string | null): boolean {
@@ -437,11 +452,22 @@ function isControlPlaneRoute(route: string): boolean {
 }
 
 function metricSources(row: PublicStatsEventRow): string[] {
-  const fromSources = Array.isArray(row.sources) ? row.sources.filter((source): source is string => typeof source === "string" && source.length > 0) : [];
+  const fromSources = Array.isArray(row.sources)
+    ? row.sources.map(normalizePublicSource).filter((source): source is string => Boolean(source))
+    : [];
   if (fromSources.length > 0) {
     return [...new Set(fromSources)];
   }
-  return row.source ? [row.source] : [];
+  const source = normalizePublicSource(row.source);
+  return source ? [source] : [];
+}
+
+function normalizePublicSource(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const source = value.trim().toLowerCase();
+  return PUBLIC_STATS_SOURCE_SET.has(source) ? source : null;
 }
 
 function countBy<T>(rows: T[], readKey: (row: T) => string): Map<string, number> {

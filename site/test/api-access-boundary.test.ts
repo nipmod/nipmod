@@ -15,6 +15,7 @@ import { GET as searchGet } from "../app/api/search/route";
 import { GET as sourceHealthGet } from "../app/api/sources/health/route";
 import { GET as publicStatsGet } from "../app/api/stats/route";
 import { GET as usageStatsGet } from "../app/api/usage/stats/route";
+import { deriveApiKeyDigestForStorage } from "../lib/api-auth";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -130,5 +131,36 @@ describe("API access boundary", () => {
     });
     expect(body.code).not.toBe("api_key_required");
     expect(JSON.stringify(body)).not.toContain("nka_beta_");
+  });
+
+  test("protected package POST routes reject oversized JSON bodies after authentication", async () => {
+    const rawKey = "nka_test_body_limit_key_1234567890";
+    const hashSecret = "test-body-limit-secret";
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashSecret);
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", `test:beta:${deriveApiKeyDigestForStorage(rawKey, hashSecret)}`);
+    const headers = {
+      "content-type": "application/json",
+      "x-nipmod-api-key": rawKey
+    };
+    const oversized = JSON.stringify({ record: "x".repeat(129 * 1024) });
+    const routes = [
+      () => installPlanPost(new Request("https://nipmod.com/api/install-plan", { body: oversized, headers, method: "POST" })),
+      () => archivePreparePost(new Request("https://nipmod.com/api/archive/prepare", { body: oversized, headers, method: "POST" })),
+      () => archiveConfirmPost(new Request("https://nipmod.com/api/archive/confirm", { body: oversized, headers, method: "POST" }))
+    ];
+
+    for (const call of routes) {
+      const response = await call();
+      const body = await response.json();
+
+      expect(response.status).toBe(413);
+      expect(body).toMatchObject({
+        code: "payload_too_large",
+        error: "request body is too large",
+        retryable: false,
+        status: 413,
+        type: "dev.nipmod.api-error.v1"
+      });
+    }
   });
 });

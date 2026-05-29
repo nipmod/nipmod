@@ -1,5 +1,6 @@
 import { hasApiAccessTier } from "../../../../lib/api-auth";
 import { adminCorsPolicy, apiJson, apiOptions, createApiHttpContext } from "../../../../lib/api-http";
+import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
 import { cleanupStaleBetaKeys, updateAdminKeyLabel, updateAdminKeyStatus } from "../../../../lib/admin-keys";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
@@ -41,7 +42,26 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  const body = await readJsonBody(request);
+  const bodyResult = await readJsonBody(request);
+  if (!bodyResult.ok) {
+    return apiJson(
+      {
+        code: bodyResult.code,
+        error: bodyResult.error,
+        retryable: false,
+        source: null,
+        status: bodyResult.status,
+        type: "dev.nipmod.api-error.v1"
+      },
+      {
+        context,
+        corsPolicy,
+        headers: rateLimit.headers,
+        status: bodyResult.status
+      }
+    );
+  }
+  const body = bodyResult.body;
   const parsed = parseAdminKeyAction(body);
   if (!parsed.ok) {
     return apiJson(
@@ -103,11 +123,16 @@ export async function POST(request: Request): Promise<Response> {
   });
 }
 
-async function readJsonBody(request: Request): Promise<unknown> {
+async function readJsonBody(
+  request: Request
+): Promise<{ body: unknown; ok: true } | { code: "invalid_json" | "payload_too_large"; error: string; ok: false; status: 400 | 413 }> {
   try {
-    return await request.json();
-  } catch {
-    return {};
+    return { body: await readJsonRequestBody(request, 64 * 1024), ok: true };
+  } catch (error) {
+    if (error instanceof ApiRequestBodyError) {
+      return { code: error.code, error: error.message, ok: false, status: error.status };
+    }
+    return { code: "invalid_json", error: "invalid JSON", ok: false, status: 400 };
   }
 }
 

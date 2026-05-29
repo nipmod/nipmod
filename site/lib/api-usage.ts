@@ -52,7 +52,7 @@ export async function recordApiUsage(input: ApiUsageInput, env: UsageEnv = proce
     return;
   }
 
-  const summary = summarizeResponse(input.responseBody, input.request);
+  const summary = summarizeResponse(input.responseBody, input.request, env);
   const row = {
     access_tier: input.access.tier,
     api_key_id: input.access.keyId,
@@ -491,7 +491,7 @@ function isUsageMetricsEventRow(value: unknown): value is UsageMetricsEventRow {
   );
 }
 
-function summarizeResponse(value: unknown, request: Request): UsageSummary {
+function summarizeResponse(value: unknown, request: Request, env: UsageEnv): UsageSummary {
   const url = new URL(request.url);
   const query = url.searchParams.get("q");
   const name = url.searchParams.get("name");
@@ -499,8 +499,8 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
     archiveStored: null,
     errorCode: null,
     installBlocked: null,
-    packageHash: name ? hashValue(name) : null,
-    queryHash: query ? hashValue(query) : null,
+    packageHash: name ? hashUsageValue(name, env) : null,
+    queryHash: query ? hashUsageValue(query, env) : null,
     resultCount: null,
     source: normalizeMetricSource(url.searchParams.get("source")),
     sources: readSources(url.searchParams.get("sources")),
@@ -536,7 +536,7 @@ function summarizeResponse(value: unknown, request: Request): UsageSummary {
     ...base,
     archiveStored: typeof record.stored === "boolean" ? record.stored : base.archiveStored,
     installBlocked: typeof safety?.blocked === "boolean" ? safety.blocked : base.installBlocked,
-    packageHash: packageName ? hashValue(packageName) : base.packageHash,
+    packageHash: packageName ? hashUsageValue(packageName, env) : base.packageHash,
     source,
     trustDecision: readTrustDecision(trust?.decision),
     trustRisk: readTrustRisk(trust?.risk)
@@ -579,8 +579,17 @@ function hashClient(request: Request, env: UsageEnv): string {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const realIp = request.headers.get("x-real-ip")?.trim();
   const userAgent = request.headers.get("user-agent")?.trim() ?? "unknown-agent";
-  const salt = env[USAGE_HASH_SALT_ENV] ?? "nipmod-public-api";
+  const salt = usageHashSalt(env);
   return hashValue(`${salt}:${forwarded || realIp || "anonymous"}:${userAgent}`).slice(0, 32);
+}
+
+function hashUsageValue(value: string, env: UsageEnv): string {
+  const salt = usageHashSalt(env);
+  return hashValue(`${salt}:${value}`);
+}
+
+function usageHashSalt(env: UsageEnv): string {
+  return env[USAGE_HASH_SALT_ENV] ?? env[SUPABASE_SERVICE_ROLE_KEY_ENV] ?? "nipmod-public-api";
 }
 
 function classifyTrafficOrigin(input: ApiUsageInput): Exclude<TrafficOrigin, "unknown_legacy"> {

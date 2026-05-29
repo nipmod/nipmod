@@ -312,7 +312,7 @@ async function readApiKeyRow(
 
 function patchForStatusAction(action: "pause" | "resume" | "revoke", row: ApiKeyRow): Record<string, unknown> {
   if (action === "pause") {
-    return { label: pausedApiKeyLabel(row.label), revoked_at: null };
+    return { label: pausedApiKeyLabel(row.label), revoked_at: null, status: "paused" };
   }
   if (action === "resume") {
     const patch: Record<string, unknown> = { label: visibleApiKeyLabel(row.label), revoked_at: null };

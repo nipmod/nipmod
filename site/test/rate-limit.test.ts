@@ -56,6 +56,32 @@ describe("API rate limits", () => {
     });
   });
 
+  test("rate limits repeated invalid async auth attempts", async () => {
+    const request = new Request("https://nipmod.com/api/search", {
+      headers: {
+        "user-agent": "bad-auth-rate-limit-test",
+        "x-forwarded-for": "203.0.113.44",
+        "x-nipmod-api-key": "short",
+        "x-request-id": "bad-auth-rate-limit-test"
+      }
+    });
+    const context = createApiHttpContext(request);
+    const policy = { limit: 1, name: "bad-auth-rate-limit", windowMs: 60_000 };
+
+    const first = await checkApiRateLimitAsync(request, policy, context, { requireApiKey: true });
+    const second = await checkApiRateLimitAsync(request, policy, context, { requireApiKey: true });
+
+    expect(first.ok).toBe(false);
+    expect(first.response?.status).toBe(401);
+    expect(second.ok).toBe(false);
+    expect(second.response?.status).toBe(429);
+    expect(second.response?.headers.get("x-ratelimit-policy")).toBe("bad-auth-rate-limit-auth-failure");
+    await expect(second.response?.json()).resolves.toMatchObject({
+      code: "rate_limited",
+      status: 429
+    });
+  });
+
   test("requires an API key when the route opts into key-required access", async () => {
     const request = new Request("https://nipmod.com/api/search", {
       headers: {

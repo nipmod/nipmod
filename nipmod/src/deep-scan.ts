@@ -181,13 +181,13 @@ const LIFECYCLE_SCRIPTS = new Set([
 const TEXT_RULES: TextRule[] = [
   {
     category: "remote-shell",
-    regex: /\b(curl|wget)\b[^\n\r|;&]{0,220}(?:\||;|&&)\s*(?:sudo\s+)?(?:sh|bash|zsh|node|python|python3)\b|\b(?:bash|sh|zsh)\s+-c\s+["']?\$?\(\s*(?:curl|wget)\b|\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b|\b(?:iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:\||;)[^\n\r]{0,120}\b(?:iex|Invoke-Expression)\b/i,
+    regex: /\b(curl|wget)\b[^\n\r|;&]{0,220}(?:\||;|&&)\s*(?:sudo\s+)?(?:sh|bash|zsh|node|python|python3|deno|bun|npx|tsx|npm|pnpm|yarn|uv)\b|\b(?:bash|sh|zsh)\s+-c\s+["']?\$?\(\s*(?:curl|wget)\b|\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b|\b(?:iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:\||;)[^\n\r]{0,120}\b(?:iex|Invoke-Expression)\b/i,
     severity: "high",
     recommendation: "Review remote shell execution before allowing any install or setup command."
   },
   {
     category: "downloaded-file-execution",
-    regex: /\b(curl|wget|iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:-o|--output|>|-OutFile)\s*\S+[^\n\r]{0,220}(?:&&|;|\|\|)[^\n\r]{0,160}\b(sh|bash|zsh|node|python|python3|chmod|pwsh|powershell)\b/i,
+    regex: /\b(curl|wget|iwr|irm|Invoke-WebRequest|Invoke-RestMethod)\b[^\n\r]{0,220}(?:-o|--output|>|-OutFile)\s*\S+[^\n\r]{0,220}(?:&&|;|\|\|)[^\n\r]{0,160}\b(sh|bash|zsh|node|python|python3|chmod|pwsh|powershell|deno|bun|npx|tsx|npm|pnpm|yarn|uv)\b/i,
     severity: "high",
     recommendation: "Reject or isolate installers that download a payload and then execute it."
   },
@@ -211,7 +211,7 @@ const TEXT_RULES: TextRule[] = [
   },
   {
     category: "credential-access",
-    regex: /\b(id_rsa|id_ed25519|ssh-agent|\.ssh|\.npmrc|\.pypirc|\.netrc|\/proc\/self\/environ|process\.env|os\.environ|getenv|GITHUB_TOKEN|NPM_TOKEN|PYPI_TOKEN|HF_TOKEN|AWS_SECRET_ACCESS_KEY|SSH_AUTH_SOCK|169\.254\.169\.254|metadata\.google\.internal|mnemonic|seed phrase|private[_-]?key|wallet|keystore|\.env)\b/i,
+    regex: /\b(id_rsa|id_ed25519|ssh-agent|\.ssh|\.npmrc|\.pypirc|\.netrc|\/proc\/self\/environ|process\.env|os\.environ|getenv|GITHUB_TOKEN|NPM_TOKEN|PYPI_TOKEN|HF_TOKEN|HUGGINGFACE_HUB_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|COINBASE_API_KEY|BASE_PRIVATE_KEY|WALLET_PRIVATE_KEY|PRIVY_APP_SECRET|VERCEL_TOKEN|SUPABASE_SERVICE_ROLE_KEY|AWS_SECRET_ACCESS_KEY|AWS_SESSION_TOKEN|GOOGLE_APPLICATION_CREDENTIALS|SSH_AUTH_SOCK|169\.254\.169\.254|metadata\.google\.internal|mnemonic|seed phrase|private[_-]?key|wallet|keystore|\.env)\b/i,
     severity: "high",
     recommendation: "Check whether the package attempts to read credentials, wallets, SSH keys or environment secrets."
   },
@@ -489,7 +489,15 @@ async function scanArtifactFile(
       scanZipArtifact(buffer, scanEntry, skipEntry, state.maxArtifactEntries, state.maxBytesPerFile);
     }
   } catch {
-    state.skipped.push({ path: rel, reason: "artifact could not be parsed as a supported archive" });
+    const reason = "artifact could not be parsed as a supported archive";
+    state.skipped.push({ path: rel, reason });
+    addFinding(state, {
+      category: "artifact-scan-limit",
+      evidence: reason,
+      file: rel,
+      recommendation: "Review unsupported, malformed or intentionally hard-to-scan package artifacts before allowing install execution.",
+      severity: "medium"
+    });
     return;
   }
 
@@ -859,7 +867,7 @@ function addFinding(
   }
   const entry: DeepScanFinding = {
     category: finding.category,
-    evidence: finding.evidence.slice(0, MAX_EVIDENCE_LENGTH),
+    evidence: redactEvidence(finding.evidence).slice(0, MAX_EVIDENCE_LENGTH),
     file: finding.file,
     recommendation: finding.recommendation,
     severity: finding.severity
@@ -928,4 +936,15 @@ function readTarOctal(buffer: Buffer, offset: number, length: number): number {
 
 function compact(value: string): string {
   return value.replace(/\s+/g, " ").trim().slice(0, MAX_EVIDENCE_LENGTH);
+}
+
+function redactEvidence(value: string): string {
+  return value
+    .replace(
+      /\b([A-Z][A-Z0-9_]*(?:API[_-]?KEY|TOKEN|SECRET|PRIVATE[_-]?KEY|SESSION[_-]?TOKEN|SERVICE[_-]?ROLE[_-]?KEY|ACCESS[_-]?KEY)[A-Z0-9_]*)\b\s*[:=]\s*["']?[^"',\s)]+/gi,
+      "$1=<redacted>"
+    )
+    .replace(/\b(?:sk|pk|rk|nka|ghp|github_pat|hf|xox[baprs]?)-?[A-Za-z0-9_]{16,}\b/g, "<redacted-token>")
+    .replace(/\b0x[a-fA-F0-9]{64}\b/g, "0x<redacted-private-key>")
+    .replace(/\b(?:password|passwd|pwd|secret|token|api[_-]?key)\b\s*[:=]\s*["']?[^"',\s)]+/gi, "$1=<redacted>");
 }

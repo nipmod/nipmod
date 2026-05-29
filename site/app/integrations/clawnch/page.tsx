@@ -10,7 +10,7 @@ export const metadata = createPageMetadata({
   title: "Clawnch integration draft"
 });
 
-const hostInstruction = `Before this agent installs or enables Clawnch SDK, CLI, MCP, memory or chat-launch tooling, call Nipmod.
+const hostInstruction = `Before this agent installs or enables Clawnch SDK, CLI, MCP or memory tooling, call Nipmod.
 Resolve the exact package or source.
 Inspect trust signals and source evidence.
 Request an install plan.
@@ -19,7 +19,7 @@ Do not install, run, launch, trade, manage liquidity, handle credentials or touc
 const httpContract = `POST https://nipmod.com/api/keys/beta
 {"label":"clawnch-integration-review"}
 
-GET https://nipmod.com/api/search?q=clawnch%20agent%20token%20tooling&sources=npm,pypi,github,mcp&limit=5
+GET https://nipmod.com/api/search?q=clawnch%20agent%20token%20tooling&sources=npm,github,mcp&limit=5
 Header: x-nipmod-api-key: <key>
 
 GET https://nipmod.com/api/inspect?source=npm&name=@clawnch/sdk

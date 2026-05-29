@@ -45,8 +45,8 @@ interface JsonRpcResponse {
 
 interface ToolDefinition {
   annotations: {
-    destructiveHint: false;
-    idempotentHint: true;
+    destructiveHint: boolean;
+    idempotentHint: boolean;
     openWorldHint: boolean;
     readOnlyHint: boolean;
   };
@@ -1008,8 +1008,8 @@ const MCP_TOOLS: ToolDefinition[] = [
   },
   {
     annotations: {
-      destructiveHint: false,
-      idempotentHint: true,
+      destructiveHint: true,
+      idempotentHint: false,
       readOnlyHint: false,
       openWorldHint: true
     },
