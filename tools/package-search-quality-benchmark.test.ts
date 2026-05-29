@@ -12,7 +12,7 @@ describe("package search quality benchmark", () => {
       fail: 0,
       missingExpectedIntentReasonCount: 0,
       recallAt3: 1,
-      total: 28
+      total: 36
     });
     expect(result.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.85);
     expect(result.summary.recallAt1).toBeGreaterThanOrEqual(0.75);
@@ -23,6 +23,14 @@ describe("package search quality benchmark", () => {
     });
     expect(result.checks.find((check) => check.name === "PyPI confusion alias")?.data?.recommendedId).toBe("pypi:pillow");
     expect(result.checks.find((check) => check.name === "Crypto wallet drainer decoy")?.data?.recommendedId).toBe("npm:ethers");
+    expect(result.checks.find((check) => check.name === "Node JWT authentication")?.data?.recommendedId).toBe("npm:jose");
+    expect(result.checks.find((check) => check.name === "Stripe payments SDK")?.data?.recommendedId).toBe("npm:stripe");
+    expect(result.checks.find((check) => check.name === "Node background job queue")?.data?.recommendedId).toBe("npm:bullmq");
+    expect(result.checks.find((check) => check.name === "Python Redis cache")?.data?.recommendedId).toBe("pypi:redis");
+    expect(result.checks.find((check) => check.name === "OpenAI TypeScript SDK")?.data?.recommendedId).toBe("npm:openai");
+    expect(result.checks.find((check) => check.name === "Python PDF parsing")?.data?.recommendedId).toBe("pypi:pypdf");
+    expect(result.checks.find((check) => check.name === "Node email delivery")?.data?.recommendedId).toBe("npm:nodemailer");
+    expect(result.checks.find((check) => check.name === "Python structured logging")?.data?.recommendedId).toBe("pypi:structlog");
     expect(result.checks.find((check) => check.name === "PyPI typo-squat HTTP client")?.data?.recommendedId).toBe("pypi:requests");
     expect(result.checks.find((check) => check.name === "Deprecated npm HTTP client decoy")?.data?.recommendedId).toBe("npm:undici");
     expect(result.checks.find((check) => check.name === "Multi-source outage keeps safe recommendation")?.data).toMatchObject({

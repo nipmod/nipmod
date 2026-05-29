@@ -101,6 +101,86 @@ const DEFAULT_CASES: BenchmarkCase[] = [
     sources: ["pypi"]
   },
   {
+    expectedId: "npm:jose",
+    expectedRecommendedId: "npm:jose",
+    limit: 3,
+    maxRank: 1,
+    name: "Node JWT authentication",
+    query: "jwt auth for node api",
+    requiredIntentReason: "query intent match: Node JOSE/JWT authentication fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "npm:stripe",
+    expectedRecommendedId: "npm:stripe",
+    limit: 3,
+    maxRank: 1,
+    name: "Stripe payments SDK",
+    query: "stripe payments sdk for node",
+    requiredIntentReason: "query intent match: Stripe payments SDK fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "npm:bullmq",
+    expectedRecommendedId: "npm:bullmq",
+    limit: 3,
+    maxRank: 1,
+    name: "Node background job queue",
+    query: "queue worker for node jobs",
+    requiredIntentReason: "query intent match: Node background job queue fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:redis",
+    expectedRecommendedId: "pypi:redis",
+    limit: 3,
+    maxRank: 1,
+    name: "Python Redis cache",
+    query: "redis cache python",
+    requiredIntentReason: "query intent match: Redis client fit",
+    sources: ["pypi"]
+  },
+  {
+    expectedId: "npm:openai",
+    expectedRecommendedId: "npm:openai",
+    limit: 3,
+    maxRank: 1,
+    name: "OpenAI TypeScript SDK",
+    query: "openai llm sdk typescript",
+    requiredIntentReason: "query intent match: OpenAI SDK fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:pypdf",
+    expectedRecommendedId: "pypi:pypdf",
+    limit: 3,
+    maxRank: 1,
+    name: "Python PDF parsing",
+    query: "pdf parsing python",
+    requiredIntentReason: "query intent match: Python PDF parsing fit",
+    sources: ["pypi"]
+  },
+  {
+    expectedId: "npm:nodemailer",
+    expectedRecommendedId: "npm:nodemailer",
+    limit: 3,
+    maxRank: 1,
+    name: "Node email delivery",
+    query: "send transactional email node",
+    requiredIntentReason: "query intent match: Node email delivery fit",
+    sources: ["npm"]
+  },
+  {
+    expectedId: "pypi:structlog",
+    expectedRecommendedId: "pypi:structlog",
+    limit: 3,
+    maxRank: 1,
+    name: "Python structured logging",
+    query: "structured logging python",
+    requiredIntentReason: "query intent match: Python structured logging fit",
+    sources: ["pypi"]
+  },
+  {
     expectedId: "npm:playwright",
     limit: 4,
     maxRank: 2,
