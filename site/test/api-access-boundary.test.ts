@@ -26,6 +26,9 @@ const siteRoot = new URL("..", import.meta.url);
 const apiRouteFiles = [
   "app/api/admin/keys/route.ts",
   "app/api/admin/summary/route.ts",
+  "app/api/account/chat/route.ts",
+  "app/api/account/keys/route.ts",
+  "app/api/account/session/route.ts",
   "app/api/alerts/primary/route.ts",
   "app/api/alerts/secondary/route.ts",
   "app/api/archive/confirm/route.ts",
@@ -45,9 +48,12 @@ const apiRouteFiles = [
   "app/api/usage/stats/route.ts"
 ];
 
-const routeAuthClass = new Map<string, "api-key" | "bearer-token" | "public-key-issuer">([
+const routeAuthClass = new Map<string, "account-session" | "api-key" | "bearer-token" | "public-key-issuer">([
   ["/api/admin/keys", "api-key"],
   ["/api/admin/summary", "api-key"],
+  ["/api/account/chat", "account-session"],
+  ["/api/account/keys", "account-session"],
+  ["/api/account/session", "account-session"],
   ["/api/alerts/primary", "bearer-token"],
   ["/api/alerts/secondary", "bearer-token"],
   ["/api/archive/confirm", "api-key"],
@@ -91,6 +97,11 @@ describe("API access boundary", () => {
         expect(
           source.includes("hasValidBearerToken") || source.includes("handleAlertSinkPost"),
           `${path} must use bearer-token protection`
+        ).toBe(true);
+      } else if (authClass === "account-session") {
+        expect(
+          source.includes("getCurrentAccountUser") || source.includes("accountAuthConfig"),
+          `${path} must use account session protection or report account session state`
         ).toBe(true);
       } else {
         expect(source).toContain("issueSelfServeBetaApiKey");

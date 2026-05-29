@@ -57,6 +57,22 @@ export async function issueSelfServeBetaApiKey(
   env: ApiKeyIssuerEnv = process.env,
   fetchImpl: typeof fetch = fetch
 ): Promise<BetaApiKeyIssueResult> {
+  return issueBetaApiKeyWithLabel(BETA_KEY_LABEL, env, fetchImpl);
+}
+
+export async function issueAccountBetaApiKey(
+  input: { label?: unknown },
+  env: ApiKeyIssuerEnv = process.env,
+  fetchImpl: typeof fetch = fetch
+): Promise<BetaApiKeyIssueResult> {
+  return issueBetaApiKeyWithLabel(accountKeyLabel(input.label), env, fetchImpl);
+}
+
+async function issueBetaApiKeyWithLabel(
+  label: string,
+  env: ApiKeyIssuerEnv,
+  fetchImpl: typeof fetch
+): Promise<BetaApiKeyIssueResult> {
   const baseUrl = env[SUPABASE_URL_ENV];
   const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV];
   const hashSecret = env[API_KEY_HASH_SECRET_ENV];
@@ -70,7 +86,6 @@ export async function issueSelfServeBetaApiKey(
     };
   }
 
-  const label = BETA_KEY_LABEL;
   const createdAt = new Date();
   const expiresAt = new Date(createdAt.getTime() + BETA_KEY_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
@@ -134,6 +149,16 @@ export async function issueSelfServeBetaApiKey(
 
 function generateBetaApiKey(): string {
   return `nka_beta_${randomBytes(32).toString("base64url")}`;
+}
+
+function accountKeyLabel(value: unknown): string {
+  const raw = typeof value === "string" ? value : "agent";
+  const label = raw
+    .toLowerCase()
+    .replace(/[^a-z0-9./_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 52);
+  return `account/${label || "agent"}`;
 }
 
 async function insertApiKeyRow(input: {

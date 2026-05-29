@@ -1,12 +1,15 @@
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const bankrTokenUrl = "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3";
 const isDevelopment = process.env.NODE_ENV === "development";
+const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
+const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
-
   const url = request.nextUrl.clone();
+
   if (host === "token.nipmod.com" || url.pathname === "/token") {
     return NextResponse.redirect(bankrTokenUrl, 308);
   }
@@ -15,7 +18,7 @@ export function proxy(request: NextRequest) {
     return adminResponse(request);
   }
 
-  return NextResponse.next();
+  return updateAccountSession(request);
 }
 
 export const config = {
@@ -58,6 +61,32 @@ function adminResponse(request: NextRequest): NextResponse {
     }
   });
   response.headers.set("Content-Security-Policy", csp);
+  return response;
+}
+
+async function updateAccountSession(request: NextRequest): Promise<NextResponse> {
+  const supabaseUrl = process.env[SUPABASE_URL_ENV];
+  const supabasePublishableKey = process.env[SUPABASE_PUBLISHABLE_KEY_ENV];
+
+  if (!supabaseUrl || !supabasePublishableKey) {
+    return NextResponse.next({ request });
+  }
+
+  let response = NextResponse.next({ request });
+  const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet: Array<{ name: string; options: CookieOptions; value: string }>) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, options, value }) => response.cookies.set(name, value, options));
+      }
+    }
+  });
+
+  await supabase.auth.getUser();
   return response;
 }
 
