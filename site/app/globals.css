@@ -6254,6 +6254,26 @@ body {
   padding: clamp(44px, 7vw, 88px) var(--docs-page-pad) 88px;
 }
 
+.account-auth-docs-link {
+  align-items: center;
+  align-self: start;
+  border: 1px solid var(--docs-line);
+  border-radius: 4px;
+  color: var(--docs-text);
+  display: inline-flex;
+  font-family: var(--docs-ui);
+  font-size: 13px;
+  font-weight: 650;
+  grid-column: 1 / -1;
+  justify-self: end;
+  min-height: 38px;
+  padding: 10px 14px;
+}
+
+.account-auth-docs-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .account-auth-copy {
   align-content: start;
   display: grid;
@@ -6295,28 +6315,6 @@ body {
   font-size: 18px;
   line-height: 1.58;
   margin: 0;
-}
-
-.account-auth-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.account-auth-links a {
-  border: 1px solid var(--docs-line);
-  border-radius: 4px;
-  color: var(--docs-text);
-  font-family: var(--docs-ui);
-  font-size: 13px;
-  font-weight: 650;
-  min-height: 38px;
-  padding: 10px 14px;
-}
-
-.account-auth-links a:hover {
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .account-auth-panel {
@@ -7993,15 +7991,6 @@ body {
   .account-login-help {
     font-size: 16px;
     line-height: 1.55;
-  }
-
-  .account-auth-links {
-    gap: 10px;
-  }
-
-  .account-auth-links a {
-    justify-content: center;
-    text-align: center;
   }
 
   .account-auth-panel {

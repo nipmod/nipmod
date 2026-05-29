@@ -28,14 +28,11 @@ export function AccountLoginSurface({
 
   return (
     <main className="account-auth-shell" id="main">
+      <Link className="account-auth-docs-link" href={docsHref}>
+        Docs
+      </Link>
       <section className="account-auth-copy" aria-labelledby="account-login-title">
-        <h1 id="account-login-title">Sign in to Nipmod.</h1>
-        <div className="account-auth-body">
-          <p>Use Nipmod directly in chat, then create API keys for agents and integrations.</p>
-        </div>
-        <div className="account-auth-links">
-          <Link href={docsHref}>Docs</Link>
-        </div>
+        <h1 id="account-login-title">Explore packages through Nipmod.</h1>
       </section>
 
       <section className="account-auth-panel" aria-label="Email login">
@@ -61,8 +58,7 @@ function LoginPanel({
   return (
     <>
       <div className="account-auth-panel-head">
-        <span>Login</span>
-        <h2>{state.codeRequested ? "Enter email code" : "Continue with email"}</h2>
+        <h2>{state.codeRequested ? "Email code" : "Login"}</h2>
       </div>
       {state.notice ? <p className={`account-login-notice account-login-notice-${state.notice.tone}`}>{state.notice.text}</p> : null}
       <div className="account-login-steps">
