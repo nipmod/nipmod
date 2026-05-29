@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { type ReactNode } from "react";
+import { AccountLink } from "./account/account-link";
 import { homeContent } from "./content";
 import { NipmodMark } from "./editorial-mark";
 
@@ -12,6 +13,7 @@ export function SiteHeader() {
       </Link>
 
       <div className="brand-socials" aria-label="Nipmod links">
+        <AccountLink />
         <SocialIcon href={homeContent.links.github} label="Open Nipmod GitHub repository in a new tab" title="GitHub">
           <img alt="" height="18" src="/github-logo.svg" width="18" />
         </SocialIcon>

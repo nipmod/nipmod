@@ -550,6 +550,12 @@ body {
 
 }
 
+@media (max-width: 900px) {
+  .account-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 720px) {
   .topbar {
     grid-template-columns: auto minmax(0, 1fr);
@@ -4264,6 +4270,26 @@ body {
   justify-self: end;
 }
 
+.brand-login-link {
+  border: 1px solid var(--editorial-border);
+  border-radius: 4px;
+  color: var(--editorial-ink);
+  font-family: var(--docs-ui);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+  margin-right: 8px;
+  min-height: 34px;
+  padding: 10px 13px;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.brand-login-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--editorial-ink);
+}
+
 .brand-icon-button {
   background: transparent;
   border: 0;
@@ -6122,6 +6148,152 @@ body {
   font-size: 13px;
   font-weight: 650;
   margin-bottom: 12px;
+}
+
+.account-workspace {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+}
+
+.account-panel {
+  border-top: 1px solid var(--docs-line);
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  padding-top: 18px;
+}
+
+.account-panel-head {
+  display: grid;
+  gap: 10px;
+}
+
+.account-panel-head span,
+.account-field > span,
+.account-key-box > span {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 11px;
+  font-weight: 740;
+  text-transform: uppercase;
+}
+
+.account-panel-head h2 {
+  color: var(--docs-text);
+  font-family: var(--docs-serif);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.account-panel-head p,
+.account-action-row p,
+.account-key-box p,
+.account-chat-result p,
+.account-user-line span {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.account-field {
+  display: grid;
+  gap: 10px;
+}
+
+.account-field input,
+.account-field textarea {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--docs-line);
+  border-radius: 6px;
+  color: var(--docs-text);
+  font: inherit;
+  min-width: 0;
+  outline: none;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
+}
+
+.account-field input {
+  min-height: 42px;
+}
+
+.account-field input:focus,
+.account-field textarea:focus {
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.account-action-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.account-chat-result,
+.account-key-box,
+.account-user-line {
+  border: 1px solid var(--docs-line);
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.account-user-line strong {
+  color: var(--docs-text);
+  font-family: var(--docs-ui);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.account-chat-result dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.account-chat-result dl div {
+  display: grid;
+  gap: 5px;
+}
+
+.account-chat-result dt {
+  color: var(--docs-faint);
+  font-family: var(--docs-ui);
+  font-size: 11px;
+  font-weight: 740;
+  text-transform: uppercase;
+}
+
+.account-chat-result dd {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.account-chat-result code,
+.account-key-box code {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--docs-line);
+  border-radius: 6px;
+  color: var(--docs-code);
+  display: block;
+  font-family: var(--docs-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  padding: 12px;
 }
 
 .quality-profile-list {
