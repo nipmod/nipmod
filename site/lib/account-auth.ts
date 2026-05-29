@@ -129,7 +129,10 @@ export function normalizeAccountEmailCode(value: FormDataEntryValue | string | n
 
 function readEnv(env: AccountAuthEnv, key: string): string | null {
   const value = env[key]?.trim();
-  return value ? value : null;
+  if (!value || value === '""' || value === "''") {
+    return null;
+  }
+  return value;
 }
 
 function readMetadataString(metadata: Record<string, unknown>, keys: string[]): string | null {
