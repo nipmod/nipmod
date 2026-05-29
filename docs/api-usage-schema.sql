@@ -4,7 +4,7 @@ create table if not exists public.api_usage_events (
   method text not null check (method in ('GET', 'POST', 'OPTIONS')),
   status integer not null check (status >= 100 and status <= 599),
   request_id text not null,
-  access_tier text not null check (access_tier in ('public', 'builder', 'partner', 'admin')),
+  access_tier text not null check (access_tier in ('public', 'beta', 'builder', 'partner', 'admin')),
   api_key_id text,
   client_hash text not null,
   query_hash text,

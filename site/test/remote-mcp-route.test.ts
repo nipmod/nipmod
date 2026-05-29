@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { GET, OPTIONS, POST } from "../app/api/mcp/route";
+import { resetExternalSourceRuntimeStateForTests } from "../lib/external-packages";
 import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
 async function postJson(body: unknown) {
@@ -22,6 +23,7 @@ describe("hosted read-only MCP route", () => {
   });
 
   afterEach(() => {
+    resetExternalSourceRuntimeStateForTests();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
@@ -223,6 +225,32 @@ describe("hosted read-only MCP route", () => {
     });
     expect(plan.body.result.structuredContent.plan.plan.commands).toEqual(["npm install node-telegram-bot-api"]);
     expect(plan.body.result.structuredContent.plan.plan.sourceOwnership).toBe("external-owner-retained");
+  });
+
+  test("does not expose internal upstream failure details through external install planning", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("socket password=secret failed at /tmp/private-path");
+      })
+    );
+
+    const plan = await postJson({
+      id: 10,
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: {
+        arguments: { name: "node-telegram-bot-api", source: "npm" },
+        name: "nipmod.external_install_plan"
+      }
+    });
+
+    expect(plan.body.error).toMatchObject({
+      code: -32602,
+      message: "source request failed"
+    });
+    expect(JSON.stringify(plan.body)).not.toContain("secret");
+    expect(JSON.stringify(plan.body)).not.toContain("/tmp/private-path");
   });
 });
 

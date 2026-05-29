@@ -131,6 +131,36 @@ describe("beta key route", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  test("rejects oversized public key issue payloads before minting", async () => {
+    stubRateLimitMemory();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("https://nipmod.com/api/keys/beta", {
+        body: JSON.stringify({ label: "x".repeat(17 * 1024) }),
+        headers: {
+          "content-type": "application/json",
+          "user-agent": "beta-key-oversized-test",
+          "x-forwarded-for": "203.0.113.12"
+        },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "payload_too_large",
+      error: "request body is too large",
+      retryable: false,
+      status: 413,
+      type: "dev.nipmod.api-error.v1"
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(JSON.stringify(body)).not.toContain("nka_beta_");
+  });
+
   test("does not mint a key when JSON is malformed", async () => {
     stubIssuerEnv();
     const fetchMock = vi.fn();

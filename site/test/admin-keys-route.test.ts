@@ -170,11 +170,12 @@ describe("admin keys route", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  test("pauses and resumes active keys without requiring native paused database status", async () => {
+  test("pauses and resumes active keys with native paused database status", async () => {
     const rawKey = "nka_test_admin_key_for_pause_resume_123456";
     const hashSecret = "test-admin-pause-resume-secret";
     const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
     let storedLabel = "self-serve/agent";
+    let storedStatus = "active";
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/rest/v1/api_keys?") && init?.method !== "PATCH") {
@@ -188,7 +189,7 @@ describe("admin keys route", () => {
             label: storedLabel,
             rate_limit_multiplier: 10,
             revoked_at: null,
-            status: "active",
+            status: storedStatus,
             tier: "beta"
           }
         ]);
@@ -199,8 +200,9 @@ describe("admin keys route", () => {
         expect(parsed.searchParams.get("id")).toBe("eq.key_1234567890abcdef");
         if (body.label === "paused/self-serve/agent") {
           expect(body.revoked_at).toBeNull();
-          expect(body.status).toBeUndefined();
+          expect(body.status).toBe("paused");
           storedLabel = body.label;
+          storedStatus = body.status;
           return Response.json([
             {
               created_at: "2026-05-24T00:00:00.000Z",
@@ -209,14 +211,14 @@ describe("admin keys route", () => {
               label: storedLabel,
               rate_limit_multiplier: 10,
               revoked_at: null,
-              status: "active",
+              status: storedStatus,
               tier: "beta"
             }
           ]);
         }
-        expect(body).toMatchObject({ label: "self-serve/agent", revoked_at: null });
-        expect(body.status).toBeUndefined();
+        expect(body).toMatchObject({ label: "self-serve/agent", revoked_at: null, status: "active" });
         storedLabel = body.label;
+        storedStatus = body.status;
         return Response.json([
           {
             created_at: "2026-05-24T00:00:00.000Z",
@@ -225,7 +227,7 @@ describe("admin keys route", () => {
             label: storedLabel,
             rate_limit_multiplier: 10,
             revoked_at: null,
-            status: "active",
+            status: storedStatus,
             tier: "beta"
           }
         ]);
@@ -401,6 +403,40 @@ describe("admin keys route", () => {
       ok: true
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("rejects oversized admin key management bodies after admin authentication", async () => {
+    const rawKey = "nka_test_admin_key_body_limit_123456";
+    const hashSecret = "test-admin-body-limit-secret";
+    const hash = deriveApiKeyDigestForStorage(rawKey, hashSecret);
+    const fetchMock = vi.fn(async () => Response.json({ error: "unexpected store call" }, { status: 500 })) as unknown as typeof fetch;
+
+    vi.stubEnv("NIPMOD_API_KEY_HASH_SECRET", hashSecret);
+    vi.stubEnv("NIPMOD_API_KEY_HASHES", `ops:admin:${hash}`);
+    vi.stubEnv("NIPMOD_RATE_LIMIT_STORE", "memory");
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("https://nipmod.com/api/admin/keys", {
+        body: JSON.stringify({ action: "update-label", label: "x".repeat(65 * 1024), keyId: "key_1234567890abcdef" }),
+        headers: {
+          authorization: `Bearer ${rawKey}`,
+          "content-type": "application/json"
+        },
+        method: "POST"
+      })
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(body).toMatchObject({
+      code: "payload_too_large",
+      error: "request body is too large",
+      retryable: false,
+      status: 413,
+      type: "dev.nipmod.api-error.v1"
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(0);
   });
 
   test("blocks current admin key self-modification", async () => {

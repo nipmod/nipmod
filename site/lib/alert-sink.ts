@@ -1,3 +1,5 @@
+import { hasValidBearerToken } from "./bearer-auth";
+
 const MAX_ALERT_BYTES = 64 * 1024;
 const CHANNELS = new Set(["primary", "secondary"]);
 
@@ -14,7 +16,7 @@ export async function handleAlertSinkPost(request: Request, options: AlertSinkOp
   if (!token) {
     return Response.json({ ok: false, error: "alert sink not configured" }, { status: 503 });
   }
-  if (request.headers.get("authorization") !== `Bearer ${token}`) {
+  if (!hasValidBearerToken(request.headers.get("authorization"), token)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

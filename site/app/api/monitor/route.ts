@@ -1,4 +1,5 @@
 import { runProductionMonitor, type MonitorMode } from "../../../lib/production-monitor";
+import { hasValidBearerToken } from "../../../lib/bearer-auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -34,7 +35,7 @@ function authorizeMonitorRequest(authorization: string | null): { ok: true } | {
   if (!secret) {
     return { error: "monitor secret not configured", ok: false, status: 503 };
   }
-  if (authorization !== `Bearer ${secret}`) {
+  if (!hasValidBearerToken(authorization, secret)) {
     return { error: "unauthorized", ok: false, status: 401 };
   }
   return { ok: true };

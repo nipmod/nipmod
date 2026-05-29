@@ -5,6 +5,7 @@ import { GET as resolveGet } from "../app/api/resolve/route";
 import { GET as searchGet } from "../app/api/search/route";
 import {
   createExternalInstallPlan,
+  externalPackageApiError,
   externalSourceCapabilities,
   externalSourceRequestHeaders,
   inspectExternalPackage,
@@ -17,6 +18,20 @@ import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 describe("external package resolver", () => {
   beforeEach(() => {
     stubApiKeyAuth();
+  });
+
+  test("does not expose unexpected internal error messages through public API envelopes", () => {
+    const apiError = externalPackageApiError(new Error("database password=secret crashed at /tmp/private-path"), "external inspect failed");
+
+    expect(apiError).toMatchObject({
+      code: "internal_error",
+      error: "external inspect failed",
+      retryable: false,
+      source: null,
+      status: 500
+    });
+    expect(JSON.stringify(apiError)).not.toContain("secret");
+    expect(JSON.stringify(apiError)).not.toContain("/tmp/private-path");
   });
 
   afterEach(() => {
@@ -183,6 +198,26 @@ describe("external package resolver", () => {
     expect(result.records.map((record) => record.id)).toEqual(expect.arrayContaining(["pypi:requests", "pypi:httpx"]));
     expect(result.records.every((record) => record.source === "pypi")).toBe(true);
     expect(result.selection.candidates.length).toBeGreaterThan(0);
+  });
+
+  test("flags protected package names that point at non-canonical repository owners", async () => {
+    const record = await inspectExternalPackage("pypi", "requests", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://pypi.org/pypi/requests/json") {
+          return pyPiProjectResponse("requests", "2.34.2", "https://github.com/evil/requests");
+        }
+        if (url === "https://pypi.org/simple/requests/") {
+          return pyPiSimpleResponse("requests");
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      timeoutMs: 2000
+    });
+
+    expect(record.trust.warnings.join(" ")).toContain("expected psf/requests");
+    expect(record.trust.decision).toBe("avoid");
+    expect(record.trust.risk).toBe("high");
   });
 
   test("uses graphics task hints for natural-language package searches", async () => {
@@ -435,6 +470,34 @@ describe("external package resolver", () => {
     expect(record.trust.signals).toContain("Repository link is missing.");
   });
 
+  test("warns when source repository metadata is not HTTPS", async () => {
+    const record = await inspectExternalPackage("npm", "http-repo", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://registry.npmjs.org/http-repo/latest") {
+          return jsonResponse({
+            description: "HTTP repo fixture.",
+            dist: {
+              integrity: "sha512-test",
+              signatures: [{ keyid: "SHA256:test", sig: "test" }]
+            },
+            license: "MIT",
+            name: "http-repo",
+            repository: { url: "http://github.com/example/http-repo.git" },
+            version: "1.0.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/http-repo") {
+          return jsonResponse({ downloads: 2000, package: "http-repo" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      }
+    });
+
+    expect(record.repo).toBe("http://github.com/example/http-repo");
+    expect(record.trust.warnings).toContain("Repository link is not HTTPS; verify source ownership before installation.");
+  });
+
   test("quotes source package names before returning install commands", async () => {
     const record = await inspectExternalPackage("npm", "semi;colon", {
       fetchImpl: async (input: string | URL | Request) => {
@@ -467,6 +530,34 @@ describe("external package resolver", () => {
       hostedApiExecutes: false,
       risk: "low"
     });
+  });
+
+  test("adds an argument boundary for leading dash package names", async () => {
+    const record = await inspectExternalPackage("npm", "--flag-like", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        if (url === "https://registry.npmjs.org/--flag-like/latest") {
+          return jsonResponse({
+            description: "Leading dash fixture.",
+            dist: {
+              integrity: "sha512-leading-dash",
+              signatures: [{ keyid: "SHA256:leading-dash", sig: "leading-dash" }]
+            },
+            license: "MIT",
+            name: "--flag-like",
+            repository: { url: "git+https://github.com/example/leading-dash.git" },
+            version: "1.0.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/--flag-like") {
+          return jsonResponse({ downloads: 1000, package: "--flag-like" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      }
+    });
+
+    expect(record.install.command).toBe("npm install -- '--flag-like'");
+    expect(createExternalInstallPlan(record).plan.commands).toEqual(["npm install -- '--flag-like'"]);
   });
 
   test("surfaces PyPI source-only release build risk", async () => {

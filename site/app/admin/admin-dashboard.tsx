@@ -5,8 +5,6 @@ import { FormEvent, type CSSProperties, type ReactNode, useEffect, useMemo, useS
 type AdminSummary = Record<string, any>;
 type KeyManagementAction = "cleanup-stale-beta" | "pause" | "resume" | "revoke" | "update-label";
 
-const SESSION_KEY = "nipmod.admin.key";
-
 export function AdminDashboard() {
   const [adminKey, setAdminKey] = useState("");
   const [hours, setHours] = useState("24");
@@ -16,10 +14,6 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [keyActionLoading, setKeyActionLoading] = useState<string | null>(null);
   const [labelDrafts, setLabelDrafts] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    setAdminKey(sessionStorage.getItem(SESSION_KEY) ?? "");
-  }, []);
 
   const usage = summary?.usage ?? {};
   const totals = usage?.totals ?? {};
@@ -53,7 +47,7 @@ export function AdminDashboard() {
     }
     setLoading(true);
     setError(null);
-    sessionStorage.setItem(SESSION_KEY, adminKey.trim());
+    setNotice(null);
     try {
       const response = await fetch(`/api/admin/summary?hours=${encodeURIComponent(hours)}&limit=12`, {
         headers: {
@@ -73,8 +67,8 @@ export function AdminDashboard() {
   }
 
   function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
     setAdminKey("");
+    setError(null);
     setNotice(null);
     setSummary(null);
     setLabelDrafts({});
@@ -167,7 +161,7 @@ export function AdminDashboard() {
           </div>
         </form>
         {signedIn ? (
-          <p className="admin-session">Logged in. The credential stays in this browser session only.</p>
+          <p className="admin-session">Logged in. The credential stays in memory for this page only.</p>
         ) : (
           <p className="admin-login-help">Enter the admin password to open the internal dashboard.</p>
         )}

@@ -36,7 +36,7 @@ const SECRET_PATTERNS = [
   {
     type: "generic-secret-assignment",
     pattern:
-      /\b(?:API_TOKEN|AUTH_TOKEN|BEARER_TOKEN|GITHUB_TOKEN|IDENTITY_B64|IDENTITY_JSON|NIPMOD_SCOUT_NOTIFY_IDENTITY_B64|NIPMOD_SCOUT_NOTIFY_IDENTITY_JSON|NPM_TOKEN|PRIVATE_KEY|SECRET|SIGNING_PRIVATE_KEY|TOKEN|VERCEL_TOKEN)\s*=\s*["']?[A-Za-z0-9._~+/=-]{24,}|["'](?:apiToken|authToken|bearerToken|githubToken|identityB64|identityJson|npmToken|privateKey|secret|signingPrivateKey|token|vercelToken)["']\s*:\s*["'][A-Za-z0-9._~+/=-]{24,}["']/i
+      /\b(?:ANTHROPIC_API_KEY|API_TOKEN|AUTH_TOKEN|BEARER_TOKEN|GITHUB_TOKEN|IDENTITY_B64|IDENTITY_JSON|NIPMOD_ADMIN_PASSWORD_HASH|NIPMOD_ALERT_SINK_TOKEN|NIPMOD_API_KEY|NIPMOD_API_KEY_HASH_SECRET|NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY|NIPMOD_ARCHIVE_WRITE_TOKEN|NIPMOD_CANARY_API_KEY|NIPMOD_MONITOR_SECRET|NIPMOD_SCOUT_NOTIFY_IDENTITY_B64|NIPMOD_SCOUT_NOTIFY_IDENTITY_JSON|NPM_TOKEN|OPENAI_API_KEY|PRIVATE_KEY|SECRET|SIGNING_PRIVATE_KEY|SUPABASE_SERVICE_ROLE_KEY|TOKEN|VERCEL_TOKEN)\s*=\s*["']?[A-Za-z0-9._~+/=-]{24,}|["'](?:anthropicApiKey|apiKey|apiToken|authToken|bearerToken|githubToken|identityB64|identityJson|npmToken|openaiApiKey|privateKey|secret|signingPrivateKey|supabaseServiceRoleKey|token|vercelToken)["']\s*:\s*["'][A-Za-z0-9._~+/=-]{24,}["']/i
   }
 ];
 

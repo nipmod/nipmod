@@ -848,7 +848,7 @@ export function externalPackageApiError(error: unknown, fallback: string): {
   }
   return {
     code: "internal_error",
-    error: error instanceof Error ? error.message : fallback,
+    error: fallback,
     retryable: false,
     source: null,
     status: 500,
@@ -991,6 +991,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
   const version = readString(manifest.version);
   const repo = normalizeRepositoryUrl(readNestedString(manifest, ["repository", "url"]) ?? readString(manifest.repository));
   const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(packageName, repo);
+  const repositoryTransportWarnings = sourceRepositoryTransportWarnings(repo);
   const license = readString(manifest.license);
   const integrity = readNestedString(manifest, ["dist", "integrity"]);
   const tarball = readNestedString(manifest, ["dist", "tarball"]);
@@ -1028,6 +1029,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     ...(hasSignature ? [] : ["npm did not return registry signature metadata for the latest release."]),
     ...(tarball && !tarballIsHttps ? ["npm tarball URL is not HTTPS."] : []),
     ...repositoryMismatchWarnings,
+    ...repositoryTransportWarnings,
     ...(latestPublisherInMaintainers === false
       ? ["Latest npm publisher is not listed in maintainer records; review publisher continuity."]
       : []),
@@ -1048,6 +1050,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
       (latestPublisher ? 2 : 0) +
       (latestPublisherInMaintainers === false ? -18 : 0) +
       (repositoryMismatchWarnings.length ? -22 : 0) +
+      (repositoryTransportWarnings.length ? -8 : 0) +
       (deprecated ? -28 : 0) +
       osv.vulnerabilityCount * -24 +
       versionIntelligencePenalty(packument) +
@@ -1061,7 +1064,7 @@ async function inspectNpm(name: string, fetchImpl: typeof fetch, timeoutMs: numb
     displayName: packageName,
     id: `npm:${packageName}`,
     install: {
-      command: `npm install ${shellArg(packageName)}`,
+      command: `npm install ${installTargetArg(packageName)}`,
       manager: "npm",
       notes: ["Install from the original npm registry. Nipmod does not claim ownership of this package."]
     },
@@ -1259,12 +1262,21 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
   const license = readString(pkg.license);
   const repo = normalizeRepositoryUrl(readNestedString(pkg, ["links", "repository"]));
   const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(name, repo);
+  const repositoryTransportWarnings = sourceRepositoryTransportWarnings(repo);
   const warnings = [
     ...(readNumber(readRecord(item.flags)?.insecure) ? ["npm search marks this package as insecure."] : []),
-    ...repositoryMismatchWarnings
+    ...repositoryMismatchWarnings,
+    ...repositoryTransportWarnings
   ];
   const score = clampScore(
-    45 + popularity * 18 + quality * 18 + maintenance * 18 + (license ? 6 : 0) + (repo ? 6 : 0) - repositoryMismatchWarnings.length * 22
+    45 +
+      popularity * 18 +
+      quality * 18 +
+      maintenance * 18 +
+      (license ? 6 : 0) +
+      (repo ? 6 : 0) -
+      repositoryMismatchWarnings.length * 22 -
+      repositoryTransportWarnings.length * 8
   );
 
   return makeRecord({
@@ -1272,7 +1284,7 @@ function npmSearchRecord(item: unknown): ExternalPackageRecord | null {
     displayName: name,
     id: `npm:${name}`,
     install: {
-      command: `npm install ${shellArg(name)}`,
+      command: `npm install ${installTargetArg(name)}`,
       manager: "npm",
       notes: ["Install from the original npm registry. Nipmod does not claim ownership of this package."]
     },
@@ -1389,6 +1401,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
   const repo =
     normalizeRepositoryUrl(readString(projectUrls?.Source) ?? readString(projectUrls?.Homepage) ?? readString(info.home_page)) ?? null;
   const repositoryMismatchWarnings = sourceRepositoryMismatchWarnings(projectName, repo);
+  const repositoryTransportWarnings = sourceRepositoryTransportWarnings(repo);
   const license = readString(info.license) || licenseFromClassifiers(info.classifiers);
   const version = readString(info.version);
   const longDescription = readString(info.description);
@@ -1431,6 +1444,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     ...(sourceOnlyRelease ? ["PyPI latest release has only source distribution files; local install may execute build backend code."] : []),
     ...(yankedCount > 0 ? [`PyPI marks ${yankedCount} latest release file(s) as yanked.`] : []),
     ...repositoryMismatchWarnings,
+    ...repositoryTransportWarnings,
     ...longDescriptionWarnings,
     ...(confusionTarget ? [`PyPI package name is commonly confused with ${confusionTarget}; verify this is the intended project.`] : [])
   ];
@@ -1450,6 +1464,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
       (sourceOnlyRelease ? 10 : 0) -
       yankedCount * 30 -
       repositoryMismatchWarnings.length * 22 -
+      repositoryTransportWarnings.length * 8 -
       longDescriptionWarnings.length * 34 -
       (confusionTarget ? 12 : 0)
   );
@@ -1459,7 +1474,7 @@ async function inspectPyPi(name: string, fetchImpl: typeof fetch, timeoutMs: num
     displayName: projectName,
     id: `pypi:${projectName}`,
     install: {
-      command: `python -m pip install ${shellArg(projectName)}`,
+      command: `python -m pip install ${installTargetArg(projectName)}`,
       manager: "pip",
       notes: ["Install from the original PyPI project. Nipmod does not claim ownership of this package."]
     },
@@ -1903,7 +1918,7 @@ function gitHubRecord(item: unknown, manifest: GitHubManifestSummary | null = nu
     displayName: fullName,
     id: `github:${fullName}`,
     install: {
-      command: `git clone ${shellArg(readString(item.clone_url) ?? `https://github.com/${fullName}.git`)}`,
+      command: `git clone ${installTargetArg(readString(item.clone_url) ?? `https://github.com/${fullName}.git`)}`,
       manager: "git",
       notes: ["Clone from the original GitHub repository. Review project-specific install instructions before execution."]
     },
@@ -2456,7 +2471,7 @@ function mcpRecord(item: unknown): ExternalPackageRecord | null {
     displayName: readString(server.title) ?? name,
     id: `mcp:${name}`,
     install: {
-      command: `mcp install ${shellArg(name)}`,
+      command: `mcp install ${installTargetArg(name)}`,
       manager: "mcp",
       notes: ["MCP install commands differ by host. Use the server's original documentation before adding it to an agent runtime."]
     },
@@ -3486,7 +3501,7 @@ async function fetchJsonOnce(
         status: 504
       });
     }
-    throw new ExternalPackageError(error instanceof Error ? error.message : "source request failed", {
+    throw new ExternalPackageError("source request failed", {
       code: "source_fetch_failed",
       retryable: true,
       source: source ?? null,
@@ -4565,8 +4580,22 @@ function normalizeRepositoryUrl(value: string | null): string | null {
   return isHttpUrl(withoutTrailingGit) ? withoutTrailingGit : null;
 }
 
+const PROTECTED_PACKAGE_REPOSITORIES: Record<string, { canonicalRepos: string[]; label: string }> = {
+  ethers: { canonicalRepos: ["ethers-io/ethers.js"], label: "ethers" },
+  got: { canonicalRepos: ["sindresorhus/got"], label: "got" },
+  playwright: { canonicalRepos: ["microsoft/playwright"], label: "playwright" },
+  pydantic: { canonicalRepos: ["pydantic/pydantic"], label: "pydantic" },
+  requests: { canonicalRepos: ["psf/requests"], label: "requests" },
+  solanaweb3js: { canonicalRepos: ["solana-foundation/solana-web3.js"], label: "@solana/web3.js" },
+  undici: { canonicalRepos: ["nodejs/undici"], label: "undici" },
+  viem: { canonicalRepos: ["wevm/viem"], label: "viem" },
+  web3js: { canonicalRepos: ["solana-foundation/solana-web3.js"], label: "@solana/web3.js" },
+  zod: { canonicalRepos: ["colinhacks/zod"], label: "zod" }
+};
+
 const PROTECTED_SOURCE_REPOSITORY_SLUGS: Record<string, { allowedPackageNames: string[]; label: string }> = {
   ethers: { allowedPackageNames: ["ethers"], label: "ethers" },
+  ethersjs: { allowedPackageNames: ["ethers"], label: "ethers" },
   got: { allowedPackageNames: ["got"], label: "got" },
   playwright: { allowedPackageNames: ["playwright"], label: "playwright" },
   pydantic: { allowedPackageNames: ["pydantic"], label: "pydantic" },
@@ -4578,24 +4607,39 @@ const PROTECTED_SOURCE_REPOSITORY_SLUGS: Record<string, { allowedPackageNames: s
 };
 
 function sourceRepositoryMismatchWarnings(packageName: string, repo: string | null): string[] {
-  const repoSlug = githubRepositorySlug(repo);
-  if (!repoSlug) {
-    return [];
-  }
-  const protectedRepo = PROTECTED_SOURCE_REPOSITORY_SLUGS[repoIdentity(repoSlug)];
-  if (!protectedRepo) {
+  const repoParts = githubRepositoryParts(repo);
+  if (!repoParts) {
     return [];
   }
   const packageIdentity = repoIdentity(packageName.split("/").at(-1) ?? packageName);
-  if (protectedRepo.allowedPackageNames.includes(packageIdentity)) {
-    return [];
+  const repoIdentityValue = repoIdentity(`${repoParts.owner}/${repoParts.repo}`);
+  const protectedPackage = PROTECTED_PACKAGE_REPOSITORIES[packageIdentity];
+  if (
+    protectedPackage &&
+    !protectedPackage.canonicalRepos.map(repoIdentity).includes(repoIdentityValue)
+  ) {
+    return [
+      `Source-repository mismatch: package ${packageName} is a protected package name but points at ${repoParts.owner}/${repoParts.repo}; expected ${protectedPackage.canonicalRepos.join(" or ")}.`
+    ];
   }
-  return [
-    `Source-repository mismatch: package ${packageName} points at the canonical ${protectedRepo.label} repository; review possible impersonation before installation.`
-  ];
+
+  const protectedRepo = PROTECTED_SOURCE_REPOSITORY_SLUGS[repoIdentity(repoParts.repo)];
+  if (protectedRepo && !protectedRepo.allowedPackageNames.includes(packageIdentity)) {
+    return [
+      `Source-repository mismatch: package ${packageName} points at the canonical ${protectedRepo.label} repository; review possible impersonation before installation.`
+    ];
+  }
+  return [];
 }
 
-function githubRepositorySlug(repo: string | null): string | null {
+function sourceRepositoryTransportWarnings(repo: string | null): string[] {
+  if (!repo) {
+    return [];
+  }
+  return isHttpsUrl(repo) ? [] : ["Repository link is not HTTPS; verify source ownership before installation."];
+}
+
+function githubRepositoryParts(repo: string | null): { owner: string; repo: string } | null {
   if (!repo) {
     return null;
   }
@@ -4605,7 +4649,9 @@ function githubRepositorySlug(repo: string | null): string | null {
       return null;
     }
     const parts = url.pathname.split("/").filter(Boolean);
-    return parts[1]?.replace(/\.git$/i, "") ?? null;
+    const owner = parts[0];
+    const repoName = parts[1]?.replace(/\.git$/i, "");
+    return owner && repoName ? { owner, repo: repoName } : null;
   } catch {
     return null;
   }
@@ -4624,7 +4670,15 @@ function shellSingleQuote(value: string): string {
 }
 
 function shellArg(value: string): string {
+  if (value.startsWith("-")) {
+    return shellSingleQuote(value);
+  }
   return /^[A-Za-z0-9@._/:+-]+$/.test(value) ? value : shellSingleQuote(value);
+}
+
+function installTargetArg(value: string): string {
+  const arg = shellArg(value);
+  return value.startsWith("-") ? `-- ${arg}` : arg;
 }
 
 function encodeNpmName(name: string): string {

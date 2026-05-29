@@ -214,14 +214,37 @@ function hasPipedShellDownload(command: string): boolean {
   }
   const beforePipe = command.slice(0, pipeIndex);
   const afterPipe = command.slice(pipeIndex + 1);
-  return containsAnyToken(beforePipe, ["curl", "wget"]) && containsAnyToken(afterPipe, ["bash", "sh"]);
+  return (
+    containsAnyToken(beforePipe, ["curl", "wget", "irm", "iwr", "invoke-restmethod", "invoke-webrequest"]) &&
+    containsAnyToken(afterPipe, [
+      "bash",
+      "bun",
+      "deno",
+      "node",
+      "npm",
+      "npx",
+      "perl",
+      "php",
+      "pnpm",
+      "pwsh",
+      "powershell",
+      "python",
+      "python3",
+      "ruby",
+      "sh",
+      "tsx",
+      "uv",
+      "yarn",
+      "zsh"
+    ])
+  );
 }
 
 function hasDownloadedFileExecutionPattern(command: string): boolean {
   return (
     /\b(?:bash|sh|zsh)\s+-c\s+["']?\$?\(\s*(?:curl|wget)\b/.test(command) ||
     /\b(?:sh|bash|zsh)\s+<\(\s*(?:curl|wget)\b/.test(command) ||
-    /\b(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod)\b.{0,220}(?:-o|--output|>|-outfile)\s*\S+.{0,220}(?:&&|;|\|\|).{0,160}\b(?:sh|bash|zsh|node|python|python3|chmod|pwsh|powershell)\b/.test(command) ||
+    /\b(?:curl|wget|iwr|irm|invoke-webrequest|invoke-restmethod)\b.{0,220}(?:-o|--output|>|-outfile)\s*\S+.{0,220}(?:&&|;|\|\|).{0,160}\b(?:sh|bash|zsh|node|python|python3|chmod|pwsh|powershell|deno|bun|npx|tsx|npm|pnpm|yarn|uv)\b/.test(command) ||
     /\b(?:iwr|irm|invoke-webrequest|invoke-restmethod)\b.{0,220}(?:\||;).{0,120}\b(?:iex|invoke-expression)\b/.test(command) ||
     /\b(?:curl|wget)\b.{0,220}(?:\||;|&&).{0,120}\b(?:eval|exec|iex|invoke-expression)\b/.test(command)
   );

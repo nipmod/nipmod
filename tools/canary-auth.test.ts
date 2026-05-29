@@ -73,6 +73,35 @@ describe("canary auth", () => {
     await rm(cacheDir, { force: true, recursive: true });
   });
 
+  test("does not persist raw beta keys unless cache storage is explicitly enabled", async () => {
+    const cacheDir = await mkdtemp(join(tmpdir(), "nipmod-canary-auth-test-"));
+    vi.stubEnv("NIPMOD_CANARY_KEY_CACHE_DIR", cacheDir);
+    const fetchFn = vi.fn(async () => Response.json({ key: "nka_beta_not_persisted" }));
+    vi.stubGlobal("fetch", fetchFn);
+
+    await expect(
+      readCanaryApiKey({
+        baseUrl: "https://nipmod.test",
+        fetchFn: fetch,
+        label: "source-depth",
+        userAgent: "nipmod-canary-test"
+      })
+    ).resolves.toBe("nka_beta_not_persisted");
+
+    resetCanaryAuthCacheForTests();
+
+    await expect(
+      readCanaryApiKey({
+        baseUrl: "https://nipmod.test",
+        fetchFn: fetch,
+        label: "source-depth",
+        userAgent: "nipmod-canary-test"
+      })
+    ).resolves.toBe("nka_beta_not_persisted");
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    await rm(cacheDir, { force: true, recursive: true });
+  });
+
   test("does not cache failed beta key issuance", async () => {
     const fetchFn = vi
       .fn()

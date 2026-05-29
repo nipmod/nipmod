@@ -15,8 +15,12 @@ describe("secret scanner", () => {
         `-----BEGIN ${"PRIVATE KEY"}-----`,
         `NPM_TOKEN=${"npm_"}${"a".repeat(36)}`,
         `NIPMOD_SCOUT_NOTIFY_IDENTITY_JSON=${"a".repeat(36)}`,
+        `NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY=${"service_"}${"a".repeat(36)}`,
+        `NIPMOD_API_KEY_HASH_SECRET=${"hash_"}${"a".repeat(36)}`,
+        `OPENAI_API_KEY=${"sk-"}${"a".repeat(36)}`,
         `GITHUB_TOKEN=${"ghp_"}${"a".repeat(36)}`,
         `Authorization: Bearer ${"a".repeat(36)}`,
+        JSON.stringify({ openaiApiKey: `${"sk-"}${"b".repeat(36)}` }),
         `SIGNING_PRIVATE_KEY=${"a".repeat(36)}`
       ].join("\n")
     );
@@ -28,9 +32,13 @@ describe("secret scanner", () => {
       "npm-token",
       "generic-secret-assignment",
       "generic-secret-assignment",
+      "generic-secret-assignment",
+      "generic-secret-assignment",
+      "generic-secret-assignment",
       "github-token",
       "generic-secret-assignment",
       "bearer-token",
+      "generic-secret-assignment",
       "generic-secret-assignment"
     ]);
   });

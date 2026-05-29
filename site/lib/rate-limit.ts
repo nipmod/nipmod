@@ -72,6 +72,10 @@ export function checkRateLimit(request: Request, policy: RateLimitPolicy, contex
 export function checkApiRateLimit(request: Request, policy: RateLimitPolicy, context: ApiHttpContext = createApiHttpContext(request)): RateLimitResult {
   const access = readApiAccess(request, context);
   if (!access.ok) {
+    const authFailureLimit = checkAuthFailureRateLimit(request, policy, context);
+    if (!authFailureLimit.ok) {
+      return authFailureLimit;
+    }
     return {
       access: access.access,
       headers: access.access.headers,
@@ -95,6 +99,10 @@ export async function checkApiRateLimitAsync(
         corsPolicy: options.corsPolicy
       });
   if (!access.ok) {
+    const authFailureLimit = checkAuthFailureRateLimit(request, policy, context, options.corsPolicy);
+    if (!authFailureLimit.ok) {
+      return authFailureLimit;
+    }
     return {
       access: access.access,
       headers: access.access.headers,
@@ -254,6 +262,27 @@ function effectiveRateLimitPolicy(policy: RateLimitPolicy, access: ApiAccess): R
     ...policy,
     limit: Math.min(50_000, Math.max(policy.limit, Math.floor(policy.limit * access.limitMultiplier)))
   };
+}
+
+function checkAuthFailureRateLimit(
+  request: Request,
+  policy: RateLimitPolicy,
+  context: ApiHttpContext,
+  corsPolicy?: ApiCorsPolicy
+): RateLimitResult {
+  return checkRateLimitForAccess(
+    request,
+    {
+      limit: Math.max(1, Math.min(policy.limit, 30)),
+      name: `${policy.name}-auth-failure`,
+      windowMs: Math.max(policy.windowMs, 60_000)
+    },
+    context,
+    publicApiAccess(),
+    "memory",
+    null,
+    corsPolicy
+  );
 }
 
 function rateLimitHeaders(

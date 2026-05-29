@@ -37,6 +37,7 @@ describe("package intelligence Supabase schema", () => {
 
   test("keeps private API usage logging aligned with the migration", () => {
     expect(usageManualSql).toContain("create table if not exists public.api_usage_events");
+    expect(usageManualSql).toContain("access_tier text not null check (access_tier in ('public', 'beta', 'builder', 'partner', 'admin'))");
     expect(usageManualSql).toContain("trust_decision text");
     expect(usageManualSql).toContain("install_blocked boolean");
     expect(usageManualSql).toContain("traffic_origin text");

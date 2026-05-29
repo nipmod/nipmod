@@ -60,6 +60,111 @@ describe("API usage logging", () => {
     expect(JSON.stringify(rows[0])).not.toContain("raw-user-agent");
     expect(JSON.stringify(rows[0])).not.toContain("203.0.113.20");
     expect(JSON.stringify(rows[0])).not.toContain("service-role-key");
+    expect(rows[0]).toHaveProperty("query_hash");
+    expect(String((rows[0] as Record<string, unknown>).query_hash)).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  test("salts query and package hashes so common package names are not reusable dictionaries", async () => {
+    const rows: unknown[] = [];
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      rows.push(JSON.parse(String(init?.body))[0]);
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/install-plan?source=npm&name=react", {
+      headers: {
+        "user-agent": "usage-salt-test",
+        "x-forwarded-for": "203.0.113.23"
+      }
+    });
+    const input = {
+      access: publicApiAccess(),
+      context: createApiHttpContext(request),
+      request,
+      responseBody: {
+        package: {
+          name: "react",
+          source: "npm"
+        },
+        type: "dev.nipmod.external-install-plan.v1"
+      },
+      route: "/api/install-plan",
+      status: 200
+    };
+
+    await recordApiUsage(
+      input,
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+        NIPMOD_USAGE_HASH_SALT: "salt-a"
+      },
+      fetchMock
+    );
+    await recordApiUsage(
+      input,
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+        NIPMOD_USAGE_HASH_SALT: "salt-b"
+      },
+      fetchMock
+    );
+
+    const firstHash = (rows[0] as Record<string, unknown>).package_hash;
+    const secondHash = (rows[1] as Record<string, unknown>).package_hash;
+    expect(firstHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(secondHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(firstHash).not.toBe(secondHash);
+    expect(JSON.stringify(rows)).not.toContain("react");
+  });
+
+  test("uses the private usage store credential as the hash fallback when an explicit usage salt is absent", async () => {
+    const rows: unknown[] = [];
+    const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
+      rows.push(JSON.parse(String(init?.body))[0]);
+      return new Response(null, { status: 204 });
+    }) as unknown as typeof fetch;
+    const request = new Request("https://nipmod.com/api/search?q=react", {
+      headers: {
+        "user-agent": "usage-store-salt-fallback-test",
+        "x-forwarded-for": "203.0.113.24"
+      }
+    });
+    const input = {
+      access: publicApiAccess(),
+      context: createApiHttpContext(request),
+      request,
+      responseBody: {
+        records: [],
+        total: 0,
+        type: "dev.nipmod.external-search.v1"
+      },
+      route: "/api/search",
+      status: 200
+    };
+
+    await recordApiUsage(
+      input,
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key-a",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test"
+      },
+      fetchMock
+    );
+    await recordApiUsage(
+      input,
+      {
+        NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY: "service-role-key-b",
+        NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test"
+      },
+      fetchMock
+    );
+
+    expect((rows[0] as Record<string, unknown>).query_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect((rows[0] as Record<string, unknown>).query_hash).not.toBe((rows[1] as Record<string, unknown>).query_hash);
+    expect(JSON.stringify(rows)).not.toContain("react");
+    expect(JSON.stringify(rows)).not.toContain("service-role-key-a");
+    expect(JSON.stringify(rows)).not.toContain("service-role-key-b");
   });
 
   test("stores decision, risk and blocked plan signals for recap metrics", async () => {
