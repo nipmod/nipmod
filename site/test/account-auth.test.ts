@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalizeAccountEmail, safeAccountNextPath } from "../lib/account-auth";
+import { normalizeAccountEmail, normalizeAccountEmailCode, safeAccountNextPath } from "../lib/account-auth";
 
 describe("account auth helpers", () => {
   test("normalizes email login input", () => {
@@ -7,6 +7,14 @@ describe("account auth helpers", () => {
     expect(normalizeAccountEmail("not-an-email")).toBeNull();
     expect(normalizeAccountEmail("a@b")).toBeNull();
     expect(normalizeAccountEmail("x".repeat(245) + "@example.com")).toBeNull();
+  });
+
+  test("normalizes email login codes", () => {
+    expect(normalizeAccountEmailCode(" 123 456 ")).toBe("123456");
+    expect(normalizeAccountEmailCode("abc-def")).toBe("abcdef");
+    expect(normalizeAccountEmailCode("12")).toBeNull();
+    expect(normalizeAccountEmailCode("12345678901234567")).toBeNull();
+    expect(normalizeAccountEmailCode("123<script>")).toBeNull();
   });
 
   test("keeps account redirects local and away from auth routes", () => {

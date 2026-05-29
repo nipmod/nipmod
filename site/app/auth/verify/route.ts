@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   ACCOUNT_LOGIN_EMAIL_COOKIE,
-  accountAuthConfig,
   createAccountSupabaseServerClient,
   normalizeAccountEmail,
+  normalizeAccountEmailCode,
   safeAccountNextPath
 } from "../../../lib/account-auth";
 
@@ -17,16 +17,15 @@ export async function GET(request: NextRequest): Promise<Response> {
 export async function POST(request: NextRequest): Promise<Response> {
   const url = request.nextUrl;
   const formData = await request.formData().catch(() => null);
-  const email = normalizeAccountEmail(formData?.get("email"));
+  const email = normalizeAccountEmail(request.cookies.get(ACCOUNT_LOGIN_EMAIL_COOKIE)?.value);
+  const emailCode = normalizeAccountEmailCode(formData?.get("code"));
   const next = safeAccountNextPath(readFormString(formData?.get("next")));
 
   if (!email) {
-    return redirectToAccount(url.origin, "invalid_email");
+    return redirectToAccount(url.origin, "login_email_missing");
   }
-
-  const config = accountAuthConfig();
-  if (!config.configured) {
-    return redirectToAccount(url.origin, "auth_not_configured");
+  if (!emailCode) {
+    return redirectToAccount(url.origin, "invalid_email_code", "code_sent");
   }
 
   const supabase = await createAccountSupabaseServerClient();
@@ -34,37 +33,24 @@ export async function POST(request: NextRequest): Promise<Response> {
     return redirectToAccount(url.origin, "auth_not_configured");
   }
 
-  const callbackUrl = new URL("/auth/callback", url.origin);
-  callbackUrl.searchParams.set("next", next);
-
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.verifyOtp({
     email,
-    options: {
-      emailRedirectTo: callbackUrl.toString(),
-      shouldCreateUser: true
-    }
+    token: emailCode,
+    type: "email"
   });
 
   if (error) {
-    return redirectToAccount(url.origin, "email_login_failed");
+    return redirectToAccount(url.origin, "invalid_email_code", "code_sent");
   }
 
-  const response = redirectToAccount(url.origin, null, "code_sent");
-  response.cookies.set(ACCOUNT_LOGIN_EMAIL_COOKIE, email, {
-    httpOnly: true,
-    maxAge: 10 * 60,
-    path: "/",
-    sameSite: "lax",
-    secure: url.protocol === "https:"
-  });
+  const response = NextResponse.redirect(new URL(next, url.origin));
+  response.cookies.delete(ACCOUNT_LOGIN_EMAIL_COOKIE);
   return response;
 }
 
-function redirectToAccount(origin: string, error: string | null, sent?: string): NextResponse {
+function redirectToAccount(origin: string, error: string, sent?: string): NextResponse {
   const destination = new URL("/account", origin);
-  if (error) {
-    destination.searchParams.set("error", error);
-  }
+  destination.searchParams.set("error", error);
   if (sent) {
     destination.searchParams.set("sent", sent);
   }
