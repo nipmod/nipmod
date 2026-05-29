@@ -19,6 +19,19 @@ export default function Home() {
       ]}
       title="Package intelligence before agent execution."
     >
+      <section className="home-entry-panel" aria-label="Choose Nipmod surface">
+        <Link className="home-entry-card home-entry-card-primary" href="#principle">
+          <span>Docs</span>
+          <strong>Read the package intelligence layer.</strong>
+          <p>The public docs, API reference, architecture, source quality and agent instructions stay here.</p>
+        </Link>
+        <Link className="home-entry-card" href="/account">
+          <span>Login</span>
+          <strong>Use Nipmod directly.</strong>
+          <p>Sign in with email, ask package questions in chat and create API keys for agents.</p>
+        </Link>
+      </section>
+
       <DocsSection id="principle" title="The decision before execution">
         <DocsProse>
           <p>
