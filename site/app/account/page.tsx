@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { accountAuthConfig, getCurrentAccountUser } from "../../lib/account-auth";
-import { DocsCard, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
 import { AccountWorkspace } from "./account-workspace";
 
@@ -30,78 +30,73 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const user = await getCurrentAccountUser();
   const loginState = readAccountLoginState(await searchParams);
 
-  return (
-    <DocsShell
-      description="A human control surface for Nipmod: ask package questions in chat and create API keys for agents from the same account."
-      eyebrow="Account"
-      stats={[
-        { label: "Human surface", value: "chat" },
-        { label: "Agent surface", value: "API keys" },
-        { label: "Hosted writes", value: "0" }
-      ]}
-      title="Use Nipmod directly."
-    >
-      {!config.configured ? <AuthMissing missing={config.missing} /> : user ? <AccountWorkspace user={user} /> : <LoginPanel state={loginState} />}
+  if (user) {
+    return <AccountWorkspace user={user} />;
+  }
 
-      <DocsSection eyebrow="Model" title="One layer, two entry points">
-        <DocsTable
-          rows={[
-            ["Human", "Signs in, asks package questions, reviews context and install plans."],
-            ["Agent", "Uses an API key for search, inspect and install-plan calls."],
-            ["Boundary", "The hosted API remains read-only. No package execution, no workspace writes."],
-            ["Storage", "Raw API keys are returned once. The server stores keyed hashes only."]
-          ]}
-        />
-      </DocsSection>
-    </DocsShell>
+  return (
+    <main className="account-auth-shell" id="main">
+      <section className="account-auth-copy" aria-labelledby="account-login-title">
+        <p>Account</p>
+        <h1 id="account-login-title">Sign in to Nipmod.</h1>
+        <div className="account-auth-body">
+          <p>Use the same package intelligence layer directly in chat, then create API keys for agents and integrations.</p>
+          <p>Email login keeps the beta simple: no password, no social account, no OAuth provider setup.</p>
+        </div>
+        <div className="account-auth-links">
+          <Link href="/">Docs</Link>
+          <Link href="/api-access">API reference</Link>
+        </div>
+      </section>
+
+      <section className="account-auth-panel" aria-label="Email login">
+        {!config.configured ? <AuthMissing missing={config.missing} /> : <LoginPanel state={loginState} />}
+      </section>
+    </main>
   );
 }
 
 function LoginPanel({ state }: { state: AccountLoginState }) {
   return (
-    <DocsSection eyebrow="Login" title="Continue with email">
+    <>
+      <div className="account-auth-panel-head">
+        <span>Login</span>
+        <h2>Continue with email</h2>
+        <p>Enter your email, then confirm the code we send you.</p>
+      </div>
       {state.notice ? <p className={`account-login-notice account-login-notice-${state.notice.tone}`}>{state.notice.text}</p> : null}
-      <DocsGrid>
-        <DocsCard label="Email" title={state.codeRequested ? "Send another code" : "Get a one-time code"}>
-          <form action="/auth/login" className="account-login-form" method="post">
+      <div className="account-login-steps">
+        <form action="/auth/login" className="account-login-form" method="post">
+          <input name="next" type="hidden" value="/account" />
+          <label className="account-field">
+            <span>Email</span>
+            <input autoComplete="email" inputMode="email" name="email" placeholder="you@example.com" required type="email" />
+          </label>
+          <button className="button button-primary" type="submit">{state.codeRequested ? "Send another code" : "Send code"}</button>
+        </form>
+        {state.codeRequested ? (
+          <form action="/auth/verify" className="account-login-form account-code-form" method="post">
             <input name="next" type="hidden" value="/account" />
             <label className="account-field">
-              <span>Email</span>
-              <input autoComplete="email" inputMode="email" name="email" placeholder="you@example.com" required type="email" />
+              <span>Email code</span>
+              <input autoComplete="one-time-code" inputMode="numeric" maxLength={16} name="code" placeholder="123456" required type="text" />
             </label>
-            <button className="button button-primary button-small" type="submit">Send code</button>
+            <button className="button button-secondary" type="submit">Confirm code</button>
           </form>
-          <p className="account-login-help">No password and no OAuth provider setup. The email code signs you into Nipmod, then you can use chat and create agent keys.</p>
-        </DocsCard>
-        {state.codeRequested ? (
-          <DocsCard label="Code" title="Confirm your email">
-            <form action="/auth/verify" className="account-login-form" method="post">
-              <input name="next" type="hidden" value="/account" />
-              <label className="account-field">
-                <span>Email code</span>
-                <input autoComplete="one-time-code" inputMode="numeric" maxLength={16} name="code" placeholder="123456" required type="text" />
-              </label>
-              <button className="button button-primary button-small" type="submit">Confirm code</button>
-            </form>
-            <p className="account-login-help">Codes expire quickly. If it fails, send a new code with the same email.</p>
-          </DocsCard>
         ) : null}
-      </DocsGrid>
-    </DocsSection>
+      </div>
+      <p className="account-login-help">After login, Nipmod opens the chat first. API key creation and settings are in the left account rail.</p>
+    </>
   );
 }
 
 function AuthMissing({ missing }: { missing: string[] }) {
   return (
-    <DocsSection eyebrow="Setup" title="Login is not configured on this deployment">
-      <DocsTable
-        rows={[
-          ["Missing env", missing.join(", ") || "unknown"],
-          ["Required", "Supabase project URL and publishable key."],
-          ["Email auth", "Enable the Supabase email provider and add nipmod.com to the allowed redirect URLs."]
-        ]}
-      />
-    </DocsSection>
+    <div className="account-auth-panel-head">
+      <span>Setup</span>
+      <h2>Login is not configured.</h2>
+      <p>Missing env: {missing.join(", ") || "unknown"}. Supabase URL and publishable key are required.</p>
+    </div>
   );
 }
 
