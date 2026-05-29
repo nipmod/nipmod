@@ -7,8 +7,6 @@ type AccountAuthEnv = Record<string, string | undefined>;
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
 
-export type AccountAuthProvider = "github" | "google";
-
 export type AccountUser = {
   avatarUrl: string | null;
   email: string | null;
@@ -35,10 +33,6 @@ export function accountAuthConfig(env: AccountAuthEnv = process.env): {
     publishableKey,
     url
   };
-}
-
-export function readAccountAuthProvider(value: string | null): AccountAuthProvider | null {
-  return value === "google" || value === "github" ? value : null;
 }
 
 export async function createAccountSupabaseServerClient(env: AccountAuthEnv = process.env) {
@@ -98,6 +92,20 @@ export function safeAccountNextPath(value: string | null): string {
     return "/account";
   }
   return value.slice(0, 180);
+}
+
+export function normalizeAccountEmail(value: FormDataEntryValue | string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const email = value.trim().toLowerCase();
+  if (email.length < 6 || email.length > 254) {
+    return null;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return null;
+  }
+  return email;
 }
 
 function readEnv(env: AccountAuthEnv, key: string): string | null {

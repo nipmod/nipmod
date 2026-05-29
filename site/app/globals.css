@@ -6164,6 +6164,35 @@ body {
   padding-top: 18px;
 }
 
+.account-login-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.account-login-help,
+.account-login-notice {
+  color: var(--docs-muted);
+  font-family: var(--docs-serif);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.account-login-notice {
+  border: 1px solid var(--docs-line);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.account-login-notice-error {
+  color: #efb0a1;
+}
+
+.account-login-notice-success {
+  color: #b7d7bd;
+}
+
 .account-panel-head {
   display: grid;
   gap: 10px;
