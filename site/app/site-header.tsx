@@ -36,9 +36,6 @@ export function SiteHeader() {
         <SocialIcon href={homeContent.links.telegram} label="Open Nipmod Telegram group in a new tab" title="Telegram">
           <img alt="" className="brand-telegram-icon" height="18" src="/telegram-logo.svg" width="18" />
         </SocialIcon>
-        <SocialIcon href={homeContent.links.bankrCoin} label="Open Nipmod token page in a new tab" title="$NPM on Base">
-          <img alt="" className="brand-base-icon" height="18" src="/base-logo.svg" width="18" />
-        </SocialIcon>
       </div>
     </header>
   );

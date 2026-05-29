@@ -21,10 +21,7 @@ test("home page presents the API-first product", async ({ page }) => {
 
   if (await page.locator(".brand-socials").isVisible()) {
     await expect(page.getByRole("link", { name: "Open Nipmod Gitlawb profile in a new tab" })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Open Nipmod token page in a new tab" })).toHaveAttribute(
-      "href",
-      "https://token.nipmod.com"
-    );
+    await expect(page.getByRole("link", { name: "Open Nipmod token page in a new tab" })).toHaveCount(0);
   }
 
   await expect(page.locator("body")).not.toContainText(removedIntegrationCopy);

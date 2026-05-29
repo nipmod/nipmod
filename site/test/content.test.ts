@@ -43,8 +43,8 @@ describe("home content", () => {
     expect(homeContent.links.email).toBe("mailto:info@nipmod.com");
   });
 
-  test("links to the public token surface", () => {
-    expect(homeContent.links.bankrCoin).toBe("https://token.nipmod.com");
+  test("does not expose an unverified token surface in shared header content", () => {
+    expect("bankrCoin" in homeContent.links).toBe(false);
   });
 
   test("uses clean English copy without hyphen punctuation or slop words", () => {

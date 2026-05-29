@@ -1,7 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const bankrTokenUrl = "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3";
 const isDevelopment = process.env.NODE_ENV === "development";
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
@@ -11,7 +10,7 @@ export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
 
   if (host === "token.nipmod.com" || url.pathname === "/token") {
-    return NextResponse.redirect(bankrTokenUrl, 308);
+    return NextResponse.redirect(new URL("/", "https://nipmod.com"), 308);
   }
 
   if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
