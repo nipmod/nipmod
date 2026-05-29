@@ -1,41 +1,62 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { accountAuthConfig, createAccountSupabaseServerClient, readAccountAuthProvider, safeAccountNextPath } from "../../../lib/account-auth";
+import { accountAuthConfig, createAccountSupabaseServerClient, normalizeAccountEmail, safeAccountNextPath } from "../../../lib/account-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest): Promise<Response> {
-  const url = request.nextUrl;
-  const provider = readAccountAuthProvider(url.searchParams.get("provider"));
-  const next = safeAccountNextPath(url.searchParams.get("next"));
+  return NextResponse.redirect(new URL("/account", request.nextUrl.origin));
+}
 
-  if (!provider) {
-    return NextResponse.redirect(new URL(`/account?error=unsupported_provider`, url.origin));
+export async function POST(request: NextRequest): Promise<Response> {
+  const url = request.nextUrl;
+  const formData = await request.formData().catch(() => null);
+  const email = normalizeAccountEmail(formData?.get("email"));
+  const next = safeAccountNextPath(readFormString(formData?.get("next")));
+
+  if (!email) {
+    return redirectToAccount(url.origin, "invalid_email");
   }
 
   const config = accountAuthConfig();
   if (!config.configured) {
-    return NextResponse.redirect(new URL(`/account?error=auth_not_configured`, url.origin));
+    return redirectToAccount(url.origin, "auth_not_configured");
   }
 
   const supabase = await createAccountSupabaseServerClient();
   if (!supabase) {
-    return NextResponse.redirect(new URL(`/account?error=auth_not_configured`, url.origin));
+    return redirectToAccount(url.origin, "auth_not_configured");
   }
 
   const callbackUrl = new URL("/auth/callback", url.origin);
   callbackUrl.searchParams.set("next", next);
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
     options: {
-      redirectTo: callbackUrl.toString()
-    },
-    provider
+      emailRedirectTo: callbackUrl.toString(),
+      shouldCreateUser: true
+    }
   });
 
-  if (error || !data.url) {
-    return NextResponse.redirect(new URL(`/account?error=oauth_start_failed`, url.origin));
+  if (error) {
+    return redirectToAccount(url.origin, "email_login_failed");
   }
 
-  return NextResponse.redirect(data.url);
+  return redirectToAccount(url.origin, null, "magic_link_sent");
+}
+
+function redirectToAccount(origin: string, error: string | null, sent?: string): Response {
+  const destination = new URL("/account", origin);
+  if (error) {
+    destination.searchParams.set("error", error);
+  }
+  if (sent) {
+    destination.searchParams.set("sent", sent);
+  }
+  return NextResponse.redirect(destination);
+}
+
+function readFormString(value: FormDataEntryValue | null | undefined): string | null {
+  return typeof value === "string" ? value : null;
 }
