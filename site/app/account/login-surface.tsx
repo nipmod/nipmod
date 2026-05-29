@@ -146,6 +146,15 @@ export function readAccountLoginState(params: AccountSearchParams): AccountLogin
       }
     };
   }
+  if (error === "email_rate_limited") {
+    return {
+      codeRequested,
+      notice: {
+        text: "Email login is rate limited right now. Try again later.",
+        tone: "error"
+      }
+    };
+  }
   if (error === "invalid_email_code") {
     return {
       codeRequested: true,
