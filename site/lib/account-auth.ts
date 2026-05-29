@@ -6,6 +6,7 @@ type AccountAuthEnv = Record<string, string | undefined>;
 
 const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
+export const ACCOUNT_LOGIN_EMAIL_COOKIE = "nipmod_account_login_email";
 
 export type AccountUser = {
   avatarUrl: string | null;
@@ -106,6 +107,20 @@ export function normalizeAccountEmail(value: FormDataEntryValue | string | null 
     return null;
   }
   return email;
+}
+
+export function normalizeAccountEmailCode(value: FormDataEntryValue | string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const code = value.replace(/[\s-]/g, "").trim();
+  if (code.length < 4 || code.length > 16) {
+    return null;
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(code)) {
+    return null;
+  }
+  return code;
 }
 
 function readEnv(env: AccountAuthEnv, key: string): string | null {
