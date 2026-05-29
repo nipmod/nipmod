@@ -6,7 +6,7 @@ import { createPageMetadata } from "./metadata";
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  description: "Sign in to Nipmod, use package intelligence in chat and create API keys for agents.",
+  description: "Explore package intelligence through Nipmod.",
   path: "/",
   title: "Nipmod"
 });
