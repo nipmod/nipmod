@@ -95,6 +95,10 @@ export function safeAccountNextPath(value: string | null): string {
   return value.slice(0, 180);
 }
 
+export function safeAccountLoginPath(value: string | null): "/" | "/account" {
+  return value === "/" ? "/" : "/account";
+}
+
 export function normalizeAccountEmail(value: FormDataEntryValue | string | null | undefined): string | null {
   if (typeof value !== "string") {
     return null;

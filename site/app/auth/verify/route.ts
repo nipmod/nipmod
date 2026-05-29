@@ -4,6 +4,7 @@ import {
   createAccountSupabaseServerClient,
   normalizeAccountEmail,
   normalizeAccountEmailCode,
+  safeAccountLoginPath,
   safeAccountNextPath
 } from "../../../lib/account-auth";
 
@@ -19,18 +20,19 @@ export async function POST(request: NextRequest): Promise<Response> {
   const formData = await request.formData().catch(() => null);
   const email = normalizeAccountEmail(request.cookies.get(ACCOUNT_LOGIN_EMAIL_COOKIE)?.value);
   const emailCode = normalizeAccountEmailCode(formData?.get("code"));
+  const loginPath = safeAccountLoginPath(readFormString(formData?.get("loginPath")));
   const next = safeAccountNextPath(readFormString(formData?.get("next")));
 
   if (!email) {
-    return redirectToAccount(url.origin, "login_email_missing");
+    return redirectToLogin(url.origin, loginPath, "login_email_missing");
   }
   if (!emailCode) {
-    return redirectToAccount(url.origin, "invalid_email_code", "code_sent");
+    return redirectToLogin(url.origin, loginPath, "invalid_email_code", "code_sent");
   }
 
   const supabase = await createAccountSupabaseServerClient();
   if (!supabase) {
-    return redirectToAccount(url.origin, "auth_not_configured");
+    return redirectToLogin(url.origin, loginPath, "auth_not_configured");
   }
 
   const { error } = await supabase.auth.verifyOtp({
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   });
 
   if (error) {
-    return redirectToAccount(url.origin, "invalid_email_code", "code_sent");
+    return redirectToLogin(url.origin, loginPath, "invalid_email_code", "code_sent");
   }
 
   const response = NextResponse.redirect(new URL(next, url.origin));
@@ -48,8 +50,8 @@ export async function POST(request: NextRequest): Promise<Response> {
   return response;
 }
 
-function redirectToAccount(origin: string, error: string, sent?: string): NextResponse {
-  const destination = new URL("/account", origin);
+function redirectToLogin(origin: string, path: "/" | "/account", error: string, sent?: string): NextResponse {
+  const destination = new URL(path, origin);
   destination.searchParams.set("error", error);
   if (sent) {
     destination.searchParams.set("sent", sent);

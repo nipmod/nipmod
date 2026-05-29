@@ -20,7 +20,7 @@ export type DocsStat = {
 export const docsNavGroups: DocsNavGroup[] = [
   {
     items: [
-      { href: "/", label: "Home" },
+      { href: "/docs", label: "Home" },
       { href: "/quickstart", label: "Quickstart" },
       { href: "/demo", label: "Demo" },
       { href: "/architecture", label: "Architecture" },

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalizeAccountEmail, normalizeAccountEmailCode, safeAccountNextPath } from "../lib/account-auth";
+import { normalizeAccountEmail, normalizeAccountEmailCode, safeAccountLoginPath, safeAccountNextPath } from "../lib/account-auth";
 
 describe("account auth helpers", () => {
   test("normalizes email login input", () => {
@@ -19,9 +19,18 @@ describe("account auth helpers", () => {
 
   test("keeps account redirects local and away from auth routes", () => {
     expect(safeAccountNextPath("/account")).toBe("/account");
+    expect(safeAccountNextPath("/")).toBe("/");
     expect(safeAccountNextPath("/account?tab=keys")).toBe("/account?tab=keys");
     expect(safeAccountNextPath("https://evil.example/account")).toBe("/account");
     expect(safeAccountNextPath("//evil.example/account")).toBe("/account");
     expect(safeAccountNextPath("/auth/logout")).toBe("/account");
+  });
+
+  test("keeps email-code login errors on the selected public surface", () => {
+    expect(safeAccountLoginPath("/")).toBe("/");
+    expect(safeAccountLoginPath("/account")).toBe("/account");
+    expect(safeAccountLoginPath("/docs")).toBe("/account");
+    expect(safeAccountLoginPath("//evil.example")).toBe("/account");
+    expect(safeAccountLoginPath("https://evil.example/account")).toBe("/account");
   });
 });

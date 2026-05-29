@@ -7933,3 +7933,82 @@ body {
     flex: 1;
   }
 }
+
+@media (max-width: 900px) {
+  .account-auth-shell,
+  .account-app-shell,
+  .account-app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-auth-shell {
+    gap: 34px;
+    padding-bottom: 64px;
+    padding-top: 42px;
+  }
+
+  .account-auth-copy {
+    max-width: none;
+  }
+
+  .account-auth-panel {
+    box-sizing: border-box;
+    max-width: none;
+    width: 100%;
+  }
+
+  .account-auth-copy h1 {
+    font-size: clamp(50px, 13vw, 74px);
+  }
+
+  .account-app-sidebar {
+    border-bottom: 1px solid var(--docs-line);
+    border-right: 0;
+    min-height: auto;
+    position: static;
+  }
+}
+
+@media (max-width: 620px) {
+  .brand-word {
+    display: none;
+  }
+
+  .account-auth-shell {
+    gap: 26px;
+    padding: 34px 20px 56px;
+  }
+
+  .account-auth-copy {
+    gap: 18px;
+  }
+
+  .account-auth-copy h1 {
+    font-size: clamp(44px, 16vw, 62px);
+    line-height: 0.98;
+  }
+
+  .account-auth-body p,
+  .account-auth-panel-head p,
+  .account-login-help {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .account-auth-links {
+    gap: 10px;
+  }
+
+  .account-auth-links a {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .account-auth-panel {
+    padding: 20px 16px;
+  }
+
+  .account-auth-panel-head h2 {
+    font-size: 32px;
+  }
+}
