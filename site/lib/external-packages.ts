@@ -350,6 +350,32 @@ const FETCH_CACHE_MAX_ITEMS = 500;
 const SOURCE_CIRCUIT_FAILURE_THRESHOLD = 3;
 const SOURCE_CIRCUIT_FAILURE_WINDOW_MS = 60_000;
 const SOURCE_CIRCUIT_OPEN_MS = 20_000;
+const SEARCH_STOPWORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "api",
+  "app",
+  "build",
+  "for",
+  "get",
+  "i",
+  "in",
+  "into",
+  "me",
+  "need",
+  "of",
+  "on",
+  "package",
+  "packages",
+  "sdk",
+  "the",
+  "to",
+  "tool",
+  "tools",
+  "use",
+  "with"
+]);
 const EXTERNAL_PACKAGE_DECISIONS = ["recommended", "usable_with_warning", "avoid", "unknown"] as const;
 const EXTERNAL_PACKAGE_RISKS = ["low", "medium", "high", "unknown"] as const;
 const EXTERNAL_PACKAGE_SOURCE_KINDS = ["package-registry", "source-repo", "model-hub", "tool-registry"] as const;
@@ -377,10 +403,18 @@ const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
   { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
   { names: ["@solana/web3.js"], pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i },
+  { names: ["jsonwebtoken", "jose", "bcrypt", "passport"], pattern: /\b(auth|authentication|jwt|token|oauth|password|security|session)\b/i },
+  { names: ["stripe"], pattern: /\b(stripe|payment|payments|checkout|billing|invoice|subscription)\b/i },
   { names: ["next", "vite"], pattern: /\b(web app|web framework|frontend|react app|vite|next)\b/i },
   { names: ["prisma", "pg"], pattern: /\b(database|postgres|postgresql|sql|orm|prisma)\b/i },
+  { names: ["ioredis", "redis"], pattern: /\b(redis|cache|caching|key value|key-value)\b/i },
+  { names: ["bullmq", "p-queue", "p-limit"], pattern: /\b(queue|worker|background job|task queue|jobs|rate limit|concurrency)\b/i },
   { names: ["vitest", "playwright"], pattern: /\b(test|testing|e2e|browser automation|quality)\b/i },
   { names: ["commander", "yargs"], pattern: /\b(cli|terminal|command line|command-line|console)\b/i },
+  { names: ["openai", "ai", "langchain"], pattern: /\b(openai|llm|chatbot|agent|agents|ai sdk|completion|prompt)\b/i },
+  { names: ["pdf-parse", "pdf-lib"], pattern: /\b(pdf|document parsing|extract text|parse document)\b/i },
+  { names: ["nodemailer", "resend"], pattern: /\b(email|emails|smtp|transactional mail|send mail)\b/i },
+  { names: ["pino", "winston"], pattern: /\b(log|logs|logging|observability|telemetry)\b/i },
   { names: ["playwright"], pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i },
   { names: ["sharp", "jimp", "fabric", "konva", "canvas"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i }
 ];
@@ -389,6 +423,11 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["fastapi", "flask", "django"], pattern: /\b(web|server|api|framework|backend)\b/i },
   { names: ["python-telegram-bot", "aiogram"], pattern: /\b(telegram|bot)\b/i },
   { names: ["pandas", "numpy", "polars"], pattern: /\b(data|csv|table|analysis|analytics|frame)\b/i },
+  { names: ["stripe"], pattern: /\b(stripe|payment|payments|checkout|billing|invoice|subscription)\b/i },
+  { names: ["redis", "hiredis"], pattern: /\b(redis|cache|caching|key value|key-value)\b/i },
+  { names: ["openai", "langchain", "llama-index"], pattern: /\b(openai|llm|chatbot|agent|agents|completion|prompt|rag)\b/i },
+  { names: ["pypdf", "pdfplumber", "pymupdf"], pattern: /\b(pdf|document parsing|extract text|parse document)\b/i },
+  { names: ["loguru", "structlog"], pattern: /\b(log|logs|logging|observability|telemetry)\b/i },
   { names: ["pytest", "ruff", "mypy"], pattern: /\b(test|testing|lint|typecheck|quality)\b/i },
   { names: ["typer", "click", "rich"], pattern: /\b(cli|terminal|command|console)\b/i },
   { names: ["beautifulsoup4", "playwright", "selenium"], pattern: /\b(scrape|crawler|browser|automation|parse html|web crawl)\b/i },
@@ -417,8 +456,8 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
     matches: [
       { bonus: 14, name: "undici", reason: "Node HTTP client fit", source: "npm" },
       { bonus: 12, name: "got", reason: "Node HTTP client fit", source: "npm" },
-      { bonus: 14, name: "requests", reason: "Python HTTP client fit", source: "pypi" },
-      { bonus: 13, name: "httpx", reason: "Python HTTP client fit", source: "pypi" }
+      { bonus: 18, name: "requests", reason: "Python HTTP client fit", source: "pypi" },
+      { bonus: 12, name: "httpx", reason: "Python HTTP client fit", source: "pypi" }
     ],
     pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i
   },
@@ -432,6 +471,23 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
   {
     matches: [{ bonus: 16, name: "@solana/web3.js", reason: "Solana JavaScript SDK fit", source: "npm" }],
     pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i
+  },
+  {
+    matches: [
+      { bonus: 12, name: "jsonwebtoken", reason: "Node JWT authentication fit", source: "npm" },
+      { bonus: 18, name: "jose", reason: "Node JOSE/JWT authentication fit", source: "npm" },
+      { bonus: 12, name: "bcrypt", reason: "Node password hashing fit", source: "npm" },
+      { bonus: 14, name: "pyjwt", reason: "Python JWT authentication fit", source: "pypi" },
+      { bonus: 13, name: "cryptography", reason: "Python cryptography fit", source: "pypi" }
+    ],
+    pattern: /\b(auth|authentication|jwt|oauth|password|session|security token)\b/i
+  },
+  {
+    matches: [
+      { bonus: 15, name: "stripe", reason: "Stripe payments SDK fit", source: "npm" },
+      { bonus: 15, name: "stripe", reason: "Stripe payments SDK fit", source: "pypi" }
+    ],
+    pattern: /\b(stripe|payment|payments|checkout|billing|invoice|subscription)\b/i
   },
   {
     matches: [
@@ -461,6 +517,24 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
   },
   {
     matches: [
+      { bonus: 13, name: "redis", reason: "Redis client fit", source: "pypi" },
+      { bonus: 12, name: "hiredis", reason: "Redis client fit", source: "pypi" },
+      { bonus: 13, name: "ioredis", reason: "Redis client fit", source: "npm" },
+      { bonus: 12, name: "redis", reason: "Redis client fit", source: "npm" }
+    ],
+    pattern: /\b(redis|cache|caching|key value|key-value)\b/i
+  },
+  {
+    matches: [
+      { bonus: 14, name: "celery", reason: "Python background job queue fit", source: "pypi" },
+      { bonus: 12, name: "dramatiq", reason: "Python background job queue fit", source: "pypi" },
+      { bonus: 14, name: "bullmq", reason: "Node background job queue fit", source: "npm" },
+      { bonus: 11, name: "p-queue", reason: "Node promise queue fit", source: "npm" }
+    ],
+    pattern: /\b(queue|worker|background job|task queue|jobs|rate limit|concurrency)\b/i
+  },
+  {
+    matches: [
       { bonus: 14, name: "pytest", reason: "Python test runner fit", source: "pypi" },
       { bonus: 12, name: "ruff", reason: "Python linting fit", source: "pypi" },
       { bonus: 14, name: "vitest", reason: "TypeScript test runner fit", source: "npm" },
@@ -481,6 +555,10 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
     matches: [
       { bonus: 14, name: "sentence-transformers", reason: "embedding workflow fit", source: "pypi" },
       { bonus: 12, name: "transformers", reason: "model workflow fit", source: "pypi" },
+      { bonus: 14, name: "openai", reason: "OpenAI SDK fit", source: "npm" },
+      { bonus: 14, name: "openai", reason: "OpenAI SDK fit", source: "pypi" },
+      { bonus: 12, name: "langchain", reason: "LLM application workflow fit", source: "npm" },
+      { bonus: 12, name: "langchain", reason: "LLM application workflow fit", source: "pypi" },
       {
         bonus: 14,
         name: "sentence-transformers/all-minilm-l6-v2",
@@ -490,6 +568,31 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 12, name: "google-bert/bert-base-uncased", reason: "general NLP model fit", source: "huggingface-model" }
     ],
     pattern: /\b(embedding|embeddings|model|nlp|transformer|semantic search|llm)\b/i
+  },
+  {
+    matches: [
+      { bonus: 13, name: "pypdf", reason: "Python PDF parsing fit", source: "pypi" },
+      { bonus: 12, name: "pdfplumber", reason: "Python PDF text extraction fit", source: "pypi" },
+      { bonus: 12, name: "pdf-parse", reason: "Node PDF parsing fit", source: "npm" },
+      { bonus: 11, name: "pdf-lib", reason: "Node PDF manipulation fit", source: "npm" }
+    ],
+    pattern: /\b(pdf|document parsing|extract text|parse document)\b/i
+  },
+  {
+    matches: [
+      { bonus: 13, name: "nodemailer", reason: "Node email delivery fit", source: "npm" },
+      { bonus: 12, name: "resend", reason: "transactional email fit", source: "npm" }
+    ],
+    pattern: /\b(email|emails|smtp|transactional mail|send mail)\b/i
+  },
+  {
+    matches: [
+      { bonus: 12, name: "pino", reason: "Node logging fit", source: "npm" },
+      { bonus: 12, name: "winston", reason: "Node logging fit", source: "npm" },
+      { bonus: 12, name: "loguru", reason: "Python logging fit", source: "pypi" },
+      { bonus: 12, name: "structlog", reason: "Python structured logging fit", source: "pypi" }
+    ],
+    pattern: /\b(log|logs|logging|observability|telemetry)\b/i
   },
   {
     matches: [
@@ -566,7 +669,7 @@ export async function searchExternalPackages(query: string, options: ExternalSea
   const sources = normalizeSources(options.sources);
   const limit = normalizeLimit(options.limit);
   const fetchImpl = options.fetchImpl ?? fetch;
-  const perSourceLimit = Math.max(2, Math.ceil(limit / Math.max(sources.length, 1)) + 2);
+  const perSourceLimit = Math.min(MAX_LIMIT, Math.max(4, Math.ceil(limit / Math.max(sources.length, 1)) + 3));
 
   const sourceResults = await Promise.all(
     sources.map((source) => searchSourceWithReport(source, normalized, perSourceLimit, fetchImpl, options.timeoutMs ?? DEFAULT_TIMEOUT_MS))
@@ -1346,8 +1449,10 @@ async function enrichNpmSearchRecords(
 
 function npmCandidateNames(query: string): string[] {
   const normalized = normalizeName(query);
-  const exactName = isSafeNpmHintName(normalized.toLowerCase()) ? normalized.toLowerCase() : null;
-  const hintNames = NPM_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
+  const exactName = looksLikePackageNameQuery(normalized) && isSafeNpmHintName(normalized.toLowerCase()) ? normalized.toLowerCase() : null;
+  const hintNames = isPrivateLookingPackageQuery(normalized)
+    ? []
+    : NPM_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
   return [...new Set([exactName, ...hintNames.map((name) => name.toLowerCase())].filter((name): name is string => Boolean(name)).filter(isSafeNpmHintName))];
 }
 
@@ -1377,12 +1482,24 @@ async function searchPyPi(query: string, fetchImpl: typeof fetch, timeoutMs: num
 
 function pyPiCandidateNames(query: string): string[] {
   const normalized = normalizeName(query);
-  const baseNames = [normalized, normalized.replace(/\s+/g, "-"), normalized.replace(/\s+/g, "_")];
+  const baseNames = looksLikePyPiPackageNameQuery(normalized) ? [normalized, normalized.replace(/\s+/g, "-"), normalized.replace(/\s+/g, "_")] : [];
   const confusionName = PYPI_CONFUSION_NAMES[normalized.toLowerCase()];
-  const hintNames = looksLikeExactPackageNameQuery(normalized)
+  const hintNames = looksLikeExactPackageNameQuery(normalized) || isPrivateLookingPackageQuery(normalized)
     ? []
     : PYPI_QUERY_HINTS.flatMap((hint) => (hint.pattern.test(normalized) ? hint.names : []));
   return [...new Set([...baseNames, confusionName, ...hintNames].map((name) => normalizeName(name ?? "")).filter(Boolean))].slice(0, 10);
+}
+
+function isPrivateLookingPackageQuery(normalized: string): boolean {
+  return /\b(internal|private|company|corp|corporate|enterprise|proprietary)\b/i.test(normalized);
+}
+
+function looksLikePackageNameQuery(normalized: string): boolean {
+  return /^[a-z0-9][a-z0-9._@/-]{0,80}$/i.test(normalized);
+}
+
+function looksLikePyPiPackageNameQuery(normalized: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]{0,80}$/i.test(normalized);
 }
 
 function looksLikeExactPackageNameQuery(normalized: string): boolean {
@@ -3737,7 +3854,7 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   const description = record.description.toLowerCase();
   const exactMatch = name === normalizedQuery || displayName === normalizedQuery ? 18 : 0;
   const prefixMatch = name.startsWith(normalizedQuery) || displayName.startsWith(normalizedQuery) ? 10 : 0;
-  const textMatch = `${name} ${displayName} ${description}`.includes(normalizedQuery) ? 6 : 0;
+  const textMatch = searchTextMatchScore(record, normalizedQuery);
   const highSeverityWarningCount = record.trust.warnings.filter(hasHighSeverityWarning).length;
   const qualityPenalty =
     record.trust.decision === "avoid" || record.trust.risk === "high" ? 45 : highSeverityWarningCount ? 24 + highSeverityWarningCount * 8 : record.trust.warnings.length * 4;
@@ -3789,6 +3906,34 @@ function rankExternalRecordBreakdown(record: ExternalPackageRecord, query: strin
   };
 }
 
+function searchTextMatchScore(record: ExternalPackageRecord, normalizedQuery: string): number {
+  const nameText = `${record.name} ${record.displayName}`.toLowerCase();
+  const fullText = `${nameText} ${record.description}`.toLowerCase();
+  const tokens = querySearchTokens(normalizedQuery);
+  let score = fullText.includes(normalizedQuery) ? 6 : 0;
+
+  if (tokens.length === 0) {
+    return score;
+  }
+
+  const matchedTokens = tokens.filter((token) => fullText.includes(token));
+  const nameMatchedTokens = tokens.filter((token) => nameText.includes(token));
+  score += Math.round((matchedTokens.length / tokens.length) * 8);
+  score += Math.min(8, nameMatchedTokens.length * 4);
+  return Math.min(18, score);
+}
+
+function querySearchTokens(normalizedQuery: string): string[] {
+  return [
+    ...new Set(
+      normalizedQuery
+        .split(/[^a-z0-9@._/-]+/i)
+        .map((token) => token.trim().toLowerCase())
+        .filter((token) => token.length >= 3 && !SEARCH_STOPWORDS.has(token))
+    )
+  ].slice(0, 8);
+}
+
 function queryIntentMatch(
   record: ExternalPackageRecord,
   query: string
@@ -3825,11 +3970,33 @@ function queryIntentMatch(
 function sourceIntentPenalty(source: ExternalPackageSource, normalizedQuery: string): number {
   const asksForPython = /\b(python|pypi|pip)\b/i.test(normalizedQuery);
   const asksForNode = /\b(node|nodejs|javascript|typescript|npm|js)\b/i.test(normalizedQuery);
+  const asksForDataset = /\b(dataset|datasets|corpus|benchmark data|training data|question answering data)\b/i.test(normalizedQuery);
+  const asksForModel = /\b(model|models|embedding|embeddings|llm|nlp|transformer|semantic search)\b/i.test(normalizedQuery);
+  const asksForMcp = /\b(mcp|model context protocol|tool server|agent tool|skill plugin|skill server)\b/i.test(normalizedQuery);
+  const asksForGitHub = /\b(github|repo|repository|source code|starter|template|clone)\b/i.test(normalizedQuery) || /^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(normalizedQuery);
   if (asksForPython && source === "npm") {
     return 18;
   }
   if (asksForNode && source === "pypi") {
     return 18;
+  }
+  if (asksForDataset && source !== "huggingface-dataset") {
+    return source === "huggingface-model" ? 10 : 16;
+  }
+  if (asksForMcp && source !== "mcp") {
+    return source === "github" ? 8 : 14;
+  }
+  if (asksForGitHub && source !== "github") {
+    return source === "mcp" ? 8 : 12;
+  }
+  if (asksForModel && source === "huggingface-dataset") {
+    return 14;
+  }
+  if (asksForModel && source === "mcp") {
+    return 12;
+  }
+  if (asksForModel && source === "github") {
+    return 8;
   }
   return 0;
 }

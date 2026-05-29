@@ -52,6 +52,10 @@ The automode asks hard questions across source depth, search quality, install-pl
 
 Use `pnpm excellence:automode -- --live` before partner demos or production release notes. Live mode adds the production source-depth, install-plan and archive-depth canaries.
 
+## Search audit
+
+The detailed search audit is tracked in [`docs/package-search-excellence-audit.md`](./package-search-excellence-audit.md). It lists 30 critical failure modes, 30 optimization items and 30 package-search improvements with implementation status.
+
 ## Current hard boundary
 
 This layer improves package selection and pre-install intelligence. It still does not replace a local sandbox, full artifact scan, legal review or human/host approval before execution.

@@ -5,16 +5,16 @@ export const sourceQualityBenchmark = {
   type: "dev.nipmod.source-quality-benchmark.v1",
   status: "public_benchmark_snapshot",
   generatedFrom: "pnpm search:benchmark",
-  generatedAt: "2026-05-27T19:50:00.000Z",
+  generatedAt: "2026-05-29T22:42:07.000Z",
   summary: {
     blockedRecommendedCount: 0,
     fail: 0,
     meanReciprocalRank: 1,
     missingExpectedIntentReasonCount: 0,
-    pass: 28,
+    pass: 36,
     recallAt1: 1,
     recallAt3: 1,
-    total: 28
+    total: 36
   },
   scope: {
     countingNote: "Source coverage counts benchmark cases where the source was requested; multi-source cases count toward each requested source.",
@@ -23,15 +23,16 @@ export const sourceQualityBenchmark = {
     unit: "search result and pre-install source selection"
   },
   sourceCoverage: [
-    { pass: 16, requestedCases: 16, source: "npm" },
-    { pass: 12, requestedCases: 12, source: "pypi" },
+    { pass: 21, requestedCases: 21, source: "npm" },
+    { pass: 15, requestedCases: 15, source: "pypi" },
     { pass: 1, requestedCases: 1, source: "github" },
     { pass: 2, requestedCases: 2, source: "huggingface-model" },
     { pass: 1, requestedCases: 1, source: "huggingface-dataset" },
     { pass: 2, requestedCases: 2, source: "mcp" }
   ],
   scenarioCoverage: [
-    { cases: 8, label: "baseline package, model, repo or MCP selection" },
+    { cases: 16, label: "baseline package, model, repo or MCP selection" },
+    { cases: 8, label: "daily developer package tasks" },
     { cases: 2, label: "partial or multi-source outage behavior" },
     { cases: 6, label: "typo, namespace, dependency confusion or source impersonation" },
     { cases: 5, label: "install, lifecycle, wallet, dataset script or credential-scope risk" },
