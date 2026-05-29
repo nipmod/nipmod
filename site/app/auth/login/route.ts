@@ -49,6 +49,9 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   if (error) {
     logSupabaseAuthError("account_email_login_failed", error);
+    if (error.code === "over_email_send_rate_limit") {
+      return redirectToLogin(url.origin, loginPath, "email_rate_limited");
+    }
     return redirectToLogin(url.origin, loginPath, "email_login_failed");
   }
 
