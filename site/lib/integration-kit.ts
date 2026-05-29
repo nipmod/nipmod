@@ -73,6 +73,8 @@ export const integrationKit = {
     api: "https://nipmod.com/api-access",
     demo: "https://nipmod.com/demo",
     machine: "https://nipmod.com/integration-kit.json",
+    partnerPack: "https://nipmod.com/partner-pack.json",
+    partners: "https://nipmod.com/partners",
     sourceQuality: "https://nipmod.com/source-quality"
   }
 } as const;

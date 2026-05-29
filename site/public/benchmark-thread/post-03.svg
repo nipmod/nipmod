@@ -47,7 +47,7 @@
     
 
       <text x="54" y="128" class="mutedText sans" font-size="20" font-weight="720">Native registries</text>
-      <rect x="444" y="109" width="167" height="20" rx="10" fill="url(#muted)"/>
+      <rect x="444" y="109" width="175" height="20" rx="10" fill="url(#muted)"/>
       <text x="1324" y="129" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">source metadata</text>
     
 
@@ -57,12 +57,12 @@
     
 
       <text x="54" y="224" class="mutedText sans" font-size="20" font-weight="720">deps.dev</text>
-      <rect x="444" y="205" width="122" height="20" rx="10" fill="url(#muted)"/>
+      <rect x="444" y="205" width="106" height="20" rx="10" fill="url(#muted)"/>
       <text x="1324" y="225" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">package evidence</text>
     
 
       <text x="54" y="272" class="mutedText sans" font-size="20" font-weight="720">Socket</text>
-      <rect x="444" y="253" width="76" height="20" rx="10" fill="url(#muted)"/>
+      <rect x="444" y="253" width="122" height="20" rx="10" fill="url(#muted)"/>
       <text x="1324" y="273" class="mutedText sans" font-size="18" font-weight="850" text-anchor="end">authenticated PURL lookup</text>
     
 

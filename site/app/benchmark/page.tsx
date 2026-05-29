@@ -195,7 +195,7 @@ export default function BenchmarkPage() {
       <DocsSection eyebrow="Definition" title="What is measured">
         <DocsTable
           rows={[
-            ["7 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, MCP server and GitHub repository posture."],
+            ["8 cases", "npm package selection, known vulnerable npm package, PyPI package selection, Python schema package, Hugging Face model, Hugging Face dataset, MCP server and GitHub repository posture."],
             ["15 dimensions", "Search, identity, version, metadata, advisories, provenance, repository posture, source depth, package behavior, prompt boundary, install plan, read-only boundary, machine-readable output, agent JSON and multi-source coverage."],
             ["4 public categories", "Source resolution, security evidence, execution preflight and agent readiness."],
             ["8 tracks", "Nipmod, native registries, OSV, deps.dev, OpenSSF Scorecard, Socket, Snyk and a raw agent baseline."],

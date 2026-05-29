@@ -49,12 +49,12 @@
     
       <text x="54" y="100" class="white sans" font-size="24" font-weight="820">Live checks</text>
       <rect x="484" y="81" width="720" height="24" rx="12" fill="url(#gold)"/>
-      <text x="1324" y="101" class="white sans" font-size="22" font-weight="850" text-anchor="end">7/7</text>
+      <text x="1324" y="101" class="white sans" font-size="22" font-weight="850" text-anchor="end">8/8</text>
     
 
       <text x="54" y="172" class="mutedText sans" font-size="24" font-weight="720">Install-plan evidence</text>
       <rect x="484" y="153" width="720" height="24" rx="12" fill="url(#muted)"/>
-      <text x="1324" y="173" class="mutedText sans" font-size="22" font-weight="850" text-anchor="end">7/7</text>
+      <text x="1324" y="173" class="mutedText sans" font-size="22" font-weight="850" text-anchor="end">8/8</text>
     
 
       <text x="54" y="244" class="mutedText sans" font-size="24" font-weight="720">Hosted workspace writes</text>

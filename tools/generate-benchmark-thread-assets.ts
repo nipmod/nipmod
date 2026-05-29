@@ -22,8 +22,8 @@ const assets: Asset[] = [
     kicker: "01 · Public benchmark",
     metric: "95/100",
     rows: [
-      { label: "Live checks", value: "7/7", width: 100 },
-      { label: "Install-plan evidence", value: "7/7", width: 100 },
+      { label: "Live checks", value: "8/8", width: 100 },
+      { label: "Install-plan evidence", value: "8/8", width: 100 },
       { label: "Hosted workspace writes", value: "0", width: 0 }
     ],
     subtitle: "What an agent knows before package, model, repository or MCP execution.",
@@ -39,10 +39,10 @@ const assets: Asset[] = [
     kicker: "03 · Tracks",
     rows: [
       { label: "Nipmod", value: "agent preflight layer", width: 95 },
-      { label: "Native registries", value: "source metadata", width: 22 },
+      { label: "Native registries", value: "source metadata", width: 23 },
       { label: "OSV", value: "vulnerability feed", width: 10 },
-      { label: "deps.dev", value: "package evidence", width: 16 },
-      { label: "Socket", value: "authenticated PURL lookup", width: 10 },
+      { label: "deps.dev", value: "package evidence", width: 14 },
+      { label: "Socket", value: "authenticated PURL lookup", width: 16 },
       { label: "Snyk API", value: "authenticated package API", width: 1 },
       { label: "OpenSSF Scorecard", value: "repository posture", width: 2 },
       { label: "Raw agent", value: "control baseline", width: 3 }
@@ -58,8 +58,8 @@ const assets: Asset[] = [
   {
     kicker: "05 · Scoring",
     rows: [
-      { label: "Source resolution", value: "identity, version, metadata", width: 97 },
-      { label: "Security evidence", value: "advisory, provenance, behavior", width: 83 },
+      { label: "Source resolution", value: "identity, version, metadata", width: 96 },
+      { label: "Security evidence", value: "advisory, provenance, behavior", width: 82 },
       { label: "Execution preflight", value: "install plan, boundary, risk", width: 100 },
       { label: "Agent readiness", value: "action-ready JSON", width: 100 }
     ],
@@ -69,12 +69,12 @@ const assets: Asset[] = [
     kicker: "06 · Result",
     rows: [
       { label: "Nipmod", value: "95", width: 95 },
-      { label: "Native registries", value: "22", width: 22 },
-      { label: "deps.dev", value: "16", width: 16 },
-      { label: "Socket", value: "10", width: 10 },
-      { label: "OSV", value: "10", width: 10 },
+      { label: "Native registries", value: "23", width: 23 },
+      { label: "Socket", value: "16", width: 16 },
+      { label: "deps.dev", value: "14", width: 14 },
+      { label: "OSV", value: "9", width: 9 },
       { label: "Raw agent", value: "3", width: 3 },
-      { label: "OpenSSF Scorecard", value: "2", width: 2 },
+      { label: "OpenSSF Scorecard", value: "1", width: 1 },
       { label: "Snyk API", value: "1", width: 1 }
     ],
     title: "Current public run"

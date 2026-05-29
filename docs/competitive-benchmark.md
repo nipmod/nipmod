@@ -78,11 +78,18 @@ Public categories:
 
 | Step | Meaning |
 | --- | --- |
-| Case set | The public snapshot uses the fixed seven cases below, so the sample is visible before interpreting the result. |
+| Case set | The benchmark uses the fixed eight cases below, so the sample is visible before interpreting the result. |
 | Observation unit | Each provider/case row records concrete dimensions such as identity, version, metadata, advisory, provenance, repository posture, package behavior, install plan, read-only boundary and agent JSON. |
 | Status treatment | `pass` rows keep their computed score, `warn` rows are discounted, `fail` and `skip` rows score zero in the coverage-adjusted headline. |
-| Category score | Each public category has explicit weights. Scores are averaged across all seven cases, so narrow evidence feeds keep applicable depth visible but do not get full-source coverage credit. |
+| Category score | Each public category has explicit weights. Scores are averaged across all eight cases, so narrow evidence feeds keep applicable depth visible but do not get full-source coverage credit. |
 | Headline score | The public score is the mean of source resolution, security evidence, execution preflight and agent readiness. |
+
+## Case Selection Policy
+
+- Cases must represent a real pre-install agent decision, not a synthetic point chosen only for Nipmod.
+- The current runner must include at least one case for each public Nipmod source surface before a public snapshot is treated as current.
+- Specialized tools are scored only on the dimensions they expose, with unsupported sources shown as scope limits.
+- Any direct competitor claim must be supported by the current JSON and must not include excluded CLI, SCM, firewall or paid platform products.
 
 ## Category Weights
 
@@ -95,7 +102,7 @@ Public categories:
 
 ## Test Set
 
-The public snapshot uses seven cases:
+The benchmark runner uses eight public cases across all six Nipmod source surfaces:
 
 | Case | Source | Expected object | Why included |
 | --- | --- | --- | --- |
@@ -104,6 +111,7 @@ The public snapshot uses seven cases:
 | Python HTTP client | PyPI | `requests@2.32.5` | Common PyPI package selection task. |
 | Python schema validation | PyPI | `pydantic@2.11.0` | Cross-ecosystem schema package task. |
 | Embedding model | Hugging Face model | `sentence-transformers/all-MiniLM-L6-v2` | Model reuse case requiring model metadata and file-shape context. |
+| Question answering dataset | Hugging Face dataset | `rajpurkar/squad` | Dataset reuse case requiring dataset metadata and file-shape context. |
 | MCP docs server | MCP | `ac.tandem/docs-mcp` | MCP tool discovery case. |
 | GitHub repository posture | GitHub | `vercel/next.js` | Repository reuse/posture case. |
 

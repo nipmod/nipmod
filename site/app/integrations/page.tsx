@@ -100,6 +100,8 @@ export default function IntegrationsPage() {
         <DocsTable
           rows={[
             ["Integration kit", <Link className="data-link" href="/integration-kit.json" key="kit">/integration-kit.json</Link>],
+            ["Partner pack", <Link className="data-link" href="/partners" key="partners">/partners</Link>],
+            ["Partner JSON", <Link className="data-link" href="/partner-pack.json" key="partner-json">/partner-pack.json</Link>],
             ["Demo flow", <Link className="data-link" href="/agent-demo-flow.json" key="demo">/agent-demo-flow.json</Link>],
             ["Source quality", <Link className="data-link" href="/source-quality.json" key="quality">/source-quality.json</Link>]
           ]}

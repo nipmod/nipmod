@@ -90,6 +90,8 @@
     "agentDemoFlow": "https://nipmod.com/agent-demo-flow.json",
     "integrations": "https://nipmod.com/integrations",
     "integrationKit": "https://nipmod.com/integration-kit.json",
+    "partners": "https://nipmod.com/partners",
+    "partnerPack": "https://nipmod.com/partner-pack.json",
     "sourceQuality": "https://nipmod.com/source-quality",
     "sourceQualityReport": "https://nipmod.com/source-quality.json",
     "architecture": "https://nipmod.com/architecture",

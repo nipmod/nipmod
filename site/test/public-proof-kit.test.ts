@@ -2,10 +2,12 @@ import { describe, expect, test } from "vitest";
 import { GET as getAgentDemoFlow } from "../app/agent-demo-flow.json/route";
 import { GET as getBenchmark } from "../app/benchmark.json/route";
 import { GET as getIntegrationKit } from "../app/integration-kit.json/route";
+import { GET as getPartnerPack } from "../app/partner-pack.json/route";
 import { GET as getSourceQuality } from "../app/source-quality.json/route";
 import { agentDemoFlow } from "../lib/agent-demo-flow";
 import { competitiveBenchmarkReport } from "../lib/competitive-benchmark-public";
 import { integrationKit } from "../lib/integration-kit";
+import { partnerIntegrationPack } from "../lib/partner-integration-pack";
 import { publicSourceQualityReport, sourceQualityBenchmark } from "../lib/source-quality-public";
 
 describe("public agent proof kit", () => {
@@ -31,6 +33,26 @@ describe("public agent proof kit", () => {
     expect(integrationKit.nonGoals).toContain("hosted workspace writes");
     expect(integrationKit.nonGoals).toContain("official partnership claim without the partner's approval");
     expect(integrationKit.expectedHandoff).toContain("user or host approves local execution outside the hosted API");
+    expect(integrationKit.links.partnerPack).toBe("https://nipmod.com/partner-pack.json");
+  });
+
+  test("publishes a partner integration pack with key-gated core calls", () => {
+    expect(partnerIntegrationPack).toMatchObject({
+      status: "public_partner_pack",
+      type: "dev.nipmod.partner-integration-pack.v1"
+    });
+    expect(partnerIntegrationPack.access.coreApi).toBe("key_required");
+    expect(partnerIntegrationPack.access.betaKeyIssue.endpoint).toBe("POST https://nipmod.com/api/keys/beta");
+    expect(partnerIntegrationPack.endpoints.map((endpoint) => endpoint.path)).toEqual(expect.arrayContaining([
+      "/api/search",
+      "/api/inspect",
+      "/api/install-plan",
+      "/api/mcp"
+    ]));
+    expect(partnerIntegrationPack.nonGoals).toContain("hosted workspace writes");
+    expect(partnerIntegrationPack.nonGoals).toContain("official partnership claims without approval");
+    expect(partnerIntegrationPack.privacy.workspaceDataRequired).toBe(false);
+    expect(partnerIntegrationPack.readinessChecklist.join(" ")).toContain("x-nipmod-api-key");
   });
 
   test("publishes source quality with honest limits and all six sources", () => {
@@ -68,8 +90,8 @@ describe("public agent proof kit", () => {
   test("publishes a visual competitive benchmark snapshot without unsafe claims", () => {
     expect(competitiveBenchmarkReport.type).toBe("dev.nipmod.competitive-benchmark-public.v1");
     expect(competitiveBenchmarkReport.headline).toMatchObject({
-      installPlanEvidence: "7/7",
-      liveChecks: "7/7",
+      installPlanEvidence: "8/8",
+      liveChecks: "8/8",
       score: 95
     });
     expect(competitiveBenchmarkReport.tracks.map((track) => track.name)).toContain("Nipmod");
@@ -84,7 +106,8 @@ describe("public agent proof kit", () => {
       name: "Nipmod",
       score: 100
     });
-    expect(competitiveBenchmarkReport.cases).toHaveLength(7);
+    expect(competitiveBenchmarkReport.cases).toHaveLength(8);
+    expect(competitiveBenchmarkReport.cases.map((testCase) => testCase.id)).toContain("hf-dataset-squad");
     expect(competitiveBenchmarkReport.rubric).toHaveLength(4);
     expect(competitiveBenchmarkReport.categoryWeights).toHaveLength(4);
     expect(competitiveBenchmarkReport.categoryWeights.find((category) => category.category === "Execution preflight")?.weights.find((weight) => weight.dimension === "install plan")?.weight).toBe(32);
@@ -111,16 +134,18 @@ describe("public agent proof kit", () => {
   });
 
   test("serves machine-readable JSON routes for agents", async () => {
-    const [benchmark, demo, kit, quality] = await Promise.all([
+    const [benchmark, demo, kit, partner, quality] = await Promise.all([
       getBenchmark().json(),
       getAgentDemoFlow().json(),
       getIntegrationKit().json(),
+      getPartnerPack().json(),
       getSourceQuality().json()
     ]);
 
     expect(benchmark.type).toBe("dev.nipmod.competitive-benchmark-public.v1");
     expect(demo.type).toBe("dev.nipmod.agent-demo-flow.v1");
     expect(kit.type).toBe("dev.nipmod.integration-kit.v1");
+    expect(partner.type).toBe("dev.nipmod.partner-integration-pack.v1");
     expect(quality.type).toBe("dev.nipmod.source-quality-report.v1");
   });
 });

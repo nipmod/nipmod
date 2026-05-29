@@ -101,6 +101,9 @@ const fixtureFetch: typeof fetch = (async (input: string | URL | Request, init?:
   if (url.startsWith("https://huggingface.co/api/models/")) {
     return json({ cardData: { license: "apache-2.0" }, downloads: 100, id: "sentence-transformers/all-MiniLM-L6-v2", lastModified: "2026-01-01T00:00:00Z", siblings: [{ rfilename: "model.safetensors" }], tags: [] });
   }
+  if (url.startsWith("https://huggingface.co/api/datasets/")) {
+    return json({ cardData: { license: "cc-by-sa-4.0" }, downloads: 100, id: "rajpurkar/squad", lastModified: "2026-01-01T00:00:00Z", siblings: [{ rfilename: "plain_text/train-00000-of-00001.parquet" }], tags: ["question-answering"] });
+  }
   if (url.startsWith("https://registry.modelcontextprotocol.io/")) return json({ servers: [{ server: { name: "ac.tandem/docs-mcp" } }] });
 
   if (url === "https://api.osv.dev/v1/query") return json({ vulns: [] });

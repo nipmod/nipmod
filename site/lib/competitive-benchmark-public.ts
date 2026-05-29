@@ -74,14 +74,14 @@ export const competitiveBenchmarkReport = {
       rubric: "Full credit requires a resolved source object with identity, version where applicable, useful metadata, source depth and broad source coverage. Advisory-only feeds receive credit only when they can identify the package/version they are asked about.",
       title: "Source resolution",
       tracks: [
-        { name: "Nipmod", score: 97, sourceCoveragePct: 100 },
-        { name: "Native registries", score: 50, sourceCoveragePct: 100 },
-        { name: "deps.dev", score: 25, sourceCoveragePct: 57 },
-        { name: "OSV", score: 17, sourceCoveragePct: 57 },
+        { name: "Nipmod", score: 96, sourceCoveragePct: 100 },
+        { name: "Native registries", score: 49, sourceCoveragePct: 100 },
+        { name: "deps.dev", score: 22, sourceCoveragePct: 50 },
+        { name: "Socket", score: 22, sourceCoveragePct: 50 },
+        { name: "OSV", score: 15, sourceCoveragePct: 50 },
         { name: "Raw agent", score: 13, sourceCoveragePct: 100 },
-        { name: "Socket", score: 13, sourceCoveragePct: 57 },
-        { name: "OpenSSF Scorecard", score: 3, sourceCoveragePct: 14 },
-        { name: "Snyk", score: 0, sourceCoveragePct: 57 }
+        { name: "OpenSSF Scorecard", score: 2, sourceCoveragePct: 13 },
+        { name: "Snyk", score: 0, sourceCoveragePct: 50 }
       ]
     },
     {
@@ -91,14 +91,14 @@ export const competitiveBenchmarkReport = {
       rubric: "Full credit requires more than a known-vulnerability lookup: advisory context, provenance or source links, repository posture when relevant, and package-behavior signals. Vulnerability feeds get credit for advisory evidence even if they do not provide install-plan context.",
       title: "Security evidence",
       tracks: [
-        { name: "Nipmod", score: 83, sourceCoveragePct: 100 },
-        { name: "deps.dev", score: 33, sourceCoveragePct: 57 },
-        { name: "Native registries", score: 26, sourceCoveragePct: 100 },
-        { name: "Socket", score: 18, sourceCoveragePct: 57 },
-        { name: "OSV", score: 17, sourceCoveragePct: 57 },
-        { name: "OpenSSF Scorecard", score: 3, sourceCoveragePct: 14 },
+        { name: "Nipmod", score: 82, sourceCoveragePct: 100 },
+        { name: "Socket", score: 31, sourceCoveragePct: 50 },
+        { name: "deps.dev", score: 29, sourceCoveragePct: 50 },
+        { name: "Native registries", score: 28, sourceCoveragePct: 100 },
+        { name: "OSV", score: 15, sourceCoveragePct: 50 },
+        { name: "OpenSSF Scorecard", score: 2, sourceCoveragePct: 13 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 },
-        { name: "Snyk", score: 0, sourceCoveragePct: 57 }
+        { name: "Snyk", score: 0, sourceCoveragePct: 50 }
       ]
     },
     {
@@ -109,13 +109,13 @@ export const competitiveBenchmarkReport = {
       title: "Execution preflight",
       tracks: [
         { name: "Nipmod", score: 100, sourceCoveragePct: 100 },
-        { name: "Socket", score: 4, sourceCoveragePct: 57 },
-        { name: "Native registries", score: 2, sourceCoveragePct: 100 },
+        { name: "Socket", score: 7, sourceCoveragePct: 50 },
+        { name: "Native registries", score: 4, sourceCoveragePct: 100 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 },
-        { name: "deps.dev", score: 0, sourceCoveragePct: 57 },
-        { name: "OSV", score: 0, sourceCoveragePct: 57 },
-        { name: "Snyk", score: 0, sourceCoveragePct: 57 },
-        { name: "OpenSSF Scorecard", score: 0, sourceCoveragePct: 14 }
+        { name: "deps.dev", score: 0, sourceCoveragePct: 50 },
+        { name: "OSV", score: 0, sourceCoveragePct: 50 },
+        { name: "Snyk", score: 0, sourceCoveragePct: 50 },
+        { name: "OpenSSF Scorecard", score: 0, sourceCoveragePct: 13 }
       ]
     },
     {
@@ -127,11 +127,11 @@ export const competitiveBenchmarkReport = {
       tracks: [
         { name: "Nipmod", score: 100, sourceCoveragePct: 100 },
         { name: "Native registries", score: 10, sourceCoveragePct: 100 },
-        { name: "deps.dev", score: 6, sourceCoveragePct: 57 },
-        { name: "OSV", score: 6, sourceCoveragePct: 57 },
-        { name: "Socket", score: 4, sourceCoveragePct: 57 },
-        { name: "Snyk", score: 2, sourceCoveragePct: 57 },
-        { name: "OpenSSF Scorecard", score: 1, sourceCoveragePct: 14 },
+        { name: "deps.dev", score: 5, sourceCoveragePct: 50 },
+        { name: "OSV", score: 5, sourceCoveragePct: 50 },
+        { name: "Socket", score: 5, sourceCoveragePct: 50 },
+        { name: "Snyk", score: 2, sourceCoveragePct: 50 },
+        { name: "OpenSSF Scorecard", score: 1, sourceCoveragePct: 13 },
         { name: "Raw agent", score: 0, sourceCoveragePct: 100 }
       ]
     }
@@ -182,7 +182,7 @@ export const competitiveBenchmarkReport = {
       ]
     }
   ] satisfies CompetitiveBenchmarkCategoryWeight[],
-  checkedAt: "2026-05-29T09:44:19.025Z",
+  checkedAt: "2026-05-29T12:39:59.575Z",
   command: "pnpm benchmark:competitive",
   marketContext: [
     {
@@ -277,7 +277,7 @@ export const competitiveBenchmarkReport = {
     "Machine-readable JSON is published so the public page can be checked against the raw snapshot."
   ],
   limitations: [
-    "The benchmark has 7 public cases. It is a focused preflight benchmark, not a full registry-wide or malware-corpus evaluation.",
+    "The benchmark has 8 public cases across all six Nipmod source surfaces. It is a focused preflight benchmark, not a full registry-wide or malware-corpus evaluation.",
     "Weights are authored by Nipmod and should be reviewed by outside maintainers before being treated as independent proof.",
     "Socket and Snyk API tracks were limited by the token, plan or rate limits available in this run; direct claims against those products should not be made from this snapshot.",
     "Local project scanners, CLI tools, SCM integrations and install-time firewalls are excluded because they require manifests, repositories, local code or runtime interception.",
@@ -295,7 +295,7 @@ export const competitiveBenchmarkReport = {
     {
       explanation: "The case list is fixed for the public snapshot so the page is not cherry-picking a different sample after seeing a result.",
       label: "Case set",
-      value: "7 source cases"
+      value: "8 source cases"
     },
     {
       explanation: "Each provider/case observation records concrete dimensions such as identity, version, metadata, advisory, provenance, repository posture, package behavior, install plan, read-only boundary and agent JSON.",
@@ -308,7 +308,7 @@ export const competitiveBenchmarkReport = {
       value: "pass full, warn discounted, fail/skip zero"
     },
     {
-      explanation: "Each category has explicit weights. Category scores are averaged across all 7 cases, so narrow evidence feeds keep their applicable depth visible but do not receive full-source coverage credit.",
+      explanation: "Each category has explicit weights. Category scores are averaged across all 8 cases, so narrow evidence feeds keep their applicable depth visible but do not receive full-source coverage credit.",
       label: "Category score",
       value: "weighted dimensions across all cases"
     },
@@ -355,6 +355,13 @@ export const competitiveBenchmarkReport = {
       task: "Embedding model"
     },
     {
+      expected: "rajpurkar/squad",
+      id: "hf-dataset-squad",
+      reason: "Dataset reuse case where package-style safety needs dataset metadata and file-shape context.",
+      source: "Hugging Face dataset",
+      task: "Question answering dataset"
+    },
+    {
       expected: "ac.tandem/docs-mcp",
       id: "mcp-docs-server",
       reason: "MCP server discovery case where agents need tool metadata, repository links and install/use boundaries.",
@@ -370,15 +377,15 @@ export const competitiveBenchmarkReport = {
     }
   ] satisfies CompetitiveBenchmarkCase[],
   headline: {
-    installPlanEvidence: "7/7",
-    liveChecks: "7/7",
-    medianLatencyMs: 2121,
+    installPlanEvidence: "8/8",
+    liveChecks: "8/8",
+    medianLatencyMs: 3059,
     score: 95
   },
   publishableClaims: [
     "Nipmod score: 95/100 across the current production agent-preflight benchmark.",
-    "Nipmod completed 7/7 live source cases and returned 7/7 read-only install-plan evidence with 2121 ms median latency.",
-    "Socket was authenticated and returned package-depth evidence in 2/4 applicable package checks, while 2/4 remained token, plan or rate limited.",
+    "Nipmod completed 8/8 live source cases and returned 8/8 read-only install-plan evidence with 3059 ms median latency.",
+    "Socket was authenticated and returned package-depth evidence in 4/4 applicable package checks.",
     "Snyk authentication worked, but package-health depth was unavailable on the current token or plan; do not use this snapshot for a direct Snyk depth claim."
   ],
   reviewerAssessment: {
@@ -424,13 +431,13 @@ export const competitiveBenchmarkReport = {
   ] satisfies CompetitiveBenchmarkRubric[],
   tracks: [
     {
-      applicable: 7,
+      applicable: 8,
       coveragePct: 100,
-      depthScore: 94,
-      latencyMs: 2121,
+      depthScore: 93,
+      latencyMs: 3059,
       name: "Nipmod",
       note: "Search, inspect, source evidence, warnings, read-only install-plan output and agent JSON.",
-      pass: 7,
+      pass: 8,
       role: "Agent preflight layer",
       score: 95,
       sourceCoveragePct: 100,
@@ -441,26 +448,26 @@ export const competitiveBenchmarkReport = {
       applicable: 4,
       coveragePct: 100,
       depthScore: 37,
-      latencyMs: 78,
+      latencyMs: 109,
       name: "deps.dev",
       note: "Package metadata, licenses, advisory and provenance context for supported ecosystems.",
       pass: 4,
       role: "Package metadata and advisory evidence",
-      score: 16,
-      sourceCoveragePct: 57,
+      score: 14,
+      sourceCoveragePct: 50,
       status: "pass",
       warn: 0
     },
     {
-      applicable: 7,
+      applicable: 8,
       coveragePct: 100,
-      depthScore: 28,
-      latencyMs: 347,
+      depthScore: 29,
+      latencyMs: 406,
       name: "Native registries",
       note: "Source-of-truth metadata from npm, PyPI, GitHub, Hugging Face and MCP.",
-      pass: 7,
+      pass: 8,
       role: "Upstream source metadata",
-      score: 22,
+      score: 23,
       sourceCoveragePct: 100,
       status: "pass",
       warn: 0
@@ -469,13 +476,13 @@ export const competitiveBenchmarkReport = {
       applicable: 4,
       coveragePct: 100,
       depthScore: 25,
-      latencyMs: 461,
+      latencyMs: 444,
       name: "OSV",
       note: "Vulnerability lookup for package and version pairs.",
       pass: 4,
       role: "Vulnerability evidence feed",
-      score: 10,
-      sourceCoveragePct: 57,
+      score: 9,
+      sourceCoveragePct: 50,
       status: "pass",
       warn: 0
     },
@@ -483,46 +490,46 @@ export const competitiveBenchmarkReport = {
       applicable: 1,
       coveragePct: 100,
       depthScore: 18,
-      latencyMs: 196,
+      latencyMs: 233,
       name: "OpenSSF Scorecard",
       note: "Repository posture for GitHub projects. It is not a package install-plan layer.",
       pass: 1,
       role: "Repository posture baseline",
-      score: 2,
-      sourceCoveragePct: 14,
+      score: 1,
+      sourceCoveragePct: 13,
       status: "pass",
       warn: 0
     },
     {
       applicable: 4,
-      coveragePct: 50,
-      depthScore: 21,
-      latencyMs: 274,
+      coveragePct: 100,
+      depthScore: 38,
+      latencyMs: 513,
       name: "Socket",
-      note: "Authenticated PURL lookup returned package-depth evidence for 2/4 applicable package checks; 2/4 remained token, plan or rate limited.",
-      pass: 2,
+      note: "Authenticated PURL lookup returned package-depth evidence for 4/4 applicable package checks.",
+      pass: 4,
       role: "Supply-chain package evidence",
-      score: 10,
-      sourceCoveragePct: 57,
-      status: "warn",
-      warn: 2
+      score: 16,
+      sourceCoveragePct: 50,
+      status: "pass",
+      warn: 0
     },
     {
       applicable: 4,
       coveragePct: 0,
       depthScore: 4,
-      latencyMs: 237,
+      latencyMs: 288,
       name: "Snyk",
       note: "Authentication worked, but package-health depth was unavailable on the current token or plan.",
       pass: 0,
       role: "Package health and security evidence",
       score: 1,
-      sourceCoveragePct: 57,
+      sourceCoveragePct: 50,
       status: "warn",
       warn: 4
     },
     {
-      applicable: 7,
+      applicable: 8,
       coveragePct: 0,
       depthScore: 4,
       latencyMs: null,
@@ -533,7 +540,7 @@ export const competitiveBenchmarkReport = {
       score: 3,
       sourceCoveragePct: 100,
       status: "warn",
-      warn: 7
+      warn: 8
     }
   ] satisfies CompetitiveBenchmarkTrack[],
   type: "dev.nipmod.competitive-benchmark-public.v1"
