@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">One question only</title>
+  <desc id="desc">02 · Scope</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#131514"/>
+      <stop offset="0.55" stop-color="#22211f"/>
+      <stop offset="1" stop-color="#101111"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#8fbf9a"/>
+      <stop offset="1" stop-color="#d8b56d"/>
+    </linearGradient>
+    <linearGradient id="muted" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#6f746f"/>
+      <stop offset="1" stop-color="#a8916d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000" flood-opacity="0.32"/>
+    </filter>
+    <style>
+      .serif { font-family: Georgia, "Times New Roman", serif; }
+      .sans { font-family: Inter, Arial, sans-serif; }
+      .white { fill: #f5f1ea; }
+      .mutedText { fill: #b9b2a8; opacity: 0.78; }
+      .faintText { fill: #b9b2a8; opacity: 0.55; }
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect x="58" y="58" width="1484" height="884" rx="18" fill="rgba(255,255,255,0.018)" stroke="rgba(245,241,234,0.16)"/>
+
+  <g transform="translate(96 86)">
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#ef7c62"/>
+    <text x="62" y="30" class="sans white" font-size="24" font-weight="750">Nipmod</text>
+    <text x="0" y="104" class="sans faintText" font-size="16" font-weight="820">02 · SCOPE</text>
+    <text x="0" y="170" class="serif white" font-size="64">One question only</text>
+    
+  </g>
+  
+
+  <g transform="translate(96 380)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1408" height="440" rx="14" fill="rgba(255,255,255,0.034)" stroke="rgba(245,241,234,0.17)"/>
+    
+    
+      <circle cx="72" cy="79" r="5" fill="#d8b56d"/>
+      <text x="96" y="88" class="white serif" font-size="30">Not a generic company ranking</text>
+    
+
+      <circle cx="72" cy="161" r="5" fill="#d8b56d"/>
+      <text x="96" y="170" class="white serif" font-size="30">Not a malware-free guarantee</text>
+    
+
+      <circle cx="72" cy="243" r="5" fill="#d8b56d"/>
+      <text x="96" y="252" class="white serif" font-size="30">A narrow pre-execution API benchmark</text>
+    
+    <text x="62" y="382" class="serif mutedText" font-size="22">The comparison is strict because vague security charts are useless.</text>
+  </g>
+
+  <text x="96" y="884" class="sans faintText" font-size="15" font-weight="780">NIPMOD.COM/BENCHMARK · RAW JSON: NIPMOD.COM/BENCHMARK.JSON · 02/12</text>
+</svg>

@@ -89,6 +89,18 @@ describe("public agent proof kit", () => {
     expect(competitiveBenchmarkReport.categoryWeights).toHaveLength(4);
     expect(competitiveBenchmarkReport.categoryWeights.find((category) => category.category === "Execution preflight")?.weights.find((weight) => weight.dimension === "install plan")?.weight).toBe(32);
     expect(competitiveBenchmarkReport.scoreAccounting).toHaveLength(5);
+    expect(competitiveBenchmarkReport.marketContext.map((item) => item.name)).toEqual([
+      "Nipmod",
+      "Native registries",
+      "OSV",
+      "deps.dev",
+      "Socket",
+      "Snyk",
+      "OpenSSF Scorecard",
+      "Raw agent"
+    ]);
+    expect(competitiveBenchmarkReport.marketContext.find((item) => item.name === "Snyk")?.benchmarkBoundary).toContain("authenticated REST package API");
+    expect(competitiveBenchmarkReport.marketContext.find((item) => item.name === "Socket")?.scaleContext).toContain("$1B");
     expect(competitiveBenchmarkReport.fairnessControls.join(" ")).toContain("coverage-adjusted");
     expect(competitiveBenchmarkReport.limitations.join(" ")).toContain("not a guarantee");
     expect(competitiveBenchmarkReport.reviewerAssessment.academicGrade).toContain("not sufficient");

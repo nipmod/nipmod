@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Nipmod benchmark cover</title>
+  <desc id="desc">Minimal cover image for the Nipmod agent preflight benchmark.</desc>
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="43%" r="54%">
+      <stop offset="0" stop-color="#ef7c62" stop-opacity="0.18"/>
+      <stop offset="0.42" stop-color="#d8b56d" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#101111" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bar" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#8fbf9a"/>
+      <stop offset="1" stop-color="#d8b56d"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="26" stdDeviation="34" flood-color="#000" flood-opacity="0.34"/>
+    </filter>
+    <style>
+      .serif { font-family: Georgia, "Times New Roman", serif; }
+      .sans { font-family: Inter, Arial, sans-serif; }
+      .white { fill: #f7f3ec; }
+      .muted { fill: #b9b2a8; opacity: 0.76; }
+      .faint { fill: #b9b2a8; opacity: 0.48; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#101111"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect x="56" y="56" width="1488" height="788" rx="28" fill="rgba(255,255,255,0.018)" stroke="rgba(247,243,236,0.15)"/>
+
+  <g transform="translate(96 82)">
+    <image href="nipmod-logo-transparent.png" x="-18" y="-20" width="82" height="82" preserveAspectRatio="xMidYMid meet"/>
+    <text x="72" y="35" class="sans white" font-size="26" font-weight="760">Nipmod</text>
+  </g>
+
+  <image href="nipmod-logo-transparent.png" x="1010" y="152" width="470" height="470" opacity="0.9" preserveAspectRatio="xMidYMid meet" filter="url(#softShadow)"/>
+
+  <g transform="translate(96 238)">
+    <text x="0" y="0" class="sans faint" font-size="16" font-weight="820">PUBLIC BENCHMARK</text>
+    <text x="0" y="86" class="serif white" font-size="86" font-weight="500">Agent preflight</text>
+    <text x="0" y="178" class="serif white" font-size="86" font-weight="500">benchmark</text>
+    <text x="0" y="238" class="serif muted" font-size="31">What an agent knows before touching external code.</text>
+  </g>
+
+  <g transform="translate(96 588)">
+    <rect x="0" y="0" width="620" height="136" rx="18" fill="rgba(255,255,255,0.035)" stroke="rgba(247,243,236,0.16)"/>
+    <text x="34" y="52" class="sans faint" font-size="14" font-weight="820">CURRENT PUBLIC RUN</text>
+    <rect x="34" y="80" width="410" height="18" rx="9" fill="rgba(255,255,255,0.08)"/>
+    <rect x="34" y="80" width="390" height="18" rx="9" fill="url(#bar)"/>
+    <text x="476" y="101" class="serif white" font-size="42" font-weight="500">95/100</text>
+  </g>
+</svg>
