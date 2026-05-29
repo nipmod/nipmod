@@ -48,6 +48,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   });
 
   if (error) {
+    logSupabaseAuthError("account_email_login_failed", error);
     return redirectToLogin(url.origin, loginPath, "email_login_failed");
   }
 
@@ -75,4 +76,21 @@ function redirectToLogin(origin: string, path: "/" | "/account", error: string |
 
 function readFormString(value: FormDataEntryValue | null | undefined): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function logSupabaseAuthError(
+  event: string,
+  error: {
+    code?: string | undefined;
+    message?: string | undefined;
+    name?: string | undefined;
+    status?: number | undefined;
+  }
+): void {
+  console.error(event, {
+    code: error.code ?? null,
+    message: error.message ?? null,
+    name: error.name ?? null,
+    status: error.status ?? null
+  });
 }

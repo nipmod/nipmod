@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { normalizeAccountEmail, normalizeAccountEmailCode, safeAccountLoginPath, safeAccountNextPath } from "../lib/account-auth";
+import {
+  accountAuthConfig,
+  normalizeAccountEmail,
+  normalizeAccountEmailCode,
+  safeAccountLoginPath,
+  safeAccountNextPath
+} from "../lib/account-auth";
 
 describe("account auth helpers", () => {
   test("normalizes email login input", () => {
@@ -32,5 +38,19 @@ describe("account auth helpers", () => {
     expect(safeAccountLoginPath("/docs")).toBe("/account");
     expect(safeAccountLoginPath("//evil.example")).toBe("/account");
     expect(safeAccountLoginPath("https://evil.example/account")).toBe("/account");
+  });
+
+  test("treats quoted empty Supabase env values as missing", () => {
+    expect(
+      accountAuthConfig({
+        NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: '""',
+        NIPMOD_ARCHIVE_SUPABASE_URL: '""'
+      })
+    ).toEqual({
+      configured: false,
+      missing: ["NIPMOD_ARCHIVE_SUPABASE_URL", "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY"],
+      publishableKey: null,
+      url: null
+    });
   });
 });
