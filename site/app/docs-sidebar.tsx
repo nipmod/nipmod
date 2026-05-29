@@ -9,7 +9,7 @@ export function DocsSidebar({ nav }: { nav: DocsNavGroup[] }) {
 
   return (
     <aside className="docs-sidebar" aria-label="Documentation">
-      <Link className="docs-sidebar-title" href="/">
+      <Link className="docs-sidebar-title" href="/docs">
         Nipmod docs
       </Link>
       <nav className="docs-sidebar-nav">

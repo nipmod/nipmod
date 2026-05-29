@@ -4,6 +4,7 @@ import {
   accountAuthConfig,
   createAccountSupabaseServerClient,
   normalizeAccountEmail,
+  safeAccountLoginPath,
   safeAccountNextPath
 } from "../../../lib/account-auth";
 
@@ -18,20 +19,21 @@ export async function POST(request: NextRequest): Promise<Response> {
   const url = request.nextUrl;
   const formData = await request.formData().catch(() => null);
   const email = normalizeAccountEmail(formData?.get("email"));
+  const loginPath = safeAccountLoginPath(readFormString(formData?.get("loginPath")));
   const next = safeAccountNextPath(readFormString(formData?.get("next")));
 
   if (!email) {
-    return redirectToAccount(url.origin, "invalid_email");
+    return redirectToLogin(url.origin, loginPath, "invalid_email");
   }
 
   const config = accountAuthConfig();
   if (!config.configured) {
-    return redirectToAccount(url.origin, "auth_not_configured");
+    return redirectToLogin(url.origin, loginPath, "auth_not_configured");
   }
 
   const supabase = await createAccountSupabaseServerClient();
   if (!supabase) {
-    return redirectToAccount(url.origin, "auth_not_configured");
+    return redirectToLogin(url.origin, loginPath, "auth_not_configured");
   }
 
   const callbackUrl = new URL("/auth/callback", url.origin);
@@ -46,10 +48,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   });
 
   if (error) {
-    return redirectToAccount(url.origin, "email_login_failed");
+    return redirectToLogin(url.origin, loginPath, "email_login_failed");
   }
 
-  const response = redirectToAccount(url.origin, null, "code_sent");
+  const response = redirectToLogin(url.origin, loginPath, null, "code_sent");
   response.cookies.set(ACCOUNT_LOGIN_EMAIL_COOKIE, email, {
     httpOnly: true,
     maxAge: 10 * 60,
@@ -60,8 +62,8 @@ export async function POST(request: NextRequest): Promise<Response> {
   return response;
 }
 
-function redirectToAccount(origin: string, error: string | null, sent?: string): NextResponse {
-  const destination = new URL("/account", origin);
+function redirectToLogin(origin: string, path: "/" | "/account", error: string | null, sent?: string): NextResponse {
+  const destination = new URL(path, origin);
   if (error) {
     destination.searchParams.set("error", error);
   }
