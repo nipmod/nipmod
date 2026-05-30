@@ -72,6 +72,17 @@ export default function BenchmarkPage() {
         </div>
       </DocsSection>
 
+      <DocsSection eyebrow="Proof chain" title="How this connects">
+        <DocsTable
+          rows={[
+            ["Demo", <Link className="data-link" href="/demo" key="demo">/demo</Link>, "Shows the agent-facing flow before workspace writes."],
+            ["Source quality", <Link className="data-link" href="/source-quality" key="quality">/source-quality</Link>, "Shows the source-depth gates behind the benchmark."],
+            ["Proof loop", <Link className="data-link" href="/proof" key="proof">/proof</Link>, "Lists repeatable live checks and machine-readable evidence."],
+            ["Investor brief", <Link className="data-link" href="/investors" key="investors">/investors</Link>, "Explains the market thesis in plain language."]
+          ]}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Audit" title="Strict reviewer answer">
         <DocsGrid>
           <article className="benchmark-panel">

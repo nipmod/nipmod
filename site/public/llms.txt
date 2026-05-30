@@ -7,8 +7,10 @@ Mode: API first package discovery
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API reference: https://nipmod.com/api-access
+Investor brief: https://nipmod.com/investors
 Public agent demo: https://nipmod.com/demo
 Public agent demo machine flow: https://nipmod.com/agent-demo-flow.json
+Public proof loop: https://nipmod.com/proof
 Contact: mailto:info@nipmod.com
 OpenAPI spec: https://nipmod.com/api/openapi
 Source health: https://nipmod.com/api/sources/health
@@ -43,6 +45,7 @@ Generic integration kit: https://nipmod.com/integrations
 Generic integration machine kit: https://nipmod.com/integration-kit.json
 Partner integration pack: https://nipmod.com/partners
 Partner integration machine pack: https://nipmod.com/partner-pack.json
+Investor brief: https://nipmod.com/investors
 
 Use the public demo flow to test the full preflight before writing platform-specific integration code:
 
@@ -58,6 +61,7 @@ Use the competitive benchmark to understand agent package-decision depth across 
 
 Competitive benchmark: https://nipmod.com/benchmark
 Competitive benchmark machine report: https://nipmod.com/benchmark.json
+Public proof loop: https://nipmod.com/proof
 
 ## Base agents
 

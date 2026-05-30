@@ -115,6 +115,12 @@ export default function SourceQualityPage() {
           ]}
         />
       </DocsSection>
+
+      <div className="docs-next">
+        <Link href="/proof">Proof loop</Link>
+        <Link href="/demo">Agent demo</Link>
+        <Link href="/benchmark">Benchmark</Link>
+      </div>
     </DocsShell>
   );
 }

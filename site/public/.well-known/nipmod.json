@@ -99,6 +99,7 @@
   },
   "docs": {
     "home": "https://nipmod.com",
+    "investors": "https://nipmod.com/investors",
     "quickstart": "https://nipmod.com/quickstart",
     "demo": "https://nipmod.com/demo",
     "agentDemoFlow": "https://nipmod.com/agent-demo-flow.json",
@@ -106,6 +107,7 @@
     "integrationKit": "https://nipmod.com/integration-kit.json",
     "partners": "https://nipmod.com/partners",
     "partnerPack": "https://nipmod.com/partner-pack.json",
+    "proof": "https://nipmod.com/proof",
     "sourceQuality": "https://nipmod.com/source-quality",
     "sourceQualityReport": "https://nipmod.com/source-quality.json",
     "architecture": "https://nipmod.com/architecture",

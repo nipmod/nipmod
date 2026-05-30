@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
+import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsSequence, DocsShell, DocsTable } from "../docs-shell";
 import { createPageMetadata } from "../metadata";
 import { DemoRunner } from "./demo-runner";
 
@@ -18,15 +18,48 @@ Do not install, clone, enable tools or edit files until I approve.`;
 export default function DemoPage() {
   return (
     <DocsShell
-      description="A public agent preflight demo. Issue a beta key, search package sources, inspect the selected record, request an install plan and stop before workspace writes."
+      description="A public demo of the moment before an AI agent brings outside software into a workflow. Nipmod searches, checks, explains and stops before any workspace write."
       eyebrow="Demo"
       stats={[
-        { label: "Flow", value: "key, search, inspect, plan" },
-        { label: "Execution", value: "none hosted" },
-        { label: "Approval", value: "local only" }
+        { label: "Decision", value: "before action" },
+        { label: "Hosted writes", value: "0" },
+        { label: "Output", value: "receipt" },
+        { label: "Approval", value: "required" }
       ]}
       title="Run the agent preflight."
     >
+      <DocsSection eyebrow="Plain English" title="What happens in the demo">
+        <DocsSequence
+          items={[
+            {
+              body: "The user asks an agent for a package, model, repository, SDK, CLI or MCP server.",
+              label: "1",
+              title: "An agent needs outside software"
+            },
+            {
+              body: "Nipmod searches supported public sources instead of letting the agent guess from memory or random metadata.",
+              label: "2",
+              title: "Nipmod finds candidates"
+            },
+            {
+              body: "The selected record is inspected for source context, trust signals, warnings and alternatives.",
+              label: "3",
+              title: "The choice gets explained"
+            },
+            {
+              body: "Nipmod returns a reviewable install plan as data. The hosted API does not run the command.",
+              label: "4",
+              title: "Execution stays blocked"
+            },
+            {
+              body: "The host or user can approve locally, reject it or store a receipt for the decision.",
+              label: "5",
+              title: "A human or host policy decides"
+            }
+          ]}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Live" title="Interactive demo">
         <DemoRunner />
       </DocsSection>
@@ -62,6 +95,17 @@ export default function DemoPage() {
         />
       </DocsSection>
 
+      <DocsSection eyebrow="Readout" title="Why it matters">
+        <DocsTable
+          rows={[
+            ["For agents", "They get a grounded package decision before acting."],
+            ["For hosts", "They can enforce approval and policy before commands touch a workspace."],
+            ["For partners", "They can add a package-intelligence step without building every source resolver themselves."],
+            ["For investors", "It shows the product as infrastructure in the agent execution path, not only a static package directory."]
+          ]}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Receipt" title="What a host should store">
         <DocsTable
           rows={[
@@ -83,6 +127,12 @@ export default function DemoPage() {
           ]}
         />
       </DocsSection>
+
+      <div className="docs-next">
+        <Link href="/investors">Investor brief</Link>
+        <Link href="/proof">Proof loop</Link>
+        <Link href="/benchmark">Benchmark</Link>
+      </div>
     </DocsShell>
   );
 }
