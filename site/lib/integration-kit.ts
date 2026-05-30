@@ -11,7 +11,24 @@ export const integrationKit = {
       "GET https://nipmod.com/api/search?q=<query>&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5 with x-nipmod-api-key",
     inspect: "GET https://nipmod.com/api/inspect?source=<source>&name=<name> with x-nipmod-api-key",
     installPlan: "GET https://nipmod.com/api/install-plan?source=<source>&name=<name> with x-nipmod-api-key",
-    mcp: "POST https://nipmod.com/api/mcp with x-nipmod-api-key"
+    mcp: "POST https://nipmod.com/api/mcp with x-nipmod-api-key",
+    optionalArchiveDryRun:
+      "POST https://nipmod.com/api/archive/confirm with dryRun=true after a user or host confirms the decision was useful"
+  },
+  decisionObject: {
+    type: "dev.nipmod.package-decision.v1",
+    fields: [
+      "recommended",
+      "comparison.candidates",
+      "confidence",
+      "security.signals",
+      "alternatives",
+      "avoid",
+      "receipt",
+      "archive"
+    ],
+    purpose:
+      "One portable pre-execution decision object that a host can show to users, store as a receipt, or feed into local approval policy."
   },
   integrationModes: [
     {
@@ -33,6 +50,11 @@ export const integrationKit = {
       id: "archive_feedback",
       name: "Archive feedback",
       description: "After useful approved results, prepare package intelligence records for future reuse."
+    },
+    {
+      id: "decision_receipts",
+      name: "Decision receipts",
+      description: "Store the returned package decision receipt with the host workflow so later actions can reference the reviewed source, version, warnings and boundary."
     }
   ],
   expectedHandoff: [
@@ -40,8 +62,10 @@ export const integrationKit = {
     "agent calls Nipmod search with a beta or partner key",
     "agent inspects the exact source record",
     "agent requests an install plan",
+    "agent builds or receives a package decision object with score, gate, alternatives, avoid list and receipt",
     "agent shows source context, trust fields, warnings and command boundary",
-    "user or host approves local execution outside the hosted API"
+    "user or host approves local execution outside the hosted API",
+    "host can optionally dry-run archive confirmation after the result proves useful"
   ],
   nonGoals: [
     "private package access",

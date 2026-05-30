@@ -55,8 +55,21 @@ export default function DemoPage() {
             ["Key required", "Package intelligence calls require a beta or partner key."],
             ["Search works", "The resolver can query supported public sources."],
             ["Trust is visible", "The response includes source context and warnings."],
+            ["Decision object", "Nipmod can express the result as a recommended candidate, scored comparison, security posture, alternatives, avoid list and receipt."],
             ["No remote write", "The hosted API returns a plan only."],
             ["Local approval", "Actual install remains a local, approved action."]
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection eyebrow="Receipt" title="What a host should store">
+        <DocsTable
+          rows={[
+            ["Recommended", "Source, name, version, trust decision and decision score."],
+            ["Comparison", "The candidates considered and their pass, review or block gate."],
+            ["Security", "Warnings, high-risk signals and the hosted execution boundary."],
+            ["Install plan", "The command as review data, never as hosted execution."],
+            ["Archive", "Optional dry-run confirmation only after usefulness is confirmed."]
           ]}
         />
       </DocsSection>

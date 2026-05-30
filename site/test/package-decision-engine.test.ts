@@ -12,6 +12,7 @@ describe("package decision engine", () => {
       type: "dev.nipmod.package-decision-query-plan.v1"
     });
     expect(plan.ecosystems).toContain("npm");
+    expect(plan.searchQueries).toContain("website design react ui component library css tailwind icons animation");
     expect(plan.criteria.map((criterion) => criterion.id)).toEqual(
       expect.arrayContaining(["task-fit", "source-identity", "security", "install-boundary"])
     );
@@ -65,15 +66,36 @@ describe("package decision engine", () => {
         label: "high"
       },
       receipt: {
+        archiveConfirm: {
+          confirmable: true,
+          dryRunEndpoint: "POST /api/archive/confirm",
+          required: false
+        },
         hostedApiExecutes: false,
         installCommand: "npm install tailwindcss",
         requiresApprovalBeforeWrite: true,
         workspaceWrites: false
       },
       recommended: {
+        decisionScore: expect.any(Number),
+        gate: "pass",
         id: "npm:tailwindcss"
       },
+      security: {
+        posture: "clean-preflight"
+      },
       type: "dev.nipmod.package-decision.v1"
+    });
+    expect(decision.comparison).toMatchObject({
+      version: "package-decision-comparison-v2"
+    });
+    expect(decision.comparison.candidates.map((candidate) => candidate.id)).toEqual(
+      expect.arrayContaining(["npm:tailwindcss", "npm:lucide-react", "npm:tailwindcss-next-free"])
+    );
+    expect(decision.archive).toMatchObject({
+      confirmable: true,
+      dryRunEndpoint: "POST /api/archive/confirm",
+      required: false
     });
     expect(decision.alternatives.map((candidate) => candidate.id)).toEqual(["npm:lucide-react"]);
     expect(decision.avoid.map((candidate) => candidate.id)).toEqual(["npm:tailwindcss-next-free"]);
@@ -96,8 +118,8 @@ describe("package decision engine", () => {
 
     const answer = formatPackageDecisionAnswer(decision);
 
-    expect(answer).toContain("Ich würde zuerst zod");
-    expect(answer).toContain("Nipmod bleibt hosted read-only");
+    expect(answer).toContain("Ich würde zod");
+    expect(answer).toContain("Hosted Nipmod bleibt read-only");
     expect(answer).toContain("npm install zod");
   });
 });

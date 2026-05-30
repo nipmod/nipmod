@@ -515,7 +515,9 @@ function summarizeResponse(value: unknown, request: Request, env: UsageEnv): Usa
   if (typeof record.code === "string" && record.type === "dev.nipmod.api-error.v1") {
     return { ...base, errorCode: record.code };
   }
-  const responseRecord = readRecord(record.record) ?? readRecord(record.package) ?? readRecord(record.archiveRecord) ?? readRecommendedSearchRecord(record);
+  const decision = readRecord(record.decision);
+  const decisionRecommended = readRecord(decision?.recommended);
+  const responseRecord = decisionRecommended ?? readRecord(record.record) ?? readRecord(record.package) ?? readRecord(record.archiveRecord) ?? readRecommendedSearchRecord(record);
   if (typeof record.total === "number") {
     const trust = readRecord(responseRecord?.trust);
     return {
@@ -531,7 +533,7 @@ function summarizeResponse(value: unknown, request: Request, env: UsageEnv): Usa
   const source = normalizeMetricSource(readString(responseRecord?.source)) ?? base.source;
   const packageName = readString(responseRecord?.name) ?? readString(responseRecord?.displayName) ?? name;
   const trust = readRecord(responseRecord?.trust);
-  const safety = readRecord(record.safety);
+  const safety = readRecord(record.safety) ?? readRecord(readRecord(record.installPlan)?.safety);
   return {
     ...base,
     archiveStored: typeof record.stored === "boolean" ? record.stored : base.archiveStored,

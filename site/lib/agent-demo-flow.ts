@@ -4,7 +4,7 @@ export const agentDemoFlow = {
   status: "public_agent_demo",
   page: "https://nipmod.com/demo",
   purpose:
-    "Show the complete hosted Nipmod preflight: issue beta key, search public sources, inspect one exact record, request an install plan and stop before workspace writes.",
+    "Show the complete hosted Nipmod preflight: issue beta key, search public sources, inspect one exact record, request an install plan, produce a decision receipt and stop before workspace writes.",
   privacy:
     "Use non-private package tasks only. The demo keeps the issued key in browser memory and does not ask for prompts, workspace paths, secrets or private package names.",
   steps: [
@@ -34,10 +34,22 @@ export const agentDemoFlow = {
       writesWorkspace: false
     },
     {
+      id: "decision_receipt",
+      endpoint: "host assembles decision from search, inspect and install-plan or uses Nipmod Chat decision output",
+      output: "recommended candidate, comparison scores, confidence, security signals, alternatives, avoid list and receipt",
+      writesWorkspace: false
+    },
+    {
       id: "approval",
       endpoint: "local host or user policy",
       output: "manual decision before install, clone, enablement or file edits",
       writesWorkspace: "outside hosted API only after approval"
+    },
+    {
+      id: "optional_archive_dry_run",
+      endpoint: "POST https://nipmod.com/api/archive/confirm with dryRun=true",
+      output: "confirmability receipt after a useful approved decision; durable writes still require archive writer authorization",
+      writesWorkspace: false
     }
   ],
   passCriteria: [
@@ -45,9 +57,11 @@ export const agentDemoFlow = {
     "search happens before package selection",
     "inspect targets the exact selected source record",
     "install plan is shown as review data",
+    "decision receipt is available before execution",
     "package metadata is treated as untrusted data",
     "hosted API does not install, clone, execute or write",
-    "local approval is required before workspace changes"
+    "local approval is required before workspace changes",
+    "archive confirmation remains explicit and gated"
   ],
   links: {
     api: "https://nipmod.com/api-access",

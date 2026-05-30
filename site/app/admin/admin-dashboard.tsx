@@ -21,6 +21,7 @@ export function AdminDashboard() {
   const archive = summary?.archive ?? {};
   const keys = summary?.keys ?? {};
   const keyActivity = summary?.keyActivity ?? {};
+  const decisionOps = summary?.decisionOps ?? {};
   const sourceQuality = summary?.sourceQuality ?? {};
   const generatedAt = useMemo(() => formatDate(summary?.generatedAt), [summary?.generatedAt]);
   const signedIn = Boolean(summary);
@@ -184,6 +185,9 @@ export function AdminDashboard() {
             <Metric label="Avg duration" suffix="ms" value={totals.avgDurationMs} />
             <Metric label="Legacy unknown" value={traffic.unknownLegacyRequestCount} />
             <Metric label="Archive records" value={archive.totalRecords} />
+            <Metric label="Decision events" value={decisionOps.decisionEvents} />
+            <Metric label="Decision coverage" suffix="%" value={decisionOps.externalDecisionCoverage} />
+            <Metric label="Safety block rate" suffix="%" value={decisionOps.safetyBlockRate} />
             <Metric label="Active keys" value={keys.activeCount} />
             <Metric label="Paused keys" value={keys.pausedCount} />
             <Metric label="Self serve beta keys" value={keys.selfServeBetaCount} />
@@ -269,6 +273,23 @@ export function AdminDashboard() {
                   ["Install blocked", usage.installPlans?.blockedCount],
                   ["Archive stored", usage.archiveWrites?.storedCount],
                   ["Archive preview", usage.archiveWrites?.previewCount]
+                ]}
+              />
+            </Panel>
+            <Panel
+              description="Decision-engine health from emitted trust, install-plan, archive and traffic signals. This is an internal operator view, not a public user count."
+              title="Decision ops"
+            >
+              <RatioGrid
+                rows={[
+                  ["Operator grade", decisionOps.confidence?.operatorGrade],
+                  ["Public claim ready", decisionOps.confidence?.publicClaimReady ? "yes" : "no"],
+                  ["Decision events", decisionOps.decisionEvents],
+                  ["Recommended", decisionOps.recommendedCount],
+                  ["Review", decisionOps.reviewCount],
+                  ["High risk", decisionOps.highRiskCount],
+                  ["Install-plan coverage", `${formatNumber(decisionOps.installPlanCoverage)}%`],
+                  ["Archive confirm rate", `${formatNumber(decisionOps.archiveConfirmRate)}%`]
                 ]}
               />
             </Panel>

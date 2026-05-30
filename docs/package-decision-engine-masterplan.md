@@ -190,6 +190,33 @@ The first slice adds:
 
 This does not replace `/api/search`, `/api/inspect` or `/api/install-plan`. It connects them into a higher-level decision object.
 
+## Decision Engine V2 Slice
+
+The next production slice turns the decision object into an operator-grade package decision.
+
+Implemented contract additions:
+
+- candidate-level `decisionScore`
+- candidate `gate`: `pass`, `review` or `block`
+- weighted score breakdown by decision dimension
+- security signal list with severity and category
+- comparison table across candidates
+- archive confirmation hint
+- admin decision-ops summary
+- integration-kit decision receipt contract
+
+The score is not a claim that a package is safe. It is a pre-execution ranking for the available hosted evidence. High-risk install, source, credential or package-confusion signals can block a candidate even if it has public adoption.
+
+Decision gates:
+
+| Gate | Meaning |
+|---|---|
+| `pass` | Strongest current preflight result. Still requires local approval before execution. |
+| `review` | Usable only after extra human or host policy review. |
+| `block` | Do not install from this decision. Risk or install boundary is unacceptable. |
+
+Archive confirmation remains explicit. A decision can be archive-confirmable only after the host or user verifies the result was useful; durable writes still require archive writer authorization.
+
 ## Acceptance Criteria
 
 - existing API keys keep working

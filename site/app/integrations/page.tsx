@@ -28,6 +28,18 @@ Header: x-nipmod-api-key: <key>
 GET https://nipmod.com/api/install-plan?source=<source>&name=<name>
 Header: x-nipmod-api-key: <key>`;
 
+const receiptContract = `Decision object:
+{
+  "type": "dev.nipmod.package-decision.v1",
+  "recommended": {"id":"npm:zod","decisionScore":91,"gate":"pass"},
+  "comparison": {"candidates":[...]},
+  "security": {"posture":"clean-preflight","signals":[]},
+  "alternatives": [...],
+  "avoid": [...],
+  "receipt": {"hostedApiExecutes":false,"workspaceWrites":false},
+  "archive": {"confirmable":true,"dryRunEndpoint":"POST /api/archive/confirm"}
+}`;
+
 const mcpContract = `POST https://nipmod.com/api/mcp
 Header: x-nipmod-api-key: <key>
 
@@ -70,6 +82,10 @@ export default function IntegrationsPage() {
 
       <DocsSection eyebrow="Host prompt" title="Instruction to ship with an agent">
         <DocsCode>{hostInstruction}</DocsCode>
+      </DocsSection>
+
+      <DocsSection eyebrow="Receipt" title="Decision object">
+        <DocsCode>{receiptContract}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Modes" title="Integration modes">
