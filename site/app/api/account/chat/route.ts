@@ -56,6 +56,8 @@ export async function POST(request: Request): Promise<Response> {
             searchQuery: llm.query ?? ""
           },
           llm: {
+            cost: llm.cost,
+            costMode: llm.costMode,
             model: llm.model,
             provider: "vercel-ai-gateway",
             usedTools: llm.usedTools
