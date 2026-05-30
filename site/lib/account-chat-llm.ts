@@ -1,4 +1,4 @@
-import { detectAccountChatLanguage } from "./account-chat";
+import { analyzeAccountChatIntent, detectAccountChatLanguage } from "./account-chat";
 import {
   EXTERNAL_PACKAGE_SOURCES,
   createExternalInstallPlan,
@@ -18,6 +18,8 @@ export type AccountChatHistoryEntry = {
 export type AccountChatLlmResult =
   | {
       answer: string;
+      cost: AccountChatLlmCostReport;
+      costMode: AccountChatLlmCostMode;
       installPlan: ExternalInstallPlan | null;
       language: "de" | "en";
       model: string;
@@ -32,6 +34,7 @@ export type AccountChatLlmResult =
       ok: false;
       reason:
         | "auth_failed"
+        | "daily_limit_exceeded"
         | "disabled"
         | "gateway_error"
         | "invalid_gateway_response"
@@ -39,6 +42,20 @@ export type AccountChatLlmResult =
         | "tool_loop_exhausted";
       status?: number;
     };
+
+export type AccountChatLlmCostMode = "conversation" | "package" | "security";
+
+export type AccountChatLlmCostReport = {
+  estimatedCostUsd: number | null;
+  inputTokens: number | null;
+  maxOutputTokens: number;
+  outputTokens: number | null;
+  pricing: {
+    inputPerMillionUsd: number;
+    outputPerMillionUsd: number;
+  } | null;
+  usageSource: "gateway" | "not_returned";
+};
 
 type AccountChatLlmOptions = {
   env?: Record<string, string | undefined>;
@@ -77,6 +94,13 @@ type GatewayResponse = {
     message?: string;
     type?: string;
   };
+  usage?: {
+    completion_tokens?: number;
+    output_tokens?: number;
+    prompt_tokens?: number;
+    input_tokens?: number;
+    total_tokens?: number;
+  };
 };
 
 type GatewayTool = {
@@ -98,9 +122,14 @@ type ToolState = {
 };
 
 const AI_GATEWAY_CHAT_COMPLETIONS_URL = "https://ai-gateway.vercel.sh/v1/chat/completions";
-const DEFAULT_CHAT_MODEL = "openai/gpt-5.5";
+const DEFAULT_FAST_MODEL = "openai/gpt-5.4-nano";
+const DEFAULT_BALANCED_MODEL = "openai/gpt-5.4-mini";
+const DEFAULT_SECURITY_MODEL = "openai/gpt-5.4";
+const DEFAULT_DAILY_USER_LIMIT = 60;
+const DEFAULT_DAILY_GLOBAL_LIMIT = 600;
 const MAX_TOOL_ROUNDS = 4;
 const MAX_HISTORY_ITEMS = 8;
+const dailyBudgetBuckets = new Map<string, { count: number; resetAt: number }>();
 
 const emptySourceSummary: ExternalSearchResult["sourceSummary"] = {
   empty: 0,
@@ -213,7 +242,12 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
     return { ok: false, reason: "not_configured" };
   }
 
-  const models = readModelCandidates(env);
+  const profile = selectAccountChatLlmProfile(message, env);
+  const budget = consumeDailyBudget(options.userId ?? options.userEmail ?? "anonymous", env);
+  if (!budget.ok) {
+    return { ok: false, reason: "daily_limit_exceeded" };
+  }
+
   const language = detectAccountChatLanguage(message);
   const state: ToolState = {
     installPlan: null,
@@ -232,8 +266,9 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
     const gateway = await callGateway({
       fetchImpl: options.fetchImpl ?? fetch,
+      maxOutputTokens: profile.maxOutputTokens,
       messages,
-      models,
+      models: profile.models,
       token,
       userId: options.userId ?? options.userEmail ?? null
     });
@@ -269,6 +304,8 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
 
     return {
       answer,
+      cost: buildCostReport(gateway.model, gateway.usage, profile.maxOutputTokens),
+      costMode: profile.mode,
       installPlan: state.installPlan,
       language,
       model: gateway.model,
@@ -314,17 +351,58 @@ function sanitizeHistory(history: AccountChatHistoryEntry[]): GatewayMessage[] {
     }));
 }
 
-function readModelCandidates(env: Record<string, string | undefined>): string[] {
-  const configured = env.NIPMOD_CHAT_MODEL
+export function selectAccountChatLlmProfile(
+  message: string,
+  env: Record<string, string | undefined> = process.env
+): {
+  maxOutputTokens: number;
+  mode: AccountChatLlmCostMode;
+  models: string[];
+} {
+  const override = readConfiguredModels(env.NIPMOD_CHAT_MODEL);
+  if (override.length > 0) {
+    return {
+      maxOutputTokens: readPositiveInteger(env.NIPMOD_CHAT_MAX_OUTPUT_TOKENS, 650),
+      mode: "package",
+      models: override
+    };
+  }
+
+  const intent = analyzeAccountChatIntent(message);
+  if (intent.mode === "conversation") {
+    return {
+      maxOutputTokens: readPositiveInteger(env.NIPMOD_CHAT_FAST_MAX_OUTPUT_TOKENS, 260),
+      mode: "conversation",
+      models: readConfiguredModels(env.NIPMOD_CHAT_FAST_MODEL, [DEFAULT_FAST_MODEL, DEFAULT_BALANCED_MODEL])
+    };
+  }
+
+  if (needsSecurityModel(message)) {
+    return {
+      maxOutputTokens: readPositiveInteger(env.NIPMOD_CHAT_SECURITY_MAX_OUTPUT_TOKENS, 850),
+      mode: "security",
+      models: readConfiguredModels(env.NIPMOD_CHAT_SECURITY_MODEL, [DEFAULT_SECURITY_MODEL, DEFAULT_BALANCED_MODEL])
+    };
+  }
+
+  return {
+    maxOutputTokens: readPositiveInteger(env.NIPMOD_CHAT_DEFAULT_MAX_OUTPUT_TOKENS, 620),
+    mode: "package",
+    models: readConfiguredModels(env.NIPMOD_CHAT_DEFAULT_MODEL, [DEFAULT_BALANCED_MODEL, DEFAULT_FAST_MODEL])
+  };
+}
+
+function readConfiguredModels(value: string | undefined, fallback: string[] = []): string[] {
+  const models = value
     ?.split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-  const models = configured?.length ? configured : [DEFAULT_CHAT_MODEL, "openai/gpt-5.4"];
-  return [...new Set(models)];
+  return [...new Set(models?.length ? models : fallback)];
 }
 
 async function callGateway(input: {
   fetchImpl: typeof fetch;
+  maxOutputTokens: number;
   messages: GatewayMessage[];
   models: string[];
   token: string;
@@ -334,6 +412,7 @@ async function callGateway(input: {
       message: NonNullable<GatewayChoice["message"]>;
       model: string;
       ok: true;
+      usage: GatewayResponse["usage"] | null;
     }
   | Extract<AccountChatLlmResult, { ok: false }>
 > {
@@ -343,7 +422,7 @@ async function callGateway(input: {
     try {
       response = await fetchWithTimeout(input.fetchImpl, AI_GATEWAY_CHAT_COMPLETIONS_URL, {
         body: JSON.stringify({
-          max_tokens: 900,
+          max_tokens: input.maxOutputTokens,
           messages: input.messages,
           model,
           temperature: 0.25,
@@ -387,7 +466,7 @@ async function callGateway(input: {
     if (!message) {
       return { ok: false, reason: "invalid_gateway_response" };
     }
-    return { message, model, ok: true };
+    return { message, model, ok: true, usage: body.usage ?? null };
   }
 
   return lastStatus ? { ok: false, reason: "gateway_error", status: lastStatus } : { ok: false, reason: "gateway_error" };
@@ -420,6 +499,100 @@ function shouldTryNextModel(status: number, body: GatewayResponse): boolean {
   }
   const message = `${body.error?.type ?? ""} ${body.error?.message ?? ""}`.toLowerCase();
   return message.includes("model") || message.includes("rate") || message.includes("overloaded");
+}
+
+function needsSecurityModel(message: string): boolean {
+  return /\b(security|safety|safe|unsafe|malware|virus|trojan|backdoor|trapdoor|cve|vulnerab|exploit|supply chain|supply-chain|typosquat|dependency confusion|prompt injection|install script|postinstall|preinstall|shell|credential|wallet|ssh key|token|secret|audit|risk|risiko|sicher|sicherheit|schwachstelle|gefährlich|malware|prüf|check)\b/i.test(
+    message
+  );
+}
+
+function consumeDailyBudget(userId: string, env: Record<string, string | undefined>): { ok: true } | { ok: false } {
+  const userLimit = readPositiveInteger(env.NIPMOD_CHAT_LLM_DAILY_USER_LIMIT, DEFAULT_DAILY_USER_LIMIT);
+  const globalLimit = readPositiveInteger(env.NIPMOD_CHAT_LLM_DAILY_GLOBAL_LIMIT, DEFAULT_DAILY_GLOBAL_LIMIT);
+  if (userLimit <= 0 || globalLimit <= 0) {
+    return { ok: false };
+  }
+  const now = Date.now();
+  const dayReset = nextUtcDayStart(now);
+  const global = consumeLocalBucket("global", globalLimit, now, dayReset);
+  if (!global.ok) {
+    return { ok: false };
+  }
+  const user = consumeLocalBucket(`user:${userId}`, userLimit, now, dayReset);
+  return user.ok ? { ok: true } : { ok: false };
+}
+
+function consumeLocalBucket(key: string, limit: number, now: number, resetAt: number): { ok: boolean } {
+  pruneDailyBudgetBuckets(now);
+  const existing = dailyBudgetBuckets.get(key);
+  const bucket = existing && existing.resetAt > now ? existing : { count: 0, resetAt };
+  if (bucket.count >= limit) {
+    dailyBudgetBuckets.set(key, bucket);
+    return { ok: false };
+  }
+  bucket.count += 1;
+  dailyBudgetBuckets.set(key, bucket);
+  return { ok: true };
+}
+
+function nextUtcDayStart(now: number): number {
+  const date = new Date(now);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1);
+}
+
+function pruneDailyBudgetBuckets(now: number): void {
+  if (dailyBudgetBuckets.size <= 2000) {
+    return;
+  }
+  for (const [key, bucket] of dailyBudgetBuckets) {
+    if (bucket.resetAt <= now || dailyBudgetBuckets.size > 2000) {
+      dailyBudgetBuckets.delete(key);
+    }
+  }
+}
+
+function buildCostReport(model: string, usage: GatewayResponse["usage"] | null, maxOutputTokens: number): AccountChatLlmCostReport {
+  const pricing = modelPricing(model);
+  const inputTokens = usage?.prompt_tokens ?? usage?.input_tokens ?? null;
+  const outputTokens = usage?.completion_tokens ?? usage?.output_tokens ?? null;
+  const estimatedCostUsd =
+    pricing && inputTokens !== null && outputTokens !== null ? roundUsd(inputTokens * pricing.inputPerToken + outputTokens * pricing.outputPerToken) : null;
+  return {
+    estimatedCostUsd,
+    inputTokens,
+    maxOutputTokens,
+    outputTokens,
+    pricing: pricing
+      ? {
+          inputPerMillionUsd: pricing.inputPerToken * 1_000_000,
+          outputPerMillionUsd: pricing.outputPerToken * 1_000_000
+        }
+      : null,
+    usageSource: usage ? "gateway" : "not_returned"
+  };
+}
+
+function modelPricing(model: string): { inputPerToken: number; outputPerToken: number } | null {
+  const prices: Record<string, { inputPerToken: number; outputPerToken: number }> = {
+    "openai/gpt-5.4": { inputPerToken: 0.0000025, outputPerToken: 0.000015 },
+    "openai/gpt-5.4-mini": { inputPerToken: 0.00000075, outputPerToken: 0.0000045 },
+    "openai/gpt-5.4-nano": { inputPerToken: 0.0000002, outputPerToken: 0.00000125 },
+    "openai/gpt-5.5": { inputPerToken: 0.000005, outputPerToken: 0.00003 }
+  };
+  return prices[model] ?? null;
+}
+
+function roundUsd(value: number): number {
+  return Math.round(value * 1_000_000) / 1_000_000;
+}
+
+function readPositiveInteger(value: string | undefined, fallback: number): number {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : fallback;
 }
 
 async function runNipmodTool(toolCall: GatewayToolCall, state: ToolState): Promise<Record<string, unknown>> {

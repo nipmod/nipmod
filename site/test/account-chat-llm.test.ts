@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { tryAnswerAccountChatWithLlm } from "../lib/account-chat-llm";
+import { selectAccountChatLlmProfile, tryAnswerAccountChatWithLlm } from "../lib/account-chat-llm";
 
 describe("account chat LLM adapter", () => {
   test("stays disabled when no gateway token is configured", async () => {
@@ -20,7 +20,11 @@ describe("account chat LLM adapter", () => {
                 content: "Mir geht es gut. Frag mich nach einem Paket, wenn du eins brauchst."
               }
             }
-          ]
+          ],
+          usage: {
+            completion_tokens: 14,
+            prompt_tokens: 120
+          }
         }),
         { headers: { "content-type": "application/json" }, status: 200 }
       );
@@ -38,6 +42,13 @@ describe("account chat LLM adapter", () => {
 
     expect(result).toMatchObject({
       answer: "Mir geht es gut. Frag mich nach einem Paket, wenn du eins brauchst.",
+      cost: {
+        estimatedCostUsd: null,
+        inputTokens: 120,
+        outputTokens: 14,
+        usageSource: "gateway"
+      },
+      costMode: "package",
       installPlan: null,
       model: "openai/test-model",
       ok: true,
@@ -73,9 +84,43 @@ describe("account chat LLM adapter", () => {
 
     expect(result).toMatchObject({
       answer: "Fallback model response.",
-      model: "openai/gpt-5.4",
+      costMode: "conversation",
+      model: "openai/gpt-5.4-mini",
       ok: true
     });
-    expect(models).toEqual(["openai/gpt-5.5", "openai/gpt-5.4"]);
+    expect(models).toEqual(["openai/gpt-5.4-nano", "openai/gpt-5.4-mini"]);
+  });
+
+  test("routes normal chat, package questions and security questions to different cost profiles", () => {
+    expect(selectAccountChatLlmProfile("wie gehts?")).toMatchObject({
+      maxOutputTokens: 260,
+      mode: "conversation",
+      models: ["openai/gpt-5.4-nano", "openai/gpt-5.4-mini"]
+    });
+    expect(selectAccountChatLlmProfile("best package for forms in react")).toMatchObject({
+      maxOutputTokens: 620,
+      mode: "package",
+      models: ["openai/gpt-5.4-mini", "openai/gpt-5.4-nano"]
+    });
+    expect(selectAccountChatLlmProfile("is this npm package safe from malware and postinstall scripts?")).toMatchObject({
+      maxOutputTokens: 850,
+      mode: "security",
+      models: ["openai/gpt-5.4", "openai/gpt-5.4-mini"]
+    });
+  });
+
+  test("can disable LLM spend with the daily user limit", async () => {
+    const result = await tryAnswerAccountChatWithLlm("hello", {
+      env: {
+        AI_GATEWAY_API_KEY: "test-gateway-token",
+        NIPMOD_CHAT_LLM_DAILY_USER_LIMIT: "0"
+      },
+      fetchImpl: async () => {
+        throw new Error("gateway should not be called");
+      },
+      userId: "budget-user"
+    });
+
+    expect(result).toEqual({ ok: false, reason: "daily_limit_exceeded" });
   });
 });
