@@ -126,6 +126,7 @@ export default function PartnersPage() {
       </DocsSection>
 
       <div className="docs-next">
+        <Link href="/investors">Investor brief</Link>
         <Link href="/integrations">Open integration kit</Link>
         <Link href="/api-access">API reference</Link>
         <Link href="/benchmark">Benchmark</Link>

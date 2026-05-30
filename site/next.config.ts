@@ -104,11 +104,6 @@ const nextConfig: NextConfig = {
         source: "/cursor"
       },
       {
-        destination: "/status",
-        permanent: false,
-        source: "/proof"
-      },
-      {
         destination: "/packages",
         permanent: false,
         source: "/package"
