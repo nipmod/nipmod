@@ -401,6 +401,10 @@ const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
 const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["undici", "got"], pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i },
   { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
+  {
+    names: ["@coinbase/onchainkit", "viem", "wagmi", "@uniswap/sdk-core", "@uniswap/v3-sdk"],
+    pattern: /\b(base|coinbase|onchainkit)\b|(?=.*\bonchain\b)(?=.*\b(token|tokens|coin|coins|trading|traden|trade|swap|wallet|sdk)\b)/i
+  },
   { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
   { names: ["@solana/web3.js"], pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i },
   { names: ["jsonwebtoken", "jose", "bcrypt", "passport"], pattern: /\b(auth|authentication|jwt|token|oauth|password|security|session)\b/i },
@@ -464,6 +468,16 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 12, name: "httpx", reason: "Python HTTP client fit", source: "pypi" }
     ],
     pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i
+  },
+  {
+    matches: [
+      { bonus: 24, name: "@coinbase/onchainkit", reason: "Base app and onchain SDK fit", source: "npm" },
+      { bonus: 22, name: "viem", reason: "EVM client and onchain read/write SDK fit", source: "npm" },
+      { bonus: 18, name: "wagmi", reason: "React wallet and EVM app SDK fit", source: "npm" },
+      { bonus: 17, name: "@uniswap/sdk-core", reason: "swap routing SDK fit", source: "npm" },
+      { bonus: 16, name: "@uniswap/v3-sdk", reason: "Uniswap trading SDK fit", source: "npm" }
+    ],
+    pattern: /\b(base|coinbase|onchainkit)\b|(?=.*\bonchain\b)(?=.*\b(token|tokens|coin|coins|trading|traden|trade|swap|wallet|sdk)\b)/i
   },
   {
     matches: [

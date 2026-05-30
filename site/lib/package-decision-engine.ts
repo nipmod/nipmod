@@ -671,6 +671,9 @@ function decisionEcosystems(query: string, intent: PackageDecisionIntent): Exter
     if (/\bdataset|daten|data set\b/i.test(query)) return ["huggingface-dataset", "huggingface-model", "pypi", "npm"];
     return ["huggingface-model", "huggingface-dataset", "pypi", "npm"];
   }
+  if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity|viem|wagmi|uniswap)\b/i.test(query)) {
+    return ["npm", "github", "mcp"];
+  }
   if (/\b(npm|node|javascript|typescript|react|next|vite|css|tailwind)\b/i.test(query)) return ["npm", "github", "mcp"];
   if (/\b(pypi|pip|python|django|fastapi|pandas|pytest)\b/i.test(query)) return ["pypi", "github", "huggingface-model"];
   return [...EXTERNAL_PACKAGE_SOURCES];
@@ -698,6 +701,7 @@ function criterion(id: PackageDecisionCriterionId, label: string, weight: number
 function decisionConstraints(query: string): string[] {
   const constraints: string[] = [];
   if (/\b(production|prod|enterprise|kunden|users|payments|wallet|token|ssh|secret|private key|api key)\b/i.test(query)) constraints.push("security-sensitive");
+  if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity)\b/i.test(query)) constraints.push("onchain-transaction-sensitive");
   if (/\b(browser|frontend|react|next|vite)\b/i.test(query)) constraints.push("frontend");
   if (/\b(server|backend|api|worker|queue)\b/i.test(query)) constraints.push("backend");
   if (/\b(lightweight|small|klein|fast|schnell)\b/i.test(query)) constraints.push("prefer-small-surface");
@@ -733,6 +737,9 @@ function decisionSearchQueries(query: string): string[] {
   }
   if (/\b(embedding|rag|semantic search|vector)\b/i.test(query)) {
     expansions.push("embedding model sentence transformers rag semantic search");
+  }
+  if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity|viem|wagmi|uniswap)\b/i.test(query)) {
+    expansions.push("base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit");
   }
   if (/\b(wallet|token|private key|ssh|secret|malware|postinstall|supply chain)\b/i.test(query)) {
     expansions.push(`${cleaned || query} security install script provenance`);
