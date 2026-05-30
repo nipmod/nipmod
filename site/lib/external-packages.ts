@@ -401,12 +401,14 @@ const MCP_REGISTRY_BOOTSTRAP_SNAPSHOT = "2026-05-22";
 const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["undici", "got"], pattern: /\b(http|https|request|requests|fetch|client|api client)\b/i },
   { names: ["zod", "valibot"], pattern: /\b(schema|validation|validate|typed|typesafe|type-safe|json schema)\b/i },
+  { names: ["react-hook-form", "@tanstack/react-form", "zod", "valibot", "formik"], pattern: /\b(form|forms|formular|formulare|react form|form validation)\b/i },
   {
     names: ["@coinbase/onchainkit", "viem", "wagmi", "@uniswap/sdk-core", "@uniswap/v3-sdk"],
     pattern: /\b(base|coinbase|onchainkit)\b|(?=.*\bonchain\b)(?=.*\b(token|tokens|coin|coins|trading|traden|trade|swap|wallet|sdk)\b)/i
   },
   { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
   { names: ["@solana/web3.js"], pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i },
+  { names: ["jose", "helmet", "zod", "express-rate-limit"], pattern: /\b(security|secure|sicherheit|auth|authentication|jwt|rate limit|rate-limit|api hardening)\b/i },
   { names: ["jsonwebtoken", "jose", "bcrypt", "passport"], pattern: /\b(auth|authentication|jwt|token|oauth|password|security|session)\b/i },
   { names: ["stripe"], pattern: /\b(stripe|payment|payments|checkout|billing|invoice|subscription)\b/i },
   { names: ["next", "vite"], pattern: /\b(web app|web framework|frontend|react app|vite|next)\b/i },
@@ -444,6 +446,7 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["pillow", "opencv-python", "scikit-image", "cairosvg"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i },
   { names: ["pillow"], pattern: /\b(pil|pillow)\b/i },
   { names: ["cryptography", "pyjwt", "passlib"], pattern: /\b(auth|jwt|token|crypto|cryptography|password|security)\b/i },
+  { names: ["bandit", "pip-audit", "cryptography", "pyjwt", "pydantic"], pattern: /\b(security|sicherheit|audit|malware|cve|vulnerability|dependency audit|secret|auth|jwt)\b/i },
   { names: ["pydantic", "marshmallow", "jsonschema"], pattern: /\b(schema|validate|validation|json schema|typed)\b/i },
   { names: ["celery", "dramatiq", "rq"], pattern: /\b(queue|worker|background job|task queue|jobs)\b/i }
 ];
@@ -471,6 +474,15 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
   },
   {
     matches: [
+      { bonus: 20, name: "react-hook-form", reason: "React form state fit", source: "npm" },
+      { bonus: 18, name: "@tanstack/react-form", reason: "React form state fit", source: "npm" },
+      { bonus: 16, name: "zod", reason: "schema validation fit", source: "npm" },
+      { bonus: 14, name: "valibot", reason: "schema validation fit", source: "npm" }
+    ],
+    pattern: /\b(form|forms|formular|formulare|react form|form validation|schema validation for forms)\b/i
+  },
+  {
+    matches: [
       { bonus: 24, name: "@coinbase/onchainkit", reason: "Base app and onchain SDK fit", source: "npm" },
       { bonus: 22, name: "viem", reason: "EVM client and onchain read/write SDK fit", source: "npm" },
       { bonus: 18, name: "wagmi", reason: "React wallet and EVM app SDK fit", source: "npm" },
@@ -489,6 +501,17 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
   {
     matches: [{ bonus: 16, name: "@solana/web3.js", reason: "Solana JavaScript SDK fit", source: "npm" }],
     pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i
+  },
+  {
+    matches: [
+      { bonus: 20, name: "jose", reason: "Node JOSE/JWT security fit", source: "npm" },
+      { bonus: 18, name: "helmet", reason: "Node API hardening fit", source: "npm" },
+      { bonus: 16, name: "express-rate-limit", reason: "Node API rate-limit security fit", source: "npm" },
+      { bonus: 18, name: "cryptography", reason: "Python cryptography security fit", source: "pypi" },
+      { bonus: 16, name: "bandit", reason: "Python security audit fit", source: "pypi" },
+      { bonus: 16, name: "pip-audit", reason: "Python dependency audit fit", source: "pypi" }
+    ],
+    pattern: /\b(security|sicherheit|secure|safe|audit|malware|cve|vulnerability|schwachstelle|rate limit|rate-limit|api hardening|secret scanning)\b/i
   },
   {
     matches: [

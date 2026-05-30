@@ -100,6 +100,111 @@ describe("account chat intent", () => {
       mode: "search"
     });
     expect(intent.searchQuery).toContain("onchainkit");
+    expect(intent.sources).toEqual(["npm", "github", "mcp"]);
+  });
+
+  test("asks a clarifying question for broad trading package requests", () => {
+    const intent = analyzeAccountChatIntent("welches package ist am besten für trading");
+
+    expect(intent).toMatchObject({
+      category: "clarify-trading",
+      language: "de",
+      mode: "conversation"
+    });
+    expect(buildAccountChatAnswer("welches package ist am besten für trading", null, [], null, intent)).toContain("Für welche Art von Trading");
+  });
+
+  test("asks a clarifying question for broad security package requests", () => {
+    const intent = analyzeAccountChatIntent("was sind die besten security pakete");
+
+    expect(intent).toMatchObject({
+      category: "clarify-security",
+      language: "de",
+      mode: "conversation"
+    });
+    expect(buildAccountChatAnswer("was sind die besten security pakete", null, [], null, intent)).toContain("Stack und Ziel");
+  });
+
+  test("routes concrete security package requests by stack", () => {
+    const node = analyzeAccountChatIntent("ich brauche security pakete für eine Node API");
+    const python = analyzeAccountChatIntent("best security packages for python fastapi");
+
+    expect(node).toMatchObject({
+      category: "security-stack",
+      language: "de",
+      mode: "search",
+      sources: ["npm", "github", "pypi"]
+    });
+    expect(node.searchQuery).toContain("helmet");
+    expect(python).toMatchObject({
+      category: "security-stack",
+      language: "en",
+      mode: "search",
+      sources: ["pypi", "github", "npm"]
+    });
+    expect(python.searchQuery).toContain("pip-audit");
+  });
+
+  test("routes React form requests to form stack candidates", () => {
+    const intent = analyzeAccountChatIntent("ich brauche ein paket für forms in react mit validation");
+
+    expect(intent).toMatchObject({
+      category: "form-stack",
+      language: "de",
+      mode: "search",
+      sources: ["npm", "github"]
+    });
+    expect(intent.searchQuery).toContain("react-hook-form");
+  });
+
+  test("keeps Hugging Face top list requests source scoped and larger than normal", () => {
+    const models = analyzeAccountChatIntent("top 10 models bei Hugging Face");
+    const datasets = analyzeAccountChatIntent("top 10 datasets bei huggingface");
+
+    expect(models).toMatchObject({
+      category: "hugging-face",
+      language: "de",
+      mode: "search",
+      resultLimit: 10,
+      sources: ["huggingface-model", "pypi", "npm", "huggingface-dataset"]
+    });
+    expect(datasets).toMatchObject({
+      category: "hugging-face",
+      mode: "search",
+      resultLimit: 10,
+      sources: ["huggingface-dataset", "huggingface-model", "pypi", "npm"]
+    });
+  });
+
+  test("routes MCP server discovery to MCP first", () => {
+    const intent = analyzeAccountChatIntent("find me the best MCP server for docs");
+
+    expect(intent).toMatchObject({
+      category: "mcp",
+      language: "en",
+      mode: "search",
+      sources: ["mcp", "github", "npm"]
+    });
+  });
+
+  test("routes package comparisons even when the user only names packages", () => {
+    const intent = analyzeAccountChatIntent("zod vs yup");
+
+    expect(intent).toMatchObject({
+      category: "compare",
+      mode: "search",
+      searchQuery: "zod vs yup"
+    });
+  });
+
+  test("routes Solana trading separately from Base trading", () => {
+    const intent = analyzeAccountChatIntent("best package for solana wallet swap trading sdk");
+
+    expect(intent).toMatchObject({
+      category: "onchain-trading",
+      mode: "search"
+    });
+    expect(intent.searchQuery).toContain("@solana/web3.js");
   });
 
   test("keeps general non-package questions out of fallback search", () => {

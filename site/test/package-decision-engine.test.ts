@@ -36,7 +36,23 @@ describe("package decision engine", () => {
     });
     expect(plan.ecosystems).toEqual(["npm", "github", "mcp"]);
     expect(plan.constraints).toContain("onchain-transaction-sensitive");
+    expect(plan.constraints).toContain("financial-action-sensitive");
     expect(plan.searchQueries).toContain("base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit");
+  });
+
+  test("plans stock trading and security searches without forcing every trading query into EVM", () => {
+    const trading = planPackageDecisionQuery("best python package for stock trading backtesting");
+    const security = planPackageDecisionQuery("security packages for node api auth and rate limit");
+
+    expect(trading.ecosystems).toEqual(["pypi", "github", "npm"]);
+    expect(trading.constraints).toContain("financial-action-sensitive");
+    expect(trading.searchQueries).toContain("python trading backtesting exchange api quant finance ccxt vectorbt backtrader");
+    expect(security.searchQueries).toEqual(
+      expect.arrayContaining([
+        "node api security auth jwt validation rate limiting helmet jose zod express-rate-limit",
+        "python security auth validation dependency audit cryptography pyjwt bandit pip-audit"
+      ])
+    );
   });
 
   test("creates an agent-readable receipt with alternatives and avoid candidates", () => {

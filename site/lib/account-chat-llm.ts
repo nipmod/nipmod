@@ -1,4 +1,4 @@
-import { analyzeAccountChatIntent, detectAccountChatLanguage } from "./account-chat";
+import { analyzeAccountChatIntent, detectAccountChatLanguage, selectAccountChatRecord } from "./account-chat";
 import {
   EXTERNAL_PACKAGE_SOURCES,
   createExternalInstallPlan,
@@ -156,8 +156,8 @@ const nipmodTools: GatewayTool[] = [
         properties: {
           limit: {
             default: 5,
-            description: "Maximum number of candidate records to return. Use 3 to 8.",
-            maximum: 8,
+            description: "Maximum number of candidate records to return. Use 3 to 12. Use 10 only when the user asks for a top/list ranking.",
+            maximum: 12,
             minimum: 1,
             type: "integer"
           },
@@ -186,7 +186,7 @@ const nipmodTools: GatewayTool[] = [
         properties: {
           limit: {
             default: 5,
-            maximum: 8,
+            maximum: 12,
             minimum: 1,
             type: "integer"
           },
@@ -344,7 +344,11 @@ function systemPrompt(language: "de" | "en", toolsEnabled: boolean): string {
     toolInstruction,
     "Speak naturally and briefly. Do not sound like a template.",
     "If the user asks whether Nipmod supports or has access to a source, answer directly with the supported public sources: npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets and MCP.",
+    "If the user asks about trading packages without saying the trading surface, ask one concise clarifying question before recommending anything. Useful surfaces: Base/onchain swaps, EVM/Solana wallet SDK, exchange API, backtesting, charting.",
     "If the user asks about Base/onchain token trading packages, frame it as SDK/package intelligence only. Do not give trading advice or imply wallet execution.",
+    "If the user asks for top 10 or a ranked list, return a numbered list from the inspected/search results and state that ranking is based on returned source context, trust signals and task fit.",
+    "If the user asks for security packages broadly, ask what layer they mean: auth/JWT, validation, rate limiting, dependency audit, secret scanning, malware checks or runtime hardening.",
+    "For package choices, explain the tradeoff in human terms: what it is for, when to use it, when to avoid it, trust/warning summary and exact install boundary.",
     "If the user is only greeting you, thanking you or making small talk, answer normally and do not call tools.",
     "If the user asks about packages, models, repositories, MCP servers, installs, package choices or package safety, use Nipmod tools before making a recommendation.",
     "Prefer nipmod_preflight for package decisions because it searches, inspects and returns a read-only install plan in one step.",
@@ -631,14 +635,15 @@ async function runPreflight(args: Record<string, unknown>, state: ToolState): Pr
     return { error: "query_required" };
   }
   const decisionPlan = planPackageDecisionQuery(query);
+  const intent = analyzeAccountChatIntent(query);
   const plannedQuery = decisionPlan.searchQueries.at(-1) ?? query;
   const search = await searchExternalPackages(plannedQuery, {
-    limit: readLimit(args.limit),
-    sources: readSources(args.sources) ?? decisionPlan.ecosystems
+    limit: readLimit(args.limit, intent.resultLimit),
+    sources: readSources(args.sources) ?? intent.sources ?? decisionPlan.ecosystems
   });
   applySearchState(search, state);
 
-  const selected = search.records.find((record) => record.id === search.selection.recommendedId) ?? search.records[0] ?? null;
+  const selected = selectAccountChatRecord(search.records, search.selection.recommendedId, intent);
   if (!selected) {
     state.decision = buildPackageDecision({
       installPlan: null,
@@ -706,9 +711,10 @@ async function runSearch(args: Record<string, unknown>, state: ToolState): Promi
     return { error: "query_required" };
   }
   const decisionPlan = planPackageDecisionQuery(query);
+  const intent = analyzeAccountChatIntent(query);
   const search = await searchExternalPackages(decisionPlan.searchQueries.at(-1) ?? query, {
-    limit: readLimit(args.limit),
-    sources: readSources(args.sources) ?? decisionPlan.ecosystems
+    limit: readLimit(args.limit, intent.resultLimit),
+    sources: readSources(args.sources) ?? intent.sources ?? decisionPlan.ecosystems
   });
   applySearchState(search, state);
   return {
@@ -927,8 +933,8 @@ function readString(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, 600) : "";
 }
 
-function readLimit(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) ? Math.min(8, Math.max(1, Math.round(value))) : 5;
+function readLimit(value: unknown, fallback?: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.min(12, Math.max(1, Math.round(value))) : fallback ?? 5;
 }
 
 function readSources(value: unknown): ExternalPackageSource[] | null {
