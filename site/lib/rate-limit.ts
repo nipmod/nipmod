@@ -3,7 +3,7 @@ import { readAdminPasswordAccess } from "./admin-access";
 import { type ApiCorsPolicy, type ApiHttpContext, apiJson, createApiHttpContext } from "./api-http";
 import { publicApiAccess, readApiAccess, readApiAccessAsync, type ApiAccess } from "./api-auth";
 
-type RateLimitPolicy = {
+export type RateLimitPolicy = {
   limit: number;
   name: string;
   windowMs: number;
@@ -22,9 +22,9 @@ type RateLimitResult = {
   response?: Response;
 };
 
-type RateLimitEnv = Record<string, string | undefined>;
+export type RateLimitEnv = Record<string, string | undefined>;
 type RateLimitStore = "memory" | "memory-fallback" | "supabase";
-type RateLimitFallbackReason =
+export type RateLimitFallbackReason =
   | "distributed_rpc_http_401"
   | "distributed_rpc_http_403"
   | "distributed_rpc_http_404"
@@ -56,6 +56,14 @@ type RateLimitCheckOptions = {
   fetchImpl?: typeof fetch;
   requireApiKey?: boolean;
   timeoutMs?: number;
+};
+export type NamedRateLimitResult = {
+  count: number;
+  fallbackReason: RateLimitFallbackReason | null;
+  ok: boolean;
+  remaining: number;
+  resetAt: string;
+  store: RateLimitStore;
 };
 
 const buckets = new Map<string, Bucket>();
@@ -153,6 +161,56 @@ export async function checkApiRateLimitAsync(
   }
 
   return checkRateLimitForAccess(request, policy, context, access.access, "memory-fallback", distributed.fallbackReason, options.corsPolicy);
+}
+
+export async function consumeNamedRateLimitAsync(
+  identifier: string,
+  policy: RateLimitPolicy,
+  options: Pick<RateLimitCheckOptions, "env" | "fetchImpl" | "timeoutMs"> = {}
+): Promise<NamedRateLimitResult> {
+  const now = Date.now();
+  const safePolicy = {
+    ...policy,
+    limit: Math.max(0, Math.floor(policy.limit)),
+    windowMs: Math.max(1000, Math.floor(policy.windowMs))
+  };
+  if (safePolicy.limit <= 0) {
+    return {
+      count: 0,
+      fallbackReason: null,
+      ok: false,
+      remaining: 0,
+      resetAt: new Date(now + safePolicy.windowMs).toISOString(),
+      store: "memory"
+    };
+  }
+
+  const distributed = await consumeDistributedRateLimitForIdentifier(identifier, safePolicy, options);
+  if (distributed.row) {
+    return {
+      count: distributed.row.count,
+      fallbackReason: null,
+      ok: distributed.row.allowed,
+      remaining: distributed.row.remaining,
+      resetAt: distributed.row.reset_at,
+      store: "supabase"
+    };
+  }
+
+  pruneBuckets(now);
+  const key = `named:${safePolicy.name}:${identifier}`;
+  const existing = buckets.get(key);
+  const bucket = existing && existing.resetAt > now ? existing : { count: 0, resetAt: now + safePolicy.windowMs };
+  bucket.count += 1;
+  buckets.set(key, bucket);
+  return {
+    count: bucket.count,
+    fallbackReason: distributed.fallbackReason,
+    ok: bucket.count <= safePolicy.limit,
+    remaining: Math.max(0, safePolicy.limit - bucket.count),
+    resetAt: new Date(bucket.resetAt).toISOString(),
+    store: distributed.fallbackReason ? "memory-fallback" : "memory"
+  };
 }
 
 export function rateLimitStoreStatus(env: RateLimitEnv = process.env): {
@@ -317,6 +375,63 @@ async function consumeDistributedRateLimit(
   const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV]!;
 
   const clientHash = await keyedDigest(`key-or-client:${access.keyId ?? clientKey(request)}`, serviceRoleKey);
+  const bucketKey = await keyedDigest(`bucket:${policy.name}:${clientHash}`, serviceRoleKey);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DISTRIBUTED_RATE_LIMIT_TIMEOUT_MS);
+  try {
+    const response = await (options.fetchImpl ?? fetch)(`${baseUrl.replace(/\/$/, "")}/rest/v1/rpc/consume_api_rate_limit`, {
+      body: JSON.stringify({
+        p_bucket_key: bucketKey,
+        p_client_hash: clientHash,
+        p_limit_count: policy.limit,
+        p_policy: policy.name,
+        p_window_ms: policy.windowMs
+      }),
+      headers: {
+        apikey: serviceRoleKey,
+        authorization: `Bearer ${serviceRoleKey}`,
+        "content-type": "application/json"
+      },
+      method: "POST",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return { fallbackReason: httpFallbackReason(response.status), row: null };
+    }
+    const text = await response.text();
+    let parsed: unknown;
+    try {
+      parsed = text ? (JSON.parse(text) as unknown) : null;
+    } catch {
+      return { fallbackReason: "distributed_rpc_invalid_json", row: null };
+    }
+    const row = Array.isArray(parsed) ? parsed.at(0) : parsed;
+    return isDistributedRateLimitRow(row)
+      ? { fallbackReason: null, row }
+      : { fallbackReason: "distributed_rpc_invalid_shape", row: null };
+  } catch (error) {
+    return {
+      fallbackReason: error instanceof DOMException && error.name === "AbortError" ? "distributed_rpc_timeout" : "distributed_rpc_network_error",
+      row: null
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function consumeDistributedRateLimitForIdentifier(
+  identifier: string,
+  policy: RateLimitPolicy,
+  options: Pick<RateLimitCheckOptions, "env" | "fetchImpl" | "timeoutMs">
+): Promise<DistributedRateLimitResult> {
+  const env = options.env ?? process.env;
+  const status = rateLimitStoreStatus(env);
+  if (!status.configured) {
+    return { fallbackReason: null, row: null };
+  }
+  const baseUrl = env[SUPABASE_URL_ENV]!;
+  const serviceRoleKey = env[SUPABASE_SERVICE_ROLE_KEY_ENV]!;
+  const clientHash = await keyedDigest(`named:${identifier}`, serviceRoleKey);
   const bucketKey = await keyedDigest(`bucket:${policy.name}:${clientHash}`, serviceRoleKey);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DISTRIBUTED_RATE_LIMIT_TIMEOUT_MS);
