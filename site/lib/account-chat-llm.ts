@@ -9,6 +9,7 @@ import {
   type ExternalPackageSource,
   type ExternalSearchResult
 } from "./external-packages";
+import { consumeNamedRateLimitAsync } from "./rate-limit";
 
 export type AccountChatHistoryEntry = {
   content: string;
@@ -129,7 +130,7 @@ const DEFAULT_DAILY_USER_LIMIT = 60;
 const DEFAULT_DAILY_GLOBAL_LIMIT = 600;
 const MAX_TOOL_ROUNDS = 4;
 const MAX_HISTORY_ITEMS = 8;
-const dailyBudgetBuckets = new Map<string, { count: number; resetAt: number }>();
+const DAILY_BUDGET_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const emptySourceSummary: ExternalSearchResult["sourceSummary"] = {
   empty: 0,
@@ -243,7 +244,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
   }
 
   const profile = selectAccountChatLlmProfile(message, env);
-  const budget = consumeDailyBudget(options.userId ?? options.userEmail ?? "anonymous", env);
+  const budget = await consumeDailyBudget(options.userId ?? options.userEmail ?? "anonymous", env, options.fetchImpl);
   if (!budget.ok) {
     return { ok: false, reason: "daily_limit_exceeded" };
   }
@@ -507,49 +508,34 @@ function needsSecurityModel(message: string): boolean {
   );
 }
 
-function consumeDailyBudget(userId: string, env: Record<string, string | undefined>): { ok: true } | { ok: false } {
+async function consumeDailyBudget(
+  userId: string,
+  env: Record<string, string | undefined>,
+  fetchImpl?: typeof fetch
+): Promise<{ ok: true } | { ok: false }> {
   const userLimit = readPositiveInteger(env.NIPMOD_CHAT_LLM_DAILY_USER_LIMIT, DEFAULT_DAILY_USER_LIMIT);
   const globalLimit = readPositiveInteger(env.NIPMOD_CHAT_LLM_DAILY_GLOBAL_LIMIT, DEFAULT_DAILY_GLOBAL_LIMIT);
   if (userLimit <= 0 || globalLimit <= 0) {
     return { ok: false };
   }
-  const now = Date.now();
-  const dayReset = nextUtcDayStart(now);
-  const global = consumeLocalBucket("global", globalLimit, now, dayReset);
-  if (!global.ok) {
+  const user = await consumeNamedRateLimitAsync(`account-chat-llm:user:${userId}`, {
+    limit: userLimit,
+    name: "account-chat-llm-daily-user",
+    windowMs: DAILY_BUDGET_WINDOW_MS
+  }, rateLimitOptions(env, fetchImpl));
+  if (!user.ok) {
     return { ok: false };
   }
-  const user = consumeLocalBucket(`user:${userId}`, userLimit, now, dayReset);
-  return user.ok ? { ok: true } : { ok: false };
+  const global = await consumeNamedRateLimitAsync("account-chat-llm:global", {
+    limit: globalLimit,
+    name: "account-chat-llm-daily-global",
+    windowMs: DAILY_BUDGET_WINDOW_MS
+  }, rateLimitOptions(env, fetchImpl));
+  return global.ok ? { ok: true } : { ok: false };
 }
 
-function consumeLocalBucket(key: string, limit: number, now: number, resetAt: number): { ok: boolean } {
-  pruneDailyBudgetBuckets(now);
-  const existing = dailyBudgetBuckets.get(key);
-  const bucket = existing && existing.resetAt > now ? existing : { count: 0, resetAt };
-  if (bucket.count >= limit) {
-    dailyBudgetBuckets.set(key, bucket);
-    return { ok: false };
-  }
-  bucket.count += 1;
-  dailyBudgetBuckets.set(key, bucket);
-  return { ok: true };
-}
-
-function nextUtcDayStart(now: number): number {
-  const date = new Date(now);
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1);
-}
-
-function pruneDailyBudgetBuckets(now: number): void {
-  if (dailyBudgetBuckets.size <= 2000) {
-    return;
-  }
-  for (const [key, bucket] of dailyBudgetBuckets) {
-    if (bucket.resetAt <= now || dailyBudgetBuckets.size > 2000) {
-      dailyBudgetBuckets.delete(key);
-    }
-  }
+function rateLimitOptions(env: Record<string, string | undefined>, fetchImpl?: typeof fetch): { env: Record<string, string | undefined>; fetchImpl?: typeof fetch } {
+  return fetchImpl ? { env, fetchImpl } : { env };
 }
 
 function buildCostReport(model: string, usage: GatewayResponse["usage"] | null, maxOutputTokens: number): AccountChatLlmCostReport {
