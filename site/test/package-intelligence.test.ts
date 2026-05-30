@@ -20,6 +20,8 @@ import {
 import type { ExternalPackageRecord } from "../lib/external-packages";
 import { apiKeyHeaders, stubApiKeyAuth } from "./api-key-test-helper";
 
+const ARCHIVE_WRITE_TOKEN = "archive-write-token-1234567890abcdef";
+
 describe("package intelligence archive", () => {
   beforeEach(() => {
     stubApiKeyAuth();
@@ -39,6 +41,14 @@ describe("package intelligence archive", () => {
     expect(record.ownership.retainedByOriginalSource).toBe(true);
     expect(record.ownership.claimRequiredForVerified).toBe(true);
     expect(record.security.metadataIsInstruction).toBe(false);
+    expect(record.privacy).toMatchObject({
+      privateWorkspaceDataStored: false,
+      rawApiKeysStored: false,
+      rawIpAddressesStored: false,
+      rawPromptsStored: false,
+      version: "archive-privacy-v1"
+    });
+    expect(record.privacy.excluded).toEqual(expect.arrayContaining(["raw API keys", "workspace paths", "secrets"]));
     expect(record.evidence).toMatchObject({
       archivePolicy: "agent-confirmed-source-owned-v1",
       generatedFrom: "server-reinspected-source",
@@ -100,6 +110,34 @@ describe("package intelligence archive", () => {
       status: "fresh"
     });
     expect(validatePackageIntelligenceRecord(upgraded).ok).toBe(true);
+  });
+
+  test("upgrades legacy archive privacy metadata without changing source evidence", () => {
+    const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const legacy = { ...record };
+    delete (legacy as Partial<typeof record>).privacy;
+
+    const upgraded = ensurePackageIntelligenceEvidence(legacy);
+
+    expect(upgraded.privacy).toMatchObject({
+      privateWorkspaceDataStored: false,
+      rawApiKeysStored: false,
+      rawIpAddressesStored: false,
+      rawPromptsStored: false,
+      version: "archive-privacy-v1"
+    });
+    expect(validatePackageIntelligenceRecord(upgraded).ok).toBe(true);
+  });
+
+  test("rejects archive records without a privacy boundary", () => {
+    const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const withoutPrivacy = { ...record };
+    delete (withoutPrivacy as Partial<typeof record>).privacy;
+
+    expect(validatePackageIntelligenceRecord(withoutPrivacy)).toMatchObject({
+      ok: false,
+      errors: expect.arrayContaining(["archive privacy boundary is missing"])
+    });
   });
 
   test("flags risky shell install plans without regex backtracking", () => {
@@ -208,7 +246,32 @@ describe("package intelligence archive", () => {
 
     expect(confirmed.archive.status).toBe("agent_confirmed");
     expect(confirmed.archive.confirmationCount).toBe(1);
-    expect(confirmed.events.at(-1)).toMatchObject({ actor: "codex", type: "agent_confirmed" });
+    expect(confirmed.events.at(-1)).toMatchObject({
+      actor: expect.stringMatching(/^agent:[a-f0-9]{16}$/),
+      message: "Package usefulness confirmed by an agent workflow. Caller notes are not stored in public archive events.",
+      type: "agent_confirmed"
+    });
+    expect(JSON.stringify(confirmed.events)).not.toContain("Telegram bot");
+    expect(JSON.stringify(confirmed.events)).not.toContain("codex");
+  });
+
+  test("redacts private caller context from public archive confirmation events", () => {
+    const record = createPackageIntelligenceRecord(externalRecord, { now: "2026-05-21T00:00:00.000Z" });
+    const confirmed = confirmPackageIntelligenceRecord(record, {
+      actor: "alice@example.com",
+      message: "Used in /Users/hazar/customer-acme with token nip_live_secret_123 for production.",
+      now: "2026-05-21T00:05:00.000Z"
+    });
+    const publicEvents = JSON.stringify(confirmed.events);
+
+    expect(confirmed.events.at(-1)).toMatchObject({
+      actor: expect.stringMatching(/^agent:[a-f0-9]{16}$/),
+      message: "Package usefulness confirmed by an agent workflow for production use. Caller notes are not stored in public archive events."
+    });
+    expect(publicEvents).not.toContain("alice@example.com");
+    expect(publicEvents).not.toContain("/Users/hazar");
+    expect(publicEvents).not.toContain("customer-acme");
+    expect(publicEvents).not.toContain("nip_live_secret_123");
   });
 
   test("maps package intelligence records to public lifecycle states", () => {
@@ -254,10 +317,10 @@ describe("package intelligence archive", () => {
     expect(merged.archive.firstSeenAt).toBe(first.archive.firstSeenAt);
     expect(merged.archive.confirmationCount).toBe(2);
     expect(merged.archive.status).toBe("agent_confirmed");
-    expect(merged.events.filter((event) => event.type === "agent_confirmed").map((event) => event.actor)).toEqual([
-      "codex",
-      "claude-code"
-    ]);
+    const actors = merged.events.filter((event) => event.type === "agent_confirmed").map((event) => event.actor);
+    expect(actors).toHaveLength(2);
+    expect(new Set(actors).size).toBe(2);
+    expect(actors.every((actor) => /^agent:[a-f0-9]{16}$/.test(actor))).toBe(true);
   });
 
   test("marks archive source drift when repeated confirmations see changed upstream identity metadata", () => {
@@ -494,14 +557,14 @@ describe("package intelligence archive", () => {
   });
 
   test("rejects archive writes when persistence is unavailable before source resolution", async () => {
-    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", "write-token");
+    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", ARCHIVE_WRITE_TOKEN);
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ record: externalRecord }),
-        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": "write-token" }),
+        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": ARCHIVE_WRITE_TOKEN }),
         method: "POST"
       })
     );
@@ -512,16 +575,29 @@ describe("package intelligence archive", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  test("treats short archive write tokens as unconfigured", () => {
+    const env = {
+      NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
+      NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+    };
+
+    expect(archiveStoreStatus(env)).toMatchObject({
+      configured: false,
+      missing: expect.arrayContaining(["NIPMOD_ARCHIVE_WRITE_TOKEN (min 32 chars)"])
+    });
+  });
+
   test("accepts authorized archive writes through the archive token header", async () => {
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY", "publishable-key");
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
-    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", "write-token");
-    stubArchiveRouteFetch({ expectSupabaseWriteToken: "write-token", supabaseConfigured: true });
+    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", ARCHIVE_WRITE_TOKEN);
+    stubArchiveRouteFetch({ expectSupabaseWriteToken: ARCHIVE_WRITE_TOKEN, supabaseConfigured: true });
 
     const response = await confirmPost(
       new Request("https://nipmod.com/api/archive/confirm", {
         body: JSON.stringify({ actor: "codex", record: externalRecord }),
-        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": "write-token" }),
+        headers: apiKeyHeaders({ "content-type": "application/json", "x-nipmod-archive-token": ARCHIVE_WRITE_TOKEN }),
         method: "POST"
       })
     );
@@ -530,6 +606,7 @@ describe("package intelligence archive", () => {
     expect(response.status).toBe(200);
     expect(body.stored).toBe(true);
     expect(body.receipt.stored).toBe(true);
+    expect(JSON.stringify(body.record.events)).not.toContain("codex");
   });
 
   test("reports disabled archive search without a configured database", async () => {
@@ -544,7 +621,7 @@ describe("package intelligence archive", () => {
   test("does not expose unexpected archive search failures", async () => {
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY", "publishable-key");
     vi.stubEnv("NIPMOD_ARCHIVE_SUPABASE_URL", "https://db.example.test");
-    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", "write-token");
+    vi.stubEnv("NIPMOD_ARCHIVE_WRITE_TOKEN", ARCHIVE_WRITE_TOKEN);
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
@@ -580,7 +657,7 @@ describe("package intelligence archive", () => {
     const env = {
       NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
       NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
-      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+      NIPMOD_ARCHIVE_WRITE_TOKEN: ARCHIVE_WRITE_TOKEN
     };
     const record = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord), { actor: "codex" });
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
@@ -590,10 +667,10 @@ describe("package intelligence archive", () => {
         authorization: "Bearer publishable-key"
       });
       if (url.includes("package_intelligence_records?on_conflict=stable_key")) {
-        expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": "write-token" });
+        expect(init?.headers).toMatchObject({ "x-nipmod-archive-token": ARCHIVE_WRITE_TOKEN });
         return new Response(null, { status: 204 });
       }
-      expect(JSON.stringify(init?.headers)).not.toContain("write-token");
+      expect(JSON.stringify(init?.headers)).not.toContain(ARCHIVE_WRITE_TOKEN);
       return Response.json([{ record }]);
     }) as unknown as typeof fetch;
 
@@ -612,7 +689,7 @@ describe("package intelligence archive", () => {
     const env = {
       NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
       NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
-      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+      NIPMOD_ARCHIVE_WRITE_TOKEN: ARCHIVE_WRITE_TOKEN
     };
     const record = confirmPackageIntelligenceRecord(createPackageIntelligenceRecord(externalRecord), { actor: "codex" });
     const legacyRecord = { ...record, id: "pkgintel_legacyarchive000001" };
@@ -643,11 +720,26 @@ describe("package intelligence archive", () => {
     });
   });
 
+  test("rejects direct Supabase writes for unconfirmed archive records", async () => {
+    const env = {
+      NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
+      NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
+      NIPMOD_ARCHIVE_WRITE_TOKEN: ARCHIVE_WRITE_TOKEN
+    };
+    const record = createPackageIntelligenceRecord(externalRecord);
+    const fetchMock = vi.fn(async () => Response.json([])) as unknown as typeof fetch;
+
+    await expect(upsertPackageIntelligenceRecord(record, { env, fetchImpl: fetchMock })).rejects.toMatchObject({
+      message: "archive writes require a confirmed package intelligence record",
+      status: 422
+    });
+  });
+
   test("times out Supabase archive reads instead of hanging", async () => {
     const env = {
       NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
       NIPMOD_ARCHIVE_SUPABASE_URL: "https://db.example.test",
-      NIPMOD_ARCHIVE_WRITE_TOKEN: "write-token"
+      NIPMOD_ARCHIVE_WRITE_TOKEN: ARCHIVE_WRITE_TOKEN
     };
     const hangingFetch = vi.fn((_input: string | URL | Request, init?: RequestInit) => {
       const signal = init?.signal;

@@ -83,7 +83,7 @@ export default function BaseAgentsPage() {
             ["1", "The agent needs a Base ecosystem package, SDK, CLI, MCP server or repo."],
             ["2", "The agent calls Nipmod search across npm, PyPI, GitHub and MCP sources."],
             ["3", "The agent inspects the exact source record instead of trusting package text."],
-            ["4", "Nipmod returns trust signals, warnings and a safe install plan."],
+            ["4", "Nipmod returns trust signals, warnings and a reviewable install plan."],
             ["5", "The user or host approves any local install or tool enablement."],
             ["6", "Only after that should the agent continue to Base MCP, x402 or protocol-specific work."]
           ]}

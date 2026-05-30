@@ -425,6 +425,138 @@ function openApiDocument() {
           required: ["action", "installPlanRequired", "nextSteps", "summary", "version", "workspaceWriteAllowed"],
           type: "object"
         },
+        PackageDecision: {
+          additionalProperties: true,
+          description:
+            "Portable pre-execution decision object for agent hosts. It combines query planning, selected source identity, comparison, trust context, install boundary, receipt and agent readiness before local execution.",
+          properties: {
+            agentReadiness: { $ref: "#/components/schemas/PackageDecisionAgentReadiness" },
+            alternatives: { items: { additionalProperties: true, type: "object" }, type: "array" },
+            archive: { additionalProperties: true, type: "object" },
+            avoid: { items: { additionalProperties: true, type: "object" }, type: "array" },
+            comparison: {
+              additionalProperties: true,
+              properties: {
+                candidates: { items: { additionalProperties: true, type: "object" }, type: "array" },
+                version: { const: "package-decision-comparison-v2", type: "string" }
+              },
+              required: ["candidates", "version"],
+              type: "object"
+            },
+            confidence: {
+              additionalProperties: false,
+              properties: {
+                label: { enum: ["high", "low", "medium"], type: "string" },
+                score: { maximum: 100, minimum: 0, type: "integer" },
+                uncertainty: { items: { type: "string" }, type: "array" }
+              },
+              required: ["label", "score", "uncertainty"],
+              type: "object"
+            },
+            evidence: { additionalProperties: true, type: "object" },
+            generatedAt: { format: "date-time", type: "string" },
+            plan: { additionalProperties: true, type: "object" },
+            query: { type: "string" },
+            receipt: {
+              anyOf: [
+                { $ref: "#/components/schemas/PackageDecisionReceipt" },
+                { type: "null" }
+              ]
+            },
+            recommended: {
+              anyOf: [
+                { additionalProperties: true, type: "object" },
+                { type: "null" }
+              ]
+            },
+            security: {
+              additionalProperties: true,
+              properties: {
+                highSignalCount: { minimum: 0, type: "integer" },
+                posture: { enum: ["blocked", "clean-preflight", "needs-review"], type: "string" },
+                reviewSignalCount: { minimum: 0, type: "integer" },
+                signals: { items: { additionalProperties: true, type: "object" }, type: "array" }
+              },
+              required: ["highSignalCount", "posture", "reviewSignalCount", "signals"],
+              type: "object"
+            },
+            summary: { type: "string" },
+            type: { const: "dev.nipmod.package-decision.v1", type: "string" }
+          },
+          required: [
+            "agentReadiness",
+            "alternatives",
+            "archive",
+            "avoid",
+            "comparison",
+            "confidence",
+            "evidence",
+            "generatedAt",
+            "plan",
+            "query",
+            "receipt",
+            "recommended",
+            "security",
+            "summary",
+            "type"
+          ],
+          type: "object"
+        },
+        PackageDecisionAgentReadiness: {
+          additionalProperties: false,
+          description:
+            "Agent-host readiness gate. Ready means the hosted preflight has a recommendation, receipt and approval boundary; it still does not grant local execution permission.",
+          properties: {
+            blockers: { items: { type: "string" }, type: "array" },
+            integrationSafe: { type: "boolean" },
+            mode: { const: "pre-execution-package-decision", type: "string" },
+            reasons: { items: { type: "string" }, type: "array" },
+            requiredHostActions: { items: { type: "string" }, type: "array" },
+            score: { maximum: 100, minimum: 0, type: "integer" },
+            verdict: { enum: ["blocked", "ready", "review"], type: "string" },
+            version: { const: "agent-readiness-v1", type: "string" }
+          },
+          required: ["blockers", "integrationSafe", "mode", "reasons", "requiredHostActions", "score", "verdict", "version"],
+          type: "object"
+        },
+        PackageDecisionReceipt: {
+          additionalProperties: false,
+          properties: {
+            alternativesConsidered: { items: { type: "string" }, type: "array" },
+            archiveConfirm: { additionalProperties: true, type: "object" },
+            generatedAt: { format: "date-time", type: "string" },
+            hostedApiExecutes: { const: false, type: "boolean" },
+            installCommand: { nullable: true, type: "string" },
+            installPlanBlocked: { type: "boolean" },
+            originalUrl: { format: "uri", type: "string" },
+            packageId: { type: "string" },
+            requiresApprovalBeforeWrite: { const: true, type: "boolean" },
+            reviewSteps: { items: { type: "string" }, type: "array" },
+            source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" },
+            type: { const: "dev.nipmod.package-decision-receipt.v1", type: "string" },
+            version: { nullable: true, type: "string" },
+            warnings: { items: { type: "string" }, type: "array" },
+            workspaceWrites: { const: false, type: "boolean" }
+          },
+          required: [
+            "alternativesConsidered",
+            "archiveConfirm",
+            "generatedAt",
+            "hostedApiExecutes",
+            "installCommand",
+            "installPlanBlocked",
+            "originalUrl",
+            "packageId",
+            "requiresApprovalBeforeWrite",
+            "reviewSteps",
+            "source",
+            "type",
+            "version",
+            "warnings",
+            "workspaceWrites"
+          ],
+          type: "object"
+        },
         PackageArtifactIntelligence: {
           additionalProperties: false,
           properties: {
@@ -1229,10 +1361,12 @@ function openApiDocument() {
         },
         PackageIntelligenceEvent: {
           additionalProperties: false,
+          description:
+            "Public archive timeline event. Confirmation actor values are non-reversible hashes and messages are bounded reason text, not raw caller notes.",
           properties: {
-            actor: { type: "string" },
+            actor: { description: "System actor or non-reversible agent hash; not an email, user id or workspace identifier.", type: "string" },
             at: { format: "date-time", type: "string" },
-            message: { type: "string" },
+            message: { description: "Bounded public reason text. Raw caller confirmation notes are not stored.", type: "string" },
             type: {
               enum: ["external_resolved", "agent_confirmed", "owner_claimed", "verified", "quarantined", "yanked", "restored"],
               type: "string"
@@ -1262,6 +1396,7 @@ function openApiDocument() {
               required: ["claimRequiredForVerified", "originalOwner", "originalUrl", "retainedByOriginalSource"],
               type: "object"
             },
+            privacy: { $ref: "#/components/schemas/PackageIntelligencePrivacy" },
             security: {
               additionalProperties: false,
               properties: {
@@ -1305,6 +1440,7 @@ function openApiDocument() {
             "installPlan",
             "name",
             "ownership",
+            "privacy",
             "security",
             "source",
             "sourceKind",
@@ -1313,6 +1449,27 @@ function openApiDocument() {
             "stableKey",
             "trust",
             "type",
+            "version"
+          ],
+          type: "object"
+        },
+        PackageIntelligencePrivacy: {
+          additionalProperties: false,
+          description: "Archive privacy boundary. Public archive records exclude raw caller prompts, API keys, IP addresses and private workspace data.",
+          properties: {
+            excluded: { items: { type: "string" }, type: "array" },
+            privateWorkspaceDataStored: { const: false, type: "boolean" },
+            rawApiKeysStored: { const: false, type: "boolean" },
+            rawIpAddressesStored: { const: false, type: "boolean" },
+            rawPromptsStored: { const: false, type: "boolean" },
+            version: { const: "archive-privacy-v1", type: "string" }
+          },
+          required: [
+            "excluded",
+            "privateWorkspaceDataStored",
+            "rawApiKeysStored",
+            "rawIpAddressesStored",
+            "rawPromptsStored",
             "version"
           ],
           type: "object"
@@ -1542,7 +1699,8 @@ function openApiDocument() {
         name: "Nipmod",
         url: "https://nipmod.com/security"
       },
-      description: "The package intelligence layer for AI agents. Search sources, inspect trust and get safe install plans before workspace writes.",
+      description:
+        "The package intelligence layer for AI agents. Search sources, inspect trust and get reviewable install plans before workspace writes.",
       title: "Nipmod API",
       version: "2026-05-23"
     },
@@ -1692,9 +1850,9 @@ function openApiDocument() {
                 schema: {
                   additionalProperties: true,
                   properties: {
-                    actor: { type: "string" },
+                    actor: { description: "Optional caller label. Public archive events store only a non-reversible hash.", type: "string" },
                     dryRun: { type: "boolean" },
-                    message: { type: "string" },
+                    message: { description: "Optional caller note. Public archive events store only bounded reason text, not raw notes.", type: "string" },
                     name: { type: "string" },
                     record: { $ref: "#/components/schemas/ExternalPackageRecord" },
                     source: { enum: [...EXTERNAL_PACKAGE_SOURCES], type: "string" }
@@ -1794,7 +1952,7 @@ function openApiDocument() {
                   schema: { $ref: "#/components/schemas/ExternalInstallPlan" }
                 }
               },
-              description: "Safe install plan."
+              description: "Reviewable install plan."
             },
             "400": errorResponse(),
             "401": errorResponse(),
@@ -1803,7 +1961,7 @@ function openApiDocument() {
             "502": errorResponse(),
             "504": errorResponse()
           },
-          summary: "Create a safe install plan for one exact package."
+          summary: "Create a reviewable install plan for one exact package."
         },
         post: {
           "x-nipmod-agent-step": "install-plan",
@@ -1830,13 +1988,13 @@ function openApiDocument() {
                   schema: { $ref: "#/components/schemas/ExternalInstallPlan" }
                 }
               },
-              description: "Safe install plan from a posted external package record."
+              description: "Reviewable install plan from a posted external package record."
             },
             "400": errorResponse(),
             "401": errorResponse(),
             "429": errorResponse()
           },
-          summary: "Create a safe install plan from a posted external package record."
+          summary: "Create a reviewable install plan from a posted external package record."
         }
       },
       "/api/mcp": {

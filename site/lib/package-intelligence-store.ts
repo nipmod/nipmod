@@ -1,5 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
-import { ensurePackageIntelligenceEvidence, mergePackageIntelligenceRecords, type PackageIntelligenceRecord } from "./package-intelligence";
+import {
+  ensurePackageIntelligenceEvidence,
+  mergePackageIntelligenceRecords,
+  validatePackageIntelligenceRecord,
+  type PackageIntelligenceRecord
+} from "./package-intelligence";
 
 type ArchiveEnv = Record<string, string | undefined>;
 
@@ -29,12 +34,16 @@ const SUPABASE_URL_ENV = "NIPMOD_ARCHIVE_SUPABASE_URL";
 const SUPABASE_SERVICE_ROLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_SERVICE_ROLE_KEY";
 const SUPABASE_PUBLISHABLE_KEY_ENV = "NIPMOD_ARCHIVE_SUPABASE_PUBLISHABLE_KEY";
 const WRITE_TOKEN_ENV = "NIPMOD_ARCHIVE_WRITE_TOKEN";
+const MIN_WRITE_TOKEN_LENGTH = 32;
 const SUPABASE_REQUEST_TIMEOUT_MS = 5_000;
 
 export function archiveStoreStatus(env: ArchiveEnv = process.env): ArchiveStoreStatus {
   const hasServiceRole = Boolean(env[SUPABASE_SERVICE_ROLE_KEY_ENV]);
   const hasPublishable = Boolean(env[SUPABASE_PUBLISHABLE_KEY_ENV]);
-  const missing = [SUPABASE_URL_ENV, WRITE_TOKEN_ENV].filter((key) => !env[key]);
+  const missing = [SUPABASE_URL_ENV].filter((key) => !env[key]);
+  if (!validArchiveWriteToken(env[WRITE_TOKEN_ENV])) {
+    missing.push(`${WRITE_TOKEN_ENV} (min ${MIN_WRITE_TOKEN_LENGTH} chars)`);
+  }
   if (!hasServiceRole && !hasPublishable) {
     missing.push(`${SUPABASE_SERVICE_ROLE_KEY_ENV} or ${SUPABASE_PUBLISHABLE_KEY_ENV}`);
   }
@@ -49,7 +58,7 @@ export function archiveStoreStatus(env: ArchiveEnv = process.env): ArchiveStoreS
 
 export function assertArchiveWriteAuthorized(request: Request, env: ArchiveEnv = process.env): void {
   const expected = env[WRITE_TOKEN_ENV];
-  if (!expected) {
+  if (!validArchiveWriteToken(expected)) {
     throw new ArchiveStoreError("archive write token is not configured", 503);
   }
 
@@ -138,6 +147,7 @@ export async function upsertPackageIntelligenceRecord(
     (await readPackageIntelligenceRecordByStableKey(record.stableKey, options));
   const mergedRecord = existing ? mergePackageIntelligenceRecords(existing, record) : record;
   const recordToStore = existing && existing.id !== mergedRecord.id ? { ...mergedRecord, id: existing.id } : mergedRecord;
+  assertArchiveRecordWritable(recordToStore);
   const requestOptions: SupabaseRequestOptions = {
     body: JSON.stringify([toSupabaseRow(recordToStore)]),
     headers: {
@@ -159,6 +169,20 @@ export async function upsertPackageIntelligenceRecord(
     stored: true,
     type: "dev.nipmod.package-intelligence-write.v1"
   };
+}
+
+function validArchiveWriteToken(value: string | undefined): value is string {
+  return typeof value === "string" && value.length >= MIN_WRITE_TOKEN_LENGTH;
+}
+
+function assertArchiveRecordWritable(record: PackageIntelligenceRecord): void {
+  const validation = validatePackageIntelligenceRecord(record);
+  if (!validation.ok) {
+    throw new ArchiveStoreError(`archive record validation failed: ${validation.errors.join("; ")}`, 422);
+  }
+  if (record.archive.confirmationCount < 1 || record.archive.status === "external_indexed") {
+    throw new ArchiveStoreError("archive writes require a confirmed package intelligence record", 422);
+  }
 }
 
 export async function readPackageIntelligenceRecordById(

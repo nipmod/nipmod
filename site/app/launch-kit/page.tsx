@@ -15,7 +15,7 @@ export default function LaunchKitPage() {
       title="Shareable copy."
     >
       <DocsSection eyebrow="Copy" title="Short update">
-        <DocsCode>{"Nipmod is moving toward one package API for agents.\n\nAgents can search public sources, inspect trust signals and get safe install plans before anything touches a workspace.\n\nhttps://nipmod.com/api-access"}</DocsCode>
+        <DocsCode>{"Nipmod is moving toward one package API for agents.\n\nAgents can search public sources, inspect trust signals and get install plans with risk and approval boundaries before anything touches a workspace.\n\nhttps://nipmod.com/api-access"}</DocsCode>
       </DocsSection>
 
       <DocsSection eyebrow="Links" title="Use these links">

@@ -2,6 +2,7 @@ import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/accoun
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
 import { issueAccountBetaApiKey } from "../../../../lib/api-key-issuer";
 import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
+import { accountMutationRejection } from "../../../../lib/account-request-security";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,11 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
+  const rejectedMutation = accountMutationRejection(request);
+  if (rejectedMutation) {
+    return accountError(request, "account_mutation_rejected", rejectedMutation, 403, false, {});
+  }
+
   const rateLimit = await checkApiRateLimitAsync(request, { limit: 5, name: "account-key-issue", windowMs: 60 * 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;

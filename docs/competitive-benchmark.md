@@ -45,8 +45,8 @@ Company size and ecosystem weight are included only as context. They are not sco
 | Native registries | Official package/model/repository sources. | Public source metadata from npm, PyPI, GitHub, Hugging Face and MCP. They are source-of-truth registries, not install-plan layers. |
 | OSV | Open source vulnerability infrastructure backed by the OSV ecosystem. | Vulnerability lookup feed for package/version cases. |
 | deps.dev | Open Source Insights data service developed by Google. | Package metadata, dependency, license, advisory and provenance context where supported. |
-| Socket | Socket announced a $60M Series C at a $1B valuation in May 2026. | Authenticated PURL package lookup only. Socket Firewall, CLI, GitHub app, browser extension and paid enterprise workflows are outside this snapshot. |
-| Snyk | Snyk was reported at a $7.4B valuation after its 2022 Series G round. | Authenticated REST package API access only. Snyk CLI, SCM imports, full platform project scanning, IaC, container and code analysis are outside this snapshot. |
+| Socket | Commercial supply-chain security product. Company size is not a scoring input. | Authenticated PURL package lookup only. Socket Firewall, CLI, GitHub app, browser extension and paid enterprise workflows are outside this snapshot. |
+| Snyk | Commercial developer security product. Company size is not a scoring input. | Authenticated REST package API access only. Snyk CLI, SCM imports, full platform project scanning, IaC, container and code analysis are outside this snapshot. |
 | OpenSSF Scorecard | OpenSSF project for automated open source repository security posture scoring. | GitHub repository posture case only. |
 | Raw agent | Control baseline. No company or product valuation. | Agent flow without an independent package intelligence layer. |
 
@@ -61,7 +61,7 @@ Strict reviewer assessment:
 | Standard | Result |
 | --- | --- |
 | Academic security benchmark | Not sufficient. The case set is small, weights are authored by Nipmod and no external reviewer has signed off. |
-| Public product benchmark | Usable if the narrow scope, raw JSON, exclusions and limitations stay visible. |
+| Public product benchmark | Usable if the narrow scope, machine-readable summary, exclusions and limitations stay visible. |
 
 The benchmark should be read as a scoped product test, not independent scientific proof.
 
@@ -140,11 +140,11 @@ This favors systems that help an agent make a pre-install decision. That is inte
 - The headline score is coverage-adjusted, while applicable depth remains visible.
 - Token, rate-limit and plan limitations are marked as limitations instead of hidden.
 - No package install, clone, artifact unpacking, model execution, paid inference call or workspace write is performed.
-- Raw JSON is published at `/benchmark.json`.
+- Machine-readable summary JSON is published at `/benchmark.json`.
 
 ## Known Limitations
 
-- Seven cases are not enough for registry-wide or malware-corpus claims.
+- Eight cases are not enough for registry-wide or malware-corpus claims.
 - Weights are authored by Nipmod and need outside review before being treated as independent proof.
 - Socket and Snyk API tracks were limited by token, plan or rate limits in this snapshot, so do not use this run for direct Socket/Snyk depth claims.
 - Local project scanners, CLI tools, SCM integrations and install firewalls are excluded because they require manifests, repositories, local code or runtime interception.

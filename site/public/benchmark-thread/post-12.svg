@@ -47,7 +47,7 @@
     
 
       <circle cx="72" cy="161" r="5" fill="#d8b56d"/>
-      <text x="96" y="170" class="white serif" font-size="30">Raw JSON: nipmod.com/benchmark.json</text>
+      <text x="96" y="170" class="white serif" font-size="30">Summary JSON: nipmod.com/benchmark.json</text>
     
 
       <circle cx="72" cy="243" r="5" fill="#d8b56d"/>

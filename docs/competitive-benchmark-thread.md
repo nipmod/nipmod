@@ -47,7 +47,7 @@ It scores the hosted API surface available at the agent preflight boundary:
 - agent readiness
 - one fixed case for each Nipmod source surface
 
-Raw JSON is public at:
+Machine-readable summary JSON is public at:
 https://nipmod.com/benchmark.json
 
 6/ Current public run:
@@ -89,7 +89,7 @@ Nipmod uses source intelligence from the ecosystem and turns it into an agent re
 
 the big tools are strong evidence sources.
 
-Nipmod is stronger at the agent boundary we are building for: search, inspect, trust signals, warnings and a safe install plan in one API flow.
+Nipmod is stronger at the agent boundary we are building for: search, inspect, trust signals, warnings and a reviewable install plan in one API flow.
 
 That is the layer agents need before they start touching code.
 
@@ -104,7 +104,7 @@ If an agent might touch it, Nipmod should learn how to inspect it better.
 12/ Full benchmark:
 https://nipmod.com/benchmark
 
-Raw JSON:
+Machine-readable summary JSON:
 https://nipmod.com/benchmark.json
 
 GitHub:

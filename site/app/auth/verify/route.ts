@@ -7,6 +7,7 @@ import {
   safeAccountLoginPath,
   safeAccountNextPath
 } from "../../../lib/account-auth";
+import { accountMutationRejection } from "../../../lib/account-request-security";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 export async function POST(request: NextRequest): Promise<Response> {
   const url = request.nextUrl;
+  const rejectedMutation = accountMutationRejection(request);
+  if (rejectedMutation) {
+    return redirectToLogin(url.origin, "/account", "account_mutation_rejected");
+  }
+
   const formData = await request.formData().catch(() => null);
   const email = normalizeAccountEmail(request.cookies.get(ACCOUNT_LOGIN_EMAIL_COOKIE)?.value);
   const emailCode = normalizeAccountEmailCode(formData?.get("code"));

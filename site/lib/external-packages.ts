@@ -408,6 +408,10 @@ const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   },
   { names: ["ethers", "viem"], pattern: /\b(ethereum|evm|wallet|wallets|web3|smart contract|contract sdk)\b/i },
   { names: ["@solana/web3.js"], pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i },
+  {
+    names: ["ccxt", "lightweight-charts", "technicalindicators"],
+    pattern: /\b(exchange api|market data|technical analysis|charting|trading bot|backtest|backtesting|stock trading|crypto trading)\b/i
+  },
   { names: ["jose", "helmet", "zod", "express-rate-limit"], pattern: /\b(security|secure|sicherheit|auth|authentication|jwt|rate limit|rate-limit|api hardening)\b/i },
   { names: ["jsonwebtoken", "jose", "bcrypt", "passport"], pattern: /\b(auth|authentication|jwt|token|oauth|password|security|session)\b/i },
   { names: ["stripe"], pattern: /\b(stripe|payment|payments|checkout|billing|invoice|subscription)\b/i },
@@ -447,6 +451,10 @@ const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["pillow"], pattern: /\b(pil|pillow)\b/i },
   { names: ["cryptography", "pyjwt", "passlib"], pattern: /\b(auth|jwt|token|crypto|cryptography|password|security)\b/i },
   { names: ["bandit", "pip-audit", "cryptography", "pyjwt", "pydantic"], pattern: /\b(security|sicherheit|audit|malware|cve|vulnerability|dependency audit|secret|auth|jwt)\b/i },
+  {
+    names: ["ccxt", "vectorbt", "backtrader", "yfinance", "ta"],
+    pattern: /\b(exchange api|market data|technical analysis|quant|stock trading|crypto trading|forex|backtest|backtesting|trading bot)\b/i
+  },
   { names: ["pydantic", "marshmallow", "jsonschema"], pattern: /\b(schema|validate|validation|json schema|typed)\b/i },
   { names: ["celery", "dramatiq", "rq"], pattern: /\b(queue|worker|background job|task queue|jobs)\b/i }
 ];
@@ -501,6 +509,19 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
   {
     matches: [{ bonus: 16, name: "@solana/web3.js", reason: "Solana JavaScript SDK fit", source: "npm" }],
     pattern: /\b(solana|spl token|solana web3|solana wallet|solana sdk)\b/i
+  },
+  {
+    matches: [
+      { bonus: 22, name: "ccxt", reason: "exchange API trading workflow fit", source: "pypi" },
+      { bonus: 20, name: "vectorbt", reason: "quant backtesting workflow fit", source: "pypi" },
+      { bonus: 18, name: "backtrader", reason: "strategy backtesting workflow fit", source: "pypi" },
+      { bonus: 16, name: "yfinance", reason: "market data workflow fit", source: "pypi" },
+      { bonus: 16, name: "ta", reason: "technical analysis workflow fit", source: "pypi" },
+      { bonus: 18, name: "ccxt", reason: "exchange API trading workflow fit", source: "npm" },
+      { bonus: 16, name: "lightweight-charts", reason: "trading chart UI fit", source: "npm" },
+      { bonus: 15, name: "technicalindicators", reason: "technical indicator workflow fit", source: "npm" }
+    ],
+    pattern: /\b(exchange api|market data|technical analysis|quant|stock trading|crypto trading|forex|backtest|backtesting|trading bot)\b/i
   },
   {
     matches: [

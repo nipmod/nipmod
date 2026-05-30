@@ -135,7 +135,7 @@ Nipmod adds:
 - normalized package records
 - source context
 - trust signals
-- safe install plans
+- reviewable install plans
 - archive records after confirmed useful discovery
 
 Nipmod does not add:

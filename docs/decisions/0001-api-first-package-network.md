@@ -16,7 +16,7 @@ Agent host specific setup remains useful for local workspace writes, but the pub
 - search packages across supported public sources
 - inspect source context and metadata
 - return trust signals
-- return safe install plans
+- return reviewable install plans
 - prepare durable archive records
 
 ## Alternatives

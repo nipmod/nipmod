@@ -11,7 +11,8 @@ export const metadata = createPageMetadata({
 
 export default function BenchmarkPage() {
   const report = competitiveBenchmarkReport;
-  const tracks = [...report.tracks].sort((left, right) => right.score - left.score);
+  const tracks = [...report.tracks];
+  const caseCount = report.cases.length;
   const nipmodTrack = tracks.find((track) => track.name === "Nipmod");
   if (!nipmodTrack) {
     throw new Error("Benchmark report is missing the Nipmod track.");
@@ -24,8 +25,8 @@ export default function BenchmarkPage() {
       eyebrow="Benchmark"
       stats={[
         { label: "Nipmod live", value: report.headline.liveChecks },
-        { label: "Install plans", value: report.headline.installPlanEvidence },
-        { label: "Score", value: String(report.headline.score) },
+        { label: "Reviewable plans", value: report.headline.installPlanEvidence },
+        { label: "Rubric score", value: String(report.headline.score) },
         { label: "Median latency", value: `${report.headline.medianLatencyMs} ms` }
       ]}
       title="Agent preflight benchmark."
@@ -34,6 +35,9 @@ export default function BenchmarkPage() {
         <div className="benchmark-article-lede">
           <p>
             The run measures one specific moment: before an agent installs a package, pulls a model, reuses a repository or connects a tool. It does not rank security companies on a generic score.
+          </p>
+          <p>
+            This is a Nipmod-authored {caseCount}-case snapshot with explicit limits, not independent proof or a malware-free safety claim.
           </p>
           <p>
             Each track is measured by what it exposes to that preflight decision. Specialized feeds keep their own scope visible, so advisory databases and repository scanners are not treated as full package-intelligence layers.
@@ -52,8 +56,8 @@ export default function BenchmarkPage() {
           </article>
           <article>
             <span>Source scope</span>
-            <strong>{nipmodTrack.applicable}/7</strong>
-            <p>Npm, PyPI, GitHub, Hugging Face model, MCP and known vulnerable package cases completed in the live run.</p>
+            <strong>{nipmodTrack.applicable}/{caseCount}</strong>
+            <p>npm, PyPI, GitHub, Hugging Face model and dataset, MCP and known vulnerable package cases completed in the live run.</p>
           </article>
           <article>
             <span>Execution preflight</span>
@@ -260,9 +264,7 @@ export default function BenchmarkPage() {
             ["OSV", <a className="data-link" href="https://google.github.io/osv.dev/api/" rel="noreferrer" target="_blank">Official API docs for vulnerability queries by package version or commit hash.</a>],
             ["deps.dev", <a className="data-link" href="https://docs.deps.dev/api/v3/" rel="noreferrer" target="_blank">Official API docs for package versions, dependencies, licenses and advisories.</a>],
             ["Socket", <a className="data-link" href="https://docs.socket.dev/reference/batchpackagefetchbyorg" rel="noreferrer" target="_blank">Official PURL API docs for package metadata and alerts.</a>],
-            ["Socket funding context", <a className="data-link" href="https://socket.dev/blog/series-c" rel="noreferrer" target="_blank">Socket announcement of its $60M Series C at a $1B valuation.</a>],
             ["Snyk", <a className="data-link" href="https://docs.snyk.io/snyk-api/reference/package" rel="noreferrer" target="_blank">Official package API docs and package-health endpoint boundary.</a>],
-            ["Snyk funding context", <a className="data-link" href="https://www.streetinsider.com/Reuters/Cybersecurity%2Bstartup%2BSnyk%2Bvalued%2Bat%2B%247.4%2Bbillion%2Bafter%2Blatest%2Bfunding/20960166.html" rel="noreferrer" target="_blank">Reuters report on Snyk's $7.4B valuation after its 2022 Series G.</a>],
             ["OpenSSF Scorecard", <a className="data-link" href="https://openssf.org/scorecard/" rel="noreferrer" target="_blank">Official project description for repository security posture scoring.</a>],
             ["npm audit", <a className="data-link" href="https://docs.npmjs.com/cli/v8/commands/npm-audit/" rel="noreferrer" target="_blank">Official npm audit docs for dependency-tree advisory checks.</a>]
           ]}
@@ -276,8 +278,7 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
   const ordered = [...category.tracks].sort((left, right) => right.score - left.score);
   const topScore = ordered[0]?.score ?? 0;
   const leaders = ordered.filter((track) => track.score === topScore).map((track) => track.name);
-  const nextScore = ordered.find((track) => track.score < topScore)?.score ?? topScore;
-  const gap = topScore - nextScore;
+  const scopedTracks = ordered.filter((track) => track.sourceCoveragePct > 0).length;
 
   return (
     <article className="benchmark-category-panel">
@@ -290,7 +291,7 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
       </header>
       <dl className="benchmark-category-summary">
         <div>
-          <dt>Leader</dt>
+          <dt>Highest fit in snapshot</dt>
           <dd>{leaders.join(", ")}</dd>
         </div>
         <div>
@@ -298,8 +299,8 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
           <dd>{topScore}/100</dd>
         </div>
         <div>
-          <dt>Margin</dt>
-          <dd>+{gap}</dd>
+          <dt>Tracks with scope</dt>
+          <dd>{scopedTracks}</dd>
         </div>
       </dl>
       <div className="benchmark-category-bars">
@@ -325,9 +326,9 @@ function BenchmarkCategoryPanel({ category }: { category: CompetitiveBenchmarkCa
 
 function BenchmarkChart({ tracks }: { tracks: CompetitiveBenchmarkTrack[] }) {
   return (
-    <div className="benchmark-rank-list" role="table" aria-label="Competitive benchmark score chart">
+    <div className="benchmark-rank-list" role="table" aria-label="Agent preflight track comparison">
       <div className="benchmark-rank-head" role="row">
-        <span role="columnheader">Rank</span>
+        <span role="columnheader">Status</span>
         <span role="columnheader">Track</span>
         <span role="columnheader">Preflight fit</span>
         <span role="columnheader">Scope</span>
@@ -336,14 +337,14 @@ function BenchmarkChart({ tracks }: { tracks: CompetitiveBenchmarkTrack[] }) {
       </div>
 
       <div className="benchmark-rank-rows">
-        {tracks.map((track, index) => {
+        {tracks.map((track) => {
           const latency = track.latencyMs === null ? "n/a" : `${track.latencyMs} ms`;
           const width = `${Math.max(2, Math.min(100, track.score))}%`;
           const isNipmod = track.name === "Nipmod";
 
           return (
             <article className={`benchmark-rank-row benchmark-rank-row-${track.status}${isNipmod ? " benchmark-rank-row-primary" : ""}`} key={track.name} role="row">
-              <strong className="benchmark-rank-index" role="cell">{index + 1}</strong>
+              <strong className="benchmark-rank-index" role="cell">{track.status === "pass" ? "pass" : "limited"}</strong>
               <div className="benchmark-rank-track" role="cell">
                 <strong>{track.name}</strong>
                 <span>{track.role}</span>

@@ -72,6 +72,14 @@ export interface PackageIntelligenceRecord {
     originalUrl: string;
     retainedByOriginalSource: true;
   };
+  privacy: {
+    excluded: string[];
+    privateWorkspaceDataStored: false;
+    rawApiKeysStored: false;
+    rawIpAddressesStored: false;
+    rawPromptsStored: false;
+    version: "archive-privacy-v1";
+  };
   security: {
     installCommandRisk: InstallCommandRisk;
     metadataIsInstruction: false;
@@ -219,6 +227,7 @@ export function createPackageIntelligenceRecord(
       originalUrl: sourceRecord.originalUrl,
       retainedByOriginalSource: true
     },
+    privacy: packageIntelligencePrivacyPolicy(),
     security: {
       installCommandRisk: installCommandRisk(installPlan.plan.commands),
       metadataIsInstruction: false,
@@ -241,8 +250,8 @@ export function confirmPackageIntelligenceRecord(
   options: ConfirmPackageIntelligenceOptions
 ): PackageIntelligenceRecord {
   const now = options.now ?? new Date().toISOString();
-  const actor = cleanText(options.actor, 120) || "unknown-agent";
-  const message = cleanText(options.message ?? "Package usefulness confirmed by an agent workflow.", 400);
+  const actor = publicArchiveActor(options.actor);
+  const message = publicArchiveConfirmationMessage(options.message);
 
   return {
     ...record,
@@ -297,7 +306,8 @@ export function mergePackageIntelligenceRecords(
     },
     evidence,
     events: mergedEvents,
-    ownership: protectedStatuses.includes(existing.archive.status) ? existing.ownership : incoming.ownership
+    ownership: protectedStatuses.includes(existing.archive.status) ? existing.ownership : incoming.ownership,
+    privacy: incoming.privacy ?? existing.privacy ?? packageIntelligencePrivacyPolicy()
   };
 }
 
@@ -317,6 +327,15 @@ export function validatePackageIntelligenceRecord(record: PackageIntelligenceRec
   }
   if (!record.ownership.retainedByOriginalSource) {
     errors.push("external source ownership boundary is missing");
+  }
+  if (
+    !record.privacy ||
+    record.privacy.privateWorkspaceDataStored !== false ||
+    record.privacy.rawApiKeysStored !== false ||
+    record.privacy.rawIpAddressesStored !== false ||
+    record.privacy.rawPromptsStored !== false
+  ) {
+    errors.push("archive privacy boundary is missing");
   }
   if (!validEvidenceDigests(record)) {
     errors.push("archive evidence digests are invalid");
@@ -417,7 +436,7 @@ export function createPackageIntelligenceReceipt(
 export function ensurePackageIntelligenceEvidence(record: PackageIntelligenceRecord): PackageIntelligenceRecord {
   const existing = (record as PackageIntelligenceRecord & { evidence?: PackageIntelligenceRecord["evidence"] }).evidence;
   if (existing && validEvidenceDigests({ ...record, evidence: existing })) {
-    return { ...record, evidence: existing };
+    return { ...record, evidence: existing, privacy: record.privacy ?? packageIntelligencePrivacyPolicy() };
   }
   const currentSourceDriftDigest = packageIntelligenceSourceDriftDigest(record.sourceRecord);
   const baselineSourceRecordDigest =
@@ -434,7 +453,8 @@ export function ensurePackageIntelligenceEvidence(record: PackageIntelligenceRec
   }
   return {
     ...record,
-    evidence: packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust, evidenceOptions)
+    evidence: packageIntelligenceEvidence(record.sourceRecord, record.sourceSnapshot, record.installPlan, record.trust, evidenceOptions),
+    privacy: record.privacy ?? packageIntelligencePrivacyPolicy()
   };
 }
 
@@ -460,6 +480,25 @@ function packageIntelligenceEvidence(
     sourceRecordDigest,
     sourceSnapshotDigest: sha256(stableJson(sourceSnapshot)),
     trustDigest: sha256(stableJson(trust))
+  };
+}
+
+function packageIntelligencePrivacyPolicy(): PackageIntelligenceRecord["privacy"] {
+  return {
+    excluded: [
+      "raw API keys",
+      "raw IP addresses",
+      "raw prompts",
+      "raw user agents",
+      "workspace paths",
+      "private package names",
+      "secrets"
+    ],
+    privateWorkspaceDataStored: false,
+    rawApiKeysStored: false,
+    rawIpAddressesStored: false,
+    rawPromptsStored: false,
+    version: "archive-privacy-v1"
   };
 }
 
@@ -595,6 +634,25 @@ function packageMetadataInstructionWarnings(record: ExternalPackageRecord): stri
 
 function cleanText(value: string, maxLength: number): string {
   return cleanPlainText(value, maxLength);
+}
+
+function publicArchiveActor(value: string): string {
+  const actor = cleanText(value, 120).toLowerCase();
+  if (!actor) {
+    return "agent:unknown";
+  }
+  return `agent:${sha256(actor).slice(0, 16)}`;
+}
+
+function publicArchiveConfirmationMessage(value: string | undefined): string {
+  const message = cleanText(value ?? "", 400).toLowerCase();
+  if (/\bproduction\b|\bprod\b/.test(message)) {
+    return "Package usefulness confirmed by an agent workflow for production use. Caller notes are not stored in public archive events.";
+  }
+  if (/\btest\b|\bci\b|\bbenchmark\b|\bsmoke\b/.test(message)) {
+    return "Package usefulness confirmed by an agent workflow for test or evaluation use. Caller notes are not stored in public archive events.";
+  }
+  return "Package usefulness confirmed by an agent workflow. Caller notes are not stored in public archive events.";
 }
 
 function sha256(value: string): string {

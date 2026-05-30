@@ -9,13 +9,13 @@ node --experimental-strip-types examples/http-api/search.ts "http client"
 For the fuller agent-style output with inspect data, source degradation, trust factors, install-plan safety and archive preview:
 
 ```bash
-node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
+node --experimental-strip-types examples/http-api/agent-flow.ts --issue-key "http client"
 ```
 
 The same flow using only the Python standard library:
 
 ```bash
-python3 examples/http-api/agent_flow.py "http client"
+python3 examples/http-api/agent_flow.py --issue-key "http client"
 ```
 
 Flow:
@@ -35,6 +35,8 @@ Environment:
 NIPMOD_API_BASE_URL=https://nipmod.com
 NIPMOD_API_KEY=<key>
 ```
+
+If `NIPMOD_API_KEY` is absent, pass `--issue-key` to request a self-service beta key for the example run. The examples do not print the raw key.
 
 Known exact records used by production canaries:
 

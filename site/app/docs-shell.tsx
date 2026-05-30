@@ -21,29 +21,30 @@ export const docsNavGroups: DocsNavGroup[] = [
   {
     items: [
       { href: "/docs", label: "Home" },
+      { href: "/agents", label: "Agents" },
       { href: "/quickstart", label: "Quickstart" },
-      { href: "/demo", label: "Demo" },
-      { href: "/architecture", label: "Architecture" },
-      { href: "/base-agents", label: "Base agents" },
-      { href: "/api-access", label: "API reference" }
+      { href: "/api-access", label: "API reference" },
+      { href: "/sources", label: "Sources" },
+      { href: "/architecture", label: "Architecture" }
     ],
     title: "Start"
   },
   {
     items: [
-      { href: "/sources", label: "Sources" },
+      { href: "/demo", label: "Demo" },
       { href: "/source-quality", label: "Source quality" },
+      { href: "/mcp", label: "MCP" },
+      { href: "/examples", label: "Examples" },
       { href: "/integrations", label: "Integrations" },
       { href: "/partners", label: "Partners" },
-      { href: "/trust", label: "Trust and safety" },
-      { href: "/mcp", label: "MCP" },
-      { href: "/examples", label: "Examples" }
+      { href: "/base-agents", label: "Base agents" }
     ],
     title: "Build"
   },
   {
     items: [
       { href: "/packages", label: "Archive" },
+      { href: "/trust", label: "Trust and safety" },
       { href: "/security", label: "Security" },
       { href: "/benchmark", label: "Benchmark" },
       { href: "/stats", label: "Stats" },
@@ -184,7 +185,7 @@ export function ArchitectureDiagram() {
   return (
     <figure
       className="docs-architecture"
-      aria-label="Nipmod architecture flow: agent asks Nipmod for a package, Nipmod searches existing sources, normalizes results, checks trust, creates a safe install plan, waits for user approval before workspace writes, and saves confirmed useful package intelligence for future reuse."
+      aria-label="Nipmod architecture flow: agent asks Nipmod for a package, Nipmod searches existing sources, normalizes results, checks trust, creates a reviewable install plan, waits for user approval before workspace writes, and saves confirmed useful package intelligence for future reuse."
     >
       <img
         src="/architecture.png"

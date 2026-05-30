@@ -35,7 +35,8 @@ curl 'https://nipmod.com/api/usage/stats?hours=24' \\
   -H 'authorization: Bearer <admin-key>'`;
 
 const betaKeyCall = `curl -s -X POST 'https://nipmod.com/api/keys/beta' \\
-  -H 'content-type: application/json'
+  -H 'content-type: application/json' \\
+  -d '{"label":"agent-quickstart"}'
 
 curl 'https://nipmod.com/api/search?q=http%20client&limit=3' \\
   -H 'x-nipmod-api-key: <returned-key>'`;
@@ -83,8 +84,8 @@ const mcpCall = `curl -s https://nipmod.com/api/mcp \\
   -H 'x-nipmod-api-key: <key>' \\
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`;
 
-const clientExamples = `node --experimental-strip-types examples/http-api/agent-flow.ts "http client"
-python3 examples/http-api/agent_flow.py "http client"
+const clientExamples = `node --experimental-strip-types examples/http-api/agent-flow.ts --issue-key "http client"
+python3 examples/http-api/agent_flow.py --issue-key "http client"
 curl 'https://nipmod.com/api/openapi' -H 'x-nipmod-api-key: <key>'`;
 
 export default function ApiAccessPage() {

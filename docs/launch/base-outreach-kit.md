@@ -6,7 +6,7 @@ Use these as starting points. Keep the wording honest until Base confirms a list
 
 Hey, saw the Base MCP launch and wanted to share what we are building around it.
 
-Nipmod is a read-only package preflight for agents. Before an agent installs or enables a Base SDK, CLI, MCP server, package or repo, it can use Nipmod to search sources, inspect trust signals and get a safe install plan.
+Nipmod is a read-only package preflight for agents. Before an agent installs or enables a Base SDK, CLI, MCP server, package or repo, it can use Nipmod to search sources, inspect trust signals and get a reviewable install plan.
 
 The fit I see is simple: Base MCP helps agents act onchain, Nipmod helps agents decide which tools to trust before they act.
 

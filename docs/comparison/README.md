@@ -23,7 +23,7 @@ Nipmod focuses on the pre-install decision an agent needs:
 - inspect exact package records
 - expose trust factors
 - separate popularity from security
-- generate safe install plans
+- generate reviewable install plans
 - preserve approval boundary
 - store confirmed package intelligence after useful discovery
 

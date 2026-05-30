@@ -4,7 +4,8 @@ import { createPageMetadata } from "../metadata";
 import { publicSourceQualityReport } from "../../lib/source-quality-public";
 
 export const metadata = createPageMetadata({
-  description: "Nipmod source quality benchmark and public source intelligence depth across npm, PyPI, GitHub, Hugging Face and MCP.",
+  description:
+    "Nipmod offline search-quality regression gates and public source intelligence depth across npm, PyPI, GitHub, Hugging Face and MCP.",
   path: "/source-quality",
   title: "Nipmod source quality"
 });
@@ -24,7 +25,7 @@ export default function SourceQualityPage() {
         { label: "Recall at 3", value: String(benchmark.recallAt3) },
         { label: "Blocked recommended", value: String(benchmark.blockedRecommendedCount) }
       ]}
-      title="Source quality benchmark."
+      title="Offline search-quality regression gates."
     >
       <DocsSection eyebrow="Depth" title="Source intelligence depth">
         <div className="quality-profile-list">
@@ -34,8 +35,8 @@ export default function SourceQualityPage() {
                 <h3>{sourceLabel(profile.source)}</h3>
                 <p>{profile.inspectDepth}</p>
               </div>
-              <div className="quality-meter" aria-label={`${sourceLabel(profile.source)} depth score ${profile.depthScore} of ${profile.targetDepthScore}`}>
-                <span style={{ width: `${Math.min(100, Math.round((profile.depthScore / profile.targetDepthScore) * 100))}%` }} />
+              <div className="quality-meter" aria-label={`${sourceLabel(profile.source)} depth score ${profile.depthScore} of 100`}>
+                <span style={{ width: `${Math.min(100, profile.depthScore)}%` }} />
               </div>
               <dl>
                 <div><dt>Current</dt><dd>{profile.depthScore}</dd></div>
@@ -66,6 +67,7 @@ export default function SourceQualityPage() {
           rows={[
             ["Question", report.benchmark.scope.question],
             ["Unit", report.benchmark.scope.unit],
+            ["Fixture mode", report.benchmark.scope.fixtureMode],
             ["Counting", report.benchmark.scope.countingNote],
             ["Scenarios", report.benchmark.scope.scenarioNote]
           ]}

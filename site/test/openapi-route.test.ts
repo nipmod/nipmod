@@ -105,6 +105,14 @@ describe("OpenAPI route", () => {
       "version",
       "workspaceWriteAllowed"
     ]);
+    expect(body.components.schemas.PackageDecision.required).toEqual(
+      expect.arrayContaining(["agentReadiness", "comparison", "confidence", "receipt", "security"])
+    );
+    expect(body.components.schemas.PackageDecision.properties.agentReadiness.$ref).toBe(
+      "#/components/schemas/PackageDecisionAgentReadiness"
+    );
+    expect(body.components.schemas.PackageDecisionAgentReadiness.required).toContain("verdict");
+    expect(body.components.schemas.PackageDecisionAgentReadiness.properties.verdict.enum).toEqual(["blocked", "ready", "review"]);
     expect(body.components.schemas.ExternalPackageRecord.properties.trust.$ref).toBe("#/components/schemas/ExternalPackageTrust");
     expect(body.components.schemas.ExternalPackageTrust.required).toContain("checkedAt");
     expect(body.components.schemas.ExternalPackageTrust.required).toContain("dimensions");
@@ -142,8 +150,17 @@ describe("OpenAPI route", () => {
     expect(body.components.schemas.ExternalInstallPlan.properties.plan.required).toContain("commandDetails");
     expect(body.components.schemas.ExternalInstallPlan.properties.safety.required).toContain("blocked");
     expect(body.components.schemas.PackageIntelligenceRecord.required).toEqual(
-      expect.arrayContaining(["archive", "installPlan", "ownership", "security", "sourceRecord", "trust"])
+      expect.arrayContaining(["archive", "installPlan", "ownership", "privacy", "security", "sourceRecord", "trust"])
     );
+    expect(body.components.schemas.PackageIntelligenceRecord.properties.privacy.$ref).toBe("#/components/schemas/PackageIntelligencePrivacy");
+    expect(body.components.schemas.PackageIntelligencePrivacy.required).toEqual([
+      "excluded",
+      "privateWorkspaceDataStored",
+      "rawApiKeysStored",
+      "rawIpAddressesStored",
+      "rawPromptsStored",
+      "version"
+    ]);
     expect(body.components.schemas.PackageIntelligenceEvidence.required).toContain("sourceDrift");
     expect(body.components.schemas.PackageIntelligenceSourceDrift.required).toEqual([
       "baselineSourceRecordDigest",

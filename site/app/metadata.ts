@@ -31,6 +31,7 @@ export function createPageMetadata({
   title?: string;
 } = {}): Metadata {
   const url = new URL(path, siteUrl).toString();
+  const pageTitle = title === siteName ? siteName : `${title} | ${siteName}`;
 
   return {
     alternates: { canonical: url },
@@ -38,18 +39,18 @@ export function createPageMetadata({
     openGraph: withPreviewImage({
       description,
       siteName,
-      title,
+      title: pageTitle,
       type: "website",
       url
     }),
-    title: siteName,
+    title: pageTitle,
     twitter: {
       card: "summary_large_image",
       creator: "@Nipmod",
       description,
       images: [previewImageUrl],
       site: "@Nipmod",
-      title
+      title: pageTitle
     }
   };
 }

@@ -233,7 +233,9 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
           <Link aria-current={section === "settings" ? "page" : undefined} href="/account/settings">Settings</Link>
         </nav>
         <div className="account-app-sidebar-foot">
-          <a href="/auth/logout">Log out</a>
+          <form action="/auth/logout" method="post">
+            <button type="submit">Log out</button>
+          </form>
         </div>
       </aside>
 
@@ -333,7 +335,9 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
                 <div><dt>Raw API key storage</dt><dd>shown once only</dd></div>
                 <div><dt>Execution</dt><dd>outside hosted API</dd></div>
               </dl>
-              <a className="button button-secondary button-small account-logout-button" href="/auth/logout">Log out</a>
+              <form action="/auth/logout" method="post">
+                <button className="button button-secondary button-small account-logout-button" type="submit">Log out</button>
+              </form>
             </section>
           ) : null}
         </div>

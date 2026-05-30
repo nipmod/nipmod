@@ -29,7 +29,7 @@ export default function McpPage() {
             ["nipmod.search", "Search public package sources."],
             ["nipmod.resolve", "Resolve candidates with normalized metadata."],
             ["nipmod.inspect", "Inspect one exact package record."],
-            ["nipmod.external_install_plan", "Return a safe install plan without writing."],
+            ["nipmod.external_install_plan", "Return a reviewable install plan without writing."],
             ["nipmod.demo", "Run a small read only demo response."]
           ]}
         />
@@ -41,7 +41,7 @@ export default function McpPage() {
             <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -H "x-nipmod-api-key: <key>" -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}\''}</DocsCode>
           </DocsCard>
           <DocsCard label="tools/call" title="Search">
-            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -H "x-nipmod-api-key: <key>" -d \'{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"q":"http client","limit":3}}}\''}</DocsCode>
+            <DocsCode>{'curl -fsS https://nipmod.com/api/mcp -H "content-type: application/json" -H "x-nipmod-api-key: <key>" -d \'{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"http client","limit":3}}}\''}</DocsCode>
           </DocsCard>
         </DocsGrid>
       </DocsSection>

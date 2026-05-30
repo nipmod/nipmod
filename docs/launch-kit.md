@@ -18,7 +18,7 @@ Use this only for claims backed by live product paths.
 ```text
 Nipmod is moving to one package API for agents.
 
-Agents can search npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive through one API, then receive source context, trust checks and safe install plans.
+Agents can search npm, PyPI, GitHub, Hugging Face, MCP and the Nipmod archive through one API, then receive source context, trust checks and reviewable install plans.
 
 https://nipmod.com/api-access
 ```

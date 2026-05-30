@@ -71,5 +71,11 @@ Public docs are organized around the product surface that agents and maintainers
 - [API beta launch kit](launch/api-beta.md)
 - [API beta post](launch/api-beta-post.md)
 - [Launch kit](launch-kit.md)
+
+## Legacy / Historical
+
+These documents are retained as historical Gitlawb-era launch material. They are not the current API-first agent integration path.
+
+- [Community](community.md)
 - [Public launch packet](public-launch-packet.md)
 - [Release posting](release-posting.md)

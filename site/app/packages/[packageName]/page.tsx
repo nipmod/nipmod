@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: PackagePageProps): Promise<Me
   const pkg = findPackage(packageName);
   const title = pkg ? `${pkg.name} package` : "package";
   const description = pkg
-    ? `${pkg.name}: source context, trust signals and a safe install plan through Nipmod.`
-    : "Nipmod package record with source context, trust signals and safe install planning.";
+    ? `${pkg.name}: source context, trust signals and a reviewable install plan through Nipmod.`
+    : "Nipmod package record with source context, trust signals and reviewable install planning.";
 
   return createPageMetadata({
     description,

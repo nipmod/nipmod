@@ -152,7 +152,7 @@ const REMOTE_TOOLS: ToolDefinition[] = [
   },
   {
     annotations: READONLY_ANNOTATIONS,
-    description: "Create a remote-safe install plan from registry evidence without writing a lockfile.",
+    description: "Create a remote reviewable install plan from registry evidence without writing a lockfile.",
     inputSchema: {
       additionalProperties: false,
       properties: {
@@ -167,7 +167,7 @@ const REMOTE_TOOLS: ToolDefinition[] = [
   {
     annotations: READONLY_ANNOTATIONS,
     description:
-      "Create a remote-safe install plan for an external indexed package. The plan keeps source ownership external and requires local user approval before workspace writes.",
+      "Create a remote reviewable install plan for an external indexed package. The plan keeps source ownership external and requires local user approval before workspace writes.",
     inputSchema: {
       additionalProperties: false,
       properties: {

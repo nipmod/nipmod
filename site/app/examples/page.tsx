@@ -3,7 +3,7 @@ import { createPageMetadata } from "../metadata";
 import { DocsCard, DocsCode, DocsGrid, DocsSection, DocsShell, DocsTable } from "../docs-shell";
 
 export const metadata = createPageMetadata({
-  description: "Example package records agents can search, inspect and turn into safe install plans through Nipmod.",
+  description: "Example package records agents can search, inspect and turn into reviewable install plans through Nipmod.",
   path: "/examples",
   title: "Nipmod examples"
 });
@@ -55,7 +55,7 @@ curl 'https://nipmod.com/api/install-plan?source=mcp&name=ac.tandem/docs-mcp' -H
 export default function ExamplesPage() {
   return (
     <DocsShell
-      description="Copyable examples for the key-required agent flow: search sources, inspect one record and request a safe install plan before any workspace write."
+      description="Copyable examples for the key-required agent flow: search sources, inspect one record and request a reviewable install plan before any workspace write."
       eyebrow="Examples"
       stats={[
         { label: "Flow", value: "Search, Inspect, Plan" },
