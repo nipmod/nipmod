@@ -221,17 +221,17 @@ export const competitiveBenchmarkReport = {
       benchmarkBoundary: "Measured through authenticated PURL package lookup. The benchmark does not test Socket Firewall, CLI, GitHub app, browser extension or paid enterprise workflows.",
       benchmarkRole: "Supply-chain package evidence",
       name: "Socket",
-      scaleContext: "Socket announced a $60M Series C at a $1B valuation in May 2026.",
-      sourceLabel: "Socket Series C announcement",
-      sourceUrl: "https://socket.dev/blog/series-c"
+      scaleContext: "Commercial supply-chain security product. Company size is not a scoring input.",
+      sourceLabel: "Socket API docs",
+      sourceUrl: "https://docs.socket.dev/reference/batchpackagefetchbyorg"
     },
     {
       benchmarkBoundary: "Measured through authenticated REST package API access. The benchmark does not test Snyk CLI, SCM imports, full platform project scanning, IaC, container or code analysis.",
       benchmarkRole: "Developer security and package health evidence",
       name: "Snyk",
-      scaleContext: "Snyk was reported at a $7.4B valuation after its 2022 Series G round.",
-      sourceLabel: "Reuters report",
-      sourceUrl: "https://www.streetinsider.com/Reuters/Cybersecurity%2Bstartup%2BSnyk%2Bvalued%2Bat%2B%247.4%2Bbillion%2Bafter%2Blatest%2Bfunding/20960166.html"
+      scaleContext: "Commercial developer security product. Company size is not a scoring input.",
+      sourceLabel: "Snyk API docs",
+      sourceUrl: "https://docs.snyk.io/snyk-api/reference/package"
     },
     {
       benchmarkBoundary: "Measured only for the GitHub repository posture case. It is not expected to search npm, PyPI, Hugging Face or MCP.",
@@ -274,7 +274,7 @@ export const competitiveBenchmarkReport = {
     "The headline score is coverage-adjusted across all cases, while applicable depth remains visible for specialized feeds.",
     "Token, rate-limit and plan limitations are marked as limitations in the snapshot instead of being hidden.",
     "No package install, clone, artifact unpacking, model execution, paid inference call or workspace write is performed.",
-    "Machine-readable JSON is published so the public page can be checked against the raw snapshot."
+    "Machine-readable summary JSON is published so the public page can be checked against the public snapshot."
   ],
   limitations: [
     "The benchmark has 8 public cases across all six Nipmod source surfaces. It is a focused preflight benchmark, not a full registry-wide or malware-corpus evaluation.",
@@ -383,8 +383,8 @@ export const competitiveBenchmarkReport = {
     score: 95
   },
   publishableClaims: [
-    "Nipmod score: 95/100 across the current production agent-preflight benchmark.",
-    "Nipmod completed 8/8 live source cases and returned 8/8 read-only install-plan evidence with 3059 ms median latency.",
+    "In this authored 8-case preflight snapshot, Nipmod returned live source evidence and read-only install-plan output for 8/8 cases; the 95/100 score is a rubric view of that narrow boundary.",
+    "Nipmod completed 8/8 live source cases and returned 8/8 read-only install-plan evidence with 3059 ms median latency in this snapshot.",
     "Socket was authenticated and returned package-depth evidence in 4/4 applicable package checks.",
     "Snyk authentication worked, but package-health depth was unavailable on the current token or plan; do not use this snapshot for a direct Snyk depth claim."
   ],

@@ -94,7 +94,7 @@ They are stronger at user-facing integrations and auth. Nipmod should not chase 
 
 The strongest market position is:
 
-> one agent-facing API that searches package sources, ranks candidates, explains trust, creates safe install plans and remembers useful confirmed records.
+> one agent-facing API that searches package sources, ranks candidates, explains trust, creates reviewable install plans and remembers useful confirmed records.
 
 This is different from:
 

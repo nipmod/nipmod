@@ -2,7 +2,7 @@ import { DocsCode, DocsSection, DocsShell, DocsTable } from "../../docs-shell";
 import { createPageMetadata } from "../../metadata";
 
 export const metadata = createPageMetadata({
-  description: "Use Nipmod from agent hosts for package search, trust checks and safe install plans.",
+  description: "Use Nipmod from agent hosts for package search, trust checks and reviewable install plans.",
   path: "/agents/mcp-hosts",
   title: "Nipmod for agent hosts"
 });

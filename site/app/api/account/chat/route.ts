@@ -12,6 +12,7 @@ import { tryAnswerAccountChatWithLlm, type AccountChatHistoryEntry } from "../..
 import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/account-auth";
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
 import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
+import { accountMutationRejection } from "../../../../lib/account-request-security";
 import { checkApiRateLimitAsync } from "../../../../lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,11 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request): Promise<Response> {
   const context = createApiHttpContext(request);
+  const rejectedMutation = accountMutationRejection(request);
+  if (rejectedMutation) {
+    return chatError(request, "account_mutation_rejected", rejectedMutation, 403, false, {});
+  }
+
   const rateLimit = await checkApiRateLimitAsync(request, { limit: 30, name: "account-chat", windowMs: 60_000 }, context);
   if (!rateLimit.ok) {
     return rateLimit.response!;

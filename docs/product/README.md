@@ -6,7 +6,7 @@ The direction is:
 
 > Nipmod is the package intelligence layer for AI agents.
 
-Agents use Nipmod to search packages, inspect trust, and get safe install plans before touching a workspace.
+Agents use Nipmod to search packages, inspect trust, and get install plans with risk and approval boundaries before touching a workspace.
 
 Nipmod should help agents find, evaluate and plan package usage across the existing software ecosystem. It should not present itself as a Gitlawb add-on, a generic package mirror, an agent IDE integration collection or a token-first story.
 

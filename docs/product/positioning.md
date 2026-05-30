@@ -2,7 +2,7 @@
 
 Nipmod is the package intelligence layer for AI agents.
 
-Agents use Nipmod to search packages, inspect trust, and get safe install plans before touching a workspace.
+Agents use Nipmod to search packages, inspect trust, and get install plans with risk and approval boundaries before touching a workspace.
 
 ## What Nipmod Is
 
@@ -44,7 +44,7 @@ Use precise language:
 | --- | --- |
 | Package layer for AI agents | New npm |
 | Package intelligence over existing sources | Replacement registry |
-| Safe install plans before workspace writes | Hosted API installs packages |
+| Install plans with risk and approval boundaries | Hosted API installs packages |
 | Confirmed package intelligence records | Verified packages from search alone |
 | API beta, key-required and rate limited | Unlimited production access |
 

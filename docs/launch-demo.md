@@ -4,7 +4,7 @@ This is the public demo script for a Gitlawb founder review or X post.
 
 ## Goal
 
-Show that Nipmod is not a centralized upload gate. Gitlawb stores the repo. Nipmod creates package evidence, verifies it and gives agents a safe install path.
+Show that Nipmod is not a centralized upload gate. Gitlawb stores the repo. Nipmod creates package evidence, verifies it and gives agents a reviewable install path.
 
 ## Reproducible public demo flow
 

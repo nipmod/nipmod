@@ -244,6 +244,33 @@ describe("external package resolver", () => {
     expect(result.selection.candidates[0]?.reasons).toContain("query intent match: Python image processing fit");
   });
 
+  test("uses finance task hints for trading and backtesting searches", async () => {
+    const requested: string[] = [];
+    const result = await searchExternalPackages("stock trading backtesting exchange api quant finance", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        requested.push(url);
+        if (url === "https://pypi.org/pypi/ccxt/json") {
+          return pyPiProjectResponse("ccxt", "4.4.0", "https://github.com/ccxt/ccxt");
+        }
+        if (url === "https://pypi.org/pypi/vectorbt/json") {
+          return pyPiProjectResponse("vectorbt", "0.28.0", "https://github.com/polakowo/vectorbt");
+        }
+        if (url === "https://pypi.org/pypi/backtrader/json") {
+          return pyPiProjectResponse("backtrader", "1.9.78.123", "https://github.com/mementum/backtrader");
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 3,
+      sources: ["pypi"]
+    });
+
+    expect(requested).toContain("https://pypi.org/pypi/ccxt/json");
+    expect(requested).toContain("https://pypi.org/pypi/vectorbt/json");
+    expect(result.records.map((record) => record.id)).toEqual(expect.arrayContaining(["pypi:ccxt", "pypi:vectorbt", "pypi:backtrader"]));
+    expect(result.selection.candidates[0]?.reasons).toContain("query intent match: exchange API trading workflow fit");
+  });
+
   test("uses web design task hints for broad UI package searches", async () => {
     const requested: string[] = [];
     const result = await searchExternalPackages("website design react ui component library css tailwind icons animation", {
@@ -421,7 +448,7 @@ describe("external package resolver", () => {
     expect(result.selection.candidates[0]?.reasons).toContain("query intent match: TypeScript schema validation fit");
   });
 
-  test("inspects exact packages and creates safe install plans", async () => {
+  test("inspects exact packages and creates reviewable install plans", async () => {
     const record = await inspectExternalPackage("npm", "node-telegram-bot-api", { fetchImpl: mockFetch });
     const plan = createExternalInstallPlan(record);
 

@@ -14,7 +14,7 @@
   },
   "api": {
     "baseUrl": "https://nipmod.com",
-    "description": "Hosted package discovery, trust checks and safe install plans for agents.",
+    "description": "Hosted package discovery, trust checks and reviewable install plans for agents.",
     "openapi": "https://nipmod.com/api/openapi",
     "search": "https://nipmod.com/api/search",
     "resolve": "https://nipmod.com/api/resolve",
@@ -42,6 +42,12 @@
     "selectionPolicy": {
       "version": "agent-selection-v1",
       "summary": "Search responses include a recommended candidate, gate state and rank breakdown for agent planning."
+    },
+    "decisionObject": {
+      "type": "dev.nipmod.package-decision.v1",
+      "schema": "https://nipmod.com/api/openapi#/components/schemas/PackageDecision",
+      "readinessField": "agentReadiness",
+      "approvalBoundary": "Ready means the preflight record is complete enough to review; it is not permission to execute package commands."
     },
     "writeBoundary": "Hosted API calls do not write to a caller workspace.",
     "localDeepScan": {
@@ -81,7 +87,15 @@
       "below threshold trust score",
       "high risk install commands"
     ],
-    "writeBoundary": "Prepared records are not persisted by /api/archive/prepare. Durable writes require archive confirmation and an authorized server writer."
+    "writeBoundary": "Prepared records are not persisted by /api/archive/prepare. Durable writes require archive confirmation and an authorized server writer.",
+    "privacy": {
+      "version": "archive-privacy-v1",
+      "rawApiKeysStored": false,
+      "rawIpAddressesStored": false,
+      "rawPromptsStored": false,
+      "privateWorkspaceDataStored": false,
+      "publicEvents": "Confirmation actor values are non-reversible hashes and public messages are bounded reason text, not raw caller notes."
+    }
   },
   "docs": {
     "home": "https://nipmod.com",
@@ -293,7 +307,11 @@
       "search": "https://nipmod.com/api/archive/search",
       "status": "https://nipmod.com/api/archive/status",
       "receiptType": "dev.nipmod.package-intelligence-receipt.v1",
-      "writeBoundary": "Durable writes require the configured server-side archive store and an authorized server writer."
+      "writeBoundary": "Durable writes require the configured server-side archive store and an authorized server writer.",
+      "privacy": {
+        "rawCallerNotesStored": false,
+        "publicConfirmationActor": "non-reversible hash"
+      }
     },
     "sources": [
       "npm",

@@ -2,7 +2,7 @@
 
 Status: implemented key-required API beta
 
-Nipmod exposes a hosted package intelligence API for agents. The API searches supported public sources, normalizes records, returns trust signals and prepares safe install plans.
+Nipmod exposes a hosted package intelligence API for agents. The API searches supported public sources, normalizes records, returns trust signals and prepares install plans with risk and approval boundaries.
 
 Nipmod does not replace package registries. Nipmod makes existing package ecosystems readable and safer for AI agents.
 
@@ -178,7 +178,7 @@ dev.nipmod.external-inspect.v1
 
 ## `GET /api/install-plan`
 
-Return a safe install plan for an agent to show before any workspace write.
+Return a reviewable install plan for an agent to show before any workspace write.
 
 Query parameters:
 

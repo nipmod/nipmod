@@ -32,7 +32,19 @@ describe("public agent proof kit", () => {
     expect(integrationKit.integrationContract.issueBetaKey).toBe("POST https://nipmod.com/api/keys/beta");
     expect(integrationKit.integrationContract.search).toContain("x-nipmod-api-key");
     expect(integrationKit.integrationContract.optionalArchiveDryRun).toContain("/api/archive/confirm");
-    expect(integrationKit.decisionObject.fields).toEqual(expect.arrayContaining(["comparison.candidates", "security.signals", "receipt", "archive"]));
+    expect(integrationKit.decisionObject.fields).toEqual(
+      expect.arrayContaining(["agentReadiness", "comparison.candidates", "security.signals", "receipt", "archive"])
+    );
+    expect(integrationKit.decisionObject.schema).toBe("https://nipmod.com/api/openapi#/components/schemas/PackageDecision");
+    expect(integrationKit.decisionObject.requiredFields).toContain("agentReadiness.verdict");
+    expect(integrationKit.decisionObject.approvalPolicy.beforeLocalExecution).toContain("Require host or user approval");
+    expect(integrationKit.decisionObject.example.agentReadiness.verdict).toBe("ready");
+    expect(integrationKit.apiKeyLifecycle).toMatchObject({
+      betaKeyIssue: "POST https://nipmod.com/api/keys/beta",
+      keyMaterialStored: "server-side hash only",
+      versioning: "additive API fields are shipped without requiring agents to rotate existing keys"
+    });
+    expect(integrationKit.proofArtifacts).toEqual(expect.arrayContaining(["https://nipmod.com/.well-known/nipmod.json", "https://nipmod.com/source-quality.json"]));
     expect(integrationKit.nonGoals).toContain("hosted workspace writes");
     expect(integrationKit.nonGoals).toContain("official partnership claim without the partner's approval");
     expect(integrationKit.expectedHandoff).toContain("user or host approves local execution outside the hosted API");
@@ -96,6 +108,8 @@ describe("public agent proof kit", () => {
     });
     expect(sourceQualityBenchmark.summary.meanReciprocalRank).toBeGreaterThanOrEqual(0.95);
     expect(sourceQualityBenchmark.scope.unit).toBe("search result and pre-install source selection");
+    expect(sourceQualityBenchmark.status).toBe("offline_fixture_regression_snapshot");
+    expect(sourceQualityBenchmark.scope.fixtureMode).toContain("deterministic offline fixtures");
     expect(sourceQualityBenchmark.sourceCoverage.map((item) => item.source)).toEqual([
       "npm",
       "pypi",
@@ -145,12 +159,17 @@ describe("public agent proof kit", () => {
       "Raw agent"
     ]);
     expect(competitiveBenchmarkReport.marketContext.find((item) => item.name === "Snyk")?.benchmarkBoundary).toContain("authenticated REST package API");
-    expect(competitiveBenchmarkReport.marketContext.find((item) => item.name === "Socket")?.scaleContext).toContain("$1B");
+    expect(competitiveBenchmarkReport.marketContext.find((item) => item.name === "Socket")?.scaleContext).toContain("not a scoring input");
+    expect(JSON.stringify(competitiveBenchmarkReport.marketContext)).not.toContain("$1B");
+    expect(JSON.stringify(competitiveBenchmarkReport.marketContext)).not.toContain("$7.4B");
     expect(competitiveBenchmarkReport.fairnessControls.join(" ")).toContain("coverage-adjusted");
+    expect(competitiveBenchmarkReport.fairnessControls.join(" ")).toContain("Machine-readable summary JSON");
     expect(competitiveBenchmarkReport.limitations.join(" ")).toContain("not a guarantee");
     expect(competitiveBenchmarkReport.reviewerAssessment.academicGrade).toContain("not sufficient");
     expect(competitiveBenchmarkReport.claimBoundary.join(" ")).toContain("not a malware-free guarantee");
     expect(JSON.stringify(competitiveBenchmarkReport)).not.toMatch(/Surplus|cost-market|cost_market/i);
+    expect(competitiveBenchmarkReport.publishableClaims.join(" ")).toMatch(/authored 8-case preflight snapshot/);
+    expect(competitiveBenchmarkReport.publishableClaims.join(" ")).not.toMatch(/Nipmod score:/);
     expect(competitiveBenchmarkReport.publishableClaims.join(" ")).not.toMatch(/safer than every competitor|guarantees package safety/i);
     expect(competitiveBenchmarkReport.unsafeClaims.join(" ")).toMatch(/Socket or Snyk/);
   });

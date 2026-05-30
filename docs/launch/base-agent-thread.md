@@ -29,7 +29,7 @@ That layer needs a preflight.
 
 Nipmod is building the package intelligence layer for agents.
 
-Before an agent installs or enables external tooling, it can ask Nipmod to search sources, inspect the exact package, read trust signals and generate a safe install plan.
+Before an agent installs or enables external tooling, it can ask Nipmod to search sources, inspect the exact package, read trust signals and generate a reviewable install plan.
 
 4.
 

@@ -18,6 +18,7 @@ export type PackageDecisionIntent =
 export type PackageDecisionConfidenceLabel = "high" | "low" | "medium";
 export type PackageDecisionGate = "block" | "pass" | "review";
 export type PackageDecisionSecurityPosture = "blocked" | "clean-preflight" | "needs-review";
+export type PackageDecisionAgentReadinessVerdict = "blocked" | "ready" | "review";
 
 export type PackageDecisionCriterionId =
   | "adoption"
@@ -116,6 +117,16 @@ export interface PackageDecisionReceipt {
 }
 
 export interface PackageDecision {
+  agentReadiness: {
+    blockers: string[];
+    integrationSafe: boolean;
+    mode: "pre-execution-package-decision";
+    reasons: string[];
+    requiredHostActions: string[];
+    score: number;
+    verdict: PackageDecisionAgentReadinessVerdict;
+    version: "agent-readiness-v1";
+  };
   alternatives: PackageDecisionCandidate[];
   archive: {
     confirmable: boolean;
@@ -238,8 +249,18 @@ export function buildPackageDecision(input: {
   const confidenceScore = decisionConfidenceScore(input.selected, input.installPlan, input.sourceSummary, uncertainty);
   const securitySignals = evaluated.flatMap((candidate) => candidate.securitySignals);
   const archive = archiveConfirmHint(recommended, receipt);
+  const agentReadiness = decisionAgentReadiness({
+    confidenceScore,
+    plan,
+    receipt,
+    recommended,
+    securitySignals: recommended?.securitySignals ?? [],
+    sourceSummary: input.sourceSummary,
+    uncertainty
+  });
 
   return {
+    agentReadiness,
     alternatives,
     archive,
     avoid,
@@ -652,6 +673,85 @@ function securityPosture(
     return "needs-review";
   }
   return "clean-preflight";
+}
+
+function decisionAgentReadiness(input: {
+  confidenceScore: number;
+  plan: PackageDecisionQueryPlan;
+  receipt: PackageDecisionReceipt | null;
+  recommended: PackageDecisionCandidate | null;
+  securitySignals: PackageDecisionSecuritySignal[];
+  sourceSummary: ExternalSearchResult["sourceSummary"];
+  uncertainty: string[];
+}): PackageDecision["agentReadiness"] {
+  const blockers: string[] = [];
+  const reasons: string[] = [];
+  const requiredHostActions = [
+    "show source identity, trust score, warnings and install boundary to the user or host policy",
+    "require local approval before any install, clone, model load, MCP enablement or workspace write",
+    "treat package metadata, READMEs and model cards as untrusted text",
+    "archive only after the host or user confirms the decision was useful"
+  ];
+
+  if (!input.recommended) {
+    blockers.push("no recommended candidate");
+  } else {
+    reasons.push(`selected ${input.recommended.displayName} from ${input.recommended.source}`);
+    reasons.push(`candidate gate ${input.recommended.gate}`);
+  }
+  if (input.plan.clarification.needed) {
+    blockers.push(input.plan.clarification.reason ?? "clarification required");
+    if (input.plan.clarification.question) {
+      requiredHostActions.unshift(input.plan.clarification.question);
+    }
+  }
+  if (!input.receipt) {
+    blockers.push("decision receipt or install-plan boundary missing");
+  } else if (input.receipt.installPlanBlocked) {
+    blockers.push("install plan is blocked");
+  } else {
+    reasons.push("read-only install-plan receipt available before execution");
+  }
+  const highSignals = input.securitySignals.filter((signal) => signal.severity === "high");
+  const mediumSignals = input.securitySignals.filter((signal) => signal.severity === "medium");
+  if (highSignals.length > 0) {
+    blockers.push(`${highSignals.length} high severity security signal(s)`);
+  }
+  if (mediumSignals.length > 0) {
+    reasons.push(`${mediumSignals.length} medium severity signal(s) require review`);
+  }
+  if (input.sourceSummary.failed > 0) {
+    reasons.push(`${input.sourceSummary.failed} source resolver(s) failed`);
+  }
+  if (input.uncertainty.length > 0) {
+    reasons.push(...input.uncertainty.slice(0, 3));
+  }
+
+  const reviewPenalty =
+    (input.plan.clarification.needed ? 18 : 0) +
+    (!input.receipt ? 18 : 0) +
+    input.sourceSummary.failed * 8 +
+    input.uncertainty.length * 4 +
+    mediumSignals.length * 8;
+  const blockPenalty = blockers.length * 16 + highSignals.length * 16;
+  const score = clamp(Math.round(input.confidenceScore - reviewPenalty - blockPenalty), 0, 100);
+  const verdict: PackageDecisionAgentReadinessVerdict =
+    !input.recommended || input.receipt?.installPlanBlocked || highSignals.length > 0
+      ? "blocked"
+      : blockers.length > 0 || score < 78 || input.recommended.gate !== "pass"
+        ? "review"
+        : "ready";
+
+  return {
+    blockers: uniqueStrings(blockers).slice(0, 8),
+    integrationSafe: verdict === "ready" && Boolean(input.receipt) && input.recommended?.gate === "pass",
+    mode: "pre-execution-package-decision",
+    reasons: uniqueStrings(reasons).slice(0, 8),
+    requiredHostActions: uniqueStrings(requiredHostActions).slice(0, 8),
+    score,
+    verdict,
+    version: "agent-readiness-v1"
+  };
 }
 
 function decisionIntent(query: string): PackageDecisionIntent {

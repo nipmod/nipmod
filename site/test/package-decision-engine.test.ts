@@ -109,6 +109,12 @@ describe("package decision engine", () => {
         gate: "pass",
         id: "npm:tailwindcss"
       },
+      agentReadiness: {
+        integrationSafe: true,
+        mode: "pre-execution-package-decision",
+        verdict: "ready",
+        version: "agent-readiness-v1"
+      },
       security: {
         posture: "clean-preflight"
       },
@@ -125,8 +131,32 @@ describe("package decision engine", () => {
       dryRunEndpoint: "POST /api/archive/confirm",
       required: false
     });
+    expect(decision.agentReadiness.requiredHostActions.join(" ")).toContain("require local approval");
     expect(decision.alternatives.map((candidate) => candidate.id)).toEqual(["npm:lucide-react"]);
     expect(decision.avoid.map((candidate) => candidate.id)).toEqual(["npm:tailwindcss-next-free"]);
+  });
+
+  test("marks agent readiness as review when broad queries require clarification", () => {
+    const selected = packageRecord({
+      displayName: "ccxt",
+      name: "ccxt",
+      source: "pypi",
+      sourceDepthScore: 90
+    });
+    const decision = buildPackageDecision({
+      installPlan: createExternalInstallPlan(selected),
+      originalQuery: "trading",
+      records: [selected],
+      searchQuery: "trading",
+      selected,
+      sourceSummary: { empty: 0, failed: 0, ok: 1, requested: 1 }
+    });
+
+    expect(decision.plan.clarification.needed).toBe(true);
+    expect(decision.agentReadiness.verdict).toBe("review");
+    expect(decision.agentReadiness.integrationSafe).toBe(false);
+    expect(decision.agentReadiness.blockers).toContain("query too broad for a strong package decision");
+    expect(decision.agentReadiness.requiredHostActions[0]).toContain("Which stack or use case");
   });
 
   test("formats German fallback answers from the structured decision", () => {

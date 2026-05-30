@@ -1,10 +1,17 @@
-const task = process.argv.slice(2).join(" ").trim() || "http client";
+const args = process.argv.slice(2);
+const issueKey = args.includes("--issue-key");
+const task = args.filter((arg) => arg !== "--issue-key").join(" ").trim() || "http client";
 const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
-const apiKey = process.env.NIPMOD_API_KEY;
+let apiKey = process.env.NIPMOD_API_KEY;
+
+if (!apiKey && issueKey) {
+  apiKey = await issueBetaKey();
+}
 
 if (!apiKey) {
-  throw new Error("Set NIPMOD_API_KEY before calling the Nipmod API.");
+  throw new Error("Set NIPMOD_API_KEY or pass --issue-key before calling the Nipmod API.");
 }
+const activeApiKey = apiKey;
 
 const search = await readJson(searchUrl(task));
 const first = firstRecord(search);
@@ -23,6 +30,10 @@ console.log(
   JSON.stringify(
     {
       task,
+      apiAccess: {
+        keyIssuedByExample: issueKey,
+        rawKeyPrinted: false
+      },
       agentInstruction: "Search Nipmod, inspect the selected package and show the install plan before any workspace write.",
       sourceHealth: {
         partial: search.partial,
@@ -108,7 +119,7 @@ async function readJson(url: URL): Promise<Record<string, any>> {
   const response = await fetch(url, {
     headers: {
       accept: "application/json",
-      "x-nipmod-api-key": apiKey,
+      "x-nipmod-api-key": activeApiKey,
       "user-agent": "nipmod-agent-flow-example/1.0"
     }
   });
@@ -116,6 +127,26 @@ async function readJson(url: URL): Promise<Record<string, any>> {
     throw new Error(`${url.pathname} failed with ${response.status}: ${await response.text()}`);
   }
   return response.json();
+}
+
+async function issueBetaKey(): Promise<string> {
+  const response = await fetch(new URL("/api/keys/beta", baseUrl), {
+    body: JSON.stringify({ label: "agent-flow-example" }),
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "user-agent": "nipmod-agent-flow-example/1.0"
+    },
+    method: "POST"
+  });
+  if (!response.ok) {
+    throw new Error(`/api/keys/beta failed with ${response.status}: ${await response.text()}`);
+  }
+  const body = await response.json() as Record<string, any>;
+  if (typeof body.key !== "string") {
+    throw new Error("/api/keys/beta did not return a key");
+  }
+  return body.key;
 }
 
 function firstRecord(value: Record<string, any>): Record<string, any> | null {

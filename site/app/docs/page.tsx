@@ -3,7 +3,7 @@ import { ArchitectureDiagram, DocsCode, DocsProse, DocsSection, DocsSequence, Do
 import { createPageMetadata } from "../metadata";
 
 export const metadata = createPageMetadata({
-  description: "Nipmod docs for package search, source inspection, trust signals and safe install plans for agents.",
+  description: "Nipmod docs for package search, source inspection, trust signals and reviewable install plans for agents.",
   path: "/docs",
   title: "Nipmod docs"
 });

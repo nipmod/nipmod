@@ -23,7 +23,7 @@ Out of scope for this plan:
 
 Nipmod should be a public package intelligence surface for agents.
 
-An agent asks Nipmod for a package. Nipmod searches supported public sources, normalizes the result, evaluates trust and risk, returns a safe install plan, and can save useful confirmed records into the package intelligence archive.
+An agent asks Nipmod for a package. Nipmod searches supported public sources, normalizes the result, evaluates trust and risk, returns a reviewable install plan, and can save useful confirmed records into the package intelligence archive.
 
 The hosted API remains read-only. It must never read or write a caller workspace.
 
@@ -194,7 +194,7 @@ Current hardening:
 
 Definition of Done:
 
-- Agents can render a safe install plan without executing anything.
+- Agents can render a reviewable install plan without executing anything.
 - High-risk commands are marked blocked, return explicit command boundary metadata and tell agents not to execute.
 - The hosted API stays read-only.
 - Live install-plan canary passes across all current public sources.
@@ -528,7 +528,7 @@ Allowed current framing:
 - API-first package discovery and trust layer for agents.
 - Live public source resolvers.
 - Durable package intelligence archive foundation.
-- Safe install-plan workflow.
+- Reviewable install-plan workflow.
 
 Avoid current framing:
 

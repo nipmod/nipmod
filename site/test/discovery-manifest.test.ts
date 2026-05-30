@@ -225,12 +225,18 @@ describe("nipmod discovery manifest", () => {
     expect(manifest.sources).toEqual(manifest.externalIndex.sources);
     expect(manifest.api).toMatchObject({
       baseUrl: "https://nipmod.com",
-      description: "Hosted package discovery, trust checks and safe install plans for agents.",
+      description: "Hosted package discovery, trust checks and reviewable install plans for agents.",
       betaKey: "https://nipmod.com/api/keys/beta",
       installPlan: "https://nipmod.com/api/install-plan",
       openapi: "https://nipmod.com/api/openapi",
       search: "https://nipmod.com/api/search",
       writeBoundary: "Hosted API calls do not write to a caller workspace."
+    });
+    expect(manifest.api.decisionObject).toMatchObject({
+      approvalBoundary: expect.stringContaining("not permission to execute"),
+      readinessField: "agentReadiness",
+      schema: "https://nipmod.com/api/openapi#/components/schemas/PackageDecision",
+      type: "dev.nipmod.package-decision.v1"
     });
     expect(manifest.archive).toMatchObject({
       confirm: "https://nipmod.com/api/archive/confirm",
@@ -239,7 +245,14 @@ describe("nipmod discovery manifest", () => {
       search: "https://nipmod.com/api/archive/search",
       status: "https://nipmod.com/api/archive/status"
     });
+    expect(manifest.archive.privacy).toMatchObject({
+      privateWorkspaceDataStored: false,
+      rawApiKeysStored: false,
+      rawIpAddressesStored: false,
+      rawPromptsStored: false
+    });
     expect(manifest.externalIndex.packageIntelligence.writeBoundary).toContain("Durable writes require");
+    expect(manifest.externalIndex.packageIntelligence.privacy.rawCallerNotesStored).toBe(false);
     expect(manifest.mcp.remoteEndpoint).toBe("https://nipmod.com/api/mcp");
     expect(manifest.mcp.remoteTools).toContain("nipmod.resolve");
     expect(manifest.mcp.remoteNotExposed).toContain("nipmod.install");

@@ -7,7 +7,7 @@
 The package intelligence layer for AI agents.
 
 Nipmod lets agents search npm, PyPI, Hugging Face, GitHub and MCP sources,
-inspect package trust, and generate safe install plans before workspace writes.
+inspect package trust, and generate reviewable install plans before workspace writes.
 
 Nipmod does not replace package registries.
 It makes existing package ecosystems readable and safer for AI agents.

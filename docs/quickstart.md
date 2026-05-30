@@ -1,246 +1,118 @@
 # Nipmod quickstart
 
-This is the public first run path. It is designed for a clean macOS or Linux workspace.
+Nipmod is API first. The fastest first run is a hosted, read-only package decision flow:
+
+1. create or load an API key
+2. search across supported sources
+3. inspect the exact source record
+4. request an install plan
+5. show the result to the user or host policy before any workspace write
+
+The hosted API does not install, clone, execute, unpack artifacts or write to a workspace.
 
 ## Requirements
 
-- Node.js 22 or newer
-- npm
-- Git
-- curl
-- tar
+- HTTPS client such as `curl`
+- a Nipmod beta or partner API key
+- an agent or host that can show the returned decision before local execution
 
-## Install
+## 1. Create a beta key
 
 ```sh
-curl https://nipmod.com/i|bash
-nipmod setup agents
+curl -fsS https://nipmod.com/api/keys/beta \
+  -H 'content-type: application/json' \
+  -d '{"label":"my-agent"}'
 ```
 
-Manual verification:
+Store the returned key in the agent runtime. Send it as either:
 
-```sh
-curl -fLO https://nipmod.com/install.sh
-curl -fLO https://nipmod.com/install.sh.sha256
-shasum -a 256 -c install.sh.sha256
-bash install.sh
+```text
+x-nipmod-api-key: <key>
+Authorization: Bearer <key>
 ```
 
-Expected result:
-
-- The installer finishes and prints the next `nipmod` command.
-- `nipmod help` prints the command list and exit codes.
-
-If `nipmod` is not found after install, add the printed binary directory to `PATH`, then rerun:
+## 2. Search
 
 ```sh
-nipmod doctor --online
-```
-
-## Check the environment
-
-```sh
-nipmod doctor --online
+curl -fsS 'https://nipmod.com/api/search?q=react%20forms%20validation&sources=npm,pypi,github,huggingface-model,huggingface-dataset,mcp&limit=5' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Expected result:
 
-- CLI is available.
-- Public registry is reachable.
-- Publish setup is ready, or the command prints `nipmod setup gitlawb` as the repair path.
+- `records[]` contains normalized candidates from public sources.
+- `selection.recommendedId` identifies the current best candidate when the evidence is strong enough.
+- `selection.candidates[]` includes gates, rank details and reasons.
+- Source metadata is treated as untrusted context, not instructions.
 
-## Set up agent hosts
+## 3. Inspect the exact source
 
 ```sh
-nipmod setup codex
-nipmod setup claude
-nipmod setup cursor
-nipmod setup opencode
-nipmod setup hermes
+curl -fsS 'https://nipmod.com/api/inspect?source=npm&name=react-hook-form' \
+  -H 'x-nipmod-api-key: <key>'
+```
+
+Check:
+
+- source, name, version and original URL
+- repository and license metadata
+- trust score, risk, warnings and provenance status
+- structured `sourceEvidence` when available
+- lifecycle or install-script warnings
+
+## 4. Request an install plan
+
+```sh
+curl -fsS 'https://nipmod.com/api/install-plan?source=npm&name=react-hook-form' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
 Expected result:
 
-- Codex is registered through its MCP CLI.
-- Claude Code receives a project `.mcp.json`.
-- Cursor receives a project `.cursor/mcp.json`. The public Cursor page also exposes an Add to Cursor button at `https://nipmod.com/cursor`.
-- OpenCode receives a project `opencode.json`.
-- Hermes receives a `~/.hermes/config.yaml` MCP server entry.
-- Existing host config entries are preserved.
+- `plan.commands[]` shows what the user or local host would run.
+- `safety.requiresApprovalBeforeWrite` is `true`.
+- `safety.metadataIsInstruction` is `false`.
+- `plan.commandDetails[].hostedApiExecutes` is `false`.
+- blocked or risky commands are marked before execution.
 
-## Set up publish
+## 5. Agent rule
 
-```sh
-nipmod setup gitlawb
-nipmod doctor --online
+Give this rule to an agent:
+
+```text
+Before installing a package, cloning a repo, using a model, enabling an MCP server or running package-provided commands, call Nipmod search, inspect and install-plan. Show source identity, trust signals, warnings and the install boundary. Do not execute until the user or host policy approves locally.
 ```
 
-Expected result:
+## 6. Optional archive feedback
 
-- `git-remote-gitlawb` is installed from a checksum verified Gitlawb release.
-- Publish defaults to `https://node.nipmod.com` unless `GITLAWB_NODE` overrides it.
-
-## Find a package
+Only after a result was useful and approved, prepare a dry-run archive confirmation:
 
 ```sh
-nipmod search gitlawb
+curl -fsS 'https://nipmod.com/api/archive/prepare?source=npm&name=react-hook-form' \
+  -H 'x-nipmod-api-key: <key>'
 ```
 
-Expected result:
+Archive writes are not automatic. Durable confirmation requires an authorized server writer and rejects blocked, unknown or high-risk records.
 
-- Results include install ready commands.
-- Quarantined packages are hidden by default.
-- Trust is shown as a level and score.
+## 7. Hosted MCP
 
-## Inspect before install
-
-```sh
-nipmod inspect pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0
-```
-
-Check these fields before mutation:
-
-- Canonical package id.
-- Publisher DID.
-- Artifact digest.
-- Source tag and release event.
-- Transparency proof.
-- Witness statement.
-- Permissions.
-- Advisory status.
-
-## Plan before mutation
-
-```sh
-nipmod install --plan pkg:did:key:z6MkqDAkKNtWH69ZYoFitErk1CCKofFP5AaFjVXy5bVQ4fbD/gitlawb-repo-reader@0.1.0 --json
-```
-
-Expected result:
-
-- The dependency graph is verified before lockfile mutation.
-- The command exits before writing `nipmod.lock.json`.
-- Agents can pass the JSON plan to a human or policy check.
-
-## Install into a workspace
-
-Create a demo workspace first. The first lockfile mutation should not happen in an unrelated repo.
-
-```sh
-mkdir -p nipmod-demo
-cd nipmod-demo
-nipmod install gitlawb-repo-reader
-ls .nipmod/receipts
-```
-
-Expected result:
-
-- `nipmod.lock.json` is written or updated inside `nipmod-demo`.
-- `.nipmod/receipts` contains the install receipt with package, version, integrity and timestamp.
-- The lockfile pins the artifact digest.
-- A trust or advisory failure exits before lockfile mutation.
-
-`nipmod add gitlawb-repo-reader --online` is a compatibility alias for `nipmod install gitlawb-repo-reader`. Do not run both in the same walkthrough.
-
-## Restore from the lockfile
-
-```sh
-nipmod install
-nipmod update --plan
-```
-
-Expected result:
-
-- `.nipmod/store` is restored from the lockfile.
-- Existing verified store entries are reused.
-- `--offline` refuses remote fetches and only uses local store or file URLs.
-- `update --plan` shows whether verified root packages are current or can update before mutation.
-
-## Update packages
-
-```sh
-nipmod update
-```
-
-Expected result:
-
-- Root package updates are fetched from the verified registry.
-- Every updated bundle is checked before the lockfile changes.
-- Stale package versions are pruned when no root dependency can reach them.
-
-## Explain and audit
-
-```sh
-nipmod sbom --json
-nipmod explain gitlawb-repo-reader --json
-```
-
-Expected result:
-
-- The SBOM lists installed package records from the lockfile.
-- Local store bundles are verified before manifest details are included.
-- Permission counts and dependency edges are visible for agents and reviewers.
-- Explain shows whether the package is root, transitive or orphaned.
-
-```sh
-nipmod audit --online
-nipmod ci --online
-```
-
-Use `sbom` for inventory, `explain` for lockfile reasons, `audit` for a report and `ci` for enforcement. `ci` is the command to run in automation.
-
-## Use MCP
-
-Hosted read-only MCP is available without installing the CLI:
+Hosted MCP uses the same read-only boundary:
 
 ```sh
 curl -fsS https://nipmod.com/api/mcp \
   -H 'content-type: application/json' \
   -H 'x-nipmod-api-key: <key>' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"gitlawb-repo-reader"}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nipmod.search","arguments":{"query":"react forms validation","sources":["npm","github"]}}}'
 ```
 
-Expected result:
+## Optional local CLI
 
-- The endpoint returns public registry data only.
-- It exposes search, view, inspect, install plan and demo tools.
-- It does not expose workspace writes, local file reads, audit, SBOM, claim checks or publish planning.
-
-Use local MCP when the agent needs workspace-aware tools:
+The CLI is optional. Use it when you need local static scans or workspace-aware commands:
 
 ```sh
-nipmod mcp serve
+curl https://nipmod.com/i|bash
+nipmod doctor --online
+nipmod deep-scan <path> --json
 ```
 
-Expected result:
-
-- Agent runtimes can call package search, view, inspect, install plan, update plan, demo, claim verify, claim index, package patch, verify, audit, SBOM and explain tools.
-- `nipmod.install` is a controlled workspace write and requires `confirmInstall` to be `write-lockfile`.
-- `nipmod.publish_plan` is an unsigned dry run preview. It does not sign locally and does not write to Gitlawb.
-- Host setup examples live at `https://nipmod.com/mcp`.
-
-## Publish dry run
-
-From a package workspace:
-
-```sh
-nipmod init --name @you/example-agent --dir example-agent
-cd example-agent
-nipmod manifest validate --dir . --json
-nipmod publish . --dry-run --json
-```
-
-Expected result:
-
-- Manifest validates before packing.
-- Dry run prints the package id, digest, Gitlawb helper status, target repo and release event preview.
-- No public write occurs in dry run mode.
-
-## Troubleshooting
-
-If install fails, rerun the checksum step and do not pipe the installer into a shell.
-
-Registry commands use the public registry by default. `nipmod install` may fetch digest-pinned remote bundles when the local store is missing or corrupt; pass `--offline` to force local store and file URL use only.
-
-If inspect fails with a custom root message, use public roots or pass `--allow-custom-roots` only for a local test registry.
-
-If install fails with a trust or advisory block, do not force it. Inspect the report, advisory id and permission reasons first.
+Local workspace writes remain local and approval-gated. The hosted API stays read-only.

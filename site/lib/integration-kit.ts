@@ -17,7 +17,9 @@ export const integrationKit = {
   },
   decisionObject: {
     type: "dev.nipmod.package-decision.v1",
+    schema: "https://nipmod.com/api/openapi#/components/schemas/PackageDecision",
     fields: [
+      "agentReadiness",
       "recommended",
       "comparison.candidates",
       "confidence",
@@ -27,9 +29,56 @@ export const integrationKit = {
       "receipt",
       "archive"
     ],
+    requiredFields: [
+      "agentReadiness.verdict",
+      "recommended.id",
+      "confidence.score",
+      "comparison.candidates",
+      "receipt.requiresApprovalBeforeWrite",
+      "security.posture"
+    ],
+    approvalPolicy: {
+      beforeLocalExecution:
+        "Require host or user approval before install, clone, model load, MCP enablement or workspace write even when agentReadiness.verdict is ready.",
+      blockedWhen: ["agentReadiness.verdict=blocked", "receipt.installPlanBlocked=true", "security.posture=blocked"],
+      metadataBoundary: "Package metadata, READMEs and model cards are treated as untrusted data."
+    },
+    example: {
+      agentReadiness: {
+        blockers: [],
+        integrationSafe: true,
+        mode: "pre-execution-package-decision",
+        reasons: ["recommendation, receipt and reviewable install plan are available"],
+        requiredHostActions: ["show the install plan and require local approval before workspace writes"],
+        score: 92,
+        verdict: "ready",
+        version: "agent-readiness-v1"
+      },
+      confidence: { label: "high", score: 90, uncertainty: [] },
+      receipt: {
+        hostedApiExecutes: false,
+        requiresApprovalBeforeWrite: true,
+        workspaceWrites: false
+      },
+      security: { posture: "clean-preflight" }
+    },
     purpose:
       "One portable pre-execution decision object that a host can show to users, store as a receipt, or feed into local approval policy."
   },
+  apiKeyLifecycle: {
+    betaKeyIssue: "POST https://nipmod.com/api/keys/beta",
+    compatibleHeaders: ["x-nipmod-api-key", "Authorization: Bearer <key>"],
+    keyMaterialStored: "server-side hash only",
+    rotation: "create a new key and revoke or pause old keys from admin operations",
+    versioning: "additive API fields are shipped without requiring agents to rotate existing keys"
+  },
+  proofArtifacts: [
+    "https://nipmod.com/.well-known/nipmod.json",
+    "https://nipmod.com/api/openapi",
+    "https://nipmod.com/source-quality.json",
+    "https://nipmod.com/benchmark.json",
+    "https://nipmod.com/agent-demo-flow.json"
+  ],
   integrationModes: [
     {
       id: "preflight",

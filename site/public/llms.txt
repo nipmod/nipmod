@@ -2,32 +2,20 @@
 
 Nipmod is the package intelligence layer for AI agents.
 
-Agents use Nipmod to search package ecosystems, inspect trust signals and request safe install plans before changing a workspace.
+Agents use Nipmod to search package ecosystems, inspect trust signals and request reviewable install plans before changing a workspace.
 Mode: API first package discovery
 
 Primary machine manifest: https://nipmod.com/.well-known/nipmod.json
 API reference: https://nipmod.com/api-access
 Public agent demo: https://nipmod.com/demo
 Public agent demo machine flow: https://nipmod.com/agent-demo-flow.json
-Generic integration kit: https://nipmod.com/integrations
-Generic integration machine kit: https://nipmod.com/integration-kit.json
-Partner integration pack: https://nipmod.com/partners
-Partner integration machine pack: https://nipmod.com/partner-pack.json
-Source quality benchmark: https://nipmod.com/source-quality
-Source quality machine report: https://nipmod.com/source-quality.json
-Competitive benchmark: https://nipmod.com/benchmark
-Competitive benchmark machine report: https://nipmod.com/benchmark.json
 Contact: mailto:info@nipmod.com
-Base agent preflight: https://nipmod.com/base-agents
-Base agent machine preflight: https://nipmod.com/base-agent-preflight.json
-Base MCP integration outline: https://nipmod.com/base-agents/integration
-Base MCP integration machine outline: https://nipmod.com/base-agent-integration.json
-Base agent demo flow: https://nipmod.com/base-agents/demo
-Base agent demo machine flow: https://nipmod.com/base-agent-demo-flow.json
 OpenAPI spec: https://nipmod.com/api/openapi
 Source health: https://nipmod.com/api/sources/health
 Hosted read-only MCP endpoint: https://nipmod.com/api/mcp
 Registry: https://nipmod.com/registry/packages.json
+Source quality report: https://nipmod.com/source-quality.json
+Generic integration machine kit: https://nipmod.com/integration-kit.json
 System readiness receipt: https://nipmod.com/compatibility/system-readiness.json
 Platform readiness receipt: https://nipmod.com/compatibility/platform-readiness.json
 Quorum receipts: https://nipmod.com/quorum/receipts.json
@@ -51,10 +39,10 @@ Search is not install permission. A popular package can still be risky.
 
 Use the generic integration kit when adding Nipmod to an agent product, MCP server, SDK, CLI, wallet flow, infra layer or devtool:
 
-https://nipmod.com/integrations
-https://nipmod.com/integration-kit.json
-https://nipmod.com/partners
-https://nipmod.com/partner-pack.json
+Generic integration kit: https://nipmod.com/integrations
+Generic integration machine kit: https://nipmod.com/integration-kit.json
+Partner integration pack: https://nipmod.com/partners
+Partner integration machine pack: https://nipmod.com/partner-pack.json
 
 Use the public demo flow to test the full preflight before writing platform-specific integration code:
 
@@ -63,13 +51,13 @@ https://nipmod.com/agent-demo-flow.json
 
 Use source quality data to understand current source depth and limits:
 
-https://nipmod.com/source-quality
-https://nipmod.com/source-quality.json
+Source quality benchmark: https://nipmod.com/source-quality
+Source quality machine report: https://nipmod.com/source-quality.json
 
 Use the competitive benchmark to understand agent package-decision depth across evidence feeds, source metadata, repository posture and install-plan readiness:
 
-https://nipmod.com/benchmark
-https://nipmod.com/benchmark.json
+Competitive benchmark: https://nipmod.com/benchmark
+Competitive benchmark machine report: https://nipmod.com/benchmark.json
 
 ## Base agents
 
@@ -81,17 +69,17 @@ Nipmod returns package source context, trust signals, warnings and install plans
 Nipmod Base Builder Code: bc_vu9r71xi.
 Current hosted package intelligence calls do not append this code because they do not build or submit transactions.
 
-Base agent preflight page:
-https://nipmod.com/base-agents
+Base agent preflight page: https://nipmod.com/base-agents
 
-Base agent machine preflight:
-https://nipmod.com/base-agent-preflight.json
+Base MCP integration machine outline: https://nipmod.com/base-agent-integration.json
 
-Base MCP integration outline:
-https://nipmod.com/base-agents/integration
+Base agent machine preflight: https://nipmod.com/base-agent-preflight.json
 
-Base agent demo flow:
-https://nipmod.com/base-agents/demo
+Base MCP integration outline: https://nipmod.com/base-agents/integration
+
+Base agent demo flow: https://nipmod.com/base-agents/demo
+
+Base agent demo machine flow: https://nipmod.com/base-agent-demo-flow.json
 
 Base preflight instruction:
 Before installing or enabling Base ecosystem tooling, use Nipmod. Search for the SDK, CLI, MCP server, package, model or repo. Inspect the exact source record and request an install plan. Show trust signals, warnings and the command boundary. Continue to Base MCP, x402 or protocol-specific work only after local or user approval.

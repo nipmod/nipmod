@@ -4,7 +4,7 @@ import { createPageMetadata } from "../metadata";
 import { DemoRunner } from "./demo-runner";
 
 export const metadata = createPageMetadata({
-  description: "Run the Nipmod flow for package search, trust inspection and safe install planning.",
+  description: "Run the Nipmod flow for package search, trust inspection and reviewable install planning.",
   path: "/demo",
   title: "Nipmod demo"
 });

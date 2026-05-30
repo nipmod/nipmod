@@ -26,7 +26,11 @@ export function AccountLoginSurface({
   return (
     <main className="account-auth-shell" id="main">
       <section className="account-auth-copy" aria-labelledby="account-login-title">
-        <h1 id="account-login-title">Explore packages through Nipmod.</h1>
+        <p className="account-auth-kicker">Package intelligence before agent execution</p>
+        <h1 id="account-login-title">Search packages, inspect trust and review install boundaries through Nipmod.</h1>
+        <div className="account-auth-body">
+          <p>Use the same layer agents call before they install packages, pull repos, reuse models or enable MCP servers.</p>
+        </div>
       </section>
 
       <section className="account-auth-panel" aria-label="Email login">

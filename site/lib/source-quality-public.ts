@@ -3,7 +3,7 @@ import { EXTERNAL_PACKAGE_SOURCES, externalSourceQualityProfile } from "./extern
 export const sourceQualityBenchmark = {
   formatVersion: 1,
   type: "dev.nipmod.source-quality-benchmark.v1",
-  status: "public_benchmark_snapshot",
+  status: "offline_fixture_regression_snapshot",
   generatedFrom: "pnpm search:benchmark",
   generatedAt: "2026-05-29T22:42:07.000Z",
   summary: {
@@ -18,6 +18,7 @@ export const sourceQualityBenchmark = {
   },
   scope: {
     countingNote: "Source coverage counts benchmark cases where the source was requested; multi-source cases count toward each requested source.",
+    fixtureMode: "deterministic offline fixtures; live source availability is covered by /api/sources/health",
     question: "Can Nipmod choose a useful package, model, repo, dataset or MCP server before an agent moves toward external code execution?",
     scenarioNote: "Scenario groups are overlapping by design; one benchmark case can exercise more than one risk class.",
     unit: "search result and pre-install source selection"

@@ -6,6 +6,7 @@ import {
   safeAccountLoginPath,
   safeAccountNextPath
 } from "../lib/account-auth";
+import { accountMutationRejection } from "../lib/account-request-security";
 
 describe("account auth helpers", () => {
   test("normalizes email login input", () => {
@@ -52,5 +53,35 @@ describe("account auth helpers", () => {
       publishableKey: null,
       url: null
     });
+  });
+
+  test("rejects cross-site account mutations", () => {
+    expect(
+      accountMutationRejection(
+        new Request("https://nipmod.com/api/account/keys", {
+          headers: {
+            origin: "https://evil.example",
+            "sec-fetch-site": "cross-site"
+          },
+          method: "POST"
+        })
+      )
+    ).toContain("cross-site");
+    expect(
+      accountMutationRejection(
+        new Request("https://nipmod.com/api/account/keys", {
+          headers: { origin: "https://evil.example" },
+          method: "POST"
+        })
+      )
+    ).toContain("does not match");
+    expect(
+      accountMutationRejection(
+        new Request("https://nipmod.com/api/account/keys", {
+          headers: { origin: "https://nipmod.com" },
+          method: "POST"
+        })
+      )
+    ).toBeNull();
   });
 });

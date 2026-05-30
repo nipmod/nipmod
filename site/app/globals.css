@@ -6357,6 +6357,7 @@ body {
 }
 
 .account-app-identity span,
+.account-app-sidebar-foot button,
 .account-app-sidebar-foot a,
 .account-settings-list dt {
   color: var(--docs-faint);
@@ -6414,6 +6415,15 @@ body {
   padding-top: 18px;
 }
 
+.account-app-sidebar-foot button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+.account-app-sidebar-foot button:hover,
 .account-app-sidebar-foot a:hover {
   color: var(--docs-text);
 }

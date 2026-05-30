@@ -53,7 +53,7 @@
       <circle cx="72" cy="243" r="5" fill="#d8b56d"/>
       <text x="96" y="252" class="white serif" font-size="30">Nipmod turns evidence into agent decisions</text>
     
-    <text x="62" y="382" class="serif mutedText" font-size="22">Search, inspect, warnings and safe install plans in one API flow.</text>
+    <text x="62" y="382" class="serif mutedText" font-size="22">Search, inspect, warnings and reviewable install plans in one API flow.</text>
   </g>
 
   <text x="96" y="884" class="sans faintText" font-size="15" font-weight="780">NIPMOD.COM/BENCHMARK · RAW JSON: NIPMOD.COM/BENCHMARK.JSON · 10/12</text>

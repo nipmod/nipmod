@@ -14,10 +14,15 @@ SOURCES = "npm,pypi,github,huggingface-model,huggingface-dataset,mcp"
 
 
 def main() -> None:
+    global API_KEY
+    args = [arg for arg in sys.argv[1:] if arg != "--issue-key"]
+    issue_key = "--issue-key" in sys.argv[1:]
+    if not API_KEY and issue_key:
+        API_KEY = issue_beta_key()
     if not API_KEY:
-        raise RuntimeError("Set NIPMOD_API_KEY before calling the Nipmod API.")
+        raise RuntimeError("Set NIPMOD_API_KEY or pass --issue-key before calling the Nipmod API.")
 
-    task = " ".join(sys.argv[1:]).strip() or "http client"
+    task = " ".join(args).strip() or "http client"
     search = read_json("/api/search", {"q": task, "sources": SOURCES, "limit": "5"})
     selected = first_record(search)
 
@@ -32,6 +37,10 @@ def main() -> None:
 
     output = {
         "task": task,
+        "apiAccess": {
+            "keyIssuedByExample": issue_key,
+            "rawKeyPrinted": False,
+        },
         "agentInstruction": "Search Nipmod, inspect the selected package and show the install plan before any workspace write.",
         "sourceHealth": {
             "partial": search.get("partial"),
@@ -89,6 +98,30 @@ def read_json(path: str, params: dict[str, str]) -> dict:
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"{path} failed with {error.code}: {body}") from error
+
+
+def issue_beta_key() -> str:
+    payload = json.dumps({"label": "python-agent-flow-example"}).encode("utf-8")
+    request = urllib.request.Request(
+        f"{BASE_URL}/api/keys/beta",
+        data=payload,
+        headers={
+            "accept": "application/json",
+            "content-type": "application/json",
+            "user-agent": "nipmod-python-agent-flow-example/1.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"/api/keys/beta failed with {error.code}: {body}") from error
+    key = body.get("key")
+    if not isinstance(key, str):
+        raise RuntimeError("/api/keys/beta did not return a key")
+    return key
 
 
 def first_record(search: dict) -> dict | None:

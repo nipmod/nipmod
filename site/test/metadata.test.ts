@@ -18,12 +18,12 @@ describe("site metadata", () => {
     expect(metadata).toMatchObject({
       alternates: { canonical: "https://nipmod.com/api-access" },
       description: siteDescription,
-      title: siteName,
+      title: "Nipmod API | Nipmod",
       twitter: {
         card: "summary_large_image",
         description: siteDescription,
         images: [previewImageUrl],
-        title: "Nipmod API"
+        title: "Nipmod API | Nipmod"
       }
     });
     expect(metadata.openGraph).toMatchObject({
@@ -34,7 +34,7 @@ describe("site metadata", () => {
           url: previewImageUrl
         }
       ],
-      title: "Nipmod API",
+      title: "Nipmod API | Nipmod",
       url: "https://nipmod.com/api-access"
     });
   });

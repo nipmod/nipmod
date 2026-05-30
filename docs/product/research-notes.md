@@ -56,7 +56,7 @@ Public claim not allowed:
 Allowed:
 
 - Nipmod provides one package intelligence API for agents.
-- Nipmod resolves public package sources and returns trust context and safe install plans.
+- Nipmod resolves public package sources and returns trust context and reviewable install plans.
 - Hosted API calls are read-only.
 - Confirmed package records can be stored in the Nipmod archive.
 - Gitlawb is a supported source.
