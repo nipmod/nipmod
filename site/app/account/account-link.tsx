@@ -11,9 +11,10 @@ type SessionResponse = {
 export function AccountLink() {
   const pathname = usePathname();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const isAccountSurface = pathname === "/" || pathname.startsWith("/account");
 
   useEffect(() => {
-    if (pathname === "/" || pathname === "/account") {
+    if (isAccountSurface) {
       setAuthenticated(false);
       return;
     }
@@ -33,9 +34,9 @@ export function AccountLink() {
     return () => {
       cancelled = true;
     };
-  }, [pathname]);
+  }, [isAccountSurface]);
 
-  if (pathname === "/" || pathname === "/account") {
+  if (isAccountSurface) {
     return null;
   }
 

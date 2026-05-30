@@ -20,7 +20,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const loginState = readAccountLoginState(await searchParams);
 
   if (user) {
-    return <AccountWorkspace user={user} />;
+    return <AccountWorkspace section="chat" user={user} />;
   }
 
   return <AccountLoginSurface loginPath="/account" nextPath="/account" state={loginState} />;

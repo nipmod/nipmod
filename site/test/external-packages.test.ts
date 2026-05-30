@@ -244,6 +244,60 @@ describe("external package resolver", () => {
     expect(result.selection.candidates[0]?.reasons).toContain("query intent match: Python image processing fit");
   });
 
+  test("uses web design task hints for broad UI package searches", async () => {
+    const requested: string[] = [];
+    const result = await searchExternalPackages("website design react ui component library css tailwind icons animation", {
+      fetchImpl: async (input: string | URL | Request) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        requested.push(url);
+        if (url.includes("registry.npmjs.org/-/v1/search")) {
+          return jsonResponse({
+            objects: [
+              {
+                dependents: "1",
+                downloads: { monthly: 1000, weekly: 250 },
+                flags: { insecure: 0 },
+                package: {
+                  date: "2026-01-01T00:00:00.000Z",
+                  description: "Small unrelated UI package.",
+                  links: { npm: "https://www.npmjs.com/package/random-ui-kit" },
+                  name: "random-ui-kit",
+                  version: "1.0.0"
+                },
+                score: { detail: { maintenance: 0.2, popularity: 0.1, quality: 0.2 } }
+              }
+            ]
+          });
+        }
+        if (url === "https://registry.npmjs.org/tailwindcss/latest") {
+          return jsonResponse({
+            _npmUser: { name: "tailwind-bot" },
+            description: "A utility-first CSS framework for rapidly building custom user interfaces.",
+            dist: {
+              integrity: "sha512-tailwind",
+              signatures: [{ keyid: "SHA256:tailwind", sig: "tailwind" }]
+            },
+            license: "MIT",
+            name: "tailwindcss",
+            repository: { url: "git+https://github.com/tailwindlabs/tailwindcss.git" },
+            version: "4.2.0"
+          });
+        }
+        if (url === "https://api.npmjs.org/downloads/point/last-month/tailwindcss") {
+          return jsonResponse({ downloads: 120_000_000, package: "tailwindcss" });
+        }
+        return jsonResponse({ error: "not found" }, 404);
+      },
+      limit: 3,
+      sources: ["npm"]
+    });
+
+    expect(requested).toContain("https://registry.npmjs.org/tailwindcss/latest");
+    expect(result.records.map((record) => record.id)).toContain("npm:tailwindcss");
+    expect(result.selection.recommendedId).toBe("npm:tailwindcss");
+    expect(result.selection.candidates[0]?.reasons).toContain("query intent match: CSS utility framework fit");
+  });
+
   test("adds query intent reasons for common agent package tasks", async () => {
     const result = await searchExternalPackages("schema validation", {
       fetchImpl: async (input: string | URL | Request) => {
