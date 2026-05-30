@@ -8,7 +8,9 @@ type ChatResponse = {
   answer?: string;
   decision?: {
     alternatives?: Array<{
+      decisionScore?: number;
       displayName?: string;
+      gate?: string;
       id: string;
       source: string;
       trust?: {
@@ -19,8 +21,10 @@ type ChatResponse = {
     }>;
     avoid?: Array<{
       displayName?: string;
+      gate?: string;
       id: string;
       reasons?: string[];
+      score?: number;
       source: string;
       trust?: {
         decision?: string;
@@ -33,6 +37,15 @@ type ChatResponse = {
       score?: number;
       uncertainty?: string[];
     };
+    comparison?: {
+      candidates?: Array<{
+        displayName?: string;
+        gate?: string;
+        id: string;
+        score?: number;
+        source: string;
+      }>;
+    };
     receipt?: {
       hostedApiExecutes?: boolean;
       installCommand?: string | null;
@@ -41,7 +54,9 @@ type ChatResponse = {
       workspaceWrites?: boolean;
     } | null;
     recommended?: {
+      decisionScore?: number;
       displayName?: string;
+      gate?: string;
       id: string;
       source: string;
       trust?: {
@@ -387,6 +402,7 @@ function ChatResponseView({ response }: { response: ChatResponse }) {
   const decision = response.decision;
   const alternatives = decision?.alternatives?.slice(0, 3) ?? [];
   const avoid = decision?.avoid?.slice(0, 2) ?? [];
+  const comparison = decision?.comparison?.candidates?.slice(0, 4) ?? [];
 
   return (
     <div className="account-chat-result">
@@ -403,11 +419,13 @@ function ChatResponseView({ response }: { response: ChatResponse }) {
       {decision ? (
         <dl>
           <div><dt>Confidence</dt><dd>{decision.confidence?.score ?? "n/a"} / {decision.confidence?.label ?? "unknown"}</dd></div>
+          {decision.recommended ? <div><dt>Decision score</dt><dd>{decision.recommended.decisionScore ?? "n/a"} / {decision.recommended.gate ?? "unknown"}</dd></div> : null}
           {decision.receipt ? (
             <div><dt>Hosted boundary</dt><dd>{decision.receipt.hostedApiExecutes ? "executes" : "read-only"} / {decision.receipt.workspaceWrites ? "writes" : "no writes"}</dd></div>
           ) : null}
-          {alternatives.length ? <div><dt>Alternatives</dt><dd>{alternatives.map((item) => `${item.displayName ?? item.id} (${item.source})`).join(", ")}</dd></div> : null}
-          {avoid.length ? <div><dt>Avoid</dt><dd>{avoid.map((item) => `${item.displayName ?? item.id}: ${item.reasons?.[0] ?? item.trust?.risk ?? "review"}`).join("; ")}</dd></div> : null}
+          {comparison.length ? <div><dt>Compared</dt><dd>{comparison.map((item) => `${item.displayName ?? item.id} ${item.score ?? "n/a"}/${item.gate ?? "gate"}`).join(", ")}</dd></div> : null}
+          {alternatives.length ? <div><dt>Alternatives</dt><dd>{alternatives.map((item) => `${item.displayName ?? item.id} (${item.source}, ${item.decisionScore ?? "n/a"})`).join(", ")}</dd></div> : null}
+          {avoid.length ? <div><dt>Avoid</dt><dd>{avoid.map((item) => `${item.displayName ?? item.id}: ${item.reasons?.[0] ?? item.trust?.risk ?? "review"} (${item.score ?? "n/a"})`).join("; ")}</dd></div> : null}
         </dl>
       ) : null}
     </div>

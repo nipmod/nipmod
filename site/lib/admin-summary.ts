@@ -37,6 +37,7 @@ export async function readAdminSummary(
 
   return {
     archive,
+    decisionOps: decisionOpsSummary(usage.ok ? usage.metrics : null, sourceCapabilities.length),
     generatedAt: new Date().toISOString(),
     keyActivity,
     keys,
@@ -46,7 +47,8 @@ export async function readAdminSummary(
       "Core package intelligence routes are key-gated. Any public usage count should be treated as an audit signal, not external adoption.",
       "Traffic origin separates public/keyed usage from Nipmod canaries and monitors for events recorded after the traffic-origin schema is live.",
       "Trust-decision and blocked-install metrics are populated for events recorded after the decision-metrics schema is live.",
-      "Source quality profiles describe resolver depth and known limits. They are review context, not a claim that external packages are safe to execute."
+      "Source quality profiles describe resolver depth and known limits. They are review context, not a claim that external packages are safe to execute.",
+      "Decision ops estimates package-decision health from emitted trust, install-plan, source and archive signals. It is an operator guide, not a public adoption claim."
     ],
     privacy: "admin-only aggregated metrics; no raw keys, IPs, queries, prompts, package names from usage events, user agents or workspace data",
     since: input.since.toISOString(),
@@ -77,6 +79,94 @@ export async function readAdminSummary(
     type: "dev.nipmod.admin-summary.v1",
     usage: usage.ok ? usage.metrics : { error: usage.error, ok: false, status: usage.status }
   };
+}
+
+function decisionOpsSummary(metrics: unknown, sourceCount: number) {
+  const usage = asRecord(metrics);
+  const totals = asRecord(usage?.totals);
+  const installPlans = asRecord(usage?.installPlans);
+  const archiveWrites = asRecord(usage?.archiveWrites);
+  const traffic = asRecord(usage?.trafficSummary);
+  const trustDecisions = Array.isArray(usage?.trustDecisions) ? usage.trustDecisions : [];
+  const trustRisks = Array.isArray(usage?.trustRisks) ? usage.trustRisks : [];
+  const recommendedCount = countFromRows(trustDecisions, "decision", "recommended");
+  const warningCount = countFromRows(trustDecisions, "decision", "usable_with_warning");
+  const avoidCount = countFromRows(trustDecisions, "decision", "avoid");
+  const highRiskCount = countFromRows(trustRisks, "risk", "high");
+  const requestCount = numberField(totals, "requestCount");
+  const externalRequests = numberField(traffic, "externalRequestCount");
+  const blockedInstallPlans = numberField(installPlans, "blockedCount");
+  const allowedInstallPlans = numberField(installPlans, "allowedCount");
+  const archiveStored = numberField(archiveWrites, "storedCount");
+  const archivePreview = numberField(archiveWrites, "previewCount");
+  return {
+    archiveConfirmRate: percentNumber(archiveStored, archiveStored + archivePreview),
+    archivePreviewCount: archivePreview,
+    archiveStoredCount: archiveStored,
+    blockedInstallPlanCount: blockedInstallPlans,
+    confidence: {
+      operatorGrade: decisionOperatorGrade({
+        allowedInstallPlans,
+        avoidCount,
+        blockedInstallPlans,
+        externalRequests,
+        highRiskCount,
+        recommendedCount,
+        requestCount,
+        sourceCount
+      }),
+      publicClaimReady: externalRequests > 0 && recommendedCount + warningCount + avoidCount >= 10,
+      reason: "Public claims need enough external keyed traffic and enough emitted decision events."
+    },
+    decisionEvents: recommendedCount + warningCount + avoidCount,
+    externalDecisionCoverage: percentNumber(recommendedCount + warningCount + avoidCount, Math.max(1, externalRequests)),
+    highRiskCount,
+    installPlanCoverage: percentNumber(allowedInstallPlans + blockedInstallPlans, Math.max(1, requestCount)),
+    recommendedCount,
+    reviewCount: warningCount,
+    safetyBlockRate: percentNumber(blockedInstallPlans, allowedInstallPlans + blockedInstallPlans),
+    sourceCount,
+    type: "dev.nipmod.admin-decision-ops.v1"
+  };
+}
+
+function decisionOperatorGrade(input: {
+  allowedInstallPlans: number;
+  avoidCount: number;
+  blockedInstallPlans: number;
+  externalRequests: number;
+  highRiskCount: number;
+  recommendedCount: number;
+  requestCount: number;
+  sourceCount: number;
+}): "needs-data" | "operational" | "watch" {
+  if (input.requestCount === 0 || input.externalRequests === 0) {
+    return "needs-data";
+  }
+  if (input.sourceCount >= 6 && input.allowedInstallPlans + input.blockedInstallPlans > 0 && input.recommendedCount + input.avoidCount + input.highRiskCount > 0) {
+    return "operational";
+  }
+  return "watch";
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function numberField(record: Record<string, unknown> | null, key: string): number {
+  const value = record?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function countFromRows(rows: unknown[], key: string, value: string): number {
+  return rows.reduce<number>((sum, row) => {
+    const record = asRecord(row);
+    return record?.[key] === value ? sum + numberField(record, "requestCount") : sum;
+  }, 0);
+}
+
+function percentNumber(part: number, total: number): number {
+  return total > 0 ? Number(((part / total) * 100).toFixed(1)) : 0;
 }
 
 async function readKeyActivityMetrics(input: AdminSummaryInput, env: AdminSummaryEnv, fetchImpl: typeof fetch) {

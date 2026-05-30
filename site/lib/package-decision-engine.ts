@@ -16,6 +16,8 @@ export type PackageDecisionIntent =
   | "replace-package";
 
 export type PackageDecisionConfidenceLabel = "high" | "low" | "medium";
+export type PackageDecisionGate = "block" | "pass" | "review";
+export type PackageDecisionSecurityPosture = "blocked" | "clean-preflight" | "needs-review";
 
 export type PackageDecisionCriterionId =
   | "adoption"
@@ -54,13 +56,17 @@ export interface PackageDecisionQueryPlan {
 }
 
 export interface PackageDecisionCandidate {
+  decisionScore: number;
   displayName: string;
   fitReasons: string[];
+  gate: PackageDecisionGate;
   id: string;
   installCommand: string | null;
   license: string | null;
   originalUrl: string;
   repo: string | null;
+  scoreBreakdown: PackageDecisionScoreBreakdown;
+  securitySignals: PackageDecisionSecuritySignal[];
   source: ExternalPackageSource;
   sourceDepthScore: number | null;
   trust: {
@@ -74,8 +80,10 @@ export interface PackageDecisionCandidate {
 
 export interface PackageDecisionAvoid {
   displayName: string;
+  gate: PackageDecisionGate;
   id: string;
   reasons: string[];
+  score: number;
   source: ExternalPackageSource;
   trust: {
     decision: ExternalPackageRecord["trust"]["decision"];
@@ -86,6 +94,12 @@ export interface PackageDecisionAvoid {
 
 export interface PackageDecisionReceipt {
   alternativesConsidered: string[];
+  archiveConfirm: {
+    confirmable: boolean;
+    dryRunEndpoint: "POST /api/archive/confirm";
+    reason: string;
+    required: false;
+  };
   generatedAt: string;
   hostedApiExecutes: false;
   installCommand: string | null;
@@ -103,7 +117,24 @@ export interface PackageDecisionReceipt {
 
 export interface PackageDecision {
   alternatives: PackageDecisionCandidate[];
+  archive: {
+    confirmable: boolean;
+    dryRunEndpoint: "POST /api/archive/confirm";
+    reason: string;
+    required: false;
+  };
   avoid: PackageDecisionAvoid[];
+  comparison: {
+    candidates: Array<{
+      dimensions: PackageDecisionScoreDimension[];
+      displayName: string;
+      gate: PackageDecisionGate;
+      id: string;
+      score: number;
+      source: ExternalPackageSource;
+    }>;
+    version: "package-decision-comparison-v2";
+  };
   confidence: {
     label: PackageDecisionConfidenceLabel;
     score: number;
@@ -119,8 +150,35 @@ export interface PackageDecision {
   query: string;
   receipt: PackageDecisionReceipt | null;
   recommended: PackageDecisionCandidate | null;
+  security: {
+    highSignalCount: number;
+    posture: PackageDecisionSecurityPosture;
+    reviewSignalCount: number;
+    signals: PackageDecisionSecuritySignal[];
+  };
   summary: string;
   type: "dev.nipmod.package-decision.v1";
+}
+
+export interface PackageDecisionScoreBreakdown {
+  dimensions: PackageDecisionScoreDimension[];
+  total: number;
+  version: "decision-score-v2";
+}
+
+export interface PackageDecisionScoreDimension {
+  id: PackageDecisionCriterionId;
+  label: string;
+  reason: string;
+  score: number;
+  weight: number;
+}
+
+export interface PackageDecisionSecuritySignal {
+  category: "advisory" | "credential" | "install" | "metadata" | "provenance" | "source";
+  evidence: string;
+  id: string;
+  severity: "high" | "info" | "low" | "medium";
 }
 
 export function planPackageDecisionQuery(message: string, generatedAt = new Date().toISOString()): PackageDecisionQueryPlan {
@@ -159,17 +217,16 @@ export function buildPackageDecision(input: {
 }): PackageDecision {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const plan = planPackageDecisionQuery(input.originalQuery, generatedAt);
-  const recommended = input.selected ? packageDecisionCandidate(input.selected, input.installPlan) : null;
-  const alternatives = input.records
-    .filter((record) => record.id !== input.selected?.id)
-    .filter((record) => !isAvoidRecord(record))
-    .slice(0, 4)
-    .map((record) => packageDecisionCandidate(record, null));
+  const candidateRecords = orderedUniqueRecords(input.selected ? [input.selected, ...input.records] : input.records);
+  const evaluated = candidateRecords
+    .map((record) => packageDecisionCandidate(record, record.id === input.selected?.id ? input.installPlan : null, plan))
+    .sort(compareDecisionCandidates);
+  const recommended = evaluated.find((candidate) => candidate.id === input.selected?.id && candidate.gate !== "block") ?? evaluated.find((candidate) => candidate.gate === "pass") ?? evaluated.find((candidate) => candidate.gate === "review") ?? null;
+  const alternatives = evaluated.filter((candidate) => candidate.id !== recommended?.id && candidate.gate !== "block").slice(0, 4);
   const avoid = input.records
-    .filter((record) => record.id !== input.selected?.id || isAvoidRecord(record))
-    .filter(isAvoidRecord)
+    .filter((record) => evaluated.find((candidate) => candidate.id === record.id)?.gate === "block" || isAvoidRecord(record))
     .slice(0, 4)
-    .map(packageDecisionAvoid);
+    .map((record) => packageDecisionAvoid(record, evaluated.find((candidate) => candidate.id === record.id)));
 
   const receipt = recommended && input.installPlan ? packageDecisionReceipt(input.installPlan, alternatives, generatedAt) : null;
   const uncertainty = decisionUncertainty({
@@ -179,10 +236,24 @@ export function buildPackageDecision(input: {
     sourceSummary: input.sourceSummary
   });
   const confidenceScore = decisionConfidenceScore(input.selected, input.installPlan, input.sourceSummary, uncertainty);
+  const securitySignals = evaluated.flatMap((candidate) => candidate.securitySignals);
+  const archive = archiveConfirmHint(recommended, receipt);
 
   return {
     alternatives,
+    archive,
     avoid,
+    comparison: {
+      candidates: evaluated.slice(0, 8).map((candidate) => ({
+        dimensions: candidate.scoreBreakdown.dimensions,
+        displayName: candidate.displayName,
+        gate: candidate.gate,
+        id: candidate.id,
+        score: candidate.decisionScore,
+        source: candidate.source
+      })),
+      version: "package-decision-comparison-v2"
+    },
     confidence: {
       label: confidenceLabel(confidenceScore),
       score: confidenceScore,
@@ -206,6 +277,12 @@ export function buildPackageDecision(input: {
     query: input.originalQuery,
     receipt,
     recommended,
+    security: {
+      highSignalCount: securitySignals.filter((signal) => signal.severity === "high").length,
+      posture: securityPosture(recommended, receipt, recommended?.securitySignals ?? []),
+      reviewSignalCount: securitySignals.filter((signal) => signal.severity === "medium").length,
+      signals: securitySignals.slice(0, 12)
+    },
     summary: decisionSummary(plan.language, recommended, input.installPlan, alternatives, avoid),
     type: "dev.nipmod.package-decision.v1"
   };
@@ -222,9 +299,10 @@ export function formatPackageDecisionAnswer(decision: PackageDecision): string {
   const selected = decision.recommended;
   const command = decision.receipt?.installCommand ?? selected.installCommand;
   const warnings = [...selected.trust.warnings, ...(decision.receipt?.warnings ?? [])].filter(Boolean).slice(0, 3);
+  const confidence = `${decision.confidence.score}/100`;
   const alternatives = decision.alternatives
     .slice(0, 3)
-    .map((candidate) => `${candidate.displayName} (${candidate.source})`)
+    .map((candidate) => `${candidate.displayName} (${candidate.source}, ${candidate.decisionScore}/100)`)
     .join(", ");
   const avoid = decision.avoid
     .slice(0, 2)
@@ -233,26 +311,38 @@ export function formatPackageDecisionAnswer(decision: PackageDecision): string {
 
   if (language === "de") {
     const warningText = warnings.length ? ` Sichtbare Warnungen: ${uniqueStrings(warnings).join("; ")}.` : " Keine blockierende Warnung im Preflight.";
-    const alternativesText = alternatives ? ` Gute Vergleichskandidaten: ${alternatives}.` : "";
+    const alternativesText = alternatives ? ` Vergleichskandidaten: ${alternatives}.` : "";
     const avoidText = avoid ? ` Nicht blind installieren: ${avoid}.` : "";
-    return `Ich würde zuerst ${selected.displayName} aus ${selected.source} prüfen. Trust: ${selected.trust.score}/100, ${selected.trust.decision}, Risiko ${selected.trust.risk}. Install Plan: ${command ?? "kein Install Command zurückgegeben"}. Nipmod bleibt hosted read-only und führt nichts aus.${warningText}${alternativesText}${avoidText}`;
+    return `Ich würde ${selected.displayName} aus ${selected.source} als ersten Kandidaten nehmen und trotzdem vor der Ausführung prüfen. Decision Score: ${selected.decisionScore}/100, Confidence ${confidence}, Trust ${selected.trust.score}/100, Risiko ${selected.trust.risk}. Install Plan: ${command ?? "kein Install Command zurückgegeben"}. Hosted Nipmod bleibt read-only: keine Ausführung, kein Clone, kein Workspace Write.${warningText}${alternativesText}${avoidText}`;
   }
 
   const warningText = warnings.length ? ` Visible warnings: ${uniqueStrings(warnings).join("; ")}.` : " No blocking warning was returned in this preflight.";
   const alternativesText = alternatives ? ` Compare it with: ${alternatives}.` : "";
   const avoidText = avoid ? ` Do not install blindly: ${avoid}.` : "";
-  return `I would inspect ${selected.displayName} from ${selected.source} first. Trust: ${selected.trust.score}/100, ${selected.trust.decision}, risk ${selected.trust.risk}. Install plan: ${command ?? "no install command returned"}. Hosted Nipmod stays read-only and does not execute anything.${warningText}${alternativesText}${avoidText}`;
+  return `I would start with ${selected.displayName} from ${selected.source}, then review it before execution. Decision score: ${selected.decisionScore}/100, confidence ${confidence}, trust ${selected.trust.score}/100, risk ${selected.trust.risk}. Install plan: ${command ?? "no install command returned"}. Hosted Nipmod stays read-only: no execution, no clone, no workspace write.${warningText}${alternativesText}${avoidText}`;
 }
 
-function packageDecisionCandidate(record: ExternalPackageRecord, installPlan: ExternalInstallPlan | null): PackageDecisionCandidate {
+function packageDecisionCandidate(
+  record: ExternalPackageRecord,
+  installPlan: ExternalInstallPlan | null,
+  plan: PackageDecisionQueryPlan
+): PackageDecisionCandidate {
+  const securitySignals = packageSecuritySignals(record, installPlan);
+  const scoreBreakdown = decisionScoreBreakdown(record, installPlan, plan, securitySignals);
+  const decisionScore = scoreBreakdown.total;
+  const gate = candidateGate(record, installPlan, securitySignals, decisionScore);
   return {
+    decisionScore,
     displayName: record.displayName,
     fitReasons: candidateFitReasons(record, installPlan),
+    gate,
     id: record.id,
     installCommand: installPlan?.plan.commands.at(0) ?? record.install.command ?? null,
     license: record.license,
     originalUrl: record.originalUrl,
     repo: record.repo,
+    scoreBreakdown,
+    securitySignals,
     source: record.source,
     sourceDepthScore: record.sourceEvidence?.depthScore ?? null,
     trust: {
@@ -265,11 +355,13 @@ function packageDecisionCandidate(record: ExternalPackageRecord, installPlan: Ex
   };
 }
 
-function packageDecisionAvoid(record: ExternalPackageRecord): PackageDecisionAvoid {
+function packageDecisionAvoid(record: ExternalPackageRecord, candidate: PackageDecisionCandidate | undefined): PackageDecisionAvoid {
   return {
     displayName: record.displayName,
+    gate: candidate?.gate ?? "block",
     id: record.id,
     reasons: avoidReasons(record),
+    score: candidate?.decisionScore ?? record.trust.score,
     source: record.source,
     trust: {
       decision: record.trust.decision,
@@ -286,6 +378,14 @@ function packageDecisionReceipt(
 ): PackageDecisionReceipt {
   return {
     alternativesConsidered: alternatives.map((candidate) => candidate.id).slice(0, 6),
+    archiveConfirm: archiveConfirmHint(
+      {
+        decisionScore: installPlan.package.trust.score,
+        gate: installPlan.safety.blocked ? "block" : "pass",
+        trust: installPlan.package.trust
+      },
+      { installPlanBlocked: installPlan.safety.blocked }
+    ),
     generatedAt,
     hostedApiExecutes: false,
     installCommand: installPlan.plan.commands.at(0) ?? null,
@@ -326,7 +426,232 @@ function avoidReasons(record: ExternalPackageRecord): string[] {
 }
 
 function isAvoidRecord(record: ExternalPackageRecord): boolean {
-  return record.trust.decision === "avoid" || record.trust.risk === "high" || record.trust.warnings.some((warning) => /malware|backdoor|credential|token|wallet|high-risk|typosquat|confusion/i.test(warning));
+  return record.trust.decision === "avoid" || record.trust.risk === "high" || packageSecuritySignals(record, null).some((signal) => signal.severity === "high");
+}
+
+function orderedUniqueRecords(records: ExternalPackageRecord[]): ExternalPackageRecord[] {
+  const seen = new Set<string>();
+  const unique: ExternalPackageRecord[] = [];
+  for (const record of records) {
+    if (!seen.has(record.id)) {
+      seen.add(record.id);
+      unique.push(record);
+    }
+  }
+  return unique;
+}
+
+function compareDecisionCandidates(left: PackageDecisionCandidate, right: PackageDecisionCandidate): number {
+  return gateRank(right.gate) - gateRank(left.gate) || right.decisionScore - left.decisionScore || right.trust.score - left.trust.score || left.displayName.localeCompare(right.displayName);
+}
+
+function gateRank(gate: PackageDecisionGate): number {
+  if (gate === "pass") return 3;
+  if (gate === "review") return 2;
+  return 1;
+}
+
+function candidateGate(
+  record: ExternalPackageRecord,
+  installPlan: ExternalInstallPlan | null,
+  securitySignals: PackageDecisionSecuritySignal[],
+  decisionScore: number
+): PackageDecisionGate {
+  if (installPlan?.safety.blocked || record.trust.decision === "avoid" || record.trust.risk === "high") {
+    return "block";
+  }
+  if (securitySignals.some((signal) => signal.severity === "high")) {
+    return "block";
+  }
+  if (
+    decisionScore < 72 ||
+    record.trust.decision !== "recommended" ||
+    record.trust.risk !== "low" ||
+    record.trust.warnings.length > 0 ||
+    securitySignals.some((signal) => signal.severity === "medium")
+  ) {
+    return "review";
+  }
+  return "pass";
+}
+
+function decisionScoreBreakdown(
+  record: ExternalPackageRecord,
+  installPlan: ExternalInstallPlan | null,
+  plan: PackageDecisionQueryPlan,
+  securitySignals: PackageDecisionSecuritySignal[]
+): PackageDecisionScoreBreakdown {
+  const dimensions = plan.criteria.map((criterionItem) => scoreDimension(criterionItem, record, installPlan, plan, securitySignals));
+  const weighted = dimensions.reduce((sum, dimension) => sum + dimension.score * (dimension.weight / 100), 0);
+  const highPenalty = securitySignals.filter((signal) => signal.severity === "high").length * 18;
+  const mediumPenalty = securitySignals.filter((signal) => signal.severity === "medium").length * 6;
+  return {
+    dimensions,
+    total: clamp(Math.round(weighted - highPenalty - mediumPenalty), 0, 100),
+    version: "decision-score-v2"
+  };
+}
+
+function scoreDimension(
+  criterionItem: PackageDecisionCriterion,
+  record: ExternalPackageRecord,
+  installPlan: ExternalInstallPlan | null,
+  plan: PackageDecisionQueryPlan,
+  securitySignals: PackageDecisionSecuritySignal[]
+): PackageDecisionScoreDimension {
+  if (criterionItem.id === "task-fit") {
+    const match = taskFitScore(record, plan);
+    return { ...criterionItem, reason: match.reason, score: match.score };
+  }
+  if (criterionItem.id === "source-identity") {
+    const score = clamp(52 + (record.originalUrl ? 16 : 0) + (record.owner ? 10 : 0) + (record.version ? 10 : 0) + (record.repo ? 12 : 0), 0, 100);
+    return { ...criterionItem, reason: record.originalUrl ? "resolved source URL and identity fields" : "weak source identity fields", score };
+  }
+  if (criterionItem.id === "security") {
+    const signalPenalty = securitySignals.reduce((sum, signal) => sum + (signal.severity === "high" ? 30 : signal.severity === "medium" ? 12 : signal.severity === "low" ? 4 : 0), 0);
+    const score = clamp(record.trust.score - signalPenalty + (record.trust.dimensions.securityConfidence === "high" ? 8 : 0), 0, 100);
+    return { ...criterionItem, reason: securitySignals.length ? `${securitySignals.length} security signal(s)` : "no additional security signal in hosted preflight", score };
+  }
+  if (criterionItem.id === "install-boundary") {
+    const score = installPlan ? (installPlan.safety.blocked ? 12 : installPlan.safety.commandRisk === "medium" ? 68 : 96) : 45;
+    return { ...criterionItem, reason: installPlan ? "install plan returned before workspace write" : "install plan not available for this candidate", score };
+  }
+  if (criterionItem.id === "source-depth") {
+    const score = record.sourceEvidence?.depthScore ?? 45;
+    return { ...criterionItem, reason: record.sourceEvidence ? "structured source evidence returned" : "source evidence missing", score };
+  }
+  if (criterionItem.id === "maintenance") {
+    const score = clamp(record.trust.dimensions.qualityScore + (record.updatedAt ? 10 : 0), 0, 100);
+    return { ...criterionItem, reason: record.updatedAt ? "quality score plus update metadata" : "quality score without update metadata", score };
+  }
+  if (criterionItem.id === "license") {
+    return { ...criterionItem, reason: record.license ? "license metadata present" : "license metadata missing", score: record.license ? 96 : 20 };
+  }
+  if (criterionItem.id === "adoption") {
+    const signals = (record.metrics.downloads ?? 0) + (record.metrics.stars ?? 0) + (record.metrics.likes ?? 0) + (record.metrics.dependents ?? 0);
+    const score = signals > 1_000_000 ? 96 : signals > 100_000 ? 84 : signals > 10_000 ? 68 : signals > 0 ? 50 : 30;
+    return { ...criterionItem, reason: signals > 0 ? "public usage signal present" : "no public usage signal returned", score };
+  }
+  return { ...criterionItem, reason: "alternative context is derived from the candidate set", score: 50 };
+}
+
+function taskFitScore(record: ExternalPackageRecord, plan: PackageDecisionQueryPlan): { reason: string; score: number } {
+  const text = `${record.name} ${record.displayName} ${record.description}`.toLowerCase();
+  const tokens = queryTokens(plan.normalizedQuery);
+  const matchCount = tokens.filter((token) => text.includes(token)).length;
+  const sourceFit = plan.ecosystems.includes(record.source) ? 20 : -18;
+  const exact = text.includes(plan.normalizedQuery.toLowerCase()) ? 20 : 0;
+  const score = clamp(44 + matchCount * 8 + sourceFit + exact, 0, 100);
+  return {
+    reason: matchCount > 0 ? `${matchCount} query token(s) match package text` : "weak direct text fit; rely on source resolver ranking",
+    score
+  };
+}
+
+function packageSecuritySignals(record: ExternalPackageRecord, installPlan: ExternalInstallPlan | null): PackageDecisionSecuritySignal[] {
+  const text = `${record.name}\n${record.displayName}\n${record.description}\n${record.install.command}\n${record.trust.warnings.join("\n")}\n${record.trust.signals.join("\n")}`.toLowerCase();
+  const signals: PackageDecisionSecuritySignal[] = [];
+  if (record.trust.risk === "high" || record.trust.decision === "avoid") {
+    signals.push(securitySignal("trust.high-risk", "source", "high", "Trust policy returned avoid or high risk."));
+  }
+  if (installPlan?.safety.blocked) {
+    signals.push(securitySignal("install.blocked", "install", "high", installPlan.safety.blockReason ?? "Install plan is blocked."));
+  }
+  if (/postinstall|preinstall|install script|lifecycle script/.test(text)) {
+    signals.push(securitySignal("install.lifecycle", "install", "medium", "Package text or warnings mention install lifecycle behavior."));
+  }
+  if (/curl\s|wget\s|bash\s+-c|powershell|remote code|eval\(|exec\(/.test(text)) {
+    signals.push(securitySignal("install.remote-code", "install", "high", "Install or metadata text suggests remote-code or shell execution patterns."));
+  }
+  if (/wallet|private key|seed phrase|mnemonic|ssh key|credential|token stealer|secret/.test(text)) {
+    signals.push(securitySignal("credential.language", "credential", "high", "Credential or wallet-sensitive language appears in package context."));
+  }
+  if (/typosquat|dependency confusion|confusable|package confusion/.test(text)) {
+    signals.push(securitySignal("source.confusion", "source", "high", "Package confusion or typosquat warning returned."));
+  }
+  if (!record.license) {
+    signals.push(securitySignal("metadata.license-missing", "metadata", "low", "License metadata missing."));
+  }
+  if (!record.repo && record.source !== "huggingface-model" && record.source !== "huggingface-dataset") {
+    signals.push(securitySignal("source.repo-missing", "source", record.source === "mcp" ? "medium" : "low", "Repository link missing from source metadata."));
+  }
+  if (!record.sourceEvidence) {
+    signals.push(securitySignal("source.evidence-missing", "source", "medium", "Structured source evidence missing."));
+  }
+  if (record.trust.dimensions.provenanceStatus === "unknown") {
+    signals.push(securitySignal("provenance.unknown", "provenance", "low", "Provenance status unknown."));
+  }
+  return dedupeSecuritySignals(signals);
+}
+
+function securitySignal(
+  id: string,
+  category: PackageDecisionSecuritySignal["category"],
+  severity: PackageDecisionSecuritySignal["severity"],
+  evidence: string
+): PackageDecisionSecuritySignal {
+  return { category, evidence, id, severity };
+}
+
+function dedupeSecuritySignals(signals: PackageDecisionSecuritySignal[]): PackageDecisionSecuritySignal[] {
+  const seen = new Set<string>();
+  return signals.filter((signal) => {
+    if (seen.has(signal.id)) {
+      return false;
+    }
+    seen.add(signal.id);
+    return true;
+  });
+}
+
+function archiveConfirmHint(
+  candidate: Pick<PackageDecisionCandidate, "decisionScore" | "gate" | "trust"> | null,
+  receipt: Pick<PackageDecisionReceipt, "installPlanBlocked"> | null
+): PackageDecision["archive"] {
+  if (!candidate) {
+    return {
+      confirmable: false,
+      dryRunEndpoint: "POST /api/archive/confirm",
+      reason: "No recommended package decision to confirm.",
+      required: false
+    };
+  }
+  if (candidate.gate === "block" || receipt?.installPlanBlocked) {
+    return {
+      confirmable: false,
+      dryRunEndpoint: "POST /api/archive/confirm",
+      reason: "Blocked or high-risk decisions are not confirmable archive candidates.",
+      required: false
+    };
+  }
+  if (candidate.trust.decision !== "recommended" || candidate.decisionScore < 72) {
+    return {
+      confirmable: false,
+      dryRunEndpoint: "POST /api/archive/confirm",
+      reason: "Review candidates need stronger trust before archive confirmation.",
+      required: false
+    };
+  }
+  return {
+    confirmable: true,
+    dryRunEndpoint: "POST /api/archive/confirm",
+    reason: "Can be dry-run confirmed after the host or user verifies the result was useful.",
+    required: false
+  };
+}
+
+function securityPosture(
+  recommended: PackageDecisionCandidate | null,
+  receipt: PackageDecisionReceipt | null,
+  signals: PackageDecisionSecuritySignal[]
+): PackageDecisionSecurityPosture {
+  if (!recommended || recommended.gate === "block" || receipt?.installPlanBlocked || signals.some((signal) => signal.severity === "high")) {
+    return "blocked";
+  }
+  if (recommended.gate === "review" || signals.some((signal) => signal.severity === "medium")) {
+    return "needs-review";
+  }
+  return "clean-preflight";
 }
 
 function decisionIntent(query: string): PackageDecisionIntent {
@@ -396,7 +721,23 @@ function decisionSearchQueries(query: string): string[] {
     .replace(/\b(ich brauche|i need|finde|find|suche|such|bestes|beste|best|good|gutes|paket|package|library|lib)\b/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
-  return uniqueStrings([query, cleaned]).filter(Boolean).slice(0, 3);
+  const expansions: string[] = [];
+  if (/\b(form|forms|formular|schema|validation|validierung|react)\b/i.test(query)) {
+    expansions.push("react forms validation schema react-hook-form zod valibot tanstack form");
+  }
+  if (/\b(web ?design|website ?design|ui|component|tailwind|icons?|animation)\b/i.test(query)) {
+    expansions.push("website design react ui component library css tailwind icons animation");
+  }
+  if (/\b(pdf|document|extract|parse|text)\b/i.test(query)) {
+    expansions.push("pdf document parsing extract text package");
+  }
+  if (/\b(embedding|rag|semantic search|vector)\b/i.test(query)) {
+    expansions.push("embedding model sentence transformers rag semantic search");
+  }
+  if (/\b(wallet|token|private key|ssh|secret|malware|postinstall|supply chain)\b/i.test(query)) {
+    expansions.push(`${cleaned || query} security install script provenance`);
+  }
+  return uniqueStrings([query, cleaned, ...expansions]).filter(Boolean).slice(0, 5);
 }
 
 function decisionTask(query: string, intent: PackageDecisionIntent): string {
@@ -478,6 +819,16 @@ function normalizeWhitespace(value: string): string {
 
 function uniqueStrings(values: Array<string | null | undefined>): string[] {
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
+}
+
+function queryTokens(value: string): string[] {
+  return uniqueStrings(
+    value
+      .toLowerCase()
+      .split(/[^a-z0-9@/_-]+/i)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 3)
+  ).slice(0, 10);
 }
 
 function checkedSources(records: ExternalPackageRecord[], fallback: ExternalPackageSource[]): ExternalPackageSource[] {

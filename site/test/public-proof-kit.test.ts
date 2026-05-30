@@ -16,9 +16,10 @@ describe("public agent proof kit", () => {
       status: "public_agent_demo",
       type: "dev.nipmod.agent-demo-flow.v1"
     });
-    expect(agentDemoFlow.steps).toHaveLength(5);
-    expect(agentDemoFlow.steps.slice(0, 4).every((step) => step.writesWorkspace === false)).toBe(true);
+    expect(agentDemoFlow.steps).toHaveLength(7);
+    expect(agentDemoFlow.steps.filter((step) => step.id !== "approval").every((step) => step.writesWorkspace === false)).toBe(true);
     expect(agentDemoFlow.passCriteria).toContain("hosted API does not install, clone, execute or write");
+    expect(agentDemoFlow.passCriteria).toContain("decision receipt is available before execution");
     expect(agentDemoFlow.passCriteria).toContain("local approval is required before workspace changes");
     expect(agentDemoFlow.privacy).toContain("does not ask for prompts, workspace paths, secrets or private package names");
   });
@@ -30,6 +31,8 @@ describe("public agent proof kit", () => {
     });
     expect(integrationKit.integrationContract.issueBetaKey).toBe("POST https://nipmod.com/api/keys/beta");
     expect(integrationKit.integrationContract.search).toContain("x-nipmod-api-key");
+    expect(integrationKit.integrationContract.optionalArchiveDryRun).toContain("/api/archive/confirm");
+    expect(integrationKit.decisionObject.fields).toEqual(expect.arrayContaining(["comparison.candidates", "security.signals", "receipt", "archive"]));
     expect(integrationKit.nonGoals).toContain("hosted workspace writes");
     expect(integrationKit.nonGoals).toContain("official partnership claim without the partner's approval");
     expect(integrationKit.expectedHandoff).toContain("user or host approves local execution outside the hosted API");

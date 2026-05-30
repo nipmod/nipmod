@@ -7,7 +7,7 @@ import {
   searchExternalPackages
 } from "../../../../lib/external-packages";
 import { analyzeAccountChatIntent, buildAccountChatAnswer, selectAccountChatRecord } from "../../../../lib/account-chat";
-import { buildPackageDecision, formatPackageDecisionAnswer } from "../../../../lib/package-decision-engine";
+import { buildPackageDecision, formatPackageDecisionAnswer, planPackageDecisionQuery } from "../../../../lib/package-decision-engine";
 import { tryAnswerAccountChatWithLlm, type AccountChatHistoryEntry } from "../../../../lib/account-chat-llm";
 import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/account-auth";
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
@@ -106,9 +106,11 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const search = await searchExternalPackages(intent.searchQuery, {
+    const decisionPlan = planPackageDecisionQuery(input.message);
+    const searchQuery = intent.searchQuery || decisionPlan.searchQueries.at(-1) || input.message;
+    const search = await searchExternalPackages(searchQuery, {
       limit: intent.category === "web-design" ? 8 : 5,
-      sources: [...EXTERNAL_PACKAGE_SOURCES]
+      sources: intent.category === "generic" ? decisionPlan.ecosystems : [...EXTERNAL_PACKAGE_SOURCES]
     });
     const selected = selectAccountChatRecord(search.records, search.selection.recommendedId, intent);
     const inspected = selected ? await inspectExternalPackage(selected.source, selected.name) : null;
