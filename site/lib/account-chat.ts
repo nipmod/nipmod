@@ -10,7 +10,7 @@ type AccountChatInstallPlan = {
 };
 
 export type AccountChatIntent = {
-  category: "capability" | "generic" | "greeting" | "hugging-face" | "small-talk" | "thanks" | "web-design";
+  category: "capability" | "general" | "generic" | "greeting" | "hugging-face" | "small-talk" | "thanks" | "web-design";
   language: "de" | "en";
   mode: "conversation" | "search";
   searchQuery: string;
@@ -64,12 +64,16 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
     };
   }
 
-  return {
-    category: "generic",
-    language,
-    mode: "search",
-    searchQuery: message
-  };
+  if (hasPackageDecisionIntent(normalized)) {
+    return {
+      category: "generic",
+      language,
+      mode: "search",
+      searchQuery: message
+    };
+  }
+
+  return { category: "general", language, mode: "conversation", searchQuery: "" };
 }
 
 export function buildAccountChatAnswer(
@@ -189,6 +193,9 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
     if (intent.category === "thanks") {
       return "Gerne. Schick mir einfach den nächsten Use Case oder Paketnamen.";
     }
+    if (intent.category === "general") {
+      return "Ich kann normal antworten, aber mein eigentlicher Job ist Paket-Intelligence. Wenn du ein Paket, Modell, Repo oder einen MCP Server suchst, beschreib einfach den Use Case. Dann prüfe ich Quellen, Trust Signale und den Install Plan.";
+    }
     return "Nipmod hilft dir vor einer Installation: Paket suchen, Quelle prüfen, Trust Signale ansehen und einen Install Plan bekommen. Die hosted API bleibt read-only und führt nichts in deinem Workspace aus.";
   }
 
@@ -200,6 +207,9 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
   }
   if (intent.category === "thanks") {
     return "Anytime. Send the next use case or package name when you are ready.";
+  }
+  if (intent.category === "general") {
+    return "I can answer normally, but Nipmod is built for package intelligence. If you need a package, model, repo or MCP server, describe the use case and I will check sources, trust signals and the install plan.";
   }
   return "Nipmod helps before install time: search a package, inspect source context, review trust signals and get an install plan. The hosted API stays read-only and does not execute in your workspace.";
 }
@@ -214,4 +224,14 @@ function isThanks(compact: string): boolean {
 
 function isSmallTalk(compact: string): boolean {
   return /^(wie gehts|wie geht es dir|wie geht's|wie gehts dir|alles gut|alles klar|was geht|na|how are you|how are u|how is it going|how's it going|whats up|what's up|sup)$/.test(compact);
+}
+
+function hasPackageDecisionIntent(normalized: string): boolean {
+  const namesKnownSurface = /\b(npm|pypi|pip|python|github|repo|repository|hugging ?face|huggingface|hf|mcp|sdk|cli|library|libraries|lib|package|packages|paket|pakete|modell|model|dataset|server|dependency|dependencies|abhängigkeit|tool|tools)\b/i.test(normalized);
+  const asksForChoice = /\b(best|beste|good|gute|better|besser|popular|bekannt|bekannteste|standard|standart|typisch|common|recommend|empfehl|suche|find|finden|brauche|need|looking for|use case|install|installieren|safe|sicher|trust|risk|risiko|malware|cve|vulnerab|schwachstelle)\b/i.test(normalized);
+  const directInstallOrInspect = /\b(npm install|pnpm add|yarn add|bun add|pip install|uv add|npx|git clone|docker pull|install|installieren|install plan|install-plan|inspect|preflight)\b/i.test(normalized);
+  const packageLikeName = /(^|\s)(@[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z0-9_.-]+@[0-9]+(?:\.[0-9]+){1,3})(\s|$)/i.test(normalized);
+  const singlePackageName = /^[a-z][a-z0-9_.-]{1,44}$/i.test(normalized.trim());
+
+  return directInstallOrInspect || packageLikeName || singlePackageName || (namesKnownSurface && asksForChoice);
 }

@@ -56,6 +56,25 @@ describe("public agent proof kit", () => {
     expect(partnerIntegrationPack.nonGoals).toContain("official partnership claims without approval");
     expect(partnerIntegrationPack.privacy.workspaceDataRequired).toBe(false);
     expect(partnerIntegrationPack.readinessChecklist.join(" ")).toContain("x-nipmod-api-key");
+    expect(partnerIntegrationPack.liveSourceSmoke).toMatchObject({
+      baseUrl: "https://nipmod.com",
+      expected: "6/6 source families pass depth inspection"
+    });
+    expect(partnerIntegrationPack.liveSourceSmoke.sources).toEqual([
+      "npm",
+      "pypi",
+      "github",
+      "huggingface-model",
+      "huggingface-dataset",
+      "mcp"
+    ]);
+    expect(partnerIntegrationPack.partnerOutlines.map((outline) => outline.name)).toEqual([
+      "Clawnch",
+      "Nookplot",
+      "Bankr",
+      "OpenHuman"
+    ]);
+    expect(partnerIntegrationPack.partnerOutlines.every((outline) => outline.status !== "approved_partner")).toBe(true);
   });
 
   test("publishes source quality with honest limits and all six sources", () => {

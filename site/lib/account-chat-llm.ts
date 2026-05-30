@@ -247,6 +247,8 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
   }
 
   const profile = selectAccountChatLlmProfile(message, env);
+  const intent = analyzeAccountChatIntent(message);
+  const toolsEnabled = intent.mode !== "conversation";
   const budget = await consumeDailyBudget(options.userId ?? options.userEmail ?? "anonymous", env, options.fetchImpl);
   if (!budget.ok) {
     return { ok: false, reason: "daily_limit_exceeded" };
@@ -263,7 +265,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
     usedTools: []
   };
   const messages: GatewayMessage[] = [
-    { content: systemPrompt(language), role: "system" },
+    { content: systemPrompt(language, toolsEnabled), role: "system" },
     ...sanitizeHistory(options.history ?? []),
     { content: message, role: "user" }
   ];
@@ -275,6 +277,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
       messages,
       models: profile.models,
       token,
+      toolsEnabled,
       userId: options.userId ?? options.userEmail ?? null
     });
 
@@ -284,7 +287,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
 
     const assistantMessage = gateway.message;
     const toolCalls = (assistantMessage.tool_calls ?? []).filter((toolCall) => toolCall.type === "function" && toolCall.function?.name);
-    if (toolCalls.length > 0) {
+    if (toolCalls.length > 0 && toolsEnabled) {
       messages.push({
         content: assistantMessage.content ?? null,
         role: "assistant",
@@ -327,14 +330,18 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
   return { ok: false, reason: "tool_loop_exhausted" };
 }
 
-function systemPrompt(language: "de" | "en"): string {
+function systemPrompt(language: "de" | "en", toolsEnabled: boolean): string {
   const languageInstruction =
     language === "de"
       ? "Answer in German unless the user explicitly asks for another language."
       : "Answer in English unless the user explicitly asks for another language.";
+  const toolInstruction = toolsEnabled
+    ? "Nipmod tools are available for this message. Use them before package, model, repository, MCP, install, choice or safety recommendations."
+    : "Nipmod tools are intentionally not available for this message. Answer as normal chat and do not invent package scan results.";
   return [
     "You are Nipmod Chat, a careful package intelligence assistant for humans and AI agents.",
     languageInstruction,
+    toolInstruction,
     "Speak naturally and briefly. Do not sound like a template.",
     "If the user is only greeting you, thanking you or making small talk, answer normally and do not call tools.",
     "If the user asks about packages, models, repositories, MCP servers, installs, package choices or package safety, use Nipmod tools before making a recommendation.",
@@ -413,6 +420,7 @@ async function callGateway(input: {
   messages: GatewayMessage[];
   models: string[];
   token: string;
+  toolsEnabled: boolean;
   userId: string | null;
 }): Promise<
   | {
@@ -427,25 +435,25 @@ async function callGateway(input: {
   for (const model of input.models) {
     let response: Response;
     try {
-      response = await fetchWithTimeout(input.fetchImpl, AI_GATEWAY_CHAT_COMPLETIONS_URL, {
-        body: JSON.stringify({
-          max_tokens: input.maxOutputTokens,
-          messages: input.messages,
-          model,
-          temperature: 0.25,
-          tools: nipmodTools,
-          tool_choice: "auto",
-          ...(input.userId
-            ? {
-                providerOptions: {
-                  gateway: {
-                    tags: ["feature:account-chat", "surface:nipmod-site"],
-                    user: input.userId
-                  }
+      const body = {
+        max_tokens: input.maxOutputTokens,
+        messages: input.messages,
+        model,
+        temperature: 0.25,
+        ...(input.toolsEnabled ? { tool_choice: "auto", tools: nipmodTools } : {}),
+        ...(input.userId
+          ? {
+              providerOptions: {
+                gateway: {
+                  tags: ["feature:account-chat", "surface:nipmod-site"],
+                  user: input.userId
                 }
               }
-            : {})
-        }),
+            }
+          : {})
+      };
+      response = await fetchWithTimeout(input.fetchImpl, AI_GATEWAY_CHAT_COMPLETIONS_URL, {
+        body: JSON.stringify(body),
         headers: {
           authorization: `Bearer ${input.token}`,
           "content-type": "application/json"
