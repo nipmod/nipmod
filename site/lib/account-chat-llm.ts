@@ -343,6 +343,8 @@ function systemPrompt(language: "de" | "en", toolsEnabled: boolean): string {
     languageInstruction,
     toolInstruction,
     "Speak naturally and briefly. Do not sound like a template.",
+    "If the user asks whether Nipmod supports or has access to a source, answer directly with the supported public sources: npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets and MCP.",
+    "If the user asks about Base/onchain token trading packages, frame it as SDK/package intelligence only. Do not give trading advice or imply wallet execution.",
     "If the user is only greeting you, thanking you or making small talk, answer normally and do not call tools.",
     "If the user asks about packages, models, repositories, MCP servers, installs, package choices or package safety, use Nipmod tools before making a recommendation.",
     "Prefer nipmod_preflight for package decisions because it searches, inspects and returns a read-only install plan in one step.",

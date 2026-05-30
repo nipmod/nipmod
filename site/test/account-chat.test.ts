@@ -80,6 +80,28 @@ describe("account chat intent", () => {
     expect(intent.searchQuery).toContain("transformers");
   });
 
+  test("answers typo-heavy German source access questions in German", () => {
+    const intent = analyzeAccountChatIntent("hast du auf huggingsfaceaich zugriff");
+
+    expect(intent).toMatchObject({
+      category: "capability",
+      language: "de",
+      mode: "conversation"
+    });
+    expect(buildAccountChatAnswer("hast du auf huggingsfaceaich zugriff", null, [], null, intent)).toContain("Hugging Face Models");
+  });
+
+  test("routes Base coin trading package requests to onchain SDK search", () => {
+    const intent = analyzeAccountChatIntent("find mir das betse package für base coins zu traden");
+
+    expect(intent).toMatchObject({
+      category: "onchain-trading",
+      language: "de",
+      mode: "search"
+    });
+    expect(intent.searchQuery).toContain("onchainkit");
+  });
+
   test("keeps general non-package questions out of fallback search", () => {
     const intent = analyzeAccountChatIntent("was ist npm eigentlich?");
 

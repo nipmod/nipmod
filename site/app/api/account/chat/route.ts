@@ -110,7 +110,7 @@ export async function POST(request: Request): Promise<Response> {
     const searchQuery = intent.searchQuery || decisionPlan.searchQueries.at(-1) || input.message;
     const search = await searchExternalPackages(searchQuery, {
       limit: intent.category === "web-design" ? 8 : 5,
-      sources: intent.category === "generic" ? decisionPlan.ecosystems : [...EXTERNAL_PACKAGE_SOURCES]
+      sources: intent.category === "generic" || intent.category === "onchain-trading" ? decisionPlan.ecosystems : [...EXTERNAL_PACKAGE_SOURCES]
     });
     const selected = selectAccountChatRecord(search.records, search.selection.recommendedId, intent);
     const inspected = selected ? await inspectExternalPackage(selected.source, selected.name) : null;

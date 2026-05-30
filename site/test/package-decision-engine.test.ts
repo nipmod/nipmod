@@ -27,6 +27,18 @@ describe("package decision engine", () => {
     expect(plan.ecosystems).not.toEqual(["mcp"]);
   });
 
+  test("plans Base trading package requests around onchain SDKs", () => {
+    const plan = planPackageDecisionQuery("find mir das betse package für base coins zu traden");
+
+    expect(plan).toMatchObject({
+      intent: "find-package",
+      language: "de"
+    });
+    expect(plan.ecosystems).toEqual(["npm", "github", "mcp"]);
+    expect(plan.constraints).toContain("onchain-transaction-sensitive");
+    expect(plan.searchQueries).toContain("base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit");
+  });
+
   test("creates an agent-readable receipt with alternatives and avoid candidates", () => {
     const selected = packageRecord({
       description: "Utility-first CSS framework.",

@@ -10,7 +10,7 @@ type AccountChatInstallPlan = {
 };
 
 export type AccountChatIntent = {
-  category: "capability" | "general" | "generic" | "greeting" | "hugging-face" | "small-talk" | "thanks" | "web-design";
+  category: "capability" | "general" | "generic" | "greeting" | "hugging-face" | "onchain-trading" | "small-talk" | "thanks" | "web-design";
   language: "de" | "en";
   mode: "conversation" | "search";
   searchQuery: string;
@@ -34,6 +34,10 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
   }
 
   if (asksAboutNipmod(compact)) {
+    return { category: "capability", language, mode: "conversation", searchQuery: "" };
+  }
+
+  if (asksForSourceAccess(normalized)) {
     return { category: "capability", language, mode: "conversation", searchQuery: "" };
   }
 
@@ -61,6 +65,15 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
       language,
       mode: "search",
       searchQuery: "huggingface transformers huggingface hub datasets sentence transformers model inference"
+    };
+  }
+
+  if (asksForOnchainTrading(normalized)) {
+    return {
+      category: "onchain-trading",
+      language,
+      mode: "search",
+      searchQuery: "base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit"
     };
   }
 
@@ -113,6 +126,12 @@ export function buildAccountChatAnswer(
       return `Wenn du Hugging Face als Entwickler-Ökosystem meinst, sind die wichtigsten Namen meistens transformers, huggingface_hub, datasets und sentence-transformers. Für JavaScript ist @huggingface/transformers der naheliegende Einstieg.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nWenn du ein Modell suchst, sollte die Frage anders gestellt werden, zum Beispiel: "bestes Embedding Modell für RAG" oder "kleines Vision Modell für Browser".${warningText}${alternativesText}`;
     }
 
+    if (intent.category === "onchain-trading") {
+      const warningText = warnings.length ? `\n\nSichtbare Warnungen: ${warnings.join("; ")}` : "";
+      const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
+      return `Für Base Token Trading würde ich nicht nach einem beliebigen "Coin Package" suchen. Sinnvoller ist ein SDK für Onchain Reads, Swap Routing oder Wallet/App Integration.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nWichtig: Nipmod gibt keine Trading Empfehlung und führt keine Wallet Aktion aus. Es prüft nur Paketkontext, Trust Signale und den Install Plan vor lokaler Ausführung.${warningText}${alternativesText}`;
+    }
+
     const warningText = warnings.length ? ` Sichtbare Warnungen: ${warnings.join("; ")}.` : " In diesem Preflight gab es keine blockierende Warnung.";
     const alternativesText = alternatives.length ? ` Vergleichbare Alternativen: ${alternatives.join(", ")}.` : "";
     return `Für "${query}" würde Nipmod zuerst ${selected.displayName} aus ${selected.source} prüfen. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}. Die hosted API ist read-only, führt nichts aus und schreibt nicht in den Workspace.${warningText}${alternativesText}`;
@@ -130,6 +149,12 @@ export function buildAccountChatAnswer(
     return `If you mean the Hugging Face developer ecosystem, the core names are usually transformers, huggingface_hub, datasets and sentence-transformers. For JavaScript, @huggingface/transformers is the natural starting point.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nIf you mean a model instead of a package, ask by task, for example "embedding model for RAG" or "small vision model for browser use".${warningText}${alternativesText}`;
   }
 
+  if (intent.category === "onchain-trading") {
+    const warningText = warnings.length ? `\n\nVisible warnings: ${warnings.join("; ")}` : "";
+    const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
+    return `For Base token trading, I would not search for a random "coin package." The useful surface is usually an SDK for onchain reads, swap routing or wallet/app integration.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nImportant: Nipmod does not give trading advice and does not execute wallet actions. It only checks package context, trust signals and the install plan before local execution.${warningText}${alternativesText}`;
+  }
+
   const warningText = warnings.length ? ` Visible warnings: ${warnings.join("; ")}.` : " No blocking warning was returned in this preflight.";
   const alternativesText = alternatives.length ? ` Alternatives worth comparing: ${alternatives.join(", ")}.` : "";
   return `For "${query}", Nipmod would inspect ${selected.displayName} from ${selected.source}. Trust result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}. The hosted API is read-only and does not execute or write to a workspace.${warningText}${alternativesText}`;
@@ -144,7 +169,7 @@ export function detectAccountChatLanguage(message: string): "de" | "en" {
   if (/^(hallo|servus|moin|danke|danke dir|danke nipmod)$/.test(compact)) {
     return "de";
   }
-  const germanWords = normalized.match(/\b(was|ist|sind|so|für|paket|pakete|brauche|bekannt|bekannteste|beste|webseite|warum|wie|geht|gehts|dir|alles|gut|kann|kannst|ich|nicht|oder|danke)\b/g);
+  const germanWords = normalized.match(/\b(alles|auf|bekannt|bekannteste|beste|betse|brauche|danke|das|deutsch|dir|du|find|für|geht|gehts|gut|hast|ich|ist|kann|kannst|mir|nicht|oder|paket|pakete|quelle|quellen|sind|so|traden|was|webseite|wie|warum|zugriff)\b/g);
   return (germanWords?.length ?? 0) >= 2 ? "de" : "en";
 }
 
@@ -175,6 +200,29 @@ export function selectAccountChatRecord(records: ExternalPackageRecord[], recomm
     }
   }
 
+  if (intent.category === "onchain-trading") {
+    const preferred = [
+      ["npm", "@coinbase/onchainkit"],
+      ["npm", "viem"],
+      ["npm", "wagmi"],
+      ["npm", "@uniswap/sdk-core"],
+      ["npm", "@uniswap/v3-sdk"]
+    ];
+    for (const [source, name] of preferred) {
+      const record = records.find((candidate) => candidate.source === source && candidate.name.toLowerCase() === name);
+      if (record) {
+        return record;
+      }
+    }
+    return (
+      records.find((candidate) =>
+        /\b(base|onchain|swap|trading|trade|wallet|viem|wagmi|uniswap|coinbase)\b/i.test(
+          `${candidate.name} ${candidate.displayName} ${candidate.description}`
+        )
+      ) ?? null
+    );
+  }
+
   return records.find((record) => record.id === recommendedId) ?? records[0] ?? null;
 }
 
@@ -196,7 +244,7 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
     if (intent.category === "general") {
       return "Ich kann normal antworten, aber mein eigentlicher Job ist Paket-Intelligence. Wenn du ein Paket, Modell, Repo oder einen MCP Server suchst, beschreib einfach den Use Case. Dann prüfe ich Quellen, Trust Signale und den Install Plan.";
     }
-    return "Nipmod hilft dir vor einer Installation: Paket suchen, Quelle prüfen, Trust Signale ansehen und einen Install Plan bekommen. Die hosted API bleibt read-only und führt nichts in deinem Workspace aus.";
+    return "Ja. Nipmod kann öffentliche Quellen wie npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets und MCP vor einer Installation prüfen. Die hosted API bleibt read-only: sie sucht, inspiziert Trust Signale und erstellt Install Plans, aber sie führt nichts aus und schreibt nicht in deinen Workspace.";
   }
 
   if (intent.category === "greeting") {
@@ -211,7 +259,20 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
   if (intent.category === "general") {
     return "I can answer normally, but Nipmod is built for package intelligence. If you need a package, model, repo or MCP server, describe the use case and I will check sources, trust signals and the install plan.";
   }
-  return "Nipmod helps before install time: search a package, inspect source context, review trust signals and get an install plan. The hosted API stays read-only and does not execute in your workspace.";
+  return "Yes. Nipmod can inspect public sources including npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets and MCP. The hosted API stays read-only: it searches, inspects trust signals and creates install plans, but it does not execute or write to your workspace.";
+}
+
+function asksForSourceAccess(normalized: string): boolean {
+  const sourceMention = /\b(npm|pypi|github|mcp|hf)\b|hugg\w*face\w*/i.test(normalized);
+  const accessQuestion = /\b(access|support|supports|source|sources|registry|registries|zugriff|quelle|quellen|unterstützt|kannst|kann|hast)\b/i.test(normalized);
+  return sourceMention && accessQuestion;
+}
+
+function asksForOnchainTrading(normalized: string): boolean {
+  const onchainSurface = /\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto)\b/i.test(normalized);
+  const tradingNeed = /\b(trade|trading|traden|swap|swaps|dex|router|liquidity|kaufen|verkaufen)\b/i.test(normalized);
+  const packageNeed = /\b(package|packages|paket|pakete|sdk|library|lib|tool|find|finde|such|suche|best|beste|betse|good|gute)\b/i.test(normalized);
+  return onchainSurface && tradingNeed && packageNeed;
 }
 
 function isGreeting(compact: string): boolean {
@@ -227,7 +288,7 @@ function isSmallTalk(compact: string): boolean {
 }
 
 function hasPackageDecisionIntent(normalized: string): boolean {
-  const namesKnownSurface = /\b(npm|pypi|pip|python|github|repo|repository|hugging ?face|huggingface|hf|mcp|sdk|cli|library|libraries|lib|package|packages|paket|pakete|modell|model|dataset|server|dependency|dependencies|abhängigkeit|tool|tools)\b/i.test(normalized);
+  const namesKnownSurface = /\b(npm|pypi|pip|python|github|repo|repository|hugging ?face|huggingface|hf|mcp|sdk|cli|library|libraries|lib|package|packages|paket|pakete|modell|model|dataset|server|dependency|dependencies|abhängigkeit|tool|tools|wallet|token|coin|base|onchain|swap|trading|traden)\b/i.test(normalized);
   const asksForChoice = /\b(best|beste|good|gute|better|besser|popular|bekannt|bekannteste|standard|standart|typisch|common|recommend|empfehl|suche|find|finden|brauche|need|looking for|use case|install|installieren|safe|sicher|trust|risk|risiko|malware|cve|vulnerab|schwachstelle)\b/i.test(normalized);
   const directInstallOrInspect = /\b(npm install|pnpm add|yarn add|bun add|pip install|uv add|npx|git clone|docker pull|install|installieren|install plan|install-plan|inspect|preflight)\b/i.test(normalized);
   const packageLikeName = /(^|\s)(@[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z0-9_.-]+@[0-9]+(?:\.[0-9]+){1,3})(\s|$)/i.test(normalized);
