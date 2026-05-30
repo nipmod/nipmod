@@ -416,6 +416,10 @@ const NPM_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
   { names: ["nodemailer", "resend"], pattern: /\b(email|emails|smtp|transactional mail|send mail)\b/i },
   { names: ["pino", "winston"], pattern: /\b(log|logs|logging|observability|telemetry)\b/i },
   { names: ["playwright"], pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i },
+  {
+    names: ["tailwindcss", "clsx", "class-variance-authority", "lucide-react", "framer-motion", "@radix-ui/react-dialog"],
+    pattern: /\b(web ?design|website ?design|webseite|websitedesign|frontend design|ui design|design system|component library|components|css|tailwind|icons?|animation)\b/i
+  },
   { names: ["sharp", "jimp", "fabric", "konva", "canvas"], pattern: /\b(graphic|graphics|image|images|design|canvas|svg|photo|render)\b/i }
 ];
 const PYPI_QUERY_HINTS: Array<{ names: string[]; pattern: RegExp }> = [
@@ -601,6 +605,17 @@ const QUERY_INTENT_RANKING_HINTS: Array<{
       { bonus: 12, name: "playwright", reason: "browser automation fit", source: "npm" }
     ],
     pattern: /\b(scrape|scraper|crawler|crawl|browser|parse html|web crawl)\b/i
+  },
+  {
+    matches: [
+      { bonus: 28, name: "tailwindcss", reason: "CSS utility framework fit", source: "npm" },
+      { bonus: 18, name: "clsx", reason: "conditional class composition fit", source: "npm" },
+      { bonus: 18, name: "class-variance-authority", reason: "component variant styling fit", source: "npm" },
+      { bonus: 17, name: "lucide-react", reason: "React icon library fit", source: "npm" },
+      { bonus: 16, name: "framer-motion", reason: "frontend animation fit", source: "npm" },
+      { bonus: 16, name: "@radix-ui/react-dialog", reason: "accessible UI primitive fit", source: "npm" }
+    ],
+    pattern: /\b(web ?design|website ?design|webseite|websitedesign|frontend design|ui design|design system|component library|components|css|tailwind|icons?|animation)\b/i
   },
   {
     matches: [

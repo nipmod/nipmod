@@ -4,9 +4,9 @@ import {
   createExternalInstallPlan,
   externalPackageApiError,
   inspectExternalPackage,
-  searchExternalPackages,
-  type ExternalPackageRecord
+  searchExternalPackages
 } from "../../../../lib/external-packages";
+import { analyzeAccountChatIntent, buildAccountChatAnswer, selectAccountChatRecord } from "../../../../lib/account-chat";
 import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/account-auth";
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
 import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
@@ -37,18 +37,46 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const search = await searchExternalPackages(input.message, {
-      limit: 5,
+    const intent = analyzeAccountChatIntent(input.message);
+    if (intent.mode === "conversation") {
+      return apiJson(
+        {
+          answer: buildAccountChatAnswer(input.message, null, [], null, intent),
+          generatedAt: new Date().toISOString(),
+          installPlan: null,
+          intent,
+          query: null,
+          records: [],
+          selected: null,
+          sourceSummary: {
+            empty: 0,
+            failed: 0,
+            ok: 0,
+            requested: 0
+          },
+          type: "dev.nipmod.account-chat.v1",
+          user: {
+            email: user.email,
+            id: user.id
+          }
+        },
+        { context, headers: rateLimit.headers }
+      );
+    }
+
+    const search = await searchExternalPackages(intent.searchQuery, {
+      limit: intent.category === "web-design" ? 8 : 5,
       sources: [...EXTERNAL_PACKAGE_SOURCES]
     });
-    const selected = selectRecord(search.records, search.selection.recommendedId);
+    const selected = selectAccountChatRecord(search.records, search.selection.recommendedId, intent);
     const inspected = selected ? await inspectExternalPackage(selected.source, selected.name) : null;
     const installPlan = inspected ? createExternalInstallPlan(inspected) : null;
 
     return apiJson(
       {
-        answer: buildChatAnswer(input.message, inspected, search.records, installPlan),
+        answer: buildAccountChatAnswer(input.message, inspected, search.records, installPlan, intent),
         generatedAt: new Date().toISOString(),
+        intent,
         installPlan,
         query: search.query,
         records: search.records,
@@ -84,36 +112,10 @@ async function readChatInput(
     return { code: "invalid_json", error: "request body must be an object", ok: false, status: 400 };
   }
   const message = (body as Record<string, unknown>).message;
-  if (typeof message !== "string" || message.trim().length < 3) {
-    return { code: "invalid_message", error: "message must contain a package search question", ok: false, status: 400 };
+  if (typeof message !== "string" || message.trim().length < 1) {
+    return { code: "invalid_message", error: "message is required", ok: false, status: 400 };
   }
   return { message: message.trim().slice(0, 1200), ok: true };
-}
-
-function selectRecord(records: ExternalPackageRecord[], recommendedId: string | null): ExternalPackageRecord | null {
-  return records.find((record) => record.id === recommendedId) ?? records[0] ?? null;
-}
-
-function buildChatAnswer(
-  query: string,
-  selected: ExternalPackageRecord | null,
-  records: ExternalPackageRecord[],
-  installPlan: ReturnType<typeof createExternalInstallPlan> | null
-): string {
-  if (!selected || !installPlan) {
-    return `I could not find a strong package candidate for "${query}". Try a narrower package task or name the ecosystem you want.`;
-  }
-
-  const alternatives = records
-    .filter((record) => record.id !== selected.id)
-    .slice(0, 3)
-    .map((record) => `${record.displayName} (${record.source})`);
-  const warnings = [...selected.trust.warnings, ...(installPlan.safety.warnings ?? [])].slice(0, 3);
-  const command = installPlan.plan.commands.at(0) ?? selected.install.command;
-  const warningText = warnings.length ? ` Visible warnings: ${warnings.join("; ")}.` : " No blocking warning was returned in this preflight.";
-  const alternativesText = alternatives.length ? ` Alternatives worth comparing: ${alternatives.join(", ")}.` : "";
-
-  return `For "${query}", Nipmod would inspect ${selected.displayName} from ${selected.source}. Trust result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}. The hosted API is read-only and does not execute or write to a workspace.${warningText}${alternativesText}`;
 }
 
 function chatError(
