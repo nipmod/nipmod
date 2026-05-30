@@ -7,6 +7,7 @@ import {
   searchExternalPackages
 } from "../../../../lib/external-packages";
 import { analyzeAccountChatIntent, buildAccountChatAnswer, selectAccountChatRecord } from "../../../../lib/account-chat";
+import { buildPackageDecision, formatPackageDecisionAnswer } from "../../../../lib/package-decision-engine";
 import { tryAnswerAccountChatWithLlm, type AccountChatHistoryEntry } from "../../../../lib/account-chat-llm";
 import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/account-auth";
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
@@ -47,6 +48,7 @@ export async function POST(request: Request): Promise<Response> {
       return apiJson(
         {
           answer: llm.answer,
+          decision: llm.decision,
           generatedAt: new Date().toISOString(),
           installPlan: llm.installPlan,
           intent: {
@@ -81,6 +83,7 @@ export async function POST(request: Request): Promise<Response> {
       return apiJson(
         {
           answer: buildAccountChatAnswer(input.message, null, [], null, intent),
+          decision: null,
           generatedAt: new Date().toISOString(),
           installPlan: null,
           intent,
@@ -110,10 +113,19 @@ export async function POST(request: Request): Promise<Response> {
     const selected = selectAccountChatRecord(search.records, search.selection.recommendedId, intent);
     const inspected = selected ? await inspectExternalPackage(selected.source, selected.name) : null;
     const installPlan = inspected ? createExternalInstallPlan(inspected) : null;
+    const decision = buildPackageDecision({
+      installPlan,
+      originalQuery: input.message,
+      records: search.records,
+      searchQuery: search.query,
+      selected: inspected,
+      sourceSummary: search.sourceSummary
+    });
 
     return apiJson(
       {
-        answer: buildAccountChatAnswer(input.message, inspected, search.records, installPlan, intent),
+        answer: formatPackageDecisionAnswer(decision),
+        decision,
         generatedAt: new Date().toISOString(),
         intent,
         installPlan,

@@ -6,6 +6,52 @@ import type { AccountUser } from "../../lib/account-auth";
 
 type ChatResponse = {
   answer?: string;
+  decision?: {
+    alternatives?: Array<{
+      displayName?: string;
+      id: string;
+      source: string;
+      trust?: {
+        decision?: string;
+        risk?: string;
+        score?: number;
+      };
+    }>;
+    avoid?: Array<{
+      displayName?: string;
+      id: string;
+      reasons?: string[];
+      source: string;
+      trust?: {
+        decision?: string;
+        risk?: string;
+        score?: number;
+      };
+    }>;
+    confidence?: {
+      label?: string;
+      score?: number;
+      uncertainty?: string[];
+    };
+    receipt?: {
+      hostedApiExecutes?: boolean;
+      installCommand?: string | null;
+      installPlanBlocked?: boolean;
+      requiresApprovalBeforeWrite?: boolean;
+      workspaceWrites?: boolean;
+    } | null;
+    recommended?: {
+      displayName?: string;
+      id: string;
+      source: string;
+      trust?: {
+        decision?: string;
+        risk?: string;
+        score?: number;
+        warnings?: string[];
+      };
+    } | null;
+  };
   installPlan?: {
     plan?: {
       commands?: string[];
@@ -338,6 +384,9 @@ function isProbablyGerman(value: string): boolean {
 function ChatResponseView({ response }: { response: ChatResponse }) {
   const installCommand = response.installPlan?.plan?.commands?.at(0) ?? "";
   const warnings = response.selected?.trust?.warnings ?? response.installPlan?.safety?.warnings ?? [];
+  const decision = response.decision;
+  const alternatives = decision?.alternatives?.slice(0, 3) ?? [];
+  const avoid = decision?.avoid?.slice(0, 2) ?? [];
 
   return (
     <div className="account-chat-result">
@@ -349,6 +398,16 @@ function ChatResponseView({ response }: { response: ChatResponse }) {
           <div><dt>Trust</dt><dd>{trustLine(response.selected.trust)}</dd></div>
           {installCommand ? <div><dt>Install plan</dt><dd><code>{installCommand}</code></dd></div> : null}
           {warnings.length ? <div><dt>Warnings</dt><dd>{warnings.slice(0, 3).join("; ")}</dd></div> : null}
+        </dl>
+      ) : null}
+      {decision ? (
+        <dl>
+          <div><dt>Confidence</dt><dd>{decision.confidence?.score ?? "n/a"} / {decision.confidence?.label ?? "unknown"}</dd></div>
+          {decision.receipt ? (
+            <div><dt>Hosted boundary</dt><dd>{decision.receipt.hostedApiExecutes ? "executes" : "read-only"} / {decision.receipt.workspaceWrites ? "writes" : "no writes"}</dd></div>
+          ) : null}
+          {alternatives.length ? <div><dt>Alternatives</dt><dd>{alternatives.map((item) => `${item.displayName ?? item.id} (${item.source})`).join(", ")}</dd></div> : null}
+          {avoid.length ? <div><dt>Avoid</dt><dd>{avoid.map((item) => `${item.displayName ?? item.id}: ${item.reasons?.[0] ?? item.trust?.risk ?? "review"}`).join("; ")}</dd></div> : null}
         </dl>
       ) : null}
     </div>

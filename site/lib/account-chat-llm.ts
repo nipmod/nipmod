@@ -10,6 +10,7 @@ import {
   type ExternalSearchResult
 } from "./external-packages";
 import { consumeNamedRateLimitAsync } from "./rate-limit";
+import { buildPackageDecision, type PackageDecision } from "./package-decision-engine";
 
 export type AccountChatHistoryEntry = {
   content: string;
@@ -21,6 +22,7 @@ export type AccountChatLlmResult =
       answer: string;
       cost: AccountChatLlmCostReport;
       costMode: AccountChatLlmCostMode;
+      decision: PackageDecision | null;
       installPlan: ExternalInstallPlan | null;
       language: "de" | "en";
       model: string;
@@ -115,6 +117,7 @@ type GatewayTool = {
 
 type ToolState = {
   installPlan: ExternalInstallPlan | null;
+  decision: PackageDecision | null;
   query: string | null;
   records: ExternalPackageRecord[];
   selected: ExternalPackageRecord | null;
@@ -252,6 +255,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
   const language = detectAccountChatLanguage(message);
   const state: ToolState = {
     installPlan: null,
+    decision: null,
     query: null,
     records: [],
     selected: null,
@@ -307,6 +311,7 @@ export async function tryAnswerAccountChatWithLlm(message: string, options: Acco
       answer,
       cost: buildCostReport(gateway.model, gateway.usage, profile.maxOutputTokens),
       costMode: profile.mode,
+      decision: state.decision,
       installPlan: state.installPlan,
       language,
       model: gateway.model,
@@ -622,7 +627,16 @@ async function runPreflight(args: Record<string, unknown>, state: ToolState): Pr
 
   const selected = search.records.find((record) => record.id === search.selection.recommendedId) ?? search.records[0] ?? null;
   if (!selected) {
+    state.decision = buildPackageDecision({
+      installPlan: null,
+      originalQuery: query,
+      records: [],
+      searchQuery: search.query,
+      selected: null,
+      sourceSummary: search.sourceSummary
+    });
     return {
+      decision: compactDecision(state.decision),
       query: search.query,
       records: [],
       sourceSummary: search.sourceSummary
@@ -632,9 +646,19 @@ async function runPreflight(args: Record<string, unknown>, state: ToolState): Pr
   try {
     const inspected = await inspectExternalPackage(selected.source, selected.name);
     const installPlan = createExternalInstallPlan(inspected);
+    const decision = buildPackageDecision({
+      installPlan,
+      originalQuery: query,
+      records: search.records,
+      searchQuery: search.query,
+      selected: inspected,
+      sourceSummary: search.sourceSummary
+    });
     state.selected = inspected;
     state.installPlan = installPlan;
+    state.decision = decision;
     return {
+      decision: compactDecision(decision),
       installPlan: compactInstallPlan(installPlan),
       query: search.query,
       records: search.records.slice(0, 6).map(compactRecord),
@@ -644,7 +668,16 @@ async function runPreflight(args: Record<string, unknown>, state: ToolState): Pr
   } catch (error) {
     state.selected = selected;
     state.installPlan = null;
+    state.decision = buildPackageDecision({
+      installPlan: null,
+      originalQuery: query,
+      records: search.records,
+      searchQuery: search.query,
+      selected,
+      sourceSummary: search.sourceSummary
+    });
     return {
+      decision: compactDecision(state.decision),
       inspectError: error instanceof Error ? error.message : String(error),
       query: search.query,
       records: search.records.slice(0, 6).map(compactRecord),
@@ -695,9 +728,19 @@ async function runInstallPlan(args: Record<string, unknown>, state: ToolState): 
   }
   const inspected = await inspectExternalPackage(source, name);
   const installPlan = createExternalInstallPlan(inspected);
+  const decision = buildPackageDecision({
+    installPlan,
+    originalQuery: name,
+    records: [inspected],
+    searchQuery: name,
+    selected: inspected,
+    sourceSummary: { empty: 0, failed: 0, ok: 1, requested: 1 }
+  });
   state.selected = inspected;
   state.installPlan = installPlan;
+  state.decision = decision;
   return {
+    decision: compactDecision(decision),
     installPlan: compactInstallPlan(installPlan),
     selected: compactRecord(inspected)
   };
@@ -780,6 +823,60 @@ function compactInstallPlan(installPlan: ExternalInstallPlan): Record<string, un
       requiresApprovalBeforeWrite: installPlan.safety.requiresApprovalBeforeWrite,
       warnings: installPlan.safety.warnings.slice(0, 6)
     }
+  };
+}
+
+function compactDecision(decision: PackageDecision): Record<string, unknown> {
+  return {
+    alternatives: decision.alternatives.slice(0, 4).map((candidate) => ({
+      displayName: candidate.displayName,
+      id: candidate.id,
+      installCommand: candidate.installCommand,
+      source: candidate.source,
+      trust: candidate.trust
+    })),
+    avoid: decision.avoid.slice(0, 4).map((candidate) => ({
+      displayName: candidate.displayName,
+      id: candidate.id,
+      reasons: candidate.reasons.slice(0, 4),
+      source: candidate.source,
+      trust: candidate.trust
+    })),
+    confidence: decision.confidence,
+    plan: {
+      constraints: decision.plan.constraints,
+      criteria: decision.plan.criteria,
+      ecosystems: decision.plan.ecosystems,
+      intent: decision.plan.intent,
+      task: decision.plan.task
+    },
+    receipt: decision.receipt
+      ? {
+          alternativesConsidered: decision.receipt.alternativesConsidered,
+          hostedApiExecutes: decision.receipt.hostedApiExecutes,
+          installCommand: decision.receipt.installCommand,
+          installPlanBlocked: decision.receipt.installPlanBlocked,
+          packageId: decision.receipt.packageId,
+          requiresApprovalBeforeWrite: decision.receipt.requiresApprovalBeforeWrite,
+          reviewSteps: decision.receipt.reviewSteps.slice(0, 5),
+          warnings: decision.receipt.warnings.slice(0, 5),
+          workspaceWrites: decision.receipt.workspaceWrites
+        }
+      : null,
+    recommended: decision.recommended
+      ? {
+          displayName: decision.recommended.displayName,
+          fitReasons: decision.recommended.fitReasons,
+          id: decision.recommended.id,
+          installCommand: decision.recommended.installCommand,
+          source: decision.recommended.source,
+          sourceDepthScore: decision.recommended.sourceDepthScore,
+          trust: decision.recommended.trust,
+          version: decision.recommended.version
+        }
+      : null,
+    summary: decision.summary,
+    type: decision.type
   };
 }
 
