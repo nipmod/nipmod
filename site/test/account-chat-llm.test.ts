@@ -58,7 +58,42 @@ describe("account chat LLM adapter", () => {
     });
     expect(requests).toHaveLength(1);
     expect(requests[0]?.model).toBe("openai/test-model");
+    expect(requests[0]?.tools).toBeUndefined();
+    expect(JSON.stringify(requests[0])).toContain("Nipmod tools are intentionally not available");
+  });
+
+  test("offers Nipmod tools only for package decisions", async () => {
+    const requests: Array<Record<string, unknown>> = [];
+    const fetchImpl: typeof fetch = async (_input, init) => {
+      requests.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: "I would inspect the package first."
+              }
+            }
+          ]
+        }),
+        { headers: { "content-type": "application/json" }, status: 200 }
+      );
+    };
+
+    const result = await tryAnswerAccountChatWithLlm("best package for forms in react", {
+      env: {
+        AI_GATEWAY_API_KEY: "test-gateway-token"
+      },
+      fetchImpl,
+      userId: "package-user"
+    });
+
+    expect(result).toMatchObject({
+      costMode: "package",
+      ok: true
+    });
     expect(requests[0]?.tools).toEqual(expect.any(Array));
+    expect(JSON.stringify(requests[0])).toContain("Nipmod tools are available");
   });
 
   test("tries the fallback model when the first gateway model is unavailable", async () => {

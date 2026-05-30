@@ -66,6 +66,27 @@ export default function PartnersPage() {
         <DocsTable rows={partnerIntegrationPack.limits.routes.map((route) => [route.path, route.limit, "Per key before partner multiplier"])} />
       </DocsSection>
 
+      <DocsSection eyebrow="Live smoke" title="Six source check">
+        <DocsTable
+          rows={[
+            ["Command", <code key="source-canary">{partnerIntegrationPack.liveSourceSmoke.command}</code>],
+            ["Base URL", partnerIntegrationPack.liveSourceSmoke.baseUrl],
+            ["Expected", partnerIntegrationPack.liveSourceSmoke.expected],
+            ["Sources", partnerIntegrationPack.liveSourceSmoke.sources.join(", ")]
+          ]}
+        />
+      </DocsSection>
+
+      <DocsSection eyebrow="Outlines" title="Partner starting points">
+        <DocsTable
+          rows={partnerIntegrationPack.partnerOutlines.map((outline) => [
+            outline.name,
+            outline.fit,
+            `${outline.status}: ${outline.firstFlow}`
+          ])}
+        />
+      </DocsSection>
+
       <DocsSection eyebrow="Boundary" title="What stays outside Nipmod">
         <DocsGrid>
           <DocsCard label="Hosted API" title="Read-only package intelligence">

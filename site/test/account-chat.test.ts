@@ -79,4 +79,29 @@ describe("account chat intent", () => {
     });
     expect(intent.searchQuery).toContain("transformers");
   });
+
+  test("keeps general non-package questions out of fallback search", () => {
+    const intent = analyzeAccountChatIntent("was ist npm eigentlich?");
+
+    expect(intent).toMatchObject({
+      category: "general",
+      language: "de",
+      mode: "conversation",
+      searchQuery: ""
+    });
+    expect(buildAccountChatAnswer("was ist npm eigentlich?", null, [], null, intent)).toContain("Paket-Intelligence");
+  });
+
+  test("still searches when a user asks for a package decision", () => {
+    expect(analyzeAccountChatIntent("ich brauche ein paket für pdf parsing")).toMatchObject({
+      category: "generic",
+      language: "de",
+      mode: "search"
+    });
+    expect(analyzeAccountChatIntent("is zod safe to install?")).toMatchObject({
+      category: "generic",
+      language: "en",
+      mode: "search"
+    });
+  });
 });

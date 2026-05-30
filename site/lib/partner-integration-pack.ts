@@ -75,6 +75,14 @@ export const partnerIntegrationPack = {
       { limit: "240/min", path: "/api/sources/health" }
     ]
   },
+  liveSourceSmoke: {
+    command: "pnpm source:canary",
+    baseUrl: "https://nipmod.com",
+    expected: "6/6 source families pass depth inspection",
+    sources: ["npm", "pypi", "github", "huggingface-model", "huggingface-dataset", "mcp"],
+    purpose:
+      "Use before partner demos to prove the hosted API can inspect representative public objects across every supported source family without executing, cloning, unpacking or writing."
+  },
   nonGoals: [
     "hosted workspace writes",
     "hosted package installation",
@@ -94,6 +102,44 @@ export const partnerIntegrationPack = {
     usageStores: ["route", "method", "status", "access tier", "key id", "client hash", "query hash", "package hash", "source", "duration"],
     workspaceDataRequired: false
   },
+  partnerOutlines: [
+    {
+      name: "Clawnch",
+      status: "draft_for_partner_review",
+      fit: "Agent token launch and agent-tooling surfaces can call Nipmod before SDK, CLI, MCP or memory tooling enters a workflow.",
+      firstFlow:
+        "Preflight Clawnch SDK, CLI, MCP and memory candidates, then hand local install, wallet, token launch and trading actions back to Clawnch-controlled flows.",
+      reviewAsk: "Confirm package names, docs links, surfaces to index and wording before any public claim.",
+      publicLink: "https://nipmod.com/integrations/clawnch"
+    },
+    {
+      name: "Nookplot",
+      status: "async_outline_ready",
+      fit: "Agent coordination, identity, reputation and settlement can use Nipmod package decisions as one input to an agent activity or reputation trail.",
+      firstFlow:
+        "A Nookplot agent calls Nipmod before package, model, repo or MCP decisions, receives a decision receipt, then Nookplot decides what part belongs in its activity or reputation record.",
+      reviewAsk: "Confirm which Nookplot action items should consume package decision receipts and which events should stay private.",
+      publicLink: "https://nipmod.com/partners"
+    },
+    {
+      name: "Bankr",
+      status: "async_outline_ready",
+      fit: "Agent skill and onchain action workflows can use Nipmod before agents install or enable SDKs, skills, CLIs or MCP servers.",
+      firstFlow:
+        "A Bankr skill or agent host uses Nipmod preflight for package/tool discovery, then keeps any token, swap, payment or wallet action inside Bankr/Base approval boundaries.",
+      reviewAsk: "Confirm whether this belongs as a skill, a docs integration, a demo workflow or only a preflight recommendation.",
+      publicLink: "https://nipmod.com/partners"
+    },
+    {
+      name: "OpenHuman",
+      status: "maintainer_review_needed",
+      fit: "Agent skill directories can reference Nipmod as a pre-install package intelligence layer without importing mutable third-party skill files blindly.",
+      firstFlow:
+        "Use a pinned Nipmod skill or integration note that tells OpenHuman agents to call Nipmod before external package, repo, model or MCP server adoption.",
+      reviewAsk: "Maintainer signoff, pinned reference strategy and supply-chain wording before any PR is treated as ready.",
+      publicLink: "https://github.com/tinyhumansai/openhuman/pull/2432"
+    }
+  ],
   readinessChecklist: [
     "Core calls use x-nipmod-api-key.",
     "The integration treats package metadata and model cards as untrusted input.",
