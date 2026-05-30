@@ -10,7 +10,7 @@ type AccountChatInstallPlan = {
 };
 
 export type AccountChatIntent = {
-  category: "capability" | "generic" | "greeting" | "hugging-face" | "thanks" | "web-design";
+  category: "capability" | "generic" | "greeting" | "hugging-face" | "small-talk" | "thanks" | "web-design";
   language: "de" | "en";
   mode: "conversation" | "search";
   searchQuery: string;
@@ -27,6 +27,10 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
 
   if (isThanks(compact)) {
     return { category: "thanks", language, mode: "conversation", searchQuery: "" };
+  }
+
+  if (isSmallTalk(compact)) {
+    return { category: "small-talk", language, mode: "conversation", searchQuery: "" };
   }
 
   if (asksAboutNipmod(compact)) {
@@ -136,7 +140,7 @@ export function detectAccountChatLanguage(message: string): "de" | "en" {
   if (/^(hallo|servus|moin|danke|danke dir|danke nipmod)$/.test(compact)) {
     return "de";
   }
-  const germanWords = normalized.match(/\b(was|ist|sind|so|für|paket|pakete|brauche|bekannt|bekannteste|beste|webseite|warum|wie|kann|kannst|ich|nicht|oder|danke)\b/g);
+  const germanWords = normalized.match(/\b(was|ist|sind|so|für|paket|pakete|brauche|bekannt|bekannteste|beste|webseite|warum|wie|geht|gehts|dir|alles|gut|kann|kannst|ich|nicht|oder|danke)\b/g);
   return (germanWords?.length ?? 0) >= 2 ? "de" : "en";
 }
 
@@ -171,13 +175,16 @@ export function selectAccountChatRecord(records: ExternalPackageRecord[], recomm
 }
 
 function asksAboutNipmod(compact: string): boolean {
-  return /\b(was kannst du|was kann nipmod|wie funktioniert nipmod|hilfe|help|what can you do|how does nipmod work|what is nipmod)\b/i.test(compact);
+  return /\b(was kannst du|was kann nipmod|wie funktioniert nipmod|wer bist du|was bist du|hilfe|help|what can you do|how does nipmod work|what is nipmod|what are you)\b/i.test(compact);
 }
 
 function buildConversationAnswer(intent: AccountChatIntent): string {
   if (intent.language === "de") {
     if (intent.category === "greeting") {
       return "Hey. Frag mich nach einem Paket, Modell, Repository oder MCP Server. Wenn du nur den Use Case kennst, reicht das auch.";
+    }
+    if (intent.category === "small-talk") {
+      return "Mir geht's gut. Ich bin hier, um dir bei Paket-, Modell-, Repo- und MCP Entscheidungen zu helfen. Frag einfach normal, zum Beispiel: \"Ich brauche ein gutes Paket für Forms in React.\"";
     }
     if (intent.category === "thanks") {
       return "Gerne. Schick mir einfach den nächsten Use Case oder Paketnamen.";
@@ -187,6 +194,9 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
 
   if (intent.category === "greeting") {
     return "Hey. Ask me for a package, model, repository or MCP server. A use case is enough if you do not know the exact name.";
+  }
+  if (intent.category === "small-talk") {
+    return "Doing well. I am here to help with package, model, repository and MCP decisions. Ask naturally, for example: \"I need a good forms package for React.\"";
   }
   if (intent.category === "thanks") {
     return "Anytime. Send the next use case or package name when you are ready.";
@@ -200,4 +210,8 @@ function isGreeting(compact: string): boolean {
 
 function isThanks(compact: string): boolean {
   return /^(thanks|thank you|thx|danke|danke dir|dankeschön|danke nipmod)$/.test(compact);
+}
+
+function isSmallTalk(compact: string): boolean {
+  return /^(wie gehts|wie geht es dir|wie geht's|wie gehts dir|alles gut|alles klar|was geht|na|how are you|how are u|how is it going|how's it going|whats up|what's up|sup)$/.test(compact);
 }
