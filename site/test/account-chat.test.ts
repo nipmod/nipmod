@@ -36,6 +36,30 @@ describe("account chat intent", () => {
     expect(buildAccountChatAnswer("was kannst du?", null, [], null, intent)).toContain("vor einer Installation");
   });
 
+  test("answers German small talk instead of searching packages", () => {
+    const intent = analyzeAccountChatIntent("wie gehts?");
+
+    expect(intent).toMatchObject({
+      category: "small-talk",
+      language: "de",
+      mode: "conversation",
+      searchQuery: ""
+    });
+    expect(buildAccountChatAnswer("wie gehts?", null, [], null, intent)).toContain("Mir geht");
+  });
+
+  test("answers English small talk instead of searching packages", () => {
+    const intent = analyzeAccountChatIntent("how are you?");
+
+    expect(intent).toMatchObject({
+      category: "small-talk",
+      language: "en",
+      mode: "conversation",
+      searchQuery: ""
+    });
+    expect(buildAccountChatAnswer("how are you?", null, [], null, intent)).toContain("Doing well");
+  });
+
   test("keeps German search questions in German", () => {
     expect(detectAccountChatLanguage("was ist so standart pakete für webdesign")).toBe("de");
     expect(analyzeAccountChatIntent("was ist so standart pakete für webdesign")).toMatchObject({
