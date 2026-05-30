@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { accountAuthConfig } from "../../lib/account-auth";
 
 export type AccountNotice = {
@@ -14,12 +13,10 @@ export type AccountLoginState = {
 export type AccountSearchParams = Record<string, string | string[] | undefined> | undefined;
 
 export function AccountLoginSurface({
-  docsHref = "/docs",
   loginPath = "/account",
   nextPath = "/account",
   state
 }: {
-  docsHref?: string;
   loginPath?: "/" | "/account";
   nextPath?: string;
   state: AccountLoginState;
@@ -28,9 +25,6 @@ export function AccountLoginSurface({
 
   return (
     <main className="account-auth-shell" id="main">
-      <Link className="account-auth-docs-link" href={docsHref}>
-        Docs
-      </Link>
       <section className="account-auth-copy" aria-labelledby="account-login-title">
         <h1 id="account-login-title">Explore packages through Nipmod.</h1>
       </section>

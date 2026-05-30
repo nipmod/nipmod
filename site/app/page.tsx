@@ -22,5 +22,5 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     return <AccountWorkspace user={user} />;
   }
 
-  return <AccountLoginSurface docsHref="/docs" loginPath="/" nextPath="/account" state={readAccountLoginState(await searchParams)} />;
+  return <AccountLoginSurface loginPath="/" nextPath="/account" state={readAccountLoginState(await searchParams)} />;
 }
