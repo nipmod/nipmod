@@ -78,9 +78,16 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
 
   async function askNipmod() {
     const prompt = message.trim();
-    if (prompt.length < 3 || chatStatus === "running") {
+    if (prompt.length < 1 || chatStatus === "running") {
       return;
     }
+    const history = chatMessages
+      .filter((entry) => entry.status === "done" && entry.content.trim().length > 0)
+      .slice(-8)
+      .map((entry) => ({
+        content: entry.role === "assistant" ? entry.response?.answer ?? entry.content : entry.content,
+        role: entry.role
+      }));
     const timestamp = Date.now();
     const assistantId = `assistant-${timestamp}`;
     setChatStatus("running");
@@ -92,7 +99,7 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
     ]);
     try {
       const data = await requestJson<ChatResponse>("/api/account/chat", {
-        body: JSON.stringify({ message: prompt }),
+        body: JSON.stringify({ history, message: prompt }),
         headers: { "content-type": "application/json" },
         method: "POST"
       });
@@ -211,7 +218,7 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
                   />
                 </label>
                 <button className="button button-primary" disabled={chatStatus === "running"} onClick={askNipmod} type="button">
-                  {chatStatus === "running" ? "Checking" : "Ask Nipmod"}
+                  {chatStatus === "running" ? "Thinking" : "Ask Nipmod"}
                 </button>
               </div>
             </section>
@@ -317,7 +324,7 @@ function loadingLine(prompt: string): string {
 
 function isLightConversation(value: string): boolean {
   const compact = value.toLowerCase().replace(/[!?.,;:]+/g, " ").replace(/\s+/g, " ").trim();
-  return /^(hey|hi|hello|hallo|servus|moin|yo|gm|gn|hey nipmod|hi nipmod|hallo nipmod|thanks|thank you|thx|danke|danke dir|dankeschön|danke nipmod)$/.test(compact);
+  return /^(hey|hi|hello|hallo|servus|moin|yo|gm|gn|hey nipmod|hi nipmod|hallo nipmod|thanks|thank you|thx|danke|danke dir|dankeschön|danke nipmod|wie gehts|wie geht es dir|wie geht's|wie gehts dir|alles gut|alles klar|was geht|na|how are you|how are u|how is it going|how's it going|whats up|what's up|sup)$/.test(compact);
 }
 
 function isProbablyGerman(value: string): boolean {
