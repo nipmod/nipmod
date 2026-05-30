@@ -13,6 +13,9 @@ export function SiteHeader() {
       </Link>
 
       <div className="brand-socials" aria-label="Nipmod links">
+        <Link className="brand-docs-link" href="/docs">
+          Docs
+        </Link>
         <AccountLink />
         <SocialIcon href={homeContent.links.github} label="Open Nipmod GitHub repository in a new tab" title="GitHub">
           <img alt="" height="18" src="/github-logo.svg" width="18" />

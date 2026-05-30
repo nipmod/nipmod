@@ -170,21 +170,15 @@ export function AccountWorkspace({ section = "chat", user }: { section?: Account
       </aside>
 
       <section className="account-app-content" aria-label="Account workspace">
-        <div className="account-app-topline">
-          <span>{sectionLabel(section)}</span>
-          <Link className="account-app-docs-link" href="/docs">
-            Docs
-          </Link>
-        </div>
         <div className="account-app-main">
           {section === "chat" ? (
             <section className="account-panel account-chat-panel" id="chat">
               <div className="account-panel-head">
                 <div>
-                  <span>Nipmod Chat</span>
-                  <h1>Ask before you install.</h1>
+                  <span>Nipmod</span>
+                  <h1>Ask Nipmod</h1>
                 </div>
-                <p>Search packages, inspect trust and get an install plan from the same layer agents use.</p>
+                <p>Search packages, models, repos and MCP servers before install.</p>
               </div>
 
               <div className="account-chat-thread" aria-live="polite" ref={chatThreadRef}>
@@ -352,16 +346,6 @@ function ChatResponseView({ response }: { response: ChatResponse }) {
       ) : null}
     </div>
   );
-}
-
-function sectionLabel(section: AccountSection): string {
-  if (section === "api") {
-    return "API";
-  }
-  if (section === "settings") {
-    return "Settings";
-  }
-  return "Chat";
 }
 
 async function requestJson<T>(input: string, init: RequestInit): Promise<T> {
