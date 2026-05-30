@@ -94,6 +94,38 @@ describe("account chat LLM adapter", () => {
     });
     expect(requests[0]?.tools).toEqual(expect.any(Array));
     expect(JSON.stringify(requests[0])).toContain("Nipmod tools are available");
+    expect(JSON.stringify(requests[0])).toContain("top 10");
+    expect(JSON.stringify(requests[0])).toContain("what layer they mean");
+    const tools = requests[0]?.tools as Array<{ function?: { name?: string; parameters?: { properties?: Record<string, { maximum?: number }> } } }>;
+    const preflight = tools.find((tool) => tool.function?.name === "nipmod_preflight");
+    expect(preflight?.function?.parameters?.properties?.limit?.maximum).toBe(12);
+  });
+
+  test("does not offer tools for broad trading questions that need clarification", async () => {
+    const requests: Array<Record<string, unknown>> = [];
+    const fetchImpl: typeof fetch = async (_input, init) => {
+      requests.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return new Response(JSON.stringify({ choices: [{ message: { content: "What kind of trading do you mean?" } }] }), {
+        headers: { "content-type": "application/json" },
+        status: 200
+      });
+    };
+
+    const result = await tryAnswerAccountChatWithLlm("which package is best for trading?", {
+      env: {
+        AI_GATEWAY_API_KEY: "test-gateway-token"
+      },
+      fetchImpl,
+      userId: "clarify-user"
+    });
+
+    expect(result).toMatchObject({
+      answer: "What kind of trading do you mean?",
+      costMode: "conversation",
+      ok: true,
+      usedTools: []
+    });
+    expect(requests[0]?.tools).toBeUndefined();
   });
 
   test("tries the fallback model when the first gateway model is unavailable", async () => {

@@ -671,7 +671,10 @@ function decisionEcosystems(query: string, intent: PackageDecisionIntent): Exter
     if (/\bdataset|daten|data set\b/i.test(query)) return ["huggingface-dataset", "huggingface-model", "pypi", "npm"];
     return ["huggingface-model", "huggingface-dataset", "pypi", "npm"];
   }
-  if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity|viem|wagmi|uniswap)\b/i.test(query)) {
+  if (/\b(stock|stocks|aktien|forex|backtest|backtesting|quant|trading bot)\b/i.test(query)) {
+    return ["pypi", "github", "npm"];
+  }
+  if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|dex|router|liquidity|viem|wagmi|uniswap)\b/i.test(query)) {
     return ["npm", "github", "mcp"];
   }
   if (/\b(npm|node|javascript|typescript|react|next|vite|css|tailwind)\b/i.test(query)) return ["npm", "github", "mcp"];
@@ -702,6 +705,7 @@ function decisionConstraints(query: string): string[] {
   const constraints: string[] = [];
   if (/\b(production|prod|enterprise|kunden|users|payments|wallet|token|ssh|secret|private key|api key)\b/i.test(query)) constraints.push("security-sensitive");
   if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity)\b/i.test(query)) constraints.push("onchain-transaction-sensitive");
+  if (/\b(trading|traden|trade|exchange|börse|boerse|wallet|swap|payments|financial|finance|stock|stocks|aktien)\b/i.test(query)) constraints.push("financial-action-sensitive");
   if (/\b(browser|frontend|react|next|vite)\b/i.test(query)) constraints.push("frontend");
   if (/\b(server|backend|api|worker|queue)\b/i.test(query)) constraints.push("backend");
   if (/\b(lightweight|small|klein|fast|schnell)\b/i.test(query)) constraints.push("prefer-small-surface");
@@ -729,6 +733,10 @@ function decisionSearchQueries(query: string): string[] {
   if (/\b(form|forms|formular|schema|validation|validierung|react)\b/i.test(query)) {
     expansions.push("react forms validation schema react-hook-form zod valibot tanstack form");
   }
+  if (/\b(security|sicherheit|secure|safe|audit|malware|cve|vulnerability|schwachstelle|auth|jwt|rate limit|secret scanning)\b/i.test(query)) {
+    expansions.push("node api security auth jwt validation rate limiting helmet jose zod express-rate-limit");
+    expansions.push("python security auth validation dependency audit cryptography pyjwt bandit pip-audit");
+  }
   if (/\b(web ?design|website ?design|ui|component|tailwind|icons?|animation)\b/i.test(query)) {
     expansions.push("website design react ui component library css tailwind icons animation");
   }
@@ -740,6 +748,9 @@ function decisionSearchQueries(query: string): string[] {
   }
   if (/\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|swap|trading|traden|dex|router|liquidity|viem|wagmi|uniswap)\b/i.test(query)) {
     expansions.push("base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit");
+  }
+  if (/\b(stock|stocks|aktien|forex|backtest|backtesting|quant|trading bot)\b/i.test(query)) {
+    expansions.push("python trading backtesting exchange api quant finance ccxt vectorbt backtrader");
   }
   if (/\b(wallet|token|private key|ssh|secret|malware|postinstall|supply chain)\b/i.test(query)) {
     expansions.push(`${cleaned || query} security install script provenance`);

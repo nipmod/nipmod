@@ -1,4 +1,4 @@
-import type { ExternalPackageRecord } from "./external-packages";
+import type { ExternalPackageRecord, ExternalPackageSource } from "./external-packages";
 
 type AccountChatInstallPlan = {
   plan: {
@@ -10,10 +10,27 @@ type AccountChatInstallPlan = {
 };
 
 export type AccountChatIntent = {
-  category: "capability" | "general" | "generic" | "greeting" | "hugging-face" | "onchain-trading" | "small-talk" | "thanks" | "web-design";
+  category:
+    | "capability"
+    | "clarify-security"
+    | "clarify-trading"
+    | "compare"
+    | "form-stack"
+    | "general"
+    | "generic"
+    | "greeting"
+    | "hugging-face"
+    | "mcp"
+    | "onchain-trading"
+    | "security-stack"
+    | "small-talk"
+    | "thanks"
+    | "web-design";
   language: "de" | "en";
   mode: "conversation" | "search";
+  resultLimit?: number | undefined;
   searchQuery: string;
+  sources?: ExternalPackageSource[];
 };
 
 export function analyzeAccountChatIntent(message: string): AccountChatIntent {
@@ -41,6 +58,16 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
     return { category: "capability", language, mode: "conversation", searchQuery: "" };
   }
 
+  if (asksForBroadTrading(normalized)) {
+    return { category: "clarify-trading", language, mode: "conversation", searchQuery: "" };
+  }
+
+  if (asksForBroadSecurity(normalized)) {
+    return { category: "clarify-security", language, mode: "conversation", searchQuery: "" };
+  }
+
+  const requestedLimit = requestedResultLimit(normalized);
+
   const asksForWebDesign =
     /\b(web ?design|websitedesign|website ?design|webseite|frontend design|ui design|design system|komponenten|component library|css|tailwind|icons?|animation)\b/i.test(normalized) ||
     (/\b(website|web|frontend|ui)\b/i.test(normalized) && /\b(design|styling|style|pakete|packages|library|libraries|libs)\b/i.test(normalized));
@@ -51,20 +78,37 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
       category: "web-design",
       language,
       mode: "search",
+      resultLimit: Math.max(requestedLimit ?? 0, 8) || undefined,
       searchQuery: "website design react ui component library css tailwind icons animation"
+    };
+  }
+
+  if (asksForFormStack(normalized)) {
+    return {
+      category: "form-stack",
+      language,
+      mode: "search",
+      resultLimit: requestedLimit,
+      searchQuery: "react forms validation schema react-hook-form zod valibot tanstack form",
+      sources: ["npm", "github"]
     };
   }
 
   const asksForHuggingFace =
     /\b(hugging ?face|huggingface|hf)\b/i.test(normalized) &&
-    /\b(paket|pakete|package|packages|library|libraries|lib|modell|model|bekannt|bekannteste|beste|popular|standard)\b/i.test(normalized);
+    /\b(paket|pakete|package|packages|library|libraries|lib|modell|model|models|dataset|datasets|datensatz|datensätze|bekannt|bekannteste|beste|popular|standard|top|liste|list)\b/i.test(normalized);
 
   if (asksForHuggingFace) {
+    const datasetFirst = /\b(dataset|datasets|datensatz|datensätze)\b/i.test(normalized);
     return {
       category: "hugging-face",
       language,
       mode: "search",
-      searchQuery: "huggingface transformers huggingface hub datasets sentence transformers model inference"
+      resultLimit: requestedLimit,
+      searchQuery: datasetFirst
+        ? "huggingface datasets popular dataset question answering text image audio"
+        : "huggingface transformers huggingface hub datasets sentence transformers model inference",
+      sources: datasetFirst ? ["huggingface-dataset", "huggingface-model", "pypi", "npm"] : ["huggingface-model", "pypi", "npm", "huggingface-dataset"]
     };
   }
 
@@ -73,7 +117,41 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
       category: "onchain-trading",
       language,
       mode: "search",
-      searchQuery: "base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit"
+      resultLimit: requestedLimit,
+      searchQuery: onchainTradingQuery(normalized),
+      sources: ["npm", "github", "mcp"]
+    };
+  }
+
+  if (asksForSecurityStack(normalized)) {
+    return {
+      category: "security-stack",
+      language,
+      mode: "search",
+      resultLimit: requestedLimit,
+      searchQuery: securityStackQuery(normalized),
+      sources: securitySources(normalized)
+    };
+  }
+
+  if (asksForMcp(normalized)) {
+    return {
+      category: "mcp",
+      language,
+      mode: "search",
+      resultLimit: requestedLimit,
+      searchQuery: message,
+      sources: ["mcp", "github", "npm"]
+    };
+  }
+
+  if (asksForComparison(normalized)) {
+    return {
+      category: "compare",
+      language,
+      mode: "search",
+      resultLimit: requestedLimit,
+      searchQuery: message
     };
   }
 
@@ -82,6 +160,7 @@ export function analyzeAccountChatIntent(message: string): AccountChatIntent {
       category: "generic",
       language,
       mode: "search",
+      resultLimit: requestedLimit,
       searchQuery: message
     };
   }
@@ -106,10 +185,12 @@ export function buildAccountChatAnswer(
       : `I could not find a strong package candidate for "${query}". Try a narrower package task or name the ecosystem you want.`;
   }
 
+  const listLimit = Math.max(0, Math.min(intent.resultLimit ?? 0, 12));
   const alternatives = records
     .filter((record) => record.id !== selected.id)
-    .slice(0, 3)
-    .map((record) => `${record.displayName} (${record.source})`);
+    .slice(0, Math.max(3, Math.min(listLimit, 8)))
+    .map(formatCandidateLine);
+  const scannedList = records.slice(0, listLimit || 0).map(formatCandidateLine);
   const warnings = [...selected.trust.warnings, ...(installPlan.safety.warnings ?? [])].slice(0, 3);
   const command = installPlan.plan.commands.at(0) ?? selected.install.command;
 
@@ -123,13 +204,30 @@ export function buildAccountChatAnswer(
     if (intent.category === "hugging-face") {
       const warningText = warnings.length ? `\n\nSichtbare Warnungen: ${warnings.join("; ")}` : "";
       const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
-      return `Wenn du Hugging Face als Entwickler-Ökosystem meinst, sind die wichtigsten Namen meistens transformers, huggingface_hub, datasets und sentence-transformers. Für JavaScript ist @huggingface/transformers der naheliegende Einstieg.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nWenn du ein Modell suchst, sollte die Frage anders gestellt werden, zum Beispiel: "bestes Embedding Modell für RAG" oder "kleines Vision Modell für Browser".${warningText}${alternativesText}`;
+      const topText = scannedList.length ? `\n\nTop Kandidaten aus dem Scan:\n${scannedList.map((item, index) => `${index + 1}. ${item}`).join("\n")}` : "";
+      return `Bei Hugging Face muss man zuerst unterscheiden: suchst du ein Entwicklerpaket, ein Modell oder ein Dataset? Nipmod prüft dafür Hugging Face selbst und passende npm/PyPI Pakete.\n\nAls ersten Kandidaten hat Nipmod ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.${topText}\n\nWenn du ein konkretes Modell suchst, ist ein Task besser als "bestes Modell", zum Beispiel Embeddings für RAG, kleines Vision Modell oder Dataset für QA.${warningText}${alternativesText}`;
     }
 
     if (intent.category === "onchain-trading") {
       const warningText = warnings.length ? `\n\nSichtbare Warnungen: ${warnings.join("; ")}` : "";
       const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
       return `Für Base Token Trading würde ich nicht nach einem beliebigen "Coin Package" suchen. Sinnvoller ist ein SDK für Onchain Reads, Swap Routing oder Wallet/App Integration.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nWichtig: Nipmod gibt keine Trading Empfehlung und führt keine Wallet Aktion aus. Es prüft nur Paketkontext, Trust Signale und den Install Plan vor lokaler Ausführung.${warningText}${alternativesText}`;
+    }
+
+    if (intent.category === "form-stack") {
+      const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
+      return `Für React Forms würde ich die Entscheidung in drei Teile trennen: Form State, Schema Validation und UI Integration.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nTypische Kandidaten sind react-hook-form, @tanstack/react-form, zod, valibot und je nach UI Stack Radix/shadcn Komponenten. Nipmod führt nichts aus, sondern liefert dir Paketkontext, Warnungen und den Install Plan.${alternativesText}`;
+    }
+
+    if (intent.category === "security-stack") {
+      const warningText = warnings.length ? `\n\nSichtbare Warnungen: ${warnings.join("; ")}` : "";
+      const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
+      return `Für Security Pakete ist der Stack entscheidend: Auth, Input Validation, Rate Limits, Dependency Audit und Secret Handling sind verschiedene Aufgaben.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.\n\nIch würde danach nicht blind installieren, sondern die Warnungen, Maintainer, Provenance, Lifecycle Scripts und genaue Install Boundary prüfen.${warningText}${alternativesText}`;
+    }
+
+    if (intent.category === "mcp") {
+      const alternativesText = alternatives.length ? `\n\nWeitere Kandidaten aus dem Scan: ${alternatives.join(", ")}.` : "";
+      return `Für MCP Server zählt nicht nur der Name, sondern welche Tools er freigibt, ob ein Repository verlinkt ist, welche Credentials nötig sind und ob Remote Endpoints sauber aussehen.\n\nNipmod hat zuerst ${selected.displayName} aus ${selected.source} geprüft. Ergebnis: ${selected.trust.decision}, Risiko ${selected.trust.risk}, Score ${selected.trust.score}/100. Install Plan: ${command}.${alternativesText}`;
     }
 
     const warningText = warnings.length ? ` Sichtbare Warnungen: ${warnings.join("; ")}.` : " In diesem Preflight gab es keine blockierende Warnung.";
@@ -146,13 +244,30 @@ export function buildAccountChatAnswer(
   if (intent.category === "hugging-face") {
     const warningText = warnings.length ? `\n\nVisible warnings: ${warnings.join("; ")}` : "";
     const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
-    return `If you mean the Hugging Face developer ecosystem, the core names are usually transformers, huggingface_hub, datasets and sentence-transformers. For JavaScript, @huggingface/transformers is the natural starting point.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nIf you mean a model instead of a package, ask by task, for example "embedding model for RAG" or "small vision model for browser use".${warningText}${alternativesText}`;
+    const topText = scannedList.length ? `\n\nTop candidates from the scan:\n${scannedList.map((item, index) => `${index + 1}. ${item}`).join("\n")}` : "";
+    return `With Hugging Face, the first split is package, model or dataset. Nipmod can check Hugging Face itself plus related npm/PyPI packages.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.${topText}\n\nFor model selection, ask by task rather than "best model", for example embeddings for RAG, small vision model or QA dataset.${warningText}${alternativesText}`;
   }
 
   if (intent.category === "onchain-trading") {
     const warningText = warnings.length ? `\n\nVisible warnings: ${warnings.join("; ")}` : "";
     const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
     return `For Base token trading, I would not search for a random "coin package." The useful surface is usually an SDK for onchain reads, swap routing or wallet/app integration.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nImportant: Nipmod does not give trading advice and does not execute wallet actions. It only checks package context, trust signals and the install plan before local execution.${warningText}${alternativesText}`;
+  }
+
+  if (intent.category === "form-stack") {
+    const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
+    return `For React forms, split the decision into form state, schema validation and UI integration.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nTypical candidates include react-hook-form, @tanstack/react-form, zod, valibot and UI primitives depending on your stack. Nipmod does not execute anything; it returns context, warnings and the install plan.${alternativesText}`;
+  }
+
+  if (intent.category === "security-stack") {
+    const warningText = warnings.length ? `\n\nVisible warnings: ${warnings.join("; ")}` : "";
+    const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
+    return `For security packages, the stack matters: auth, input validation, rate limits, dependency audit and secret handling are different jobs.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.\n\nI would review warnings, maintainers, provenance, lifecycle scripts and the exact install boundary before installing.${warningText}${alternativesText}`;
+  }
+
+  if (intent.category === "mcp") {
+    const alternativesText = alternatives.length ? `\n\nOther candidates from the scan: ${alternatives.join(", ")}.` : "";
+    return `For MCP servers, the important parts are exposed tools, linked source, credential requirements and remote endpoint posture.\n\nNipmod inspected ${selected.displayName} from ${selected.source} first. Result: ${selected.trust.decision}, risk ${selected.trust.risk}, score ${selected.trust.score}/100. Install plan: ${command}.${alternativesText}`;
   }
 
   const warningText = warnings.length ? ` Visible warnings: ${warnings.join("; ")}.` : " No blocking warning was returned in this preflight.";
@@ -169,7 +284,10 @@ export function detectAccountChatLanguage(message: string): "de" | "en" {
   if (/^(hallo|servus|moin|danke|danke dir|danke nipmod)$/.test(compact)) {
     return "de";
   }
-  const germanWords = normalized.match(/\b(alles|auf|bekannt|bekannteste|beste|betse|brauche|danke|das|deutsch|dir|du|find|für|geht|gehts|gut|hast|ich|ist|kann|kannst|mir|nicht|oder|paket|pakete|quelle|quellen|sind|so|traden|was|webseite|wie|warum|zugriff)\b/g);
+  if (/\bbei\b/i.test(normalized) && /\b(hugging ?face|huggingface|npm|pypi|github|mcp)\b/i.test(normalized)) {
+    return "de";
+  }
+  const germanWords = normalized.match(/\b(alles|auf|bei|bekannt|bekannteste|beste|betse|brauche|danke|das|deutsch|dir|du|find|für|geht|gehts|gut|hast|ich|ist|kann|kannst|mir|nicht|oder|paket|pakete|quelle|quellen|sicherheit|sicherheits|sind|so|traden|vergleich|was|webseite|welche|welches|wie|wofür|warum|zugriff)\b/g);
   return (germanWords?.length ?? 0) >= 2 ? "de" : "en";
 }
 
@@ -191,6 +309,22 @@ export function selectAccountChatRecord(records: ExternalPackageRecord[], recomm
       ["pypi", "huggingface-hub"],
       ["pypi", "datasets"],
       ["pypi", "sentence-transformers"]
+    ];
+    for (const [source, name] of preferred) {
+      const record = records.find((candidate) => candidate.source === source && candidate.name.toLowerCase() === name);
+      if (record) {
+        return record;
+      }
+    }
+  }
+
+  if (intent.category === "form-stack") {
+    const preferred = [
+      ["npm", "react-hook-form"],
+      ["npm", "@tanstack/react-form"],
+      ["npm", "zod"],
+      ["npm", "valibot"],
+      ["npm", "formik"]
     ];
     for (const [source, name] of preferred) {
       const record = records.find((candidate) => candidate.source === source && candidate.name.toLowerCase() === name);
@@ -223,6 +357,24 @@ export function selectAccountChatRecord(records: ExternalPackageRecord[], recomm
     );
   }
 
+  if (intent.category === "security-stack") {
+    const preferred = [
+      ["npm", "jose"],
+      ["npm", "helmet"],
+      ["npm", "zod"],
+      ["npm", "express-rate-limit"],
+      ["pypi", "cryptography"],
+      ["pypi", "bandit"],
+      ["pypi", "pip-audit"]
+    ];
+    for (const [source, name] of preferred) {
+      const record = records.find((candidate) => candidate.source === source && candidate.name.toLowerCase() === name);
+      if (record) {
+        return record;
+      }
+    }
+  }
+
   return records.find((record) => record.id === recommendedId) ?? records[0] ?? null;
 }
 
@@ -244,6 +396,12 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
     if (intent.category === "general") {
       return "Ich kann normal antworten, aber mein eigentlicher Job ist Paket-Intelligence. Wenn du ein Paket, Modell, Repo oder einen MCP Server suchst, beschreib einfach den Use Case. Dann prüfe ich Quellen, Trust Signale und den Install Plan.";
     }
+    if (intent.category === "clarify-trading") {
+      return "Für welche Art von Trading meinst du das? Base/onchain Token Swaps, Solana/EVM Wallet Integration, Börsen/Exchange APIs, Backtesting oder Charting? Sobald du mir das sagst, kann ich die passenden Pakete prüfen statt irgendein Trading Paket zu raten.";
+    }
+    if (intent.category === "clarify-security") {
+      return "Security ist zu breit für eine ehrliche Paketempfehlung. Meinst du Auth/JWT, Input Validation, Rate Limiting, Dependency Audit, Secret Scanning, Malware Prüfung oder Hardening für Node/Python? Sag mir Stack und Ziel, dann prüfe ich passende Pakete.";
+    }
     return "Ja. Nipmod kann öffentliche Quellen wie npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets und MCP vor einer Installation prüfen. Die hosted API bleibt read-only: sie sucht, inspiziert Trust Signale und erstellt Install Plans, aber sie führt nichts aus und schreibt nicht in deinen Workspace.";
   }
 
@@ -259,6 +417,12 @@ function buildConversationAnswer(intent: AccountChatIntent): string {
   if (intent.category === "general") {
     return "I can answer normally, but Nipmod is built for package intelligence. If you need a package, model, repo or MCP server, describe the use case and I will check sources, trust signals and the install plan.";
   }
+  if (intent.category === "clarify-trading") {
+    return "What kind of trading do you mean: Base/onchain token swaps, Solana/EVM wallet integration, exchange APIs, backtesting or charting? Once you give me that, I can check the right packages instead of guessing.";
+  }
+  if (intent.category === "clarify-security") {
+    return "Security is too broad for an honest package recommendation. Do you mean auth/JWT, input validation, rate limiting, dependency audit, secret scanning, malware checks or Node/Python hardening? Give me the stack and target, then I can inspect candidates.";
+  }
   return "Yes. Nipmod can inspect public sources including npm, PyPI, GitHub, Hugging Face Models, Hugging Face Datasets and MCP. The hosted API stays read-only: it searches, inspects trust signals and creates install plans, but it does not execute or write to your workspace.";
 }
 
@@ -269,10 +433,88 @@ function asksForSourceAccess(normalized: string): boolean {
 }
 
 function asksForOnchainTrading(normalized: string): boolean {
-  const onchainSurface = /\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto)\b/i.test(normalized);
+  const onchainSurface = /\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|solana|aptos|sui|ethereum)\b/i.test(normalized);
   const tradingNeed = /\b(trade|trading|traden|swap|swaps|dex|router|liquidity|kaufen|verkaufen)\b/i.test(normalized);
   const packageNeed = /\b(package|packages|paket|pakete|sdk|library|lib|tool|find|finde|such|suche|best|beste|betse|good|gute)\b/i.test(normalized);
   return onchainSurface && tradingNeed && packageNeed;
+}
+
+function asksForBroadTrading(normalized: string): boolean {
+  const tradingNeed = /\b(trade|trading|traden|swap|market|börse|boerse|exchange)\b/i.test(normalized);
+  const packageNeed = /\b(package|packages|paket|pakete|sdk|library|lib|tool|find|finde|such|suche|best|beste|welches|welche|recommend|empfehl)\b/i.test(normalized);
+  const hasSurface = /\b(base|onchain|coinbase|evm|web3|wallet|token|tokens|coin|coins|crypto|solana|aptos|sui|ethereum|stock|stocks|aktien|forex|binance|coinbase|backtest|chart|charting)\b/i.test(normalized);
+  return tradingNeed && packageNeed && !hasSurface;
+}
+
+function asksForBroadSecurity(normalized: string): boolean {
+  const securityNeed = /\b(security|sicherheit|sicherheits|safe|sicher|audit|malware|cve|vulnerability|schwachstelle)\b/i.test(normalized);
+  const packageNeed = /\b(package|packages|paket|pakete|sdk|library|lib|tool|tools|best|beste|welche|welches|recommend|empfehl)\b/i.test(normalized);
+  const hasStackOrTask = /\b(node|npm|react|next|express|python|pypi|django|fastapi|auth|jwt|oauth|rate limit|validation|validierung|secret|dependency|dependencies|api)\b/i.test(normalized);
+  return securityNeed && packageNeed && !hasStackOrTask;
+}
+
+function asksForSecurityStack(normalized: string): boolean {
+  const securityNeed = /\b(security|sicherheit|sicherheits|safe|sicher|audit|malware|cve|vulnerability|schwachstelle|auth|jwt|oauth|rate limit|secret scanning|dependency audit)\b/i.test(normalized);
+  const packageNeed = /\b(package|packages|paket|pakete|sdk|library|lib|tool|tools|find|finde|such|suche|best|beste|welche|welches|recommend|empfehl|brauche|need)\b/i.test(normalized);
+  return securityNeed && packageNeed;
+}
+
+function asksForFormStack(normalized: string): boolean {
+  return /\b(form|forms|formular|formulare)\b/i.test(normalized) && /\b(react|next|frontend|validation|validierung|schema|package|paket|library|lib)\b/i.test(normalized);
+}
+
+function asksForMcp(normalized: string): boolean {
+  return /\b(mcp|model context protocol|tool server|agent skill|skill package)\b/i.test(normalized) && /\b(server|tool|skill|package|paket|find|suche|best|beste|recommend|empfehl)\b/i.test(normalized);
+}
+
+function asksForComparison(normalized: string): boolean {
+  if (!/\b(compare|vergleich|vergleichen|vs|versus|oder|better|besser)\b/i.test(normalized)) {
+    return false;
+  }
+  const packageishTokens =
+    normalized.match(/(?:@[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z0-9_.-]+\/[a-z0-9_.-]+|[a-z][a-z0-9_.-]{1,44})/gi)?.filter((token) =>
+      !/^(compare|vergleich|vergleichen|versus|oder|better|besser|was|ist|which|is|the|and|und|für|for)$/.test(token)
+    ) ?? [];
+  return hasPackageDecisionIntent(normalized) || packageishTokens.length >= 2;
+}
+
+function requestedResultLimit(normalized: string): number | undefined {
+  const numeric = normalized.match(/\b(?:top|beste|best|list|liste)\s*(\d{1,2})\b/i) ?? normalized.match(/\b(\d{1,2})\s*(?:pakete|packages|models|modelle|datasets)\b/i);
+  if (!numeric) {
+    return undefined;
+  }
+  return Math.min(12, Math.max(3, Number(numeric[1])));
+}
+
+function onchainTradingQuery(normalized: string): string {
+  if (/\b(solana|spl)\b/i.test(normalized)) {
+    return "solana wallet trading swap sdk @solana/web3.js";
+  }
+  if (/\b(ethereum|evm)\b/i.test(normalized) && !/\b(base|coinbase)\b/i.test(normalized)) {
+    return "ethereum evm wallet trading swap sdk ethers viem wagmi uniswap";
+  }
+  return "base onchain token trading swap sdk viem wagmi uniswap coinbase onchainkit";
+}
+
+function securityStackQuery(normalized: string): string {
+  if (/\b(python|pypi|django|fastapi)\b/i.test(normalized)) {
+    return "python security auth validation dependency audit cryptography pyjwt bandit pip-audit";
+  }
+  if (/\b(rate limit|rate-limit|ratelimit)\b/i.test(normalized)) {
+    return "node api rate limiting security express-rate-limit slow-down";
+  }
+  return "node api security auth jwt validation rate limiting helmet jose zod express-rate-limit";
+}
+
+function securitySources(normalized: string): ExternalPackageSource[] {
+  if (/\b(python|pypi|django|fastapi)\b/i.test(normalized)) {
+    return ["pypi", "github", "npm"];
+  }
+  return ["npm", "github", "pypi"];
+}
+
+function formatCandidateLine(record: ExternalPackageRecord): string {
+  return `${record.displayName} (${record.source}, ${record.trust.score}/100, ${record.trust.risk})`;
 }
 
 function isGreeting(compact: string): boolean {
