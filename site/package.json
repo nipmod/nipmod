@@ -17,11 +17,6 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "pnpm": {
-    "overrides": {
-      "postcss": "^8.5.14"
-    }
-  },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.2",
