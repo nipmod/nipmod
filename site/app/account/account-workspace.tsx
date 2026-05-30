@@ -313,16 +313,24 @@ function ChatMessage({ entry }: { entry: ChatEntry }) {
 }
 
 function loadingLine(prompt: string): string {
+  if (isLightConversation(prompt)) {
+    return isProbablyGerman(prompt) ? "Nipmod antwortet." : "Nipmod is replying.";
+  }
   return isProbablyGerman(prompt)
     ? "Nipmod durchsucht Quellen und prüft den Install Boundary."
     : "Nipmod is searching sources and checking the install boundary.";
+}
+
+function isLightConversation(value: string): boolean {
+  const compact = value.toLowerCase().replace(/[!?.,;:]+/g, " ").replace(/\s+/g, " ").trim();
+  return /^(hey|hi|hello|hallo|servus|moin|yo|gm|gn|hey nipmod|hi nipmod|hallo nipmod|thanks|thank you|thx|danke|danke dir|dankeschön|danke nipmod)$/.test(compact);
 }
 
 function isProbablyGerman(value: string): boolean {
   if (/[äöüß]/i.test(value)) {
     return true;
   }
-  const matches = value.toLowerCase().match(/\b(was|ist|sind|so|für|paket|pakete|brauche|bekannt|beste|webseite|warum|wie|ich|nicht|oder)\b/g);
+  const matches = value.toLowerCase().match(/\b(was|ist|sind|so|für|paket|pakete|brauche|bekannt|beste|webseite|warum|wie|ich|nicht|oder|danke)\b/g);
   return (matches?.length ?? 0) >= 2;
 }
 
