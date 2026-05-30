@@ -7,6 +7,7 @@ import {
   searchExternalPackages
 } from "../../../../lib/external-packages";
 import { analyzeAccountChatIntent, buildAccountChatAnswer, selectAccountChatRecord } from "../../../../lib/account-chat";
+import { tryAnswerAccountChatWithLlm, type AccountChatHistoryEntry } from "../../../../lib/account-chat-llm";
 import { accountAuthConfig, getCurrentAccountUser } from "../../../../lib/account-auth";
 import { apiJson, createApiHttpContext } from "../../../../lib/api-http";
 import { ApiRequestBodyError, readJsonRequestBody } from "../../../../lib/api-request";
@@ -37,6 +38,42 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    const llm = await tryAnswerAccountChatWithLlm(input.message, {
+      history: input.history,
+      userEmail: user.email,
+      userId: user.id
+    });
+    if (llm.ok) {
+      return apiJson(
+        {
+          answer: llm.answer,
+          generatedAt: new Date().toISOString(),
+          installPlan: llm.installPlan,
+          intent: {
+            category: "llm",
+            language: llm.language,
+            mode: "llm",
+            searchQuery: llm.query ?? ""
+          },
+          llm: {
+            model: llm.model,
+            provider: "vercel-ai-gateway",
+            usedTools: llm.usedTools
+          },
+          query: llm.query,
+          records: llm.records,
+          selected: llm.selected,
+          sourceSummary: llm.sourceSummary,
+          type: "dev.nipmod.account-chat.v1",
+          user: {
+            email: user.email,
+            id: user.id
+          }
+        },
+        { context, headers: rateLimit.headers }
+      );
+    }
+
     const intent = analyzeAccountChatIntent(input.message);
     if (intent.mode === "conversation") {
       return apiJson(
@@ -98,7 +135,10 @@ export async function POST(request: Request): Promise<Response> {
 
 async function readChatInput(
   request: Request
-): Promise<{ message: string; ok: true } | { code: "invalid_json" | "invalid_message" | "payload_too_large"; error: string; ok: false; status: 400 | 413 }> {
+): Promise<
+  | { history: AccountChatHistoryEntry[]; message: string; ok: true }
+  | { code: "invalid_json" | "invalid_message" | "payload_too_large"; error: string; ok: false; status: 400 | 413 }
+> {
   let body: unknown;
   try {
     body = await readJsonRequestBody(request, 16 * 1024);
@@ -115,7 +155,22 @@ async function readChatInput(
   if (typeof message !== "string" || message.trim().length < 1) {
     return { code: "invalid_message", error: "message is required", ok: false, status: 400 };
   }
-  return { message: message.trim().slice(0, 1200), ok: true };
+  return { history: readChatHistory((body as Record<string, unknown>).history), message: message.trim().slice(0, 1200), ok: true };
+}
+
+function readChatHistory(value: unknown): AccountChatHistoryEntry[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object" && !Array.isArray(item))
+    .map((item) => {
+      const role = item.role === "assistant" || item.role === "user" ? item.role : null;
+      const content = typeof item.content === "string" ? item.content.trim().slice(0, 2000) : "";
+      return role && content ? { content, role } : null;
+    })
+    .filter((item): item is AccountChatHistoryEntry => item !== null)
+    .slice(-8);
 }
 
 function chatError(
