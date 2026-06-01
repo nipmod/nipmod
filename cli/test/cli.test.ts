@@ -26,11 +26,14 @@ describe("nipmod CLI", () => {
       ok: true;
       data: {
         commands: string[];
+        experimentalLocalSetupCommands: string[];
         exitCodes: Array<{ code: number; meaning: string }>;
       };
     };
 
     expect(parsed.ok).toBe(true);
+    expect(text.stdout).toContain("experimental local setup: setup, setup-cloudflare");
+    expect(text.stdout).toContain("boundary: hosted Nipmod is read-only; local execution requires explicit host approval");
     expect(parsed.data.commands).toEqual(
       expect.arrayContaining([
         "inspect",
@@ -58,6 +61,7 @@ describe("nipmod CLI", () => {
         { code: 12, meaning: "preflight not ready" }
       ])
     );
+    expect(parsed.data.experimentalLocalSetupCommands).toEqual(["setup", "setup-cloudflare"]);
   }, 15_000);
 
   test("prints the installed version with standard version flags", async () => {

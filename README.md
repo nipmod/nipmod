@@ -56,7 +56,7 @@ Do not install, clone, enable tools or edit files until the user approves the pl
 | Path | Purpose |
 | --- | --- |
 | `docs/` | Public product, API and safety documentation. |
-| `cli/` | Public Nipmod CLI source, local audit code and tests. |
+| `cli/` | Public Nipmod CLI source, local audit code, sandbox receipt helpers and tests. |
 | `examples/http-api/` | TypeScript and Python examples for calling the hosted API. |
 | `examples/agent-workflow/` | Copyable instructions for Codex, Claude Code, MCP hosts and generic HTTPS agents. |
 | `SECURITY.md` | Security reporting and public safety boundary. |
@@ -68,6 +68,8 @@ Nipmod can recommend candidates and produce install plans, but local execution m
 
 Hosted Nipmod API calls are read-only with respect to caller workspaces.
 They do not install packages, clone repositories, enable tools or edit files.
+
+The CLI is the local host side. It can inspect local files and run explicitly confirmed local or sandboxed commands, but that action is separate from hosted API search and decision output.
 
 ## Links
 

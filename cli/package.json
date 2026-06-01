@@ -2,11 +2,39 @@
   "name": "nipmod",
   "version": "1.2.9",
   "description": "Search packages, inspect trust and get safe install plans for humans and AI agents.",
-  "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@10.30.0",
   "type": "module",
   "bin": {
     "nipmod": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nipmod/nipmod.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/nipmod/nipmod/issues"
+  },
+  "homepage": "https://nipmod.com/cli",
+  "keywords": [
+    "ai-agents",
+    "mcp",
+    "package-search",
+    "sandbox",
+    "software-security",
+    "supply-chain"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -128,6 +128,8 @@ const CLI_COMMANDS = [
   "setup-cloudflare"
 ] as const;
 
+const EXPERIMENTAL_LOCAL_SETUP_COMMANDS = ["setup", "setup-cloudflare"] as const;
+
 const CLI_EXIT_CODES = [
   { code: 0, meaning: "ok" },
   { code: 1, meaning: "usage or unexpected error" },
@@ -261,6 +263,8 @@ async function helpCommand(): Promise<CliResult> {
     "usage: nipmod <command>",
     "",
     `commands: ${CLI_COMMANDS.join(", ")}`,
+    `experimental local setup: ${EXPERIMENTAL_LOCAL_SETUP_COMMANDS.join(", ")}`,
+    "boundary: hosted Nipmod is read-only; local execution requires explicit host approval",
     "",
     "exit codes:",
     ...CLI_EXIT_CODES.map((item) => `${item.code} ${item.meaning}`)
@@ -271,6 +275,7 @@ async function helpCommand(): Promise<CliResult> {
     data: {
       message,
       commands: [...CLI_COMMANDS],
+      experimentalLocalSetupCommands: [...EXPERIMENTAL_LOCAL_SETUP_COMMANDS],
       exitCodes: [...CLI_EXIT_CODES]
     }
   };
