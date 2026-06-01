@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import os
+import sys
+import urllib.parse
+import urllib.request
+
+
+BASE_URL = os.environ.get("NIPMOD_API_BASE_URL", "https://nipmod.com").rstrip("/")
+API_KEY = os.environ.get("NIPMOD_API_KEY")
+SOURCES_LIST = ["npm", "jsr", "pypi", "cratesio", "go", "maven", "nuget", "rubygems", "packagist", "dockerhub", "homebrew", "terraform", "helm", "conda", "openvsx", "cran", "github", "huggingface-model", "huggingface-dataset", "mcp"]
+SOURCES = ",".join(SOURCES_LIST)
+
+
+def main() -> None:
+    global API_KEY
+    args = [arg for arg in sys.argv[1:] if arg != "--issue-key"]
+    issue_key = "--issue-key" in sys.argv[1:]
+    if not API_KEY and issue_key:
+        API_KEY = issue_beta_key()
+    if not API_KEY:
+        raise RuntimeError("Set NIPMOD_API_KEY or pass --issue-key before calling the Nipmod API.")
+
+    task = " ".join(args).strip() or "http client"
+    search = read_json("/api/search", {"q": task, "sources": SOURCES, "limit": "5"})
+    selected = first_record(search)
+
+    if selected is None:
+        print(json.dumps({"task": task, "result": "no package records returned"}, indent=2))
+        return
+
+    inspect = read_json("/api/inspect", {"source": selected["source"], "name": selected["name"]})
+    record = inspect.get("record") or selected
+    plan = read_json("/api/install-plan", {"source": record["source"], "name": record["name"]})
+    decision = post_json(
+        "/api/decision",
+        {
+            "query": task,
+            "sources": SOURCES_LIST,
+            "limit": 5,
+            "selected": {"source": record["source"], "name": record["name"]},
+        },
+    )
+    archive = read_json("/api/archive/prepare", {"source": record["source"], "name": record["name"]})
+
+    output = {
+        "task": task,
+        "apiAccess": {
+            "keyIssuedByExample": issue_key,
+            "rawKeyPrinted": False,
+        },
+        "agentInstruction": "Search Nipmod, inspect the selected package and show the install plan before any workspace write.",
+        "sourceHealth": {
+            "partial": search.get("partial"),
+            "summary": search.get("sourceSummary"),
+            "degraded": degraded_sources(search),
+        },
+        "selection": {
+            "policy": search.get("selection", {}).get("policy"),
+            "recommendedId": search.get("selection", {}).get("recommendedId"),
+            "candidates": search.get("selection", {}).get("candidates", [])[:3],
+        },
+        "selected": {
+            "id": record.get("id"),
+            "name": record.get("name"),
+            "source": record.get("source"),
+            "originalUrl": record.get("originalUrl"),
+            "trust": {
+                "decision": record.get("trust", {}).get("decision"),
+                "score": record.get("trust", {}).get("score"),
+                "dimensions": record.get("trust", {}).get("dimensions"),
+                "warnings": record.get("trust", {}).get("warnings"),
+            },
+        },
+        "decision": {
+            "type": decision.get("decision", {}).get("type"),
+            "answer": decision.get("answer"),
+            "recommended": decision.get("decision", {}).get("recommended"),
+            "confidence": decision.get("decision", {}).get("confidence"),
+            "security": decision.get("decision", {}).get("security"),
+            "alternatives": decision.get("decision", {}).get("alternatives", [])[:3],
+            "avoid": decision.get("decision", {}).get("avoid", [])[:3],
+            "receipt": decision.get("decision", {}).get("receipt"),
+            "agentReadiness": decision.get("decision", {}).get("agentReadiness"),
+        },
+        "installPlan": plan.get("plan"),
+        "safety": plan.get("safety"),
+        "approvalBoundary": {
+            "hostedApiExecutesCommands": False,
+            "hostedApiWritesCallerWorkspace": False,
+            "localHostMustApproveBeforeWrite": plan.get("plan", {}).get("requiresApprovalBeforeWrite") is True,
+        },
+        "archivePreview": {
+            "status": (archive.get("record") or {}).get("status") or (archive.get("receipt") or {}).get("archiveStatus"),
+            "stored": (archive.get("receipt") or {}).get("stored", False),
+            "receiptType": (archive.get("receipt") or {}).get("type"),
+            "writeBoundary": "prepare-only; durable confirm requires x-nipmod-archive-token",
+        },
+    }
+    print(json.dumps(output, indent=2))
+
+
+def read_json(path: str, params: dict[str, str]) -> dict:
+    query = urllib.parse.urlencode(params)
+    request = urllib.request.Request(
+        f"{BASE_URL}{path}?{query}",
+        headers={
+            "accept": "application/json",
+            "x-nipmod-api-key": API_KEY,
+            "user-agent": "nipmod-python-agent-flow-example/1.0",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{path} failed with {error.code}: {body}") from error
+
+
+def post_json(path: str, payload: dict) -> dict:
+    request = urllib.request.Request(
+        f"{BASE_URL}{path}",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "accept": "application/json",
+            "content-type": "application/json",
+            "x-nipmod-api-key": API_KEY,
+            "user-agent": "nipmod-python-agent-flow-example/1.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{path} failed with {error.code}: {body}") from error
+
+
+def issue_beta_key() -> str:
+    payload = json.dumps({"label": "python-agent-flow-example"}).encode("utf-8")
+    request = urllib.request.Request(
+        f"{BASE_URL}/api/keys/beta",
+        data=payload,
+        headers={
+            "accept": "application/json",
+            "content-type": "application/json",
+            "user-agent": "nipmod-python-agent-flow-example/1.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"/api/keys/beta failed with {error.code}: {body}") from error
+    key = body.get("key")
+    if not isinstance(key, str):
+        raise RuntimeError("/api/keys/beta did not return a key")
+    return key
+
+
+def first_record(search: dict) -> dict | None:
+    records = search.get("records")
+    if not isinstance(records, list) or not records:
+        return None
+    recommended_id = search.get("selection", {}).get("recommendedId")
+    for record in records:
+        if isinstance(record, dict) and record.get("id") == recommended_id:
+            return record
+    return records[0] if isinstance(records[0], dict) else None
+
+
+def degraded_sources(search: dict) -> list[dict]:
+    reports = search.get("sourceReports")
+    if not isinstance(reports, list):
+        return []
+    degraded = []
+    for report in reports:
+        if not isinstance(report, dict) or report.get("status") != "failed":
+            continue
+        error = report.get("error") if isinstance(report.get("error"), dict) else {}
+        recovery = report.get("recovery") if isinstance(report.get("recovery"), dict) else {}
+        degraded.append(
+            {
+                "source": report.get("source"),
+                "code": error.get("code"),
+                "retryable": recovery.get("retryable"),
+                "suggestedAction": recovery.get("suggestedAction"),
+            }
+        )
+    return degraded
+
+
+if __name__ == "__main__":
+    main()

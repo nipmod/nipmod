@@ -1,0 +1,24 @@
+name: Public repo check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  public-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public boundary
+        run: |
+          test ! -e site
+          test ! -e supabase
+          test ! -e tools
+          test ! -e packages
+          test ! -e .cursor
+          test ! -e .mcp.json
+          test ! -e opencode.json
+          ! find . -path ./.git -prune -o -name '*.sql' -print | grep .
+          grep -q "The production site, backend implementation" README.md

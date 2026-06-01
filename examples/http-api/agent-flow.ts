@@ -1,0 +1,197 @@
+const args = process.argv.slice(2);
+const issueKey = args.includes("--issue-key");
+const task = args.filter((arg) => arg !== "--issue-key").join(" ").trim() || "http client";
+const baseUrl = process.env.NIPMOD_API_BASE_URL ?? "https://nipmod.com";
+let apiKey = process.env.NIPMOD_API_KEY;
+const externalSources = ["npm", "jsr", "pypi", "cratesio", "go", "maven", "nuget", "rubygems", "packagist", "dockerhub", "homebrew", "terraform", "helm", "conda", "openvsx", "cran", "github", "huggingface-model", "huggingface-dataset", "mcp"];
+
+if (!apiKey && issueKey) {
+  apiKey = await issueBetaKey();
+}
+
+if (!apiKey) {
+  throw new Error("Set NIPMOD_API_KEY or pass --issue-key before calling the Nipmod API.");
+}
+const activeApiKey = apiKey;
+
+const search = await readJson(searchUrl(task));
+const first = firstRecord(search);
+
+if (!first) {
+  console.log(JSON.stringify({ result: "no package records returned", task }, null, 2));
+  process.exit(0);
+}
+
+const inspect = await readJson(inspectUrl(first.source, first.name));
+const inspectedRecord = inspect.record ?? first;
+const plan = await readJson(planUrl(inspectedRecord.source, inspectedRecord.name));
+const decision = await postJson(new URL("/api/decision", baseUrl), {
+  limit: 5,
+  query: task,
+  selected: {
+    name: inspectedRecord.name,
+    source: inspectedRecord.source
+  },
+  sources: externalSources
+});
+const archive = await readJson(archivePrepareUrl(inspectedRecord.source, inspectedRecord.name));
+
+console.log(
+  JSON.stringify(
+    {
+      task,
+      apiAccess: {
+        keyIssuedByExample: issueKey,
+        rawKeyPrinted: false
+      },
+      agentInstruction: "Search Nipmod, inspect the selected package and show the install plan before any workspace write.",
+      sourceHealth: {
+        partial: search.partial,
+        summary: search.sourceSummary,
+        degraded: Array.isArray(search.sourceReports)
+          ? search.sourceReports
+              .filter((report: Record<string, any>) => report.status === "failed")
+              .map((report: Record<string, any>) => ({
+                source: report.source,
+                code: report.error?.code,
+                retryable: report.recovery?.retryable,
+                suggestedAction: report.recovery?.suggestedAction
+              }))
+          : []
+      },
+      selection: {
+        policy: search.selection?.policy,
+        recommendedId: search.selection?.recommendedId,
+        candidates: search.selection?.candidates?.slice(0, 3)
+      },
+      selected: {
+        id: inspectedRecord.id,
+        name: inspectedRecord.name,
+        originalUrl: inspectedRecord.originalUrl,
+        source: inspectedRecord.source,
+        trust: {
+          decision: inspectedRecord.trust?.decision,
+          dimensions: inspectedRecord.trust?.dimensions,
+          factors: inspectedRecord.trust?.factors?.slice(0, 5),
+          score: inspectedRecord.trust?.score,
+          warnings: inspectedRecord.trust?.warnings
+        }
+      },
+      decision: {
+        answer: decision.answer,
+        agentReadiness: decision.decision?.agentReadiness,
+        alternatives: decision.decision?.alternatives?.slice(0, 3),
+        avoid: decision.decision?.avoid?.slice(0, 3),
+        confidence: decision.decision?.confidence,
+        receipt: decision.decision?.receipt,
+        recommended: decision.decision?.recommended,
+        security: decision.decision?.security,
+        type: decision.decision?.type
+      },
+      installPlan: plan.plan,
+      safety: plan.safety,
+      approvalBoundary: {
+        hostedApiExecutesCommands: false,
+        hostedApiWritesCallerWorkspace: false,
+        localHostMustApproveBeforeWrite: plan.plan?.requiresApprovalBeforeWrite === true
+      },
+      archivePreview: {
+        status: archive.record?.status ?? archive.receipt?.archiveStatus,
+        stored: archive.receipt?.stored ?? false,
+        receiptType: archive.receipt?.type,
+        writeBoundary: "prepare-only; durable confirm requires x-nipmod-archive-token"
+      }
+    },
+    null,
+    2
+  )
+);
+
+function searchUrl(query: string): URL {
+  const url = new URL("/api/search", baseUrl);
+  url.searchParams.set("q", query);
+  url.searchParams.set("sources", externalSources.join(","));
+  url.searchParams.set("limit", "5");
+  return url;
+}
+
+function planUrl(source: string, name: string): URL {
+  const url = new URL("/api/install-plan", baseUrl);
+  url.searchParams.set("source", source);
+  url.searchParams.set("name", name);
+  return url;
+}
+
+function inspectUrl(source: string, name: string): URL {
+  const url = new URL("/api/inspect", baseUrl);
+  url.searchParams.set("source", source);
+  url.searchParams.set("name", name);
+  return url;
+}
+
+function archivePrepareUrl(source: string, name: string): URL {
+  const url = new URL("/api/archive/prepare", baseUrl);
+  url.searchParams.set("source", source);
+  url.searchParams.set("name", name);
+  return url;
+}
+
+async function readJson(url: URL): Promise<Record<string, any>> {
+  const response = await fetch(url, {
+    headers: {
+      accept: "application/json",
+      "x-nipmod-api-key": activeApiKey,
+      "user-agent": "nipmod-agent-flow-example/1.0"
+    }
+  });
+  if (!response.ok) {
+    throw new Error(`${url.pathname} failed with ${response.status}: ${await response.text()}`);
+  }
+  return response.json();
+}
+
+async function postJson(url: URL, body: Record<string, any>): Promise<Record<string, any>> {
+  const response = await fetch(url, {
+    body: JSON.stringify(body),
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "x-nipmod-api-key": activeApiKey,
+      "user-agent": "nipmod-agent-flow-example/1.0"
+    },
+    method: "POST"
+  });
+  if (!response.ok) {
+    throw new Error(`${url.pathname} failed with ${response.status}: ${await response.text()}`);
+  }
+  return response.json();
+}
+
+async function issueBetaKey(): Promise<string> {
+  const response = await fetch(new URL("/api/keys/beta", baseUrl), {
+    body: JSON.stringify({ label: "agent-flow-example" }),
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "user-agent": "nipmod-agent-flow-example/1.0"
+    },
+    method: "POST"
+  });
+  if (!response.ok) {
+    throw new Error(`/api/keys/beta failed with ${response.status}: ${await response.text()}`);
+  }
+  const body = await response.json() as Record<string, any>;
+  if (typeof body.key !== "string") {
+    throw new Error("/api/keys/beta did not return a key");
+  }
+  return body.key;
+}
+
+function firstRecord(value: Record<string, any>): Record<string, any> | null {
+  if (!Array.isArray(value.records)) {
+    return null;
+  }
+  const recommendedId = typeof value.selection?.recommendedId === "string" ? value.selection.recommendedId : null;
+  const recommended = recommendedId ? value.records.find((record) => record?.id === recommendedId) : null;
+  return recommended && typeof recommended === "object" ? recommended : value.records[0] && typeof value.records[0] === "object" ? value.records[0] : null;
+}

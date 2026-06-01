@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.env.*
+.cursor/
+.codex/
+.claude/
+.mcp.json
+opencode.json
+node_modules/
+dist/
+.next/
+.vercel/
+
