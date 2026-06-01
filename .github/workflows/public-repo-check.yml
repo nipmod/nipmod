@@ -11,14 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Enable pnpm
+        run: corepack enable
       - name: Verify public boundary
         run: |
           test ! -e site
           test ! -e supabase
           test ! -e tools
           test ! -e packages
+          test ! -e cli/node_modules
+          test ! -e cli/dist
           test ! -e .cursor
           test ! -e .mcp.json
           test ! -e opencode.json
           ! find . -path ./.git -prune -o -name '*.sql' -print | grep .
           grep -q "The production site, backend implementation" README.md
+          grep -q "public CLI source" README.md
+      - name: Verify public CLI
+        run: |
+          pnpm --dir cli install --frozen-lockfile
+          pnpm --dir cli typecheck
+          pnpm --dir cli test
+          pnpm --dir cli build

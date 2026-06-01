@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "name": "@probe/missing-permissions",
+  "canonical": "pkg:did:key:z6Mkprobeinvalid/missing-permissions",
+  "version": "0.1.0",
+  "type": "skill",
+  "exports": {
+    ".": {
+      "skill": "./SKILL.md"
+    }
+  },
+  "publish": {
+    "signingKey": "did:key:z6Mkprobeinvalid",
+    "provenance": "local"
+  }
+}
+

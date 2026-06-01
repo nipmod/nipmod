@@ -21,8 +21,9 @@ A user, local host or policy engine must approve before any workspace write or l
 
 Sandbox and audit execution are local or host-controlled flows.
 Results should be bound to exact package bytes, content hashes, decisions and approval policy.
+The public CLI source includes these local receipt and audit helpers so agents and reviewers can inspect the code path before using it.
 
 ## Public Repo Boundary
 
-This repository intentionally excludes production site source, backend code, Supabase migrations, ranking logic, internal tooling and local agent configuration.
-
+This repository intentionally excludes production site source, backend code, Supabase migrations, ranking logic, operational deployment tooling and local agent configuration.
+It includes public CLI source for local package review, deep scan and sandbox-audit receipt handling.

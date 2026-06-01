@@ -8,8 +8,9 @@ Helping humans and AI agents discover, verify, and use software safely.
 Nipmod is a package search and trust layer for software, code, models and developer tools.
 It helps humans and AI agents search public software sources, inspect trust signals and request reviewable install plans before anything writes to a workspace.
 
-This public repository contains product documentation, API examples and agent integration material.
-The production site, backend implementation, ranking logic, Supabase schema, audit execution code and operational tooling live in private repositories.
+This public repository contains product documentation, API examples, agent integration material and the public CLI source.
+The production site, backend implementation, ranking logic, Supabase schema and operational tooling live in private repositories.
+The public CLI covers local package review, deep scan, sandbox-audit receipt handling and agent-facing command contracts.
 
 ## Use The API
 
@@ -55,6 +56,7 @@ Do not install, clone, enable tools or edit files until the user approves the pl
 | Path | Purpose |
 | --- | --- |
 | `docs/` | Public product, API and safety documentation. |
+| `cli/` | Public Nipmod CLI source, local audit code and tests. |
 | `examples/http-api/` | TypeScript and Python examples for calling the hosted API. |
 | `examples/agent-workflow/` | Copyable instructions for Codex, Claude Code, MCP hosts and generic HTTPS agents. |
 | `SECURITY.md` | Security reporting and public safety boundary. |
