@@ -79,3 +79,5 @@ Sandbox receipts can prove a local audit matched a decision. They cannot approve
 - [Codex](codex.md)
 - [Claude Code](claude-code.md)
 - [MCP host](mcp-host.md)
+- [Base agent package preflight](base-agent-package-preflight.md)
+- [Base MCP plus Nipmod preflight](base-mcp-nipmod-preflight-plugin.md)
