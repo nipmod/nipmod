@@ -15,7 +15,9 @@ jobs:
         with:
           node-version: 24
       - name: Enable pnpm
-        run: corepack enable
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.30.0 --activate
       - name: Verify public boundary
         run: |
           test ! -e site
