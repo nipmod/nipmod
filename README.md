@@ -1,6 +1,6 @@
 # Nipmod
 
-[![Public repo check](https://github.com/nipmod/nipmod-public/actions/workflows/public-repo-check.yml/badge.svg)](https://github.com/nipmod/nipmod-public/actions/workflows/public-repo-check.yml)
+[![Public repo check](https://github.com/nipmod/nipmod/actions/workflows/public-repo-check.yml/badge.svg)](https://github.com/nipmod/nipmod/actions/workflows/public-repo-check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-white.svg)](LICENSE)
 
 Helping humans and AI agents discover, verify, and use software safely.
@@ -74,8 +74,7 @@ They do not install packages, clone repositories, enable tools or edit files.
 | Website | https://nipmod.com |
 | API docs | https://nipmod.com/api-access |
 | Trust model | https://nipmod.com/trust |
-| Public repo | https://github.com/nipmod/nipmod-public |
+| Public repo | https://github.com/nipmod/nipmod |
 | Email | info@nipmod.com |
 | X | https://x.com/Nipmod |
 | Telegram | https://t.me/nipmod |
-
