@@ -1,0 +1,28 @@
+name: Verify x402Books wallet manifest
+
+on:
+  push:
+    paths:
+      - ".x402books/wallets.json"
+      - ".github/workflows/verify-wallets.yml"
+  pull_request:
+    paths:
+      - ".x402books/wallets.json"
+      - ".github/workflows/verify-wallets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-wallets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate and submit wallet manifest
+        uses: danbuildss/agent-wallet-manifest@82c239f6bdb2695701cd12114dabfac26bfaf085
+        with:
+          manifest-path: .x402books/wallets.json
+          registry-submit: true

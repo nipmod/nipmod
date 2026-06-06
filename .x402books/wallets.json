@@ -1,0 +1,21 @@
+{
+  "agent": "Nipmod",
+  "project": "Nipmod",
+  "ecosystem": "Base",
+  "website": "https://nipmod.com",
+  "x": "@Nipmod",
+  "github": "@nipmod",
+  "contact": "mailto:info@nipmod.com",
+  "wallets": [
+    {
+      "address": "0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
+      "chain": "base",
+      "role": "token_contract",
+      "verification_method": "repo_manifest",
+      "evidence_url": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
+      "notes": "Official $NPM token contract on Bankr. This is an associated token contract, not a signing operator wallet; owner signer wallet is pending.",
+      "last_updated": "2026-06-06",
+      "active": true
+    }
+  ]
+}
