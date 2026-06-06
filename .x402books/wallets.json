@@ -13,7 +13,17 @@
       "role": "token_contract",
       "verification_method": "repo_manifest",
       "evidence_url": "https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3",
-      "notes": "Official $NPM token contract on Bankr. This is an associated token contract, not a signing operator wallet; owner signer wallet is pending.",
+      "notes": "Official $NPM token contract on Bankr. This is an associated token contract, not a signing operator wallet; owner/operator signer wallet is declared separately in this manifest.",
+      "last_updated": "2026-06-06",
+      "active": true
+    },
+    {
+      "address": "0xae22c33907572ebce7dab4d71d56f6793b8826ae",
+      "chain": "base",
+      "role": "owner_operator",
+      "verification_method": "repo_manifest_and_profile_claim",
+      "evidence_url": "https://x402books.xyz/registry/nipmod",
+      "notes": "Declared Nipmod owner/operator signing wallet for x402Books profile verification. Public address only; never publish private keys, seed phrases or wallet recovery material.",
       "last_updated": "2026-06-06",
       "active": true
     }
