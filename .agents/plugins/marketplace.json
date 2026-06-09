@@ -1,0 +1,20 @@
+{
+  "name": "nipmod",
+  "interface": {
+    "displayName": "Nipmod"
+  },
+  "plugins": [
+    {
+      "name": "nipmod",
+      "source": {
+        "source": "local",
+        "path": "./plugins/nipmod"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "nipmod": {
+      "url": "https://nipmod.com/api/mcp",
+      "env_http_headers": {
+        "x-nipmod-api-key": "NIPMOD_API_KEY"
+      },
+      "startup_timeout_sec": 20,
+      "tool_timeout_sec": 90,
+      "enabled_tools": [
+        "nipmod.search",
+        "nipmod.resolve",
+        "nipmod.view",
+        "nipmod.inspect",
+        "nipmod.install_plan",
+        "nipmod.external_install_plan",
+        "nipmod.package_decision",
+        "nipmod.demo"
+      ],
+      "default_tools_approval_mode": "auto"
+    }
+  }
+}

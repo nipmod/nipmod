@@ -1,0 +1,18 @@
+interface:
+  display_name: "Nipmod Package Decision"
+  short_description: "Search and inspect package trust before installing"
+  icon_small: "assets/nipmod-logo.png"
+  icon_large: "assets/nipmod-logo.png"
+  brand_color: "#E5392B"
+  default_prompt: "Use Nipmod to find the best package for my stack, show trust/risk, and wait before installing."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "nipmod"
+      description: "Nipmod package decision MCP server"
+      transport: "streamable_http"
+      url: "https://nipmod.com/api/mcp"

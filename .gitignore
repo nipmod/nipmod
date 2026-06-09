@@ -5,9 +5,9 @@
 .codex/
 .claude/
 .mcp.json
+!plugins/nipmod/.mcp.json
 opencode.json
 node_modules/
 dist/
 .next/
 .vercel/
-
