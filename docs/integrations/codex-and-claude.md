@@ -4,11 +4,16 @@ Nipmod can be used by agent hosts through MCP.
 
 ## Codex
 
-Codex users should add the Nipmod repo marketplace, install the plugin, then set:
+Codex users should add the Nipmod repo marketplace and install the plugin:
 
 ```bash
 codex plugin marketplace add nipmod/nipmod --ref main
 codex plugin add nipmod@nipmod
+```
+
+Hosted MCP works read-only without a key. For higher limits or account-scoped usage, set:
+
+```bash
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
@@ -26,7 +31,7 @@ The plugin includes:
 
 ## Claude Code
 
-Claude Code users can copy `docs/integrations/claude-code-mcp.json` into their project `.mcp.json`, then set:
+Claude Code users can copy `docs/integrations/claude-code-mcp.json` into their project `.mcp.json`. Set a key only when higher limits or account-scoped usage are needed:
 
 ```bash
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"

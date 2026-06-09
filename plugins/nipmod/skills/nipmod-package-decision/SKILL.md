@@ -66,10 +66,11 @@ For common tasks:
 
 ## Failure Handling
 
-If Nipmod is unavailable or missing `NIPMOD_API_KEY`, say that the Nipmod tool is not connected yet and provide the setup:
+If Nipmod is unavailable, say that the Nipmod tool is not connected yet and provide the setup:
 
 ```bash
-export NIPMOD_API_KEY=<key>
+codex plugin marketplace add nipmod/nipmod --ref main
+codex plugin add nipmod@nipmod
 ```
 
-Then continue with a safe fallback only if the user explicitly asks. In fallback mode, clearly label the result as not Nipmod-verified.
+Then continue with a safe fallback only if the user explicitly asks. In fallback mode, clearly label the result as not Nipmod-verified. `NIPMOD_API_KEY` is optional for higher limits and account-scoped usage.

@@ -2,10 +2,7 @@
   "mcpServers": {
     "nipmod": {
       "type": "http",
-      "url": "https://nipmod.com/api/mcp",
-      "headers": {
-        "x-nipmod-api-key": "${NIPMOD_API_KEY}"
-      }
+      "url": "https://nipmod.com/api/mcp"
     }
   }
 }

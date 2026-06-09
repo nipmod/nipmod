@@ -11,20 +11,20 @@ Nipmod makes Codex use a package decision layer before it installs software.
 
 ## Required environment
 
-Add the repo marketplace in Codex, install the Nipmod plugin, then set a key:
+Add the repo marketplace in Codex and install the Nipmod plugin:
 
 ```bash
 codex plugin marketplace add nipmod/nipmod --ref main
 codex plugin add nipmod@nipmod
 ```
 
-Set a Nipmod API key before using the remote MCP server. Use an account key, or issue a free beta key:
+The hosted MCP server works read-only without a key. For higher limits or account-scoped usage, set a Nipmod API key:
 
 ```bash
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
-The plugin sends it as `x-nipmod-api-key` to `https://nipmod.com/api/mcp`.
+The plugin sends it as `Authorization: Bearer <key>` to `https://nipmod.com/api/mcp` when `NIPMOD_API_KEY` is set.
 
 ## Example prompts
 
