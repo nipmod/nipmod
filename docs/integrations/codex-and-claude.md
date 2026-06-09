@@ -8,7 +8,8 @@ Codex users should add the Nipmod repo marketplace, install the plugin, then set
 
 ```bash
 codex plugin marketplace add nipmod/nipmod --ref main
-export NIPMOD_API_KEY=<key>
+codex plugin add nipmod@nipmod
+export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
 Example prompt:
@@ -28,7 +29,7 @@ The plugin includes:
 Claude Code users can copy `docs/integrations/claude-code-mcp.json` into their project `.mcp.json`, then set:
 
 ```bash
-export NIPMOD_API_KEY=<key>
+export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
 Recommended Claude prompt:
