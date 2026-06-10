@@ -1,0 +1,34 @@
+# Optional user- or project-level Codex hard guard.
+# Copy to ~/.codex/rules/default.rules for user-wide enforcement, or to
+# .codex/rules/default.rules in a trusted project.
+
+prefix_rule(
+    pattern=["npm", ["install", "i"]],
+    decision="forbidden",
+    justification="Use Nipmod install_guard before npm dependency writes. Prefer npm ci for reproducible installs."
+)
+
+prefix_rule(
+    pattern=[["pnpm", "yarn", "bun"], ["add", "install"]],
+    decision="forbidden",
+    justification="Use Nipmod install_guard before package-manager dependency writes."
+)
+
+prefix_rule(
+    pattern=[["pip", "uv", "poetry"], ["install", "add"]],
+    decision="forbidden",
+    justification="Use Nipmod install_guard before Python dependency writes."
+)
+
+prefix_rule(
+    pattern=[["go", "cargo"], ["get", "add"]],
+    decision="forbidden",
+    justification="Use Nipmod install_guard before dependency writes."
+)
+
+prefix_rule(
+    pattern=["docker", "pull"],
+    decision="forbidden",
+    justification="Use Nipmod install_guard before pulling container images."
+)
+

@@ -1,7 +1,7 @@
 # MCP Host Example
 
 The hosted MCP endpoint is read-only and mirrors the public package intelligence surface.
-It requires a Nipmod API key.
+Read-only MCP decisions work without a key. Set `NIPMOD_API_KEY` only for higher limits or account-scoped usage.
 
 Endpoint:
 
@@ -16,28 +16,25 @@ List tools:
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
-  -H "x-nipmod-api-key: <key>" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-Search:
+Codex preflight:
 
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
-  -H "x-nipmod-api-key: <key>" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.resolve","arguments":{"query":"http client","sources":["npm","pypi","github","mcp"],"limit":5}}}'
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"nipmod.codex_preflight","arguments":{"task":"http client for a TypeScript service","context":"Node.js, pnpm, production API service","packageManager":"pnpm","riskSurface":"untrusted HTTP input","sources":["npm","github","mcp"],"limit":5}}}'
 ```
 
-The result includes the same `selection.recommendedId`, candidate gates and rank reasons as the HTTPS API.
+The result includes the selected package, decision score, trust score, risk level, approval gate, approval packet, action plan and install boundary.
 
-Install plan:
+Install guard:
 
 ```bash
 curl -s https://nipmod.com/api/mcp \
   -H "content-type: application/json" \
-  -H "x-nipmod-api-key: <key>" \
-  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.external_install_plan","arguments":{"source":"npm","name":"undici"}}}'
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"nipmod.install_guard","arguments":{"command":"pnpm add undici","context":"TypeScript API service","sources":["npm","github"],"limit":5}}}'
 ```
 
 Boundary:

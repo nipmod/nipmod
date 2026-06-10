@@ -12,6 +12,51 @@ This public repository contains product documentation, API examples, agent integ
 The production site, backend implementation, ranking logic, Supabase schema and operational tooling live in private repositories.
 The public CLI covers local package review, deep scan, sandbox-audit receipt handling and agent-facing command contracts.
 
+## Codex In 60 Seconds
+
+Before Codex installs external code, Nipmod returns a read-only package decision: best candidate, trust evidence, exact command, approval gate and install boundary.
+
+Install:
+
+```bash
+codex plugin marketplace add nipmod/nipmod --ref main
+codex plugin add nipmod@nipmod
+codex mcp get nipmod --json
+```
+
+Start a new Codex session after install, then run the fixture:
+
+```bash
+cd examples/codex-nextjs-auth
+codex
+```
+
+Prompt:
+
+```text
+Find the best auth package for this Next.js repo and show the Nipmod install boundary before changing anything.
+```
+
+Expected decision card:
+
+```text
+Nipmod decision: REVIEW
+Best: npm:next-auth@...
+Score: decision score, trust score, risk level.
+Boundary: hosted Nipmod did not install, execute, clone, read local files or write to the workspace.
+After approval: npm install next-auth@...
+Receipt: decision:<hash>
+```
+
+Hosted MCP read-only decisions work without a key. REST API calls and higher limits require `NIPMOD_API_KEY`.
+
+Optional hard guard for local Codex command enforcement:
+
+```bash
+mkdir -p ~/.codex/rules
+cp examples/codex-rules/default.rules ~/.codex/rules/default.rules
+```
+
 ## Use The API
 
 Issue a free beta key:
@@ -58,6 +103,7 @@ Codex users can install the public Nipmod plugin:
 ```bash
 codex plugin marketplace add nipmod/nipmod --ref main
 codex plugin add nipmod@nipmod
+codex mcp get nipmod --json
 ```
 
 Then ask Codex to make a package decision before changing dependencies:
@@ -76,6 +122,8 @@ The hosted MCP server works read-only without a key. Set `NIPMOD_API_KEY` only w
 | `cli/` | Public Nipmod CLI source, local audit code, sandbox receipt helpers and tests. |
 | `examples/http-api/` | TypeScript and Python examples for calling the hosted API. |
 | `examples/agent-workflow/` | Copyable instructions for Codex, Claude Code, MCP hosts and generic HTTPS agents. |
+| `examples/codex-nextjs-auth/` | Tiny fixture repo for a Codex package-decision demo. |
+| `examples/codex-rules/` | Optional Codex command rules that block dependency writes until Nipmod guard runs. |
 | `SECURITY.md` | Security reporting and public safety boundary. |
 
 ## Important Boundary

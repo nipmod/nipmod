@@ -13,6 +13,8 @@
         "nipmod.install_plan",
         "nipmod.external_install_plan",
         "nipmod.package_decision",
+        "nipmod.codex_preflight",
+        "nipmod.install_guard",
         "nipmod.demo"
       ],
       "default_tools_approval_mode": "auto"

@@ -9,9 +9,10 @@ Codex users should add the Nipmod repo marketplace and install the plugin:
 ```bash
 codex plugin marketplace add nipmod/nipmod --ref main
 codex plugin add nipmod@nipmod
+codex mcp get nipmod --json
 ```
 
-Hosted MCP works read-only without a key. For higher limits or account-scoped usage, set:
+Start a new Codex session after installing so the MCP tool list is loaded. Hosted MCP works read-only without a key. REST API calls and higher limits require `NIPMOD_API_KEY`.
 
 ```bash
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
@@ -27,7 +28,7 @@ Expected:
 
 - transport is `streamable_http`
 - URL is `https://nipmod.com/api/mcp`
-- `nipmod.package_decision` is enabled
+- `nipmod.codex_preflight`, `nipmod.install_guard` and `nipmod.package_decision` are enabled
 - `NIPMOD_API_KEY` is optional through `bearer_token_env_var`
 
 Codex behavior:
@@ -36,6 +37,7 @@ Codex behavior:
 - read safe local manifest context first
 - send only stack/runtime/package-manager/risk summaries to hosted Nipmod
 - show a compact decision card before raw evidence
+- read `approvalGate`, `approvalPacket`, `actionPlan` and `agentHandoff` before continuing
 - require explicit approval before dependency writes
 - use pinned install commands when the decision provides them
 
@@ -49,6 +51,12 @@ Install-guard prompt:
 
 ```text
 Before installing anything, use Nipmod to choose a safe PDF parser for this Python backend.
+```
+
+Concrete command guard:
+
+```text
+Before running npm install zod, use Nipmod install guard and show the approval packet.
 ```
 
 ## Claude Code
