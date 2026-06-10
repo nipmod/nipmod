@@ -31,6 +31,26 @@ export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | py
 
 Use that key for direct HTTP API calls or for a manually configured MCP server in an environment where the key is definitely set. Do not add `bearer_token_env_var` to the default Codex plugin config unless `NIPMOD_API_KEY` exists in the environment Codex inherits; Codex treats a missing bearer env var as MCP startup failure. A key is not required for hosted read-only decisions.
 
+## Make Nipmod the Codex default
+
+The plugin makes Nipmod available to Codex and gives Codex a skill that should
+trigger before package, SDK, CLI, model, dataset, container, repository,
+extension and MCP-server decisions. For stricter repo guidance, copy the public
+Codex rule example and agent workflow notes:
+
+```bash
+mkdir -p .codex/rules
+cp examples/codex-rules/default.rules ./.codex/rules/default.rules
+```
+
+Then add the policy text from `examples/agent-workflow/codex.md` to the target
+repo's `AGENTS.md` or team instructions.
+
+Important boundary: installing a plugin does not silently force every future
+Codex session to use it. A fresh session can choose installed tools based on the
+task, and `@nipmod` can invoke it explicitly. Repo/team rules are the stricter
+path when a team wants Nipmod as the default dependency decision rule.
+
 ## Example prompts
 
 ```text
@@ -66,3 +86,12 @@ The approval packet should include the command, cwd, package manager, package/ve
 ## Boundaries
 
 The hosted MCP server is read-only. It can search, resolve, inspect and return install plans. It does not install packages, edit files, run package managers, or write to the workspace.
+
+Codex still owns local execution. Nipmod returns the decision and approval
+packet; Codex, the user and the host policy decide whether a local write is
+allowed.
+
+## Release operations
+
+Plugin versioning, local install/uninstall checks, light/dark icon review and
+release-gate commands are maintained in `RELEASE.md`.
