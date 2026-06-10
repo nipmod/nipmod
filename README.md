@@ -3,13 +3,13 @@
 [![Public repo check](https://github.com/nipmod/nipmod/actions/workflows/public-repo-check.yml/badge.svg)](https://github.com/nipmod/nipmod/actions/workflows/public-repo-check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-white.svg)](LICENSE)
 
-Helping humans and AI agents discover, verify, and use software safely.
+Package intelligence, install boundaries and trust evidence for AI agents.
 
 Nipmod is a package search and trust layer for software, code, models and developer tools.
 It helps humans and AI agents search public software sources, inspect trust signals and request reviewable install plans before anything writes to a workspace.
 
-This public repository contains product documentation, API examples, agent integration material and the public CLI source.
-The production site, backend implementation, ranking logic, Supabase schema and operational tooling live in private repositories.
+This public repository contains the public CLI source, Codex plugin material, MCP examples, API examples and agent integration docs.
+The hosted product, backend implementation, ranking logic, Supabase schema and operational tooling live in private repositories.
 The public CLI covers local package review, deep scan, sandbox-audit receipt handling and agent-facing command contracts.
 
 ## Codex In 60 Seconds
@@ -125,6 +125,7 @@ The hosted MCP server works read-only without a key. Set `NIPMOD_API_KEY` only w
 | `examples/codex-nextjs-auth/` | Tiny fixture repo for a Codex package-decision demo. |
 | `examples/codex-rules/` | Optional Codex command rules that block dependency writes until Nipmod guard runs. |
 | `SECURITY.md` | Security reporting and public safety boundary. |
+| `CONTRIBUTING.md` | Contribution scope and public/private boundary. |
 
 ## Important Boundary
 
@@ -142,8 +143,12 @@ The CLI is the local host side. It can inspect local files and run explicitly co
 | --- | --- |
 | Website | https://nipmod.com |
 | API docs | https://nipmod.com/api-access |
+| Codex | https://nipmod.com/codex |
+| Codex proof | https://nipmod.com/codex-proof |
+| MCP | https://nipmod.com/mcp |
 | Trust model | https://nipmod.com/trust |
 | Public repo | https://github.com/nipmod/nipmod |
 | Email | info@nipmod.com |
 | X | https://x.com/Nipmod |
 | Discord | https://discord.gg/wYmatRDzk |
+| $NPM | https://bankr.bot/launches/0x5155Eaa3B5784B829DeAD78189Eb4Bf69359dbA3 |

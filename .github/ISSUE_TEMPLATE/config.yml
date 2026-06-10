@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/nipmod/nipmod/security/policy
+    about: Report vulnerabilities privately. Do not post secrets or exploit details in public issues.
+  - name: Discord
+    url: https://discord.gg/wYmatRDzk
+    about: Use Discord for general questions and community discussion.
+  - name: Website
+    url: https://nipmod.com
+    about: Product, API and integration links.

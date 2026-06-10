@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible public CLI, docs or integration issue.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include API keys, wallet phrases, access tokens, private repository content or unpublished vulnerability details.
+  - type: input
+    id: surface
+    attributes:
+      label: Surface
+      description: CLI, Codex plugin, MCP, API example, docs or other public surface.
+      placeholder: "CLI"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Minimal commands, package id or docs URL.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, package manager and Nipmod CLI version when relevant.
+    validations:
+      required: false

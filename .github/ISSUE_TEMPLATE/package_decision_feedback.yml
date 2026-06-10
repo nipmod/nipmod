@@ -1,0 +1,45 @@
+name: Package decision feedback
+description: Report incorrect package evidence, risk, source metadata or recommendation output.
+title: "[Decision feedback]: "
+labels:
+  - package-feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for public package metadata or recommendation corrections. Do not include private customer data, secrets or unpublished vulnerabilities.
+  - type: input
+    id: package
+    attributes:
+      label: Package
+      description: Include source and package name.
+      placeholder: "npm:next-auth"
+    validations:
+      required: true
+  - type: input
+    id: decision_url
+    attributes:
+      label: Decision, proof or docs URL
+      placeholder: "https://nipmod.com/packages/..."
+    validations:
+      required: false
+  - type: dropdown
+    id: feedback_type
+    attributes:
+      label: Feedback type
+      options:
+        - Incorrect metadata
+        - Incorrect risk level
+        - Missing source evidence
+        - Better alternative package
+        - Install boundary wording
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Explain what should change and cite public evidence when possible.
+    validations:
+      required: true
