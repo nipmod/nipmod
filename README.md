@@ -60,10 +60,10 @@ codex plugin marketplace add nipmod/nipmod --ref main
 codex plugin add nipmod@nipmod
 ```
 
-Then ask:
+Then ask Codex to make a package decision before changing dependencies:
 
 ```text
-@nipmod find the best package for auth in a Next.js app.
+Find the best auth package for this Next.js repo and show the Nipmod install boundary before changing anything.
 ```
 
 The hosted MCP server works read-only without a key. Set `NIPMOD_API_KEY` only when higher limits or account-scoped usage are needed. Claude Code users can use `docs/integrations/claude-code-mcp.json` as a project `.mcp.json` template.

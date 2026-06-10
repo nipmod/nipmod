@@ -1,13 +1,14 @@
 # Nipmod Codex Plugin
 
-Nipmod makes Codex use a package decision layer before it installs software.
+Nipmod makes Codex use a pre-install package decision and safety layer before it chooses or changes software dependencies.
 
 ## What this plugin does
 
-- Adds a Codex skill for package, model, container, repository and MCP-server selection.
+- Adds a Codex skill for package, SDK, CLI, model, dataset, container, repository, extension and MCP-server selection.
 - Connects Codex to the hosted read-only Nipmod MCP endpoint.
-- Formats recommendations as compact decision cards in the Codex chat.
-- Keeps package manager writes behind explicit approval.
+- Formats package decisions as compact Codex decision cards while keeping full structured evidence available.
+- Uses local repo context in Codex first, then sends only a short stack/risk summary to hosted Nipmod.
+- Keeps package-manager writes behind explicit approval.
 
 ## Required environment
 
@@ -29,16 +30,32 @@ The plugin sends it as `Authorization: Bearer <key>` to `https://nipmod.com/api/
 ## Example prompts
 
 ```text
-@nipmod find the best package for auth in a Next.js app.
+Find the best auth package for this Next.js repo and show the Nipmod install boundary before changing anything.
 ```
 
 ```text
-Use Nipmod before installing anything. I need a safe PDF parser for a Python backend.
+Before installing anything, use Nipmod to choose a safe PDF parser for this Python backend.
 ```
 
 ```text
-Use Nipmod to compare MCP servers for documentation search and show the install boundary.
+Use Nipmod to compare MCP servers for documentation search and show the exact approval packet.
 ```
+
+## Codex behavior
+
+When installed, Codex should invoke Nipmod for package and dependency decisions even when the user does not type `@nipmod`.
+
+The intended flow is:
+
+1. Codex reads safe local manifest context, such as `package.json`, lockfiles, `pyproject.toml`, `go.mod`, `Dockerfile` or `.mcp.json`.
+2. Codex calls `nipmod.package_decision` with the task, stack, runtime, package manager and risk surface.
+3. Nipmod returns the best candidate, trust score, risk level, source evidence, alternatives, install boundary and receipt.
+4. Codex shows the compact decision card first.
+5. Codex waits for explicit approval before dependency writes.
+
+## Install guard
+
+If the user asks Codex to run a command such as `pnpm add`, `npm install`, `pip install`, `uv add`, `go get`, `cargo add`, `docker pull`, `git clone` or MCP enablement, Codex should call Nipmod first and show the exact command that would run after approval.
 
 ## Boundaries
 

@@ -1,7 +1,7 @@
 {
   "name": "nipmod",
   "version": "0.1.0",
-  "description": "Use Nipmod as Codex's package decision layer before installing packages, tools, models, repositories, containers, or MCP servers.",
+  "description": "Use Nipmod as Codex's pre-install decision and safety layer for packages, SDKs, tools, models, repositories, containers, and MCP servers.",
   "author": {
     "name": "Nipmod",
     "url": "https://nipmod.com"
@@ -22,8 +22,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Nipmod",
-    "shortDescription": "Find safer packages before Codex installs anything",
-    "longDescription": "Nipmod gives Codex a package decision layer: search package sources, compare candidates, inspect trust evidence, return risk and install boundaries, then wait for explicit approval before local package manager writes.",
+    "shortDescription": "Codex package decisions before install",
+    "longDescription": "Nipmod gives Codex a pre-install decision layer: detect package-selection tasks, search package sources, compare candidates, inspect trust evidence, return risk and install boundaries, then require explicit approval before local package manager writes.",
     "developerName": "Nipmod",
     "category": "Developer Tools",
     "capabilities": [
@@ -34,9 +34,9 @@
     "privacyPolicyURL": "https://nipmod.com/privacy",
     "termsOfServiceURL": "https://nipmod.com/terms",
     "defaultPrompt": [
-      "Use @nipmod to find the best package for auth in a Next.js app.",
-      "Use Nipmod before installing anything. I need a safe PDF parser for a Python backend.",
-      "Use Nipmod to compare MCP servers for documentation search and show the install boundary."
+      "Find the best auth package for this Next.js repo and show the Nipmod install boundary before changing anything.",
+      "Before installing anything, use Nipmod to choose a safe PDF parser for this Python backend.",
+      "Use Nipmod to compare MCP servers for documentation search and show the exact approval packet."
     ],
     "composerIcon": "./assets/nipmod-logo.png",
     "logo": "./assets/nipmod-logo.png",

@@ -17,17 +17,39 @@ Hosted MCP works read-only without a key. For higher limits or account-scoped us
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
-Example prompt:
+Smoke test:
 
-```text
-@nipmod find the best package for auth in a Next.js app. Show trust, risk, alternatives and install boundary.
+```bash
+codex mcp get nipmod --json
 ```
 
-The plugin includes:
+Expected:
 
-- a Codex skill that triggers before package/tool/model installs
-- a hosted read-only MCP server config
-- a compact decision-card response format for Codex chat
+- transport is `streamable_http`
+- URL is `https://nipmod.com/api/mcp`
+- `nipmod.package_decision` is enabled
+- `NIPMOD_API_KEY` is optional through `bearer_token_env_var`
+
+Codex behavior:
+
+- trigger before package, SDK, CLI, repository, model, dataset, container, extension or MCP-server choices
+- read safe local manifest context first
+- send only stack/runtime/package-manager/risk summaries to hosted Nipmod
+- show a compact decision card before raw evidence
+- require explicit approval before dependency writes
+- use pinned install commands when the decision provides them
+
+Demo prompt:
+
+```text
+Find the best auth package for this Next.js repo and show the Nipmod install boundary before changing anything.
+```
+
+Install-guard prompt:
+
+```text
+Before installing anything, use Nipmod to choose a safe PDF parser for this Python backend.
+```
 
 ## Claude Code
 

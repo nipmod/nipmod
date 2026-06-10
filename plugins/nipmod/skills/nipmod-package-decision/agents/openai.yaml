@@ -1,10 +1,10 @@
 interface:
   display_name: "Nipmod Package Decision"
-  short_description: "Search and inspect package trust before installing"
+  short_description: "Pre-install package decisions for Codex"
   icon_small: "assets/nipmod-logo.png"
   icon_large: "assets/nipmod-logo.png"
   brand_color: "#E5392B"
-  default_prompt: "Use Nipmod to find the best package for my stack, show trust/risk, and wait before installing."
+  default_prompt: "Use Nipmod to choose the best package for this repo, show trust/risk and the install boundary, then wait for approval before changing dependencies."
 
 policy:
   allow_implicit_invocation: true
