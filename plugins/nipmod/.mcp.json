@@ -2,7 +2,6 @@
   "mcpServers": {
     "nipmod": {
       "url": "https://nipmod.com/api/mcp",
-      "bearer_token_env_var": "NIPMOD_API_KEY",
       "startup_timeout_sec": 20,
       "tool_timeout_sec": 90,
       "enabled_tools": [

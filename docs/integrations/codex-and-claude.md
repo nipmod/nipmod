@@ -29,7 +29,8 @@ Expected:
 - transport is `streamable_http`
 - URL is `https://nipmod.com/api/mcp`
 - `nipmod.codex_preflight`, `nipmod.install_guard` and `nipmod.package_decision` are enabled
-- `NIPMOD_API_KEY` is optional through `bearer_token_env_var`
+- `bearer_token_env_var` is absent by default so the plugin works without `NIPMOD_API_KEY`
+- `NIPMOD_API_KEY` is used only for direct REST calls or manually configured higher-limit MCP setups where the environment variable is definitely present
 
 Codex behavior:
 

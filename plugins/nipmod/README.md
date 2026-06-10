@@ -23,13 +23,13 @@ codex mcp get nipmod --json
 
 Start a new Codex session after installing so the MCP tools are loaded.
 
-The hosted MCP server works read-only without a key. For higher limits or account-scoped usage, set a Nipmod API key:
+The hosted MCP server works read-only without a key. The Codex plugin defaults to zero-key MCP so first-run setup does not fail when `NIPMOD_API_KEY` is missing. For higher limits or account-scoped usage, get a Nipmod API key:
 
 ```bash
 export NIPMOD_API_KEY="$(curl -fsS -X POST https://nipmod.com/api/keys/beta | python3 -c 'import json,sys; print(json.load(sys.stdin)["key"])')"
 ```
 
-The plugin sends it as `Authorization: Bearer <key>` to `https://nipmod.com/api/mcp` when `NIPMOD_API_KEY` is set. Codex Desktop only inherits environment variables available when the app starts; set the key in that environment and restart Codex. A key is not required for hosted read-only decisions.
+Use that key for direct HTTP API calls or for a manually configured MCP server in an environment where the key is definitely set. Do not add `bearer_token_env_var` to the default Codex plugin config unless `NIPMOD_API_KEY` exists in the environment Codex inherits; Codex treats a missing bearer env var as MCP startup failure. A key is not required for hosted read-only decisions.
 
 ## Example prompts
 
